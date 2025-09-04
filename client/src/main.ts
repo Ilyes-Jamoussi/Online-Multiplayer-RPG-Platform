@@ -3,11 +3,12 @@ import { enableProdMode, enableProfiling } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { Routes, provideRouter, withHashLocation } from '@angular/router';
+import { ROUTES } from '@app/constants/routes.constants';
 import { AppComponent } from '@app/pages/app/app.component';
-import { GamePageComponent } from '@app/pages/game-page/game-page.component';
-import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
+import { HomePageComponent } from '@app/pages/home-page/home-page.component';
+import { removeLeadingSlash } from '@src/utils/route/route.utils';
 import { environment } from './environments/environment';
+
 
 if (environment.production) {
     enableProdMode();
@@ -15,11 +16,14 @@ if (environment.production) {
 
 
 const routes: Routes = [
-    { path: '', redirectTo: '/home', pathMatch: 'full' },
-    { path: 'home', component: MainPageComponent },
-    { path: 'game', component: GamePageComponent },
-    { path: 'material', component: MaterialPageComponent },
-    { path: '**', redirectTo: '/home' },
+    { path: '', redirectTo: removeLeadingSlash(ROUTES.home), pathMatch: 'full' },
+
+    {
+        path: removeLeadingSlash(ROUTES.home),
+        component: HomePageComponent,
+    },
+
+    { path: '**', redirectTo: removeLeadingSlash(ROUTES.home) },
 ];
 
 enableProfiling();

@@ -1,8 +1,8 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PlayAreaComponent } from '@app/components/play-area/play-area.component';
-import { TimeService } from '@app/services/time.service';
+import { TimeService } from '@app/services/time/time.service';
 import SpyObj = jasmine.SpyObj;
-import { signal } from '@angular/core';
 
 describe('PlayAreaComponent', () => {
     let component: PlayAreaComponent;

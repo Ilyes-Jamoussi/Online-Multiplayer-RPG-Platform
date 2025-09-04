@@ -32,6 +32,9 @@
         ],
         "@common/*": [
           "../common/*"
+        ],
+        "@src/*": [
+          "./src/*"
         ]
       },
       "useDefineForClassFields": false
