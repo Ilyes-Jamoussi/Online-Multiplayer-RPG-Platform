@@ -1,0 +1,32 @@
+.ui-btn {
+    font-weight: 500;
+
+    &-sm {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    &-md {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    &-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    &-full {
+        width: 100%;
+        display: block;
+    }
+}
+
+:host {
+    &.ui-btn-full {
+        width: 100%;
+    }
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

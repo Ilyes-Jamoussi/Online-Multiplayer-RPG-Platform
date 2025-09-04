@@ -1,0 +1,33 @@
+<div class="showcase-container">
+    <h1 class="page-title">UI Showcase</h1>
+
+    <mat-grid-list cols="2" rowHeight="100px" gutterSize="16px">
+        <mat-grid-tile>
+            <app-ui-button variant="elevated" color="accent" (onClick)="handleButtonClick()"> Elevated Button </app-ui-button>
+        </mat-grid-tile>
+
+        <mat-grid-tile>
+            <app-ui-button variant="outlined" (onClick)="handleButtonClick()"> Outlined Button </app-ui-button>
+        </mat-grid-tile>
+
+        <mat-grid-tile>
+            <app-ui-button variant="filled" (onClick)="handleButtonClick()"> Filled Button </app-ui-button>
+        </mat-grid-tile>
+
+        <mat-grid-tile>
+            <app-ui-button variant="text" (onClick)="handleButtonClick()"> Text Button </app-ui-button>
+        </mat-grid-tile>
+
+        <mat-grid-tile>
+            <app-ui-button variant="elevated" [disabled]="true"> Disabled Button </app-ui-button>
+        </mat-grid-tile>
+
+        <mat-grid-tile>
+            <app-ui-button variant="outlined" color="accent" iconName="thumb_up" (onClick)="handleButtonClick()"> Button with Icons </app-ui-button>
+        </mat-grid-tile>
+
+        <mat-grid-tile colspan="2">
+            <app-ui-button variant="filled" color="warn" [fullWidth]="true"> Full Width Button </app-ui-button>
+        </mat-grid-tile>
+    </mat-grid-list>
+</div>

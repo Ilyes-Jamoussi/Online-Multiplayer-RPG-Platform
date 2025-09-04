@@ -1,0 +1,4 @@
+<button [color]="color" [matButton]="matButtonType" [disabled]="disabled" [ngClass]="classes" [ngStyle]="customStyle" (click)="handleClick($event)">
+    @if(iconName){<mat-icon>{{ iconName }}</mat-icon>}
+    <ng-content></ng-content>
+</button>
