@@ -53,7 +53,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { ButtonComponent } from '../../shared/button/button.component';
+import { ButtonComponent } from '../../components/button/button.component';
 @Component({
     selector: 'app-main-page',
     templateUrl: './main-page.component.html',
@@ -62,9 +62,9 @@ import { ButtonComponent } from '../../shared/button/button.component';
     standalone: true,
 })
 export class MainPageComponent {
-    // Informations de l'équipe (personnalise selon ton équipe)
+
     teamInfo = {
-        teamNumber: '001', // Ton numéro d'équipe
+        teamNumber: '204',
         members: [
             'Wael El Karoui',
             'Ilyes Jamoussi',
@@ -83,12 +83,11 @@ export class MainPageComponent {
     }
 
     onCreateGame(): void {
-        // Tu devras ajouter cette route dans main.ts plus tard
         this.router.navigate(['/create-game']);
     }
 
     onAdminGames(): void {
-        // Tu devras ajouter cette route dans main.ts plus tard
+
         this.router.navigate(['/admin-games']);
     }
 }
