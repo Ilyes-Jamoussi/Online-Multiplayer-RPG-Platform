@@ -1,22 +1,49 @@
-<div class="container justified">
-    <h1 class="header-item">Bienvenue au cours {{ title }}</h1>
-    <img src="https://bit.ly/3QofL1J" alt="Logo Projet" />
-    <section id="server-message" class="justified">
-        <p>Petit message du serveur : {{ message.getValue() }}</p>
-        <div class="justified">
-            <button class="button" (click)="getMessagesFromServer()">Récupérer un message du serveur</button>
-            <button class="button" (click)="sendTimeToServer()">Envoyer un message au serveur</button>
-            <button class="button" routerLink="/material">Voir la page démo Angular Material</button>
+<div class="home-container">
+    <header class="game-header">
+        <div class="logo-container">
+            <img src="client\src\assets\logo1.jpg" alt="Logo du jeu" class="game-logo">
+            <h1 class="game-title">Mon Jeu RPG</h1>
         </div>
-    </section>
+    </header>
 
-    <button class="button" routerLink="/game">Jouer!</button>
+    <main class="main-menu">
+        <div class="menu-buttons">
+            <app-button 
+                [text]="'Joindre une partie'"
+                [type]="'secondary'"
+                [disabled]="true"
+                [size]="'large'"
+                [fullWidth]="true"
+                (clicked)="onJoinGame()">
+            </app-button>
 
-    <footer class="footer-item">
-        <h4 class="team-name">Équipe Poly</h4>
-        <p>
-            <span>Coéquipier #1</span>, <span>Coéquipier #2</span>, <span>Coéquipier #3</span>, 
-            <span>Coéquipier #4</span>, <span>Coéquipier #5</span>, <span>Coéquipier #6</span>
-        </p>
+            <app-button 
+                [text]="'Créer une partie'"
+                [type]="'success'"
+                [size]="'large'"
+                [fullWidth]="true"
+                (clicked)="onCreateGame()">
+            </app-button>
+
+            <app-button 
+                [text]="'Administrer les jeux'"
+                [type]="'primary'"
+                [size]="'large'"
+                [fullWidth]="true"
+                (clicked)="onAdminGames()">
+            </app-button>
+        </div>
+    </main>
+
+    <footer class="team-info">
+        <div class="team-details">
+            <h2>Équipe {{ teamInfo.teamNumber }}</h2>
+            <div class="team-members">
+                <h3>Développeurs :</h3>
+                <ul class="members-list">
+                    <li *ngFor="let member of teamInfo.members">{{ member }}</li>
+                </ul>
+            </div>
+        </div>
     </footer>
 </div>
