@@ -81,7 +81,7 @@ export class HomePageComponent {
 
     onJoinGame(): void {
         // Désactivé pour Sprint 1
-        console.log('Joindre une partie - Option désactivée pour le Sprint 1');
+        alert('Joindre une partie - Option désactivée pour le Sprint 1');
     }
 
     onCreateGame(): void {

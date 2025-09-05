@@ -1,24 +1,178 @@
-.ui-btn {
-    font-weight: 500;
+/* Base */
+.uiBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Press Start 2P', monospace; /* retro font */
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    cursor: pointer;
+    position: relative;
+    outline: none;
 
-    &-sm {
-        padding: 0.25rem 0.75rem;
+    border: 2px solid #000;
+    border-radius: 0; /* old school square buttons */
+    box-shadow: 4px 4px 0px #000;
+    transition:
+        transform 0.1s ease,
+        box-shadow 0.1s ease;
+
+    /* width */
+    &.isFull {
+        width: 100%;
+        display: inline-flex;
+    }
+
+    /* states */
+    &.isDisabled {
+        background: #cfcfcf !important;
+        color: #7a7a7a !important;
+        border-color: #555;
+        box-shadow: 4px 4px 0 #555;
+        cursor: not-allowed;
+        pointer-events: none;
+        transform: none !important;
+    }
+
+    &.isLoading {
+        cursor: wait;
+        .btn-text {
+            opacity: 0.85;
+        }
+    }
+
+    &:hover:not(.isDisabled):not(.isLoading) {
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0 #000;
+    }
+
+    &:active:not(.isDisabled):not(.isLoading) {
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0 #000;
+    }
+
+    &:focus-visible {
+        outline: 2px dashed #000;
+        outline-offset: 2px;
+    }
+
+    /* sizes */
+    &.s-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.65rem;
+    }
+    &.s-md {
+        padding: 0.75rem 1.25rem;
         font-size: 0.75rem;
     }
-
-    &-md {
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
+    &.s-lg {
+        padding: 1rem 1.75rem;
+        font-size: 0.85rem;
     }
 
-    &-lg {
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
+    /* shapes */
+    &.sh-rounded {
+        border-radius: 0.5rem;
+    }
+    &.sh-square {
+        border-radius: 0;
+    }
+    &.sh-pill {
+        border-radius: 9999px;
     }
 
-    &-full {
-        width: 100%;
-        display: block;
+    /* alignment */
+    &.al-left {
+        justify-content: flex-start;
+    }
+    &.al-center {
+        justify-content: center;
+    }
+    &.al-right {
+        justify-content: flex-end;
+    }
+    &.al-justify {
+        justify-content: space-between;
+    }
+
+    /* gap */
+    &.gap-none {
+        gap: 0;
+    }
+    &.gap-xs {
+        gap: 0.25rem;
+    }
+    &.gap-sm {
+        gap: 0.5rem;
+    }
+    &.gap-md {
+        gap: 0.75rem;
+    }
+    &.gap-lg {
+        gap: 1rem;
+    }
+    &.gap-xl {
+        gap: 1.25rem;
+    }
+
+    /* sub-elements */
+    .btn-icon {
+        line-height: 1;
+        display: inline-flex;
+    }
+    .btn-text {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-spinner {
+        width: 16px;
+        height: 16px;
+        margin-left: 0.5rem;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
     }
 }
 
+/* Retro variants (flat colors + black outline) */
+.uiBtn {
+    &.v-primary {
+        background: #5a5af7;
+        color: #fff;
+    }
+    &.v-secondary {
+        background: #c0c0c0;
+        color: #000;
+    }
+    &.v-success {
+        background: #3ca85c;
+        color: #fff;
+    }
+    &.v-danger {
+        background: #d62828;
+        color: #fff;
+    }
+    &.v-warning {
+        background: #ffb703;
+        color: #000;
+    }
+    &.v-info {
+        background: #219ebc;
+        color: #fff;
+    }
+}
+
+/* Icône à droite */
+.uiBtn.iconRight {
+    flex-direction: row-reverse;
+}
+
+/* Anim */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
