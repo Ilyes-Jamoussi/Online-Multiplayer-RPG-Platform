@@ -64,17 +64,9 @@ import { ROUTES } from '@app/constants/routes.constants';
     standalone: true,
 })
 export class HomePageComponent {
-
     teamInfo = {
         teamNumber: '204',
-        members: [
-            'Wael El Karoui',
-            'Ilyes Jamoussi',
-            'Noah Blanchard',
-            'Adam Rafai',
-            'Eduard Andrei Podaru',
-
-        ]
+        members: ['Wael El Karoui', 'Ilyes Jamoussi', 'Noah Blanchard', 'Adam Rafai', 'Eduard Andrei Podaru'],
     };
 
     constructor(private router: Router) {}
@@ -89,7 +81,6 @@ export class HomePageComponent {
     }
 
     onAdminGames(): void {
-
         this.router.navigate([ROUTES.adminPage]);
     }
 }

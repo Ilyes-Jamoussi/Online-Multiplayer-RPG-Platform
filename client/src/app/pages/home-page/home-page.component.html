@@ -13,11 +13,25 @@
                 Rejoindre une partie (Bientôt disponible)
             </app-ui-button>
 
-            <app-ui-button [text]="'Créer une partie'" [variant]="'success'" [size]="'lg'" [fullWidth]="true" shape="square" (buttonClick)="onCreateGame()">
+            <app-ui-button
+                [text]="'Créer une partie'"
+                [variant]="'success'"
+                [size]="'lg'"
+                [fullWidth]="true"
+                shape="square"
+                (buttonClick)="onCreateGame()"
+            >
                 Créer une partie
             </app-ui-button>
 
-            <app-ui-button [text]="'Administrer les jeux'" [variant]="'primary'" [size]="'lg'" [fullWidth]="true" (buttonClick)="onAdminGames()" shape="square">
+            <app-ui-button
+                [text]="'Administrer les jeux'"
+                [variant]="'primary'"
+                [size]="'lg'"
+                [fullWidth]="true"
+                (buttonClick)="onAdminGames()"
+                shape="square"
+            >
                 Administrer les jeux
             </app-ui-button>
         </div>

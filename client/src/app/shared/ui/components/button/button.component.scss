@@ -1,9 +1,11 @@
+@use 'theme' as *;
+
 /* Base */
 .uiBtn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Press Start 2P', monospace; /* retro font */
+    font-family: 'Press Start 2P', monospace;
     font-size: 0.75rem;
     text-transform: uppercase;
     font-weight: 700;
@@ -11,25 +13,23 @@
     position: relative;
     outline: none;
 
-    border: 2px solid #000;
-    border-radius: 0; /* old school square buttons */
-    box-shadow: 4px 4px 0px #000;
+    border: 2px solid $ui-border;
+    border-radius: 0;
+    box-shadow: 4px 4px 0 $ui-shadow;
     transition:
         transform 0.1s ease,
         box-shadow 0.1s ease;
 
-    /* width */
     &.isFull {
         width: 100%;
         display: inline-flex;
     }
 
-    /* states */
     &.isDisabled {
-        background: #cfcfcf !important;
-        color: #7a7a7a !important;
-        border-color: #555;
-        box-shadow: 4px 4px 0 #555;
+        background: $ui-disabled-bg !important;
+        color: $ui-disabled-fg !important;
+        border-color: $ui-disabled-bord;
+        box-shadow: 4px 4px 0 $ui-disabled-shadow;
         cursor: not-allowed;
         pointer-events: none;
         transform: none !important;
@@ -44,45 +44,68 @@
 
     &:hover:not(.isDisabled):not(.isLoading) {
         transform: translate(-2px, -2px);
-        box-shadow: 6px 6px 0 #000;
+        box-shadow: 6px 6px 0 $ui-shadow;
     }
-
     &:active:not(.isDisabled):not(.isLoading) {
         transform: translate(2px, 2px);
-        box-shadow: 2px 2px 0 #000;
+        box-shadow: 2px 2px 0 $ui-shadow;
     }
-
     &:focus-visible {
-        outline: 2px dashed #000;
+        outline: 2px dashed $ui-black;
         outline-offset: 2px;
     }
 
-    /* sizes */
-    &.s-sm {
-        padding: 0.5rem 1rem;
-        font-size: 0.65rem;
+    /* sub-elements */
+    .btn-icon {
+        line-height: 1;
+        display: inline-flex;
     }
-    &.s-md {
-        padding: 0.75rem 1.25rem;
-        font-size: 0.75rem;
+    .btn-text {
+        display: inline-flex;
+        align-items: center;
     }
-    &.s-lg {
-        padding: 1rem 1.75rem;
-        font-size: 0.85rem;
-    }
+}
 
-    /* shapes */
-    &.sh-rounded {
-        border-radius: 0.5rem;
+/* Variants depuis $ui-colors + $ui-contrasts */
+.uiBtn {
+    @each $name, $bg in $ui-colors {
+        &.v-#{$name} {
+            background: $bg;
+            color: ui-contrast($name);
+        }
     }
-    &.sh-square {
-        border-radius: 0;
-    }
-    &.sh-pill {
-        border-radius: 9999px;
-    }
+}
 
-    /* alignment */
+/* Sizes depuis $ui-sizes */
+.uiBtn {
+    @each $name, $cfg in $ui-sizes {
+        &.s-#{$name} {
+            padding: map-get($cfg, padding);
+            font-size: map-get($cfg, font-size);
+        }
+    }
+}
+
+/* Shapes depuis $ui-shapes */
+.uiBtn {
+    @each $name, $radius in $ui-shapes {
+        &.sh-#{$name} {
+            border-radius: $radius;
+        }
+    }
+}
+
+/* Gaps depuis $ui-gaps */
+.uiBtn {
+    @each $name, $space in $ui-gaps {
+        &.gap-#{$name} {
+            gap: $space;
+        }
+    }
+}
+
+/* Alignement (optionnel : utilitaires statiques ou map si tu veux) */
+.uiBtn {
     &.al-left {
         justify-content: flex-start;
     }
@@ -95,84 +118,9 @@
     &.al-justify {
         justify-content: space-between;
     }
-
-    /* gap */
-    &.gap-none {
-        gap: 0;
-    }
-    &.gap-xs {
-        gap: 0.25rem;
-    }
-    &.gap-sm {
-        gap: 0.5rem;
-    }
-    &.gap-md {
-        gap: 0.75rem;
-    }
-    &.gap-lg {
-        gap: 1rem;
-    }
-    &.gap-xl {
-        gap: 1.25rem;
-    }
-
-    /* sub-elements */
-    .btn-icon {
-        line-height: 1;
-        display: inline-flex;
-    }
-    .btn-text {
-        display: inline-flex;
-        align-items: center;
-    }
-
-    .btn-spinner {
-        width: 16px;
-        height: 16px;
-        margin-left: 0.5rem;
-        border: 2px solid transparent;
-        border-top: 2px solid currentColor;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-}
-
-/* Retro variants (flat colors + black outline) */
-.uiBtn {
-    &.v-primary {
-        background: #5a5af7;
-        color: #fff;
-    }
-    &.v-secondary {
-        background: #c0c0c0;
-        color: #000;
-    }
-    &.v-success {
-        background: #3ca85c;
-        color: #fff;
-    }
-    &.v-danger {
-        background: #d62828;
-        color: #fff;
-    }
-    &.v-warning {
-        background: #ffb703;
-        color: #000;
-    }
-    &.v-info {
-        background: #219ebc;
-        color: #fff;
-    }
 }
 
 /* Icône à droite */
 .uiBtn.iconRight {
     flex-direction: row-reverse;
-}
-
-/* Anim */
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
 }
