@@ -27,7 +27,16 @@
         </mat-grid-tile>
 
         <mat-grid-tile colspan="2">
-            <app-ui-button variant="filled" color="warn" [fullWidth]="true"> Full Width Button </app-ui-button>
+            <app-ui-button variant="filled" color="warn" [fullWidth]="true" (onClick)="handleButtonClick()"> Full Width Button </app-ui-button>
+        </mat-grid-tile>
+
+        <mat-grid-tile colspan="2">
+            <app-ui-input label="Username" placeholder="Enter your username" [(ngModel)]="username" [fullWidth]="true"></app-ui-input>
+        </mat-grid-tile>
+        <mat-grid-tile colspan="2"> Username : {{ username }} </mat-grid-tile>
+        <mat-grid-tile colspan="2">
+            <app-ui-input label="Password" type="password"></app-ui-input>
+            <app-ui-input label="Email" type="email" placeholder="Enter your email"></app-ui-input>
         </mat-grid-tile>
     </mat-grid-list>
 </div>

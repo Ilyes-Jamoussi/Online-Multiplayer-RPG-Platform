@@ -12,7 +12,7 @@ type ButtonColor = 'primary' | 'accent' | 'warn' | 'error';
     standalone: true,
     imports: [MatButtonModule, MatIconModule, NgStyle, NgClass],
     templateUrl: './button.component.html',
-    styleUrls: ['./button.component.scss'],
+    styleUrls: ['./button.component.scss', '../../../styles/common.scss'],
 })
 export class UiButtonComponent {
     @Input() variant: ButtonVariant = 'filled';
@@ -25,7 +25,7 @@ export class UiButtonComponent {
 
     @Output() onClick = new EventEmitter<Event>();
 
-    @HostBinding('class.ui-btn-full')
+    @HostBinding('class.ui-full')
     get hostFullWidth() {
         return this.fullWidth;
     }
