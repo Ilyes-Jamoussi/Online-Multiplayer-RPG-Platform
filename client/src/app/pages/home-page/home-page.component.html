@@ -1,1 +1,49 @@
-<p>home-page works!</p>
+<div class="home-container">
+    <header class="game-header">
+        <div class="logo-container">
+            <img src="client\src\assets\logo1.jpg" alt="Logo du jeu" class="game-logo">
+            <h1 class="game-title">Mon Jeu RPG</h1>
+        </div>
+    </header>
+
+    <main class="main-menu">
+        <div class="menu-buttons">
+            <app-button 
+                [text]="'Joindre une partie'"
+                [type]="'secondary'"
+                [disabled]="true"
+                [size]="'large'"
+                [fullWidth]="true"
+                (clicked)="onJoinGame()">
+            </app-button>
+
+            <app-button 
+                [text]="'Créer une partie'"
+                [type]="'success'"
+                [size]="'large'"
+                [fullWidth]="true"
+                (clicked)="onCreateGame()">
+            </app-button>
+
+            <app-button 
+                [text]="'Administrer les jeux'"
+                [type]="'primary'"
+                [size]="'large'"
+                [fullWidth]="true"
+                (clicked)="onAdminGames()">
+            </app-button>
+        </div>
+    </main>
+
+    <footer class="team-info">
+        <div class="team-details">
+            <h2>Équipe {{ teamInfo.teamNumber }}</h2>
+            <div class="team-members">
+                <h3>Développeurs :</h3>
+                <ul class="members-list">
+                    <li *ngFor="let member of teamInfo.members">{{ member }}</li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+</div>

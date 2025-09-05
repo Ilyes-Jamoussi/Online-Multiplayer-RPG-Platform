@@ -22,6 +22,8 @@ const routes: Routes = [
         path: removeLeadingSlash(ROUTES.home),
         component: HomePageComponent,
     },
+    //{ path: removeLeadingSlash(ROUTES.createGame), component: CreateGameComponent },
+    //{ path: removeLeadingSlash(ROUTES.adminGame), component: AdminGameComponent }, 
 
     { path: '**', redirectTo: removeLeadingSlash(ROUTES.home) },
 ];
