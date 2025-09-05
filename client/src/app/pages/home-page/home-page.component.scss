@@ -54,7 +54,7 @@
   }
 }
 
-// Styles pour tes boutons personnalisés
+
 ::ng-deep .custom-button {
   padding: 1rem 2rem !important;
   font-family: 'Courier New', monospace !important;
@@ -155,7 +155,6 @@
   }
 }
 
-// Responsive
 @media (max-width: 768px) {
   .game-header .logo-container .game-title {
     font-size: 2rem;

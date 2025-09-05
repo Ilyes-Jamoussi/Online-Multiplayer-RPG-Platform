@@ -24,7 +24,6 @@ export class ButtonComponent {
     }
   }
 
-  // Classes CSS dynamiques
   get buttonClasses(): string {
     const classes = [
       'custom-button',

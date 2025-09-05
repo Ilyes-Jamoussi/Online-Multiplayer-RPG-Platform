@@ -53,7 +53,9 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { ButtonComponent } from '../../components/button/button.component';
+import { ButtonComponent } from '@app/components/button/button.component';
+import { ROUTES } from '@app/constants/routes.constants';
+
 @Component({
     selector: 'app-home-page',
     templateUrl: './home-page.component.html',
@@ -88,6 +90,6 @@ export class HomePageComponent {
 
     onAdminGames(): void {
 
-        this.router.navigate(['/admin-games']);
+        this.router.navigate([ROUTES.adminPage]);
     }
 }
