@@ -2,7 +2,6 @@ import { NgClass } from '@angular/common';
 import { Component, forwardRef, Input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { UiAlignment, UiShapeVariant, UiSize, UiVariant } from '@app/shared/ui/types/ui.types';
-import { UiSpinnerComponent } from '@app/shared/ui/components/spinner/spinner.component';
 
 type InputType = 'text' | 'number' | 'password' | 'email' | 'tel' | 'url';
 
@@ -11,7 +10,7 @@ type InputType = 'text' | 'number' | 'password' | 'email' | 'tel' | 'url';
     templateUrl: './input.component.html',
     styleUrls: ['./input.component.scss'],
     standalone: true,
-    imports: [NgClass, UiSpinnerComponent],
+    imports: [NgClass],
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -34,7 +33,7 @@ export class UiInputComponent implements ControlValueAccessor {
     @Input() fullWidth?: boolean = false;
 
     /** Shows a loading indicator */
-    @Input() loading?: boolean = false;
+    @Input() loading?: boolean = true;
 
     /** Label for the input */
     @Input() label: string = '';
@@ -58,7 +57,7 @@ export class UiInputComponent implements ControlValueAccessor {
     @Input() shape?: UiShapeVariant = 'square';
 
     /** Size of the input */
-    @Input() size?: UiSize = 'md';
+    @Input() size: UiSize = 'md';
 
     /** Icon to display after the input */
     @Input() suffixIcon?: string;
@@ -67,7 +66,7 @@ export class UiInputComponent implements ControlValueAccessor {
     @Input() type: InputType = 'text';
 
     /** Visual variant of the input */
-    @Input() variant?: UiVariant = 'primary';
+    @Input() variant: UiVariant = 'primary';
 
     value: string = '';
     isDisabled = false;
@@ -94,16 +93,16 @@ export class UiInputComponent implements ControlValueAccessor {
     onInput(event: Event): void {
         const input = event.target as HTMLInputElement;
         this.value = input.value;
-        this.onChange(this.value);
+        this?.onChange?.(this.value);
     }
 
     onClear(): void {
         this.value = '';
-        this.onChange(this.value);
+        this?.onChange?.(this.value);
     }
 
     onBlur(): void {
-        this.onTouched();
+        this?.onTouched?.();
     }
 
     get classes(): Record<string, boolean> {

@@ -1,7 +1,7 @@
 <div class="uiInput" [ngClass]="classes">
     @if (label) {
-    <label class="uiInput-label"> {{ label }} @if (required) { <span class="req">*</span> } </label>
-    }
+    <label class="uiInput-label"> {{ label }} @if (required) { <span class="req">*</span> }</label>
+ }
 
     <div class="uiInput-field">
         @if (prefixIcon) {
@@ -33,9 +33,6 @@
         >
             ×
         </button>
-        @if (loading) {
-        <app-ui-spinner></app-ui-spinner>
-        }
     </div>
 
     @if (maxLength) {

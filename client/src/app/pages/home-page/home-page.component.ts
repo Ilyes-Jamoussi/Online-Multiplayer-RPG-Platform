@@ -67,6 +67,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class HomePageComponent {
     gameName: string = 'RPG X Y Z Edition EXTREME';
+    gameDescription: string = '';
     teamInfo = {
         teamNumber: '204',
         members: ['Wael El Karoui', 'Ilyes Jamoussi', 'Noah Blanchard', 'Adam Rafai', 'Eduard Andrei Podaru'],

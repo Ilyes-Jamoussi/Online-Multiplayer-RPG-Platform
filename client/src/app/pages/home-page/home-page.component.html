@@ -4,6 +4,9 @@
             <!-- Utilise le chemin Angular d’assets -->
             <img src="assets/logo1.jpg" alt="Logo du jeu" class="game-logo" />
             <h1 class="game-title">{{ gameName }}</h1>
+            <h3>
+                {{ gameDescription }}
+            </h3>
         </div>
     </header>
 
@@ -47,8 +50,9 @@
                 alignText="left"
             ></app-ui-input>
             <app-ui-input
+                [(ngModel)]="gameDescription"
                 [fullWidth]="true"
-                placeholder="No label..."
+                placeholder="Game description..."
                 [size]="'lg'"
                 variant="primary"
                 [clearable]="true"
