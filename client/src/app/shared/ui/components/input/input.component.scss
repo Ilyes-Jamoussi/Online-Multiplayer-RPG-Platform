@@ -1,0 +1,221 @@
+@use 'theme' as *;
+@use 'sass:math';
+@use 'sass:list';
+@use 'sass:map';
+
+/* =========================
+   UiInput — style "carte" :
+   - header (label) plein width coloré
+   - zone champ claire
+   - ligne pointillée
+   - bouton clear à droite
+   ========================= */
+
+.uiInput {
+  /* Espace réservé au bouton clear (surclassé par .s-*) */
+  --clear-size: 1.5rem;
+
+  display: inline-flex;
+  flex-direction: column;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.75rem;
+  color: $ui-black;
+  position: relative;
+
+  background: $ui-white;
+  border: 2px solid $ui-border;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 $ui-shadow; /* ombre "cartouche" */
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+
+  &.isFull { width: 100%; }
+
+  &.isDisabled {
+    background: $ui-disabled-bg !important;
+    color: $ui-disabled-fg !important;
+    border-color: $ui-disabled-bord;
+    box-shadow: 4px 4px 0 $ui-disabled-shadow;
+    pointer-events: none;
+
+    .in-control { color: $ui-disabled-fg; }
+    .in-icon    { opacity: 0.6; }
+  }
+
+  &:focus-within:not(.isDisabled) {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 $ui-shadow;
+  }
+
+  /* ---------- Bandeau label ---------- */
+  .uiInput-label {
+    padding: 0.5rem 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: ui-gap(xs);
+    color: ui-contrast(primary); /* surclassé par .v-* plus bas */
+    /* Fond surclassé par la variant */
+    background: ui-color(primary);
+    border-bottom: 2px solid $ui-border; /* ligne de séparation nette */
+  }
+
+  /* ---------- Zone du champ ---------- */
+  .uiInput-field {
+    display: flex;
+    align-items: center;
+    gap: ui-gap(sm);
+    position: relative;
+
+    /* Padding de base (md), surclassé par .s-* */
+    padding: ui-size(md, padding);
+    $py: list.nth(ui-size(md, padding), 1);
+    $px: list.nth(ui-size(md, padding), 2);
+    padding-top: math.div($py, 2);
+    padding-bottom: math.div($py, 2);
+    padding-left: $px * 0.8;
+    padding-right: $px * 0.8;
+
+    min-height: var(--clear-size);
+    background: $ui-white;
+
+    /* La ligne pointillée comme dans ta capture */
+    &::after {
+      content: '';
+      position: absolute;
+      left: $px * 0.8;
+      right: calc(#{$px} * 0.8 + var(--clear-size) + #{ui-gap(xs)});
+      bottom: 0.3rem;                 /* léger décalage vers le haut */
+      border-bottom: 1px dashed #7a7a7a;
+    }
+  }
+
+  /* ---------- Input natif ---------- */
+  .in-control {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    font: inherit;
+    color: currentColor;
+    line-height: 1.3;
+
+    &::placeholder { opacity: 0.75; }
+  }
+
+  /* ---------- Icônes optionnelles ---------- */
+  .in-icon {
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    user-select: none;
+
+    &.prefix { margin-left: 0.1rem; }
+    &.suffix { margin-right: 0.1rem; }
+  }
+
+  /* ---------- Bouton Clear (toujours réservé) ---------- */
+  .clear-btn {
+    appearance: none;
+    border: 2px solid $ui-border;
+    background: $ui-white;
+    font: inherit;
+    line-height: 1;
+    width: var(--clear-size);
+    height: var(--clear-size);
+    flex: 0 0 var(--clear-size);
+    padding: 0;
+    margin-left: ui-gap(xs);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+    box-shadow: 4px 4px 0 $ui-shadow; /* ombre marquée comme la capture */
+
+    &:hover  { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 $ui-shadow; }
+    &:active { transform: translate( 1px,  1px); box-shadow: 3px 3px 0 $ui-shadow; }
+
+    &.isHidden { visibility: hidden; pointer-events: none; }
+  }
+
+  /* ---------- Ligne compteur ---------- */
+  .uiInput-meta {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 0.6rem 0.5rem;
+    .counter { opacity: 0.85; font-size: 0.7rem; }
+  }
+}
+
+/* ===== Variants (couleur du bandeau) ===== */
+.uiInput {
+  @each $name, $bg in $ui-colors {
+    &.v-#{$name} {
+      .uiInput-label {
+        background: $bg;
+        color: ui-contrast($name); /* texte du bandeau */
+      }
+    }
+  }
+}
+
+/* ===== Sizes ===== */
+.uiInput {
+  @each $name, $cfg in $ui-sizes {
+    &.s-#{$name} {
+      font-size: map.get($cfg, font-size);
+
+      .uiInput-field {
+        padding-left:   list.nth(map.get($cfg, padding), 2) * 0.8;
+        padding-right:  list.nth(map.get($cfg, padding), 2) * 0.8;
+        padding-top:    list.nth(map.get($cfg, padding), 1) * 0.5;
+        padding-bottom: list.nth(map.get($cfg, padding), 1) * 0.5;
+
+        /* recalcule la zone de la ligne pour épouser le padding et le clear */
+        &::after {
+          left:  list.nth(map.get($cfg, padding), 2) * 0.8;
+          right: calc(#{list.nth(map.get($cfg, padding), 2)} * 0.8 + var(--clear-size) + #{ui-gap(xs)});
+        }
+      }
+
+      .in-icon { font-size: calc(map.get($cfg, font-size) * 1.4); }
+
+      @if $name == sm { --clear-size: 1.25rem; }
+      @if $name == md { --clear-size: 1.5rem;  }
+      @if $name == lg { --clear-size: 1.75rem; }
+    }
+  }
+}
+
+/* ===== Shapes ===== */
+.uiInput {
+  @each $name, $radius in $ui-shapes {
+    &.sh-#{$name} {
+      border-radius: $radius;
+      .uiInput-label {
+        border-top-left-radius: $radius;
+        border-top-right-radius: $radius;
+      }
+    }
+  }
+}
+
+/* ===== Gaps ===== */
+.uiInput {
+  @each $name, $space in $ui-gaps {
+    &.gap-#{$name} .uiInput-field { gap: $space; }
+  }
+}
+
+/* ===== Alignment (contenu horizontal) ===== */
+.uiInput {
+  &.al-left    .uiInput-field { justify-content: flex-start; }
+  &.al-center  .uiInput-field { justify-content: center; }
+  &.al-right   .uiInput-field { justify-content: flex-end; }
+  &.al-justify .uiInput-field { justify-content: space-between; }
+}

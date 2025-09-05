@@ -1,0 +1,46 @@
+<div class="uiInput" [ngClass]="classes">
+    @if (label) {
+    <label class="uiInput-label"> {{ label }} @if (required) { <span class="req">*</span> } </label>
+    }
+
+    <div class="uiInput-field">
+        @if (prefixIcon) {
+        <span class="in-icon prefix material-icons">{{ prefixIcon }}</span>
+        }
+
+        <input
+            class="in-control"
+            [attr.type]="type"
+            [attr.placeholder]="placeholder"
+            [attr.maxLength]="maxLength ?? null"
+            [attr.minLength]="minLength ?? null"
+            [disabled]="disabled || isDisabled"
+            [value]="value"
+            [style.text-align]="alignText ?? 'left'"
+            (input)="onInput($event)"
+            (blur)="onBlur()"
+        />
+
+        @if (suffixIcon) {
+        <span class="in-icon suffix material-icons">{{ suffixIcon }}</span>
+        }
+        <button
+            type="button"
+            class="clear-btn"
+            [ngClass]="{ isHidden: !clearable || !value || disabled || isDisabled }"
+            (click)="onClear(); $event.stopPropagation()"
+            aria-label="Clear"
+        >
+            ×
+        </button>
+        @if (loading) {
+        <app-ui-spinner></app-ui-spinner>
+        }
+    </div>
+
+    @if (maxLength) {
+    <div class="uiInput-meta">
+        <span class="counter">{{ value.length || 0 }}/{{ maxLength }}</span>
+    </div>
+    }
+</div>

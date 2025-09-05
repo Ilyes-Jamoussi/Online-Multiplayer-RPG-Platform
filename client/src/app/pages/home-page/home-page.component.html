@@ -3,7 +3,7 @@
         <div class="logo-container">
             <!-- Utilise le chemin Angular d’assets -->
             <img src="assets/logo1.jpg" alt="Logo du jeu" class="game-logo" />
-            <h1 class="game-title">Mon Jeu RPG</h1>
+            <h1 class="game-title">{{ gameName }}</h1>
         </div>
     </header>
 
@@ -34,6 +34,28 @@
             >
                 Administrer les jeux
             </app-ui-button>
+            <app-ui-input
+                [(ngModel)]="gameName"
+                [fullWidth]="true"
+                label="Avec label"
+                placeholder="Type game name..."
+                [size]="'lg'"
+                variant="primary"
+                [clearable]="true"
+                type="text"
+                shape="square"
+                alignText="left"
+            ></app-ui-input>
+            <app-ui-input
+                [fullWidth]="true"
+                placeholder="No label..."
+                [size]="'lg'"
+                variant="primary"
+                [clearable]="true"
+                type="text"
+                shape="square"
+                alignText="left"
+            ></app-ui-input>
         </div>
     </main>
 

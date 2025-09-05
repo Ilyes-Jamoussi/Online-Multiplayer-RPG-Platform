@@ -55,15 +55,18 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ButtonComponent } from '@app/shared/ui/components/button/button.component';
 import { ROUTES } from '@app/constants/routes.constants';
+import { UiInputComponent } from '@app/shared/ui/components/input/input.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-home-page',
     templateUrl: './home-page.component.html',
     styleUrls: ['./home-page.component.scss'],
-    imports: [ButtonComponent, CommonModule],
+    imports: [ButtonComponent, CommonModule, UiInputComponent, FormsModule],
     standalone: true,
 })
 export class HomePageComponent {
+    gameName: string = 'RPG X Y Z Edition EXTREME';
     teamInfo = {
         teamNumber: '204',
         members: ['Wael El Karoui', 'Ilyes Jamoussi', 'Noah Blanchard', 'Adam Rafai', 'Eduard Andrei Podaru'],

@@ -1,8 +1,13 @@
+@use 'sass:math';
+@use 'sass:list';
+@use 'sass:map';
+
 // --- Base (neutres / contours)
-$ui-black: #000;
-$ui-white: #fff;
-$ui-border: #000; // contour "pixel art"
-$ui-shadow: #000; // ombre
+$ui-black: #222;
+$ui-gray: #777;
+$ui-white: #f5f5f5;
+$ui-border: #111; // contour "pixel art" (less black but more black than $ui-black)
+$ui-shadow: #111; // ombre
 $ui-disabled-bg: #cfcfcf;
 $ui-disabled-fg: #7a7a7a;
 $ui-disabled-bord: #555;
@@ -63,21 +68,21 @@ $ui-sizes: (
 
 // --- Helpers
 @function ui-color($name) {
-    @return map-get($ui-colors, $name);
+    @return map.get($ui-colors, $name);
 }
 
 @function ui-contrast($name) {
-    @return map-get($ui-contrasts, $name);
+    @return map.get($ui-contrasts, $name);
 }
 
 @function ui-gap($name) {
-    @return map-get($ui-gaps, $name);
+    @return map.get($ui-gaps, $name);
 }
 
 @function ui-shape($name) {
-    @return map-get($ui-shapes, $name);
+    @return map.get($ui-shapes, $name);
 }
 
 @function ui-size($name, $prop) {
-    @return map-get(map-get($ui-sizes, $name), $prop);
+    @return map.get(map.get($ui-sizes, $name), $prop);
 }
