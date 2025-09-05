@@ -1,3 +1,4 @@
+@use 'sass:map';
 @use 'theme' as *;
 
 /* Base */
@@ -80,8 +81,8 @@
 .uiBtn {
     @each $name, $cfg in $ui-sizes {
         &.s-#{$name} {
-            padding: map-get($cfg, padding);
-            font-size: map-get($cfg, font-size);
+            padding: map.get($cfg, padding);
+            font-size: map.get($cfg, font-size);
         }
     }
 }
