@@ -85,7 +85,7 @@ export class HomePageComponent {
     }
 
     onCreateGame(): void {
-        this.router.navigate(['/create-game']);
+        this.router.navigate([ROUTES.createGamePage]);
     }
 
     onAdminGames(): void {

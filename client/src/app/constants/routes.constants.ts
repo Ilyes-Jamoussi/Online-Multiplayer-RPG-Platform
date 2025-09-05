@@ -1,6 +1,6 @@
 
 export const ROUTES = {
     home: 'home',
-    createGame: 'create-game',
+    createGamePage: 'create--game-page',
     adminPage: 'admin-page',
 };
