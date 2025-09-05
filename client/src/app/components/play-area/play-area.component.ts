@@ -1,5 +1,5 @@
 import { Component, computed, effect, HostListener, inject, signal } from '@angular/core';
-import { TimeService } from '@app/services/time.service';
+import { TimeService } from '@app/services/time/time.service';
 
 // TODO : Avoir un fichier séparé pour les constantes!
 export const DEFAULT_WIDTH = 200;

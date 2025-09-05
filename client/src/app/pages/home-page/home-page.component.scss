@@ -1,0 +1,166 @@
+.home-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #87CEEB 0%, #90EE90 100%);
+  font-family: 'Courier New', monospace;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-header {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.1);
+  
+  .logo-container {
+    .game-logo {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 1rem;
+      background: #8B4513;
+      border: 4px solid #654321;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      box-shadow: 
+        4px 4px 0 #654321,
+        8px 8px 0 #4A4A4A;
+    }
+    
+    .game-title {
+      font-size: 3rem;
+      color: #2F4F2F;
+      margin: 0;
+      text-shadow: 2px 2px 0 #FFF, 4px 4px 0 #CCC;
+      font-weight: bold;
+    }
+  }
+}
+
+.main-menu {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  
+  .menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 400px;
+  }
+}
+
+
+::ng-deep .custom-button {
+  padding: 1rem 2rem !important;
+  font-family: 'Courier New', monospace !important;
+  font-size: 1.2rem !important;
+  font-weight: bold !important;
+  border: 3px solid #000 !important;
+  border-radius: 6px !important;
+  background: #C0C0C0 !important;
+  color: #000 !important;
+  cursor: pointer !important;
+  box-shadow: 
+    3px 3px 0 #808080,
+    6px 6px 0 #404040 !important;
+  transition: all 0.1s ease !important;
+  
+  &:hover:not(.button-disabled) {
+    transform: translate(-1px, -1px) !important;
+    box-shadow: 
+      4px 4px 0 #808080,
+      7px 7px 0 #404040 !important;
+  }
+  
+  &:active:not(.button-disabled) {
+    transform: translate(2px, 2px) !important;
+    box-shadow: 
+      1px 1px 0 #808080,
+      2px 2px 0 #404040 !important;
+  }
+  
+  &.button-disabled {
+    background: #A0A0A0 !important;
+    color: #606060 !important;
+    cursor: not-allowed !important;
+  }
+  
+  &.button-success {
+    background: #90EE90 !important;
+    color: #006400 !important;
+  }
+  
+  &.button-primary {
+    background: #87CEEB !important;
+    color: #000080 !important;
+  }
+  
+  &.button-secondary {
+    background: #D3D3D3 !important;
+    color: #696969 !important;
+  }
+}
+
+.team-info {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+  border-top: 4px solid #654321;
+  
+  .team-details {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+    
+    h2 {
+      font-size: 2rem;
+      color: #8B4513;
+      margin-bottom: 1rem;
+      text-shadow: 1px 1px 0 #FFF;
+    }
+    
+    .team-members h3 {
+      font-size: 1.3rem;
+      color: #2F4F2F;
+      margin-bottom: 1rem;
+      text-shadow: 1px 1px 0 #FFF;
+    }
+    
+    .members-list {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      
+      li {
+        padding: 0.8rem;
+        background: #F5DEB3;
+        border: 2px solid #8B4513;
+        border-radius: 4px;
+        color: #654321;
+        font-weight: bold;
+        box-shadow: 2px 2px 0 #D2691E;
+        
+        &:hover {
+          transform: translate(-1px, -1px);
+          box-shadow: 3px 3px 0 #D2691E;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .game-header .logo-container .game-title {
+    font-size: 2rem;
+  }
+  
+  .team-info .team-details .members-list {
+    grid-template-columns: 1fr;
+  }
+}

@@ -3,6 +3,13 @@
     height: auto;
 }
 
+.game-item {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid black;
+    padding: 5px;
+}
+
 .justified {
     display: flex;
     flex-direction: column;
@@ -15,12 +22,6 @@
     text-align: center;
 }
 
-.team-name {
-    margin-top: 0.25em;
-    margin-bottom: 0.25em;
-    color: green;
-}
-
 .header-item {
     justify-content: center;
     text-align: center;
@@ -28,17 +29,4 @@
 
 .footer-item {
     text-align: center;
-}
-
-.footer-item p :nth-child(even) {
-    color: orange;
-}
-.footer-item p :nth-child(odd) {
-    color: blue;
-}
-
-.server-message {
-    justify-content: center;
-    width: 20%;
-    min-width: min-content;
 }

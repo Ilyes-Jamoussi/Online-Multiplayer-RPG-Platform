@@ -1,0 +1,37 @@
+<div class="home-container">
+    <header class="game-header">
+        <div class="logo-container">
+            <!-- Utilise le chemin Angular d’assets -->
+            <img src="assets/logo1.jpg" alt="Logo du jeu" class="game-logo" />
+            <h1 class="game-title">Mon Jeu RPG</h1>
+        </div>
+    </header>
+
+    <main class="main-menu">
+        <div class="menu-buttons">
+            <app-ui-button [variant]="'secondary'" [disabled]="true" [size]="'lg'" [fullWidth]="true" (buttonClick)="onJoinGame()" shape="square">
+                Rejoindre une partie (Bientôt disponible)
+            </app-ui-button>
+
+            <app-ui-button [text]="'Créer une partie'" [variant]="'success'" [size]="'lg'" [fullWidth]="true" shape="square" (buttonClick)="onCreateGame()">
+                Créer une partie
+            </app-ui-button>
+
+            <app-ui-button [text]="'Administrer les jeux'" [variant]="'primary'" [size]="'lg'" [fullWidth]="true" (buttonClick)="onAdminGames()" shape="square">
+                Administrer les jeux
+            </app-ui-button>
+        </div>
+    </main>
+
+    <footer class="team-info">
+        <div class="team-details">
+            <h2>Équipe {{ teamInfo.teamNumber }}</h2>
+            <div class="team-members">
+                <h3>Développeurs :</h3>
+                <ul class="members-list">
+                    <li *ngFor="let member of teamInfo.members">{{ member }}</li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+</div>
