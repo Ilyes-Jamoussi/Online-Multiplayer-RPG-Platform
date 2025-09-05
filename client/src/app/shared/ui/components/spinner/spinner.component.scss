@@ -47,11 +47,11 @@
     }
 }
 
-/* Variantes dynamiques depuis la map */
+/* Dynamic variants from the map */
 .uiSpinner {
     @each $name, $bg in $ui-colors {
         &.v-#{$name} {
-            color: ui-contrast($name); // le spinner prend la couleur de contraste
+            color: ui-contrast($name); // the spinner takes the contrast color
         }
     }
 }
