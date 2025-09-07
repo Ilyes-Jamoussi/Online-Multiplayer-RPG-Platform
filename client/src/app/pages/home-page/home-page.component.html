@@ -37,6 +37,16 @@
             >
                 Administrer les jeux
             </app-ui-button>
+            <!-- Demo checkboxes -->
+            <div style="margin: 24px 0; display: flex; flex-direction: column; gap: 12px;">
+                <app-ui-checkbox shape="square" size="lg" label="Enable Variant Primary" variant="primary" [(ngModel)]="variantPrimary"></app-ui-checkbox>
+                <app-ui-checkbox shape="square" size="lg" label="Enable Variant Secondary" variant="secondary" [(ngModel)]="variantSecondary"></app-ui-checkbox>
+                <app-ui-checkbox shape="square" size="lg" label="Enable Variant Success" variant="success" [(ngModel)]="variantSuccess"></app-ui-checkbox>
+                <app-ui-checkbox shape="square" size="lg" label="Enable Variant Danger" variant="danger" [(ngModel)]="variantDanger"></app-ui-checkbox>
+                <app-ui-checkbox shape="square" size="lg" label="Enable Variant Warning" variant="warning" [(ngModel)]="variantWarning"></app-ui-checkbox>
+                <app-ui-checkbox shape="square" size="lg" label="Enable Variant Info" variant="info" [(ngModel)]="variantInfo"></app-ui-checkbox>
+            </div>
+            <!-- End demo checkboxes -->
             <app-ui-input
                 [(ngModel)]="gameName"
                 [fullWidth]="true"

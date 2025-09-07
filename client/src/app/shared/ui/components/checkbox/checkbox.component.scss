@@ -1,0 +1,136 @@
+@use 'sass:map';
+@use 'theme' as *;
+
+/* Base */
+.uiCheckbox {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+    user-select: none;
+    gap: 8px;
+
+
+    .checkbox-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid $ui-border;
+        background: white;
+        box-shadow: 2px 2px 0 $ui-shadow;
+        transition:
+            transform 0.1s ease,
+            box-shadow 0.1s ease;
+        position: relative;
+    }
+
+    .checkbox-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        font-size: 1.1em;
+        opacity: 0;
+        transition: opacity 0.1s;
+        width: 1em;
+        height: 1em;
+        pointer-events: none;
+    }
+    .checkbox-indicator.visible {
+        opacity: 1;
+    }
+
+    .checkbox-label {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    /* Disabled state */
+    &.isDisabled {
+        background: transparent;
+        color: $ui-disabled-fg;
+        cursor: not-allowed;
+        pointer-events: none;
+
+        .checkbox-box {
+            background: $ui-disabled-bg;
+            border-color: $ui-disabled-bord;
+            box-shadow: 2px 2px 0 $ui-disabled-shadow;
+        }
+    }
+
+    /* Hover and focus states */
+    &:not(.isDisabled):hover .checkbox-box {
+        transform: translate(-1px, -1px);
+        box-shadow: 3px 3px 0 $ui-shadow;
+    }
+
+    &:not(.isDisabled):active .checkbox-box {
+        transform: translate(1px, 1px);
+        box-shadow: 1px 1px 0 $ui-shadow;
+    }
+
+    &:focus-visible {
+        outline: 2px dashed $ui-black;
+        outline-offset: 2px;
+    }
+}
+
+/* Variants from $ui-colors + $ui-contrasts */
+.uiCheckbox {
+    @each $name, $bg in $ui-colors {
+        &.v-#{$name} {
+            &.isChecked .checkbox-box {
+                background: $bg;
+                border-color: darken($bg, 10%);
+
+                .checkbox-indicator {
+                    color: ui-contrast($name);
+                }
+            }
+        }
+    }
+}
+
+/* Sizes from $ui-sizes */
+.uiCheckbox {
+    &.s-sm {
+        font-size: 0.65rem;
+        .checkbox-box {
+            width: 16px;
+            height: 16px;
+        }
+    }
+
+    &.s-md {
+        font-size: 0.75rem;
+        .checkbox-box {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    &.s-lg {
+        font-size: 0.85rem;
+        .checkbox-box {
+            width: 24px;
+            height: 24px;
+        }
+    }
+}
+
+/* Shapes from $ui-shapes */
+.uiCheckbox {
+    &.sh-rounded .checkbox-box {
+        border-radius: 4px;
+    }
+    &.sh-square .checkbox-box {
+        border-radius: 0;
+    }
+    &.sh-pill .checkbox-box {
+        border-radius: 50%;
+    }
+}

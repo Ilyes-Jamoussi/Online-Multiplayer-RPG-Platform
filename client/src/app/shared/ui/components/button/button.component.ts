@@ -21,7 +21,7 @@ export class ButtonComponent {
     @Input() size: UiSize = 'md';
 
     /** Button shape */
-    @Input() shape: UiShapeVariant = 'rounded';
+    @Input() shape: UiShapeVariant = 'square';
 
     /** Internal content alignment */
     @Input() align: UiAlignment = 'center';
