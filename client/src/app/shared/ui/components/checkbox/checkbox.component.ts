@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, forwardRef, EventEmitter, Input, Output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { UiBaseComponent } from '@ui/components/ui-base.component';
+import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
 
 @Component({
     selector: 'app-ui-checkbox',
@@ -29,8 +29,12 @@ export class UiCheckboxComponent extends UiBaseComponent implements ControlValue
 
     // ControlValueAccessor implementation
     // Placeholder for ControlValueAccessor; will be set by Angular forms
-    onChange: (value: boolean) => void = () => { /* no-op */ };
-    onTouch: () => void = () => { /* no-op */ };
+    onChange: (value: boolean) => void = () => {
+        /* no-op */
+    };
+    onTouch: () => void = () => {
+        /* no-op */
+    };
 
     writeValue(value: boolean): void {
         this.value = value;

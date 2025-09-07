@@ -1,0 +1,40 @@
+@use 'theme' as *;
+
+// ==================== ICON COMPONENT ====================
+.uiIcon {
+    // Material Icons font setup
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+
+    // Default styling
+    color: $ui-black;
+    font-size: ui-size(md, icon-size);
+
+    // Apply all variant systems
+    @include ui-variant-colors(false); // false = don't use background colors
+    @include ui-disabled-state;
+
+    // Icon-specific size variants
+    &.s-sm {
+        font-size: ui-size(sm, icon-size);
+    }
+
+    &.s-md {
+        font-size: ui-size(md, icon-size);
+    }
+
+    &.s-lg {
+        font-size: ui-size(lg, icon-size);
+    }
+}

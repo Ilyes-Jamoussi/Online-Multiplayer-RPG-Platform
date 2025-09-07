@@ -10,9 +10,7 @@ describe('HomePageComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [HomePageComponent, RouterModule.forRoot([])],
-            providers: [
-                { provide: ActivatedRoute, useValue: {} },
-            ],
+            providers: [{ provide: ActivatedRoute, useValue: {} }],
         }).compileComponents();
 
         fixture = TestBed.createComponent(HomePageComponent);

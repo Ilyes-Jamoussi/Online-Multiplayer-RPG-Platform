@@ -1,7 +1,9 @@
 import { NgClass } from '@angular/common';
 import { Component, forwardRef, Input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { UiBaseComponent } from '@ui/components/ui-base.component';
+import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
+import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
+import { MaterialIcon } from '@app/shared/ui/types/ui.types';
 
 type InputType = 'text' | 'number' | 'password' | 'email' | 'tel' | 'url';
 
@@ -10,7 +12,7 @@ type InputType = 'text' | 'number' | 'password' | 'email' | 'tel' | 'url';
     templateUrl: './input.component.html',
     styleUrls: ['./input.component.scss'],
     standalone: true,
-    imports: [NgClass],
+    imports: [NgClass, UiIconComponent],
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -36,7 +38,7 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
     @Input() minLength?: number;
 
     /** Icon to display before the input */
-    @Input() prefixIcon?: string;
+    @Input() prefixIcon?: keyof typeof MaterialIcon;
 
     /** Placeholder text for the input */
     @Input() placeholder: string = '';
@@ -45,7 +47,7 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
     @Input() required: boolean = false;
 
     /** Icon to display after the input */
-    @Input() suffixIcon?: string;
+    @Input() suffixIcon?: keyof typeof MaterialIcon;
 
     /** Type of the input */
     @Input() type: InputType = 'text';

@@ -1,41 +1,31 @@
-@use 'sass:map';
 @use 'theme' as *;
 
-/* Base */
+// ==================== BUTTON COMPONENT ====================
 .uiBtn {
+    // Base component setup
+    @include ui-component-base;
+
+    // Layout and display
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.75rem;
     text-transform: uppercase;
     font-weight: 700;
     cursor: pointer;
-    position: relative;
-    outline: none;
 
-    border: 2px solid $ui-border;
-    border-radius: 0;
-    box-shadow: 4px 4px 0 $ui-shadow;
-    transition:
-        transform 0.1s ease,
-        box-shadow 0.1s ease;
+    // Default styling
+    background: ui-color(primary);
+    color: ui-contrast(primary);
+    box-shadow: ui-elevation(sm);
+    border-radius: ui-shape(square);
+    gap: ui-gap(sm);
 
-    &.isFull {
-        width: 100%;
-        display: inline-flex;
-    }
+    // Default size (md)
+    padding: ui-size(md, padding);
+    font-size: ui-size(md, font-size);
+    min-height: ui-size(md, height);
 
-    &.isDisabled {
-        background: $ui-disabled-bg !important;
-        color: $ui-disabled-fg !important;
-        border-color: $ui-disabled-bord;
-        box-shadow: 4px 4px 0 $ui-disabled-shadow;
-        cursor: not-allowed;
-        pointer-events: none;
-        transform: none !important;
-    }
-
+    // Loading state
     &.isLoading {
         cursor: wait;
         .btn-text {
@@ -43,99 +33,57 @@
         }
     }
 
-    &:hover:not(.isDisabled):not(.isLoading) {
-        transform: translate(-2px, -2px);
-        box-shadow: 6px 6px 0 $ui-shadow;
-    }
-    &:active:not(.isDisabled):not(.isLoading) {
-        transform: translate(2px, 2px);
-        box-shadow: 2px 2px 0 $ui-shadow;
-    }
-    &:focus-visible {
-        outline: 2px dashed $ui-black;
-        outline-offset: 2px;
+    // Full width modifier
+    &.isFull {
+        width: 100%;
     }
 
-    /* Sub-elements */
+    // Icon positioning
+    &.iconRight {
+        flex-direction: row-reverse;
+    }
+
+    // Link button specific
+    &.linkBtn {
+        text-decoration: none;
+        &:hover,
+        &:active,
+        &:focus {
+            text-decoration: none;
+        }
+    }
+
+    // Apply consistent states
+    @include ui-disabled-state;
+    @include ui-hover-effects;
+    @include ui-focus-state;
+
+    // Apply all variant systems
+    @include ui-variant-colors(true);
+    @include ui-size-variants;
+    @include ui-shape-variants;
+    @include ui-elevation-variants;
+    @include ui-alignment-variants;
+    @include ui-gap-variants;
+
+    // Button sub-elements
     .btn-icon {
         line-height: 1;
         display: inline-flex;
+        font-size: ui-size(md, icon-size);
     }
+
     .btn-text {
         display: inline-flex;
         align-items: center;
     }
-}
 
-/* Variants from $ui-colors + $ui-contrasts */
-.uiBtn {
-    @each $name, $bg in $ui-colors {
-        &.v-#{$name} {
-            background: $bg;
-            color: ui-contrast($name);
-        }
+    // Icon sizing per button size
+    &.s-sm .btn-icon {
+        font-size: ui-size(sm, icon-size);
     }
-}
 
-/* Sizes from $ui-sizes */
-.uiBtn {
-    @each $name, $cfg in $ui-sizes {
-        &.s-#{$name} {
-            padding: map.get($cfg, padding);
-            font-size: map.get($cfg, font-size);
-        }
-    }
-}
-
-/* Shapes from $ui-shapes */
-.uiBtn {
-    @each $name, $radius in $ui-shapes {
-        &.sh-#{$name} {
-            border-radius: $radius;
-        }
-    }
-}
-
-/* Gaps from $ui-gaps */
-.uiBtn {
-    @each $name, $space in $ui-gaps {
-        &.gap-#{$name} {
-            gap: $space;
-        }
-    }
-}
-
-/* Alignment */
-.uiBtn {
-    &.al-left {
-        justify-content: flex-start;
-    }
-    &.al-center {
-        justify-content: center;
-    }
-    &.al-right {
-        justify-content: flex-end;
-    }
-    &.al-justify {
-        justify-content: space-between;
-    }
-}
-
-/* Icon on the right */
-.uiBtn.iconRight {
-    flex-direction: row-reverse;
-}
-
-/* Remove the underline from link buttons */
-.uiBtn.linkBtn {
-    text-decoration: none;
-    &:hover {
-        text-decoration: none;
-    }
-    &:active {
-        text-decoration: none;
-    }
-    &:focus {
-        text-decoration: none;
+    &.s-lg .btn-icon {
+        font-size: ui-size(lg, icon-size);
     }
 }

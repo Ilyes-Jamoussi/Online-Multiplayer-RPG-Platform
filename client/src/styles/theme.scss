@@ -2,18 +2,25 @@
 @use 'sass:list';
 @use 'sass:map';
 
-// --- Base (neutres / contours)
+// ==================== BASE FOUNDATION ====================
+// Core neutral colors and system fundamentals
 $ui-black: #222;
 $ui-gray: #777;
 $ui-white: #f5f5f5;
-$ui-border: #111; // contour "pixel art" (less black but more black than $ui-black)
-$ui-shadow: #111; // ombre
+$ui-border: #111;
+$ui-shadow: #111;
+
+// Disabled state colors
 $ui-disabled-bg: #cfcfcf;
 $ui-disabled-fg: #7a7a7a;
-$ui-disabled-bord: #555;
+$ui-disabled-border: #555;
 $ui-disabled-shadow: #555;
 
-// --- color palette
+// System font stack
+$ui-font-family: 'Press Start 2P', monospace;
+
+// ==================== COLOR SYSTEM ====================
+// Primary color palette
 $ui-colors: (
     primary: #5a5af7,
     secondary: #c0c0c0,
@@ -23,7 +30,7 @@ $ui-colors: (
     info: #219ebc,
 );
 
-// --- contrast colors
+// Contrast colors for text on colored backgrounds
 $ui-contrasts: (
     primary: $ui-white,
     secondary: $ui-black,
@@ -33,7 +40,8 @@ $ui-contrasts: (
     info: $ui-white,
 );
 
-// --- gap sizes
+// ==================== SPACING SYSTEM ====================
+// Consistent spacing values
 $ui-gaps: (
     none: 0,
     xs: 0.25rem,
@@ -41,32 +49,93 @@ $ui-gaps: (
     md: 0.75rem,
     lg: 1rem,
     xl: 1.25rem,
+    xxl: 1.5rem,
 );
 
-// --- shapes
-$ui-shapes: (
-    rounded: 0.5rem,
-    square: 0,
-    pill: 9999px,
-);
-
-// --- sizes
+// ==================== SIZING SYSTEM ====================
+// Component size configurations
 $ui-sizes: (
     sm: (
         padding: 0.5rem 1rem,
         font-size: 0.65rem,
+        height: 2rem,
+        icon-size: 1rem,
     ),
     md: (
         padding: 0.75rem 1.25rem,
         font-size: 0.75rem,
+        height: 2.5rem,
+        icon-size: 1.25rem,
     ),
     lg: (
         padding: 1rem 1.75rem,
         font-size: 0.85rem,
+        height: 3rem,
+        icon-size: 1.5rem,
     ),
 );
 
-// --- Helpers
+// ==================== SHAPE SYSTEM ====================
+// Border radius variations
+$ui-shapes: (
+    square: 0,
+    rounded: 0.5rem,
+    pill: 9999px,
+);
+
+// ==================== ELEVATION SYSTEM ====================
+// Box shadow levels for depth
+$ui-elevations: (
+    none: none,
+    xs: 2px 2px 0 $ui-shadow,
+    sm: 4px 4px 0 $ui-shadow,
+    md: 6px 6px 0 $ui-shadow,
+    lg: 8px 8px 0 $ui-shadow,
+    xl: 10px 10px 0 $ui-shadow,
+);
+
+// ==================== ALIGNMENT SYSTEM ====================
+// Text and content alignment options
+$ui-alignments: (
+    left: left,
+    center: center,
+    right: right,
+    justify: justify,
+);
+
+// ==================== ANIMATION SYSTEM ====================
+// Consistent transition and animation values
+$ui-transitions: (
+    fast: 0.1s,
+    normal: 0.2s,
+    slow: 0.3s,
+);
+
+$ui-easings: (
+    linear: linear,
+    ease: ease,
+    ease-in: ease-in,
+    ease-out: ease-out,
+    ease-in-out: ease-in-out,
+);
+
+// ==================== INTERACTIVE STATES ====================
+// Hover and active transform values
+$ui-interactions: (
+    hover-translate: (
+        -2px,
+        -2px,
+    ),
+    active-translate: (
+        1px,
+        1px,
+    ),
+    hover-shadow-offset: 6px,
+    active-shadow-offset: 1px,
+);
+
+// ==================== UTILITY FUNCTIONS ====================
+// Theme value getters with fallbacks
 @function ui-color($name) {
     @return map.get($ui-colors, $name);
 }
@@ -85,4 +154,147 @@ $ui-sizes: (
 
 @function ui-size($name, $prop) {
     @return map.get(map.get($ui-sizes, $name), $prop);
+}
+
+@function ui-elevation($level) {
+    @return map.get($ui-elevations, $level);
+}
+
+@function ui-alignment($name) {
+    @return map.get($ui-alignments, $name);
+}
+
+@function ui-transition($speed) {
+    @return map.get($ui-transitions, $speed);
+}
+
+@function ui-easing($type) {
+    @return map.get($ui-easings, $type);
+}
+
+@function ui-interaction($prop) {
+    @return map.get($ui-interactions, $prop);
+}
+
+// ==================== COMPONENT MIXINS ====================
+// Reusable component patterns
+
+// Base component styling
+@mixin ui-component-base {
+    font-family: $ui-font-family;
+    border: 2px solid $ui-border;
+    outline: none;
+    user-select: none;
+    position: relative;
+    transition:
+        transform ui-transition(fast) ui-easing(ease),
+        box-shadow ui-transition(fast) ui-easing(ease);
+}
+
+// Disabled state styling
+@mixin ui-disabled-state {
+    &.isDisabled {
+        background: $ui-disabled-bg !important;
+        color: $ui-disabled-fg !important;
+        border-color: $ui-disabled-border !important;
+        box-shadow: ui-elevation(sm) !important;
+        box-shadow: 4px 4px 0 $ui-disabled-shadow !important;
+        cursor: not-allowed;
+        pointer-events: none;
+
+        * {
+            color: $ui-disabled-fg !important;
+            opacity: 0.6;
+        }
+    }
+}
+
+// Interactive hover effects
+@mixin ui-hover-effects {
+    &:hover:not(.isDisabled):not(.isLoading) {
+        transform: translate(ui-interaction(hover-translate));
+        box-shadow: ui-interaction(hover-shadow-offset) ui-interaction(hover-shadow-offset) 0 $ui-shadow;
+    }
+
+    &:hover.popOut:not(.isDisabled):not(.isLoading) {
+        transform: translate(ui-interaction(hover-translate));
+        box-shadow: ui-interaction(hover-shadow-offset) ui-interaction(hover-shadow-offset) 0 $ui-shadow;
+    }
+
+    &:active:not(.isDisabled):not(.isLoading) {
+        transform: translate(ui-interaction(active-translate));
+        box-shadow: ui-interaction(active-shadow-offset) ui-interaction(active-shadow-offset) 0 $ui-shadow;
+    }
+}
+
+// Focus styling
+@mixin ui-focus-state {
+    &:focus-visible {
+        outline: 2px dashed $ui-black;
+        outline-offset: 2px;
+    }
+}
+
+// Variant color generator
+@mixin ui-variant-colors($use-background: true) {
+    @each $name, $color in $ui-colors {
+        &.v-#{$name} {
+            @if $use-background {
+                background: $color;
+                color: ui-contrast($name);
+                border-color: darken($color, 10%);
+            } @else {
+                color: $color;
+                border-color: $color;
+            }
+        }
+    }
+}
+
+// Size generator
+@mixin ui-size-variants {
+    @each $name, $config in $ui-sizes {
+        &.s-#{$name} {
+            padding: map.get($config, padding);
+            font-size: map.get($config, font-size);
+            min-height: map.get($config, height);
+        }
+    }
+}
+
+// Shape generator
+@mixin ui-shape-variants {
+    @each $name, $radius in $ui-shapes {
+        &.sh-#{$name} {
+            border-radius: $radius;
+        }
+    }
+}
+
+// Elevation generator
+@mixin ui-elevation-variants {
+    @each $level, $shadow in $ui-elevations {
+        &.elev-#{$level} {
+            box-shadow: $shadow;
+        }
+    }
+}
+
+// Alignment generator
+@mixin ui-alignment-variants {
+    @each $name, $alignment in $ui-alignments {
+        &.al-#{$name} {
+            text-align: $alignment;
+            justify-content: if($alignment == left, flex-start, if($alignment == center, center, if($alignment == right, flex-end, space-between)));
+        }
+    }
+}
+
+// Gap generator
+@mixin ui-gap-variants($property: gap) {
+    @each $name, $value in $ui-gaps {
+        &.gap-#{$name} {
+            #{$property}: $value;
+        }
+    }
 }
