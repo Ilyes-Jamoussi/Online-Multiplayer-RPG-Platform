@@ -28,8 +28,9 @@ export class UiCheckboxComponent extends UiBaseComponent implements ControlValue
     @Output() valueChange = new EventEmitter<boolean>();
 
     // ControlValueAccessor implementation
-    onChange: (value: boolean) => void;
-    onTouch: () => void;
+    // Placeholder for ControlValueAccessor; will be set by Angular forms
+    onChange: (value: boolean) => void = () => { /* no-op */ };
+    onTouch: () => void = () => { /* no-op */ };
 
     writeValue(value: boolean): void {
         this.value = value;
