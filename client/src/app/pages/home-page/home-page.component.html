@@ -38,18 +38,35 @@
             <h2>Équipe {{ teamInfo.teamNumber }}</h2>
             <div class="team-members">
                 <h3>Développeurs :</h3>
-                <ul class="members-list">
+                <div class="members-list">
                     @for (member of teamInfo.members; track member) {
-                    <app-ui-card variant="info" [fullWidth]="true">
-                        <app-ui-card-title alignText="center">{{ member }}</app-ui-card-title>
-                        <app-ui-card-content alignText="center">
+                    <app-ui-card [popOut]="true" alignContent="left" variant="warning" [fullWidth]="true">
+                        <app-ui-card-title [iconRight]="true" icon="Code">{{ member }}</app-ui-card-title>
+                        <app-ui-card-content>
                             <p>Rôle : Développeur</p>
-                            <app-ui-icon size="lg" variant="info" iconName="Code" />
+                            <div style="max-width: 100%; display: flex; flex-direction: row; gap: 8px; flex-wrap: wrap">
+                                <app-ui-icon size="lg" iconName="Code" />
+                                <app-ui-icon size="lg" iconName="JavaScript" />
+                                <app-ui-icon size="lg" iconName="Html" />
+                                <app-ui-icon size="lg" iconName="Css" />
+                                <app-ui-icon size="lg" iconName="Php" />
+                                <app-ui-icon size="lg" iconName="Group" />
+                                <app-ui-icon size="lg" iconName="Psychology" />
+                                <app-ui-icon size="lg" iconName="Work" />
+                                <app-ui-icon size="lg" iconName="Visibility" />
+                                <app-ui-icon size="lg" iconName="VisibilityOff" />
+                                <app-ui-icon size="lg" iconName="Logout" />
+                                <app-ui-icon size="lg" iconName="Settings" />
+                                <app-ui-icon size="lg" iconName="Error" />
+                                <app-ui-icon size="lg" iconName="Warning" />
+                                <app-ui-icon size="lg" iconName="Info" />
+                                <app-ui-icon size="lg" iconName="Check" />
+                            </div>
                         </app-ui-card-content>
-                        <app-ui-card-footer alignText="center"> Étudiant en informatique </app-ui-card-footer>
+                        <app-ui-card-footer> Étudiant en informatique </app-ui-card-footer>
                     </app-ui-card>
                     }
-                </ul>
+                </div>
             </div>
         </div>
     </footer>

@@ -55,9 +55,10 @@
 
     // Apply consistent states
     @include ui-disabled-state;
-    @include ui-hover-effects;
+    @include ui-popout-effects;
+    @include ui-active-effects;
     @include ui-focus-state;
-
+    @include ui-hover-brightness;
     // Apply all variant systems
     @include ui-variant-colors(true);
     @include ui-size-variants;
