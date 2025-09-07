@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, forwardRef, EventEmitter, Input, Output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { UiVariant, UiSize, UiShapeVariant } from '@app/shared/ui/types/ui.types';
+import { UiBaseComponent } from '@ui/components/ui-base.component';
 
 @Component({
     selector: 'app-ui-checkbox',
@@ -17,21 +17,9 @@ import { UiVariant, UiSize, UiShapeVariant } from '@app/shared/ui/types/ui.types
         },
     ],
 })
-export class UiCheckboxComponent implements ControlValueAccessor {
-    /** Variant: global style (color + style) */
-    @Input() variant: UiVariant = 'primary';
-
-    /** Size */
-    @Input() size: UiSize = 'md';
-
-    /** Checkbox shape */
-    @Input() shape: UiShapeVariant = 'square';
-
+export class UiCheckboxComponent extends UiBaseComponent implements ControlValueAccessor {
     /** Label text */
     @Input() label: string = '';
-
-    /** Disabled state */
-    @Input() disabled: boolean = false;
 
     /** Value state */
     @Input() value: boolean = false;
@@ -70,21 +58,10 @@ export class UiCheckboxComponent implements ControlValueAccessor {
         this.onTouch();
     }
 
-    get classes(): Record<string, boolean> {
+    override get classes(): Record<string, boolean> {
         return {
             uiCheckbox: true,
-
-            // variants
-            [`v-${this.variant}`]: true,
-
-            // sizes
-            [`s-${this.size}`]: true,
-
-            // shapes
-            [`sh-${this.shape}`]: true,
-
-            // states
-            isDisabled: this.disabled,
+            ...super.classes,
             isChecked: this.value,
         };
     }

@@ -1,7 +1,7 @@
 import { NgClass } from '@angular/common';
 import { Component, forwardRef, Input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { UiAlignment, UiShapeVariant, UiSize, UiVariant } from '@app/shared/ui/types/ui.types';
+import { UiBaseComponent } from '@ui/components/ui-base.component';
 
 type InputType = 'text' | 'number' | 'password' | 'email' | 'tel' | 'url';
 
@@ -19,21 +19,12 @@ type InputType = 'text' | 'number' | 'password' | 'email' | 'tel' | 'url';
         },
     ],
 })
-export class UiInputComponent implements ControlValueAccessor {
-    /** Text alignment inside the input */
-    @Input() alignText?: UiAlignment = 'left';
+export class UiInputComponent extends UiBaseComponent implements ControlValueAccessor {
+    /** Text alignment inside the input (overrides base align for input field) */
+    @Input() alignText?: string = 'left';
 
     /** Whether the input can be cleared */
     @Input() clearable: boolean = false;
-
-    /** Whether the input is disabled */
-    @Input() disabled?: boolean = false;
-
-    /** Whether the input should take full width */
-    @Input() fullWidth?: boolean = false;
-
-    /** Shows a loading indicator */
-    @Input() loading?: boolean = true;
 
     /** Label for the input */
     @Input() label: string = '';
@@ -53,20 +44,11 @@ export class UiInputComponent implements ControlValueAccessor {
     /** Whether the input is required */
     @Input() required: boolean = false;
 
-    /** Shape variant of the input */
-    @Input() shape?: UiShapeVariant = 'square';
-
-    /** Size of the input */
-    @Input() size: UiSize = 'md';
-
     /** Icon to display after the input */
     @Input() suffixIcon?: string;
 
     /** Type of the input */
     @Input() type: InputType = 'text';
-
-    /** Visual variant of the input */
-    @Input() variant: UiVariant = 'primary';
 
     value: string = '';
     isDisabled = false;
@@ -105,22 +87,13 @@ export class UiInputComponent implements ControlValueAccessor {
         this?.onTouched?.();
     }
 
-    get classes(): Record<string, boolean> {
+    override get classes(): Record<string, boolean> {
         return {
             uiInput: true,
-
-            [`v-${this.variant ?? 'primary'}`]: true,
-
-            [`s-${this.size ?? 'md'}`]: true,
-
-            [`sh-${this.shape ?? 'rounded'}`]: true,
-
+            ...super.classes,
             [`al-${this.alignText ?? 'left'}`]: true,
-
-            isFull: !!this.fullWidth,
             isDisabled: !!this.disabled || !!this.isDisabled,
             isLoading: !!this.loading,
-
             hasPrefixIcon: !!this.prefixIcon,
             hasSuffixIcon: !!this.suffixIcon,
             isClearable: !!this.clearable,
