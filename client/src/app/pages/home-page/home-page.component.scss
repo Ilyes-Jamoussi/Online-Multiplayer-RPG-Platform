@@ -19,7 +19,7 @@
     min-width: 340px;
     box-sizing: border-box;
     overflow: auto;
-    background: map.get($ui-gradients, green);
+    background: map.get($ui-gradients, misty);
 }
 
 .game-title-block {
@@ -71,7 +71,6 @@
     min-width: 320px;
     box-sizing: border-box;
     overflow: auto;
-    background: map.get($ui-gradients, subtle-gray-white);
 }
 
 .team-section-modern {

@@ -5,7 +5,7 @@
 
     <div class="uiInput-field">
         @if (prefixIcon) {
-        <app-ui-icon [iconName]="prefixIcon" class="in-icon prefix"></app-ui-icon>
+        <app-ui-icon [iconName]="prefixIcon" variant="secondary"></app-ui-icon>
         }
 
         <input
@@ -22,7 +22,7 @@
         />
 
         @if (suffixIcon) {
-        <app-ui-icon [iconName]="suffixIcon" class="in-icon suffix"></app-ui-icon>
+        <app-ui-icon [iconName]="suffixIcon" variant="secondary"></app-ui-icon>
         }
         <button
             type="button"

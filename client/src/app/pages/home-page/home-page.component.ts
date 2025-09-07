@@ -23,7 +23,7 @@ import { UiCardTitleComponent, UiCardContentComponent } from '@app/shared/ui/com
     standalone: true,
 })
 export class HomePageComponent {
-    gameName: string = 'Le Grand RPG';
+    gameName: string = 'RPG Maker x2';
     teamInfo = {
         teamNumber: '204',
         members: ['Wael El Karoui', 'Ilyes Jamoussi', 'Noah Blanchard', 'Adam Rafai', 'Eduard Andrei Podaru'],

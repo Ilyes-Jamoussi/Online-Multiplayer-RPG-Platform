@@ -23,6 +23,7 @@
 
     // Apply all variant systems
     @include ui-disabled-state;
+    @include ui-contrast-colors;
 
     // Icon-specific size variants
     &.s-sm {
