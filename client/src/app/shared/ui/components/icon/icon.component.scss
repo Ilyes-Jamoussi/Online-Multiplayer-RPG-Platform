@@ -22,7 +22,6 @@
     font-size: ui-size(md, icon-size);
 
     // Apply all variant systems
-    @include ui-variant-colors(false); // false = don't use background colors
     @include ui-disabled-state;
 
     // Icon-specific size variants

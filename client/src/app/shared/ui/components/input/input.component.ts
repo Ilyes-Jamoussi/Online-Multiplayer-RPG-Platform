@@ -100,6 +100,7 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
             hasSuffixIcon: !!this.suffixIcon,
             isClearable: !!this.clearable,
             hasLabel: !!this.label,
+            disableHoverEffects: true,
         };
     }
 }

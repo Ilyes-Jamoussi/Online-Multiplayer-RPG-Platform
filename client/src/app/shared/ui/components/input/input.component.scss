@@ -22,6 +22,7 @@
     // Apply consistent states
     @include ui-disabled-state;
     @include ui-focus-state;
+    @include ui-popout-effects;
 
     // Custom focus effects for input
     &:focus-within:not(.isDisabled) {

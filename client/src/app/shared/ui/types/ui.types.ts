@@ -64,4 +64,12 @@ export enum MaterialIcon {
     Psychology = 'psychology',
     Group = 'group',
     Work = 'work',
+    LogoDev = 'logo_dev',
+    FrameSource = 'frame_source',
+    JavaScript = 'javascript',
+    Html = 'html',
+    Css = 'css',
+    Php = 'php',
+    Python = 'python',
+    FileJson = 'file_json',
 }

@@ -22,7 +22,7 @@ export abstract class UiBaseComponent {
     @Input() fullWidth: boolean = false;
 
     /** Alignment (optional, for components that use it) */
-    @Input() align: UiAlignment = 'center';
+    @Input() alignContent: UiAlignment = 'center';
 
     /** Gap (optional, for components that use it) */
     @Input() gap: UiSpacing = 'sm';
@@ -47,10 +47,11 @@ export abstract class UiBaseComponent {
             [`sh-${this.shape}`]: true,
             isDisabled: this.disabled,
             isFull: this.fullWidth,
-            [`al-${this.align}`]: true,
+            [`al-${this.alignContent}`]: true,
             [`gap-${this.gap}`]: true,
             [`elev-${this.elevation}`]: true,
             popOut: this.popOut,
+            disableHoverEffects: false,
         };
     }
 }

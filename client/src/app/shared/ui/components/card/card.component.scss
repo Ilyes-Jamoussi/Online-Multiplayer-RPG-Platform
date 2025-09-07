@@ -4,6 +4,7 @@
 .uiCard {
     // Base component setup
     @include ui-component-base;
+    @include ui-popout-effects;
 
     // Layout and display
     display: flex;
@@ -27,7 +28,6 @@
 
     // Apply consistent states
     @include ui-disabled-state;
-    @include ui-hover-effects;
     @include ui-focus-state;
 
     // Apply all variant systems
@@ -36,6 +36,7 @@
     @include ui-shape-variants;
     @include ui-elevation-variants;
     @include ui-gap-variants;
+    @include ui-contrast-colors;
 }
 
 // ==================== CARD SECTIONS ====================
@@ -57,8 +58,12 @@
         flex: 1;
     }
 
-    // Apply alignment variants
+    &.icon-right {
+        flex-direction: row-reverse;
+    }
+
     @include ui-alignment-variants;
+    @include ui-contrast-colors;
 }
 
 .uiCard__content {
@@ -66,6 +71,9 @@
     flex-direction: column;
     gap: ui-gap(sm);
     flex: 1;
+
+    @include ui-alignment-variants;
+    @include ui-contrast-colors;
 }
 
 .uiCard__footer {
@@ -74,4 +82,7 @@
     align-items: center;
     padding-top: ui-gap(sm);
     gap: ui-gap(sm);
+
+    @include ui-alignment-variants;
+    @include ui-contrast-colors;
 }

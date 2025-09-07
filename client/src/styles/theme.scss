@@ -22,12 +22,18 @@ $ui-font-family: 'Press Start 2P', monospace;
 // ==================== COLOR SYSTEM ====================
 // Primary color palette
 $ui-colors: (
-    primary: #5a5af7,
-    secondary: #c0c0c0,
-    success: #3ca85c,
-    danger: #d62828,
-    warning: #ffb703,
-    info: #219ebc,
+    primary: #3572b0,
+    // Darker blue
+    secondary: #f7c8e0,
+    // Light pastel pink
+    success: #8be9a5,
+    // Pastel green
+    danger: #ff8b94,
+    // Pastel red
+    warning: #ffe066,
+    // Pastel yellow
+    info: #a0e7e5,
+    // Pastel cyan
 );
 
 // Contrast colors for text on colored backgrounds
@@ -132,6 +138,7 @@ $ui-interactions: (
     ),
     hover-shadow-offset: 6px,
     active-shadow-offset: 1px,
+    hover-brightness: 95%,
 );
 
 // ==================== UTILITY FUNCTIONS ====================
@@ -209,21 +216,29 @@ $ui-interactions: (
     }
 }
 
-// Interactive hover effects
-@mixin ui-hover-effects {
-    &:hover:not(.isDisabled):not(.isLoading) {
+// Interactive pop-out effects
+@mixin ui-popout-effects {
+    &:hover.popOut:not(.isDisabled):not(.isLoading):not(.disableHoverEffects) {
         transform: translate(ui-interaction(hover-translate));
         box-shadow: ui-interaction(hover-shadow-offset) ui-interaction(hover-shadow-offset) 0 $ui-shadow;
     }
 
-    &:hover.popOut:not(.isDisabled):not(.isLoading) {
+    &:focus.popOut:not(.isDisabled):not(.isLoading):not(.disableHoverEffects) {
         transform: translate(ui-interaction(hover-translate));
         box-shadow: ui-interaction(hover-shadow-offset) ui-interaction(hover-shadow-offset) 0 $ui-shadow;
     }
+}
 
+@mixin ui-active-effects {
     &:active:not(.isDisabled):not(.isLoading) {
         transform: translate(ui-interaction(active-translate));
         box-shadow: ui-interaction(active-shadow-offset) ui-interaction(active-shadow-offset) 0 $ui-shadow;
+    }
+}
+
+@mixin ui-hover-brightness {
+    &:hover:not(.isDisabled):not(.isLoading) {
+        filter: brightness(ui-interaction(hover-brightness));
     }
 }
 
@@ -295,6 +310,15 @@ $ui-interactions: (
     @each $name, $value in $ui-gaps {
         &.gap-#{$name} {
             #{$property}: $value;
+        }
+    }
+}
+
+// Contrast color generator
+@mixin ui-contrast-colors {
+    @each $name, $color in $ui-contrasts {
+        &.v-#{$name} {
+            color: $color !important;
         }
     }
 }
