@@ -1,4 +1,3 @@
-
 export const ROUTES = {
     home: 'home',
     createGamePage: 'create--game-page',

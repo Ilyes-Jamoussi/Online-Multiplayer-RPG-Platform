@@ -1,37 +1,30 @@
 <div class="home-container">
     <header class="game-header">
         <div class="logo-container">
-            <img src="client\src\assets\logo1.jpg" alt="Logo du jeu" class="game-logo">
-            <h1 class="game-title">Mon Jeu RPG</h1>
+            <img src="assets/logo1.jpg" alt="Logo du jeu" class="game-logo" />
+            <h1 class="game-title">{{ gameName }}</h1>
         </div>
     </header>
 
     <main class="main-menu">
         <div class="menu-buttons">
-            <app-button 
-                [text]="'Joindre une partie'"
-                [type]="'secondary'"
-                [disabled]="true"
-                [size]="'large'"
+            <app-ui-link-button [fullWidth]="true" [routerLink]="'/join-game-page'" [variant]="'secondary'" [disabled]="true">
+                Rejoindre une partie (Bientôt disponible)
+            </app-ui-link-button>
+            <app-ui-link-button [fullWidth]="true" [routerLink]="'/create--game-page'" [variant]="'primary'"> Créer une partie </app-ui-link-button>
+            <app-ui-link-button [fullWidth]="true" [routerLink]="'/admin-page'" [variant]="'primary'"> Administrer les jeux </app-ui-link-button>
+            <app-ui-input
+                [(ngModel)]="gameName"
                 [fullWidth]="true"
-                (buttonClick)="onJoinGame()">
-            </app-button>
-
-            <app-button 
-                [text]="'Créer une partie'"
-                [type]="'success'"
-                [size]="'large'"
-                [fullWidth]="true"
-                (buttonClick)="onCreateGame()">
-            </app-button>
-
-            <app-button 
-                [text]="'Administrer les jeux'"
-                [type]="'primary'"
-                [size]="'large'"
-                [fullWidth]="true"
-                (buttonClick)="onAdminGames()">
-            </app-button>
+                label="Nom du jeu"
+                placeholder="Le nom du jeu"
+                [size]="'lg'"
+                variant="primary"
+                [clearable]="true"
+                type="text"
+                shape="square"
+                alignText="left"
+            ></app-ui-input>
         </div>
     </main>
 

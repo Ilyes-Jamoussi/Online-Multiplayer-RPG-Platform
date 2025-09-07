@@ -30,6 +30,9 @@
         "@app/*": [
           "./src/app/*"
         ],
+        "@ui/*": [
+          "./src/app/shared/ui/*"
+        ],
         "@common/*": [
           "../common/*"
         ],

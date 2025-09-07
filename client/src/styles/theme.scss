@@ -1,0 +1,88 @@
+@use 'sass:math';
+@use 'sass:list';
+@use 'sass:map';
+
+// --- Base (neutres / contours)
+$ui-black: #222;
+$ui-gray: #777;
+$ui-white: #f5f5f5;
+$ui-border: #111; // contour "pixel art" (less black but more black than $ui-black)
+$ui-shadow: #111; // ombre
+$ui-disabled-bg: #cfcfcf;
+$ui-disabled-fg: #7a7a7a;
+$ui-disabled-bord: #555;
+$ui-disabled-shadow: #555;
+
+// --- color palette
+$ui-colors: (
+    primary: #5a5af7,
+    secondary: #c0c0c0,
+    success: #3ca85c,
+    danger: #d62828,
+    warning: #ffb703,
+    info: #219ebc,
+);
+
+// --- contrast colors
+$ui-contrasts: (
+    primary: $ui-white,
+    secondary: $ui-black,
+    success: $ui-white,
+    danger: $ui-white,
+    warning: $ui-black,
+    info: $ui-white,
+);
+
+// --- gap sizes
+$ui-gaps: (
+    none: 0,
+    xs: 0.25rem,
+    sm: 0.5rem,
+    md: 0.75rem,
+    lg: 1rem,
+    xl: 1.25rem,
+);
+
+// --- shapes
+$ui-shapes: (
+    rounded: 0.5rem,
+    square: 0,
+    pill: 9999px,
+);
+
+// --- sizes
+$ui-sizes: (
+    sm: (
+        padding: 0.5rem 1rem,
+        font-size: 0.65rem,
+    ),
+    md: (
+        padding: 0.75rem 1.25rem,
+        font-size: 0.75rem,
+    ),
+    lg: (
+        padding: 1rem 1.75rem,
+        font-size: 0.85rem,
+    ),
+);
+
+// --- Helpers
+@function ui-color($name) {
+    @return map.get($ui-colors, $name);
+}
+
+@function ui-contrast($name) {
+    @return map.get($ui-contrasts, $name);
+}
+
+@function ui-gap($name) {
+    @return map.get($ui-gaps, $name);
+}
+
+@function ui-shape($name) {
+    @return map.get($ui-shapes, $name);
+}
+
+@function ui-size($name, $prop) {
+    @return map.get(map.get($ui-sizes, $name), $prop);
+}
