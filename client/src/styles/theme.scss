@@ -4,28 +4,26 @@
 
 // ==================== BASE FOUNDATION ====================
 // Core neutral colors and system fundamentals
-$ui-black: #222;
-$ui-gray: #777;
+$ui-black: #0d0d0d;
+$ui-gray: #2e2e2e;
 $ui-white: #f5f5f5;
-$ui-border: #111;
-$ui-shadow: #111;
+$ui-border: #1a1a1a;
+$ui-shadow: #4d4d4d;
 
 // Disabled state colors
-$ui-disabled-bg: #cfcfcf;
-$ui-disabled-fg: #7a7a7a;
-$ui-disabled-border: #555;
-$ui-disabled-shadow: #555;
+$ui-disabled-bg: #3a3a3a;
+$ui-disabled-fg: #8c8c8c;
+$ui-disabled-border: #4d4d4d;
+$ui-disabled-shadow: #4d4d4d;
 
 // Gradients
 $ui-gradients: (
-    green: linear-gradient(120deg, #47e4a5 0%, #daffe7 100%),
-    blue: linear-gradient(120deg, #90caf9 0%, #64b5f6 100%),
-    dark: linear-gradient(120deg, $ui-black 0%, $ui-gray 100%),
-    light: linear-gradient(120deg, $ui-white 0%, #e0e0e0 100%),
-    green-radial: radial-gradient(circle at 60% 40%, #47e4a5 100%, #daffe7 0%),
-    subtle-gray-white: linear-gradient(120deg, #f5f5f5 0%, #e0e0e0 100%),
+    misty: radial-gradient(circle at 50% 50%, rgba(176, 224, 230, 0.8) 0%, rgba(135, 206, 250, 0.8) 50%, rgba(70, 130, 180, 0.8) 100%),
+    midnight: radial-gradient(circle at 50% 50%, rgba(25, 25, 112, 0.8) 0%, rgba(72, 61, 139, 0.8) 50%, rgba(123, 104, 238, 0.8) 100%),
+    mystical: radial-gradient(circle at 50% 50%, rgba(75, 0, 130, 0.8) 0%, rgba(138, 43, 226, 0.8) 50%, rgba(255, 105, 180, 0.8) 100%),
+    twilight: radial-gradient(circle at 50% 50%, rgba(72, 61, 139, 0.8) 0%, rgba(123, 104, 238, 0.8) 50%, rgba(176, 224, 230, 0.8) 100%),
+    nebula: radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.8) 0%, rgba(75, 0, 130, 0.8) 50%, rgba(25, 25, 112, 0.8) 100%),
 );
-
 
 // System font stack
 $ui-font-family: 'Press Start 2P', monospace;
@@ -33,25 +31,25 @@ $ui-font-family: 'Press Start 2P', monospace;
 // ==================== COLOR SYSTEM ====================
 // Primary color palette
 $ui-colors: (
-    primary: #3572b0,
-    // Darker blue
-    secondary: #f3f7ff,
-    // Light pastel pink
-    success: #8be9a5,
-    // Pastel green
-    danger: #ff8b94,
-    // Pastel red
-    warning: #ffe066,
-    // Pastel yellow
-    info: #a0e7e5,
-    // Pastel cyan
+    primary: #8400ff,
+    // Hot pink
+    secondary: #eed7ff,
+    // Indigo
+    success: #32cd32,
+    // Lime green
+    danger: #ff4500,
+    // Orange red
+    warning: #ffd700,
+    // Gold
+    info: #00bfff,
+    // Deep sky blue
 );
 
 // Contrast colors for text on colored backgrounds
 $ui-contrasts: (
     primary: $ui-white,
     secondary: $ui-black,
-    success: $ui-white,
+    success: $ui-black,
     danger: $ui-white,
     warning: $ui-black,
     info: $ui-white,
@@ -232,16 +230,18 @@ $ui-interactions: (
     &:hover.popOut:not(.isDisabled):not(.isLoading):not(.disableHoverEffects) {
         transform: translate(ui-interaction(hover-translate));
         box-shadow: ui-interaction(hover-shadow-offset) ui-interaction(hover-shadow-offset) 0 $ui-shadow;
-    }
 
-    &:focus.popOut:not(.isDisabled):not(.isLoading):not(.disableHoverEffects) {
-        transform: translate(ui-interaction(hover-translate));
-        box-shadow: ui-interaction(hover-shadow-offset) ui-interaction(hover-shadow-offset) 0 $ui-shadow;
+        // Active state overrides hover when both are present
+        &:active {
+            transform: translate(ui-interaction(active-translate));
+            box-shadow: ui-interaction(active-shadow-offset) ui-interaction(active-shadow-offset) 0 $ui-shadow;
+        }
     }
 }
 
 @mixin ui-active-effects {
-    &:active:not(.isDisabled):not(.isLoading) {
+    // For non-hover active states (e.g., keyboard)
+    &:active:not(.isDisabled):not(.isLoading):not(:hover) {
         transform: translate(ui-interaction(active-translate));
         box-shadow: ui-interaction(active-shadow-offset) ui-interaction(active-shadow-offset) 0 $ui-shadow;
     }

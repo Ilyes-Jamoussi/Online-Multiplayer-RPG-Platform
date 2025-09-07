@@ -12,7 +12,7 @@ import { UI_CARD_CONTEXT, UiCardContext } from './card.component';
     styleUrls: ['./card.component.scss'],
     template: `
         <div class="uiCard__title" [ngClass]="classes">
-            @if(icon){<app-ui-icon [iconName]="icon" />}
+            @if(icon){<app-ui-icon [variant]="variant" [iconName]="icon" />}
             <span class="title-slot"><ng-content /></span>
         </div>
     `,
