@@ -5,7 +5,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { Routes, provideRouter, withHashLocation } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
 import { AppComponent } from '@app/pages/app/app.component';
-import { CreateGamePageComponent } from '@app/pages/create-game-page/game-creation-component/game-creation-component.component';
+import { CreateGamePageComponent } from '@app/pages/create-game-page/game-creation-component/create-game-page.component';
 import { HomePageComponent } from '@app/pages/home-page/home-page.component';
 import { removeLeadingSlash } from '@src/utils/route/route.utils';
 import { AdminPageComponent } from './app/pages/admin-page/admin-page.component';
@@ -19,12 +19,14 @@ if (environment.production) {
 
 const routes: Routes = [
     { path: '', redirectTo: removeLeadingSlash(ROUTES.home), pathMatch: 'full' },
+
     {
         path: removeLeadingSlash(ROUTES.home),
         component: HomePageComponent,
     },
     { path: removeLeadingSlash(ROUTES.createGamePage), component: CreateGamePageComponent },
     { path: removeLeadingSlash(ROUTES.adminPage), component: AdminPageComponent },
+
     { path: '**', redirectTo: removeLeadingSlash(ROUTES.home) },
 ];
 

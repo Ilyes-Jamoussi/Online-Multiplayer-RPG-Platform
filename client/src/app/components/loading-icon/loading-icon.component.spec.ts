@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AdminPageComponent } from './admin-page.component';
+import { LoadingIconComponent } from './loading-icon.component';
 
-describe('AdminPageComponent', () => {
-  let component: AdminPageComponent;
-  let fixture: ComponentFixture<AdminPageComponent>;
+describe('LoadingIconComponent', () => {
+  let component: LoadingIconComponent;
+  let fixture: ComponentFixture<LoadingIconComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminPageComponent]
+      imports: [LoadingIconComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AdminPageComponent);
+    fixture = TestBed.createComponent(LoadingIconComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

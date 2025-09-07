@@ -1,12 +1,8 @@
 <div class="home-container">
     <header class="game-header">
         <div class="logo-container">
-            <!-- Utilise le chemin Angular d’assets -->
             <img src="assets/logo1.jpg" alt="Logo du jeu" class="game-logo" />
             <h1 class="game-title">{{ gameName }}</h1>
-            <h3>
-                {{ gameDescription }}
-            </h3>
         </div>
     </header>
 
@@ -17,60 +13,11 @@
             </app-ui-link-button>
             <app-ui-link-button [fullWidth]="true" [routerLink]="'/create--game-page'" [variant]="'primary'"> Créer une partie </app-ui-link-button>
             <app-ui-link-button [fullWidth]="true" [routerLink]="'/admin-page'" [variant]="'primary'"> Administrer les jeux </app-ui-link-button>
-            <div style="margin: 24px 0; display: flex; flex-direction: column; gap: 12px">
-                <app-ui-checkbox
-                    shape="square"
-                    size="lg"
-                    label="Enable Variant Primary"
-                    variant="primary"
-                    [(ngModel)]="variantPrimary"
-                ></app-ui-checkbox>
-                <app-ui-checkbox
-                    shape="square"
-                    size="lg"
-                    label="Enable Variant Secondary"
-                    variant="secondary"
-                    [(ngModel)]="variantSecondary"
-                ></app-ui-checkbox>
-                <app-ui-checkbox
-                    shape="square"
-                    size="lg"
-                    label="Enable Variant Success"
-                    variant="success"
-                    [(ngModel)]="variantSuccess"
-                ></app-ui-checkbox>
-                <app-ui-checkbox
-                    shape="square"
-                    size="lg"
-                    label="Enable Variant Danger"
-                    variant="danger"
-                    [(ngModel)]="variantDanger"
-                ></app-ui-checkbox>
-                <app-ui-checkbox
-                    shape="square"
-                    size="lg"
-                    label="Enable Variant Warning"
-                    variant="warning"
-                    [(ngModel)]="variantWarning"
-                ></app-ui-checkbox>
-                <app-ui-checkbox shape="square" size="lg" label="Enable Variant Info" variant="info" [(ngModel)]="variantInfo"></app-ui-checkbox>
-            </div>
             <app-ui-input
                 [(ngModel)]="gameName"
                 [fullWidth]="true"
-                label="Avec label"
-                placeholder="Type game name..."
-                [size]="'lg'"
-                variant="primary"
-                [clearable]="true"
-                type="text"
-                shape="square"
-                alignText="left"
-            ></app-ui-input>
-            <app-ui-input
-                [(ngModel)]="gameDescription"
-                [fullWidth]="true"
-                placeholder="Game description..."
+                label="Nom du jeu"
+                placeholder="Le nom du jeu"
                 [size]="'lg'"
                 variant="primary"
                 [clearable]="true"
