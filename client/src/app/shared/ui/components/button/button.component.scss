@@ -125,3 +125,17 @@
 .uiBtn.iconRight {
     flex-direction: row-reverse;
 }
+
+/* Remove the underline from link buttons */
+.uiBtn.linkBtn {
+    text-decoration: none;
+    &:hover {
+        text-decoration: none;
+    }
+    &:active {
+        text-decoration: none;
+    }
+    &:focus {
+        text-decoration: none;
+    }
+}

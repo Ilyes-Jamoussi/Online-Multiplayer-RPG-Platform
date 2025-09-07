@@ -1,17 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { ButtonComponent } from '@app/shared/ui/components/button/button.component';
-import { ROUTES } from '@app/constants/routes.constants';
 import { UiInputComponent } from '@ui/components/input/input.component';
 import { FormsModule } from '@angular/forms';
 import { UiCheckboxComponent } from '@ui/components/checkbox/checkbox.component';
+import { UiLinkButtonComponent } from '@ui/components/button/link-button.component';
 
 @Component({
     selector: 'app-home-page',
     templateUrl: './home-page.component.html',
     styleUrls: ['./home-page.component.scss'],
-    imports: [ButtonComponent, CommonModule, UiInputComponent, UiCheckboxComponent, FormsModule],
+    imports: [UiLinkButtonComponent, CommonModule, UiInputComponent, UiCheckboxComponent, FormsModule, UiLinkButtonComponent],
     standalone: true,
 })
 export class HomePageComponent {
@@ -29,18 +27,4 @@ export class HomePageComponent {
         teamNumber: '204',
         members: ['Wael El Karoui', 'Ilyes Jamoussi', 'Noah Blanchard', 'Adam Rafai', 'Eduard Andrei Podaru'],
     };
-
-    constructor(private router: Router) {}
-
-    onJoinGame(): void {
-        alert('Joindre une partie - Option désactivée pour le Sprint 1');
-    }
-
-    onCreateGame(): void {
-        this.router.navigate([ROUTES.createGamePage]);
-    }
-
-    onAdminGames(): void {
-        this.router.navigate([ROUTES.adminPage]);
-    }
 }
