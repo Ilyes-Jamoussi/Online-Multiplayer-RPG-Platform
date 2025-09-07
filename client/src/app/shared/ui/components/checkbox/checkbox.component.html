@@ -1,10 +1,4 @@
-<div
-    [ngClass]="classes"
-    (click)="toggleValue($event)"
-    [attr.aria-checked]="value"
-    role="checkbox"
-    [attr.aria-disabled]="disabled"
->
+<div [ngClass]="classes" (click)="toggleValue($event)" [attr.aria-checked]="value" role="checkbox" [attr.aria-disabled]="disabled">
     <div class="checkbox-box">
         <span class="checkbox-indicator" [class.visible]="value" aria-hidden="true">✓</span>
     </div>

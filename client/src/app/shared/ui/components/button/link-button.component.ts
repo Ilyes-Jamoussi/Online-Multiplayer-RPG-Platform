@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { UiBaseComponent } from '@app/shared/ui/components/ui-base.component';
+import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
 
 @Component({
     selector: 'app-ui-link-button',

@@ -8,19 +8,24 @@
 
     <main class="main-menu">
         <div class="menu-buttons">
-            <app-ui-link-button [fullWidth]="true" [routerLink]="'/join-game-page'" [variant]="'secondary'" [disabled]="true">
+            <app-ui-link-button icon="group" [fullWidth]="true" [routerLink]="'/join-game-page'" [variant]="'secondary'" [disabled]="true">
                 Rejoindre une partie (Bientôt disponible)
             </app-ui-link-button>
-            <app-ui-link-button [fullWidth]="true" [routerLink]="'/create--game-page'" [variant]="'primary'"> Créer une partie </app-ui-link-button>
-            <app-ui-link-button [fullWidth]="true" [routerLink]="'/admin-page'" [variant]="'primary'"> Administrer les jeux </app-ui-link-button>
+            <app-ui-link-button icon="add" [fullWidth]="true" [routerLink]="'/create--game-page'" [variant]="'primary'">
+                Créer une partie
+            </app-ui-link-button>
+            <app-ui-link-button icon="admin_panel_settings" [fullWidth]="true" [routerLink]="'/admin-page'" [variant]="'primary'">
+                Administrer les jeux
+            </app-ui-link-button>
             <app-ui-input
+                prefixIcon="SportsEsports"
+                suffixIcon="SportsEsports"
                 [(ngModel)]="gameName"
                 [fullWidth]="true"
                 label="Nom du jeu"
                 placeholder="Le nom du jeu"
                 [size]="'lg'"
                 variant="primary"
-                [clearable]="true"
                 type="text"
                 shape="square"
                 alignText="left"
@@ -34,7 +39,16 @@
             <div class="team-members">
                 <h3>Développeurs :</h3>
                 <ul class="members-list">
-                    <li *ngFor="let member of teamInfo.members">{{ member }}</li>
+                    @for (member of teamInfo.members; track member) {
+                    <app-ui-card variant="info" [fullWidth]="true">
+                        <app-ui-card-title alignText="center">{{ member }}</app-ui-card-title>
+                        <app-ui-card-content alignText="center">
+                            <p>Rôle : Développeur</p>
+                            <app-ui-icon size="lg" variant="info" iconName="Code" />
+                        </app-ui-card-content>
+                        <app-ui-card-footer alignText="center"> Étudiant en informatique </app-ui-card-footer>
+                    </app-ui-card>
+                    }
                 </ul>
             </div>
         </div>

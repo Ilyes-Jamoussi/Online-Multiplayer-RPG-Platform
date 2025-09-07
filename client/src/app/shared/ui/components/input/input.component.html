@@ -1,11 +1,11 @@
 <div class="uiInput" [ngClass]="classes">
     @if (label) {
     <label class="uiInput-label"> {{ label }} @if (required) { <span class="req">*</span> }</label>
- }
+    }
 
     <div class="uiInput-field">
         @if (prefixIcon) {
-        <span class="in-icon prefix material-icons">{{ prefixIcon }}</span>
+        <app-ui-icon [iconName]="prefixIcon" class="in-icon prefix"></app-ui-icon>
         }
 
         <input
@@ -22,7 +22,7 @@
         />
 
         @if (suffixIcon) {
-        <span class="in-icon suffix material-icons">{{ suffixIcon }}</span>
+        <app-ui-icon [iconName]="suffixIcon" class="in-icon suffix"></app-ui-icon>
         }
         <button
             type="button"

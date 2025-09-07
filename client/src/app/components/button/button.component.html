@@ -1,10 +1,6 @@
-<button
-  [class]="buttonClasses"
-  [disabled]="disabled || loading"
-  (click)="onClick()">
-  
-  <span *ngIf="loading" class="loading-spinner"></span>
-  <span *ngIf="icon && !loading" [class]="'icon-' + icon"></span>
-  
-  <span class="button-text">{{ text }}</span>
+<button [class]="buttonClasses" [disabled]="disabled || loading" (click)="onClick()">
+    <span *ngIf="loading" class="loading-spinner"></span>
+    <span *ngIf="icon && !loading" [class]="'icon-' + icon"></span>
+
+    <span class="button-text">{{ text }}</span>
 </button>

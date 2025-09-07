@@ -1,5 +1,5 @@
 import { Directive, Input } from '@angular/core';
-import { UiVariant, UiSize, UiShapeVariant, UiAlignment, UiSpacing } from '@app/shared/ui/types/ui.types';
+import { UiVariant, UiSize, UiShapeVariant, UiAlignment, UiSpacing, UiElevation } from '@app/shared/ui/types/ui.types';
 
 /**
  * Abstract base class for UI components (no template, not instantiable directly)
@@ -30,6 +30,12 @@ export abstract class UiBaseComponent {
     /** Loading state */
     @Input() loading: boolean = false;
 
+    /** Elevation */
+    @Input() elevation: UiElevation = 'xs';
+
+    /** Activate pop out effect */
+    @Input() popOut: boolean = true;
+
     /**
      * Returns the CSS classes for the component based on its inputs.
      * Extend this in child components if you need to add more classes.
@@ -43,6 +49,8 @@ export abstract class UiBaseComponent {
             isFull: this.fullWidth,
             [`al-${this.align}`]: true,
             [`gap-${this.gap}`]: true,
+            [`elev-${this.elevation}`]: true,
+            popOut: this.popOut,
         };
     }
 }
