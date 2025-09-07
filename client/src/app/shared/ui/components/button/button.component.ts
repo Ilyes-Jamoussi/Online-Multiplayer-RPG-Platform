@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
 import { UiSpinnerComponent } from '@app/shared/ui/components/spinner/spinner.component';
+import { UiShapeVariant } from '@ui/types/ui.types';
 
 @Component({
     selector: 'app-ui-button',
@@ -20,6 +21,9 @@ export class UiButtonComponent extends UiBaseComponent {
 
     /** HTML button type */
     @Input() htmlType: 'button' | 'submit' | 'reset' = 'button';
+
+    /** Override default shape */
+    @Input() shape: UiShapeVariant = 'pill';
 
     @Output() buttonClick = new EventEmitter<MouseEvent>();
 
