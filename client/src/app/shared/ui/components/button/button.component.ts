@@ -10,7 +10,7 @@ import { UiSpinnerComponent } from '@app/shared/ui/components/spinner/spinner.co
     templateUrl: './button.component.html',
     styleUrls: ['./button.component.scss'],
 })
-export class ButtonComponent extends UiBaseComponent {
+export class UiButtonComponent extends UiBaseComponent {
     /** Text content (if nothing in <ng-content>) */
     @Input() text: string = 'Button';
 
@@ -25,7 +25,7 @@ export class ButtonComponent extends UiBaseComponent {
 
     onClick(e: MouseEvent): void {
         if (!this.disabled && !this.loading) {
-            this.buttonClick.emit(e);
+            this?.buttonClick?.emit(e);
         }
     }
 
@@ -33,7 +33,6 @@ export class ButtonComponent extends UiBaseComponent {
         return {
             uiBtn: true,
             ...super.classes,
-            isLoading: this.loading,
             iconRight: !!this.icon && this.iconRight,
             iconLeft: !!this.icon && !this.iconRight,
         };

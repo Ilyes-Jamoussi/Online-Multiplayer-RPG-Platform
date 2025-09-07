@@ -4,12 +4,13 @@ import { UiInputComponent } from '@ui/components/input/input.component';
 import { FormsModule } from '@angular/forms';
 import { UiCheckboxComponent } from '@ui/components/checkbox/checkbox.component';
 import { UiLinkButtonComponent } from '@ui/components/button/link-button.component';
+import { UiButtonComponent } from '@ui/components/button/button.component';
 
 @Component({
     selector: 'app-home-page',
     templateUrl: './home-page.component.html',
     styleUrls: ['./home-page.component.scss'],
-    imports: [UiLinkButtonComponent, CommonModule, UiInputComponent, UiCheckboxComponent, FormsModule, UiLinkButtonComponent],
+    imports: [UiLinkButtonComponent, CommonModule, UiInputComponent, UiCheckboxComponent, FormsModule, UiLinkButtonComponent, UiButtonComponent],
     standalone: true,
 })
 export class HomePageComponent {
