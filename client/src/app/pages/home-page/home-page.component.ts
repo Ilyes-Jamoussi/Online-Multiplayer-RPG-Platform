@@ -4,8 +4,7 @@ import { UiInputComponent } from '@ui/components/input/input.component';
 import { FormsModule } from '@angular/forms';
 import { UiLinkButtonComponent } from '@ui/components/button/link-button.component';
 import { UiCardComponent } from '@app/shared/ui/components/card/card.component';
-import { UiCardTitleComponent, UiCardContentComponent, UiCardFooterComponent } from '@app/shared/ui/components/card/card-sections.component';
-import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
+import { UiCardTitleComponent, UiCardContentComponent } from '@app/shared/ui/components/card/card-sections.component';
 
 @Component({
     selector: 'app-home-page',
@@ -20,8 +19,6 @@ import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
         UiCardComponent,
         UiCardTitleComponent,
         UiCardContentComponent,
-        UiCardFooterComponent,
-        UiIconComponent,
     ],
     standalone: true,
 })

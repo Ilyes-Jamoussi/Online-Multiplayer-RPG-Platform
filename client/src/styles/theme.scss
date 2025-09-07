@@ -16,6 +16,17 @@ $ui-disabled-fg: #7a7a7a;
 $ui-disabled-border: #555;
 $ui-disabled-shadow: #555;
 
+// Gradients
+$ui-gradients: (
+    green: linear-gradient(120deg, #47e4a5 0%, #daffe7 100%),
+    blue: linear-gradient(120deg, #90caf9 0%, #64b5f6 100%),
+    dark: linear-gradient(120deg, $ui-black 0%, $ui-gray 100%),
+    light: linear-gradient(120deg, $ui-white 0%, #e0e0e0 100%),
+    green-radial: radial-gradient(circle at 60% 40%, #47e4a5 100%, #daffe7 0%),
+    subtle-gray-white: linear-gradient(120deg, #f5f5f5 0%, #e0e0e0 100%),
+);
+
+
 // System font stack
 $ui-font-family: 'Press Start 2P', monospace;
 
@@ -24,7 +35,7 @@ $ui-font-family: 'Press Start 2P', monospace;
 $ui-colors: (
     primary: #3572b0,
     // Darker blue
-    secondary: #f7c8e0,
+    secondary: #f3f7ff,
     // Light pastel pink
     success: #8be9a5,
     // Pastel green

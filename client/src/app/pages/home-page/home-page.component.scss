@@ -1,167 +1,138 @@
-.home-container {
+@use 'theme' as *;
+@use 'sass:map';
+
+.home-modern-layout {
+    height: 100%;
     min-height: 100vh;
-    background: linear-gradient(180deg, #87ceeb 0%, #90ee90 100%);
-    font-family: 'Courier New', monospace;
+    display: flex;
+    flex-direction: row;
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+.home-left {
+    flex: 10 1 0; // La section gauche occupe 60% de la largeur
     display: flex;
     flex-direction: column;
-}
-
-.game-header {
-    text-align: center;
-    padding: 2rem;
-    background: rgba(0, 0, 0, 0.1);
-
-    .logo-container {
-        .game-logo {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 1rem;
-            background: #8b4513;
-            border: 4px solid #654321;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            box-shadow:
-                4px 4px 0 #654321,
-                8px 8px 0 #4a4a4a;
-        }
-
-        .game-title {
-            font-size: 3rem;
-            color: #2f4f2f;
-            margin: 0;
-            text-shadow:
-                2px 2px 0 #fff,
-                4px 4px 0 #ccc;
-            font-weight: bold;
-        }
-    }
-}
-
-.main-menu {
-    flex: 1;
-    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
+    padding: 2rem 6rem;
+    min-width: 340px;
+    box-sizing: border-box;
+    overflow: auto;
+    background: map.get($ui-gradients, green);
+}
 
-    .menu-buttons {
-        display: flex;
+.game-title-block {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    width: 50%d
+}
+
+.game-logo-modern {
+    width: 90px;
+    height: 90px;
+    border-radius: 16px;
+    border: 3px solid #3572b0;
+    background: #fff;
+    box-shadow: 0 4px 24px 0 #3572b033;
+    object-fit: cover;
+}
+
+.game-title-modern {
+    font-size: 2.5rem;
+    color: #3572b0;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: 1px;
+    text-shadow:
+        1px 1px 0 #fff,
+        2px 2px 0 #b0c4de;
+}
+
+.menu-buttons-modern {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    width: 50%;
+    margin-top: 1rem;
+}
+
+.home-right {
+    flex: 3 1 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 3rem 4rem 2rem 2rem;
+    background: rgba(255, 255, 255, 0.7);
+    border-left: 2px solid #b0c4de;
+    min-width: 320px;
+    box-sizing: border-box;
+    overflow: auto;
+    background: map.get($ui-gradients, subtle-gray-white);
+}
+
+.team-section-modern {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.team-title-modern {
+    font-size: 2rem;
+    color: #2f4f2f;
+    margin-bottom: 2rem;
+    font-weight: 700;
+    text-align: left;
+    text-shadow: 1px 1px 0 #fff;
+}
+
+.members-list-modern {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+}
+
+.icons-row-modern {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 1100px) {
+    .home-modern-layout {
         flex-direction: column;
-        gap: 1.5rem;
-        width: 100%;
-        max-width: 400px;
+    }
+    .home-left,
+    .home-right {
+        max-width: 100vw;
+        min-width: 0;
+        padding: 2rem 1rem;
+    }
+    .team-section-modern {
+        max-width: 100vw;
     }
 }
 
-::ng-deep .custom-button {
-    padding: 1rem 2rem !important;
-    font-family: 'Courier New', monospace !important;
-    font-size: 1.2rem !important;
-    font-weight: bold !important;
-    border: 3px solid #000 !important;
-    border-radius: 6px !important;
-    background: #c0c0c0 !important;
-    color: #000 !important;
-    cursor: pointer !important;
-    box-shadow:
-        3px 3px 0 #808080,
-        6px 6px 0 #404040 !important;
-    transition: all 0.1s ease !important;
-
-    &:hover:not(.button-disabled) {
-        transform: translate(-1px, -1px) !important;
-        box-shadow:
-            4px 4px 0 #808080,
-            7px 7px 0 #404040 !important;
+@media (max-width: 700px) {
+    .home-modern-layout {
+        flex-direction: column;
+        padding: 0;
     }
-
-    &:active:not(.button-disabled) {
-        transform: translate(2px, 2px) !important;
-        box-shadow:
-            1px 1px 0 #808080,
-            2px 2px 0 #404040 !important;
+    .home-left,
+    .home-right {
+        padding: 1rem 0.5rem;
     }
-
-    &.button-disabled {
-        background: #a0a0a0 !important;
-        color: #606060 !important;
-        cursor: not-allowed !important;
+    .game-title-modern {
+        font-size: 1.5rem;
     }
-
-    &.button-success {
-        background: #90ee90 !important;
-        color: #006400 !important;
+    .team-title-modern {
+        font-size: 1.2rem;
     }
-
-    &.button-primary {
-        background: #87ceeb !important;
-        color: #000080 !important;
-    }
-
-    &.button-secondary {
-        background: #d3d3d3 !important;
-        color: #696969 !important;
-    }
-}
-
-.team-info {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 2rem;
-    border-top: 4px solid #654321;
-
-    .team-details {
-        text-align: center;
-        max-width: 600px;
-        margin: 0 auto;
-
-        h2 {
-            font-size: 2rem;
-            color: #8b4513;
-            margin-bottom: 1rem;
-            text-shadow: 1px 1px 0 #fff;
-        }
-
-        .team-members h3 {
-            font-size: 1.3rem;
-            color: #2f4f2f;
-            margin-bottom: 1rem;
-            text-shadow: 1px 1px 0 #fff;
-        }
-
-        .members-list {
-            list-style: none;
-            padding: 0;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-
-            li {
-                padding: 0.8rem;
-                background: #f5deb3;
-                border: 2px solid #8b4513;
-                border-radius: 4px;
-                color: #654321;
-                font-weight: bold;
-                box-shadow: 2px 2px 0 #d2691e;
-
-                &:hover {
-                    transform: translate(-1px, -1px);
-                    box-shadow: 3px 3px 0 #d2691e;
-                }
-            }
-        }
-    }
-}
-
-@media (max-width: 768px) {
-    .game-header .logo-container .game-title {
-        font-size: 2rem;
-    }
-
-    .team-info .team-details .members-list {
+    .members-list-modern {
         grid-template-columns: 1fr;
     }
 }
