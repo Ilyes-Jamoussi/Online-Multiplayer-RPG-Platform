@@ -4,15 +4,12 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { Routes, provideRouter, withHashLocation } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
+import { GameListPageComponent } from '@app/pages/admin-page/game-list-page/view/game-list-page.component';
 import { AppComponent } from '@app/pages/app/app.component';
 import { CreateGamePageComponent } from '@app/pages/create-game-page/game-creation-component/create-game-page.component';
 import { HomePageComponent } from '@app/pages/home-page/home-page.component';
 import { removeLeadingSlash } from '@src/utils/route/route.utils';
-import { AdminPageComponent } from './app/pages/admin-page/admin-page.component';
 import { environment } from './environments/environment';
-import { GameListPageComponent } from '@app/pages/admin-page/game-list-page/view/game-list-page.component';
-
-// import { CreateGameComponent } from './app/pages/create-game/create-game.component'; --- IGNORE ---
 
 if (environment.production) {
     enableProdMode();
@@ -26,7 +23,6 @@ const routes: Routes = [
         component: HomePageComponent,
     },
     { path: removeLeadingSlash(ROUTES.createGamePage), component: CreateGamePageComponent },
-    { path: removeLeadingSlash(ROUTES.adminPage), component: AdminPageComponent },
     { path: removeLeadingSlash(ROUTES.gameListPage), component: GameListPageComponent },
 
     { path: '**', redirectTo: removeLeadingSlash(ROUTES.home) },

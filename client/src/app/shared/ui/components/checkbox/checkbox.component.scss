@@ -1,21 +1,18 @@
 @use 'theme' as *;
 @use 'sass:map';
 
-// ==================== CHECKBOX COMPONENT ====================
 .uiCheckbox {
     @include ui-hover-brightness;
     @include ui-active-effects;
     @include ui-popout-effects;
     @include ui-focus-state;
     @include ui-disabled-state;
-    // Base + layout
     display: inline-flex;
     align-items: center;
     gap: ui-gap(sm);
     cursor: pointer;
     color: ui-contrast(primary);
 
-    // ---------- Sous-éléments ----------
     .checkbox-box {
         @include ui-component-base;
         display: inline-flex;
@@ -34,7 +31,6 @@
     }
 
     .checkbox-label {
-        // le texte
         user-select: none;
         @include ui-size-variants;
         @include ui-contrast-colors;
@@ -70,7 +66,6 @@
         @include ui-size-variants;
     }
 
-    // Hover/active ciblés sur le carré (pour un ressenti plus tactile)
     &:hover:not(.isDisabled) .checkbox-box {
         @include ui-hover-brightness;
         @include ui-size-variants;
