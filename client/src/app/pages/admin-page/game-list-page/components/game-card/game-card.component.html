@@ -1,0 +1,19 @@
+<app-ui-card size="lg" alignContent="left" [popOut]="false" [fullWidth]="false" variant="secondary" size="sm" class="game-card">
+    <app-ui-card-title [iconRight]="true" [icon]="'SportsEsports'">{{ game.name }}</app-ui-card-title>
+    <app-ui-card-content>
+        <p><strong>Game ID:</strong> {{ game.id }}</p>
+        <p><strong>Last Edited:</strong> {{ game.lastEdit | date: 'short' }}</p>
+        <p><strong>Game Mode:</strong> {{ game.gameMode }}</p>
+        <p><strong>Map Size:</strong> {{ game.mapSize }}</p>
+        <p>
+            <app-ui-checkbox variant="secondary" size="sm" [popOut]="false" [(ngModel)]="game.visible" [disabled]="false">
+                {{ game.visible ? 'Visible' : 'Hidden' }}
+            </app-ui-checkbox>
+        </p>
+    </app-ui-card-content>
+    <app-ui-card-footer alignContent="center">
+        <app-ui-link-button variant="warning" [popOut]="false" size="sm" icon="edit" [routerLink]="'/edit-game/' + game.id" [variant]="'primary'">
+            Éditer la partie
+        </app-ui-link-button>
+    </app-ui-card-footer>
+</app-ui-card>

@@ -1,131 +1,89 @@
 @use 'theme' as *;
+@use 'sass:map';
 
 // ==================== CHECKBOX COMPONENT ====================
 .uiCheckbox {
-    // Base component setup
-    @include ui-component-base;
-
-    // Layout and display
+    @include ui-hover-brightness;
+    @include ui-active-effects;
+    @include ui-popout-effects;
+    @include ui-focus-state;
+    @include ui-disabled-state;
+    // Base + layout
     display: inline-flex;
     align-items: center;
-    cursor: pointer;
     gap: ui-gap(sm);
+    cursor: pointer;
+    color: ui-contrast(primary);
 
-    // Remove border from container (checkbox-box has its own)
-    border: none;
-    background: transparent;
-
-    // Default size
-    font-size: ui-size(md, font-size);
-
-    // Checkbox box element
+    // ---------- Sous-éléments ----------
     .checkbox-box {
+        @include ui-component-base;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border: 2px solid $ui-border;
-        background: $ui-white;
-        box-shadow: ui-elevation(xs);
-        border-radius: ui-shape(square);
-        position: relative;
-
-        // Default size
         width: ui-size(md, icon-size);
         height: ui-size(md, icon-size);
+        border-radius: ui-shape(square);
+        box-shadow: ui-elevation(xs);
+        background: $ui-white; // fond neutre
     }
 
-    // Checkbox indicator (checkmark)
     .checkbox-indicator {
-        display: flex;
-        align-items: center;
-        justify-content: center;
         line-height: 1;
-        font-size: 1.1em;
-        opacity: 0;
-        transition: opacity ui-transition(fast) ui-easing(ease);
-        width: 1em;
-        height: 1em;
-        pointer-events: none;
-        color: ui-contrast(primary);
-
-        &.visible {
-            opacity: 1;
-        }
+        @include ui-size-variants;
     }
 
-    // Label text
     .checkbox-label {
-        display: inline-flex;
-        align-items: center;
+        // le texte
         user-select: none;
+        @include ui-size-variants;
+        @include ui-contrast-colors;
     }
 
-    // Checked state styling
     &.isChecked .checkbox-box {
         background: ui-color(primary);
-        border-color: darken(ui-color(primary), 10%);
+        border-color: $ui-border;
+        box-shadow: ui-elevation(sm);
+
+        + .checkbox-indicator,
+        .checkbox-indicator {
+            opacity: 1;
+            color: ui-contrast(primary);
+            @include ui-size-variants;
+        }
     }
 
-    // Apply consistent states
-    @include ui-disabled-state;
-    @include ui-focus-state;
+    &.isIndeterminate .checkbox-box {
+        background: ui-color(primary);
+        border-color: $ui-border;
+        .checkbox-indicator {
+            opacity: 1;
+            color: ui-contrast(primary);
+            @include ui-size-variants;
+        }
+    }
 
-    // Custom hover effects for checkbox
+    &.isDisabled .checkbox-box {
+        background: $ui-disabled-bg !important;
+        border-color: $ui-disabled-border !important;
+        box-shadow: 4px 4px 0 $ui-disabled-shadow !important;
+        @include ui-size-variants;
+    }
+
+    // Hover/active ciblés sur le carré (pour un ressenti plus tactile)
     &:hover:not(.isDisabled) .checkbox-box {
-        transform: translate(ui-interaction(hover-translate));
-        box-shadow: ui-interaction(hover-shadow-offset) ui-interaction(hover-shadow-offset) 0 $ui-shadow;
+        @include ui-hover-brightness;
+        @include ui-size-variants;
     }
-
-    &:hover.popOut:not(.isDisabled) .checkbox-box {
-        transform: translate(ui-interaction(hover-translate));
-        box-shadow: ui-interaction(hover-shadow-offset) ui-interaction(hover-shadow-offset) 0 $ui-shadow;
-    }
-
     &:active:not(.isDisabled) .checkbox-box {
-        transform: translate(ui-interaction(active-translate));
-        box-shadow: ui-interaction(active-shadow-offset) ui-interaction(active-shadow-offset) 0 $ui-shadow;
+        @include ui-active-effects;
+        @include ui-size-variants;
     }
 
-    // Variant colors for checked state
-    @each $name, $color in $ui-colors {
-        &.v-#{$name}.isChecked .checkbox-box {
-            background: $color;
-            border-color: darken($color, 10%);
-
-            .checkbox-indicator {
-                color: ui-contrast($name);
-            }
-        }
-    }
-
-    // Size variants
-    &.s-sm {
-        font-size: ui-size(sm, font-size);
-        .checkbox-box {
-            width: ui-size(sm, icon-size);
-            height: ui-size(sm, icon-size);
-        }
-    }
-
-    &.s-lg {
-        font-size: ui-size(lg, font-size);
-        .checkbox-box {
-            width: ui-size(lg, icon-size);
-            height: ui-size(lg, icon-size);
-        }
-    }
-
-    // Shape variants for checkbox box
-    @each $name, $radius in $ui-shapes {
-        &.sh-#{$name} .checkbox-box {
-            border-radius: if($name == pill, 50%, $radius);
-        }
-    }
-
-    // Elevation variants for checkbox box
-    @each $level, $shadow in $ui-elevations {
-        &.elev-#{$level} .checkbox-box {
-            box-shadow: $shadow;
-        }
+    .checkbox-box {
+        @include ui-size-variants;
+        @include ui-shape-variants;
+        @include ui-elevation-variants;
+        @include ui-size-variants;
     }
 }
