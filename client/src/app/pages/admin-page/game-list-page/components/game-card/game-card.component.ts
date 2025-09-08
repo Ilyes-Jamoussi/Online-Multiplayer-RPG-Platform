@@ -8,6 +8,8 @@ import { RouterModule } from '@angular/router';
 import { UiCheckboxComponent } from '@app/shared/ui/components/checkbox/checkbox.component';
 import { UiCardTitleComponent, UiCardFooterComponent, UiCardContentComponent } from '@app/shared/ui/components/card/card-sections.component';
 import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-game-card',
@@ -15,6 +17,8 @@ import { FormsModule } from '@angular/forms';
     imports: [
         CommonModule,
         FormsModule,
+        MatCardModule,
+        MatTooltipModule,
         UiCardComponent,
         UiCardContentComponent,
         UiCheckboxComponent,

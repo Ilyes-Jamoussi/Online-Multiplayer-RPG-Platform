@@ -1,14 +1,25 @@
 <app-ui-card size="lg" alignContent="left" [popOut]="false" [fullWidth]="false" variant="secondary" size="sm" class="game-card">
     <app-ui-card-title [iconRight]="true" [icon]="'SportsEsports'">{{ game.name }}</app-ui-card-title>
     <app-ui-card-content>
-        <p><strong>Game ID:</strong> {{ game.id }}</p>
-        <p><strong>Last Edited:</strong> {{ game.lastEdit | date: 'short' }}</p>
-        <p><strong>Game Mode:</strong> {{ game.gameMode }}</p>
-        <p><strong>Map Size:</strong> {{ game.mapSize }}</p>
+        <p><strong>ID du jeu:</strong> {{ game.id }}</p>
+        <p><strong>Dernière modification:</strong> {{ game.lastEdit | date: 'short' }}</p>
+        <p><strong>Mode jeu:</strong> {{ game.gameMode }}</p>
+        <p><strong>Taille de la carte:</strong> {{ game.mapSize }}</p>
         <p>
             <app-ui-checkbox variant="secondary" size="sm" [popOut]="false" [(ngModel)]="game.visible" [disabled]="false">
                 {{ game.visible ? 'Visible' : 'Caché' }}
             </app-ui-checkbox>
+        </p>
+        <p><strong>Prévisualisation</strong>
+            <mat-card>
+                <img 
+                matTooltipClass="game-description-tooltip"
+                [matTooltip]="game.description || 'Aucune description'"
+                matTooltipPosition="above"
+                src="{{ game.previewImageUrl }}"
+                style="width: 100%;"
+                />
+            </mat-card>
         </p>
     </app-ui-card-content>
     <app-ui-card-footer alignContent="center">

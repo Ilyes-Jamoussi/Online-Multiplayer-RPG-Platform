@@ -23,7 +23,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '3',
@@ -33,7 +33,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '4',
@@ -43,7 +43,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '5',
@@ -53,7 +53,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '6',
@@ -63,7 +63,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '7',
@@ -73,7 +73,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '8',
@@ -83,7 +83,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '9',
@@ -93,7 +93,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '10',
@@ -103,7 +103,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '11',
@@ -113,7 +113,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '12',
@@ -123,7 +123,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '13',
@@ -133,7 +133,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '14',
@@ -143,7 +143,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '15',
@@ -153,7 +153,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '16',
@@ -163,7 +163,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '17',
@@ -173,7 +173,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca',
         lastEdit: new Date().toISOString(),
         visible: true,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '18',
@@ -183,7 +183,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
         lastEdit: new Date().toISOString(),
         visible: false,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '19',
@@ -193,7 +193,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308',
         lastEdit: new Date().toISOString(),
         visible: false,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
     {
         id: '20',
@@ -203,7 +203,7 @@ const DB: Game[] = [
         previewImageUrl: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429',
         lastEdit: new Date().toISOString(),
         visible: false,
-        description: '',
+        description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus.',
     },
 ];
 
