@@ -1,8 +1,7 @@
 <div class="home-modern-layout">
     <div class="home-left">
         <div class="game-title-block">
-            <img src="assets/logo1.jpg" alt="Game Logo" class="game-logo-modern" />
-            <h1 class="game-title-modern">{{ gameName }}</h1>
+            <img src="assets/images/logo.png" alt="Game Logo" class="game-logo-modern" />
         </div>
         <div class="menu-buttons-modern">
             <app-ui-link-button size="lg" icon="group" [fullWidth]="true" [routerLink]="'/join-game-page'" [variant]="'secondary'" [disabled]="true">
@@ -14,19 +13,6 @@
             <app-ui-link-button size="lg" icon="admin_panel_settings" [fullWidth]="true" [routerLink]="'/admin-page'" [variant]="'primary'">
                 Administrer les jeux
             </app-ui-link-button>
-            <app-ui-input
-                prefixIcon="SportsEsports"
-                suffixIcon="SportsEsports"
-                [(ngModel)]="gameName"
-                [fullWidth]="true"
-                label="Nom du jeu"
-                placeholder="Le nom du jeu"
-                [size]="'lg'"
-                variant="primary"
-                type="text"
-                shape="square"
-                alignText="left"
-            ></app-ui-input>
         </div>
     </div>
     <div class="home-right">

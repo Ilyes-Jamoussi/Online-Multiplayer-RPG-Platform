@@ -13,7 +13,7 @@ export abstract class UiBaseComponent {
     @Input() size: UiSize = 'md';
 
     /** Shape */
-    @Input() shape: UiShapeVariant = 'square';
+    @Input() shape: UiShapeVariant = 'rounded';
 
     /** Disabled state */
     @Input() disabled: boolean = false;

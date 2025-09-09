@@ -4,25 +4,25 @@
 
 // ==================== BASE FOUNDATION ====================
 // Core neutral colors and system fundamentals
-$ui-black: #0d0d0d;
-$ui-gray: #2e2e2e;
-$ui-white: #f5f5f5;
-$ui-border: #1a1a1a;
-$ui-shadow: #4d4d4d;
+$ui-black: #0b0d10;
+$ui-gray: #2a2f36;
+$ui-white: #f3f4f6;
+$ui-border: #1f2937;
+$ui-shadow: #0f172a;
 
 // Disabled state colors
-$ui-disabled-bg: #3a3a3a;
-$ui-disabled-fg: #8c8c8c;
-$ui-disabled-border: #4d4d4d;
-$ui-disabled-shadow: #4d4d4d;
+$ui-disabled-bg: #3b3f46;
+$ui-disabled-fg: #a3adb8;
+$ui-disabled-border: #2f3540;
+$ui-disabled-shadow: #1f232b;
 
 // Gradients
 $ui-gradients: (
-    misty: radial-gradient(circle at 50% 50%, rgba(176, 224, 230, 0.8) 0%, rgba(135, 206, 250, 0.8) 50%, rgba(70, 130, 180, 0.8) 100%),
-    midnight: radial-gradient(circle at 50% 50%, rgba(25, 25, 112, 0.8) 0%, rgba(72, 61, 139, 0.8) 50%, rgba(123, 104, 238, 0.8) 100%),
-    mystical: radial-gradient(circle at 50% 50%, rgba(75, 0, 130, 0.8) 0%, rgba(138, 43, 226, 0.8) 50%, rgba(255, 105, 180, 0.8) 100%),
-    twilight: radial-gradient(circle at 50% 50%, rgba(72, 61, 139, 0.8) 0%, rgba(123, 104, 238, 0.8) 50%, rgba(176, 224, 230, 0.8) 100%),
-    nebula: radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.8) 0%, rgba(75, 0, 130, 0.8) 50%, rgba(25, 25, 112, 0.8) 100%),
+    misty: radial-gradient(circle at 50% 50%, rgba(186, 230, 253, 0.85) 0%, rgba(125, 211, 252, 0.85) 50%, rgba(56, 189, 248, 0.85) 100%),
+    midnight: radial-gradient(circle at 50% 50%, rgba(49, 46, 129, 0.85) 0%, rgba(67, 56, 202, 0.85) 50%, rgba(124, 58, 237, 0.85) 100%),
+    mystical: radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.85) 0%, rgba(217, 70, 239, 0.85) 50%, rgba(244, 114, 182, 0.85) 100%),
+    twilight: radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.6) 0%, rgba(251, 146, 60, 0.7) 50%, rgba(124, 58, 237, 0.7) 100%),
+    nebula: radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.85) 0%, rgba(59, 130, 246, 0.85) 50%, rgba(15, 23, 42, 0.85) 100%),
 );
 
 // System font stack
@@ -31,25 +31,25 @@ $ui-font-family: 'Press Start 2P', monospace;
 // ==================== COLOR SYSTEM ====================
 // Primary color palette
 $ui-colors: (
-    primary: #8400ff,
-    // Hot pink
-    secondary: #eed7ff,
-    // Indigo
-    success: #32cd32,
-    // Lime green
-    danger: #ff4500,
-    // Orange red
-    warning: #ffd700,
-    // Gold
-    info: #00bfff,
-    // Deep sky blue
+    primary: #8b5cf6,
+    // Royal violet
+    secondary: #f4d58d,
+    // Warm parchment / amber
+    success: #10b981,
+    // Emerald
+    danger: #ef4444,
+    // Red 500
+    warning: #f59e0b,
+    // Amber 500
+    info: #60a5fa,
+    // Sky 400
 );
 
 // Contrast colors for text on colored backgrounds
 $ui-contrasts: (
     primary: $ui-white,
     secondary: $ui-black,
-    success: $ui-black,
+    success: $ui-white,
     danger: $ui-white,
     warning: $ui-black,
     info: $ui-white,
@@ -164,39 +164,30 @@ $ui-opacities: (
 @function ui-color($name) {
     @return map.get($ui-colors, $name);
 }
-
 @function ui-contrast($name) {
     @return map.get($ui-contrasts, $name);
 }
-
 @function ui-gap($name) {
     @return map.get($ui-gaps, $name);
 }
-
 @function ui-shape($name) {
     @return map.get($ui-shapes, $name);
 }
-
 @function ui-size($name, $prop) {
     @return map.get(map.get($ui-sizes, $name), $prop);
 }
-
 @function ui-elevation($level) {
     @return map.get($ui-elevations, $level);
 }
-
 @function ui-alignment($name) {
     @return map.get($ui-alignments, $name);
 }
-
 @function ui-transition($speed) {
     @return map.get($ui-transitions, $speed);
 }
-
 @function ui-easing($type) {
     @return map.get($ui-easings, $type);
 }
-
 @function ui-interaction($prop) {
     @return map.get($ui-interactions, $prop);
 }
@@ -207,8 +198,6 @@ $ui-opacities: (
 
 // ==================== COMPONENT MIXINS ====================
 // Reusable component patterns
-
-// Base component styling
 @mixin ui-component-base {
     font-family: $ui-font-family;
     border: 2px solid $ui-border;
@@ -220,7 +209,6 @@ $ui-opacities: (
         box-shadow ui-transition(fast) ui-easing(ease);
 }
 
-// Disabled state styling
 @mixin ui-disabled-state {
     &.isDisabled {
         background: $ui-disabled-bg !important;
@@ -238,13 +226,11 @@ $ui-opacities: (
     }
 }
 
-// Interactive pop-out effects
 @mixin ui-popout-effects {
     &:hover.popOut:not(.isDisabled):not(.isLoading):not(.disableHoverEffects) {
         transform: translate(ui-interaction(hover-translate));
         box-shadow: ui-interaction(hover-shadow-offset) ui-interaction(hover-shadow-offset) 0 $ui-shadow;
 
-        // Active state overrides hover when both are present
         &:active {
             transform: translate(ui-interaction(active-translate));
             box-shadow: ui-interaction(active-shadow-offset) ui-interaction(active-shadow-offset) 0 $ui-shadow;
@@ -253,7 +239,6 @@ $ui-opacities: (
 }
 
 @mixin ui-active-effects {
-    // For non-hover active states (e.g., keyboard)
     &:active:not(.isDisabled):not(.isLoading):not(:hover) {
         transform: translate(ui-interaction(active-translate));
         box-shadow: ui-interaction(active-shadow-offset) ui-interaction(active-shadow-offset) 0 $ui-shadow;
@@ -266,7 +251,6 @@ $ui-opacities: (
     }
 }
 
-// Focus styling
 @mixin ui-focus-state {
     &:focus-visible {
         outline: 2px dashed $ui-black;
@@ -274,7 +258,6 @@ $ui-opacities: (
     }
 }
 
-// Variant color generator
 @mixin ui-variant-colors($use-background: true) {
     @each $name, $color in $ui-colors {
         &.v-#{$name} {
@@ -290,7 +273,6 @@ $ui-opacities: (
     }
 }
 
-// Size generator
 @mixin ui-size-variants {
     @each $name, $config in $ui-sizes {
         &.s-#{$name} {
@@ -301,7 +283,6 @@ $ui-opacities: (
     }
 }
 
-// Shape generator
 @mixin ui-shape-variants {
     @each $name, $radius in $ui-shapes {
         &.sh-#{$name} {
@@ -310,7 +291,6 @@ $ui-opacities: (
     }
 }
 
-// Elevation generator
 @mixin ui-elevation-variants {
     @each $level, $shadow in $ui-elevations {
         &.elev-#{$level} {
@@ -319,7 +299,6 @@ $ui-opacities: (
     }
 }
 
-// Alignment generator
 @mixin ui-alignment-variants {
     @each $name, $alignment in $ui-alignments {
         &.al-#{$name} {
@@ -329,7 +308,6 @@ $ui-opacities: (
     }
 }
 
-// Gap generator
 @mixin ui-gap-variants($property: gap) {
     @each $name, $value in $ui-gaps {
         &.gap-#{$name} {
@@ -338,7 +316,6 @@ $ui-opacities: (
     }
 }
 
-// Contrast color generator
 @mixin ui-contrast-colors {
     @each $name, $color in $ui-contrasts {
         &.v-#{$name} {
