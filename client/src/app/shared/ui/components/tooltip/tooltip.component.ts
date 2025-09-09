@@ -18,7 +18,7 @@ export class UiTooltipComponent extends UiBaseComponent {
     isVisible: boolean = false;
 
     showTooltip(): void {
-        this.isVisible = true;
+        this.isVisible = this.text.length > 0;
     }
 
     hideTooltip(): void {

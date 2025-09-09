@@ -19,14 +19,18 @@
     transition:
         opacity 0.2s ease,
         transform 0.2s ease;
-    min-width: 200px; // Définit une largeur minimale pour le tooltip
-    max-width: 500px; // Limite la largeur maximale du tooltip
-    white-space: normal; // Permet au texte de se répartir sur plusieurs lignes
-    word-wrap: break-word; // Force le texte à se couper si nécessaire
+    min-width: 200px;
+    max-width: 500px;
+    white-space: normal;
+    word-wrap: break-word;
+    pointer-events: none;
+    user-select: none;
 
     &.visible {
         opacity: ui-opacity(full);
         transform: scale(1) translateX(-50%) translateY(-50%);
+        pointer-events: auto;
+        user-select: auto;
     }
 
     &.top {
