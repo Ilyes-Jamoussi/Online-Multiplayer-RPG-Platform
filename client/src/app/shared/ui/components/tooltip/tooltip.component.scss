@@ -1,0 +1,71 @@
+@use 'theme' as *;
+
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.uiTooltip {
+    position: absolute;
+    background-color: $ui-gray;
+    color: $ui-white;
+    padding: 0.5rem;
+    border-radius: ui-shape(rounded);
+    box-shadow: ui-elevation(sm);
+    white-space: nowrap;
+    z-index: 1000;
+    opacity: 0;
+    transform: scale(0.9) translateX(-50%) translateY(-50%);
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+    min-width: 200px;
+    max-width: 500px;
+    white-space: normal;
+    word-wrap: break-word;
+    pointer-events: none;
+    user-select: none;
+
+    &.visible {
+        opacity: ui-opacity(full);
+        transform: scale(1) translateX(-50%) translateY(-50%);
+        pointer-events: auto;
+        user-select: auto;
+    }
+
+    &.top {
+        bottom: 100%;
+        left: 50%;
+        margin-bottom: 0;
+        &.dist-sm {
+            transform: translateX(-50%) translateY(30%);
+        }
+        &.dist-md {
+            transform: translateX(-50%) translateY(-10%);
+        }
+        &.dist-lg {
+            transform: translateX(-50%) translateY(-30%);
+        }
+    }
+
+    &.bottom {
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 0;
+    }
+
+    &.left {
+        right: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-right: 0;
+    }
+
+    &.right {
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: 0;
+    }
+}

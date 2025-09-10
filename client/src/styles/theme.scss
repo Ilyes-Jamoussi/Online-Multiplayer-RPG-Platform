@@ -150,6 +150,15 @@ $ui-interactions: (
     hover-brightness: 95%,
 );
 
+// ==================== OPACITY SYSTEM ====================
+$ui-opacities: (
+    transparent: 0,
+    faint: 0.2,
+    semi: 0.5,
+    full: 0.9,
+    opaque: 1,
+);
+
 // ==================== UTILITY FUNCTIONS ====================
 // Theme value getters with fallbacks
 @function ui-color($name) {
@@ -181,6 +190,10 @@ $ui-interactions: (
 }
 @function ui-interaction($prop) {
     @return map.get($ui-interactions, $prop);
+}
+
+@function ui-opacity($level) {
+    @return map.get($ui-opacities, $level);
 }
 
 // ==================== COMPONENT MIXINS ====================
