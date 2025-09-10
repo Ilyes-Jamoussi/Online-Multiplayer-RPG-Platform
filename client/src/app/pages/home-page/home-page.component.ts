@@ -4,13 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { UiCardComponent } from '@app/shared/ui/components/card/card.component';
 import { UiCardTitleComponent, UiCardContentComponent } from '@app/shared/ui/components/card/card-sections.component';
 import { UiLinkButtonComponent2 } from '@app/shared/ui/components/button/link-button2.component';
-import { UiButtonComponent2 } from '@app/shared/ui/components/button/button2.component';
 
 @Component({
     selector: 'app-home-page',
     templateUrl: './home-page.component.html',
     styleUrls: ['./home-page.component.scss'],
-    imports: [CommonModule, FormsModule, UiCardComponent, UiCardTitleComponent, UiCardContentComponent, UiLinkButtonComponent2, UiButtonComponent2],
+    imports: [CommonModule, FormsModule, UiCardComponent, UiCardTitleComponent, UiCardContentComponent, UiLinkButtonComponent2],
     standalone: true,
 })
 export class HomePageComponent {

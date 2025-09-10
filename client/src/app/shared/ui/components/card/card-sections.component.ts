@@ -1,10 +1,9 @@
 import { NgClass } from '@angular/common';
 import { Component, Input, Optional, Inject } from '@angular/core';
 import { FaIcons, UiAlignment } from '@ui/types/ui.types';
-import { UiIconComponent } from '@ui/components/icon/icon.component';
 import { UiBaseComponent } from '@ui/components/base/ui-base.component';
-import { UiIconComponent } from '@ui/components/icon/icon.component';
 import { UI_CARD_CONTEXT, UiCardContext } from './card.component';
+import { UiIconComponent } from '@ui/components/icon/icon.component';
 
 @Component({
     selector: 'app-ui-card-title',
@@ -13,7 +12,7 @@ import { UI_CARD_CONTEXT, UiCardContext } from './card.component';
     styleUrls: ['./card.component.scss'],
     template: `
         <div class="uiCard__title" [ngClass]="classes">
-            @if(icon){<app-ui-icon [size]="size" [variant]="variant" [iconName]="'Coffee'" />}
+            @if(icon){<app-ui-icon [size]="size" [iconName]="icon" />}
             <span class="title-slot"><ng-content /></span>
         </div>
     `,

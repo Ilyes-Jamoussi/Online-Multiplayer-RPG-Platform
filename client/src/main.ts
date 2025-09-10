@@ -23,7 +23,10 @@ const routes: Routes = [
         component: HomePageComponent,
     },
     { path: removeLeadingSlash(ROUTES.createGamePage), component: CreateGamePageComponent },
-    { path: removeLeadingSlash(ROUTES.gameListPage), component: GameListPageComponent },
+    {
+        path: removeLeadingSlash(ROUTES.adminPage),
+        component: GameListPageComponent,
+    },
 
     { path: '**', redirectTo: removeLeadingSlash(ROUTES.home) },
 ];
