@@ -4,15 +4,40 @@
             <img src="assets/images/logo.png" alt="Game Logo" class="game-logo-modern" />
         </div>
         <div class="menu-buttons-modern">
-            <app-ui-link-button size="lg" icon="group" [fullWidth]="true" [routerLink]="'/join-game-page'" [variant]="'secondary'" [disabled]="true">
-                Rejoindre une partie (Bientôt disponible)
-            </app-ui-link-button>
-            <app-ui-link-button size="lg" icon="add" [fullWidth]="true" [routerLink]="'/create--game-page'" [variant]="'primary'">
+            <app-ui-link-button2
+                shape="pill"
+                fontSize="md"
+                size="lg"
+                leftIcon="Play"
+                [width]="'full'"
+                [routerLink]="'/lobby'"
+                [style]="'filled'"
+                [disabled]="true"
+            >
+                Rejoindre une partie (Bientôt disponible !)
+            </app-ui-link-button2>
+            <app-ui-link-button2
+                shape="pill"
+                fontSize="md"
+                size="lg"
+                leftIcon="PlusCircle"
+                [width]="'full'"
+                [routerLink]="'/create--game-page'"
+                [style]="'filled'"
+            >
                 Créer une partie
-            </app-ui-link-button>
-            <app-ui-link-button size="lg" icon="admin_panel_settings" [fullWidth]="true" [routerLink]="'/admin-page'" [variant]="'primary'">
+            </app-ui-link-button2>
+            <app-ui-link-button2
+                shape="pill"
+                fontSize="md"
+                size="lg"
+                leftIcon="ShieldHalved"
+                [width]="'full'"
+                [routerLink]="'/admin-page'"
+                [style]="'filled'"
+            >
                 Administrer les jeux
-            </app-ui-link-button>
+            </app-ui-link-button2>
         </div>
     </div>
     <div class="home-right">

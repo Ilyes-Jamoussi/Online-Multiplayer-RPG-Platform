@@ -5,58 +5,50 @@ import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.componen
 import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
 import { FaIconKey } from '@ui/types/ui.types';
 
-type InputType = 'text' | 'number' | 'password' | 'email' | 'tel' | 'url';
-
 @Component({
-    selector: 'app-ui-input',
-    templateUrl: './input.component.html',
-    styleUrls: ['./input.component.scss'],
+    selector: 'app-ui-select',
+    templateUrl: './select.component.html',
+    styleUrls: ['./select.component.scss'],
     standalone: true,
     imports: [NgClass, UiIconComponent],
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => UiInputComponent),
+            useExisting: forwardRef(() => UiSelectComponent),
             multi: true,
         },
     ],
 })
-export class UiInputComponent extends UiBaseComponent implements ControlValueAccessor {
-    /** Text alignment inside the input (overrides base align for input field) */
+export class UiSelectComponent extends UiBaseComponent implements ControlValueAccessor {
+    /** Text alignment inside the select (overrides base align for select field) */
     @Input() alignText?: string = 'left';
 
-    /** Whether the input can be cleared */
-    @Input() clearable: boolean = false;
-
-    /** Label for the input */
+    /** Label for the select */
     @Input() label: string = '';
 
-    /** Maximum length of the input value */
-    @Input() maxLength?: number;
-
-    /** Minimum length of the input value */
-    @Input() minLength?: number;
-
-    /** Icon to display before the input */
+    /** Icon to display before the select */
     @Input() prefixIcon?: FaIconKey;
 
-    /** Placeholder text for the input */
+    /** Placeholder text for the select */
     @Input() placeholder: string = '';
 
-    /** Whether the input is required */
+    /** Whether the select is required */
     @Input() required: boolean = false;
 
-    /** Icon to display after the input */
-    @Input() suffixIcon?: FaIconKey;
+    // Constants for ID generation
+    private static readonly base36 = 36;
+    private static readonly randomMultiplier = 1000;
 
-    /** Type of the input */
-    @Input() type: InputType = 'text';
+    /** Unique ID for the select element */
+    readonly id: string = `select_${this.generateUniqueId()}`;
 
     value: string = '';
     isDisabled = false;
 
-    private onChange: (value: string) => void;
-    private onTouched: () => void;
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    private onChange: (value: string) => void = () => {};
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    private onTouched: () => void = () => {};
 
     writeValue(obj: string): void {
         this.value = obj;
@@ -74,33 +66,32 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
         this.isDisabled = isDisabled;
     }
 
-    onInput(event: Event): void {
-        const input = event.target as HTMLInputElement;
-        this.value = input.value;
-        this?.onChange?.(this.value);
-    }
-
-    onClear(): void {
-        this.value = '';
-        this?.onChange?.(this.value);
+    onSelectChange(event: Event): void {
+        const select = event.target as HTMLSelectElement;
+        this.value = select.value;
+        this.onChange(this.value);
     }
 
     onBlur(): void {
-        this?.onTouched?.();
+        this.onTouched();
+    }
+
+    private generateUniqueId(): string {
+        return (
+            Date.now().toString(UiSelectComponent.base36) +
+            Math.floor(Math.random() * UiSelectComponent.randomMultiplier).toString(UiSelectComponent.base36)
+        );
     }
 
     override get classes(): Record<string, boolean> {
         return {
-            uiInput: true,
+            uiSelect: true,
             ...super.classes,
             [`al-${this.alignText ?? 'left'}`]: true,
             isDisabled: !!this.disabled || !!this.isDisabled,
             isLoading: !!this.loading,
             hasPrefixIcon: !!this.prefixIcon,
-            hasSuffixIcon: !!this.suffixIcon,
-            isClearable: !!this.clearable,
             hasLabel: !!this.label,
-            disableHoverEffects: true,
         };
     }
 }
