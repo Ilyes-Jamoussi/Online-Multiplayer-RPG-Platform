@@ -189,6 +189,7 @@ export enum FaIcons {
     Table = 'table',
     Building = 'building',
     PeopleGroup = 'people-group',
+    FaceMeh = 'face-meh',
 }
 
 export type FaIconKey = keyof typeof FaIcons;
