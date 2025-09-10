@@ -2,12 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
 import { UiSpinnerComponent } from '@app/shared/ui/components/spinner/spinner.component';
-import { UiShapeVariant } from '@ui/types/ui.types';
+import { FaIconKey, UiShapeVariant } from '@ui/types/ui.types';
+import { UiIconComponent } from '@ui/components/icon/icon.component';
 
 @Component({
     selector: 'app-ui-button',
     standalone: true,
-    imports: [CommonModule, UiSpinnerComponent],
+    imports: [CommonModule, UiSpinnerComponent, UiIconComponent],
     templateUrl: './button.component.html',
     styleUrls: ['./button.component.scss'],
 })
@@ -16,7 +17,7 @@ export class UiButtonComponent extends UiBaseComponent {
     @Input() text: string = 'Button';
 
     /** Optional icon (Material icon name or text/emoji) */
-    @Input() icon?: string;
+    @Input() icon?: FaIconKey;
     @Input() iconRight: boolean = false; // false = icon on left, true = on right
 
     /** HTML button type */

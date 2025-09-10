@@ -1,10 +1,10 @@
 <button [attr.type]="htmlType" [disabled]="disabled || loading" [ngClass]="classes" (click)="onClick($event)">
     @if(icon && !iconRight) {
-    <span class="material-icons" aria-hidden="true">{{ icon }}</span>
+    <app-ui-icon [size]="size" [variant]="variant" [iconName]="icon"></app-ui-icon>
     } @if (!loading) {
     <span class="btn-text"><ng-content></ng-content></span>
     } @if(icon && iconRight) {
-    <span class="material-icons" aria-hidden="true">{{ icon }}</span>
+    <app-ui-icon [size]="size" [variant]="variant" [iconName]="icon"></app-ui-icon>
     } @if (loading) {
     <app-ui-spinner [variant]="variant" [size]="size"> </app-ui-spinner>
     }

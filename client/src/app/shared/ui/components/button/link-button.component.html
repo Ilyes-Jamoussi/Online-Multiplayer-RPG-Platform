@@ -1,9 +1,9 @@
 <a [routerLink]="routerLink" [queryParams]="queryParams" [fragment]="fragment" [target]="target" [ngClass]="classes" class="uiBtn" tabindex="0">
     @if (icon && !iconRight) {
-    <span class="material-icons" aria-hidden="true">{{ icon }}</span>
+    <app-ui-icon [size]="size" [iconName]="icon"></app-ui-icon>
     }
     <span class="btn-text"><ng-content></ng-content></span>
     @if (icon && iconRight) {
-    <span class="material-icons" aria-hidden="true">{{ icon }}</span>
+    <app-ui-icon [size]="size" [iconName]="icon"></app-ui-icon>
     }
 </a>

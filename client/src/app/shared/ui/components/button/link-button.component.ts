@@ -2,19 +2,20 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
-import { UiShapeVariant } from '@ui/types/ui.types';
+import { FaIconKey, UiShapeVariant } from '@ui/types/ui.types';
+import { UiIconComponent } from '@ui/components/icon/icon.component';
 
 @Component({
     selector: 'app-ui-link-button',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, UiIconComponent],
     templateUrl: './link-button.component.html',
     styleUrls: ['./button.component.scss'],
 })
 export class UiLinkButtonComponent extends UiBaseComponent {
     /** Optional icon (Material icon name or text/emoji) */
-    @Input() icon?: string;
-    @Input() iconRight: boolean = false;
+    @Input() icon?: FaIconKey;
+    @Input() iconRight: boolean = false; // false = icon on left, true = on right
 
     /** Router link parameters */
     @Input() routerLink!: string | string[];
