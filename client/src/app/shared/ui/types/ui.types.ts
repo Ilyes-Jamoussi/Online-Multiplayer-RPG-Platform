@@ -218,6 +218,8 @@ export enum FaIcons {
     Stethoscope = 'stethoscope',
     StreetView = 'street-view',
     WebAwesome = 'web-awesome',
+    ShieldHalved = 'shield-halved',
+    Edit = 'edit',
 }
 
 export type FaIconKey = keyof typeof FaIcons;
