@@ -7,6 +7,7 @@ import { ROUTES } from '@app/constants/routes.constants';
 import { AppComponent } from '@app/pages/app/app.component';
 import { CreateGamePageComponent } from '@app/pages/create-game-page/game-creation-component/create-game-page.component';
 import { HomePageComponent } from '@app/pages/home-page/home-page.component';
+import { TestCreateGameComponent } from '@app/pages/test-create-game/test-create-game.component';
 import { removeLeadingSlash } from '@src/utils/route/route.utils';
 import { AdminPageComponent } from './app/pages/admin-page/admin-page.component';
 import { environment } from './environments/environment';
@@ -26,6 +27,7 @@ const routes: Routes = [
     },
     { path: removeLeadingSlash(ROUTES.createGamePage), component: CreateGamePageComponent },
     { path: removeLeadingSlash(ROUTES.adminPage), component: AdminPageComponent },
+    { path: removeLeadingSlash(ROUTES.testCreateGame), component: TestCreateGameComponent },
 
     { path: '**', redirectTo: removeLeadingSlash(ROUTES.home) },
 ];

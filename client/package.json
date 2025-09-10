@@ -9,17 +9,16 @@
     "test": "ng test",
     "coverage": "ng test --code-coverage --source-map=true",
     "lint": "eslint --config eslint.config.mjs \"src/**/*.ts\"",
-    "lint:fix": "eslint --config eslint.config.mjs \"src/**/*.ts\" --fix"
+    "lint:fix": "eslint --config eslint.config.mjs \"src/**/*.ts\" --fix",
+    "generate-api": "openapi-generator-cli generate -i http://localhost:3000/api/docs-json -g typescript-angular -o src/app/api"
   },
   "private": true,
   "dependencies": {
     "@angular/animations": "20.0.0",
-    "@angular/cdk": "20.0.2",
     "@angular/common": "20.0.0",
     "@angular/compiler": "20.0.0",
     "@angular/core": "20.0.0",
     "@angular/forms": "20.0.0",
-    "@angular/material": "20.0.2",
     "@angular/platform-browser": "20.0.0",
     "@angular/platform-browser-dynamic": "20.0.0",
     "@angular/router": "20.0.0",
@@ -38,6 +37,7 @@
     "@angular/cli": "20.0.1",
     "@angular/compiler-cli": "20.0.0",
     "@eslint/js": "9.32.0",
+    "@openapitools/openapi-generator-cli": "^2.23.1",
     "@types/jasmine": "4.3.5",
     "@types/node": "22.10.2",
     "@typescript-eslint/eslint-plugin": "8.38.0",

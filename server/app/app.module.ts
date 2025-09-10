@@ -1,14 +1,7 @@
+import { GameStoreModule } from '@app/game-store/game-store.module';
 import { Logger, Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Course, courseSchema } from '@app/model/database/course';
-import { CourseController } from '@app/controllers/course/course.controller';
-import { CourseService } from '@app/services/course/course.service';
-import { DateController } from '@app/controllers/date/date.controller';
-import { DateService } from '@app/services/date/date.service';
-import { ChatGateway } from '@app/gateways/chat/chat.gateway';
-import { ExampleService } from '@app/services/example/example.service';
-import { ExampleController } from '@app/controllers/example/example.controller';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
     imports: [
@@ -20,9 +13,8 @@ import { ExampleController } from '@app/controllers/example/example.controller';
                 uri: config.get<string>('DATABASE_CONNECTION_STRING'), // Loaded from .env
             }),
         }),
-        MongooseModule.forFeature([{ name: Course.name, schema: courseSchema }]),
+        GameStoreModule,
     ],
-    controllers: [CourseController, DateController, ExampleController],
-    providers: [ChatGateway, CourseService, DateService, ExampleService, Logger],
+    providers: [Logger],
 })
 export class AppModule {}

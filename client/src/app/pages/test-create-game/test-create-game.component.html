@@ -1,0 +1,68 @@
+<div class="container">
+  <h2>Test - Créer un Jeu</h2>
+  
+  <form [formGroup]="gameForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label>Nom du jeu:</label>
+      <input type="text" formControlName="name" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label>Description:</label>
+      <textarea formControlName="description" class="form-control"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Taille de la carte:</label>
+      <select formControlName="size" class="form-control">
+        <option [value]="10">Petite (10)</option>
+        <option [value]="15">Moyenne (15)</option>
+        <option [value]="20">Grande (20)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Mode de jeu:</label>
+      <select formControlName="mode" class="form-control">
+        <option value="classic">Classique</option>
+        <option value="capture-the-flag">Capture du Drapeau</option>
+      </select>
+    </div>
+
+    <button type="submit" [disabled]="gameForm.invalid" class="btn btn-primary">
+      Créer le Jeu
+    </button>
+  </form>
+
+  <div *ngIf="message" class="alert" [class.alert-success]="isSuccess" [class.alert-danger]="!isSuccess">
+    {{ message }}
+  </div>
+
+  <!-- Liste des jeux en temps réel -->
+  <div class="games-section">
+    <h3>Liste des Jeux ({{ gameStoreService.gameDisplays().length }})</h3>
+    
+    <div class="games-grid">
+      @for (game of gameStoreService.gameDisplays(); track game.id) {
+        <div class="game-card">
+          <div class="game-header">
+            <h4>{{ game.name }}</h4>
+            <span class="game-status" [class.visible]="game.visibility" [class.hidden]="!game.visibility">
+              {{ game.visibility ? 'Visible' : 'Masqué' }}
+            </span>
+          </div>
+          <p class="game-description">{{ game.description }}</p>
+          <div class="game-details">
+            <span class="game-size">Taille: {{ game.size }}</span>
+            <span class="game-mode">Mode: {{ game.mode }}</span>
+          </div>
+          <div class="game-meta">
+            <small>Modifié: {{ game.lastModified | date:'short' }}</small>
+          </div>
+        </div>
+      } @empty {
+        <p class="no-games">Aucun jeu disponible</p>
+      }
+    </div>
+  </div>
+</div>
