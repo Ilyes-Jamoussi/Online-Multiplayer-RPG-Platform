@@ -1,6 +1,7 @@
 import { NgClass } from '@angular/common';
-import { Component, Inject, Input, Optional } from '@angular/core';
-import { MaterialIcon, UiAlignment } from '@app/shared/ui/types/ui.types';
+import { Component, Input, Optional, Inject } from '@angular/core';
+import { FaIcons, UiAlignment } from '@ui/types/ui.types';
+import { UiIconComponent } from '@ui/components/icon/icon.component';
 import { UiBaseComponent } from '@ui/components/base/ui-base.component';
 import { UiIconComponent } from '@ui/components/icon/icon.component';
 import { UI_CARD_CONTEXT, UiCardContext } from './card.component';
@@ -12,15 +13,15 @@ import { UI_CARD_CONTEXT, UiCardContext } from './card.component';
     styleUrls: ['./card.component.scss'],
     template: `
         <div class="uiCard__title" [ngClass]="classes">
-            @if(icon){<app-ui-icon [variant]="variant" [iconName]="icon" />}
+            @if(icon){<app-ui-icon [size]="size" [variant]="variant" [iconName]="'Coffee'" />}
             <span class="title-slot"><ng-content /></span>
         </div>
     `,
 })
 export class UiCardTitleComponent extends UiBaseComponent {
     /** Material icon name (or text/emoji) */
-    @Input() icon?: keyof typeof MaterialIcon;
-    /** Center the title horizontally */
+    @Input() icon?: keyof typeof FaIcons;
+    /** Centers the title horizontally */
     @Input() alignText: UiAlignment = 'left';
     /** Place the icon to the right */
     @Input() iconRight: boolean = false;
