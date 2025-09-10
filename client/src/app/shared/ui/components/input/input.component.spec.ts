@@ -21,11 +21,7 @@ describe('UiInputComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [
-                FormsModule,
-                UiInputComponent,
-                UiIconComponent,
-            ],
+            imports: [FormsModule, UiInputComponent, UiIconComponent],
         }).compileComponents();
 
         fixture = TestBed.createComponent(UiInputComponent);

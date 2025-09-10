@@ -87,6 +87,8 @@ export enum FaIcons {
     PenToSquare = 'pen-to-square',
     ShareFromSquare = 'share-from-square',
     Plus = 'plus',
+    PlusCircle = 'plus-circle',
+    PlayCircle = 'play-circle',
     Minus = 'minus',
     Share = 'share',
     CircleExclamation = 'circle-exclamation',
@@ -160,6 +162,7 @@ export enum FaIcons {
     MountainSun = 'mountain-sun',
     LocationPin = 'location-pin',
     Info = 'info',
+    InfoCircle = 'info-circle',
     UserMinus = 'user-minus',
     CartPlus = 'cart-plus',
     Clock = 'clock',
@@ -190,6 +193,13 @@ export enum FaIcons {
     Building = 'building',
     PeopleGroup = 'people-group',
     FaceMeh = 'face-meh',
+    ChevronDown = 'chevron-down',
+    ChevronLeft = 'chevron-left',
+    ChevronRight = 'chevron-right',
+    CircleChevronRight = 'circle-chevron-right',
+    CircleChevronLeft = 'circle-chevron-left',
+    CircleChevronUp = 'circle-chevron-up',
+    CircleChevronDown = 'circle-chevron-down',
 }
 
 export type FaIconKey = keyof typeof FaIcons;
