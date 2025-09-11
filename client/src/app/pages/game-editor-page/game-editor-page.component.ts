@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { CreateGameDto } from '@app/api/model/createGameDto';
 import { ROUTES } from '@app/constants/routes.constants';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 
 @Component({
   selector: 'app-game-editor-page',
@@ -20,7 +21,8 @@ export class GameEditorPageComponent {
 
   constructor(
     private readonly router: Router,
-    private readonly gameHttpService: GameHttpService
+    private readonly gameHttpService: GameHttpService,
+    private readonly notificationService: NotificationService
   ) {}
 
 
@@ -40,9 +42,18 @@ export class GameEditorPageComponent {
 
     this.gameHttpService.createGame(createGameDto).subscribe({
       next: () => {
-        this.router.navigate([ROUTES.gameManagement]);
+        this.isCreating = false;
+        this.notificationService.displaySuccess({
+          title: 'Jeu créé avec succès !',
+          message: `Le jeu "${this.gameName}" a été créé et ajouté à votre collection.`
+        });
+        // this.router.navigate([ROUTES.gameManagement]);
       },
       error: () => {
+        this.notificationService.displayError({
+          title: 'Erreur lors de la création',
+          message: `Impossible de créer le jeu "${this.gameName}". Veuillez réessayer.`
+        });
         this.isCreating = false;
       }
     });
