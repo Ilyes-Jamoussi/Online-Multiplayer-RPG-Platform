@@ -1,0 +1,44 @@
+<div class="game-card">
+    <div class="game-header">
+        <div class="game-info">
+            <h3 class="game-title">{{ game.name }}</h3>
+            <p class="game-description">{{ game.description }}</p>
+        </div>
+        <div class="visibility-badge" [class.visible]="game.visibility" [class.hidden]="!game.visibility">
+            {{ game.visibility ? 'Public' : 'Privé' }}
+        </div>
+    </div>
+
+    <div class="game-meta">
+        <div class="meta-item">
+            <span class="meta-label">Taille</span>
+            <span class="meta-value">{{ game.size }}</span>
+        </div>
+        <div class="meta-item">
+            <span class="meta-label">Modifié</span>
+            <span class="meta-value">{{ formatDate(game.lastModified) }}</span>
+        </div>
+    </div>
+
+    <div class="game-actions">
+        @if (isAdmin) {
+            <button class="edit-button" (click)="onEditGame()">
+                <mat-icon>edit</mat-icon>
+                Modifier
+            </button>
+            <button class="visibility-button" (click)="onToggleVisibility()">
+                <mat-icon>{{ game.visibility ? 'visibility_off' : 'visibility' }}</mat-icon>
+                {{ game.visibility ? 'Masquer' : 'Publier' }}
+            </button>
+            <button class="delete-button" (click)="onDeleteGame()">
+                <mat-icon>delete</mat-icon>
+                Supprimer
+            </button>
+        } @else {
+            <button class="start-button" (click)="onStartGame()">
+                <mat-icon>play_arrow</mat-icon>
+                Jouer
+            </button>
+        }
+    </div>
+</div>

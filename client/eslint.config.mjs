@@ -45,4 +45,10 @@ export default [
             // Angular template rules can be added here
         },
     },
+    {
+        files: ['src/app/api/model/**/*.ts'],
+        rules: {
+            '@typescript-eslint/naming-convention': 'off',
+        },
+    },
 ];

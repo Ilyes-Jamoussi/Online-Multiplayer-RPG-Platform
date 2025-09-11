@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'theme' as *;
 @use 'sass:map';
 
@@ -38,14 +39,38 @@
 
     &.isChecked .checkbox-box {
         background: ui-color(primary);
-        border-color: $ui-border;
-        box-shadow: ui-elevation(sm);
+        border-color: color.adjust(ui-color(primary), $lightness: -10%);
+    }
 
-        + .checkbox-indicator,
-        .checkbox-indicator {
-            opacity: 1;
-            color: ui-contrast(primary);
-            @include ui-size-variants;
+    // Apply consistent states
+    @include ui-disabled-state;
+    @include ui-focus-state;
+
+    // Custom hover effects for checkbox
+    &:hover:not(.isDisabled) .checkbox-box {
+        transform: translate(ui-interaction(hover-translate));
+        box-shadow: ui-interaction(hover-shadow-offset) ui-interaction(hover-shadow-offset) 0 $ui-shadow;
+    }
+
+    &:hover.popOut:not(.isDisabled) .checkbox-box {
+        transform: translate(ui-interaction(hover-translate));
+        box-shadow: ui-interaction(hover-shadow-offset) ui-interaction(hover-shadow-offset) 0 $ui-shadow;
+    }
+
+    &:active:not(.isDisabled) .checkbox-box {
+        transform: translate(ui-interaction(active-translate));
+        box-shadow: ui-interaction(active-shadow-offset) ui-interaction(active-shadow-offset) 0 $ui-shadow;
+    }
+
+    // Variant colors for checked state
+    @each $name, $color in $ui-colors {
+        &.v-#{$name}.isChecked .checkbox-box {
+            background: $color;
+            border-color: color.adjust($color, $lightness: -10%);
+
+            .checkbox-indicator {
+                color: ui-contrast($name);
+            }
         }
     }
 

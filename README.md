@@ -11,6 +11,12 @@ Le code contient 2 projets séparés :
 ## Guide de contribution
 
 Se référer au fichier [CONTRIBUTING.md](./CONTRIBUTING.md) pour des conseils et directives de comment maintenir un projet bien organisé et facile à comprendre pour tous les membres de l'équipe.
+
+## Backend - NestJS
+
+- **Contrôleurs** : Utiliser `@HttpCode(HttpStatus.XXX)` uniquement si différent du défaut NestJS (200 pour GET/PUT/PATCH, 201 pour POST).
+- **DTOs** : Utiliser les décorateurs de validation (`@IsString()`, `@IsNumber()`, etc.) et `@ApiProperty()` pour valider les types correctement.
+
 ## Déploiement du projet
 
 Se référer au fichier [DEPLOYMENT.md](DEPLOYMENT.md) pour tout ce qui a rapport avec le déploiement.
