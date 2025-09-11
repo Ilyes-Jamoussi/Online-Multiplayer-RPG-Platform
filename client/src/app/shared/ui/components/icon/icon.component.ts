@@ -2,8 +2,8 @@ import { NgClass } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { FaIconLibrary, FontAwesomeModule, SizeProp } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
-import { UiBaseComponent } from '@ui/components/base/ui-base.component';
 import { FaIcons } from '@ui/types/ui.types';
+import { UiBase2Component } from '@ui/components/base/ui-base2.component';
 
 const ICON_SIZES = {
     sm: 'xs' as SizeProp,
@@ -15,22 +15,15 @@ const ICON_SIZES = {
     selector: 'app-ui-icon',
     standalone: true,
     imports: [NgClass, FontAwesomeModule],
-    template: ` <fa-icon [size]="iconSize" [icon]="iconValue" [ngClass]="classes"></fa-icon> `,
+    template: ` <fa-icon class="uiIcon" [size]="iconSize" [icon]="iconValue" [ngClass]="classes"></fa-icon> `,
     styleUrls: ['./icon.component.scss'],
 })
-export class UiIconComponent extends UiBaseComponent {
+export class UiIconComponent extends UiBase2Component {
     @Input() iconName: keyof typeof FaIcons = 'Coffee'; // Default to lowercase for FontAwesome compatibility
 
     constructor(library: FaIconLibrary) {
         super();
         library.addIconPacks(fas); // Ensure FontAwesome icons are registered
-    }
-
-    get classes(): Record<string, boolean> {
-        return {
-            uiIcon: true,
-            ...super.classes,
-        };
     }
 
     get iconValue(): string {

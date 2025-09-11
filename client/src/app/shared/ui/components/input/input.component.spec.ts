@@ -216,8 +216,6 @@ describe('UiInputComponent', () => {
 
         expect(pre.iconName).toBe(component.prefixIcon);
         expect(suf.iconName).toBe(component.suffixIcon);
-        expect(pre.variant).toBe('secondary');
-        expect(suf.variant).toBe('secondary');
     });
 
     it('shows maxlength counter when maxLength is set; hides when not set', () => {
