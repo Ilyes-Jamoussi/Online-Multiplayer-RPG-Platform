@@ -25,7 +25,7 @@ export const sizePresets: Record<
     s: {
         dimensions: { width: 10, height: 10 },
         objects: {
-            startPoints: 1,
+            startPoints: 2,
             flags: 1,
             heal: 1,
             fight: 1,
@@ -36,7 +36,7 @@ export const sizePresets: Record<
     m: {
         dimensions: { width: 15, height: 15 },
         objects: {
-            startPoints: 2,
+            startPoints: 4,
             flags: 2,
             heal: 2,
             fight: 2,
@@ -47,12 +47,12 @@ export const sizePresets: Record<
     l: {
         dimensions: { width: 20, height: 20 },
         objects: {
-            startPoints: 3,
-            flags: 3,
-            heal: 3,
-            fight: 3,
-            teleports: 3,
-            boats: 3,
+            startPoints: 6,
+            flags: 4,
+            heal: 4,
+            fight: 4,
+            teleports: 4,
+            boats: 4,
         },
     },
 };
@@ -150,7 +150,7 @@ export interface GameDraft {
     editor: EditorState;
 }
 
-export type TileBrushTool = { type: 'TILE_BRUSH'; tile: TileSpec };
+export type TileBrushTool = { type: 'TILE_BRUSH'; tile: TileSpec; leftDrag?: boolean; rightDrag?: boolean };
 export type ObjectTool = { type: 'OBJECT'; kind: PlaceableKind };
 export type EraserTool = { type: 'ERASE' };
 export type PickerTool = { type: 'PICK_TILE' };
@@ -165,4 +165,7 @@ export enum ToolType {
 export interface TileActions {
     leftClick: (x: number, y: number) => void;
     rightClick: (x: number, y: number) => void;
+    dragStart?: (click: 'left' | 'right') => void;
+    dragEnd?: (click: 'left' | 'right') => void;
+    dragPaint?: (x: number, y: number) => void;
 }

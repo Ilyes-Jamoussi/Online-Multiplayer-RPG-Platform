@@ -1,4 +1,4 @@
-<div class="tile" (click)="onClick()" (contextmenu)="onRightClick($event)" [ngStyle]="{ background: colorOf(tile.kind) }">
+<div class="tile" (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mouseover)="onMouseOver($event)" (contextmenu)="onRightClick($event)" [ngStyle]="{ background: colorOf(tile.kind) }">
     @if(tile.kind === 'DOOR') {
     <div class="door">
         {{ tile.open ? '🚪' : '🔒' }}

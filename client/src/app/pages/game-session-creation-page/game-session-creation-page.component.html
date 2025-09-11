@@ -1,0 +1,28 @@
+<div class="game-session-container">
+  <div class="session-header">
+    <h1>Choisir un jeu</h1>
+    <p>Sélectionnez un jeu pour commencer une nouvelle partie</p>
+    <button class="btn btn-secondary" (click)="onBack()">
+      Retour
+    </button>
+  </div>
+
+  <div class="games-section">
+    @if (visibleGameDisplays() && visibleGameDisplays().length > 0) {
+      <div class="games-grid">
+        @for (game of visibleGameDisplays(); track game.id) {
+          <app-game-preview-card 
+            [game]="game" 
+            [isAdmin]="false"
+            (startGame)="onStartGame()">
+          </app-game-preview-card>
+        }
+      </div>
+    } @else {
+      <div class="no-games-message">
+        <h2>Aucun jeu disponible</h2>
+        <p>Il n'y a actuellement aucun jeu disponible pour jouer.</p>
+      </div>
+    }
+  </div>
+</div>

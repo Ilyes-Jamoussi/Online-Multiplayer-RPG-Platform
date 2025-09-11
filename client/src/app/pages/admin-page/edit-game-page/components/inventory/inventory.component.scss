@@ -1,0 +1,101 @@
+.inventory-container {
+    background-color: #f3f4f6;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    max-width: 300px;
+}
+
+.inventory-title {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 18px;
+    color: #1f2937;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 8px;
+}
+
+.inventory-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.inventory-item {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 6px;
+    padding: 10px;
+    transition: transform 0.2s, background-color 0.2s;
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #f9fafb;
+        transform: translateY(-2px);
+    }
+}
+
+.item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-right: 12px;
+
+    &.start {
+        background-color: rgba(16, 185, 129, 0.15);
+        border: 2px solid #10b981;
+    }
+
+    &.flag {
+        background-color: rgba(239, 68, 68, 0.15);
+        border: 2px solid #ef4444;
+    }
+
+    &.heal {
+        background-color: rgba(59, 130, 246, 0.15);
+        border: 2px solid #3b82f6;
+    }
+
+    &.fight {
+        background-color: rgba(245, 158, 11, 0.15);
+        border: 2px solid #f59e0b;
+    }
+
+    &.boat {
+        background-color: rgba(139, 92, 246, 0.15);
+        border: 2px solid #8b5cf6;
+    }
+}
+
+.item-info {
+    flex: 1;
+}
+
+.item-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+    color: #374151;
+}
+
+.item-count {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+// Style pour les objets indisponibles (count = 0)
+.inventory-item.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+
+    &:hover {
+        transform: none;
+        background-color: #ffffff;
+    }
+}

@@ -1,9 +1,7 @@
 .page {
     position: relative;
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    gap: 16px;
-    height: 100%;
+    display: flex;
+    gap: 60px;
 }
 
 .toolbox {
@@ -15,6 +13,7 @@
 .grid-wrapper {
     display: grid;
     place-items: start;
+    position: relative; /* Pour permettre le positionnement absolu à l'intérieur */
 }
 
 .grid {
@@ -22,4 +21,21 @@
     width: 100%;
     aspect-ratio: 1 / 1;
     border: 2px solid #1f2937;
+    position: relative;
+}
+
+/* Layer des objets qui seront par-dessus la grille */
+.objects-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Permet les clics à travers */
+    z-index: 100;
+}
+
+.sanctuary-wrapper {
+    position: absolute;
+    z-index: 10;
 }

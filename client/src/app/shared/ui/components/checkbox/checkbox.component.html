@@ -1,10 +1,10 @@
 <div [ngClass]="classes" (click)="toggleValue($event)" [attr.aria-checked]="value" role="checkbox" [attr.aria-disabled]="disabled">
-    <div class="checkbox-box">
-        <span class="checkbox-indicator" [class.visible]="value" aria-hidden="true">✓</span>
+    <div [ngClass]="classes" class="checkbox-box">
+        <span [ngClass]="classes" class="checkbox-indicator" [class.visible]="value" aria-hidden="true">✓</span>
     </div>
     @if (label) {
-    <span class="checkbox-label">{{ label }}</span>
+    <span [ngClass]="classes" class="checkbox-label">{{ label }}</span>
     } @else {
-    <span class="checkbox-label"><ng-content></ng-content></span>
+    <span [ngClass]="classes" class="checkbox-label"><ng-content></ng-content></span>
     }
 </div>

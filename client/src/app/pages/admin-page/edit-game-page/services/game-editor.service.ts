@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, map } from 'rxjs';
 
@@ -14,6 +15,7 @@ import {
     InventorySpec,
     InventoryState,
     MapDimensions,
+    Placeable,
     // Placeable,
     PlaceableKind,
     SizePreset,
@@ -114,6 +116,25 @@ export class GameEditorService {
         return available;
     }
 
+    private createPlaceable(kind: PlaceableKind): Placeable {
+        const id = this.uid();
+        switch (kind) {
+            case PlaceableKind.START:
+                return { id, kind };
+            case PlaceableKind.FLAG:
+                return { id, kind };
+            case PlaceableKind.HEAL:
+                return { id, kind };
+            case PlaceableKind.FIGHT:
+                return { id, kind };
+            case PlaceableKind.BOAT:
+                return { id, kind };
+            default: {
+                throw new Error(`Unsupported kind: ${kind}`);
+            }
+        }
+    }
+
     private update(mutator: (draft: GameDraft) => GameDraft) {
         const current = this._draft$.getValue();
         if (!current) {
@@ -150,15 +171,16 @@ export class GameEditorService {
     private inBounds(x: number, y: number, g: Grid) {
         return x >= 0 && y >= 0 && x < g.width && y < g.height;
     }
+
+    private uid(): string {
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        return Math.random().toString(36).substring(2, 9);
+    }
     // private isTerrain(t: TileSpec) {
     //     return t.kind === TileKind.BASE || t.kind === TileKind.WATER || t.kind === TileKind.ICE;
     // }
     // private footprintOf(k: PlaceableKind): Footprint {
     //     return k === PlaceableKind.HEAL || k === PlaceableKind.FIGHT ? { w: 2, h: 2 } : { w: 1, h: 1 };
-    // }
-    // private uid(): string {
-    //     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-    //     return Math.random().toString(36).substring(2, 9);
     // }
 
     // init a new draft
@@ -216,7 +238,7 @@ export class GameEditorService {
         return { cellWidthPx, cellHeightPx };
     }
 
-    applyLeftClickPaint(x: number, y: number) {
+    applyPaint(x: number, y: number) {
         this.update((draft) => {
             const tool = draft.editor?.activeTool;
             if (!tool || tool.type !== 'TILE_BRUSH') return draft;
@@ -243,10 +265,151 @@ export class GameEditorService {
         });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     applyRightClick(x: number, y: number) {
-        // dont do anything for now
-        // TODO !!!
-        return this.update((draft) => draft);
+        this.update((draft) => {
+            const tool = draft.editor?.activeTool;
+            if (!tool) return draft;
+            if (tool.type === 'TILE_BRUSH') {
+                const tile = this.getTile(draft.grid, x, y);
+                if (tile.kind === TileKind.BASE) return draft;
+                return {
+                    ...draft,
+                    grid: this.setTile(draft.grid, x, y, { kind: TileKind.BASE }),
+                };
+            }
+            return draft;
+        });
+    }
+
+    toggleDragging(click: 'left' | 'right') {
+        this.update((draft) => {
+            const tool = draft.editor?.activeTool;
+            if (!tool || tool.type !== 'TILE_BRUSH') return draft;
+
+            return {
+                ...draft,
+                editor: {
+                    ...draft.editor,
+                    activeTool: {
+                        ...tool,
+                        leftDrag: click === 'left' ? !tool.leftDrag : tool.leftDrag,
+                        rightDrag: click === 'right' ? !tool.rightDrag : tool.rightDrag,
+                    },
+                },
+            };
+        });
+    }
+
+    dragPaint(x: number, y: number) {
+        this.update((draft) => {
+            const tool = draft.editor?.activeTool;
+
+            if (!tool || tool.type !== 'TILE_BRUSH' || (!tool.leftDrag && !tool.rightDrag)) return draft;
+            if (tool.leftDrag) {
+                const tile = this.getTile(draft.grid, x, y);
+                if (tile.kind === tool.tile.kind) return draft; // no change if same tile
+                return {
+                    ...draft,
+                    grid: this.setTile(draft.grid, x, y, tool.tile),
+                };
+            } else {
+                const tile = this.getTile(draft.grid, x, y);
+                if (tile.kind === TileKind.BASE) return draft;
+                return {
+                    ...draft,
+                    grid: this.setTile(draft.grid, x, y, { kind: TileKind.BASE }),
+                };
+            }
+        });
+    }
+
+    dragRightClick(x: number, y: number) {
+        this.update((draft) => {
+            const tool = draft.editor?.activeTool;
+            if (!tool || tool.type !== 'TILE_BRUSH' || !tool.rightDrag) return draft;
+            const tile = this.getTile(draft.grid, x, y);
+            if (tile.kind === TileKind.BASE) return draft;
+            return {
+                ...draft,
+                grid: this.setTile(draft.grid, x, y, { kind: TileKind.BASE }),
+            };
+        });
+    }
+
+    private canPlaceObject(draft: GameDraft, x: number, y: number, kind: PlaceableKind): boolean {
+        // check inventory
+        if ((draft.inventory?.available?.[kind] ?? 0) <= 0) return false;
+
+        // check space (1x1 or 2x2)
+        if (!this.inBounds(x, y, draft.grid)) return false;
+        if (kind === PlaceableKind.HEAL || kind === PlaceableKind.FIGHT) {
+            if (!this.inBounds(x + 1, y, draft.grid)) return false;
+            if (!this.inBounds(x, y + 1, draft.grid)) return false;
+            if (!this.inBounds(x + 1, y + 1, draft.grid)) return false;
+            const idxs = [
+                this.indexOf(x, y, draft.grid.width),
+                this.indexOf(x + 1, y, draft.grid.width),
+                this.indexOf(x, y + 1, draft.grid.width),
+                this.indexOf(x + 1, y + 1, draft.grid.width),
+            ];
+            if (idxs.some((i) => draft.grid.objectIdByIndex[i])) return false; // space occupied
+        } else {
+            const idx = this.indexOf(x, y, draft.grid.width);
+            if (draft.grid.objectIdByIndex[idx]) return false; // space occupied
+        }
+        return true;
+    }
+
+    private placeObjectOnGrid(draft: GameDraft, x: number, y: number, kind: PlaceableKind, placeableId: string): string[] {
+        const newObjIdByIndex = draft.grid.objectIdByIndex.slice();
+        if (kind === PlaceableKind.HEAL || kind === PlaceableKind.FIGHT) {
+            const idxs = [
+                this.indexOf(x, y, draft.grid.width),
+                this.indexOf(x + 1, y, draft.grid.width),
+                this.indexOf(x, y + 1, draft.grid.width),
+                this.indexOf(x + 1, y + 1, draft.grid.width),
+            ];
+            idxs.forEach((i) => (newObjIdByIndex[i] = placeableId));
+        } else {
+            const idx = this.indexOf(x, y, draft.grid.width);
+            newObjIdByIndex[idx] = placeableId;
+        }
+        return newObjIdByIndex.map((id) => id ?? '');
+    }
+
+    private updateInventoryAfterPlacement(draft: GameDraft, kind: PlaceableKind): InventoryState {
+        return {
+            ...draft.inventory,
+            available: {
+                ...draft.inventory.available,
+                [kind]: (draft.inventory.available?.[kind] ?? 0) - 1,
+            },
+        };
+    }
+
+    tryPlaceObject(x: number, y: number, kind: PlaceableKind) {
+        this.update((draft) => {
+            if (!this.canPlaceObject(draft, x, y, kind)) return draft;
+
+            const placeable = this.createPlaceable(kind);
+            const newEntities: Entities = {
+                byId: {
+                    ...draft.entities.byId,
+                    [placeable.id]: placeable,
+                },
+            };
+            const newObjIdByIndex = this.placeObjectOnGrid(draft, x, y, kind, placeable.id);
+            const newInventory = this.updateInventoryAfterPlacement(draft, kind);
+
+            return {
+                ...draft,
+                entities: newEntities,
+                grid: {
+                    ...draft.grid,
+                    objectIdByIndex: newObjIdByIndex,
+                },
+                inventory: newInventory,
+            };
+        });
     }
 }

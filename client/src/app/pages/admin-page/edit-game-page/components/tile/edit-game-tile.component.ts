@@ -17,17 +17,43 @@ export class EditGameTileComponent {
 
     @Input({ required: true }) actions: TileActions;
 
-    onClick() {
-        if (this.actions?.leftClick) {
-            this.actions.leftClick(this.x, this.y);
-        }
-    }
-
     onRightClick(event: MouseEvent) {
         event.preventDefault();
         if (this.actions?.rightClick) {
             this.actions.rightClick(this.x, this.y);
         }
+    }
+
+    onMouseDown(event: MouseEvent) {
+        event.preventDefault();
+        if (event.button === 0 && this.actions?.dragStart) {
+            this.actions.dragStart('left');
+            if (this.actions?.leftClick) {
+                this.actions.leftClick(this.x, this.y);
+            }
+        } else if (event.button === 2 && this.actions?.dragStart) {
+            this.actions.dragStart('right');
+            if (this.actions?.rightClick) {
+                this.actions.rightClick(this.x, this.y);
+            }
+            if (this.actions?.rightClick) {
+                this.actions.rightClick(this.x, this.y);
+            }
+        }
+    }
+
+    onMouseUp(event: MouseEvent) {
+        event.preventDefault();
+        if (event.button === 0 && this.actions?.dragEnd) {
+            this.actions.dragEnd('left');
+        } else if (event.button === 2 && this.actions?.dragEnd) {
+            this.actions.dragEnd('right');
+        }
+    }
+
+    onMouseOver(event: MouseEvent) {
+        event.preventDefault();
+        this.actions?.dragPaint?.(this.x, this.y);
     }
 
     colorOf(kind: TileKind): string {

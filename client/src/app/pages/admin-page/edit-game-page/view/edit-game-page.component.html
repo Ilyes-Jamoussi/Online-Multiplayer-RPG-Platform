@@ -1,8 +1,9 @@
 <div class="page">
     <app-edit-game-toolbar [activeTool]="activeTool$ | async" (onSelectTool)="selectTool($event)"></app-edit-game-toolbar>
-
-    @if (grid$ | async; as grid) {
-    <div class="grid-wrapper" style="width: 850px; height: 850px;">
+    @if (inventory$ | async; as inventory) {
+    <app-editor-inventory [inventory]="inventory" (selectItem)="selectTool($event)"></app-editor-inventory>
+    } @if (grid$ | async; as grid) {
+    <div class="grid-wrapper" style="width: 850px; height: 850px">
         <div
             class="grid"
             [ngStyle]="{
@@ -11,9 +12,16 @@
             }"
         >
             @if (indices$ | async; as idxs) { @for (idx of idxs; track idx) {
-            <app-edit-game-tile [actions]="tileActions" [x]="getX(idx, grid.width)" [y]="getY(idx, grid.width)" [tile]="grid.tiles[idx]"></app-edit-game-tile>
+            <app-edit-game-tile
+                [actions]="tileActions"
+                [x]="getX(idx, grid.width)"
+                [y]="getY(idx, grid.width)"
+                [tile]="grid.tiles[idx]"
+            ></app-edit-game-tile>
             } }
         </div>
+
+        <div class="objects-overlay"></div>
     </div>
     }
 </div>

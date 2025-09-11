@@ -1,6 +1,6 @@
 <button class="uiButton2" [ngClass]="classes" [attr.type]="type" [disabled]="disabled || loading" (click)="handleClick($event)">
     <span class="btn-inner" [ngClass]="classes">
-        @if (leftIcon) { <app-ui-icon [iconName]="leftIcon" variant="secondary" class="btn-icon left"></app-ui-icon> }
+        @if (leftIcon) { <app-ui-icon [color]="color" [iconName]="leftIcon" variant="secondary" class="btn-icon left"></app-ui-icon> }
         <span class="btn-label"><ng-content></ng-content>{{ label }}</span>
         @if (rightIcon) { <app-ui-icon [iconName]="rightIcon" variant="secondary" class="btn-icon right"></app-ui-icon> }
     </span>

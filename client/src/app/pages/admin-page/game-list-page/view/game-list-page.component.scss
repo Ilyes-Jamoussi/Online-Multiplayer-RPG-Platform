@@ -1,0 +1,8 @@
+.game-cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 16px;
+}

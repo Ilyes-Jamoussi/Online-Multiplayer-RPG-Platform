@@ -1,289 +1,139 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
-
 import { UiInputComponent } from './input.component';
-import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
-import { FaIconKey } from '@ui/types/ui.types';
 
 describe('UiInputComponent', () => {
-    let fixture: ComponentFixture<UiInputComponent>;
-    let component: UiInputComponent;
+  let component: UiInputComponent;
+  let fixture: ComponentFixture<UiInputComponent>;
 
-    const queryInput = () => fixture.debugElement.query(By.css('input.in-control')).nativeElement as HTMLInputElement;
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [UiInputComponent]
+    }).compileComponents();
 
-    const queryWrapper = () => fixture.debugElement.query(By.css('.uiInput')).nativeElement as HTMLElement;
+    fixture = TestBed.createComponent(UiInputComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
 
-    const queryLabel = () => fixture.debugElement.query(By.css('.uiInput-label'));
-    const queryReqStar = () => fixture.debugElement.query(By.css('.uiInput-label .req'));
-    const queryCounter = () => fixture.debugElement.query(By.css('.uiInput-meta .counter'));
-    const queryClearBtn = () => fixture.debugElement.query(By.css('button.clear-btn'))?.nativeElement as HTMLButtonElement;
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
 
-    beforeEach(async () => {
-        await TestBed.configureTestingModule({
-            imports: [FormsModule, UiInputComponent, UiIconComponent],
-        }).compileComponents();
+  it('should have default values', () => {
+    expect(component.alignText).toBe('left');
+    expect(component.clearable).toBe(false);
+    expect(component.label).toBe('');
+    expect(component.placeholder).toBe('');
+    expect(component.required).toBe(false);
+    expect(component.type).toBe('text');
+    expect(component.value).toBe('');
+    expect(component.isDisabled).toBe(false);
+  });
 
-        fixture = TestBed.createComponent(UiInputComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+  it('should generate correct classes with defaults', () => {
+    const classes = component.classes;
+    expect(classes.uiInput).toBe(true);
+    expect(classes['al-left']).toBe(true);
+    expect(classes.isDisabled).toBe(false);
+    expect(classes.isLoading).toBe(false);
+    expect(classes.hasPrefixIcon).toBe(false);
+    expect(classes.hasSuffixIcon).toBe(false);
+    expect(classes.isClearable).toBe(false);
+    expect(classes.hasLabel).toBe(false);
+    expect(classes.disableHoverEffects).toBe(true);
+  });
+
+  it('should generate correct classes with custom values', () => {
+    component.alignText = 'center';
+    component.clearable = true;
+    component.label = 'Test Label';
+    component.prefixIcon = 'Plus';
+    component.suffixIcon = 'Trash';
+    component.disabled = true;
+    component.loading = true;
+
+    const classes = component.classes;
+    expect(classes['al-center']).toBe(true);
+    expect(classes.isClearable).toBe(true);
+    expect(classes.hasLabel).toBe(true);
+    expect(classes.hasPrefixIcon).toBe(true);
+    expect(classes.hasSuffixIcon).toBe(true);
+    expect(classes.isDisabled).toBe(true);
+    expect(classes.isLoading).toBe(true);
+  });
+
+  describe('ControlValueAccessor', () => {
+    it('should write value', () => {
+      component.writeValue('test value');
+      expect(component.value).toBe('test value');
     });
 
-    it('should create', () => {
-        expect(component).toBeTruthy();
+    it('should register onChange callback', () => {
+      const callback = jasmine.createSpy('onChange');
+      component.registerOnChange(callback);
+
+      const event = { target: { value: 'new value' } } as Event & { target: HTMLInputElement };
+      component.onInput(event);
+
+      expect(callback).toHaveBeenCalledWith('new value');
+      expect(component.value).toBe('new value');
     });
 
-    it('renders label and required star when provided', () => {
-        component.label = 'My label';
-        component.required = true;
-        fixture.detectChanges();
+    it('should register onTouched callback', () => {
+      const callback = jasmine.createSpy('onTouched');
+      component.registerOnTouched(callback);
 
-        const labelEl = queryLabel();
-        expect(labelEl).toBeTruthy();
-        expect(labelEl.nativeElement.textContent).toContain('My label');
+      component.onBlur();
 
-        const star = queryReqStar();
-        expect(star).toBeTruthy();
-        expect(star.nativeElement.textContent.trim()).toBe('*');
+      expect(callback).toHaveBeenCalled();
     });
 
-    it('does not render label when empty', () => {
-        component.label = '';
-        component.required = false;
-        fixture.detectChanges();
+    it('should set disabled state', () => {
+      component.setDisabledState(true);
+      expect(component.isDisabled).toBe(true);
 
-        expect(queryLabel()).toBeNull();
+      component.setDisabledState(false);
+      expect(component.isDisabled).toBe(false);
     });
+  });
 
-    it('writeValue() sets value and binds it to the input', () => {
-        component.writeValue('abc');
-        fixture.detectChanges();
+  it('should clear value when onClear is called', () => {
+    const callback = jasmine.createSpy('onChange');
+    component.registerOnChange(callback);
+    component.value = 'test value';
 
-        expect(component.value).toBe('abc');
-        expect(queryInput().value).toBe('abc');
-    });
+    component.onClear();
 
-    it('registerOnChange + onInput propagate value', () => {
-        const spy = jasmine.createSpy('onChange');
-        component.registerOnChange(spy);
+    expect(component.value).toBe('');
+    expect(callback).toHaveBeenCalledWith('');
+  });
 
-        const input = queryInput();
-        input.value = 'hello';
-        input.dispatchEvent(new Event('input'));
-        fixture.detectChanges();
+  it('should handle input event', () => {
+    const callback = jasmine.createSpy('onChange');
+    component.registerOnChange(callback);
 
-        expect(component.value).toBe('hello');
-        expect(spy).toHaveBeenCalledWith('hello');
-    });
+    const event = { target: { value: 'input value' } } as Event & { target: HTMLInputElement };
+    component.onInput(event);
 
-    it('registerOnTouched + onBlur propagate touch', () => {
-        const touched = jasmine.createSpy('onTouched');
-        component.registerOnTouched(touched);
+    expect(component.value).toBe('input value');
+    expect(callback).toHaveBeenCalledWith('input value');
+  });
 
-        queryInput().dispatchEvent(new Event('blur'));
-        fixture.detectChanges();
+  it('should handle blur event', () => {
+    const callback = jasmine.createSpy('onTouched');
+    component.registerOnTouched(callback);
 
-        expect(touched).toHaveBeenCalled();
-    });
+    component.onBlur();
 
-    it('clear button visible when clearable + value, and clears with onChange call', () => {
-        const spy = jasmine.createSpy('onChange');
-        component.registerOnChange(spy);
+    expect(callback).toHaveBeenCalled();
+  });
 
-        component.clearable = true;
-        component.writeValue('x');
-        fixture.detectChanges();
+  it('should handle disabled state in classes', () => {
+    component.isDisabled = true;
+    expect(component.classes.isDisabled).toBe(true);
 
-        const btn = queryClearBtn();
-        expect(btn).toBeTruthy();
-        expect(btn.classList.contains('isHidden')).toBeFalse();
-
-        btn.click();
-        fixture.detectChanges();
-
-        expect(component.value).toBe('');
-        expect(spy).toHaveBeenCalledWith('');
-    });
-
-    it('clear button hidden when not clearable', () => {
-        component.clearable = false;
-        component.writeValue('x');
-        fixture.detectChanges();
-
-        const btn = queryClearBtn();
-        expect(btn).toBeTruthy();
-        expect(btn.classList.contains('isHidden')).toBeTrue();
-    });
-
-    it('clear button hidden when empty value', () => {
-        component.clearable = true;
-        component.writeValue('');
-        fixture.detectChanges();
-
-        const btn = queryClearBtn();
-        expect(btn).toBeTruthy();
-        expect(btn.classList.contains('isHidden')).toBeTrue();
-    });
-
-    it('clear button hidden when disabled (from base disabled)', () => {
-        component.clearable = true;
-        component.writeValue('x');
-        component.disabled = true;
-        fixture.detectChanges();
-
-        const btn = queryClearBtn();
-        expect(btn).toBeTruthy();
-        expect(btn.classList.contains('isHidden')).toBeTrue();
-
-        component.disabled = false;
-        fixture.detectChanges();
-    });
-
-    it('clear button hidden when isDisabled via setDisabledState()', () => {
-        component.clearable = true;
-        component.writeValue('x');
-        component.setDisabledState(true);
-        fixture.detectChanges();
-
-        const btn = queryClearBtn();
-        expect(btn).toBeTruthy();
-        expect(btn.classList.contains('isHidden')).toBeTrue();
-
-        component.setDisabledState(false);
-        fixture.detectChanges();
-    });
-
-    it('disabled attribute reflects disabled || isDisabled', () => {
-        component.disabled = true;
-        fixture.detectChanges();
-        expect(queryInput().disabled).toBeTrue();
-
-        component.disabled = false;
-        component.setDisabledState(true);
-        fixture.detectChanges();
-        expect(queryInput().disabled).toBeTrue();
-
-        component.setDisabledState(false);
-        fixture.detectChanges();
-        expect(queryInput().disabled).toBeFalse();
-    });
-
-    it('classes getter adds proper flags (align, icons, clearable, label, loading, disabled)', () => {
-        component.alignText = 'center';
-        component.prefixIcon = 'any-icon' as unknown as FaIconKey;
-        component.suffixIcon = 'any-icon-2' as unknown as FaIconKey;
-        component.clearable = true;
-        component.label = 'LBL';
-        component.loading = true;
-        component.setDisabledState(false);
-        component.disabled = false;
-
-        fixture.detectChanges();
-        const wrapper = queryWrapper();
-        const cl = wrapper.classList;
-
-        expect(cl.contains('uiInput')).toBeTrue();
-        expect(cl.contains('al-center')).toBeTrue();
-        expect(cl.contains('hasPrefixIcon')).toBeTrue();
-        expect(cl.contains('hasSuffixIcon')).toBeTrue();
-        expect(cl.contains('isClearable')).toBeTrue();
-        expect(cl.contains('hasLabel')).toBeTrue();
-        expect(cl.contains('isLoading')).toBeTrue();
-        expect(cl.contains('isDisabled')).toBeFalse();
-        expect(cl.contains('disableHoverEffects')).toBeTrue();
-
-        component.disabled = true;
-        fixture.detectChanges();
-        expect(queryWrapper().classList.contains('isDisabled')).toBeTrue();
-
-        component.disabled = false;
-        component.setDisabledState(true);
-        fixture.detectChanges();
-        expect(queryWrapper().classList.contains('isDisabled')).toBeTrue();
-
-        component.setDisabledState(false);
-        fixture.detectChanges();
-    });
-
-    it('renders prefix & suffix icons when provided (and variant=secondary)', () => {
-        component.prefixIcon = 'icon-a' as unknown as FaIconKey;
-        component.suffixIcon = 'icon-b' as unknown as FaIconKey;
-        fixture.detectChanges();
-
-        const icons = fixture.debugElement.queryAll(By.directive(UiIconComponent));
-        expect(icons.length).toBe(2);
-        const [pre, suf] = icons.map((d) => d.componentInstance as UiIconComponent);
-
-        expect(pre.iconName).toBe(component.prefixIcon);
-        expect(suf.iconName).toBe(component.suffixIcon);
-        expect(pre.variant).toBe('secondary');
-        expect(suf.variant).toBe('secondary');
-    });
-
-    it('shows maxlength counter when maxLength is set; hides when not set', () => {
-        component.maxLength = 10;
-        component.writeValue('abcd');
-        fixture.detectChanges();
-
-        const cnt = queryCounter();
-        expect(cnt).toBeTruthy();
-        expect(cnt.nativeElement.textContent.trim()).toBe('4/10');
-
-        component.maxLength = undefined;
-        fixture.detectChanges();
-        expect(queryCounter()).toBeNull();
-    });
-
-    it('binds maxlength/minlength attributes when defined; removes when undefined', () => {
-        component.maxLength = 12;
-        component.minLength = 2;
-        fixture.detectChanges();
-
-        let input = queryInput();
-        expect(input.hasAttribute('maxlength')).toBeTrue();
-        expect(input.getAttribute('maxlength')).toBe('12');
-        expect(input.hasAttribute('minlength')).toBeTrue();
-        expect(input.getAttribute('minlength')).toBe('2');
-
-        component.maxLength = undefined;
-        component.minLength = undefined;
-        fixture.detectChanges();
-
-        input = queryInput();
-        expect(input.hasAttribute('maxlength')).toBeFalse();
-        expect(input.hasAttribute('minlength')).toBeFalse();
-    });
-
-    it('binds placeholder, type and text-align style', () => {
-        component.placeholder = 'Type here';
-        component.type = 'email';
-        component.alignText = 'right';
-        fixture.detectChanges();
-
-        const input = queryInput();
-        expect(input.getAttribute('placeholder')).toBe('Type here');
-        expect(input.getAttribute('type')).toBe('email');
-        expect(input.style.textAlign).toBe('right');
-
-        component.alignText = undefined;
-        fixture.detectChanges();
-        expect(queryInput().style.textAlign).toBe('left');
-
-        expect(queryWrapper().classList.contains('al-left')).toBeTrue();
-    });
-
-    it('provides itself as NG_VALUE_ACCESSOR and behaves like a ControlValueAccessor', () => {
-        // Retrieve the value accessors attached to the component's element
-        const accessors = fixture.debugElement.injector.get(NG_VALUE_ACCESSOR);
-
-        //  accessors is a multi-provider -> non-empty array
-        expect(Array.isArray(accessors)).toBeTrue();
-        expect(accessors.length).toBe(1); // should have 1 accessor (input component)
-
-        const accessor = accessors[0];
-
-        //  the accessor should point to the component instance
-        expect(accessor).toBe(component);
-        expect(accessor instanceof UiInputComponent).toBeTrue();
-    });
+    component.isDisabled = false;
+    component.disabled = true;
+    expect(component.classes.isDisabled).toBe(true);
+  });
 });

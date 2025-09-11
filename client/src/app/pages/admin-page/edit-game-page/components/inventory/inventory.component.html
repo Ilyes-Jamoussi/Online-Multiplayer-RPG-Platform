@@ -1,0 +1,44 @@
+<div class="inventory-container">
+    <h3 class="inventory-title">Inventaire</h3>
+    <div class="inventory-items">
+        <div class="inventory-item" [class.disabled]="!isItemAvailable(placeableKind.START)" (click)="onSelect(placeableKind.START)">
+            <div class="item-icon start">🏁</div>
+            <div class="item-info">
+                <div class="item-name">Point de départ</div>
+                <div class="item-count">{{ inventory.available[placeableKind.START] }} restant(s)</div>
+            </div>
+        </div>
+
+        <div class="inventory-item" [class.disabled]="!isItemAvailable(placeableKind.FLAG)" (click)="onSelect(placeableKind.FLAG)">
+            <div class="item-icon flag">🚩</div>
+            <div class="item-info">
+                <div class="item-name">Drapeau</div>
+                <div class="item-count">{{ inventory.available[placeableKind.FLAG] }} restant(s)</div>
+            </div>
+        </div>
+
+        <div class="inventory-item" [class.disabled]="!isItemAvailable(placeableKind.HEAL)" (click)="onSelect(placeableKind.HEAL)">
+            <div class="item-icon heal">🏥</div>
+            <div class="item-info">
+                <div class="item-name">Sanctuaire</div>
+                <div class="item-count">{{ inventory.available[placeableKind.HEAL] }} restant(s)</div>
+            </div>
+        </div>
+
+        <div class="inventory-item" [class.disabled]="!isItemAvailable(placeableKind.FIGHT)" (click)="onSelect(placeableKind.FIGHT)">
+            <div class="item-icon fight">⚔️</div>
+            <div class="item-info">
+                <div class="item-name">Zone de combat</div>
+                <div class="item-count">{{ inventory.available[placeableKind.FIGHT] }} restant(s)</div>
+            </div>
+        </div>
+
+        <div class="inventory-item" [class.disabled]="!isItemAvailable(placeableKind.BOAT)" (click)="onSelect(placeableKind.BOAT)">
+            <div class="item-icon boat">🚢</div>
+            <div class="item-info">
+                <div class="item-name">Bateau</div>
+                <div class="item-count">{{ inventory.available[placeableKind.BOAT] }} restant(s)</div>
+            </div>
+        </div>
+    </div>
+</div>
