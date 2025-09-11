@@ -4,15 +4,15 @@
             <img src="assets/images/logo.png" alt="Game Logo" class="game-logo-modern" />
         </div>
         <div class="menu-buttons-modern">
-            <app-ui-link-button size="lg" icon="group" [fullWidth]="true" [variant]="'secondary'" [disabled]="true">
+            <app-ui-button size="lg" [disabled]="true" variant="secondary">
                 Rejoindre une partie (Bientôt disponible)
-            </app-ui-link-button>
-            <app-ui-link-button size="lg" icon="add" [fullWidth]="true" (click)="navigateToCreateGame()" [variant]="'primary'">
+            </app-ui-button>
+            <app-ui-button size="lg" (buttonClick)="navigateToCreateGame()" variant="primary">
                 Créer une partie
-            </app-ui-link-button>
-            <app-ui-link-button size="lg" icon="admin_panel_settings" [fullWidth]="true" (click)="navigateToAdminPage()" [variant]="'primary'">
+            </app-ui-button>
+            <app-ui-button size="lg" (buttonClick)="navigateToAdminPage()" variant="primary">
                 Administrer les jeux
-            </app-ui-link-button>
+            </app-ui-button>
         </div>
     </div>
     <div class="home-right">
@@ -20,8 +20,8 @@
             <h2 class="team-title-modern">Crédits : équipe {{ teamInfo.teamNumber }}</h2>
             <div class="members-list-modern">
                 @for (member of teamInfo.members; track member) {
-                <app-ui-card size="lg" [popOut]="true" alignContent="left" variant="secondary" [fullWidth]="true">
-                    <app-ui-card-title [iconRight]="true" icon="Code">{{ member }}</app-ui-card-title>
+                <app-ui-card size="lg" variant="secondary">
+                    <app-ui-card-title>{{ member }}</app-ui-card-title>
                     <app-ui-card-content>
                         <p>Role: Developer</p>
                     </app-ui-card-content>
