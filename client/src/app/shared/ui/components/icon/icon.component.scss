@@ -17,10 +17,6 @@
     font-feature-settings: 'liga';
     -webkit-font-smoothing: antialiased;
 
-    // Default styling
-    color: $ui-black;
-    font-size: ui-size(md, icon-size);
-
     // Apply all variant systems
     @include ui-disabled-state;
     @include ui-contrast-colors;

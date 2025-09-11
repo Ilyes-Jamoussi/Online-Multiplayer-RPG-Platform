@@ -1,0 +1,48 @@
+@use 'theme2' as *;
+
+.uiButton2 {
+    @include ui-full-component;
+    @include ui-font-pack;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
+    text-decoration: none;
+    cursor: pointer;
+
+    &.isDisabled {
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .btn-inner {
+        @include ui-gap-variants(gap);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .btn-label {
+        display: inline-block;
+    }
+
+    .btn-icon {
+        @include ui-color-utilities;
+        font-size: 1.1em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        &.left {
+            margin-right: ui-gap(xs);
+        }
+
+        &.right {
+            margin-left: ui-gap(xs);
+        }
+    }
+}

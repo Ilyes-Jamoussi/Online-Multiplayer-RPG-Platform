@@ -42,14 +42,14 @@ export abstract class UiBaseComponent {
      */
     get classes(): Record<string, boolean> {
         return {
-            [`v-${this.variant}`]: true,
-            [`s-${this.size}`]: true,
-            [`sh-${this.shape}`]: true,
+            [`v-${this.variant || 'primary'}`]: true,
+            [`s-${this.size || 'md'}`]: true,
+            [`sh-${this.shape || 'rounded'}`]: true,
             isDisabled: this.disabled,
             isFull: this.fullWidth,
-            [`al-${this.alignContent}`]: true,
-            [`gap-${this.gap}`]: true,
-            [`elev-${this.elevation}`]: true,
+            [`al-${this.alignContent || 'center'}`]: true,
+            [`gap-${this.gap || 'sm'}`]: true,
+            [`elev-${this.elevation || 'xs'}`]: true,
             popOut: this.popOut,
             disableHoverEffects: false,
         };

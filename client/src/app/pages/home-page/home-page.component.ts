@@ -5,13 +5,12 @@ import { Router } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
 import { UiCardContentComponent, UiCardTitleComponent } from '@app/shared/ui/components/card/card-sections.component';
 import { UiCardComponent } from '@app/shared/ui/components/card/card.component';
-import { UiLinkButtonComponent } from '@ui/components/button/link-button.component';
 
 @Component({
     selector: 'app-home-page',
     templateUrl: './home-page.component.html',
     styleUrls: ['./home-page.component.scss'],
-    imports: [UiLinkButtonComponent, CommonModule, FormsModule, UiLinkButtonComponent, UiCardComponent, UiCardTitleComponent, UiCardContentComponent],
+    imports: [CommonModule, FormsModule, UiCardComponent, UiCardTitleComponent, UiCardContentComponent, UiLinkButtonComponent2],
     standalone: true,
 })
 export class HomePageComponent {

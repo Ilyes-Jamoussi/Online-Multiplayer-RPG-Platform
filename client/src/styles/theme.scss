@@ -72,19 +72,19 @@ $ui-gaps: (
 $ui-sizes: (
     sm: (
         padding: 0.5rem 1rem,
-        font-size: 0.65rem,
+        font-size: 0.75rem,
         height: 2rem,
         icon-size: 1rem,
     ),
     md: (
         padding: 0.75rem 1.25rem,
-        font-size: 0.75rem,
+        font-size: 0.85rem,
         height: 2.5rem,
         icon-size: 1.25rem,
     ),
     lg: (
         padding: 1rem 1.75rem,
-        font-size: 0.85rem,
+        font-size: 1rem,
         height: 3rem,
         icon-size: 1.5rem,
     ),
@@ -322,4 +322,21 @@ $ui-opacities: (
             color: $color !important;
         }
     }
+}
+
+// a mixin that applies all of the above mixins for a full featured component
+@mixin ui-full-component($use-background: true, $gap-property: gap) {
+    @include ui-component-base;
+    @include ui-disabled-state;
+    @include ui-popout-effects;
+    @include ui-active-effects;
+    @include ui-hover-brightness;
+    @include ui-focus-state;
+    @include ui-variant-colors($use-background);
+    @include ui-size-variants;
+    @include ui-shape-variants;
+    @include ui-elevation-variants;
+    @include ui-alignment-variants;
+    @include ui-gap-variants($gap-property);
+    @include ui-contrast-colors;
 }

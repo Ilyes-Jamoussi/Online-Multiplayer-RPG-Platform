@@ -71,10 +71,10 @@ describe('UiInputComponent', () => {
     it('should register onChange callback', () => {
       const callback = jasmine.createSpy('onChange');
       component.registerOnChange(callback);
-      
+
       const event = { target: { value: 'new value' } } as Event & { target: HTMLInputElement };
       component.onInput(event);
-      
+
       expect(callback).toHaveBeenCalledWith('new value');
       expect(component.value).toBe('new value');
     });
@@ -82,16 +82,16 @@ describe('UiInputComponent', () => {
     it('should register onTouched callback', () => {
       const callback = jasmine.createSpy('onTouched');
       component.registerOnTouched(callback);
-      
+
       component.onBlur();
-      
+
       expect(callback).toHaveBeenCalled();
     });
 
     it('should set disabled state', () => {
       component.setDisabledState(true);
       expect(component.isDisabled).toBe(true);
-      
+
       component.setDisabledState(false);
       expect(component.isDisabled).toBe(false);
     });
@@ -101,9 +101,9 @@ describe('UiInputComponent', () => {
     const callback = jasmine.createSpy('onChange');
     component.registerOnChange(callback);
     component.value = 'test value';
-    
+
     component.onClear();
-    
+
     expect(component.value).toBe('');
     expect(callback).toHaveBeenCalledWith('');
   });
@@ -111,10 +111,10 @@ describe('UiInputComponent', () => {
   it('should handle input event', () => {
     const callback = jasmine.createSpy('onChange');
     component.registerOnChange(callback);
-    
+
     const event = { target: { value: 'input value' } } as Event & { target: HTMLInputElement };
     component.onInput(event);
-    
+
     expect(component.value).toBe('input value');
     expect(callback).toHaveBeenCalledWith('input value');
   });
@@ -122,16 +122,16 @@ describe('UiInputComponent', () => {
   it('should handle blur event', () => {
     const callback = jasmine.createSpy('onTouched');
     component.registerOnTouched(callback);
-    
+
     component.onBlur();
-    
+
     expect(callback).toHaveBeenCalled();
   });
 
   it('should handle disabled state in classes', () => {
     component.isDisabled = true;
     expect(component.classes.isDisabled).toBe(true);
-    
+
     component.isDisabled = false;
     component.disabled = true;
     expect(component.classes.isDisabled).toBe(true);

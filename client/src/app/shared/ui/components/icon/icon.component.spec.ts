@@ -52,7 +52,7 @@ describe('UiIconComponent', () => {
   it('should update icon value when icon name changes', () => {
     component.iconName = 'Delete';
     expect(component.iconValue).toBe(MaterialIcon.Delete);
-    
+
     component.iconName = 'Edit';
     expect(component.iconValue).toBe(MaterialIcon.Edit);
   });
