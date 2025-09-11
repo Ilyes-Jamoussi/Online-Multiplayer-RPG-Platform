@@ -3,7 +3,7 @@
     <div class="list">
         @for (b of brushes; track b.emoji ){
         <app-ui-tooltip position="right" distance="md" [text]="b.tool.type === 'TILE_BRUSH' ? 'Tuile: ' + b.tool.tile.kind : b.tool.type">
-            <button [class.selected]="isBrushSelected(b)" class="tool-btn base" (click)="select(b)">{{ b.emoji }}</button>
+            <button [class.selected]="isBrushSelected(b)" class="tool-btn {{ b.class }}" (click)="select(b)">{{ b.emoji }}</button>
         </app-ui-tooltip>
         }
     </div>

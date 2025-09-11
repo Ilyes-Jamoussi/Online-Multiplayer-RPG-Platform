@@ -6,6 +6,7 @@ import { UiTooltipComponent } from '@app/shared/ui/components/tooltip/tooltip.co
 interface BrushItem {
     emoji: string;
     tool: ActiveTool;
+    class: string;
 }
 
 @Component({
@@ -15,19 +16,19 @@ interface BrushItem {
     styleUrls: ['./edit-game-toolbar.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [GameEditorService],
-    imports: [UiTooltipComponent]
+    imports: [UiTooltipComponent],
 })
 export class EditGameToolbarComponent {
     @Input() activeTool: ActiveTool | null = null;
     @Output() onSelectTool = new EventEmitter<ActiveTool>();
 
     brushes: BrushItem[] = [
-        { emoji: '🟩', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.BASE } } },
-        { emoji: '🟫', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.WALL } } },
-        { emoji: '🚪', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.DOOR, open: false } } },
-        { emoji: '💧', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.WATER } } },
-        { emoji: '❄️', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.ICE } } },
-        { emoji: '🔮', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.TELEPORT, pairId: 'PENDING', endpoint: 'A' } } },
+        { emoji: '🟩', class: 'base', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.BASE } } },
+        { emoji: '🟫', class: 'wall', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.WALL } } },
+        { emoji: '🚪', class: 'door', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.DOOR, open: false } } },
+        { emoji: '💧', class: 'water', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.WATER } } },
+        { emoji: '❄️', class: 'ice', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.ICE } } },
+        { emoji: '🔮', class: 'start', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.TELEPORT, pairId: 'PENDING', endpoint: 'A' } } },
     ];
 
     get selectedBrush(): BrushItem {
