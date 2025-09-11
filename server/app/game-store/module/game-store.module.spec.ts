@@ -1,14 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongooseModule } from '@nestjs/mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import { GameStoreModule } from './game-store.module';
 
 describe('GameStoreModule', () => {
     let module: TestingModule;
+    let mongoServer: MongoMemoryServer;
 
     beforeEach(async () => {
+        mongoServer = await MongoMemoryServer.create();
+        const mongoUri = mongoServer.getUri();
+
         module = await Test.createTestingModule({
             imports: [
-                MongooseModule.forRoot('mongodb://localhost/test'),
+                MongooseModule.forRoot(mongoUri),
                 GameStoreModule,
             ],
         }).compile();
@@ -19,6 +24,11 @@ describe('GameStoreModule', () => {
     });
 
     afterEach(async () => {
-        await module.close();
+        if (module) {
+            await module.close();
+        }
+        if (mongoServer) {
+            await mongoServer.stop();
+        }
     });
 });
