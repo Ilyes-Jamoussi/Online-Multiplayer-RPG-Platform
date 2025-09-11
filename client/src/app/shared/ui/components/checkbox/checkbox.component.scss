@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'theme' as *;
 
 // ==================== CHECKBOX COMPONENT ====================
@@ -63,7 +64,7 @@
     // Checked state styling
     &.isChecked .checkbox-box {
         background: ui-color(primary);
-        border-color: darken(ui-color(primary), 10%);
+        border-color: color.adjust(ui-color(primary), $lightness: -10%);
     }
 
     // Apply consistent states
@@ -90,7 +91,7 @@
     @each $name, $color in $ui-colors {
         &.v-#{$name}.isChecked .checkbox-box {
             background: $color;
-            border-color: darken($color, 10%);
+            border-color: color.adjust($color, $lightness: -10%);
 
             .checkbox-indicator {
                 color: ui-contrast($name);

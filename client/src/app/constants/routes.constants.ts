@@ -1,6 +1,8 @@
 export const ROUTES = {
     home: 'home',
-    createGamePage: 'create--game-page',
-    adminPage: 'admin-page',
-    testCreateGame: 'test-create-game',
+    gameParameters: 'game-parameters',
+    gameEditor: 'game-editor',
+    gameSessionCreation: 'game-session-creation',
+    gameManagement: 'game-management',
+    characterCreation: 'character-creation',
 };

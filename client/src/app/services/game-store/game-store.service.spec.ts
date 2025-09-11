@@ -1,153 +1,171 @@
 import { TestBed } from '@angular/core/testing';
+import { CreateGameDto, GamePreviewDto, UpdateGameDto } from '@app/api/model/models';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { GameStoreSocketService } from '@app/services/game-store-socket/game-store-socket.service';
-import { CreateGameDto } from '@common/dto/game-store/create-game.dto';
-import { DisplayGameDto } from '@common/dto/game-store/display-game.dto';
-import { UpdateGameDto } from '@common/dto/game-store/update-game.dto';
-import { MapSize } from '@common/enums/map-size.enum';
 import { of } from 'rxjs';
 import { GameStoreService } from './game-store.service';
 
 describe('GameStoreService', () => {
     let service: GameStoreService;
-    let httpServiceSpy: jasmine.SpyObj<GameHttpService>;
-    let socketServiceSpy: jasmine.SpyObj<GameStoreSocketService>;
+    let gameHttpServiceSpy: jasmine.SpyObj<GameHttpService>;
+    let gameStoreSocketServiceSpy: jasmine.SpyObj<GameStoreSocketService>;
 
-    const mockGame: DisplayGameDto = {
-        id: '1',
-        name: 'Test Game',
-        description: 'Test Description',
-        size: MapSize.Small,
-        mapPreviewImageUrl: 'preview.jpg',
-        lastModified: new Date(),
-        visibility: true,
-    };
+    const mockGames: GamePreviewDto[] = [
+        { id: '1', name: 'Game 1', description: 'Desc 1', size: 10, mode: 'classic', lastModified: '2023-01-01', visibility: true },
+        { id: '2', name: 'Game 2', description: 'Desc 2', size: 15, mode: 'classic', lastModified: '2023-01-02', visibility: false },
+    ];
 
     beforeEach(() => {
-        const httpSpy = jasmine.createSpyObj('GameHttpService', ['getGamesDisplay', 'createGame', 'updateGame', 'deleteGame', 'toggleVisibility']);
-        const socketSpy = jasmine.createSpyObj('GameStoreSocketService', [
-            'onGameCreated',
-            'onGameUpdated',
-            'onGameDeleted',
-            'onGameVisibilityToggled',
+        const gameHttpSpy = jasmine.createSpyObj('GameHttpService', [
+            'getGamesDisplay', 'createGame', 'updateGame', 'deleteGame', 'toggleVisibility'
+        ]);
+        const gameStoreSocketSpy = jasmine.createSpyObj('GameStoreSocketService', [
+            'onGameCreated', 'onGameUpdated', 'onGameDeleted', 'onGameVisibilityToggled'
         ]);
 
         TestBed.configureTestingModule({
-            providers: [GameStoreService, { provide: GameHttpService, useValue: httpSpy }, { provide: GameStoreSocketService, useValue: socketSpy }],
+            providers: [
+                { provide: GameHttpService, useValue: gameHttpSpy },
+                { provide: GameStoreSocketService, useValue: gameStoreSocketSpy }
+            ]
         });
 
         service = TestBed.inject(GameStoreService);
-        httpServiceSpy = TestBed.inject(GameHttpService) as jasmine.SpyObj<GameHttpService>;
-        socketServiceSpy = TestBed.inject(GameStoreSocketService) as jasmine.SpyObj<GameStoreSocketService>;
+        gameHttpServiceSpy = TestBed.inject(GameHttpService) as jasmine.SpyObj<GameHttpService>;
+        gameStoreSocketServiceSpy = TestBed.inject(GameStoreSocketService) as jasmine.SpyObj<GameStoreSocketService>;
     });
 
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
 
-    it('should initialize listeners on construction', () => {
-        expect(socketServiceSpy.onGameCreated).toHaveBeenCalled();
-        expect(socketServiceSpy.onGameUpdated).toHaveBeenCalled();
-        expect(socketServiceSpy.onGameDeleted).toHaveBeenCalled();
-        expect(socketServiceSpy.onGameVisibilityToggled).toHaveBeenCalled();
+    it('should initialize socket listeners on construction', () => {
+        expect(gameStoreSocketServiceSpy.onGameCreated).toHaveBeenCalled();
+        expect(gameStoreSocketServiceSpy.onGameUpdated).toHaveBeenCalled();
+        expect(gameStoreSocketServiceSpy.onGameDeleted).toHaveBeenCalled();
+        expect(gameStoreSocketServiceSpy.onGameVisibilityToggled).toHaveBeenCalled();
     });
 
-    it('should load games', (done) => {
-        const games: DisplayGameDto[] = [mockGame];
-        httpServiceSpy.getGamesDisplay.and.returnValue(of(games));
-
-        service.loadGames().subscribe(() => {
-            expect(service.gameDisplays()).toEqual(games);
-            done();
+    describe('gameDisplays', () => {
+        it('should return readonly signal of game displays', () => {
+            const gameDisplays = service.gameDisplays;
+            expect(gameDisplays()).toEqual([]);
         });
     });
 
-    it('should create a game', (done) => {
-        const createDto: CreateGameDto = {
-            name: 'New Game',
-            description: 'New Game Description',
-            size: MapSize.Small,
-            map: [],
-            items: [],
-            mapPreviewImage: 'preview.jpg',
-        };
-
-        httpServiceSpy.createGame.and.returnValue(of(void 0));
-
-        service.createGame(createDto).subscribe(() => {
-            expect(httpServiceSpy.createGame).toHaveBeenCalledWith(createDto);
-            done();
+    describe('visibleGames', () => {
+        it('should return only visible games', () => {
+            gameHttpServiceSpy.getGamesDisplay.and.returnValue(of(mockGames));
+            
+            service.loadGames().subscribe();
+            
+            const visibleGames = service.visibleGames();
+            expect(visibleGames).toEqual([mockGames[0]]);
         });
     });
 
-    it('should update a game', (done) => {
-        const updateDto: UpdateGameDto = {
-            name: 'Updated Game',
-            description: 'Updated Description',
-            map: [],
-            items: [],
-            mapPreviewImage: 'updated-preview.jpg',
-        };
+    describe('loadGames', () => {
+        it('should load games and update signal', () => {
+            gameHttpServiceSpy.getGamesDisplay.and.returnValue(of(mockGames));
 
-        httpServiceSpy.updateGame.and.returnValue(of(void 0));
+            service.loadGames().subscribe();
 
-        service.updateGame('1', updateDto).subscribe(() => {
-            expect(httpServiceSpy.updateGame).toHaveBeenCalledWith('1', updateDto);
-            done();
+            expect(gameHttpServiceSpy.getGamesDisplay).toHaveBeenCalled();
+            expect(service.gameDisplays()).toEqual(mockGames);
         });
     });
 
-    it('should delete a game', (done) => {
-        httpServiceSpy.deleteGame.and.returnValue(of(void 0));
+    describe('createGame', () => {
+        it('should call gameHttpService.createGame', () => {
+            const createDto: CreateGameDto = { name: 'New Game', description: 'New Desc', size: 10, mode: 'classic' };
+            gameHttpServiceSpy.createGame.and.returnValue(of(undefined));
 
-        service.deleteGame('1').subscribe(() => {
-            expect(httpServiceSpy.deleteGame).toHaveBeenCalledWith('1');
-            done();
+            service.createGame(createDto).subscribe();
+
+            expect(gameHttpServiceSpy.createGame).toHaveBeenCalledWith(createDto);
         });
     });
 
-    it('should toggle game visibility', (done) => {
-        service['_gameDisplays'].set([mockGame]);
-        httpServiceSpy.toggleVisibility.and.returnValue(of(void 0));
+    describe('updateGame', () => {
+        it('should call gameHttpService.updateGame', () => {
+            const updateDto: UpdateGameDto = { name: 'Updated Game', description: 'Updated Desc' };
+            gameHttpServiceSpy.updateGame.and.returnValue(of(undefined));
 
-        service.toggleGameVisibility('1').subscribe(() => {
-            expect(httpServiceSpy.toggleVisibility).toHaveBeenCalledWith('1', { visibility: false });
-            done();
+            service.updateGame('1', updateDto).subscribe();
+
+            expect(gameHttpServiceSpy.updateGame).toHaveBeenCalledWith('1', updateDto);
         });
     });
 
-    it('should throw error when toggling visibility of non-existent game', () => {
-        service['_gameDisplays'].set([]);
-        expect(() => service.toggleGameVisibility('1')).toThrowError('Game not found');
+    describe('deleteGame', () => {
+        it('should call gameHttpService.deleteGame', () => {
+            gameHttpServiceSpy.deleteGame.and.returnValue(of(undefined));
+
+            service.deleteGame('1').subscribe();
+
+            expect(gameHttpServiceSpy.deleteGame).toHaveBeenCalledWith('1');
+        });
     });
 
-    it('should return visible games only', () => {
-        const games: DisplayGameDto[] = [
-            { ...mockGame, visibility: true },
-            { ...mockGame, id: '2', visibility: false },
-        ];
-        service['_gameDisplays'].set(games);
-        expect(service.visibleGames().length).toBe(1);
-        expect(service.visibleGames()[0].id).toBe('1');
+    describe('toggleGameVisibility', () => {
+        beforeEach(() => {
+            gameHttpServiceSpy.getGamesDisplay.and.returnValue(of(mockGames));
+            service.loadGames().subscribe();
+        });
+
+        it('should toggle visibility of existing game', () => {
+            gameHttpServiceSpy.toggleVisibility.and.returnValue(of(undefined));
+
+            service.toggleGameVisibility('1').subscribe();
+
+            expect(gameHttpServiceSpy.toggleVisibility).toHaveBeenCalledWith('1', { visibility: false });
+        });
+
+        it('should throw error if game not found', () => {
+            expect(() => service.toggleGameVisibility('999')).toThrowError('Game not found');
+        });
     });
 
-    it('should handle socket events correctly', () => {
-        // Test game created
-        socketServiceSpy.onGameCreated.and.callFake((callback) => callback(mockGame));
-        expect(service.gameDisplays().length).toBe(1);
+    describe('socket event handlers', () => {
+        beforeEach(() => {
+            gameHttpServiceSpy.getGamesDisplay.and.returnValue(of(mockGames));
+            service.loadGames().subscribe();
+        });
 
-        // Test game updated
-        const updatedGame = { ...mockGame, name: 'Updated' };
-        socketServiceSpy.onGameUpdated.and.callFake((callback) => callback(updatedGame));
-        expect(service.gameDisplays()[0].name).toBe('Updated');
+        it('should handle game created event', () => {
+            const newGame: GamePreviewDto = {
+                id: '3', name: 'Game 3', description: 'Desc 3', size: 20, mode: 'classic', lastModified: '2023-01-03', visibility: true
+            };
+            const callback = gameStoreSocketServiceSpy.onGameCreated.calls.argsFor(0)[0];
 
-        // Test game deleted
-        socketServiceSpy.onGameDeleted.and.callFake((callback) => callback({ id: '1' }));
-        expect(service.gameDisplays().length).toBe(0);
+            callback(newGame);
 
-        // Test visibility toggled
-        service['_gameDisplays'].set([mockGame]);
-        socketServiceSpy.onGameVisibilityToggled.and.callFake((callback) => callback({ id: '1' }));
-        expect(service.gameDisplays()[0].visibility).toBe(false);
+            expect(service.gameDisplays()).toContain(newGame);
+        });
+
+        it('should handle game updated event', () => {
+            const updatedGame: GamePreviewDto = { ...mockGames[0], name: 'Updated Game 1' };
+            const callback = gameStoreSocketServiceSpy.onGameUpdated.calls.argsFor(0)[0];
+
+            callback(updatedGame);
+
+            expect(service.gameDisplays()[0].name).toBe('Updated Game 1');
+        });
+
+        it('should handle game deleted event', () => {
+            const callback = gameStoreSocketServiceSpy.onGameDeleted.calls.argsFor(0)[0];
+
+            callback({ id: '1' });
+
+            expect(service.gameDisplays().find(g => g.id === '1')).toBeUndefined();
+        });
+
+        it('should handle game visibility toggled event', () => {
+            const callback = gameStoreSocketServiceSpy.onGameVisibilityToggled.calls.argsFor(0)[0];
+
+            callback({ id: '1' });
+
+            expect(service.gameDisplays()[0].visibility).toBe(false);
+        });
     });
 });

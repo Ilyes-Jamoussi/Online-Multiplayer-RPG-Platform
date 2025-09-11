@@ -4,17 +4,14 @@
             <img src="assets/images/logo.png" alt="Game Logo" class="game-logo-modern" />
         </div>
         <div class="menu-buttons-modern">
-            <app-ui-link-button size="lg" icon="group" [fullWidth]="true" [routerLink]="'/join-game-page'" [variant]="'secondary'" [disabled]="true">
+            <app-ui-link-button size="lg" icon="group" [fullWidth]="true" [variant]="'secondary'" [disabled]="true">
                 Rejoindre une partie (Bientôt disponible)
             </app-ui-link-button>
-            <app-ui-link-button size="lg" icon="add" [fullWidth]="true" [routerLink]="'/create--game-page'" [variant]="'primary'">
+            <app-ui-link-button size="lg" icon="add" [fullWidth]="true" (click)="navigateToCreateGame()" [variant]="'primary'">
                 Créer une partie
             </app-ui-link-button>
-            <app-ui-link-button size="lg" icon="admin_panel_settings" [fullWidth]="true" [routerLink]="'/admin-page'" [variant]="'primary'">
+            <app-ui-link-button size="lg" icon="admin_panel_settings" [fullWidth]="true" (click)="navigateToAdminPage()" [variant]="'primary'">
                 Administrer les jeux
-            </app-ui-link-button>
-            <app-ui-link-button size="sm" icon="bug_report" [fullWidth]="true" [routerLink]="'/test-create-game'" [variant]="'secondary'">
-                Test - Créer Jeu
             </app-ui-link-button>
         </div>
     </div>

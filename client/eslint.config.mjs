@@ -8,6 +8,9 @@ import baseConfig from '../eslint.config.basic.mjs';
 export default [
     ...baseConfig(tsParser, tsPlugin),
     {
+        ignores: ['src/app/api/**/*'],
+    },
+    {
         files: ['**/*.ts'],
         plugins: {
             '@angular-eslint': angular,

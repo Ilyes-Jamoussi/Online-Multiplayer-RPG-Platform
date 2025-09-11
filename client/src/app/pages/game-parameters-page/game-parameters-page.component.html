@@ -1,0 +1,61 @@
+<div class="game-parameters-container">
+  <div class="parameters-card">
+    <header class="card-header">
+      <h1>Configuration de la partie</h1>
+      <p>Choisissez les paramètres de votre jeu</p>
+    </header>
+
+    <div class="parameters-content">
+      <!-- Sélection de la taille de carte -->
+      <section class="parameter-section">
+        <h2>Taille de la carte</h2>
+        <div class="options-grid">
+          @for (option of mapSizeOptions; track option.value) {
+            <label class="option-card" [class.selected]="selectedMapSize === option.value">
+              <input 
+                type="radio" 
+                name="mapSize" 
+                [value]="option.value" 
+                [(ngModel)]="selectedMapSize"
+              >
+              <div class="option-content">
+                <h3>{{ option.label }}</h3>
+                <p>{{ option.maxPlayers }} joueurs max</p>
+              </div>
+            </label>
+          }
+        </div>
+      </section>
+
+      <!-- Sélection du mode de jeu -->
+      <section class="parameter-section">
+        <h2>Mode de jeu</h2>
+        <div class="options-grid">
+          @for (option of gameModeOptions; track option.value) {
+            <label class="option-card" [class.selected]="selectedGameMode === option.value">
+              <input 
+                type="radio" 
+                name="gameMode" 
+                [value]="option.value" 
+                [(ngModel)]="selectedGameMode"
+              >
+              <div class="option-content">
+                <h3>{{ option.label }}</h3>
+                <p>{{ option.description }}</p>
+              </div>
+            </label>
+          }
+        </div>
+      </section>
+    </div>
+
+    <footer class="card-footer">
+      <button type="button" class="btn btn-secondary" (click)="onBack()">
+        Retour
+      </button>
+      <button type="button" class="btn btn-primary" (click)="onContinue()">
+        Continuer
+      </button>
+    </footer>
+  </div>
+</div>

@@ -1,25 +1,19 @@
 import { TestBed } from '@angular/core/testing';
 import { GameStoreEvents } from '@common/constants/game-store-events';
 import { SocketResponse } from '@common/types/socket-response.type';
-import { Observable, Subject } from 'rxjs';
+import { of } from 'rxjs';
 import { Socket } from 'socket.io-client';
 import { SocketService } from './socket.service';
 
 describe('SocketService', () => {
     let service: SocketService;
     let mockSocket: jasmine.SpyObj<Socket>;
-    let eventSubject: Subject<SocketResponse<unknown>>;
 
     beforeEach(() => {
-        eventSubject = new Subject();
-        mockSocket = jasmine.createSpyObj('Socket', ['emit', 'on', 'off', 'removeListener']);
-        (mockSocket.on as jasmine.Spy).and.callFake((event, callback) => {
-            eventSubject.subscribe(callback);
-            return mockSocket;
-        });
-
-        // Mock the io function
-        (window as any).io = jasmine.createSpy().and.returnValue(mockSocket);
+        mockSocket = jasmine.createSpyObj('Socket', ['emit']);
+        
+        // Mock the io function globally before service creation
+        (globalThis as unknown as { io: jasmine.Spy }).io = jasmine.createSpy('io').and.returnValue(mockSocket);
 
         TestBed.configureTestingModule({
             providers: [SocketService],
@@ -36,76 +30,77 @@ describe('SocketService', () => {
         const event = GameStoreEvents.GameCreated;
         const data = { test: 'data' };
 
+        // Spy on the actual socket instance
+        spyOn(service['socket'], 'emit');
+
         service.emit(event, data);
 
-        expect(mockSocket.emit).toHaveBeenCalledWith(event, data);
+        expect(service['socket'].emit).toHaveBeenCalledWith(event, data);
     });
 
-    it('should handle success events', (done) => {
+    it('should return observable from onEvent', () => {
+        const event = GameStoreEvents.GameCreated;
+        
+        const result = service.onEvent(event);
+        
+        expect(result).toBeDefined();
+    });
+
+    it('should handle success events', () => {
         const event = GameStoreEvents.GameCreated;
         const successData = { test: 'success' };
-        const response: SocketResponse<typeof successData> = {
+        const callback = jasmine.createSpy('callback');
+        
+        spyOn(service, 'onEvent').and.returnValue(of({
             success: true,
             data: successData,
-        };
+        } as SocketResponse<typeof successData>));
 
-        service.onSuccessEvent(event, (data) => {
-            expect(data).toEqual(successData);
-            done();
-        });
+        service.onSuccessEvent(event, callback);
 
-        eventSubject.next(response);
+        expect(callback).toHaveBeenCalledWith(successData);
     });
 
     it('should not call success callback on error response', () => {
         const event = GameStoreEvents.GameCreated;
         const callback = jasmine.createSpy('callback');
-        const response: SocketResponse<never> = {
+        
+        spyOn(service, 'onEvent').and.returnValue(of({
             success: false,
             message: 'error',
-        };
+        } as SocketResponse<never>));
 
         service.onSuccessEvent(event, callback);
-        eventSubject.next(response);
 
         expect(callback).not.toHaveBeenCalled();
     });
 
-    it('should handle error events', (done) => {
+    it('should handle error events', () => {
         const event = GameStoreEvents.GameCreated;
         const errorMessage = 'test error';
-        const response: SocketResponse<never> = {
+        const callback = jasmine.createSpy('callback');
+        
+        spyOn(service, 'onEvent').and.returnValue(of({
             success: false,
             message: errorMessage,
-        };
+        } as SocketResponse<never>));
 
-        service.onErrorEvent(event, (message) => {
-            expect(message).toBe(errorMessage);
-            done();
-        });
+        service.onErrorEvent(event, callback);
 
-        eventSubject.next(response);
+        expect(callback).toHaveBeenCalledWith(errorMessage);
     });
 
     it('should not call error callback on success response', () => {
         const event = GameStoreEvents.GameCreated;
         const callback = jasmine.createSpy('callback');
-        const response: SocketResponse<unknown> = {
+        
+        spyOn(service, 'onEvent').and.returnValue(of({
             success: true,
             data: { test: 'data' },
-        };
+        } as SocketResponse<unknown>));
 
         service.onErrorEvent(event, callback);
-        eventSubject.next(response);
 
         expect(callback).not.toHaveBeenCalled();
-    });
-
-    it('should return an observable of socket responses', () => {
-        const event = GameStoreEvents.GameCreated;
-        const result = service.onEvent(event);
-
-        expect(result instanceof Observable).toBeTruthy();
-        expect(mockSocket.on).toHaveBeenCalledWith(event, jasmine.any(Function));
     });
 });

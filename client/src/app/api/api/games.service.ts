@@ -33,7 +33,6 @@ import { Configuration }                                     from '../configurat
 import { BaseService } from '../api.base.service';
 
 
-
 @Injectable({
   providedIn: 'root'
 })
@@ -48,10 +47,10 @@ export class GamesService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public gameStoreControllerCreateGame(createGameDto: CreateGameDto, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public gameStoreControllerCreateGame(createGameDto: CreateGameDto, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public gameStoreControllerCreateGame(createGameDto: CreateGameDto, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public gameStoreControllerCreateGame(createGameDto: CreateGameDto, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    gameStoreControllerCreateGame(createGameDto: CreateGameDto, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<unknown>;
+    gameStoreControllerCreateGame(createGameDto: CreateGameDto, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<unknown>>;
+    gameStoreControllerCreateGame(createGameDto: CreateGameDto, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<unknown>>;
+    gameStoreControllerCreateGame(createGameDto: CreateGameDto, observe: unknown = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<unknown> {
         if (createGameDto === null || createGameDto === undefined) {
             throw new Error('Required parameter createGameDto was null or undefined when calling gameStoreControllerCreateGame.');
         }
@@ -89,18 +88,18 @@ export class GamesService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/games`;
+        const localVarPath = `/api/games`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<any>('post', `${basePath}${localVarPath}`,
+        return this.httpClient.request<unknown>('post', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: createGameDto,
-                responseType: <any>responseType_,
+                responseType: responseType_ as unknown,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
-                observe: observe,
+                observe,
                 transferCache: localVarTransferCache,
-                reportProgress: reportProgress
+                reportProgress
             }
         );
     }
@@ -110,10 +109,10 @@ export class GamesService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public gameStoreControllerDeleteGame(id: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public gameStoreControllerDeleteGame(id: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public gameStoreControllerDeleteGame(id: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public gameStoreControllerDeleteGame(id: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    gameStoreControllerDeleteGame(id: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<unknown>;
+    gameStoreControllerDeleteGame(id: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<unknown>>;
+    gameStoreControllerDeleteGame(id: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<unknown>>;
+    gameStoreControllerDeleteGame(id: string, observe: unknown = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<unknown> {
         if (id === null || id === undefined) {
             throw new Error('Required parameter id was null or undefined when calling gameStoreControllerDeleteGame.');
         }
@@ -142,17 +141,17 @@ export class GamesService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/games/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/games/${this.configuration.encodeParam({name: 'id', value: id, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
+        return this.httpClient.request<unknown>('delete', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                responseType: <any>responseType_,
+                responseType: responseType_ as unknown,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
-                observe: observe,
+                observe,
                 transferCache: localVarTransferCache,
-                reportProgress: reportProgress
+                reportProgress
             }
         );
     }
@@ -162,10 +161,10 @@ export class GamesService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public gameStoreControllerGetGameInit(id: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<GameInitDto>;
-    public gameStoreControllerGetGameInit(id: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GameInitDto>>;
-    public gameStoreControllerGetGameInit(id: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GameInitDto>>;
-    public gameStoreControllerGetGameInit(id: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    gameStoreControllerGetGameInit(id: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<GameInitDto>;
+    gameStoreControllerGetGameInit(id: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GameInitDto>>;
+    gameStoreControllerGetGameInit(id: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GameInitDto>>;
+    gameStoreControllerGetGameInit(id: string, observe: unknown = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<unknown> {
         if (id === null || id === undefined) {
             throw new Error('Required parameter id was null or undefined when calling gameStoreControllerGetGameInit.');
         }
@@ -195,17 +194,17 @@ export class GamesService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/games/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/init`;
+        const localVarPath = `/api/games/${this.configuration.encodeParam({name: 'id', value: id, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: undefined})}/init`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<GameInitDto>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                responseType: <any>responseType_,
+                responseType: responseType_ as unknown,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
-                observe: observe,
+                observe,
                 transferCache: localVarTransferCache,
-                reportProgress: reportProgress
+                reportProgress
             }
         );
     }
@@ -214,10 +213,10 @@ export class GamesService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public gameStoreControllerGetGames(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Array<GamePreviewDto>>;
-    public gameStoreControllerGetGames(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<GamePreviewDto>>>;
-    public gameStoreControllerGetGames(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<GamePreviewDto>>>;
-    public gameStoreControllerGetGames(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    gameStoreControllerGetGames(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<GamePreviewDto[]>;
+    gameStoreControllerGetGames(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GamePreviewDto[]>>;
+    gameStoreControllerGetGames(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GamePreviewDto[]>>;
+    gameStoreControllerGetGames(observe: unknown = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<unknown> {
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -244,17 +243,17 @@ export class GamesService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/games`;
+        const localVarPath = `/api/games`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<Array<GamePreviewDto>>('get', `${basePath}${localVarPath}`,
+        return this.httpClient.request<GamePreviewDto[]>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                responseType: <any>responseType_,
+                responseType: responseType_ as unknown,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
-                observe: observe,
+                observe,
                 transferCache: localVarTransferCache,
-                reportProgress: reportProgress
+                reportProgress
             }
         );
     }
@@ -265,10 +264,10 @@ export class GamesService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public gameStoreControllerToggleVisibility(id: string, toggleVisibilityDto: ToggleVisibilityDto, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public gameStoreControllerToggleVisibility(id: string, toggleVisibilityDto: ToggleVisibilityDto, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public gameStoreControllerToggleVisibility(id: string, toggleVisibilityDto: ToggleVisibilityDto, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public gameStoreControllerToggleVisibility(id: string, toggleVisibilityDto: ToggleVisibilityDto, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    gameStoreControllerToggleVisibility(id: string, toggleVisibilityDto: ToggleVisibilityDto, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<unknown>;
+    gameStoreControllerToggleVisibility(id: string, toggleVisibilityDto: ToggleVisibilityDto, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<unknown>>;
+    gameStoreControllerToggleVisibility(id: string, toggleVisibilityDto: ToggleVisibilityDto, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<unknown>>;
+    gameStoreControllerToggleVisibility(id: string, toggleVisibilityDto: ToggleVisibilityDto, observe: unknown = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<unknown> {
         if (id === null || id === undefined) {
             throw new Error('Required parameter id was null or undefined when calling gameStoreControllerToggleVisibility.');
         }
@@ -309,18 +308,18 @@ export class GamesService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/games/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/visibility`;
+        const localVarPath = `/api/games/${this.configuration.encodeParam({name: 'id', value: id, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: undefined})}/visibility`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<any>('patch', `${basePath}${localVarPath}`,
+        return this.httpClient.request<unknown>('patch', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: toggleVisibilityDto,
-                responseType: <any>responseType_,
+                responseType: responseType_ as unknown,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
-                observe: observe,
+                observe,
                 transferCache: localVarTransferCache,
-                reportProgress: reportProgress
+                reportProgress
             }
         );
     }
@@ -331,10 +330,10 @@ export class GamesService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public gameStoreControllerUpdateGame(id: string, updateGameDto: UpdateGameDto, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public gameStoreControllerUpdateGame(id: string, updateGameDto: UpdateGameDto, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public gameStoreControllerUpdateGame(id: string, updateGameDto: UpdateGameDto, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public gameStoreControllerUpdateGame(id: string, updateGameDto: UpdateGameDto, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    gameStoreControllerUpdateGame(id: string, updateGameDto: UpdateGameDto, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<unknown>;
+    gameStoreControllerUpdateGame(id: string, updateGameDto: UpdateGameDto, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<unknown>>;
+    gameStoreControllerUpdateGame(id: string, updateGameDto: UpdateGameDto, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<unknown>>;
+    gameStoreControllerUpdateGame(id: string, updateGameDto: UpdateGameDto, observe: unknown = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<unknown> {
         if (id === null || id === undefined) {
             throw new Error('Required parameter id was null or undefined when calling gameStoreControllerUpdateGame.');
         }
@@ -375,18 +374,18 @@ export class GamesService extends BaseService {
             }
         }
 
-        let localVarPath = `/api/games/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/games/${this.configuration.encodeParam({name: 'id', value: id, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<any>('patch', `${basePath}${localVarPath}`,
+        return this.httpClient.request<unknown>('patch', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: updateGameDto,
-                responseType: <any>responseType_,
+                responseType: responseType_ as unknown,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
-                observe: observe,
+                observe,
                 transferCache: localVarTransferCache,
-                reportProgress: reportProgress
+                reportProgress
             }
         );
     }
