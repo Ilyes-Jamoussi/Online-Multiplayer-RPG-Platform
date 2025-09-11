@@ -10,7 +10,7 @@ import { UiCardComponent } from '@app/shared/ui/components/card/card.component';
     selector: 'app-home-page',
     templateUrl: './home-page.component.html',
     styleUrls: ['./home-page.component.scss'],
-    imports: [CommonModule, FormsModule, UiCardComponent, UiCardTitleComponent, UiCardContentComponent, UiLinkButtonComponent2],
+    imports: [CommonModule, FormsModule, UiCardComponent, UiCardTitleComponent, UiCardContentComponent],
     standalone: true,
 })
 export class HomePageComponent {
