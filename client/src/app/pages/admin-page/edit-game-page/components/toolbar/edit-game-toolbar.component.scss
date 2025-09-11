@@ -1,0 +1,97 @@
+/* === Retro minimal FAB — single column === */
+:host {
+    --btn-size: 88px; /* taille des carrés */
+    --icon-size: 48px; /* taille des émojis */
+    --gap: 12px;
+
+    --panel: #ffffff;
+    --text: #0f172a;
+    --border: #d7e0ff;
+    --ring: #00c2ff;
+    --ring-selected: #14b8a6;
+
+    /* fonds doux par type (optionnel) */
+    --c-base: #eaffe1;
+    --c-wall: #ffeede;
+    --c-door: #fff3cf;
+    --c-water: #e6f6ff;
+    --c-ice: #eefcff;
+    --c-start: #f1e9ff;
+    font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace;
+}
+
+.toolbox {
+    display: grid;
+    gap: var(--gap);
+    padding: 12px;
+    background: var(--panel);
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+}
+
+.toolbox h3 {
+    margin: 0;
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+/* === UNE SEULE COLONNE === */
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    align-items: flex-start; /* les boutons gardent leur largeur fixe */
+}
+
+/* gros carrés type FAB */
+.tool-btn {
+    width: var(--btn-size);
+    height: var(--btn-size);
+    display: grid;
+    place-items: center;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    background: #f7fbff; /* default soft */
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 102, 255, 0.12);
+    transition:
+        transform 0.08s ease,
+        box-shadow 0.12s ease,
+        outline-color 0.12s ease,
+        border-color 0.12s ease;
+    outline: 3px solid transparent;
+    font-size: var(--icon-size); /* ← emoji agrandi directement */
+    line-height: 1;
+}
+
+.tool-btn:hover {
+    transform: translateY(-2px);
+    outline-color: var(--ring);
+    box-shadow: 0 8px 22px rgba(0, 102, 255, 0.18);
+}
+
+.tool-btn.selected {
+    outline-color: var(--ring-selected);
+    border-color: var(--ring-selected);
+}
+
+/* variantes de fond (si tu ajoutes une classe par type) */
+.tool-btn.base {
+    background: var(--c-base);
+}
+.tool-btn.wall {
+    background: var(--c-wall);
+}
+.tool-btn.door {
+    background: var(--c-door);
+}
+.tool-btn.water {
+    background: var(--c-water);
+}
+.tool-btn.ice {
+    background: var(--c-ice);
+}
+.tool-btn.start {
+    background: var(--c-start);
+}

@@ -1,0 +1,44 @@
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { GameEditorService } from '@app/pages/admin-page/edit-game-page/services/game-editor.service';
+import { ActiveTool, TileKind } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import { UiTooltipComponent } from '@app/shared/ui/components/tooltip/tooltip.component';
+
+interface BrushItem {
+    emoji: string;
+    tool: ActiveTool;
+}
+
+@Component({
+    selector: 'app-edit-game-toolbar',
+    standalone: true,
+    templateUrl: './edit-game-toolbar.component.html',
+    styleUrls: ['./edit-game-toolbar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [GameEditorService],
+    imports: [UiTooltipComponent]
+})
+export class EditGameToolbarComponent {
+    @Input() activeTool: ActiveTool | null = null;
+    @Output() onSelectTool = new EventEmitter<ActiveTool>();
+
+    brushes: BrushItem[] = [
+        { emoji: '🟩', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.BASE } } },
+        { emoji: '🟫', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.WALL } } },
+        { emoji: '🚪', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.DOOR, open: false } } },
+        { emoji: '💧', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.WATER } } },
+        { emoji: '❄️', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.ICE } } },
+        { emoji: '🔮', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.TELEPORT, pairId: 'PENDING', endpoint: 'A' } } },
+    ];
+
+    get selectedBrush(): BrushItem {
+        return this.brushes.find((b) => JSON.stringify(b.tool) === JSON.stringify(this.activeTool)) || this.brushes[0];
+    }
+
+    isBrushSelected(brush: BrushItem): boolean {
+        return JSON.stringify(brush.tool) === JSON.stringify(this.selectedBrush.tool);
+    }
+
+    select(item: BrushItem) {
+        this.onSelectTool.emit(item.tool);
+    }
+}

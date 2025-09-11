@@ -1,0 +1,25 @@
+.page {
+    position: relative;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 16px;
+    height: 100%;
+}
+
+.toolbox {
+    position: sticky;
+    top: 16px;
+    align-self: start;
+}
+
+.grid-wrapper {
+    display: grid;
+    place-items: start;
+}
+
+.grid {
+    display: grid;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border: 2px solid #1f2937;
+}

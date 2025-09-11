@@ -10,6 +10,7 @@ import { HomePageComponent } from '@app/pages/home-page/home-page.component';
 import { removeLeadingSlash } from '@src/utils/route/route.utils';
 import { AdminPageComponent } from './app/pages/admin-page/admin-page.component';
 import { environment } from './environments/environment';
+import { EditGamePageComponent } from '@app/pages/admin-page/edit-game-page/view/edit-game-page.component';
 
 // import { CreateGameComponent } from './app/pages/create-game/create-game.component'; --- IGNORE ---
 
@@ -26,6 +27,10 @@ const routes: Routes = [
     },
     { path: removeLeadingSlash(ROUTES.createGamePage), component: CreateGamePageComponent },
     { path: removeLeadingSlash(ROUTES.adminPage), component: AdminPageComponent },
+    {
+        path: removeLeadingSlash(ROUTES.editGame),
+        component: EditGamePageComponent,
+    },
 
     { path: '**', redirectTo: removeLeadingSlash(ROUTES.home) },
 ];

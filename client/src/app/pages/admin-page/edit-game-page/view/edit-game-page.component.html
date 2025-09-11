@@ -1,0 +1,19 @@
+<div class="page">
+    <app-edit-game-toolbar [activeTool]="activeTool$ | async" (onSelectTool)="selectTool($event)"></app-edit-game-toolbar>
+
+    @if (grid$ | async; as grid) {
+    <div class="grid-wrapper" style="width: 850px; height: 850px;">
+        <div
+            class="grid"
+            [ngStyle]="{
+                'grid-template-columns': 'repeat(' + grid.width + ', 1fr)',
+                'grid-template-rows': 'repeat(' + grid.height + ', 1fr)'
+            }"
+        >
+            @if (indices$ | async; as idxs) { @for (idx of idxs; track idx) {
+            <app-edit-game-tile [actions]="tileActions" [x]="getX(idx, grid.width)" [y]="getY(idx, grid.width)" [tile]="grid.tiles[idx]"></app-edit-game-tile>
+            } }
+        </div>
+    </div>
+    }
+</div>
