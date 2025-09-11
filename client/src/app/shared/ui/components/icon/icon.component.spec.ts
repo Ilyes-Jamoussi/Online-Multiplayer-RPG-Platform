@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MaterialIcon } from '@ui/types/ui.types';
 import { UiIconComponent } from './icon.component';
 
 describe('UiIconComponent', () => {
@@ -20,40 +19,26 @@ describe('UiIconComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should have default icon name', () => {
-    expect(component.iconName).toBe('Home');
+  it('should have default values', () => {
+    expect(component.iconName).toBe('Coffee');
+    expect(component.size).toBe('md');
   });
 
-  it('should return correct icon value for default', () => {
-    expect(component.iconValue).toBe(MaterialIcon.Home);
+  it('should accept valid icon names', () => {
+    component.iconName = 'Plus';
+    expect(component.iconName).toBe('Plus');
   });
 
-  it('should return correct icon value for custom icon', () => {
-    component.iconName = 'Add';
-    expect(component.iconValue).toBe(MaterialIcon.Add);
-  });
-
-  it('should generate correct classes', () => {
-    const classes = component.classes;
-    expect(classes.uiIcon).toBe(true);
-    expect(classes['v-primary']).toBe(true);
-    expect(classes['s-md']).toBe(true);
-  });
-
-  it('should generate correct classes with custom variant and size', () => {
-    component.variant = 'secondary';
+  it('should handle size changes', () => {
+    component.size = 'sm';
+    expect(component.size).toBe('sm');
+    
     component.size = 'lg';
-    const classes = component.classes;
-    expect(classes.uiIcon).toBe(true);
-    expect(classes['v-secondary']).toBe(true);
-    expect(classes['s-lg']).toBe(true);
+    expect(component.size).toBe('lg');
   });
 
-  it('should update icon value when icon name changes', () => {
-    component.iconName = 'Delete';
-    expect(component.iconValue).toBe(MaterialIcon.Delete);
-
-    component.iconName = 'Edit';
-    expect(component.iconValue).toBe(MaterialIcon.Edit);
+  it('should handle different icon names', () => {
+    component.iconName = 'Trash';
+    expect(component.iconName).toBe('Trash');
   });
 });

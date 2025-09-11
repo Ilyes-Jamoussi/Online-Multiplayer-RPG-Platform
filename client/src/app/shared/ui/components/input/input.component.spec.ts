@@ -47,8 +47,8 @@ describe('UiInputComponent', () => {
     component.alignText = 'center';
     component.clearable = true;
     component.label = 'Test Label';
-    component.prefixIcon = 'Add';
-    component.suffixIcon = 'Delete';
+    component.prefixIcon = 'Plus';
+    component.suffixIcon = 'Trash';
     component.disabled = true;
     component.loading = true;
 
