@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { GameEditorService } from '@app/pages/admin-page/edit-game-page/services/game-editor.service';
 import { ActiveTool, TileKind } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
 import { UiTooltipComponent } from '@app/shared/ui/components/tooltip/tooltip.component';
 
@@ -15,7 +14,6 @@ interface BrushItem {
     templateUrl: './edit-game-toolbar.component.html',
     styleUrls: ['./edit-game-toolbar.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [GameEditorService],
     imports: [UiTooltipComponent],
 })
 export class EditGameToolbarComponent {

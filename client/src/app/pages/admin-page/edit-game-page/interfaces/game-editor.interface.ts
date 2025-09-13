@@ -150,15 +150,28 @@ export interface GameDraft {
     editor: EditorState;
 }
 
-export type TileBrushTool = { type: 'TILE_BRUSH'; tile: TileSpec; leftDrag?: boolean; rightDrag?: boolean };
-export type ObjectTool = { type: 'OBJECT'; kind: PlaceableKind };
-export type EraserTool = { type: 'ERASE' };
-export type PickerTool = { type: 'PICK_TILE' };
-export type ActiveTool = TileBrushTool | ObjectTool | EraserTool | PickerTool;
+/** 👉 Outils actifs */
+export type TileBrushTool = {
+    type: 'TILE_BRUSH';
+    tile: TileSpec;
+    leftDrag?: boolean;
+    rightDrag?: boolean;
+};
+
+export type ObjectTool = {
+    type: 'OBJECT';
+    kind: PlaceableKind;
+};
+
+export type PickerTool = {
+    type: 'PICK_TILE';
+};
+
+export type ActiveTool = TileBrushTool | ObjectTool | PickerTool;
+
 export enum ToolType {
     TileBrush = 'TILE_BRUSH',
     Object = 'OBJECT',
-    Erase = 'ERASE',
     PickTile = 'PICK_TILE',
 }
 

@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
+import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
 
 @Component({
     selector: 'app-game-preview-card',
     templateUrl: './game-preview-card.component.html',
     styleUrls: ['./game-preview-card.component.scss'],
     standalone: true,
-    imports: [CommonModule, MatIconModule]
+    imports: [CommonModule, UiIconComponent],
 })
 export class GamePreviewCardComponent {
     @Input() game!: GamePreviewDto;

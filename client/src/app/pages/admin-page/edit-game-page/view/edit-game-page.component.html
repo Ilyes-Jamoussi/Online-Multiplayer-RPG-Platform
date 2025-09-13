@@ -14,8 +14,8 @@
             @if (indices$ | async; as idxs) { @for (idx of idxs; track idx) {
             <app-edit-game-tile
                 [actions]="tileActions"
-                [x]="getX(idx, grid.width)"
-                [y]="getY(idx, grid.width)"
+                [x]="getXFromIndex(idx, grid)"
+                [y]="getYFromIndex(idx, grid)"
                 [tile]="grid.tiles[idx]"
             ></app-edit-game-tile>
             } }

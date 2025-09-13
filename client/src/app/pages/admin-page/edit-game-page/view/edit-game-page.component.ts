@@ -2,8 +2,13 @@ import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/cor
 import { AsyncPipe, NgStyle } from '@angular/common';
 import { Observable, map } from 'rxjs';
 
-import { GameEditorService } from '@app/pages/admin-page/edit-game-page/services/game-editor.service';
+import { GameDraftService } from '@app/pages/admin-page/edit-game-page/services/game-draft.service';
+import { TileService } from '@app/pages/admin-page/edit-game-page/services/tile.service';
+//import { ObjectService } from '@app/pages/admin-page/edit-game-page/services/object.service';
+import { EditorToolsService } from '@app/pages/admin-page/edit-game-page/services/editor-tools.service';
+
 import { ActiveTool, Grid, InventoryState, TileActions } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+
 import { EditGameToolbarComponent } from '@app/pages/admin-page/edit-game-page/components/toolbar/edit-game-toolbar.component';
 import { EditGameTileComponent } from '@app/pages/admin-page/edit-game-page/components/tile/edit-game-tile.component';
 import { EditorInventoryComponent } from '@app/pages/admin-page/edit-game-page/components/inventory/inventory.component';
@@ -15,39 +20,37 @@ import { EditorInventoryComponent } from '@app/pages/admin-page/edit-game-page/c
     templateUrl: './edit-game-page.component.html',
     styleUrls: ['./edit-game-page.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [GameDraftService],
 })
 export class EditGamePageComponent implements OnInit {
-    private readonly editor: GameEditorService = inject(GameEditorService);
+    // inject new services
+    private readonly draft = inject(GameDraftService);
+    private readonly tiles = inject(TileService);
+    //private readonly objects = inject(ObjectService);
+    private readonly tools = inject(EditorToolsService);
+
     grid$!: Observable<Grid>;
     activeTool$!: Observable<ActiveTool>;
     inventory$!: Observable<InventoryState>;
-    // precomputed index array for ngFor (avoids creating arrays in template)
     indices$!: Observable<number[]>;
 
-    getX(index: number, width: number): number {
-        return index % width;
-    }
-
-    getY(index: number, width: number): number {
-        return Math.floor(index / width);
-    }
-
     ngOnInit(): void {
-        this.editor.initDraft('Nouveau jeu', 'Description…', 'l', 'CLASSIC', {
+        this.draft.initDraft('Nouveau jeu', 'Description…', 'l', 'CLASSIC', {
             x: 250,
             y: 250,
         });
 
-        this.grid$ = this.editor.grid$;
+        this.grid$ = this.draft.grid$;
+        this.activeTool$ = this.draft.activeTool$;
+        this.inventory$ = this.draft.inventory$;
+
         this.indices$ = this.grid$.pipe(map((g) => Array.from({ length: g.width * g.height }, (_, i) => i)));
-        this.activeTool$ = this.editor.activeTool$;
-        this.inventory$ = this.editor.inventory$;
     }
 
     trackByIndex = (_: number, i: number) => i;
 
     selectTool(tool: ActiveTool) {
-        this.editor.setActiveTool(tool);
+        this.tools.setActiveTool(tool);
     }
 
     getCellSize(): number {
@@ -55,21 +58,19 @@ export class EditGamePageComponent implements OnInit {
         return 850 / 15;
     }
 
+    getXFromIndex(idx: number, grid: Grid): number {
+        return idx % grid.width;
+    }
+
+    getYFromIndex(idx: number, grid: Grid): number {
+        return Math.floor(idx / grid.width);
+    }
+
     readonly tileActions: Readonly<TileActions> = {
-        leftClick: (x, y) => {
-            this.editor.applyPaint(x, y);
-        },
-        rightClick: (x, y) => {
-            this.editor.applyRightClick(x, y);
-        },
-        dragStart: (click: 'left' | 'right') => {
-            this.editor.toggleDragging(click);
-        },
-        dragEnd: (click: 'left' | 'right') => {
-            this.editor.toggleDragging(click);
-        },
-        dragPaint: (x, y) => {
-            this.editor.dragPaint(x, y);
-        },
+        leftClick: (x, y) => this.tiles.applyPaint(x, y),
+        rightClick: (x, y) => this.tiles.applyRightClick(x, y),
+        dragStart: (click: 'left' | 'right') => this.tools.toggleDragging(click),
+        dragEnd: (click: 'left' | 'right') => this.tools.toggleDragging(click),
+        dragPaint: (x, y) => this.tiles.dragPaint(x, y),
     };
 }
