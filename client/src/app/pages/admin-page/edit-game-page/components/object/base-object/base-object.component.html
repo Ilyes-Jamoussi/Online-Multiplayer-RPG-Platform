@@ -1,0 +1,22 @@
+@if (object) {
+  @switch (object.kind) {
+    @case (placeableKind.HEAL) {
+      <div class="placeholder heal">🏥</div>
+    }
+    @case (placeableKind.FIGHT) {
+      <div class="placeholder fight">⚔️</div>
+    }
+    @case (placeableKind.BOAT) {
+      <div class="placeholder boat">🛶</div>
+    }
+    @case (placeableKind.FLAG) {
+    <div class="placeholder flag">🚩</div>
+    }
+    @case (placeableKind.START) {
+      <div class="placeholder start">🏁</div>
+    }
+    @default {
+      <div class="placeholder">❓</div>
+    }
+  }
+}

@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, map } from 'rxjs';
 import {
     GameDraft,
     Grid,
-    Entities,
+    Objects,
     InventoryState,
     EditorState,
     TileKind,
@@ -31,27 +31,26 @@ export class GameDraftService {
 
     /** Selectors */
     readonly grid$ = this.draft$.pipe(map((d) => d.grid));
-    readonly entities$ = this.draft$.pipe(map((d) => d.entities));
+    readonly objects$ = this.draft$.pipe(map((d) => d.objects));
     readonly inventory$ = this.draft$.pipe(map((d) => d.inventory));
     readonly teleports$ = this.draft$.pipe(map((d) => d.teleports));
     readonly meta$ = this.draft$.pipe(map((d) => d.meta));
     readonly activeTool$ = this.draft$.pipe(map((d) => d.editor?.activeTool || { type: 'TILE_BRUSH', tile: { kind: TileKind.BASE } }));
 
+    /** Specific selectors */
+    readonly editorTileSize$ = this.draft$.pipe(map((d) => d.editor.tileSize || 0));
+    readonly inventoryCounts$ = this.draft$.pipe(map((d) => d.inventory.available || ({} as Record<PlaceableKind, number>)));
+    readonly objectsArray$ = this.draft$.pipe(map((d) => Object.values(d.objects.byId || {})));
+
     /** Exposed Methods and Core API */
-    initDraft(
-        name: string = '',
-        description: string = '',
-        size: SizePreset = 's',
-        mode: GameMode = 'CLASSIC',
-        viewPort: { x: number; y: number } = { x: 800, y: 800 },
-    ): void {
+    initDraft(name: string = '', description: string = '', size: SizePreset = 's', mode: GameMode = 'CLASSIC'): void {
         const preset = sizePresets[size];
         const baseGrid = this.createGrid(preset.dimensions);
-        const entities: Entities = { byId: {} };
+        const entities: Objects = { byId: {} };
 
         const editor: EditorState = {
             activeTool: { type: 'TILE_BRUSH', tile: { kind: TileKind.BASE } },
-            viewPort,
+            tileSize: 0,
         };
 
         const inventorySpec = this.createInventorySpec(size, mode);
@@ -60,7 +59,7 @@ export class GameDraftService {
         const draft: GameDraft = {
             meta: { name, description, sizePreset: size, mode },
             grid: baseGrid,
-            entities,
+            objects: entities,
             editor,
             inventory,
         };
@@ -70,7 +69,7 @@ export class GameDraftService {
 
     loadDraft(draft: GameDraft): void {
         const inventorySpec = this.createInventorySpec(draft.meta.sizePreset, draft.meta.mode);
-        const inventory = this.getInventoryState(draft.grid, draft.entities, inventorySpec);
+        const inventory = this.getInventoryState(draft.grid, draft.objects, inventorySpec);
         const updatedDraft = { ...draft, inventory };
         this._draft$.next(updatedDraft);
     }
@@ -82,6 +81,18 @@ export class GameDraftService {
         this._draft$.next(updated);
     }
 
+    setEditorTileSize(px: number): void {
+        this.update((draft) => {
+            return {
+                ...draft,
+                editor: {
+                    ...draft.editor,
+                    tileSize: px,
+                },
+            };
+        });
+    }
+
     /** Private Helpers */
     private createGrid(dimensions: MapDimensions, defaultTile: TileSpec = { kind: TileKind.BASE }): Grid {
         const gridSize = dimensions.width * dimensions.height;
@@ -89,7 +100,7 @@ export class GameDraftService {
             width: dimensions.width,
             height: dimensions.height,
             tiles: Array(gridSize).fill(defaultTile),
-            objectIdByIndex: Array(gridSize).fill(null),
+            objectIds: Array(gridSize).fill(null),
         };
     }
 
@@ -118,9 +129,9 @@ export class GameDraftService {
         };
     }
 
-    private getInventoryState(grid: Grid, entities: Entities, spec: InventorySpec): InventoryState {
+    private getInventoryState(grid: Grid, entities: Objects, spec: InventorySpec): InventoryState {
         const placed = this.emptyInventoryCounts();
-        grid.objectIdByIndex.forEach((objId) => {
+        grid.objectIds.forEach((objId) => {
             if (objId) {
                 const entity = entities.byId[objId];
                 if (entity) placed.available[entity.kind] = (placed.available[entity.kind] || 0) + 1;

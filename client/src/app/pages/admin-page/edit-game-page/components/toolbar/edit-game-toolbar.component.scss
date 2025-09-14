@@ -1,56 +1,42 @@
-/* === Retro minimal FAB — single column === */
 :host {
-    --btn-size: 88px; /* taille des carrés */
-    --icon-size: 48px; /* taille des émojis */
+    /* Panel token overrides (optional) so it matches your retro UI */
+    app-draggable-panel {
+        --panel-bg: #ffffff;
+        --panel-fg: #0f172a;
+        --panel-border: #d7e0ff;
+        --ring: #14b8a6;
+    }
+
+    --btn-size: 48px; /* square size */
+    --icon-size: 24px; /* emoji size */
     --gap: 12px;
 
-    --panel: #ffffff;
-    --text: #0f172a;
-    --border: #d7e0ff;
-    --ring: #00c2ff;
-    --ring-selected: #14b8a6;
-
-    /* fonds doux par type (optionnel) */
+    /* soft backgrounds by type */
     --c-base: #eaffe1;
     --c-wall: #ffeede;
     --c-door: #fff3cf;
     --c-water: #e6f6ff;
     --c-ice: #eefcff;
     --c-start: #f1e9ff;
+
     font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace;
 }
 
-.toolbox {
-    display: grid;
-    gap: var(--gap);
-    padding: 12px;
-    background: var(--panel);
-    color: var(--text);
-    border: 2px solid var(--border);
-    border-radius: 12px;
-}
-
-.toolbox h3 {
-    margin: 0;
-    font-size: 12px;
-    opacity: 0.7;
-}
-
-/* === UNE SEULE COLONNE === */
+/* Single-column layout inside the panel body */
 .list {
     display: flex;
     flex-direction: column;
     gap: var(--gap);
-    align-items: flex-start; /* les boutons gardent leur largeur fixe */
+    align-items: flex-start; /* keep fixed button width */
 }
 
-/* gros carrés type FAB */
+/* Square FAB-like buttons */
 .tool-btn {
     width: var(--btn-size);
     height: var(--btn-size);
     display: grid;
     place-items: center;
-    border: 2px solid var(--border);
+    border: 2px solid #d7e0ff;
     border-radius: 14px;
     background: #f7fbff; /* default soft */
     cursor: pointer;
@@ -61,22 +47,22 @@
         outline-color 0.12s ease,
         border-color 0.12s ease;
     outline: 3px solid transparent;
-    font-size: var(--icon-size); /* ← emoji agrandi directement */
+    font-size: var(--icon-size); /* emoji size */
     line-height: 1;
+
+    &:hover {
+        transform: translateY(-2px);
+        outline-color: #00c2ff;
+        box-shadow: 0 8px 22px rgba(0, 102, 255, 0.18);
+    }
+
+    &.selected {
+        outline-color: #14b8a6;
+        border-color: #14b8a6;
+    }
 }
 
-.tool-btn:hover {
-    transform: translateY(-2px);
-    outline-color: var(--ring);
-    box-shadow: 0 8px 22px rgba(0, 102, 255, 0.18);
-}
-
-.tool-btn.selected {
-    outline-color: var(--ring-selected);
-    border-color: var(--ring-selected);
-}
-
-/* variantes de fond (si tu ajoutes une classe par type) */
+/* Type backgrounds (match your classes) */
 .tool-btn.base {
     background: var(--c-base);
 }
@@ -92,6 +78,7 @@
 .tool-btn.ice {
     background: var(--c-ice);
 }
-.tool-btn.start {
-    background: var(--c-start);
+/* Optional: define a specific look for teleport */
+.tool-btn.teleport {
+    background: #efe9ff;
 }

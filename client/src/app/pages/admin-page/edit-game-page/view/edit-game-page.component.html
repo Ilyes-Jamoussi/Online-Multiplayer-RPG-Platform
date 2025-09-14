@@ -1,9 +1,8 @@
 <div class="page">
-    <app-edit-game-toolbar [activeTool]="activeTool$ | async" (onSelectTool)="selectTool($event)"></app-edit-game-toolbar>
-    @if (inventory$ | async; as inventory) {
-    <app-editor-inventory [inventory]="inventory" (selectItem)="selectTool($event)"></app-editor-inventory>
-    } @if (grid$ | async; as grid) {
-    <div class="grid-wrapper" style="width: 850px; height: 850px">
+    <app-edit-game-toolbar></app-edit-game-toolbar>
+    <app-editor-inventory></app-editor-inventory>
+    @if (grid$ | async; as grid) {
+    <div #gridWrapper class="grid-wrapper">
         <div
             class="grid"
             [ngStyle]="{
@@ -11,17 +10,28 @@
                 'grid-template-rows': 'repeat(' + grid.height + ', 1fr)'
             }"
         >
-            @if (indices$ | async; as idxs) { @for (idx of idxs; track idx) {
+            @if (indices$ | async; as idxs) { @for (idx of idxs; track idx; let i = $index) {
             <app-edit-game-tile
-                [actions]="tileActions"
                 [x]="getXFromIndex(idx, grid)"
                 [y]="getYFromIndex(idx, grid)"
                 [tile]="grid.tiles[idx]"
+                appTileSizeProbe
+                [probeActive]="i === 0"
+                (sizeChange)="tileSizeUpdate($event)"
             ></app-edit-game-tile>
             } }
         </div>
-
-        <div class="objects-overlay"></div>
+        @if (objects$ | async; as objects) { @if(tileSize$ | async; as tileSize) {
+        <div
+            class="objects-overlay"
+            [style.gridTemplateColumns]="'repeat(' + grid.width + ', 1fr)'"
+            [style.gridTemplateRows]="'repeat(' + grid.height + ', 1fr)'"
+        >
+            @for (obj of objects; track obj.id) {
+            <app-edit-base-object [object]="obj" [tileSize]="tileSize"></app-edit-base-object>
+            }
+        </div>
+        } }
     </div>
     }
 </div>

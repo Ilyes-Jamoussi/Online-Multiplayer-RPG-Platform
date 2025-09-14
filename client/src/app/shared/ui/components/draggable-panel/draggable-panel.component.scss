@@ -1,0 +1,62 @@
+:host {
+    --panel-bg: #fff;
+    --panel-fg: #0f172a;
+    --panel-border: #d7e0ff;
+    --panel-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --handle-bg-hover: rgba(0, 0, 0, 0.04);
+    --ring: #14b8a6;
+
+    font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace;
+}
+
+.draggable-panel {
+    position: fixed; /* left/top are controlled by TS */
+    left: 0;
+    top: 0;
+    min-width: 180px;
+    color: var(--panel-fg);
+    background: var(--panel-bg);
+    border: 2px solid var(--panel-border);
+    border-radius: 12px;
+    box-shadow: var(--panel-shadow);
+    user-select: none;
+    will-change: left, top;
+
+    &.dragging .panel-header {
+        outline: 2px dashed var(--ring);
+        outline-offset: 2px;
+        cursor: grabbing;
+    }
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px 6px 10px;
+    cursor: grab;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+
+    &:hover {
+        background: var(--handle-bg-hover);
+    }
+}
+
+.panel-title {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.panel-dots {
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0.3;
+}
+
+.panel-body {
+    padding: 10px 12px 12px 12px;
+    user-select: text; /* allow selecting text inside the body */
+}

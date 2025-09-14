@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import { GameDraftService } from '@app/pages/admin-page/edit-game-page/services/game-draft.service';
-import { PlaceableKind, Entities, InventoryState, Placeable, GameDraft } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import {
+    PlaceableKind,
+    Objects,
+    InventoryState,
+    PlaceableObject,
+    GameDraft,
+} from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
 import { indexOf } from '@app/pages/admin-page/edit-game-page/utils/grid-utils';
 
 @Injectable({
@@ -14,10 +20,10 @@ export class ObjectService {
         this.draftService.update((draft) => {
             if (!this.canPlaceObject(draft, x, y, kind)) return draft;
 
-            const placeable = this.createPlaceable(kind);
-            const newEntities: Entities = {
+            const placeable = this.createPlaceable(kind, x, y);
+            const newEntities: Objects = {
                 byId: {
-                    ...draft.entities.byId,
+                    ...draft.objects.byId,
                     [placeable.id]: placeable,
                 },
             };
@@ -26,11 +32,20 @@ export class ObjectService {
 
             return {
                 ...draft,
-                entities: newEntities,
-                grid: { ...draft.grid, objectIdByIndex: newObjIdByIndex },
+                objects: newEntities,
+                grid: { ...draft.grid, objectIds: newObjIdByIndex },
                 inventory: newInventory,
             };
         });
+    }
+
+    isObjectAvailable(kind: PlaceableKind): boolean {
+        const inventory = this.draftService.inventory$;
+        let available = false;
+        inventory.subscribe((inv) => {
+            available = (inv?.available?.[kind] ?? 0) > 0;
+        });
+        return available;
     }
 
     /** Private Helpers */
@@ -43,16 +58,22 @@ export class ObjectService {
                 indexOf(x, y + 1, draft.grid.width),
                 indexOf(x + 1, y + 1, draft.grid.width),
             ];
-            if (idxs.some((i) => draft.grid.objectIdByIndex[i])) return false;
+            const unavailable = idxs.some((i) => {
+                return draft.grid.tiles[i].kind !== 'BASE' || draft.grid.objectIds[i];
+            });
+            if (unavailable) return false;
+        } else if (kind === PlaceableKind.BOAT) {
+            const idx = indexOf(x, y, draft.grid.width);
+            if (draft.grid.tiles[idx].kind !== 'WATER' || draft.grid.objectIds[idx]) return false;
         } else {
             const idx = indexOf(x, y, draft.grid.width);
-            if (draft.grid.objectIdByIndex[idx]) return false;
+            if (draft.grid.objectIds[idx] || draft.grid.tiles[idx].kind !== 'BASE') return false;
         }
         return true;
     }
 
     private placeObjectOnGrid(draft: GameDraft, x: number, y: number, kind: PlaceableKind, id: string): string[] {
-        const newObjIdByIndex = draft.grid.objectIdByIndex.slice();
+        const newObjIdByIndex = draft.grid.objectIds.slice();
         if (kind === PlaceableKind.HEAL || kind === PlaceableKind.FIGHT) {
             const idxs = [
                 indexOf(x, y, draft.grid.width),
@@ -81,8 +102,8 @@ export class ObjectService {
     private static readonly randomIdRadix = 36;
     private static readonly randomIdLength = 9;
 
-    private createPlaceable(kind: PlaceableKind): Placeable {
+    private createPlaceable(kind: PlaceableKind, x: number, y: number): PlaceableObject {
         const id = Math.random().toString(ObjectService.randomIdRadix).substring(2, ObjectService.randomIdLength);
-        return { id, kind } as Placeable;
+        return { id, kind, position: { x, y } } as PlaceableObject;
     }
 }

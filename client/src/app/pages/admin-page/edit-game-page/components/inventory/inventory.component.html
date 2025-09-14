@@ -1,44 +1,77 @@
-<div class="inventory-container">
-    <h3 class="inventory-title">Inventaire</h3>
-    <div class="inventory-items">
-        <div class="inventory-item" [class.disabled]="!isItemAvailable(placeableKind.START)" (click)="onSelect(placeableKind.START)">
-            <div class="item-icon start">🏁</div>
-            <div class="item-info">
-                <div class="item-name">Point de départ</div>
-                <div class="item-count">{{ inventory.available[placeableKind.START] }} restant(s)</div>
-            </div>
-        </div>
+<app-draggable-panel
+  title="Inventaire"
+  storageKey="editor.inventory.pos"
+  [initialX]="120"
+  [initialY]="32"
+  [snap]="1"
+  [zIndex]="1000"
+>
+  @if (availableItems$ | async; as items) {
+    <div class="list">
+      <button
+        (dragstart)="onDragStart($event, placeableKind.HEAL, items.HEAL === 0)"
+        draggable="true"
+        class="inv-btn heal"
+        [disabled]="items.HEAL === 0"
+        (click)="select(placeableKind.HEAL, items.HEAL === 0)"
+        title="Sanctuaire de Soin"
+      >
+        <span class="emoji">🏥</span>
+        <span class="count" [class.zero]="items.HEAL === 0">{{ items.HEAL }}</span>
+        <span class="label">Sanctuaire de Soin</span>
+      </button>
 
-        <div class="inventory-item" [class.disabled]="!isItemAvailable(placeableKind.FLAG)" (click)="onSelect(placeableKind.FLAG)">
-            <div class="item-icon flag">🚩</div>
-            <div class="item-info">
-                <div class="item-name">Drapeau</div>
-                <div class="item-count">{{ inventory.available[placeableKind.FLAG] }} restant(s)</div>
-            </div>
-        </div>
+      <button
+        (dragstart)="onDragStart($event, placeableKind.FIGHT, items.FIGHT === 0)"
+        draggable="true"
+        class="inv-btn fight"
+        [disabled]="items.FIGHT === 0"
+        (click)="select(placeableKind.FIGHT, items.FIGHT === 0)"
+        title="Sanctuaire de Combat"
+      >
+        <span class="emoji">⚔️</span>
+        <span class="count" [class.zero]="items.FIGHT === 0">{{ items.FIGHT }}</span>
+        <span class="label">Sanctuaire de Combat</span>
+      </button>
 
-        <div class="inventory-item" [class.disabled]="!isItemAvailable(placeableKind.HEAL)" (click)="onSelect(placeableKind.HEAL)">
-            <div class="item-icon heal">🏥</div>
-            <div class="item-info">
-                <div class="item-name">Sanctuaire</div>
-                <div class="item-count">{{ inventory.available[placeableKind.HEAL] }} restant(s)</div>
-            </div>
-        </div>
+      <button
+        (dragstart)="onDragStart($event, placeableKind.BOAT, items.BOAT === 0)"
+        draggable="true"
+        class="inv-btn boat"
+        [disabled]="items.BOAT === 0"
+        (click)="select(placeableKind.BOAT, items.BOAT === 0)"
+        title="Bateau"
+      >
+        <span class="emoji">🛶</span>
+        <span class="count" [class.zero]="items.BOAT === 0">{{ items.BOAT }}</span>
+        <span class="label">Bâteau</span>
+      </button>
 
-        <div class="inventory-item" [class.disabled]="!isItemAvailable(placeableKind.FIGHT)" (click)="onSelect(placeableKind.FIGHT)">
-            <div class="item-icon fight">⚔️</div>
-            <div class="item-info">
-                <div class="item-name">Zone de combat</div>
-                <div class="item-count">{{ inventory.available[placeableKind.FIGHT] }} restant(s)</div>
-            </div>
-        </div>
+      <button
+        (dragstart)="onDragStart($event, placeableKind.FLAG, items.FLAG === 0)"
+        draggable="true"
+        class="inv-btn flag"
+        [disabled]="items.FLAG === 0"
+        (click)="select(placeableKind.FLAG, items.FLAG === 0)"
+        title="Drapeau"
+      >
+        <span class="emoji">🚩</span>
+        <span class="count" [class.zero]="items.FLAG === 0">{{ items.FLAG }}</span>
+        <span class="label">Drapeau</span>
+      </button>
 
-        <div class="inventory-item" [class.disabled]="!isItemAvailable(placeableKind.BOAT)" (click)="onSelect(placeableKind.BOAT)">
-            <div class="item-icon boat">🚢</div>
-            <div class="item-info">
-                <div class="item-name">Bateau</div>
-                <div class="item-count">{{ inventory.available[placeableKind.BOAT] }} restant(s)</div>
-            </div>
-        </div>
+      <button
+        (dragstart)="onDragStart($event, placeableKind.START, items.START === 0)"
+        draggable="true"
+        class="inv-btn start"
+        [disabled]="items.START === 0"
+        (click)="select(placeableKind.START, items.START === 0)"
+        title="Point de Départ"
+      >
+        <span class="emoji">🏁</span>
+        <span class="count" [class.zero]="items.START === 0">{{ items.START }}</span>
+        <span class="label">Point de Départ</span>
+      </button>
     </div>
-</div>
+  }
+</app-draggable-panel>

@@ -1,0 +1,19 @@
+<div
+    #root
+    class="draggable-panel"
+    [class.dragging]="dragging()"
+    [style.left]="styleLeft()"
+    [style.top]="styleTop()"
+    [style.zIndex]="styleZ()"
+    role="dialog"
+    aria-modal="false"
+>
+    <div #handle class="panel-header" [attr.aria-label]="title || 'Panel'" (mousedown)="onMouseDown($event)" (touchstart)="onTouchStart($event)">
+        <span class="panel-title">{{ title }}</span>
+        <span class="panel-dots" aria-hidden="true">···</span>
+    </div>
+
+    <div class="panel-body">
+        <ng-content></ng-content>
+    </div>
+</div>

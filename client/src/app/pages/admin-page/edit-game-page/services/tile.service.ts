@@ -14,7 +14,6 @@ export class TileService {
         this.draftService.update((draft) => {
             const tool = draft.editor?.activeTool;
             if (!tool || tool.type !== 'TILE_BRUSH') return draft;
-
             const tile = this.getTile(draft.grid, x, y);
             if (tile.kind === TileKind.DOOR && tool.tile.kind === TileKind.DOOR) {
                 const idx = indexOf(x, y, draft.grid.width);

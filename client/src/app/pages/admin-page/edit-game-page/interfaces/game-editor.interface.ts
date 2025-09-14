@@ -89,23 +89,28 @@ export interface PlaceableBase {
     id: ObjectId;
     kind: PlaceableKind;
     label?: string;
+    position: {
+        x: number;
+        y: number;
+    };
+    direction?: Direction;
 }
-export type Placeable =
+export type PlaceableObject =
     | (PlaceableBase & { kind: PlaceableKind.START })
     | (PlaceableBase & { kind: PlaceableKind.FLAG })
     | (PlaceableBase & { kind: PlaceableKind.HEAL })
     | (PlaceableBase & { kind: PlaceableKind.FIGHT })
     | (PlaceableBase & { kind: PlaceableKind.BOAT });
 
-export interface Entities {
-    byId: Record<ObjectId, Placeable>;
+export interface Objects {
+    byId: Record<ObjectId, PlaceableObject>;
 }
 
 export interface Grid {
     width: number;
     height: number;
     tiles: TileSpec[];
-    objectIdByIndex: (ObjectId | null)[];
+    objectIds: (ObjectId | null)[];
 }
 
 export interface TeleportPairs {
@@ -137,14 +142,15 @@ export interface InventoryState {
 
 export interface EditorState {
     activeTool: ActiveTool;
-    viewPort: { x: number; y: number };
+    // viewPort: { x: number; y: number };
+    tileSize: number;
     stagingTeleport?: { pairId: string; firstIndex: number; underTile: TileSpec; label: string };
 }
 
 export interface GameDraft {
     meta: GameMeta;
     grid: Grid;
-    entities: Entities;
+    objects: Objects;
     inventory: InventoryState;
     teleports?: TeleportPairs;
     editor: EditorState;
@@ -182,3 +188,5 @@ export interface TileActions {
     dragEnd?: (click: 'left' | 'right') => void;
     dragPaint?: (x: number, y: number) => void;
 }
+
+export const DND_MIME = 'application/x-placeable-kind';

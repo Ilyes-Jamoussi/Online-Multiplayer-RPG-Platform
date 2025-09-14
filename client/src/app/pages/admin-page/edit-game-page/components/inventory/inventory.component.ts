@@ -1,40 +1,42 @@
-// inventory component that displayed placeable items and their remaining counts (received as INPUTS this component doesnt manage state)
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActiveTool, InventoryState, PlaceableKind } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import { AfterViewInit, ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+
+import { GameDraftService } from '@app/pages/admin-page/edit-game-page/services/game-draft.service';
+import { EditorToolsService } from '@app/pages/admin-page/edit-game-page/services/editor-tools.service';
+import { PlaceableKind, DND_MIME } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+
+import { DraggablePanelComponent } from '@app/shared/ui/components/draggable-panel/draggable-panel.component'; // <-- path where you placed it
 
 @Component({
     selector: 'app-editor-inventory',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, AsyncPipe, DraggablePanelComponent],
     templateUrl: './inventory.component.html',
     styleUrls: ['./inventory.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditorInventoryComponent {
-    @Input({
-        required: true,
-    })
-    inventory: InventoryState = {
-        available: {
-            [PlaceableKind.FIGHT]: 0,
-            [PlaceableKind.HEAL]: 0,
-            [PlaceableKind.BOAT]: 0,
-            [PlaceableKind.FLAG]: 0,
-            [PlaceableKind.START]: 0,
-        },
-    };
+export class EditorInventoryComponent implements AfterViewInit {
+    private readonly draft = inject(GameDraftService);
+    private readonly tools = inject(EditorToolsService);
 
-    @Output()
-    selectItem = new EventEmitter<ActiveTool>();
+    availableItems$ = this.draft.inventoryCounts$;
+    placeableKind = PlaceableKind;
 
-    readonly placeableKind = PlaceableKind;
-
-    isItemAvailable(kind: PlaceableKind): boolean {
-        return (this.inventory?.available?.[kind] ?? 0) > 0;
+    ngAfterViewInit() {
+        // no-op; kept if you later want to react after first render
     }
 
-    onSelect(kind: PlaceableKind) {
-        const tool: ActiveTool = { type: 'OBJECT', kind };
-        this.selectItem.emit(tool);
+    /** Select an object type if it is available */
+    select(kind: PlaceableKind, disabled: boolean) {
+        if (disabled) return;
+        this.tools.setActiveTool({ type: 'OBJECT', kind });
+    }
+
+    /** Begin a native DnD for placing objects on the canvas */
+    onDragStart(evt: DragEvent, kind: PlaceableKind, disabled: boolean) {
+        if (disabled || !evt.dataTransfer) return;
+        evt.dataTransfer.effectAllowed = 'copy';
+        evt.dataTransfer.setData(DND_MIME, kind);
+        this.tools.setActiveTool({ type: 'OBJECT', kind });
     }
 }

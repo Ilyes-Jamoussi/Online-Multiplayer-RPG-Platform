@@ -1,6 +1,10 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input, HostBinding, HostListener } from '@angular/core';
 import { NgStyle } from '@angular/common';
-import { TileActions, TileKind, TileSpec } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import { TileKind, TileSpec, DND_MIME, PlaceableKind } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import { TileService } from '@app/pages/admin-page/edit-game-page/services/tile.service';
+import { EditorToolsService } from '@app/pages/admin-page/edit-game-page/services/editor-tools.service';
+import { TileSizeProbeDirective } from '@app/pages/admin-page/edit-game-page/directives/tile-size-probe.directive';
+import { ObjectService } from '@app/pages/admin-page/edit-game-page/services/object.service';
 
 @Component({
     selector: 'app-edit-game-tile',
@@ -10,50 +14,42 @@ import { TileActions, TileKind, TileSpec } from '@app/pages/admin-page/edit-game
     styleUrls: ['./edit-game-tile.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditGameTileComponent {
+export class EditGameTileComponent extends TileSizeProbeDirective {
     @Input({ required: true }) tile!: TileSpec;
     @Input({ required: true }) x!: number;
     @Input({ required: true }) y!: number;
 
-    @Input({ required: true }) actions: TileActions;
+    private readonly tiles = inject(TileService);
+    private readonly tools = inject(EditorToolsService);
+    private readonly objects = inject(ObjectService);
 
     onRightClick(event: MouseEvent) {
         event.preventDefault();
-        if (this.actions?.rightClick) {
-            this.actions.rightClick(this.x, this.y);
-        }
     }
 
     onMouseDown(event: MouseEvent) {
         event.preventDefault();
-        if (event.button === 0 && this.actions?.dragStart) {
-            this.actions.dragStart('left');
-            if (this.actions?.leftClick) {
-                this.actions.leftClick(this.x, this.y);
-            }
-        } else if (event.button === 2 && this.actions?.dragStart) {
-            this.actions.dragStart('right');
-            if (this.actions?.rightClick) {
-                this.actions.rightClick(this.x, this.y);
-            }
-            if (this.actions?.rightClick) {
-                this.actions.rightClick(this.x, this.y);
-            }
+        if (event.button === 0) {
+            this.tiles.applyPaint(this.x, this.y);
+            this.tools.toggleDragging('left');
+        } else if (event.button === 2) {
+            this.tiles.applyRightClick(this.x, this.y);
+            this.tools.toggleDragging('right');
         }
     }
 
     onMouseUp(event: MouseEvent) {
         event.preventDefault();
-        if (event.button === 0 && this.actions?.dragEnd) {
-            this.actions.dragEnd('left');
-        } else if (event.button === 2 && this.actions?.dragEnd) {
-            this.actions.dragEnd('right');
+        if (event.button === 0) {
+            this.tools.toggleDragging('left');
+        } else if (event.button === 2) {
+            this.tools.toggleDragging('right');
         }
     }
 
     onMouseOver(event: MouseEvent) {
         event.preventDefault();
-        this.actions?.dragPaint?.(this.x, this.y);
+        this.tiles.dragPaint(this.x, this.y);
     }
 
     colorOf(kind: TileKind): string {
@@ -73,5 +69,38 @@ export class EditGameTileComponent {
             default:
                 return '#ffffff';
         }
+    }
+
+    @HostBinding('class.drop-hover')
+    dropHover = false;
+
+    @HostListener('dragover', ['$event'])
+    onDragOver(evt: DragEvent) {
+        if (!evt.dataTransfer) return;
+        if (evt.dataTransfer.types.includes(DND_MIME)) {
+            evt.preventDefault();
+            evt.dataTransfer.dropEffect = 'copy';
+        }
+    }
+
+    @HostListener('dragenter', ['$event'])
+    onDragEnter(evt: DragEvent) {
+        if (evt.dataTransfer?.types.includes(DND_MIME)) this.dropHover = true;
+    }
+
+    @HostListener('dragleave')
+    onDragLeave() {
+        this.dropHover = false;
+    }
+
+    @HostListener('drop', ['$event'])
+    onDrop(evt: DragEvent) {
+        this.dropHover = false;
+        if (!evt.dataTransfer) return;
+        const kindStr = evt.dataTransfer.getData(DND_MIME);
+        if (!kindStr) return;
+        evt.preventDefault();
+        this.objects.tryPlaceObject(this.x, this.y, kindStr as PlaceableKind);
+        this.tools.setActiveTool({ type: 'TILE_BRUSH', tile: { kind: TileKind.BASE } });
     }
 }

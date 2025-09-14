@@ -1,101 +1,88 @@
-.inventory-container {
-    background-color: #f3f4f6;
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    max-width: 300px;
+:host {
+  /* You can override panel tokens on the wrapper selector if needed */
+  font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace;
+
+  /* Example: tweak the panel look from here */
+  app-draggable-panel {
+    --panel-bg: #fff;
+    --panel-fg: #0f172a;
+    --panel-border: #d7e0ff;
+    --ring: #14b8a6;
+  }
+
+  --btn-size: 48px;
+  --gap: 10px;
+
+  --c-start: #f1e9ff;
+  --c-flag: #fff5e6;
+  --c-heal: #eafff5;
+  --c-fight: #fff0f0;
+  --c-boat: #e6f6ff;
 }
 
-.inventory-title {
-    margin-top: 0;
-    margin-bottom: 16px;
-    font-size: 18px;
-    color: #1f2937;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 8px;
+/* Inventory list (content inside the panel body) */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
 }
 
-.inventory-items {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
+/* Button look & feel */
+.inv-btn {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--btn-size) 1fr auto;
+  align-items: center;
+  gap: 10px;
 
-.inventory-item {
-    display: flex;
-    align-items: center;
-    background-color: #ffffff;
-    border-radius: 6px;
-    padding: 10px;
-    transition: transform 0.2s, background-color 0.2s;
-    border: 1px solid #e5e7eb;
-    cursor: pointer;
+  padding: 8px 10px;
+  border: 2px solid #d7e0ff;
+  border-radius: 12px;
+  background: #f7fbff;
+  color: inherit;
+  cursor: pointer;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease,
+    border-color 0.12s ease,
+    outline-color 0.12s ease;
+  outline: 3px solid transparent;
 
-    &:hover {
-        background-color: #f9fafb;
-        transform: translateY(-2px);
-    }
-}
+  .emoji { font-size: 22px; line-height: 1; }
+  .label { font-size: 11px; opacity: 0.85; }
 
-.item-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    margin-right: 12px;
+  .count {
+    min-width: 28px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: #0ea5e9;
+    color: #fff;
+    font-size: 11px;
+    text-align: center;
+  }
+  .count.zero { background: #94a3b8; }
 
-    &.start {
-        background-color: rgba(16, 185, 129, 0.15);
-        border: 2px solid #10b981;
-    }
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    outline-color: #00c2ff;
+    box-shadow: 0 8px 22px rgba(0, 102, 255, 0.18);
+  }
 
-    &.flag {
-        background-color: rgba(239, 68, 68, 0.15);
-        border: 2px solid #ef4444;
-    }
+  &.selected {
+    border-color: #14b8a6;
+    outline-color: #14b8a6;
+    box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.15) inset;
+  }
 
-    &.heal {
-        background-color: rgba(59, 130, 246, 0.15);
-        border: 2px solid #3b82f6;
-    }
-
-    &.fight {
-        background-color: rgba(245, 158, 11, 0.15);
-        border: 2px solid #f59e0b;
-    }
-
-    &.boat {
-        background-color: rgba(139, 92, 246, 0.15);
-        border: 2px solid #8b5cf6;
-    }
-}
-
-.item-info {
-    flex: 1;
-}
-
-.item-name {
-    font-weight: 600;
-    font-size: 14px;
-    margin-bottom: 2px;
-    color: #374151;
-}
-
-.item-count {
-    font-size: 12px;
-    color: #6b7280;
-}
-
-// Style pour les objets indisponibles (count = 0)
-.inventory-item.disabled {
+  &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-
-    &:hover {
-        transform: none;
-        background-color: #ffffff;
-    }
+  }
 }
+
+/* Background variants per kind */
+.inv-btn.start { background: var(--c-start); }
+.inv-btn.flag  { background: var(--c-flag); }
+.inv-btn.heal  { background: var(--c-heal); }
+.inv-btn.fight { background: var(--c-fight); }
+.inv-btn.boat  { background: var(--c-boat); }

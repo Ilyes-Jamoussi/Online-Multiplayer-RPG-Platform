@@ -1,10 +1,28 @@
-<div class="toolbox">
-    <h3>Outils</h3>
-    <div class="list">
-        @for (b of brushes; track b.emoji ){
-        <app-ui-tooltip position="right" distance="md" [text]="b.tool.type === 'TILE_BRUSH' ? 'Tuile: ' + b.tool.tile.kind : b.tool.type">
-            <button [class.selected]="isBrushSelected(b)" class="tool-btn {{ b.class }}" (click)="select(b)">{{ b.emoji }}</button>
+<app-draggable-panel
+  title="Outils"
+  storageKey="editor.toolbar.pos"
+  [initialX]="32"
+  [initialY]="32"
+  [snap]="1"
+  [zIndex]="1000"
+>
+  <div class="list">
+    @if (activeTool$ | async; as activeTool) {
+      @for (b of brushes; track b.emoji) {
+        <app-ui-tooltip
+          position="right"
+          distance="md"
+          [text]="b.tool.type === 'TILE_BRUSH' ? 'Tuile: ' + b.tool.tile.kind : b.tool.type"
+        >
+          <button
+            class="tool-btn {{ b.class }}"
+            [class.selected]="isBrushSelected(b, activeTool)"
+            (click)="select(b)"
+          >
+            {{ b.emoji }}
+          </button>
         </app-ui-tooltip>
-        }
-    </div>
-</div>
+      }
+    }
+  </div>
+</app-draggable-panel>

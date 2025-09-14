@@ -1,6 +1,12 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { ActiveTool, TileKind } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+
 import { UiTooltipComponent } from '@app/shared/ui/components/tooltip/tooltip.component';
+import { GameDraftService } from '@app/pages/admin-page/edit-game-page/services/game-draft.service';
+import { EditorToolsService } from '@app/pages/admin-page/edit-game-page/services/editor-tools.service';
+import { ActiveTool, TileKind } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+
+import { DraggablePanelComponent } from '@app/shared/ui/components/draggable-panel/draggable-panel.component'; // generic panel
 
 interface BrushItem {
     emoji: string;
@@ -14,11 +20,13 @@ interface BrushItem {
     templateUrl: './edit-game-toolbar.component.html',
     styleUrls: ['./edit-game-toolbar.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [UiTooltipComponent],
+    imports: [UiTooltipComponent, AsyncPipe, DraggablePanelComponent],
 })
 export class EditGameToolbarComponent {
-    @Input() activeTool: ActiveTool | null = null;
-    @Output() onSelectTool = new EventEmitter<ActiveTool>();
+    private readonly draft = inject(GameDraftService);
+    private readonly tools = inject(EditorToolsService);
+
+    activeTool$ = this.draft.activeTool$;
 
     brushes: BrushItem[] = [
         { emoji: '🟩', class: 'base', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.BASE } } },
@@ -26,18 +34,14 @@ export class EditGameToolbarComponent {
         { emoji: '🚪', class: 'door', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.DOOR, open: false } } },
         { emoji: '💧', class: 'water', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.WATER } } },
         { emoji: '❄️', class: 'ice', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.ICE } } },
-        { emoji: '🔮', class: 'start', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.TELEPORT, pairId: 'PENDING', endpoint: 'A' } } },
+        { emoji: '🔮', class: 'teleport', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.TELEPORT, pairId: 'PENDING', endpoint: 'A' } } },
     ];
 
-    get selectedBrush(): BrushItem {
-        return this.brushes.find((b) => JSON.stringify(b.tool) === JSON.stringify(this.activeTool)) || this.brushes[0];
-    }
-
-    isBrushSelected(brush: BrushItem): boolean {
-        return JSON.stringify(brush.tool) === JSON.stringify(this.selectedBrush.tool);
-    }
-
     select(item: BrushItem) {
-        this.onSelectTool.emit(item.tool);
+        this.tools.setActiveTool(item.tool);
+    }
+
+    isBrushSelected(brush: BrushItem, activeTool: ActiveTool): boolean {
+        return JSON.stringify(brush.tool) === JSON.stringify(activeTool);
     }
 }
