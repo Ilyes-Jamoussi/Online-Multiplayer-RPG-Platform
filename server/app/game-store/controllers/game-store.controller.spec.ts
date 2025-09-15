@@ -34,6 +34,9 @@ describe('GameStoreController', () => {
         description: 'New Description',
         size: MapSize.Small,
         mode: GameMode.Classic,
+        visibility: true,
+        tiles: [],
+        objects: [],
     };
 
     const mockUpdateGameDto: UpdateGameDto = {

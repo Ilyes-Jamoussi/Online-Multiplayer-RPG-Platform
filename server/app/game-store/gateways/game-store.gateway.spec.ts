@@ -41,10 +41,7 @@ describe('GameStoreGateway', () => {
 
             gateway.emitGameCreated(mockDto);
 
-            expect(mockServer.emit).toHaveBeenCalledWith(
-                GameStoreEvents.GameCreated,
-                successResponse(mockDto)
-            );
+            expect(mockServer.emit).toHaveBeenCalledWith(GameStoreEvents.GameCreated, successResponse(mockDto));
         });
     });
 
@@ -62,10 +59,7 @@ describe('GameStoreGateway', () => {
 
             gateway.emitGameUpdated(mockDto);
 
-            expect(mockServer.emit).toHaveBeenCalledWith(
-                GameStoreEvents.GameUpdated,
-                successResponse(mockDto)
-            );
+            expect(mockServer.emit).toHaveBeenCalledWith(GameStoreEvents.GameUpdated, successResponse(mockDto));
         });
     });
 
@@ -75,10 +69,7 @@ describe('GameStoreGateway', () => {
 
             gateway.emitGameDeleted(gameId);
 
-            expect(mockServer.emit).toHaveBeenCalledWith(
-                GameStoreEvents.GameDeleted,
-                successResponse({ id: gameId })
-            );
+            expect(mockServer.emit).toHaveBeenCalledWith(GameStoreEvents.GameDeleted, successResponse({ id: gameId }));
         });
     });
 
@@ -89,10 +80,7 @@ describe('GameStoreGateway', () => {
 
             gateway.emitGameVisibilityToggled(gameId, visibility);
 
-            expect(mockServer.emit).toHaveBeenCalledWith(
-                GameStoreEvents.GameVisibilityToggled,
-                successResponse({ id: gameId, visibility })
-            );
+            expect(mockServer.emit).toHaveBeenCalledWith(GameStoreEvents.GameVisibilityToggled, successResponse({ id: gameId, visibility }));
         });
 
         it('should emit GameVisibilityToggled event with visibility false', () => {
@@ -101,10 +89,7 @@ describe('GameStoreGateway', () => {
 
             gateway.emitGameVisibilityToggled(gameId, visibility);
 
-            expect(mockServer.emit).toHaveBeenCalledWith(
-                GameStoreEvents.GameVisibilityToggled,
-                successResponse({ id: gameId, visibility })
-            );
+            expect(mockServer.emit).toHaveBeenCalledWith(GameStoreEvents.GameVisibilityToggled, successResponse({ id: gameId, visibility }));
         });
     });
 });

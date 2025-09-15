@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map } from 'rxjs';
+import { BehaviorSubject, Observable, filter, map } from 'rxjs';
 import {
     GameDraft,
     Grid,
@@ -22,12 +22,7 @@ import {
 export class GameDraftService {
     private readonly _draft$ = new BehaviorSubject<GameDraft | null>(null);
 
-    readonly draft$: Observable<GameDraft> = this._draft$.asObservable().pipe(
-        map((draft) => {
-            if (!draft) throw new Error('No game draft available');
-            return draft;
-        }),
-    );
+    readonly draft$: Observable<GameDraft> = this._draft$.pipe(filter((d): d is GameDraft => d !== null));
 
     /** Selectors */
     readonly grid$ = this.draft$.pipe(map((d) => d.grid));
@@ -43,7 +38,7 @@ export class GameDraftService {
     readonly objectsArray$ = this.draft$.pipe(map((d) => Object.values(d.objects.byId || {})));
 
     /** Exposed Methods and Core API */
-    initDraft(name: string = '', description: string = '', size: SizePreset = 's', mode: GameMode = 'CLASSIC'): void {
+    initDraft(name: string = '', description: string = '', size: SizePreset = 's', mode: GameMode = 'classic'): void {
         const preset = sizePresets[size];
         const baseGrid = this.createGrid(preset.dimensions);
         const entities: Objects = { byId: {} };
@@ -71,6 +66,7 @@ export class GameDraftService {
         const inventorySpec = this.createInventorySpec(draft.meta.sizePreset, draft.meta.mode);
         const inventory = this.getInventoryState(draft.grid, draft.objects, inventorySpec);
         const updatedDraft = { ...draft, inventory };
+
         this._draft$.next(updatedDraft);
     }
 
@@ -93,14 +89,27 @@ export class GameDraftService {
         });
     }
 
+    copyDraftToClipboard(): void {
+        const draft = this._draft$.getValue();
+        if (!draft) throw new Error('No game draft available');
+        const draftString = JSON.stringify(draft, null, 2);
+        navigator.clipboard.writeText(draftString);
+    }
+
+    getDraftSnapshot(): GameDraft {
+        const draft = this._draft$.getValue();
+        if (!draft) throw new Error('No game draft available');
+        return draft;
+    }
+
     /** Private Helpers */
     private createGrid(dimensions: MapDimensions, defaultTile: TileSpec = { kind: TileKind.BASE }): Grid {
         const gridSize = dimensions.width * dimensions.height;
         return {
             width: dimensions.width,
             height: dimensions.height,
-            tiles: Array(gridSize).fill(defaultTile),
-            objectIds: Array(gridSize).fill(null),
+            tiles: Array.from({ length: gridSize }, () => ({ ...defaultTile })),
+            objectIds: Array.from({ length: gridSize }, () => null),
         };
     }
 
@@ -109,7 +118,7 @@ export class GameDraftService {
         return {
             allowance: {
                 [PlaceableKind.START]: objects.startPoints,
-                [PlaceableKind.FLAG]: gameMode === 'CTF' ? objects.flags : 0,
+                [PlaceableKind.FLAG]: gameMode === 'capture-the-flag' ? objects.flags : 0,
                 [PlaceableKind.HEAL]: objects.heal,
                 [PlaceableKind.FIGHT]: objects.fight,
                 [PlaceableKind.BOAT]: objects.boats,

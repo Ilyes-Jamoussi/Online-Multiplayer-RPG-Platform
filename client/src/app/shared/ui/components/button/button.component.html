@@ -1,16 +1,11 @@
-<button 
-    [type]="htmlType"
-    [ngClass]="classes"
-    [disabled]="disabled || loading"
-    (click)="onClick($event)">
-    
+<button [type]="htmlType" [ngClass]="classes" [disabled]="disabled || loading" (click)="onClick($event)">
     <app-ui-spinner *ngIf="loading" size="sm"></app-ui-spinner>
-    
+
     <span *ngIf="icon && !iconRight" class="icon-left">{{ icon }}</span>
-    
+
     <span class="button-text">
         <ng-content>{{ text }}</ng-content>
     </span>
-    
+
     <span *ngIf="icon && iconRight" class="icon-right">{{ icon }}</span>
 </button>

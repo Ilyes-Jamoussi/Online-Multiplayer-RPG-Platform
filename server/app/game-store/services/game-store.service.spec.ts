@@ -33,6 +33,8 @@ describe('GameStoreService', () => {
         description: 'New Description',
         size: MapSize.Small,
         mode: GameMode.Classic,
+        tiles: [],
+        objects: [],
     };
 
     const mockUpdateGameDto: UpdateGameDto = {
@@ -133,10 +135,7 @@ describe('GameStoreService', () => {
 
             const result = await service.getGameInit(mockObjectId.toString());
 
-            expect(gameModel.findById).toHaveBeenCalledWith(
-                mockObjectId.toString(),
-                { map: 1, itemContainers: 1, size: 1 }
-            );
+            expect(gameModel.findById).toHaveBeenCalledWith(mockObjectId.toString(), { map: 1, itemContainers: 1, size: 1 });
             expect(result).toEqual({
                 mapSize: mockGameDocument.size,
             });
@@ -148,9 +147,7 @@ describe('GameStoreService', () => {
             } as unknown as Query<GameDocument | null, GameDocument>;
             gameModel.findById.mockReturnValue(mockQuery);
 
-            await expect(service.getGameInit('nonexistent-id')).rejects.toThrow(
-                new NotFoundException('Game with id nonexistent-id not found')
-            );
+            await expect(service.getGameInit('nonexistent-id')).rejects.toThrow(new NotFoundException('Game with id nonexistent-id not found'));
         });
     });
 
@@ -168,20 +165,20 @@ describe('GameStoreService', () => {
                     ...mockUpdateGameDto,
                     lastModified: expect.any(Date),
                 }),
-                { new: true }
+                { new: true },
             );
-            expect(result).toEqual(expect.objectContaining({
-                name: mockUpdateGameDto.name,
-                description: mockUpdateGameDto.description,
-            }));
+            expect(result).toEqual(
+                expect.objectContaining({
+                    name: mockUpdateGameDto.name,
+                    description: mockUpdateGameDto.description,
+                }),
+            );
         });
 
         it('should throw NotFoundException when game not found', async () => {
             (gameModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(null);
 
-            await expect(service.updateGame('nonexistent-id', mockUpdateGameDto)).rejects.toThrow(
-                new NotFoundException('Game not found')
-            );
+            await expect(service.updateGame('nonexistent-id', mockUpdateGameDto)).rejects.toThrow(new NotFoundException('Game not found'));
         });
     });
 
@@ -199,9 +196,7 @@ describe('GameStoreService', () => {
             const mockResult = { deletedCount: 0 };
             (gameModel.deleteOne as jest.Mock).mockResolvedValue(mockResult);
 
-            await expect(service.deleteGame('nonexistent-id')).rejects.toThrow(
-                new NotFoundException('Game not found')
-            );
+            await expect(service.deleteGame('nonexistent-id')).rejects.toThrow(new NotFoundException('Game not found'));
         });
     });
 
@@ -218,7 +213,7 @@ describe('GameStoreService', () => {
             expect(gameModel.findByIdAndUpdate).toHaveBeenCalledWith(
                 mockObjectId.toString(),
                 { $set: { visibility: false, lastModified: expect.any(Date) } },
-                { new: false }
+                { new: false },
             );
             expect(mockQuery.lean).toHaveBeenCalled();
         });
@@ -235,7 +230,7 @@ describe('GameStoreService', () => {
             expect(gameModel.findByIdAndUpdate).toHaveBeenCalledWith(
                 mockObjectId.toString(),
                 { $set: { visibility: true, lastModified: expect.any(Date) } },
-                { new: false }
+                { new: false },
             );
         });
 
@@ -245,9 +240,7 @@ describe('GameStoreService', () => {
             };
             (gameModel.findByIdAndUpdate as jest.Mock).mockReturnValue(mockQuery);
 
-            await expect(service.toggleVisibility('nonexistent-id', false)).rejects.toThrow(
-                new NotFoundException('Game not found')
-            );
+            await expect(service.toggleVisibility('nonexistent-id', false)).rejects.toThrow(new NotFoundException('Game not found'));
         });
     });
 });

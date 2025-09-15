@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { GameDraftService } from '@app/pages/admin-page/edit-game-page/services/game-draft.service';
+import { GameDraftService } from './game-draft.service';
 import { TileSpec, TileKind, Grid } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
-import { inBounds, indexOf } from '@app/pages/admin-page/edit-game-page/utils/grid-utils';
+import { inBounds, indexOf } from '@app/services/game/utils/grid-utils';
 
 @Injectable({
     providedIn: 'root',

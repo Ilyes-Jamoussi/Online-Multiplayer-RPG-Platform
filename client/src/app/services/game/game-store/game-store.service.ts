@@ -1,7 +1,7 @@
 import { computed, Injectable, Signal, signal } from '@angular/core';
 import { CreateGameDto, GamePreviewDto, UpdateGameDto } from '@app/api/model/models';
-import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { GameStoreSocketService } from '@app/services/game-store-socket/game-store-socket.service';
+import { GameHttpService } from '@app/services/game/game-http/game-http.service';
+import { GameStoreSocketService } from '@app/services/game/game-store-socket/game-store-socket.service';
 import { Observable, tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -27,7 +27,7 @@ export class GameStoreService {
         return this.gameHttpService.getGamesDisplay().pipe(tap((games) => this._gameDisplays.set(games)));
     }
 
-    createGame(dto: CreateGameDto): Observable<void> {
+    createGame(dto: CreateGameDto): Observable<GamePreviewDto> {
         return this.gameHttpService.createGame(dto);
     }
 

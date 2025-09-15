@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GameDraftService } from '@app/pages/admin-page/edit-game-page/services/game-draft.service';
+import { GameDraftService } from './game-draft.service';
 import {
     PlaceableKind,
     Objects,
@@ -7,7 +7,7 @@ import {
     PlaceableObject,
     GameDraft,
 } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
-import { indexOf } from '@app/pages/admin-page/edit-game-page/utils/grid-utils';
+import { indexOf } from '@app/services/game/utils/grid-utils';
 
 @Injectable({
     providedIn: 'root',
@@ -29,6 +29,9 @@ export class ObjectService {
             };
             const newObjIdByIndex = this.placeObjectOnGrid(draft, x, y, kind, placeable.id);
             const newInventory = this.updateInventoryAfterPlacement(draft, kind);
+
+            // Ensure inventory is never undefined
+            if (!newInventory) return draft;
 
             return {
                 ...draft,

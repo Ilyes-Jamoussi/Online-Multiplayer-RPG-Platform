@@ -28,6 +28,10 @@ const routes: Routes = [
         component: HomePageComponent,
     },
     { path: removeLeadingSlash(ROUTES.gameEditor), component: EditGamePageComponent },
+    {
+        path: removeLeadingSlash(ROUTES.gameEditor) + '/:id',
+        component: EditGamePageComponent,
+    },
     { path: removeLeadingSlash(ROUTES.gameManagement), component: GameManagementPageComponent },
     {
         path: removeLeadingSlash(ROUTES.gameSessionCreation),

@@ -11,9 +11,7 @@ describe('GameStoreSocketService', () => {
         const socketSpy = jasmine.createSpyObj('SocketService', ['onSuccessEvent']);
 
         TestBed.configureTestingModule({
-            providers: [
-                { provide: SocketService, useValue: socketSpy }
-            ]
+            providers: [{ provide: SocketService, useValue: socketSpy }],
         });
 
         service = TestBed.inject(GameStoreSocketService);

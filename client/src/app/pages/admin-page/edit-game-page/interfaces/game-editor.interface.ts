@@ -1,5 +1,7 @@
+import { MapSize } from '@common/enums/map-size.enum';
+
 export type SizePreset = 's' | 'm' | 'l';
-export type GameMode = 'CLASSIC' | 'CTF';
+export type GameMode = 'classic' | 'capture-the-flag';
 
 export interface MapDimensions {
     width: number;
@@ -66,7 +68,7 @@ export enum TileKind {
     TELEPORT = 'TELEPORT',
 }
 
-export type Direction = 'N' | 'E' | 'S' | 'W';
+export type Orientation = 'N' | 'E' | 'S' | 'W';
 
 export type TileSpec =
     | { kind: TileKind.BASE }
@@ -74,7 +76,7 @@ export type TileSpec =
     | { kind: TileKind.WATER }
     | { kind: TileKind.ICE }
     | { kind: TileKind.DOOR; open: boolean }
-    | { kind: TileKind.TELEPORT; pairId: string; endpoint: 'A' | 'B' };
+    | { kind: TileKind.TELEPORT; pairId: string };
 
 export enum PlaceableKind {
     START = 'START',
@@ -93,7 +95,7 @@ export interface PlaceableBase {
         x: number;
         y: number;
     };
-    direction?: Direction;
+    orientation?: Orientation;
 }
 export type PlaceableObject =
     | (PlaceableBase & { kind: PlaceableKind.START })
@@ -190,3 +192,26 @@ export interface TileActions {
 }
 
 export const DND_MIME = 'application/x-placeable-kind';
+
+export interface GamePayload {
+    name: string;
+    description: string;
+    size: MapSize;
+    mode: GameMode;
+    visibility: boolean;
+    lastModified: Date;
+    tiles: {
+        x: number;
+        y: number;
+        kind: Exclude<TileKind, 'BASE'>;
+        open?: boolean;
+        endpointId?: number;
+    }[];
+    objects: {
+        id: string;
+        kind: 'START' | 'FLAG' | 'HEAL' | 'FIGHT' | 'BOAT';
+        x: number;
+        y: number;
+        orientation?: 'N' | 'E' | 'S' | 'W';
+    }[];
+}

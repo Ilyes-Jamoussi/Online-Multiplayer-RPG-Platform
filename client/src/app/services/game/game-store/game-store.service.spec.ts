@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { CreateGameDto, GamePreviewDto, UpdateGameDto } from '@app/api/model/models';
-import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { GameStoreSocketService } from '@app/services/game-store-socket/game-store-socket.service';
+import { GameHttpService } from '@app/services/game/game-http/game-http.service';
+import { GameStoreSocketService } from '@app/services/game/game-store-socket/game-store-socket.service';
 import { of } from 'rxjs';
 import { GameStoreService } from './game-store.service';
 
@@ -17,17 +17,24 @@ describe('GameStoreService', () => {
 
     beforeEach(() => {
         const gameHttpSpy = jasmine.createSpyObj('GameHttpService', [
-            'getGamesDisplay', 'createGame', 'updateGame', 'deleteGame', 'toggleVisibility'
+            'getGamesDisplay',
+            'createGame',
+            'updateGame',
+            'deleteGame',
+            'toggleVisibility',
         ]);
         const gameStoreSocketSpy = jasmine.createSpyObj('GameStoreSocketService', [
-            'onGameCreated', 'onGameUpdated', 'onGameDeleted', 'onGameVisibilityToggled'
+            'onGameCreated',
+            'onGameUpdated',
+            'onGameDeleted',
+            'onGameVisibilityToggled',
         ]);
 
         TestBed.configureTestingModule({
             providers: [
                 { provide: GameHttpService, useValue: gameHttpSpy },
-                { provide: GameStoreSocketService, useValue: gameStoreSocketSpy }
-            ]
+                { provide: GameStoreSocketService, useValue: gameStoreSocketSpy },
+            ],
         });
 
         service = TestBed.inject(GameStoreService);
@@ -56,9 +63,9 @@ describe('GameStoreService', () => {
     describe('visibleGames', () => {
         it('should return only visible games', () => {
             gameHttpServiceSpy.getGamesDisplay.and.returnValue(of(mockGames));
-            
+
             service.loadGames().subscribe();
-            
+
             const visibleGames = service.visibleGames();
             expect(visibleGames).toEqual([mockGames[0]]);
         });
@@ -77,8 +84,15 @@ describe('GameStoreService', () => {
 
     describe('createGame', () => {
         it('should call gameHttpService.createGame', () => {
-            const createDto: CreateGameDto = { name: 'New Game', description: 'New Desc', size: 10, mode: 'classic' };
-            gameHttpServiceSpy.createGame.and.returnValue(of(undefined));
+            const createDto: CreateGameDto = {
+                name: 'New Game',
+                description: 'New Desc',
+                size: CreateGameDto.SizeEnum.NUMBER_10,
+                mode: 'classic',
+                tiles: [],
+                objects: [],
+            };
+            gameHttpServiceSpy.createGame.and.returnValue(of({ id: '3', ...createDto, lastModified: '2023-01-03', visibility: true }));
 
             service.createGame(createDto).subscribe();
 
@@ -88,7 +102,7 @@ describe('GameStoreService', () => {
 
     describe('updateGame', () => {
         it('should call gameHttpService.updateGame', () => {
-            const updateDto: UpdateGameDto = { name: 'Updated Game', description: 'Updated Desc' };
+            const updateDto: UpdateGameDto = { name: 'Updated Game', description: 'Updated Desc', size: 10, mode: 'classic' };
             gameHttpServiceSpy.updateGame.and.returnValue(of(undefined));
 
             service.updateGame('1', updateDto).subscribe();
@@ -134,7 +148,13 @@ describe('GameStoreService', () => {
 
         it('should handle game created event', () => {
             const newGame: GamePreviewDto = {
-                id: '3', name: 'Game 3', description: 'Desc 3', size: 20, mode: 'classic', lastModified: '2023-01-03', visibility: true
+                id: '3',
+                name: 'Game 3',
+                description: 'Desc 3',
+                size: 20,
+                mode: 'classic',
+                lastModified: '2023-01-03',
+                visibility: true,
             };
             const callback = gameStoreSocketServiceSpy.onGameCreated.calls.argsFor(0)[0];
 
@@ -157,7 +177,7 @@ describe('GameStoreService', () => {
 
             callback({ id: '1' });
 
-            expect(service.gameDisplays().find(g => g.id === '1')).toBeUndefined();
+            expect(service.gameDisplays().find((g) => g.id === '1')).toBeUndefined();
         });
 
         it('should handle game visibility toggled event', () => {

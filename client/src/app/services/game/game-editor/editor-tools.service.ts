@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GameDraftService } from '@app/pages/admin-page/edit-game-page/services/game-draft.service';
+import { GameDraftService } from './game-draft.service';
 import { ActiveTool } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
 
 @Injectable({

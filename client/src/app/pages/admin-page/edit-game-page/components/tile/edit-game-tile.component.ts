@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject, Input, HostBinding, HostListener } from '@angular/core';
 import { NgStyle } from '@angular/common';
 import { TileKind, TileSpec, DND_MIME, PlaceableKind } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
-import { TileService } from '@app/pages/admin-page/edit-game-page/services/tile.service';
-import { EditorToolsService } from '@app/pages/admin-page/edit-game-page/services/editor-tools.service';
+import { TileService } from '@app/services/game/game-editor/tile.service';
+import { EditorToolsService } from '@app/services/game/game-editor/editor-tools.service';
 import { TileSizeProbeDirective } from '@app/pages/admin-page/edit-game-page/directives/tile-size-probe.directive';
-import { ObjectService } from '@app/pages/admin-page/edit-game-page/services/object.service';
+import { ObjectService } from '@app/services/game/game-editor/object.service';
 
 @Component({
     selector: 'app-edit-game-tile',

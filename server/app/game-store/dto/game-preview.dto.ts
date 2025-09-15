@@ -35,6 +35,4 @@ export class GamePreviewDto {
     @ApiProperty({ example: true })
     @IsBoolean()
     readonly visibility: boolean;
-
-
 }

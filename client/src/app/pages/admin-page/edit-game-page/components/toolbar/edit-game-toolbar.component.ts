@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 
 import { UiTooltipComponent } from '@app/shared/ui/components/tooltip/tooltip.component';
-import { GameDraftService } from '@app/pages/admin-page/edit-game-page/services/game-draft.service';
-import { EditorToolsService } from '@app/pages/admin-page/edit-game-page/services/editor-tools.service';
+import { GameDraftService } from '@app/services/game/game-editor/game-draft.service';
+import { EditorToolsService } from '@app/services/game/game-editor/editor-tools.service';
 import { ActiveTool, TileKind } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
 
 import { DraggablePanelComponent } from '@app/shared/ui/components/draggable-panel/draggable-panel.component'; // generic panel
@@ -34,7 +34,7 @@ export class EditGameToolbarComponent {
         { emoji: '🚪', class: 'door', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.DOOR, open: false } } },
         { emoji: '💧', class: 'water', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.WATER } } },
         { emoji: '❄️', class: 'ice', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.ICE } } },
-        { emoji: '🔮', class: 'teleport', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.TELEPORT, pairId: 'PENDING', endpoint: 'A' } } },
+        { emoji: '🔮', class: 'teleport', tool: { type: 'TILE_BRUSH', tile: { kind: TileKind.TELEPORT, pairId: 'PENDING' } } },
     ];
 
     select(item: BrushItem) {

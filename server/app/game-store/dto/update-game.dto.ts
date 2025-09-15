@@ -1,14 +1,27 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsArray, IsOptional, ValidateNested } from 'class-validator';
 
-export class UpdateGameDto {
-    @ApiProperty()
-    @IsString()
-    @IsNotEmpty()
-    readonly name: string;
+import { CreateGameDto, PlaceableCreateDto, TileCreateDto } from './create-game.dto';
 
-    @ApiProperty()
-    @IsString()
-    @IsNotEmpty()
-    readonly description: string;
+export class UpdateGameDto extends PartialType(CreateGameDto) {
+    @ApiPropertyOptional({
+        type: [TileCreateDto],
+        description: 'Tiles array of non-BASE tiles.',
+    })
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => TileCreateDto)
+    tiles?: TileCreateDto[];
+
+    @ApiPropertyOptional({
+        type: [PlaceableCreateDto],
+        description: 'Array of placed objects.',
+    })
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => PlaceableCreateDto)
+    objects?: PlaceableCreateDto[];
 }

@@ -4,15 +4,9 @@
             <img src="assets/images/logo.png" alt="Game Logo" class="game-logo-modern" />
         </div>
         <div class="menu-buttons-modern">
-            <app-ui-button size="lg" [disabled]="true" variant="secondary">
-                Rejoindre une partie (Bientôt disponible)
-            </app-ui-button>
-            <app-ui-button size="lg" (buttonClick)="navigateToCreateGame()" variant="primary">
-                Créer une partie
-            </app-ui-button>
-            <app-ui-button size="lg" (buttonClick)="navigateToAdminPage()" variant="primary">
-                Administrer les jeux
-            </app-ui-button>
+            <app-ui-button size="lg" [disabled]="true" variant="secondary"> Rejoindre une partie (Bientôt disponible) </app-ui-button>
+            <app-ui-button size="lg" (buttonClick)="navigateToCreateGame()" variant="primary"> Créer une partie </app-ui-button>
+            <app-ui-button size="lg" (buttonClick)="navigateToAdminPage()" variant="primary"> Administrer les jeux </app-ui-button>
         </div>
     </div>
     <div class="home-right">

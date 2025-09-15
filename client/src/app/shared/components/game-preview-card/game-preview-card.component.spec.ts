@@ -13,12 +13,12 @@ describe('GamePreviewCardComponent', () => {
         size: 10,
         mode: 'classic',
         lastModified: '2023-01-01T10:00:00Z',
-        visibility: true
+        visibility: true,
     };
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [GamePreviewCardComponent]
+            imports: [GamePreviewCardComponent],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GamePreviewCardComponent);

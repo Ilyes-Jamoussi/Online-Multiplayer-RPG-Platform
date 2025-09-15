@@ -1,8 +1,8 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule, AsyncPipe } from '@angular/common';
 
-import { GameDraftService } from '@app/pages/admin-page/edit-game-page/services/game-draft.service';
-import { EditorToolsService } from '@app/pages/admin-page/edit-game-page/services/editor-tools.service';
+import { GameDraftService } from '@app/services/game/game-editor/game-draft.service';
+import { EditorToolsService } from '@app/services/game/game-editor/editor-tools.service';
 import { PlaceableKind, DND_MIME } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
 
 import { DraggablePanelComponent } from '@app/shared/ui/components/draggable-panel/draggable-panel.component'; // <-- path where you placed it

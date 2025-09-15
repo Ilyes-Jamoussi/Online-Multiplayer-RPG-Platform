@@ -1,6 +1,7 @@
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { CreateGameDto, GameInitDto, GamePreviewDto, ToggleVisibilityDto, UpdateGameDto } from '@app/api/model/models';
+import { CreateGameDto, GameInitDto, GamePreviewDto, ToggleVisibilityDto } from '@app/api/model/models';
 import { API_PATHS } from '@common/constants/api-paths';
 import { environment } from 'src/environments/environment';
 import { GameHttpService } from './game-http.service';
@@ -8,14 +9,15 @@ import { GameHttpService } from './game-http.service';
 describe('GameHttpService', () => {
     let service: GameHttpService;
     let httpMock: HttpTestingController;
+
     const baseUrl = environment.serverUrl;
     const gamesEndpoint = `${baseUrl}${API_PATHS.games.base}`;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
-            providers: [GameHttpService]
+            providers: [GameHttpService, provideHttpClient(), provideHttpClientTesting()],
         });
+
         service = TestBed.inject(GameHttpService);
         httpMock = TestBed.inject(HttpTestingController);
     });
@@ -23,7 +25,6 @@ describe('GameHttpService', () => {
     afterEach(() => {
         httpMock.verify();
     });
-
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
@@ -31,10 +32,10 @@ describe('GameHttpService', () => {
     describe('getGamesDisplay', () => {
         it('should return games display', () => {
             const mockGames: GamePreviewDto[] = [
-                { id: '1', name: 'Game 1', description: 'Desc 1', size: 10, mode: 'classic', lastModified: '2023-01-01', visibility: true }
+                { id: '1', name: 'Game 1', description: 'Desc 1', size: 10, mode: 'classic', lastModified: '2023-01-01', visibility: true },
             ];
 
-            service.getGamesDisplay().subscribe(games => {
+            service.getGamesDisplay().subscribe((games) => {
                 expect(games).toEqual(mockGames);
             });
 
@@ -49,7 +50,7 @@ describe('GameHttpService', () => {
             const gameId = '123';
             const mockGameInit: GameInitDto = { mapSize: 10 };
 
-            service.getGameInitializationData(gameId).subscribe(gameInit => {
+            service.getGameInitializationData(gameId).subscribe((gameInit) => {
                 expect(gameInit).toEqual(mockGameInit);
             });
 
@@ -61,7 +62,7 @@ describe('GameHttpService', () => {
 
     describe('createGame', () => {
         it('should create a game', () => {
-            const createDto: CreateGameDto = { name: 'New Game', description: 'New Desc', size: 10, mode: 'classic' };
+            const createDto: CreateGameDto = { name: 'New Game', description: 'New Desc', size: 10, mode: 'classic', tiles: [], objects: [] };
 
             service.createGame(createDto).subscribe();
 
@@ -75,13 +76,13 @@ describe('GameHttpService', () => {
     describe('updateGame', () => {
         it('should update a game', () => {
             const gameId = '123';
-            const updateDto: UpdateGameDto = { name: 'Updated Game', description: 'Updated Desc' };
+            const createDto: CreateGameDto = { name: 'Updated Game', description: 'Updated Desc', size: 10, mode: 'classic', tiles: [], objects: [] };
 
-            service.updateGame(gameId, updateDto).subscribe();
+            service.updateGame(gameId, createDto).subscribe();
 
             const req = httpMock.expectOne(`${gamesEndpoint}/${gameId}`);
             expect(req.request.method).toBe('PATCH');
-            expect(req.request.body).toEqual(updateDto);
+            expect(req.request.body).toEqual(createDto);
             req.flush(null);
         });
     });
