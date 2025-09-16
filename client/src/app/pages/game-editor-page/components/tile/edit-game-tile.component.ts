@@ -3,7 +3,7 @@ import { NgStyle } from '@angular/common';
 import { TileSpec, DND_MIME } from '@app/interfaces/game/game-editor.interface';
 import { TileService } from '@app/services/game/game-editor/tile.service';
 import { EditorToolsService } from '@app/services/game/game-editor/editor-tools.service';
-import { TileSizeProbeDirective } from '@app/pages/admin-page/edit-game-page/directives/tile-size-probe.directive';
+import { TileSizeProbeDirective } from '@app/pages/game-editor-page/directives/tile-size-probe.directive';
 import { ObjectService } from '@app/services/game/game-editor/object.service';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';

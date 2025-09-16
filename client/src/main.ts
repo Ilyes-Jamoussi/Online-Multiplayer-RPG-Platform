@@ -12,7 +12,7 @@ import { GameManagementPageComponent } from '@app/pages/game-management-page/gam
 import { GameSessionCreationPageComponent } from '@app/pages/game-session-creation-page/game-session-creation-page.component';
 import { CharacterCreationPageComponent } from '@app/pages/character-creation-page/character-creation-page.component';
 import { GameParametersPageComponent } from '@app/pages/game-parameters-page/game-parameters-page.component';
-import { EditGamePageComponent } from '@app/pages/admin-page/edit-game-page/view/edit-game-page.component';
+import { EditGamePageComponent } from '@app/pages/game-editor-page/view/edit-game-page.component';
 
 // import { CreateGameComponent } from './app/pages/create-game/create-game.component'; --- IGNORE ---
 
