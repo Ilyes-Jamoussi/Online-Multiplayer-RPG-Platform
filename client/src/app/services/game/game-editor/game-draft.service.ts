@@ -6,15 +6,15 @@ import {
     Objects,
     InventoryState,
     EditorState,
-    TileKind,
-    GameMode,
     SizePreset,
     sizePresets,
     InventorySpec,
     MapDimensions,
-    PlaceableKind,
     TileSpec,
-} from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+} from '@app/interfaces/game/game-editor.interface';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile-kind.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 
 @Injectable({
     providedIn: 'root',
@@ -28,7 +28,8 @@ export class GameDraftService {
     readonly grid$ = this.draft$.pipe(map((d) => d.grid));
     readonly objects$ = this.draft$.pipe(map((d) => d.objects));
     readonly inventory$ = this.draft$.pipe(map((d) => d.inventory));
-    readonly teleports$ = this.draft$.pipe(map((d) => d.teleports));
+    // todo : implement teleports
+    // readonly teleports$ = this.draft$.pipe(map((d) => d.teleports));
     readonly meta$ = this.draft$.pipe(map((d) => d.meta));
     readonly activeTool$ = this.draft$.pipe(map((d) => d.editor?.activeTool || { type: 'TILE_BRUSH', tile: { kind: TileKind.BASE } }));
 
@@ -38,13 +39,13 @@ export class GameDraftService {
     readonly objectsArray$ = this.draft$.pipe(map((d) => Object.values(d.objects.byId || {})));
 
     /** Exposed Methods and Core API */
-    initDraft(name: string = '', description: string = '', size: SizePreset = 's', mode: GameMode = 'classic'): void {
+    initDraft(name: string = '', description: string = '', size: SizePreset = 's', mode: GameMode = GameMode.CLASSIC): void {
         const preset = sizePresets[size];
         const baseGrid = this.createGrid(preset.dimensions);
         const entities: Objects = { byId: {} };
 
         const editor: EditorState = {
-            activeTool: { type: 'TILE_BRUSH', tile: { kind: TileKind.BASE } },
+            activeTool: { type: 'TILE_BRUSH', tile: TileKind.BASE },
             tileSize: 0,
         };
 

@@ -1,10 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, Input, HostBinding, HostListener } from '@angular/core';
 import { NgStyle } from '@angular/common';
-import { TileKind, TileSpec, DND_MIME, PlaceableKind } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import { TileSpec, DND_MIME } from '@app/interfaces/game/game-editor.interface';
 import { TileService } from '@app/services/game/game-editor/tile.service';
 import { EditorToolsService } from '@app/services/game/game-editor/editor-tools.service';
 import { TileSizeProbeDirective } from '@app/pages/admin-page/edit-game-page/directives/tile-size-probe.directive';
 import { ObjectService } from '@app/services/game/game-editor/object.service';
+import { TileKind } from '@common/enums/tile-kind.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { ReadTileDto } from '@app/api/model/readTileDto';
 
 @Component({
     selector: 'app-edit-game-tile',
@@ -52,7 +55,7 @@ export class EditGameTileComponent extends TileSizeProbeDirective {
         this.tiles.dragPaint(this.x, this.y);
     }
 
-    colorOf(kind: TileKind): string {
+    colorOf(kind: ReadTileDto.KindEnum): string {
         switch (kind) {
             case TileKind.BASE:
                 return '#a3e635';
@@ -101,6 +104,6 @@ export class EditGameTileComponent extends TileSizeProbeDirective {
         if (!kindStr) return;
         evt.preventDefault();
         this.objects.tryPlaceObject(this.x, this.y, kindStr as PlaceableKind);
-        this.tools.setActiveTool({ type: 'TILE_BRUSH', tile: { kind: TileKind.BASE } });
+        this.tools.setActiveTool({ type: 'TILE_BRUSH', tile: TileKind.BASE });
     }
 }

@@ -1,13 +1,8 @@
 import { Injectable } from '@angular/core';
 import { GameDraftService } from './game-draft.service';
-import {
-    PlaceableKind,
-    Objects,
-    InventoryState,
-    PlaceableObject,
-    GameDraft,
-} from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import { Objects, InventoryState, PlaceableObject, GameDraft } from '@app/interfaces/game/game-editor.interface';
 import { indexOf } from '@app/services/game/utils/grid-utils';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 
 @Injectable({
     providedIn: 'root',
@@ -107,6 +102,6 @@ export class ObjectService {
 
     private createPlaceable(kind: PlaceableKind, x: number, y: number): PlaceableObject {
         const id = Math.random().toString(ObjectService.randomIdRadix).substring(2, ObjectService.randomIdLength);
-        return { id, kind, position: { x, y } } as PlaceableObject;
+        return { id, kind, x, y } as PlaceableObject;
     }
 }

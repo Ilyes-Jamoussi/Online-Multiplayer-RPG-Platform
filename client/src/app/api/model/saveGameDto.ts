@@ -7,18 +7,30 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { SaveTileDto } from './saveTileDto';
+import { SavePlaceableDto } from './savePlaceableDto';
 
 
-export interface GamePreviewDto { 
-    id: string;
+export interface SaveGameDto { 
+    /**
+     * Game ID when saving an edit; omitted/ignored for creation.
+     */
+    id?: string;
+    size: SaveGameDto.SizeEnum;
+    mode: SaveGameDto.ModeEnum;
     name: string;
-    size: GamePreviewDto.SizeEnum;
-    mode: GamePreviewDto.ModeEnum;
     description: string;
-    lastModified: string;
-    visibility: boolean;
+    visibility?: boolean;
+    /**
+     * Complete list of non-BASE tiles (replaces existing).
+     */
+    tiles: Array<SaveTileDto>;
+    /**
+     * Complete list of placed objects (replaces existing).
+     */
+    objects: Array<SavePlaceableDto>;
 }
-export namespace GamePreviewDto {
+export namespace SaveGameDto {
     export const SizeEnum = {
         NUMBER_10: 10,
         NUMBER_15: 15,

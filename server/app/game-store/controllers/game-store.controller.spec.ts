@@ -2,13 +2,13 @@ import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
 import { GameInitDto } from '@app/game-store/dto/game-init.dto';
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
 import { ToggleVisibilityDto } from '@app/game-store/dto/toggle-visibility.dto';
-import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 import { GameStoreController } from '@app/game-store/controllers/game-store.controller';
 import { GameStoreGateway } from '@app/game-store/gateways/game-store.gateway';
 import { GameStoreService } from '@app/game-store/services/game-store.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Test, TestingModule } from '@nestjs/testing';
+import { SaveGameDto } from '@app/game-store/dto/save-game.dto';
 
 describe('GameStoreController', () => {
     let controller: GameStoreController;
@@ -19,29 +19,34 @@ describe('GameStoreController', () => {
         id: 'test-id',
         name: 'Test Game',
         description: 'Test Description',
-        size: MapSize.Medium,
-        mode: GameMode.Classic,
+        size: MapSize.MEDIUM,
+        mode: GameMode.CLASSIC,
         lastModified: new Date(),
         visibility: true,
     };
 
     const mockGameInit: GameInitDto = {
-        mapSize: MapSize.Medium,
+        mapSize: MapSize.MEDIUM,
     };
 
     const mockCreateGameDto: CreateGameDto = {
         name: 'New Game',
         description: 'New Description',
-        size: MapSize.Small,
-        mode: GameMode.Classic,
+        size: MapSize.SMALL,
+        mode: GameMode.CLASSIC,
         visibility: true,
         tiles: [],
         objects: [],
     };
 
-    const mockUpdateGameDto: UpdateGameDto = {
+    const mockUpdateGameDto: SaveGameDto = {
         name: 'Updated Game',
         description: 'Updated Description',
+        size: MapSize.SMALL,
+        mode: GameMode.CLASSIC,
+        visibility: true,
+        tiles: [],
+        objects: [],
     };
 
     const mockToggleVisibilityDto: ToggleVisibilityDto = {
@@ -93,7 +98,7 @@ describe('GameStoreController', () => {
             const mockGames = [mockGamePreview];
             gameService.getGames.mockResolvedValue(mockGames);
 
-            const result = await controller.getGames();
+            const result = await controller.getGamesPreview();
 
             expect(gameService.getGames).toHaveBeenCalled();
             expect(result).toEqual(mockGames);

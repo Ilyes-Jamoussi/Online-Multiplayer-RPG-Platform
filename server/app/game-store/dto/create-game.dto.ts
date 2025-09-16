@@ -5,31 +5,11 @@ import { IsArray, IsBoolean, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Mi
 
 import { MapSize } from '@common/enums/map-size.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
+import { TileKind } from '@common/enums/tile-kind.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { Orientation } from '@common/enums/orientation.enum';
 
-export enum ApiTileKind {
-    WALL = 'WALL',
-    WATER = 'WATER',
-    ICE = 'ICE',
-    DOOR = 'DOOR',
-    TELEPORT = 'TELEPORT',
-}
-
-export enum ApiPlaceableKind {
-    START = 'START',
-    FLAG = 'FLAG',
-    HEAL = 'HEAL',
-    FIGHT = 'FIGHT',
-    BOAT = 'BOAT',
-}
-
-export enum ApiOrientation {
-    N = 'N',
-    E = 'E',
-    S = 'S',
-    W = 'W',
-}
-
-export class TileCreateDto {
+export class CreateTileDto {
     @ApiProperty({ minimum: 0, example: 7 })
     @IsInt()
     @Min(0)
@@ -40,9 +20,9 @@ export class TileCreateDto {
     @Min(0)
     y: number;
 
-    @ApiProperty({ enum: ApiTileKind, example: ApiTileKind.WALL })
-    @IsEnum(ApiTileKind)
-    kind: ApiTileKind;
+    @ApiProperty({ enum: TileKind, example: TileKind.WALL })
+    @IsEnum(TileKind)
+    kind: TileKind;
 
     @ApiPropertyOptional({ description: 'For DOOR only', example: false })
     @IsOptional()
@@ -56,13 +36,13 @@ export class TileCreateDto {
     endpointId?: number;
 }
 
-export class PlaceableCreateDto {
+export class CreatePlaceableDto {
     @ApiProperty({
-        enum: ApiPlaceableKind,
-        example: ApiPlaceableKind.HEAL,
+        enum: PlaceableKind,
+        example: PlaceableKind.HEAL,
     })
-    @IsEnum(ApiPlaceableKind)
-    kind: ApiPlaceableKind;
+    @IsEnum(PlaceableKind)
+    kind: PlaceableKind;
 
     @ApiProperty({ minimum: 0, example: 6 })
     @IsInt()
@@ -74,26 +54,18 @@ export class PlaceableCreateDto {
     @Min(0)
     y: number;
 
-    @ApiPropertyOptional({ enum: ApiOrientation, example: ApiOrientation.E })
+    @ApiPropertyOptional({ enum: Orientation, example: Orientation.E })
     @IsOptional()
-    @IsEnum(ApiOrientation)
-    orientation?: ApiOrientation;
-
-    @ApiPropertyOptional({
-        description: 'Optional ID for reference; if not provided, the server will generate one',
-        example: 'a8tq7w8',
-    })
-    @IsOptional()
-    @IsString()
-    id?: string;
+    @IsEnum(Orientation)
+    orientation?: Orientation;
 }
 
 export class CreateGameDto {
-    @ApiProperty({ enum: MapSize, example: MapSize.Large })
+    @ApiProperty({ enum: MapSize, example: MapSize.LARGE })
     @IsEnum(MapSize)
     readonly size: MapSize;
 
-    @ApiProperty({ enum: GameMode, example: GameMode.Classic })
+    @ApiProperty({ enum: GameMode, example: GameMode.CLASSIC })
     @IsEnum(GameMode)
     readonly mode: GameMode;
 
@@ -113,18 +85,18 @@ export class CreateGameDto {
     readonly visibility?: boolean;
 
     @ApiProperty({
-        type: [TileCreateDto],
+        type: [CreateTileDto],
         description: 'Sparse tiles: only those different from BASE',
     })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => TileCreateDto)
-    readonly tiles: TileCreateDto[] = [];
+    @Type(() => CreateTileDto)
+    readonly tiles: CreateTileDto[] = [];
 
     /** Placed objects */
-    @ApiProperty({ type: [PlaceableCreateDto] })
+    @ApiProperty({ type: [CreatePlaceableDto] })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => PlaceableCreateDto)
-    readonly objects: PlaceableCreateDto[] = [];
+    @Type(() => CreatePlaceableDto)
+    readonly objects: CreatePlaceableDto[] = [];
 }

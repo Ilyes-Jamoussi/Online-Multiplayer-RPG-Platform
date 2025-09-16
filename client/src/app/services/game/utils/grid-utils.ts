@@ -1,4 +1,4 @@
-import { Grid } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import { Grid } from '@app/interfaces/game/game-editor.interface';
 
 export function indexOf(x: number, y: number, width: number): number {
     return y * width + x;

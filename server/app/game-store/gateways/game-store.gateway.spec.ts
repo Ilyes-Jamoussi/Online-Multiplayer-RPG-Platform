@@ -34,7 +34,7 @@ describe('GameStoreGateway', () => {
                 name: 'Test Game',
                 description: 'Test Description',
                 size: 15,
-                mode: GameMode.Classic,
+                mode: GameMode.CLASSIC,
                 lastModified: new Date(),
                 visibility: true,
             };
@@ -52,7 +52,7 @@ describe('GameStoreGateway', () => {
                 name: 'Updated Game',
                 description: 'Updated Description',
                 size: 20,
-                mode: GameMode.CaptureTheFlag,
+                mode: GameMode.CTF,
                 lastModified: new Date(),
                 visibility: false,
             };

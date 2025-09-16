@@ -1,12 +1,10 @@
-import { MapSize } from '@common/enums/map-size.enum';
+import { TileKind } from '@common/enums/tile-kind.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { ReadTileDto } from '@app/api/model/readTileDto';
+import { ReadPlaceableDto } from '@app/api/model/readPlaceableDto';
+import { GameMode } from '@common/enums/game-mode.enum';
 
 export type SizePreset = 's' | 'm' | 'l';
-export type GameMode = 'classic' | 'capture-the-flag';
-
-export interface MapDimensions {
-    width: number;
-    height: number;
-}
 
 export interface MapObjects {
     startPoints: number;
@@ -15,6 +13,11 @@ export interface MapObjects {
     fight: number;
     teleports: number;
     boats: number;
+}
+
+export interface MapDimensions {
+    width: number;
+    height: number;
 }
 
 export const sizePresets: Record<
@@ -59,50 +62,28 @@ export const sizePresets: Record<
     },
 };
 
-export enum TileKind {
-    BASE = 'BASE',
-    WALL = 'WALL',
-    DOOR = 'DOOR',
-    WATER = 'WATER',
-    ICE = 'ICE',
-    TELEPORT = 'TELEPORT',
+export interface TileSpec extends Omit<ReadTileDto, 'x' | 'y' | 'id'> {
+    x?: number;
+    y?: number;
+    id?: string;
 }
 
-export type Orientation = 'N' | 'E' | 'S' | 'W';
-
-export type TileSpec =
-    | { kind: TileKind.BASE }
-    | { kind: TileKind.WALL }
-    | { kind: TileKind.WATER }
-    | { kind: TileKind.ICE }
-    | { kind: TileKind.DOOR; open: boolean }
-    | { kind: TileKind.TELEPORT; pairId: string };
-
-export enum PlaceableKind {
-    START = 'START',
-    FLAG = 'FLAG',
-    HEAL = 'HEAL',
-    FIGHT = 'FIGHT',
-    BOAT = 'BOAT',
-}
 export type ObjectId = string;
 
-export interface PlaceableBase {
-    id: ObjectId;
-    kind: PlaceableKind;
-    label?: string;
-    position: {
-        x: number;
-        y: number;
-    };
-    orientation?: Orientation;
-}
-export type PlaceableObject =
-    | (PlaceableBase & { kind: PlaceableKind.START })
-    | (PlaceableBase & { kind: PlaceableKind.FLAG })
-    | (PlaceableBase & { kind: PlaceableKind.HEAL })
-    | (PlaceableBase & { kind: PlaceableKind.FIGHT })
-    | (PlaceableBase & { kind: PlaceableKind.BOAT });
+// export interface PlaceableBase {
+//     id: ObjectId;
+//     kind: PlaceableKind;
+//     label?: string;
+//     orientation?: Orientation;
+// }
+// export type PlaceableObject =
+//     | (PlaceableBase & { kind: PlaceableKind.START })
+//     | (PlaceableBase & { kind: PlaceableKind.FLAG })
+//     | (PlaceableBase & { kind: PlaceableKind.HEAL })
+//     | (PlaceableBase & { kind: PlaceableKind.FIGHT })
+//     | (PlaceableBase & { kind: PlaceableKind.BOAT });
+
+export type PlaceableObject = ReadPlaceableDto;
 
 export interface Objects {
     byId: Record<ObjectId, PlaceableObject>;
@@ -115,17 +96,13 @@ export interface Grid {
     objectIds: (ObjectId | null)[];
 }
 
-export interface TeleportPairs {
-    byId: Record<string, { aIndex: number | null; bIndex: number | null; label: string }>; // max 5 entries
-    order: string[];
-}
-
 export interface Footprint {
     w: number;
     h: number;
 }
 
-export const footprintOf = (k: PlaceableKind): Footprint => (k === PlaceableKind.HEAL || k === PlaceableKind.FIGHT ? { w: 2, h: 2 } : { w: 1, h: 1 });
+export const footprintOf = (k: ReadPlaceableDto.KindEnum): Footprint =>
+    k === PlaceableKind.HEAL || k === PlaceableKind.FIGHT ? { w: 2, h: 2 } : { w: 1, h: 1 };
 
 export interface GameMeta {
     id?: string;
@@ -154,14 +131,15 @@ export interface GameDraft {
     grid: Grid;
     objects: Objects;
     inventory: InventoryState;
-    teleports?: TeleportPairs;
+    // todo : implement teleports
+    // teleports?: something
     editor: EditorState;
 }
 
 /** 👉 Outils actifs */
 export type TileBrushTool = {
     type: 'TILE_BRUSH';
-    tile: TileSpec;
+    tile: TileKind;
     leftDrag?: boolean;
     rightDrag?: boolean;
 };
@@ -193,25 +171,25 @@ export interface TileActions {
 
 export const DND_MIME = 'application/x-placeable-kind';
 
-export interface GamePayload {
-    name: string;
-    description: string;
-    size: MapSize;
-    mode: GameMode;
-    visibility: boolean;
-    lastModified: Date;
-    tiles: {
-        x: number;
-        y: number;
-        kind: Exclude<TileKind, 'BASE'>;
-        open?: boolean;
-        endpointId?: number;
-    }[];
-    objects: {
-        id: string;
-        kind: 'START' | 'FLAG' | 'HEAL' | 'FIGHT' | 'BOAT';
-        x: number;
-        y: number;
-        orientation?: 'N' | 'E' | 'S' | 'W';
-    }[];
-}
+// export interface GamePayload {
+//     name: string;
+//     description: string;
+//     size: MapSize;
+//     mode: GameMode;
+//     visibility: boolean;
+//     lastModified: Date;
+//     tiles: {
+//         x: number;
+//         y: number;
+//         kind: Exclude<TileKind, 'BASE'>;
+//         open?: boolean;
+//         endpointId?: number;
+//     }[];
+//     objects: {
+//         id: string;
+//         kind: 'START' | 'FLAG' | 'HEAL' | 'FIGHT' | 'BOAT';
+//         x: number;
+//         y: number;
+//         orientation?: 'N' | 'E' | 'S' | 'W';
+//     }[];
+// }

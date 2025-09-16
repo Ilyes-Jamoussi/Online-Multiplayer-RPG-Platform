@@ -1,5 +1,7 @@
 import { computed, Injectable, Signal, signal } from '@angular/core';
-import { CreateGameDto, GamePreviewDto, UpdateGameDto } from '@app/api/model/models';
+import { CreateGameDto } from '@app/api/model/createGameDto';
+import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
+import { SaveGameDto } from '@app/api/model/saveGameDto';
 import { GameHttpService } from '@app/services/game/game-http/game-http.service';
 import { GameStoreSocketService } from '@app/services/game/game-store-socket/game-store-socket.service';
 import { Observable, tap } from 'rxjs';
@@ -31,7 +33,7 @@ export class GameStoreService {
         return this.gameHttpService.createGame(dto);
     }
 
-    updateGame(id: string, dto: UpdateGameDto): Observable<void> {
+    updateGame(id: string, dto: SaveGameDto): Observable<void> {
         return this.gameHttpService.updateGame(id, dto);
     }
 

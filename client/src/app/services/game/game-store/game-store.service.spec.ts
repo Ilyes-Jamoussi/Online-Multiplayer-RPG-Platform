@@ -1,9 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { CreateGameDto, GamePreviewDto, UpdateGameDto } from '@app/api/model/models';
 import { GameHttpService } from '@app/services/game/game-http/game-http.service';
 import { GameStoreSocketService } from '@app/services/game/game-store-socket/game-store-socket.service';
 import { of } from 'rxjs';
 import { GameStoreService } from './game-store.service';
+import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
+import { CreateGameDto } from '@app/api/model/createGameDto';
+import { SaveGameDto } from '@app/api/model/saveGameDto';
 
 describe('GameStoreService', () => {
     let service: GameStoreService;
@@ -102,7 +104,7 @@ describe('GameStoreService', () => {
 
     describe('updateGame', () => {
         it('should call gameHttpService.updateGame', () => {
-            const updateDto: UpdateGameDto = { name: 'Updated Game', description: 'Updated Desc', size: 10, mode: 'classic' };
+            const updateDto: SaveGameDto = { name: 'Updated Game', description: 'Updated Desc', size: 10, mode: 'classic', tiles: [], objects: [] };
             gameHttpServiceSpy.updateGame.and.returnValue(of(undefined));
 
             service.updateGame('1', updateDto).subscribe();

@@ -3,9 +3,10 @@ import { CommonModule, AsyncPipe } from '@angular/common';
 
 import { GameDraftService } from '@app/services/game/game-editor/game-draft.service';
 import { EditorToolsService } from '@app/services/game/game-editor/editor-tools.service';
-import { PlaceableKind, DND_MIME } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import {  DND_MIME } from '@app/interfaces/game/game-editor.interface';
 
 import { DraggablePanelComponent } from '@app/shared/ui/components/draggable-panel/draggable-panel.component'; // <-- path where you placed it
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 
 @Component({
     selector: 'app-editor-inventory',

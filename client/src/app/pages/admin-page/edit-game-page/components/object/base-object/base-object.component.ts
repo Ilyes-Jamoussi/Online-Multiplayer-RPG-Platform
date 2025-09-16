@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { PlaceableObject, PlaceableKind, footprintOf } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import { PlaceableObject, footprintOf } from '@app/interfaces/game/game-editor.interface';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 
 @Component({
     selector: 'app-edit-base-object',
@@ -21,13 +22,13 @@ export class EditBaseObjectComponent {
     @HostBinding('style.grid-column')
     get gridCol() {
         const w = footprintOf(this.object.kind).w;
-        return `${this.object.position.x + 1} / span ${w}`;
+        return `${this.object.x + 1} / span ${w}`;
     }
 
     @HostBinding('style.grid-row')
     get gridRow() {
         const h = footprintOf(this.object.kind).h;
-        return `${this.object.position.y + 1} / span ${h}`;
+        return `${this.object.y + 1} / span ${h}`;
     }
 
     @HostBinding('style.--tile.px')

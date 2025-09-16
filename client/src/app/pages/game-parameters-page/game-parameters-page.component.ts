@@ -29,37 +29,37 @@ interface GameModeOption {
 export class GameParametersPageComponent {
     private readonly gameHttpService = inject(GameHttpService);
 
-    selectedMapSize: MapSize = MapSize.Medium;
-    selectedGameMode: GameMode = GameMode.Classic;
+    selectedMapSize: MapSize = MapSize.MEDIUM;
+    selectedGameMode: GameMode = GameMode.CLASSIC;
     gameName: string = '';
     gameDescription: string = '';
 
     readonly mapSizeOptions: MapSizeOption[] = [
         {
-            value: MapSize.Small,
-            label: `Petite (${MapSize.Small}x${MapSize.Small})`,
-            maxPlayers: MAP_SIZE_TO_MAX_PLAYERS[MapSize.Small],
+            value: MapSize.SMALL,
+            label: `Petite (${MapSize.SMALL}x${MapSize.SMALL})`,
+            maxPlayers: MAP_SIZE_TO_MAX_PLAYERS[MapSize.SMALL],
         },
         {
-            value: MapSize.Medium,
-            label: `Moyenne (${MapSize.Medium}x${MapSize.Medium})`,
-            maxPlayers: MAP_SIZE_TO_MAX_PLAYERS[MapSize.Medium],
+            value: MapSize.MEDIUM,
+            label: `Moyenne (${MapSize.MEDIUM}x${MapSize.MEDIUM})`,
+            maxPlayers: MAP_SIZE_TO_MAX_PLAYERS[MapSize.MEDIUM],
         },
         {
-            value: MapSize.Large,
-            label: `Grande (${MapSize.Large}x${MapSize.Large})`,
-            maxPlayers: MAP_SIZE_TO_MAX_PLAYERS[MapSize.Large],
+            value: MapSize.LARGE,
+            label: `Grande (${MapSize.LARGE}x${MapSize.LARGE})`,
+            maxPlayers: MAP_SIZE_TO_MAX_PLAYERS[MapSize.LARGE],
         },
     ];
 
     readonly gameModeOptions: GameModeOption[] = [
         {
-            value: GameMode.Classic,
+            value: GameMode.CLASSIC,
             label: 'Classique',
             description: 'Mode de jeu standard',
         },
         {
-            value: GameMode.CaptureTheFlag,
+            value: GameMode.CTF,
             label: 'Capture du Drapeau',
             description: 'Capturez le drapeau ennemi',
         },

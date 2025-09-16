@@ -1,16 +1,15 @@
-// server/src/schemas/placeable.schema.ts
+import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ApiPlaceableKind, ApiOrientation } from '@app/game-store/dto/create-game.dto';
 
 @Schema({ versionKey: false })
 export class Placeable {
-    @Prop({ required: true, enum: ApiPlaceableKind })
-    kind: ApiPlaceableKind;
+    @Prop({ required: true, enum: PlaceableKind })
+    kind: PlaceableKind;
 
     @Prop({ required: true, min: 0 }) x: number;
     @Prop({ required: true, min: 0 }) y: number;
 
-    @Prop({ enum: ApiOrientation }) orientation?: ApiOrientation;
-    // @Prop({ type: SchemaTypes.Mixed }) props?: any; // si tu veux des props libres
+    @Prop({ enum: Orientation }) orientation?: Orientation;
 }
 export const placeableSchema = SchemaFactory.createForClass(Placeable);

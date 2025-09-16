@@ -4,19 +4,14 @@ import { Injectable } from '@angular/core';
 // import { HttpClient } from '@angular/common/http';
 import { MapSize } from '@common/enums/map-size.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
-import {
-    GameDraft,
-    GamePayload,
-    PlaceableKind,
-    PlaceableObject,
-    TileKind,
-    TileSpec,
-} from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import { GameDraft, PlaceableObject, TileSpec } from '@app/interfaces/game/game-editor.interface';
 import { GameDraftService } from './game-draft.service';
 import { coordOf, indexOf } from '@app/services/game/utils/grid-utils';
 import { GameHttpService } from '@app/services/game/game-http/game-http.service';
 import { map } from 'rxjs';
-import { GameDto } from '@app/api/model/gameDto';
+import { ReadGameDto } from '@app/api/model/readGameDto';
+import { TileKind } from '@common/enums/tile-kind.enum';
+import { SaveGameDto } from '@app/api/model/saveGameDto';
 
 @Injectable({ providedIn: 'root' })
 export class GameSaveService {
@@ -41,11 +36,11 @@ export class GameSaveService {
     private mapSizePreset(preset: GameDraft['meta']['sizePreset']): MapSize {
         switch (preset) {
             case 's':
-                return MapSize.Small;
+                return MapSize.SMALL;
             case 'm':
-                return MapSize.Medium;
+                return MapSize.MEDIUM;
             case 'l':
-                return MapSize.Large;
+                return MapSize.LARGE;
             default:
                 throw new Error(`Size preset inconnu: ${preset}`);
         }
@@ -54,15 +49,15 @@ export class GameSaveService {
     private mapMode(mode: GameDraft['meta']['mode']): GameMode {
         switch (mode) {
             case 'classic':
-                return GameMode.Classic;
+                return GameMode.CLASSIC;
             case 'capture-the-flag':
-                return GameMode.CaptureTheFlag;
+                return GameMode.CTF;
             default:
                 throw new Error(`Mode inconnu: ${mode}`);
         }
     }
 
-    private toPayload(draft: GameDraft): GamePayload {
+    private toPayload(draft: GameDraft): SaveGameDto {
         const { meta, grid, objects } = draft;
         const { width, height, tiles } = grid;
 
@@ -70,7 +65,7 @@ export class GameSaveService {
         if (!meta.description?.trim()) throw new Error('La description est requise.');
         if (width <= 0 || height <= 0) throw new Error('Dimensions de grille invalides.');
 
-        const sparseTiles: GamePayload['tiles'] = [];
+        const sparseTiles: SaveGameDto['tiles'] = [];
         const expected = width * height;
         const len = Math.min(tiles.length, expected);
 
@@ -84,7 +79,7 @@ export class GameSaveService {
                 continue;
             }
 
-            const entry: GamePayload['tiles'][number] = { x, y, kind: t.kind };
+            const entry: SaveGameDto['tiles'][number] = { x, y, kind: t.kind };
             if (t.kind === 'DOOR' && typeof t.open === 'boolean') entry.open = t.open;
             // todo implement teleport tiles
             // if (t.kind === 'TELEPORT' && typeof t.endpointId === 'number') entry.endpointId = t.endpointId;
@@ -92,11 +87,11 @@ export class GameSaveService {
             sparseTiles.push(entry);
         }
 
-        const outObjects: GamePayload['objects'] = Object.values(objects.byId).map((o) => ({
+        const outObjects: SaveGameDto['objects'] = Object.values(objects.byId).map((o) => ({
             id: o.id,
             kind: o.kind,
-            x: o.position.x,
-            y: o.position.y,
+            x: o.x,
+            y: o.y,
             orientation: o.orientation,
         }));
 
@@ -106,13 +101,12 @@ export class GameSaveService {
             size: this.mapSizePreset(meta.sizePreset),
             mode: this.mapMode(meta.mode),
             visibility: false,
-            lastModified: new Date(),
             tiles: sparseTiles,
             objects: outObjects,
         };
     }
 
-    private dtoToDraft(dto: GameDto): GameDraft {
+    private dtoToDraft(dto: ReadGameDto): GameDraft {
         const { size, mode, name, description, tiles, objects, id } = dto;
         const tileCount = size * size;
         const gridTiles: TileSpec[] = Array(tileCount).fill({ kind: 'BASE' });
@@ -122,7 +116,7 @@ export class GameSaveService {
             const y = t.y;
             const index = indexOf(x, y, size);
             if (index < 0 || index >= tileCount) return;
-            gridTiles[index] = { kind: t.kind as TileKind, open: t.open ?? false, pairId: '' };
+            gridTiles[index] = { kind: t.kind, open: t.open ?? false, x, y, id: t.id ?? '' };
         });
 
         const objectIds: (string | null)[] = Array(tileCount).fill(null);
@@ -134,10 +128,11 @@ export class GameSaveService {
             const index = indexOf(x, y, size);
             if (index < 0 || index >= tileCount) return;
             objectIds[index] = o.id ?? i.toString();
-            byId[o.id ?? i.toString()] = { ...o, kind: o.kind as PlaceableKind, id: o.id ?? i.toString(), position: { x, y } };
+            byId[o.id ?? i.toString()] = { ...o, kind: o.kind, id: o.id ?? i.toString(), x, y };
         });
 
-        const draftMode: GameDraft['meta']['mode'] = mode === 'classic' ? 'classic' : mode === 'capture-the-flag' ? 'capture-the-flag' : 'classic';
+        const draftMode: GameDraft['meta']['mode'] =
+            mode === GameMode.CLASSIC ? GameMode.CLASSIC : mode === GameMode.CTF ? GameMode.CTF : GameMode.CLASSIC;
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         const draftSizePreset: GameDraft['meta']['sizePreset'] = size === 10 ? 's' : size === 15 ? 'm' : size === 20 ? 'l' : 'm';
         const draft: GameDraft = {
@@ -167,7 +162,7 @@ export class GameSaveService {
             editor: {
                 activeTool: {
                     type: 'TILE_BRUSH',
-                    tile: { kind: TileKind.BASE },
+                    tile: TileKind.BASE,
                 },
                 tileSize: 32,
             },

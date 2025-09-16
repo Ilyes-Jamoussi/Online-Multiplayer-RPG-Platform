@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { GameDraftService } from './game-draft.service';
-import { ActiveTool } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import { ActiveTool } from '@app/interfaces/game/game-editor.interface';
 
 @Injectable({
     providedIn: 'root',

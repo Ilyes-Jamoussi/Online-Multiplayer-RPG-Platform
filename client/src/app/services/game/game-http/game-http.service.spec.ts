@@ -1,10 +1,13 @@
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { CreateGameDto, GameInitDto, GamePreviewDto, ToggleVisibilityDto } from '@app/api/model/models';
 import { API_PATHS } from '@common/constants/api-paths';
 import { environment } from 'src/environments/environment';
 import { GameHttpService } from './game-http.service';
+import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
+import { CreateGameDto } from '@app/api/model/createGameDto';
+import { GameInitDto } from '@app/api/model/gameInitDto';
+import { ToggleVisibilityDto } from '@app/api/model/toggleVisibilityDto';
 
 describe('GameHttpService', () => {
     let service: GameHttpService;

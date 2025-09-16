@@ -2,14 +2,14 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
-import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
+import { SaveGameDto } from '@app/game-store/dto/save-game.dto';
 import { GameInitDto } from '@app/game-store/dto/game-init.dto';
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
 import { ToggleVisibilityDto } from '@app/game-store/dto/toggle-visibility.dto';
 
 import { GameStoreGateway } from '@app/game-store/gateways/game-store.gateway';
 import { GameStoreService } from '@app/game-store/services/game-store.service';
-import { GameDto } from '@app/game-store/dto/game.dto';
+import { ReadGameDto } from '@app/game-store/dto/read-game.dto';
 
 @ApiTags('Games')
 @Controller('games')
@@ -22,7 +22,7 @@ export class GameStoreController {
     @Get()
     @ApiOperation({ summary: 'List games (preview)' })
     @ApiResponse({ status: 200, type: [GamePreviewDto] })
-    async getGames(): Promise<GamePreviewDto[]> {
+    async getGamesPreview(): Promise<GamePreviewDto[]> {
         return this.gameService.getGames();
     }
 
@@ -35,9 +35,9 @@ export class GameStoreController {
 
     @Get(':id')
     @ApiOperation({ summary: 'Get game by ID' })
-    @ApiResponse({ status: 200, type: GameDto })
-    async getGame(@Param('id') id: string): Promise<GameDto> {
-        return this.gameService.getGame(id);
+    @ApiResponse({ status: 200, type: ReadGameDto })
+    async getGameById(@Param('id') id: string): Promise<ReadGameDto> {
+        return this.gameService.getGameById(id);
     }
 
     @Post()
@@ -63,7 +63,7 @@ export class GameStoreController {
     @ApiResponse({ status: 204, description: 'Updated' })
     @ApiResponse({ status: 400, description: 'Invalid payload (DTO validation)' })
     @ApiResponse({ status: 404, description: 'Game not found' })
-    async updateGame(@Param('id') id: string, @Body() dto: UpdateGameDto): Promise<void> {
+    async updateGame(@Param('id') id: string, @Body() dto: SaveGameDto): Promise<void> {
         const gamePreview = await this.gameService.updateGame(id, dto);
         this.gameStoreGateway.emitGameUpdated(gamePreview);
     }

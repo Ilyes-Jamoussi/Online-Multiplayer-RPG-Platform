@@ -7,18 +7,25 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { ReadTileDto } from './readTileDto';
+import { ReadPlaceableDto } from './readPlaceableDto';
 
 
-export interface GamePreviewDto { 
-    id: string;
+export interface ReadGameDto { 
+    size: ReadGameDto.SizeEnum;
+    mode: ReadGameDto.ModeEnum;
     name: string;
-    size: GamePreviewDto.SizeEnum;
-    mode: GamePreviewDto.ModeEnum;
     description: string;
+    visibility?: boolean;
+    /**
+     * Sparse tiles: only those different from BASE
+     */
+    tiles: Array<ReadTileDto>;
+    objects: Array<ReadPlaceableDto>;
+    id: string;
     lastModified: string;
-    visibility: boolean;
 }
-export namespace GamePreviewDto {
+export namespace ReadGameDto {
     export const SizeEnum = {
         NUMBER_10: 10,
         NUMBER_15: 15,

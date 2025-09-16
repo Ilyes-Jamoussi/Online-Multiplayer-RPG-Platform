@@ -1,5 +1,4 @@
 import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
-import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 import { Game, GameDocument } from '@app/game-store/entities/game.entity';
 import { GameStoreService } from '@app/game-store/services/game-store.service';
 import { getProjection } from '@app/utils/mongo.utils';
@@ -9,6 +8,7 @@ import { NotFoundException } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Model, Types, Query } from 'mongoose';
+import { SaveGameDto } from '@app/game-store/dto/save-game.dto';
 
 describe('GameStoreService', () => {
     let service: GameStoreService;
@@ -21,8 +21,8 @@ describe('GameStoreService', () => {
         _id: mockObjectId,
         name: 'Test Game',
         description: 'Test Description',
-        size: MapSize.Medium,
-        mode: GameMode.Classic,
+        size: MapSize.MEDIUM,
+        mode: GameMode.CLASSIC,
         lastModified: mockDate,
         visibility: true,
         ...overrides,
@@ -31,15 +31,19 @@ describe('GameStoreService', () => {
     const mockCreateGameDto: CreateGameDto = {
         name: 'New Game',
         description: 'New Description',
-        size: MapSize.Small,
-        mode: GameMode.Classic,
+        size: MapSize.SMALL,
+        mode: GameMode.CLASSIC,
         tiles: [],
         objects: [],
     };
 
-    const mockUpdateGameDto: UpdateGameDto = {
+    const mockUpdateGameDto: SaveGameDto = {
         name: 'Updated Game',
         description: 'Updated Description',
+        size: MapSize.LARGE,
+        mode: GameMode.CTF,
+        tiles: [],
+        objects: [],
     };
 
     beforeEach(async () => {

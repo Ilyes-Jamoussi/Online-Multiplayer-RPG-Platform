@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { GameDraftService } from './game-draft.service';
-import { TileSpec, TileKind, Grid } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import { TileSpec, Grid } from '@app/interfaces/game/game-editor.interface';
 import { inBounds, indexOf } from '@app/services/game/utils/grid-utils';
+import { TileKind } from '@common/enums/tile-kind.enum';
 
 @Injectable({
     providedIn: 'root',
@@ -15,14 +16,14 @@ export class TileService {
             const tool = draft.editor?.activeTool;
             if (!tool || tool.type !== 'TILE_BRUSH') return draft;
             const tile = this.getTile(draft.grid, x, y);
-            if (tile.kind === TileKind.DOOR && tool.tile.kind === TileKind.DOOR) {
+            if (tile.kind === TileKind.DOOR && tool.tile === TileKind.DOOR) {
                 const idx = indexOf(x, y, draft.grid.width);
                 const tiles = draft.grid.tiles.slice();
                 tiles[idx] = { kind: TileKind.DOOR, open: !tile.open };
                 return { ...draft, grid: { ...draft.grid, tiles } };
             }
 
-            if (tile.kind === tool.tile.kind && tile.kind !== TileKind.DOOR) return draft;
+            if (tile.kind === tool.tile && tile.kind !== TileKind.DOOR) return draft;
 
             return { ...draft, grid: this.setTile(draft.grid, x, y, tool.tile) };
         });
@@ -36,7 +37,7 @@ export class TileService {
             const tile = this.getTile(draft.grid, x, y);
             if (tile.kind === TileKind.BASE) return draft;
 
-            return { ...draft, grid: this.setTile(draft.grid, x, y, { kind: TileKind.BASE }) };
+            return { ...draft, grid: this.setTile(draft.grid, x, y, TileKind.BASE) };
         });
     }
 
@@ -47,12 +48,12 @@ export class TileService {
 
             if (tool.leftDrag) {
                 const tile = this.getTile(draft.grid, x, y);
-                if (tile.kind === tool.tile.kind) return draft;
+                if (tile.kind === tool.tile) return draft;
                 return { ...draft, grid: this.setTile(draft.grid, x, y, tool.tile) };
             } else {
                 const tile = this.getTile(draft.grid, x, y);
                 if (tile.kind === TileKind.BASE) return draft;
-                return { ...draft, grid: this.setTile(draft.grid, x, y, { kind: TileKind.BASE }) };
+                return { ...draft, grid: this.setTile(draft.grid, x, y, TileKind.BASE) };
             }
         });
     }
@@ -65,7 +66,7 @@ export class TileService {
             const tile = this.getTile(draft.grid, x, y);
             if (tile.kind === TileKind.BASE) return draft;
 
-            return { ...draft, grid: this.setTile(draft.grid, x, y, { kind: TileKind.BASE }) };
+            return { ...draft, grid: this.setTile(draft.grid, x, y, TileKind.BASE) };
         });
     }
 
@@ -74,11 +75,11 @@ export class TileService {
         const idx = indexOf(x, y, grid.width);
         return grid.tiles[idx];
     }
-    private setTile(grid: Grid, x: number, y: number, tile: TileSpec): Grid {
+    private setTile(grid: Grid, x: number, y: number, tile: TileKind): Grid {
         if (!inBounds(x, y, grid)) return grid;
         const idx = indexOf(x, y, grid.width);
         const tiles = grid.tiles.slice();
-        tiles[idx] = tile;
+        tiles[idx] = { kind: tile };
         return { ...grid, tiles };
     }
 }

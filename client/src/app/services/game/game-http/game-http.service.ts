@@ -1,7 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { GameDto } from '@app/api/model/gameDto';
-import { CreateGameDto, GameInitDto, GamePreviewDto, ToggleVisibilityDto, UpdateGameDto } from '@app/api/model/models';
+import { CreateGameDto } from '@app/api/model/createGameDto';
+import { GameInitDto } from '@app/api/model/gameInitDto';
+import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
+import { ReadGameDto } from '@app/api/model/readGameDto';
+import { SaveGameDto } from '@app/api/model/saveGameDto';
+import { ToggleVisibilityDto } from '@app/api/model/toggleVisibilityDto';
 import { API_PATHS } from '@common/constants/api-paths';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -21,15 +25,15 @@ export class GameHttpService {
         return this.http.get<GameInitDto>(`${this.gamesEndpoint}/${gameId}/init`);
     }
 
-    getGameById(gameId: string): Observable<GameDto> {
-        return this.http.get<GameDto>(`${this.gamesEndpoint}/${gameId}`);
+    getGameById(gameId: string): Observable<ReadGameDto> {
+        return this.http.get<ReadGameDto>(`${this.gamesEndpoint}/${gameId}`);
     }
 
     createGame(dto: CreateGameDto): Observable<GamePreviewDto> {
         return this.http.post<GamePreviewDto>(this.gamesEndpoint, dto);
     }
 
-    updateGame(id: string, dto: UpdateGameDto): Observable<void> {
+    updateGame(id: string, dto: SaveGameDto): Observable<void> {
         return this.http.patch<void>(`${this.gamesEndpoint}/${id}`, dto);
     }
 

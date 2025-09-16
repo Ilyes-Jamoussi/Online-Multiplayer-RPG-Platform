@@ -10,12 +10,13 @@ import { ObjectService } from '@app/services/game/game-editor/object.service';
 import { EditorToolsService } from '@app/services/game/game-editor/editor-tools.service';
 import { GameSaveService } from '@app/services/game/game-editor/game-save.service';
 
-import { ActiveTool, Grid, InventoryState, PlaceableObject } from '@app/pages/admin-page/edit-game-page/interfaces/game-editor.interface';
+import { ActiveTool, Grid, InventoryState, PlaceableObject } from '@app/interfaces/game/game-editor.interface';
 import { EditGameToolbarComponent } from '@app/pages/admin-page/edit-game-page/components/toolbar/edit-game-toolbar.component';
 import { EditGameTileComponent } from '@app/pages/admin-page/edit-game-page/components/tile/edit-game-tile.component';
 import { TileSizeProbeDirective } from '@app/pages/admin-page/edit-game-page/directives/tile-size-probe.directive';
 import { EditorInventoryComponent } from '@app/pages/admin-page/edit-game-page/components/inventory/inventory.component';
 import { EditBaseObjectComponent } from '@app/pages/admin-page/edit-game-page/components/object/base-object/base-object.component';
+import { GameMode } from '@common/enums/game-mode.enum';
 
 @Component({
     selector: 'app-edit-game-page',
@@ -68,7 +69,7 @@ export class EditGamePageComponent implements OnInit {
     }
 
     private initNewDraft(): void {
-        this.draft.initDraft('Nouveau jeu', 'Description…', 'l', 'classic');
+        this.draft.initDraft('Nouveau jeu', 'Description…', 'l', GameMode.CLASSIC);
     }
 
     trackByIndex = (_: number, i: number) => i;
