@@ -36,10 +36,36 @@ cache:
         policy: pull
 
 stages:
+    - backup
     - install
     - lint
     - test
     - deploy
+
+backup:dev-before-merge:
+  stage: backup
+  variables:
+    GIT_DEPTH: "0"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
+  before_script:
+    - 'which git || (apt-get update -qq && apt-get install -y git)'
+    - git config user.email "ci-backup-bot@example.com"
+    - git config user.name "CI Backup Bot"
+    - git remote set-url origin "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+    - |
+      if [ -z "${CI_COMMIT_BEFORE_SHA}" ] || [ "${CI_COMMIT_BEFORE_SHA}" = "0000000000000000000000000000000000000000" ]; then
+        echo "No CI_COMMIT_BEFORE_SHA (new branch or initial push) -> skipping backup"; exit 0; 
+      fi
+    - git fetch --no-tags --depth=1 origin "${CI_COMMIT_BEFORE_SHA}"
+  script:
+    - REF_NAME="backup/dev-$(date -u +%Y%m%d-%H%M%S)-${CI_PIPELINE_IID}"
+    - git update-ref "refs/heads/${REF_NAME}" "${CI_COMMIT_BEFORE_SHA}"
+    - git push origin "refs/heads/${REF_NAME}:refs/heads/${REF_NAME}"
+    - TAG_NAME="dev-backup-$(date -u +%Y%m%d-%H%M%S)"
+    - git tag -a "${TAG_NAME}" "${CI_COMMIT_BEFORE_SHA}" -m "Backup de dev avant pipeline ${CI_PIPELINE_IID}"
+    - git push origin "${TAG_NAME}"
+  allow_failure: true
 
 install:client:
     stage: install
