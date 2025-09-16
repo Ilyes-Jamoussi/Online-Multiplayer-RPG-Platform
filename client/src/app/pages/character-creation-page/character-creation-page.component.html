@@ -1,1 +1,170 @@
-<p>character-creation-page works!</p>
+<div class="character-creation-root">
+  <div class="header-bar">
+    <h1>Création de Personnage</h1>
+    <div class="header-spacer"></div>
+  </div>
+
+  <div class="creation-container">
+    
+    <!-- Section Informations de base -->
+    <app-ui-card variant="secondary" size="lg" class="info-section">
+      <div card-title>
+        <h2>Informations de base</h2>
+      </div>
+      <div card-content>
+        
+        <!-- Nom -->
+        <div class="form-group">
+          <label for="characterName">Nom du personnage *</label>
+          <app-ui-input
+            id="characterName"
+            [(ngModel)]="character.name"
+            placeholder="Entrez le nom de votre personnage"
+          ></app-ui-input>
+        </div>
+
+        <!-- Avatar -->
+        <div class="form-group">
+          <label>Avatar</label>
+          <div class="avatar-grid">
+            <div 
+              *ngFor="let avatar of avatars; let i = index"
+              class="avatar-option"
+              [class.selected]="character.avatar === i"
+              (click)="selectAvatar(i)"
+            >
+              <div class="avatar-number">{{ i + 1 }}</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </app-ui-card>
+
+    <!-- Section Attributs -->
+    <app-ui-card variant="secondary" size="lg" class="attributes-section">
+      <div card-title>
+        <h2>Attributs du Personnage</h2>
+      </div>
+      <div card-content>
+        
+        <!-- Vie -->
+        <app-ui-card variant="primary" size="sm" class="attribute-card">
+          <div card-content>
+            <div class="attribute-header">
+              <div class="attribute-info">
+                <span class="attribute-name">Vie</span>
+              </div>
+              <span class="attribute-value">{{ character.attributes.vie }}</span>
+            </div>
+            <p class="attribute-description">Points de vie du personnage. Détermine sa résistance.</p>
+            <div class="bonus-section">
+              <app-ui-checkbox
+                [(ngModel)]="bonusVie"
+                (ngModelChange)="onBonusChange('vie')"
+                label="Bonus +2"
+              ></app-ui-checkbox>
+            </div>
+          </div>
+        </app-ui-card>
+
+        <!-- Rapidité -->
+        <app-ui-card variant="primary" size="sm" class="attribute-card">
+          <div card-content>
+            <div class="attribute-header">
+              <div class="attribute-info">
+                <span class="attribute-name">Rapidité</span>
+              </div>
+              <span class="attribute-value">{{ character.attributes.rapidite }}</span>
+            </div>
+            <p class="attribute-description">Vitesse du personnage. Influence l'ordre des actions.</p>
+            <div class="bonus-section">
+              <app-ui-checkbox
+                [(ngModel)]="bonusRapidite"
+                (ngModelChange)="onBonusChange('rapidite')"
+                label="Bonus +2"
+              ></app-ui-checkbox>
+            </div>
+          </div>
+        </app-ui-card>
+
+        <!-- Attaque -->
+        <app-ui-card variant="primary" size="sm" class="attribute-card">
+          <div card-content>
+            <div class="attribute-header">
+              <div class="attribute-info">
+                <span class="attribute-name">Attaque</span>
+              </div>
+              <span class="attribute-value">{{ character.attributes.attaque }}</span>
+            </div>
+            <p class="attribute-description">Force d'attaque du personnage. Détermine les dégâts infligés.</p>
+            <div class="dice-section">
+              <div class="dice-options">
+                <app-ui-checkbox
+                  [ngModel]="character.diceAssignment.attaque === 'D4'"
+                  (ngModelChange)="onDiceChange('attaque', 'D4')"
+                  label="D4"
+                ></app-ui-checkbox>
+                <app-ui-checkbox
+                  [ngModel]="character.diceAssignment.attaque === 'D6'"
+                  (ngModelChange)="onDiceChange('attaque', 'D6')"
+                  label="D6"
+                ></app-ui-checkbox>
+              </div>
+            </div>
+          </div>
+        </app-ui-card>
+
+        <!-- Défense -->
+        <app-ui-card variant="primary" size="sm" class="attribute-card">
+          <div card-content>
+            <div class="attribute-header">
+              <div class="attribute-info">
+                <span class="attribute-name">Défense</span>
+              </div>
+              <span class="attribute-value">{{ character.attributes.defense }}</span>
+            </div>
+            <p class="attribute-description">Capacité défensive du personnage. Réduit les dégâts reçus.</p>
+            <div class="dice-section">
+              <div class="dice-options">
+                <app-ui-checkbox
+                  [ngModel]="character.diceAssignment.defense === 'D4'"
+                  (ngModelChange)="onDiceChange('defense', 'D4')"
+                  label="D4"
+                ></app-ui-checkbox>
+                <app-ui-checkbox
+                  [ngModel]="character.diceAssignment.defense === 'D6'"
+                  (ngModelChange)="onDiceChange('defense', 'D6')"
+                  label="D6"
+                ></app-ui-checkbox>
+              </div>
+            </div>
+          </div>
+        </app-ui-card>
+
+      </div>
+    </app-ui-card>
+
+  </div>
+
+  <!-- Actions -->
+  <div class="actions-bar">
+    <app-ui-button 
+      variant="secondary" 
+      size="lg"
+      (buttonClick)="generateRandomCharacter()"
+    >
+      Générer Aléatoirement
+    </app-ui-button>
+    
+    <app-ui-button 
+      variant="primary" 
+      size="lg"
+      [disabled]="!isFormValid()"
+      (buttonClick)="onSubmit()"
+    >
+      Confirmer le Personnage
+    </app-ui-button>
+  </div>
+
+</div>

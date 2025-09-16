@@ -1,0 +1,100 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="onCancel()">
+  <app-ui-card class="session-config-modal" (click)="$event.stopPropagation()">
+    
+    <div card-title>
+      <h2>Configuration de la partie</h2>
+      <p class="game-selected">Jeu sélectionné: <strong>{{ selectedGame.title }}</strong></p>
+    </div>
+
+    <div card-content>
+      <form class="session-form">
+        
+        <!-- Nom de la partie -->
+        <div class="form-group">
+          <label for="sessionName">Nom de la partie *</label>
+          <app-ui-input
+            id="sessionName"
+            [(ngModel)]="sessionForm.sessionName"
+            name="sessionName"
+            placeholder="Entrez le nom de votre partie"
+            [required]="true"
+          ></app-ui-input>
+        </div>
+
+        <!-- Nombre de joueurs -->
+        <div class="form-group">
+          <label for="maxPlayers">Nombre maximum de joueurs</label>
+          <app-ui-select
+            id="maxPlayers"
+            [(ngModel)]="sessionForm.maxPlayers"
+            name="maxPlayers"
+          >
+            <option *ngFor="let option of maxPlayersOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </app-ui-select>
+        </div>
+
+        <!-- Difficulté -->
+        <div class="form-group">
+          <label for="difficulty">Difficulté</label>
+          <app-ui-select
+            id="difficulty"
+            [(ngModel)]="sessionForm.difficulty"
+            name="difficulty"
+          >
+            <option *ngFor="let option of difficultyOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </app-ui-select>
+        </div>
+
+        <!-- Limite de temps -->
+        <div class="form-group">
+          <label for="timeLimit">Limite de temps (minutes)</label>
+          <app-ui-input
+            id="timeLimit"
+            [(ngModel)]="sessionForm.timeLimit"
+            name="timeLimit"
+            type="number"
+          ></app-ui-input>
+        </div>
+
+        <!-- Partie privée -->
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="sessionForm.isPrivate"
+              name="isPrivate"
+            />
+            <span class="checkmark"></span>
+            Partie privée (sur invitation seulement)
+          </label>
+        </div>
+
+      </form>
+    </div>
+
+    <div card-footer>
+      <div class="modal-actions">
+        <app-ui-button2
+          [style]="'outline'"
+          (pressed)="onCancel()"
+        >
+          Annuler
+        </app-ui-button2>
+        
+        <app-ui-button2
+          [style]="'filled'"
+          [leftIcon]="'Plus'"
+          [disabled]="!isFormValid()"
+          (pressed)="onSubmit()"
+        >
+          Créer la partie
+        </app-ui-button2>
+      </div>
+    </div>
+
+  </app-ui-card>
+</div>
