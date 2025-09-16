@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { signal } from '@angular/core';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
 import { ROUTES } from '@app/constants/routes.constants';
-import { GameStoreService } from '@app/services/game-store/game-store.service';
+import { GameStoreService } from '@app/services/game/game-store/game-store.service';
 import { of } from 'rxjs';
 import { GameSessionCreationPageComponent } from './game-session-creation-page.component';
 
@@ -35,8 +35,8 @@ describe('GameSessionCreationPageComponent', () => {
             imports: [GameSessionCreationPageComponent],
             providers: [
                 { provide: Router, useValue: routerSpyObj },
-                { provide: GameStoreService, useValue: gameStoreServiceSpy }
-            ]
+                { provide: GameStoreService, useValue: gameStoreServiceSpy },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GameSessionCreationPageComponent);

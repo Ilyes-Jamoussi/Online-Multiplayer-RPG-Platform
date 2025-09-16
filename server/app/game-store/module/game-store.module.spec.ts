@@ -12,10 +12,7 @@ describe('GameStoreModule', () => {
         const mongoUri = mongoServer.getUri();
 
         module = await Test.createTestingModule({
-            imports: [
-                MongooseModule.forRoot(mongoUri),
-                GameStoreModule,
-            ],
+            imports: [MongooseModule.forRoot(mongoUri), GameStoreModule],
         }).compile();
     });
 

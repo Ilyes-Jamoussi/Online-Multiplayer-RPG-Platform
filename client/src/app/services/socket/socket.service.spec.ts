@@ -11,7 +11,7 @@ describe('SocketService', () => {
 
     beforeEach(() => {
         mockSocket = jasmine.createSpyObj('Socket', ['emit']);
-        
+
         // Mock the io function globally before service creation
         (globalThis as unknown as { io: jasmine.Spy }).io = jasmine.createSpy('io').and.returnValue(mockSocket);
 
@@ -40,9 +40,9 @@ describe('SocketService', () => {
 
     it('should return observable from onEvent', () => {
         const event = GameStoreEvents.GameCreated;
-        
+
         const result = service.onEvent(event);
-        
+
         expect(result).toBeDefined();
     });
 
@@ -50,11 +50,13 @@ describe('SocketService', () => {
         const event = GameStoreEvents.GameCreated;
         const successData = { test: 'success' };
         const callback = jasmine.createSpy('callback');
-        
-        spyOn(service, 'onEvent').and.returnValue(of({
-            success: true,
-            data: successData,
-        } as SocketResponse<typeof successData>));
+
+        spyOn(service, 'onEvent').and.returnValue(
+            of({
+                success: true,
+                data: successData,
+            } as SocketResponse<typeof successData>),
+        );
 
         service.onSuccessEvent(event, callback);
 
@@ -64,11 +66,13 @@ describe('SocketService', () => {
     it('should not call success callback on error response', () => {
         const event = GameStoreEvents.GameCreated;
         const callback = jasmine.createSpy('callback');
-        
-        spyOn(service, 'onEvent').and.returnValue(of({
-            success: false,
-            message: 'error',
-        } as SocketResponse<never>));
+
+        spyOn(service, 'onEvent').and.returnValue(
+            of({
+                success: false,
+                message: 'error',
+            } as SocketResponse<never>),
+        );
 
         service.onSuccessEvent(event, callback);
 
@@ -79,11 +83,13 @@ describe('SocketService', () => {
         const event = GameStoreEvents.GameCreated;
         const errorMessage = 'test error';
         const callback = jasmine.createSpy('callback');
-        
-        spyOn(service, 'onEvent').and.returnValue(of({
-            success: false,
-            message: errorMessage,
-        } as SocketResponse<never>));
+
+        spyOn(service, 'onEvent').and.returnValue(
+            of({
+                success: false,
+                message: errorMessage,
+            } as SocketResponse<never>),
+        );
 
         service.onErrorEvent(event, callback);
 
@@ -93,11 +99,13 @@ describe('SocketService', () => {
     it('should not call error callback on success response', () => {
         const event = GameStoreEvents.GameCreated;
         const callback = jasmine.createSpy('callback');
-        
-        spyOn(service, 'onEvent').and.returnValue(of({
-            success: true,
-            data: { test: 'data' },
-        } as SocketResponse<unknown>));
+
+        spyOn(service, 'onEvent').and.returnValue(
+            of({
+                success: true,
+                data: { test: 'data' },
+            } as SocketResponse<unknown>),
+        );
 
         service.onErrorEvent(event, callback);
 

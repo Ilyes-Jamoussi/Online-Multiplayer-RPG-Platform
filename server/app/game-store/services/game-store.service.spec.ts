@@ -1,5 +1,4 @@
 import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
-import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 import { Game, GameDocument } from '@app/game-store/entities/game.entity';
 import { GameStoreService } from '@app/game-store/services/game-store.service';
 import { getProjection } from '@app/utils/mongo.utils';
@@ -9,6 +8,7 @@ import { NotFoundException } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Model, Types, Query } from 'mongoose';
+import { SaveGameDto } from '@app/game-store/dto/save-game.dto';
 
 describe('GameStoreService', () => {
     let service: GameStoreService;
@@ -21,8 +21,8 @@ describe('GameStoreService', () => {
         _id: mockObjectId,
         name: 'Test Game',
         description: 'Test Description',
-        size: MapSize.Medium,
-        mode: GameMode.Classic,
+        size: MapSize.MEDIUM,
+        mode: GameMode.CLASSIC,
         lastModified: mockDate,
         visibility: true,
         ...overrides,
@@ -31,13 +31,19 @@ describe('GameStoreService', () => {
     const mockCreateGameDto: CreateGameDto = {
         name: 'New Game',
         description: 'New Description',
-        size: MapSize.Small,
-        mode: GameMode.Classic,
+        size: MapSize.SMALL,
+        mode: GameMode.CLASSIC,
+        tiles: [],
+        objects: [],
     };
 
-    const mockUpdateGameDto: UpdateGameDto = {
+    const mockUpdateGameDto: SaveGameDto = {
         name: 'Updated Game',
         description: 'Updated Description',
+        size: MapSize.LARGE,
+        mode: GameMode.CTF,
+        tiles: [],
+        objects: [],
     };
 
     beforeEach(async () => {
@@ -133,10 +139,7 @@ describe('GameStoreService', () => {
 
             const result = await service.getGameInit(mockObjectId.toString());
 
-            expect(gameModel.findById).toHaveBeenCalledWith(
-                mockObjectId.toString(),
-                { map: 1, itemContainers: 1, size: 1 }
-            );
+            expect(gameModel.findById).toHaveBeenCalledWith(mockObjectId.toString(), { map: 1, itemContainers: 1, size: 1 });
             expect(result).toEqual({
                 mapSize: mockGameDocument.size,
             });
@@ -148,9 +151,7 @@ describe('GameStoreService', () => {
             } as unknown as Query<GameDocument | null, GameDocument>;
             gameModel.findById.mockReturnValue(mockQuery);
 
-            await expect(service.getGameInit('nonexistent-id')).rejects.toThrow(
-                new NotFoundException('Game with id nonexistent-id not found')
-            );
+            await expect(service.getGameInit('nonexistent-id')).rejects.toThrow(new NotFoundException('Game with id nonexistent-id not found'));
         });
     });
 
@@ -168,20 +169,20 @@ describe('GameStoreService', () => {
                     ...mockUpdateGameDto,
                     lastModified: expect.any(Date),
                 }),
-                { new: true }
+                { new: true },
             );
-            expect(result).toEqual(expect.objectContaining({
-                name: mockUpdateGameDto.name,
-                description: mockUpdateGameDto.description,
-            }));
+            expect(result).toEqual(
+                expect.objectContaining({
+                    name: mockUpdateGameDto.name,
+                    description: mockUpdateGameDto.description,
+                }),
+            );
         });
 
         it('should throw NotFoundException when game not found', async () => {
             (gameModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(null);
 
-            await expect(service.updateGame('nonexistent-id', mockUpdateGameDto)).rejects.toThrow(
-                new NotFoundException('Game not found')
-            );
+            await expect(service.updateGame('nonexistent-id', mockUpdateGameDto)).rejects.toThrow(new NotFoundException('Game not found'));
         });
     });
 
@@ -199,9 +200,7 @@ describe('GameStoreService', () => {
             const mockResult = { deletedCount: 0 };
             (gameModel.deleteOne as jest.Mock).mockResolvedValue(mockResult);
 
-            await expect(service.deleteGame('nonexistent-id')).rejects.toThrow(
-                new NotFoundException('Game not found')
-            );
+            await expect(service.deleteGame('nonexistent-id')).rejects.toThrow(new NotFoundException('Game not found'));
         });
     });
 
@@ -218,7 +217,7 @@ describe('GameStoreService', () => {
             expect(gameModel.findByIdAndUpdate).toHaveBeenCalledWith(
                 mockObjectId.toString(),
                 { $set: { visibility: false, lastModified: expect.any(Date) } },
-                { new: false }
+                { new: false },
             );
             expect(mockQuery.lean).toHaveBeenCalled();
         });
@@ -235,7 +234,7 @@ describe('GameStoreService', () => {
             expect(gameModel.findByIdAndUpdate).toHaveBeenCalledWith(
                 mockObjectId.toString(),
                 { $set: { visibility: true, lastModified: expect.any(Date) } },
-                { new: false }
+                { new: false },
             );
         });
 
@@ -245,9 +244,7 @@ describe('GameStoreService', () => {
             };
             (gameModel.findByIdAndUpdate as jest.Mock).mockReturnValue(mockQuery);
 
-            await expect(service.toggleVisibility('nonexistent-id', false)).rejects.toThrow(
-                new NotFoundException('Game not found')
-            );
+            await expect(service.toggleVisibility('nonexistent-id', false)).rejects.toThrow(new NotFoundException('Game not found'));
         });
     });
 });

@@ -8,7 +8,7 @@
         <app-ui-icon [iconName]="prefixIcon" variant="secondary"></app-ui-icon>
         }
 
-        <input
+        <!-- <input
             class="in-control"
             [attr.type]="type"
             [attr.placeholder]="placeholder"
@@ -17,10 +17,8 @@
             [disabled]="disabled || isDisabled"
             [value]="value"
             [style.text-align]="alignText ?? 'left'"
-            (input)="onInput($event)"
-            (blur)="onBlur()"
-        />
-
+            <!-- (input)="onInput($event)"
+            (blur)="onBlur()" -->
         @if (suffixIcon) {
         <app-ui-icon [iconName]="suffixIcon" variant="secondary"></app-ui-icon>
         }

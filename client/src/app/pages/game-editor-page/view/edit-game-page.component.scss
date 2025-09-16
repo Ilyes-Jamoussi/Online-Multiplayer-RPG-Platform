@@ -1,0 +1,46 @@
+.page {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+
+.toolbox {
+    position: sticky;
+    top: 16px;
+    align-self: start;
+}
+
+.grid-wrapper {
+    display: grid;
+    place-items: start;
+    position: relative;
+    height: min(90vh, 90vw);
+    width: min(90vh, 90vw);
+}
+
+.grid {
+    display: grid;
+    height: 100%;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border: 2px solid #1f2937;
+    position: relative;
+}
+
+.grid-wrapper {
+    position: relative;
+    height: 90vh;
+    width: 90vh;
+}
+.objects-overlay {
+    position: absolute;
+    inset: 2px;
+    display: grid;
+    pointer-events: none; /* laisse passer les clics vers les tiles; remets auto sur l’objet si tu veux interagir */
+}
+.objects-overlay > * {
+    pointer-events: auto;
+}

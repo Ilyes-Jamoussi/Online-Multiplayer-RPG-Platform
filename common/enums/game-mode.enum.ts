@@ -1,4 +1,4 @@
 export enum GameMode {
-    Classic = 'classic',
-    CaptureTheFlag = 'capture-the-flag',
+    CLASSIC = 'classic',
+    CTF = 'capture-the-flag',
 }

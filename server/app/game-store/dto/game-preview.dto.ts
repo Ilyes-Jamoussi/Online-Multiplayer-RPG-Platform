@@ -15,11 +15,11 @@ export class GamePreviewDto {
     @IsNotEmpty()
     readonly name: string;
 
-    @ApiProperty({ enum: MapSize, example: MapSize.Medium })
+    @ApiProperty({ enum: MapSize, example: MapSize.MEDIUM })
     @IsEnum(MapSize)
     readonly size: MapSize;
 
-    @ApiProperty({ enum: GameMode, example: GameMode.Classic })
+    @ApiProperty({ enum: GameMode, example: GameMode.CLASSIC })
     @IsEnum(GameMode)
     readonly mode: GameMode;
 
@@ -35,6 +35,4 @@ export class GamePreviewDto {
     @ApiProperty({ example: true })
     @IsBoolean()
     readonly visibility: boolean;
-
-
 }

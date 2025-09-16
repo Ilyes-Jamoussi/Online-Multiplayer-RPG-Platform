@@ -1,0 +1,38 @@
+<div class="page">
+    <app-edit-game-toolbar></app-edit-game-toolbar>
+    <app-editor-inventory></app-editor-inventory>
+    @if (grid$ | async; as grid) {
+    <div #gridWrapper class="grid-wrapper">
+        <div
+            class="grid"
+            [ngStyle]="{
+                'grid-template-columns': 'repeat(' + grid.width + ', 1fr)',
+                'grid-template-rows': 'repeat(' + grid.height + ', 1fr)'
+            }"
+        >
+            @if (grid$ | async; as grid) { @for (tile of grid.tiles; track $index; let i = $index) {
+            <app-edit-game-tile
+                [x]="getXFromIndex(i, grid)"
+                [y]="getYFromIndex(i, grid)"
+                [tile]="tile"
+                appTileSizeProbe
+                [probeActive]="i === 0"
+                (sizeChange)="tileSizeUpdate($event)"
+            ></app-edit-game-tile>
+            } }
+        </div>
+        @if (objects$ | async; as objects) { @if(tileSize$ | async; as tileSize) {
+        <div
+            class="objects-overlay"
+            [style.gridTemplateColumns]="'repeat(' + grid.width + ', 1fr)'"
+            [style.gridTemplateRows]="'repeat(' + grid.height + ', 1fr)'"
+        >
+            @for (obj of objects; track obj.id) {
+            <app-edit-base-object [object]="obj" [tileSize]="tileSize"></app-edit-base-object>
+            }
+        </div>
+        } }
+    </div>
+    <button (click)="saveDraft()">Save to Database</button>
+    }
+</div>

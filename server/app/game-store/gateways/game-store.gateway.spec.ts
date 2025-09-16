@@ -34,17 +34,14 @@ describe('GameStoreGateway', () => {
                 name: 'Test Game',
                 description: 'Test Description',
                 size: 15,
-                mode: GameMode.Classic,
+                mode: GameMode.CLASSIC,
                 lastModified: new Date(),
                 visibility: true,
             };
 
             gateway.emitGameCreated(mockDto);
 
-            expect(mockServer.emit).toHaveBeenCalledWith(
-                GameStoreEvents.GameCreated,
-                successResponse(mockDto)
-            );
+            expect(mockServer.emit).toHaveBeenCalledWith(GameStoreEvents.GameCreated, successResponse(mockDto));
         });
     });
 
@@ -55,17 +52,14 @@ describe('GameStoreGateway', () => {
                 name: 'Updated Game',
                 description: 'Updated Description',
                 size: 20,
-                mode: GameMode.CaptureTheFlag,
+                mode: GameMode.CTF,
                 lastModified: new Date(),
                 visibility: false,
             };
 
             gateway.emitGameUpdated(mockDto);
 
-            expect(mockServer.emit).toHaveBeenCalledWith(
-                GameStoreEvents.GameUpdated,
-                successResponse(mockDto)
-            );
+            expect(mockServer.emit).toHaveBeenCalledWith(GameStoreEvents.GameUpdated, successResponse(mockDto));
         });
     });
 
@@ -75,10 +69,7 @@ describe('GameStoreGateway', () => {
 
             gateway.emitGameDeleted(gameId);
 
-            expect(mockServer.emit).toHaveBeenCalledWith(
-                GameStoreEvents.GameDeleted,
-                successResponse({ id: gameId })
-            );
+            expect(mockServer.emit).toHaveBeenCalledWith(GameStoreEvents.GameDeleted, successResponse({ id: gameId }));
         });
     });
 
@@ -89,10 +80,7 @@ describe('GameStoreGateway', () => {
 
             gateway.emitGameVisibilityToggled(gameId, visibility);
 
-            expect(mockServer.emit).toHaveBeenCalledWith(
-                GameStoreEvents.GameVisibilityToggled,
-                successResponse({ id: gameId, visibility })
-            );
+            expect(mockServer.emit).toHaveBeenCalledWith(GameStoreEvents.GameVisibilityToggled, successResponse({ id: gameId, visibility }));
         });
 
         it('should emit GameVisibilityToggled event with visibility false', () => {
@@ -101,10 +89,7 @@ describe('GameStoreGateway', () => {
 
             gateway.emitGameVisibilityToggled(gameId, visibility);
 
-            expect(mockServer.emit).toHaveBeenCalledWith(
-                GameStoreEvents.GameVisibilityToggled,
-                successResponse({ id: gameId, visibility })
-            );
+            expect(mockServer.emit).toHaveBeenCalledWith(GameStoreEvents.GameVisibilityToggled, successResponse({ id: gameId, visibility }));
         });
     });
 });

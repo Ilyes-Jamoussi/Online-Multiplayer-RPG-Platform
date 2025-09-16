@@ -1,0 +1,84 @@
+:host {
+    /* Panel token overrides (optional) so it matches your retro UI */
+    app-draggable-panel {
+        --panel-bg: #ffffff;
+        --panel-fg: #0f172a;
+        --panel-border: #d7e0ff;
+        --ring: #14b8a6;
+    }
+
+    --btn-size: 48px; /* square size */
+    --icon-size: 24px; /* emoji size */
+    --gap: 12px;
+
+    /* soft backgrounds by type */
+    --c-base: #eaffe1;
+    --c-wall: #ffeede;
+    --c-door: #fff3cf;
+    --c-water: #e6f6ff;
+    --c-ice: #eefcff;
+    --c-start: #f1e9ff;
+
+    font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace;
+}
+
+/* Single-column layout inside the panel body */
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    align-items: flex-start; /* keep fixed button width */
+}
+
+/* Square FAB-like buttons */
+.tool-btn {
+    width: var(--btn-size);
+    height: var(--btn-size);
+    display: grid;
+    place-items: center;
+    border: 2px solid #d7e0ff;
+    border-radius: 14px;
+    background: #f7fbff; /* default soft */
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 102, 255, 0.12);
+    transition:
+        transform 0.08s ease,
+        box-shadow 0.12s ease,
+        outline-color 0.12s ease,
+        border-color 0.12s ease;
+    outline: 3px solid transparent;
+    font-size: var(--icon-size); /* emoji size */
+    line-height: 1;
+
+    &:hover {
+        transform: translateY(-2px);
+        outline-color: #00c2ff;
+        box-shadow: 0 8px 22px rgba(0, 102, 255, 0.18);
+    }
+
+    &.selected {
+        outline-color: #14b8a6;
+        border-color: #14b8a6;
+    }
+}
+
+/* Type backgrounds (match your classes) */
+.tool-btn.base {
+    background: var(--c-base);
+}
+.tool-btn.wall {
+    background: var(--c-wall);
+}
+.tool-btn.door {
+    background: var(--c-door);
+}
+.tool-btn.water {
+    background: var(--c-water);
+}
+.tool-btn.ice {
+    background: var(--c-ice);
+}
+/* Optional: define a specific look for teleport */
+.tool-btn.teleport {
+    background: #efe9ff;
+}

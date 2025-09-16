@@ -7,6 +7,8 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { CreateTileDto } from './createTileDto';
+import { CreatePlaceableDto } from './createPlaceableDto';
 
 
 export interface CreateGameDto { 
@@ -14,6 +16,12 @@ export interface CreateGameDto {
     mode: CreateGameDto.ModeEnum;
     name: string;
     description: string;
+    visibility?: boolean;
+    /**
+     * Sparse tiles: only those different from BASE
+     */
+    tiles: Array<CreateTileDto>;
+    objects: Array<CreatePlaceableDto>;
 }
 export namespace CreateGameDto {
     export const SizeEnum = {

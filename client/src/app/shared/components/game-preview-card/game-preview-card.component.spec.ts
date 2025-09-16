@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatIconModule } from '@angular/material/icon';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
 import { GamePreviewCardComponent } from './game-preview-card.component';
 
@@ -14,12 +13,12 @@ describe('GamePreviewCardComponent', () => {
         size: 10,
         mode: 'classic',
         lastModified: '2023-01-01T10:00:00Z',
-        visibility: true
+        visibility: true,
     };
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [GamePreviewCardComponent, MatIconModule]
+            imports: [GamePreviewCardComponent],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GamePreviewCardComponent);

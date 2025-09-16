@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, Signal } from '@angular/core';
+import { Component, inject, OnInit, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
 import { ROUTES } from '@app/constants/routes.constants';
-import { GameStoreService } from '@app/services/game-store/game-store.service';
+import { GameStoreService } from '@app/services/game/game-store/game-store.service';
 import { GamePreviewCardComponent } from '@app/shared/components/game-preview-card/game-preview-card.component';
 
 @Component({
@@ -14,10 +14,8 @@ import { GamePreviewCardComponent } from '@app/shared/components/game-preview-ca
     imports: [CommonModule, GamePreviewCardComponent],
 })
 export class GameManagementPageComponent implements OnInit {
-    constructor(
-        private readonly router: Router,
-        private readonly gameStoreService: GameStoreService,
-    ) {}
+    private readonly router = inject(Router);
+    private readonly gameStoreService = inject(GameStoreService);
 
     get gameDisplays(): Signal<GamePreviewDto[]> {
         return this.gameStoreService.gameDisplays;
@@ -31,8 +29,8 @@ export class GameManagementPageComponent implements OnInit {
         this.router.navigate([ROUTES.gameParameters]);
     }
 
-    onEditGame(): void {
-        this.router.navigate([ROUTES.gameEditor]);
+    onEditGame(id: string): void {
+        this.router.navigate([ROUTES.gameEditor + '/' + id]);
     }
 
     onDeleteGame(gameId: string): void {

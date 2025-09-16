@@ -1,34 +1,30 @@
 <div class="game-management-container">
-  <header class="page-header">
-    <h1 class="page-title">Administration des Jeux</h1>
-    <div class="header-actions">
-      <button class="back-button" (click)="goBack()">
-        Retour
-      </button>
-      <button class="create-button" (click)="onCreateNewGame()">
-        Créer un nouveau jeu
-      </button>
-    </div>
-  </header>
+    <header class="page-header">
+        <h1 class="page-title">Administration des Jeux</h1>
+        <div class="header-actions">
+            <button class="back-button" (click)="goBack()">Retour</button>
+            <button class="create-button" (click)="onCreateNewGame()">Créer un nouveau jeu</button>
+        </div>
+    </header>
 
-  <div class="games-section">
-    @if (gameDisplays() && gameDisplays().length > 0) {
-      <div class="games-grid">
-        @for (game of gameDisplays(); track game.id) {
-          <app-game-preview-card
-            [game]="game"
-            [isAdmin]="true"
-            (editGame)="onEditGame()"
-            (deleteGame)="onDeleteGame($event)"
-            (toggleVisibility)="onToggleVisibility($event)"
-          ></app-game-preview-card>
+    <div class="games-section">
+        @if (gameDisplays() && gameDisplays().length > 0) {
+        <div class="games-grid">
+            @for (game of gameDisplays(); track game.id) {
+            <app-game-preview-card
+                [game]="game"
+                [isAdmin]="true"
+                (editGame)="onEditGame(game.id)"
+                (deleteGame)="onDeleteGame($event)"
+                (toggleVisibility)="onToggleVisibility($event)"
+            ></app-game-preview-card>
+            }
+        </div>
+        } @else {
+        <div class="no-games-message">
+            <h2>Aucun jeu disponible</h2>
+            <p>Créez votre premier jeu pour commencer.</p>
+        </div>
         }
-      </div>
-    } @else {
-      <div class="no-games-message">
-        <h2>Aucun jeu disponible</h2>
-        <p>Créez votre premier jeu pour commencer.</p>
-      </div>
-    }
-  </div>
+    </div>
 </div>
