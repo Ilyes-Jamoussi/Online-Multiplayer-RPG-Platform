@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { CreateGameDto } from '@app/api/model/createGameDto';
 import { ROUTES } from '@app/constants/routes.constants';
 import { GameHttpService } from '@app/services/game/game-http/game-http.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 
 @Component({
     selector: 'app-game-editor-page',
@@ -18,10 +19,12 @@ export class GameEditorPageComponent {
     gameDescription = '';
     isCreating = false;
 
-    constructor(
-        private readonly router: Router,
-        private readonly gameHttpService: GameHttpService,
-    ) {}
+  constructor(
+    private readonly router: Router,
+    private readonly gameHttpService: GameHttpService,
+    private readonly notificationService: NotificationService
+  ) {}
+
 
     onCreateGame(): void {
         if (!this.gameName.trim() || !this.gameDescription.trim()) {
@@ -39,15 +42,24 @@ export class GameEditorPageComponent {
             objects: [],
         };
 
-        this.gameHttpService.createGame(createGameDto).subscribe({
-            next: () => {
-                this.router.navigate([ROUTES.gameManagement]);
-            },
-            error: () => {
-                this.isCreating = false;
-            },
+    this.gameHttpService.createGame(createGameDto).subscribe({
+      next: () => {
+        this.isCreating = false;
+        this.notificationService.displaySuccess({
+          title: 'Jeu créé avec succès !',
+          message: `Le jeu "${this.gameName}" a été créé et ajouté à votre collection.`
         });
-    }
+        // this.router.navigate([ROUTES.gameManagement]);
+      },
+      error: () => {
+        this.notificationService.displayError({
+          title: 'Erreur lors de la création',
+          message: `Impossible de créer le jeu "${this.gameName}". Veuillez réessayer.`
+        });
+        this.isCreating = false;
+      }
+    });
+  }
 
     onBack(): void {
         this.router.navigate([ROUTES.gameParameters]);
