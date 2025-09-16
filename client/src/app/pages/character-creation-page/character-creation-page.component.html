@@ -1,64 +1,63 @@
-<div class="character-creation-root">
-  <div class="header-bar">
-    <h1>Création de Personnage</h1>
-    <div class="header-spacer"></div>
+<div class="character-selection-container">
+  
+  <!-- Header -->
+  <div class="selection-header">
+    <h1>Sélection de Personnage</h1>
+    <p>Choisissez votre héros et personnalisez ses capacités</p>
   </div>
 
-  <div class="creation-container">
+  <div class="selection-layout">
     
-    <!-- Section Informations de base -->
-    <app-ui-card variant="secondary" size="lg" class="info-section">
-      <div card-title>
-        <h2>Informations de base</h2>
-      </div>
-      <div card-content>
-        
-        <!-- Nom -->
-        <div class="form-group">
-          <label for="characterName">Nom du personnage *</label>
-          <app-ui-input
-            id="characterName"
-            [(ngModel)]="character.name"
-            placeholder="Entrez le nom de votre personnage"
-          ></app-ui-input>
-        </div>
-
-        <!-- Avatar -->
-        <div class="form-group">
-          <label>Avatar</label>
-          <div class="avatar-grid">
-            <div 
-              *ngFor="let avatar of avatars; let i = index"
-              class="avatar-option"
-              [class.selected]="character.avatar === i"
-              (click)="selectAvatar(i)"
-            >
-              <div class="avatar-number">{{ i + 1 }}</div>
-            </div>
+    <!-- Left Panel - Character Grid -->
+    <div class="character-grid-panel">
+      <h2>Choisissez votre Avatar</h2>
+      <div class="character-grid">
+        <div 
+          *ngFor="let avatar of avatars" 
+          class="character-slot"
+          [class.selected]="character.avatar === avatar"
+          (click)="selectAvatar(avatar)"
+        >
+          <!-- Placeholder pour image/gif -->
+          <div class="character-portrait">
+            <span class="avatar-number">{{ avatar + 1 }}</span>
           </div>
         </div>
-
       </div>
-    </app-ui-card>
+    </div>
 
-    <!-- Section Attributs -->
-    <app-ui-card variant="secondary" size="lg" class="attributes-section">
-      <div card-title>
-        <h2>Attributs du Personnage</h2>
+    <!-- Right Panel - Character Info & Stats -->
+    <div class="character-info-panel">
+      
+      <!-- Character Name -->
+      <div class="character-name-section">
+        <h3>Nom du Héros</h3>
+        <input 
+          type="text"
+          [(ngModel)]="character.name" 
+          placeholder="Entrez le nom de votre héros"
+          class="name-input"
+        />
       </div>
-      <div card-content>
+
+      <!-- Stats Section -->
+      <div class="stats-section">
+        <h3>Capacités de Base</h3>
+        <p class="stats-description">Tous les attributs commencent à 4. Ajoutez un bonus à vie ou rapidité.</p>
         
-        <!-- Vie -->
-        <app-ui-card variant="primary" size="sm" class="attribute-card">
-          <div card-content>
-            <div class="attribute-header">
-              <div class="attribute-info">
-                <span class="attribute-name">Vie</span>
+        <div class="stats-grid">
+          
+          <!-- Vie -->
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon">❤️</div>
+              <div class="stat-info">
+                <h4>Vie</h4>
+                <p>Points de santé</p>
               </div>
-              <span class="attribute-value">{{ character.attributes.vie }}</span>
+              <div class="stat-value">{{ character.attributes.vie }}</div>
             </div>
-            <p class="attribute-description">Points de vie du personnage. Détermine sa résistance.</p>
-            <div class="bonus-section">
+            <div class="stat-bonus">
               <app-ui-checkbox
                 [(ngModel)]="bonusVie"
                 (ngModelChange)="onBonusChange('vie')"
@@ -66,19 +65,18 @@
               ></app-ui-checkbox>
             </div>
           </div>
-        </app-ui-card>
 
-        <!-- Rapidité -->
-        <app-ui-card variant="primary" size="sm" class="attribute-card">
-          <div card-content>
-            <div class="attribute-header">
-              <div class="attribute-info">
-                <span class="attribute-name">Rapidité</span>
+          <!-- Rapidité -->
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon">⚡</div>
+              <div class="stat-info">
+                <h4>Rapidité</h4>
+                <p>Vitesse d'action</p>
               </div>
-              <span class="attribute-value">{{ character.attributes.rapidite }}</span>
+              <div class="stat-value">{{ character.attributes.rapidite }}</div>
             </div>
-            <p class="attribute-description">Vitesse du personnage. Influence l'ordre des actions.</p>
-            <div class="bonus-section">
+            <div class="stat-bonus">
               <app-ui-checkbox
                 [(ngModel)]="bonusRapidite"
                 (ngModelChange)="onBonusChange('rapidite')"
@@ -86,84 +84,81 @@
               ></app-ui-checkbox>
             </div>
           </div>
-        </app-ui-card>
 
-        <!-- Attaque -->
-        <app-ui-card variant="primary" size="sm" class="attribute-card">
-          <div card-content>
-            <div class="attribute-header">
-              <div class="attribute-info">
-                <span class="attribute-name">Attaque</span>
+          <!-- Attaque -->
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon">⚔️</div>
+              <div class="stat-info">
+                <h4>Attaque</h4>
+                <p>Force offensive</p>
               </div>
-              <span class="attribute-value">{{ character.attributes.attaque }}</span>
+              <div class="stat-value">{{ character.attributes.attaque }}</div>
             </div>
-            <p class="attribute-description">Force d'attaque du personnage. Détermine les dégâts infligés.</p>
-            <div class="dice-section">
-              <div class="dice-options">
-                <app-ui-checkbox
-                  [ngModel]="character.diceAssignment.attaque === 'D4'"
-                  (ngModelChange)="onDiceChange('attaque', 'D4')"
-                  label="D4"
-                ></app-ui-checkbox>
-                <app-ui-checkbox
-                  [ngModel]="character.diceAssignment.attaque === 'D6'"
-                  (ngModelChange)="onDiceChange('attaque', 'D6')"
-                  label="D6"
-                ></app-ui-checkbox>
-              </div>
+            <div class="dice-selection">
+              <label class="dice-option" [class.selected]="character.diceAssignment.attaque === 'D4'">
+                <input type="radio" [(ngModel)]="character.diceAssignment.attaque" value="D4">
+                <span class="dice-face">🎲 D4</span>
+              </label>
+              <label class="dice-option" [class.selected]="character.diceAssignment.attaque === 'D6'">
+                <input type="radio" [(ngModel)]="character.diceAssignment.attaque" value="D6">
+                <span class="dice-face">🎲 D6</span>
+              </label>
             </div>
           </div>
-        </app-ui-card>
 
-        <!-- Défense -->
-        <app-ui-card variant="primary" size="sm" class="attribute-card">
-          <div card-content>
-            <div class="attribute-header">
-              <div class="attribute-info">
-                <span class="attribute-name">Défense</span>
+          <!-- Défense -->
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon">🛡️</div>
+              <div class="stat-info">
+                <h4>Défense</h4>
+                <p>Résistance</p>
               </div>
-              <span class="attribute-value">{{ character.attributes.defense }}</span>
+              <div class="stat-value">{{ character.attributes.defense }}</div>
             </div>
-            <p class="attribute-description">Capacité défensive du personnage. Réduit les dégâts reçus.</p>
-            <div class="dice-section">
-              <div class="dice-options">
-                <app-ui-checkbox
-                  [ngModel]="character.diceAssignment.defense === 'D4'"
-                  (ngModelChange)="onDiceChange('defense', 'D4')"
-                  label="D4"
-                ></app-ui-checkbox>
-                <app-ui-checkbox
-                  [ngModel]="character.diceAssignment.defense === 'D6'"
-                  (ngModelChange)="onDiceChange('defense', 'D6')"
-                  label="D6"
-                ></app-ui-checkbox>
-              </div>
+            <div class="dice-selection">
+              <label class="dice-option" [class.selected]="character.diceAssignment.defense === 'D4'">
+                <input type="radio" [(ngModel)]="character.diceAssignment.defense" value="D4">
+                <span class="dice-face">🎲 D4</span>
+              </label>
+              <label class="dice-option" [class.selected]="character.diceAssignment.defense === 'D6'">
+                <input type="radio" [(ngModel)]="character.diceAssignment.defense" value="D6">
+                <span class="dice-face">🎲 D6</span>
+              </label>
             </div>
           </div>
-        </app-ui-card>
 
+        </div>
       </div>
-    </app-ui-card>
 
+    </div>
   </div>
 
-  <!-- Actions -->
-  <div class="actions-bar">
+  <!-- Bottom Actions -->
+  <div class="action-bar">
+    <app-ui-button 
+      variant="secondary" 
+      size="lg"
+      (buttonClick)="goBack()"
+    >
+      ← Retour
+    </app-ui-button>
+
     <app-ui-button 
       variant="secondary" 
       size="lg"
       (buttonClick)="generateRandomCharacter()"
     >
-      Générer Aléatoirement
+      🎲 Générer Aléatoire
     </app-ui-button>
-    
+
     <app-ui-button 
       variant="primary" 
       size="lg"
-      [disabled]="!isFormValid()"
       (buttonClick)="onSubmit()"
     >
-      Confirmer le Personnage
+      Créer le Personnage →
     </app-ui-button>
   </div>
 

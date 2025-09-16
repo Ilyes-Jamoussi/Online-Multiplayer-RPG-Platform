@@ -4,8 +4,8 @@ import { Router } from '@angular/router';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
 import { GameHttpService } from '@app/services/game/game-http/game-http.service';
 import { NotificationService } from '@app/services/notification/notification.service';
+import { GamePreviewCardComponent } from '@app/shared/components/game-preview-card/game-preview-card.component';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
-import { UiCardComponent } from '@app/shared/ui/components/card/card.component';
 import { UiSpinnerComponent } from '@app/shared/ui/components/spinner/spinner.component';
 
 @Component({
@@ -13,7 +13,7 @@ import { UiSpinnerComponent } from '@app/shared/ui/components/spinner/spinner.co
     standalone: true,
     imports: [
         CommonModule,
-        UiCardComponent,
+        GamePreviewCardComponent,
         UiButtonComponent,
         UiSpinnerComponent,
     ],
@@ -50,10 +50,10 @@ export class CreateGamePageComponent implements OnInit {
         });
     }
 
-    createGame(game: GamePreviewDto): void {
+    createGame(gameId: string): void {
         // Navigation directe sans notification
         this.router.navigate(['/character-creation'], {
-            queryParams: { gameId: game.id },
+            queryParams: { gameId },
         });
     }
 

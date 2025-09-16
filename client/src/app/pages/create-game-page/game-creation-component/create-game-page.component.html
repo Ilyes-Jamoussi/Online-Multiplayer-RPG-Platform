@@ -32,43 +32,12 @@
   </div>
 
   <div *ngIf="!loading && games.length > 0" class="games-grid">
-    <app-ui-card *ngFor="let game of games" variant="secondary" size="lg" class="game-card">
-      
-      <div card-title>
-        <div class="game-header">
-          <div class="game-info">
-            <h3 class="game-title">{{ game.name }}</h3>
-            <p class="game-description">{{ game.description }}</p>
-          </div>
-          <div class="game-mode-badge" [ngClass]="'mode-' + game.mode">
-            {{ getModeLabel(game.mode) }}
-          </div>
-        </div>
-      </div>
-
-      <div card-content>
-        <div class="game-meta">
-          <div class="meta-item">
-            <span class="meta-label">Taille</span>
-            <span class="meta-value">{{ game.size }}x{{ game.size }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Modifié</span>
-            <span class="meta-value">{{ formatDate(game.lastModified) }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div card-footer>
-        <app-ui-button 
-          variant="primary" 
-          size="lg"
-          (buttonClick)="createGame(game)"
-        >
-          Créer une partie
-        </app-ui-button>
-      </div>
-
-    </app-ui-card>
+    <app-game-preview-card 
+      *ngFor="let game of games" 
+      [game]="game"
+      [isAdmin]="false"
+      (startGame)="createGame($event)"
+      class="game-card">
+    </app-game-preview-card>
   </div>
 </div>

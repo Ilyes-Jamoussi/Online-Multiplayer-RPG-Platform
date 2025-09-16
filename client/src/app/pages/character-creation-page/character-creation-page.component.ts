@@ -4,9 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
-import { UiCardComponent } from '@app/shared/ui/components/card/card.component';
 import { UiCheckboxComponent } from '@app/shared/ui/components/checkbox/checkbox.component';
-import { UiInputComponent } from '@app/shared/ui/components/input/input.component';
 
 interface CharacterAttributes {
     vie: number;
@@ -34,9 +32,7 @@ interface Character {
     imports: [
         CommonModule,
         FormsModule,
-        UiCardComponent,
         UiButtonComponent,
-        UiInputComponent,
         UiCheckboxComponent,
     ],
     templateUrl: './character-creation-page.component.html',
