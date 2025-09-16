@@ -1,6 +1,7 @@
 import { NgClass } from '@angular/common';
 import { Component, forwardRef, Input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { UI_CONSTANTS } from '@app/constants/ui.constants';
 import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
 import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
 import { FaIconKey } from '@ui/types/ui.types';
@@ -34,10 +35,6 @@ export class UiSelectComponent extends UiBaseComponent implements ControlValueAc
 
     /** Whether the select is required */
     @Input() required: boolean = false;
-
-    // Constants for ID generation
-    private static readonly base36 = 36;
-    private static readonly randomMultiplier = 1000;
 
     /** Unique ID for the select element */
     readonly id: string = `select_${this.generateUniqueId()}`;
@@ -78,8 +75,8 @@ export class UiSelectComponent extends UiBaseComponent implements ControlValueAc
 
     private generateUniqueId(): string {
         return (
-            Date.now().toString(UiSelectComponent.base36) +
-            Math.floor(Math.random() * UiSelectComponent.randomMultiplier).toString(UiSelectComponent.base36)
+            Date.now().toString(UI_CONSTANTS.select.base36) +
+            Math.floor(Math.random() * UI_CONSTANTS.select.randomMultiplier).toString(UI_CONSTANTS.select.base36)
         );
     }
 

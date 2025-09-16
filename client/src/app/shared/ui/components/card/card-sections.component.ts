@@ -2,7 +2,8 @@ import { NgClass } from '@angular/common';
 import { Component, Input, Optional, Inject } from '@angular/core';
 import { FaIcons, UiAlignment } from '@ui/types/ui.types';
 import { UiBaseComponent } from '@ui/components/base/ui-base.component';
-import { UI_CARD_CONTEXT, UiCardContext } from './card.component';
+import { UiCardContext } from '@app/interfaces/ui-card.interface';
+import { UI_CARD_CONTEXT } from './card.component';
 import { UiIconComponent } from '@ui/components/icon/icon.component';
 
 @Component({

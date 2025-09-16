@@ -2,29 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { UI_CONSTANTS } from '@app/constants/ui.constants';
+import { Character } from '@app/interfaces/character.interface';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 import { UiCheckboxComponent } from '@app/shared/ui/components/checkbox/checkbox.component';
-
-interface CharacterAttributes {
-    vie: number;
-    rapidite: number;
-    attaque: number;
-    defense: number;
-}
-
-interface DiceAssignment {
-    attaque: 'D4' | 'D6';
-    defense: 'D4' | 'D6';
-}
-
-interface Character {
-    name: string;
-    avatar: number;
-    attributes: CharacterAttributes;
-    bonus: 'vie' | 'rapidite' | null;
-    diceAssignment: DiceAssignment;
-}
 
 @Component({
     selector: 'app-character-creation-page',
@@ -43,10 +25,10 @@ export class CharacterCreationPageComponent implements OnInit {
         name: '',
         avatar: 0,
         attributes: {
-            vie: 10,
-            rapidite: 10,
-            attaque: 10,
-            defense: 10,
+            vie: UI_CONSTANTS.characterCreation.baseAttributeValue,
+            rapidite: UI_CONSTANTS.characterCreation.baseAttributeValue,
+            attaque: UI_CONSTANTS.characterCreation.baseAttributeValue,
+            defense: UI_CONSTANTS.characterCreation.baseAttributeValue,
         },
         bonus: null,
         diceAssignment: {
@@ -98,39 +80,38 @@ export class CharacterCreationPageComponent implements OnInit {
     private updateAttributes(): void {
         // Reset to base values
         this.character.attributes = {
-            vie: 10,
-            rapidite: 10,
-            attaque: 10,
-            defense: 10,
+            vie: UI_CONSTANTS.characterCreation.baseAttributeValue,
+            rapidite: UI_CONSTANTS.characterCreation.baseAttributeValue,
+            attaque: UI_CONSTANTS.characterCreation.baseAttributeValue,
+            defense: UI_CONSTANTS.characterCreation.baseAttributeValue,
         };
 
         // Apply bonus
         if (this.character.bonus) {
-            this.character.attributes[this.character.bonus] += 2;
+            this.character.attributes[this.character.bonus] += UI_CONSTANTS.characterCreation.bonusAttributeValue;
         }
 
         // Apply dice modifiers
         if (this.character.diceAssignment.attaque === 'D6') {
-            this.character.attributes.attaque += 2;
+            this.character.attributes.attaque += UI_CONSTANTS.characterCreation.bonusAttributeValue;
         }
         if (this.character.diceAssignment.defense === 'D6') {
-            this.character.attributes.defense += 2;
+            this.character.attributes.defense += UI_CONSTANTS.characterCreation.bonusAttributeValue;
         }
     }
 
     generateRandomCharacter(): void {
-        const PROBABILITY_THRESHOLD = 0.5;
         this.character.name = this.generateRandomName();
         this.character.avatar = Math.floor(Math.random() * this.avatars.length);
         
-        const randomBonus = Math.random() > PROBABILITY_THRESHOLD ? 'vie' : 'rapidite';
+        const randomBonus = Math.random() > UI_CONSTANTS.characterCreation.probabilityThreshold ? 'vie' : 'rapidite';
         this.character.bonus = randomBonus;
         this.bonusVie = randomBonus === 'vie';
         this.bonusRapidite = randomBonus === 'rapidite';
         
         this.character.diceAssignment = {
-            attaque: Math.random() > PROBABILITY_THRESHOLD ? 'D4' : 'D6',
-            defense: Math.random() > PROBABILITY_THRESHOLD ? 'D4' : 'D6',
+            attaque: Math.random() > UI_CONSTANTS.characterCreation.probabilityThreshold ? 'D4' : 'D6',
+            defense: Math.random() > UI_CONSTANTS.characterCreation.probabilityThreshold ? 'D4' : 'D6',
         };
         this.updateAttributes();
     }

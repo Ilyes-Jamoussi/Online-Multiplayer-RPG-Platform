@@ -1,17 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, InjectionToken } from '@angular/core';
+import { UiCardContext } from '@app/interfaces/ui-card.interface';
 import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
-import { UiVariant, UiSize, UiShapeVariant, UiAlignment, UiSpacing, UiElevation } from '@app/shared/ui/types/ui.types';
-
-// Interface pour le contexte de la carte
-export interface UiCardContext {
-    variant: UiVariant;
-    size: UiSize;
-    shape: UiShapeVariant;
-    align: UiAlignment;
-    gap: UiSpacing;
-    elevation: UiElevation;
-}
 
 // Token pour l'injection de dépendance
 export const UI_CARD_CONTEXT = new InjectionToken<UiCardContext>('UI_CARD_CONTEXT');
