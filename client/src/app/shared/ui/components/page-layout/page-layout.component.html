@@ -1,20 +1,20 @@
 <div [ngClass]="classes">
   <!-- Header conditionnel -->
   @if (hasHeader) {
-    <ui-header 
+    <app-ui-header 
       [title]="headerTitle"
       [subtitle]="headerSubtitle"
       [showBackButton]="showBackButton"
       (backClick)="onBackClick()">
-    </ui-header>
+    </app-ui-header>
   }
   
   <div class="page-body">
     <!-- Sidebar conditionnel -->
     @if (hasSidebar) {
-      <ui-sidebar (menuItemClick)="onMenuItemClick($event)">
+      <app-ui-sidebar (menuItemClick)="onMenuItemClick($event)">
         <ng-content select="[slot=sidebar]"></ng-content>
-      </ui-sidebar>
+      </app-ui-sidebar>
     }
     
     <!-- Contenu principal -->
@@ -25,8 +25,8 @@
   
   <!-- Footer conditionnel -->
   @if (hasFooter) {
-    <ui-footer>
+    <app-ui-footer>
       <ng-content select="[slot=footer]"></ng-content>
-    </ui-footer>
+    </app-ui-footer>
   }
 </div>

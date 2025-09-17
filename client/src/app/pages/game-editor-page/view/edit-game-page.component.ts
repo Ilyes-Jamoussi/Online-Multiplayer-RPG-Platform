@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { AsyncPipe, NgStyle } from '@angular/common';
 import { Observable, of } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,6 +10,10 @@ import { TileService } from '@app/services/game/game-editor/tile.service';
 import { ObjectService } from '@app/services/game/game-editor/object.service';
 import { EditorToolsService } from '@app/services/game/game-editor/editor-tools.service';
 import { GameSaveService } from '@app/services/game/game-editor/game-save.service';
+import { GameHttpService } from '@app/services/game/game-http/game-http.service';
+import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
+import { NotificationService } from '@app/services/notification/notification.service';
+import { MapSize } from '@common/enums/map-size.enum';
 
 import { ActiveTool, Grid, InventoryState, PlaceableObject } from '@app/interfaces/game/game-editor.interface';
 import { EditGameToolbarComponent } from '@app/pages/game-editor-page/components/toolbar/edit-game-toolbar.component';
@@ -24,18 +28,32 @@ import { GameMode } from '@common/enums/game-mode.enum';
 @Component({
     selector: 'app-edit-game-page',
     standalone: true,
-    imports: [AsyncPipe, NgStyle, EditGameToolbarComponent, EditGameTileComponent, EditorInventoryComponent, EditBaseObjectComponent, UiPageLayoutComponent, UiButtonComponent],
+    imports: [
+        AsyncPipe,
+        NgStyle,
+        EditGameToolbarComponent,
+        EditGameTileComponent,
+        EditorInventoryComponent,
+        EditBaseObjectComponent,
+        UiPageLayoutComponent,
+        UiButtonComponent,
+    ],
     templateUrl: './edit-game-page.component.html',
     styleUrls: ['./edit-game-page.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [GameDraftService, GameSaveService, TileService, EditorToolsService, ObjectService, TileSizeProbeDirective],
 })
 export class EditGamePageComponent implements OnInit {
+    @ViewChild('gridWrapper', { static: false }) gridWrapper!: ElementRef<HTMLElement>;
+
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
     private readonly draft = inject(GameDraftService);
     private readonly save = inject(GameSaveService);
+    private readonly gameHttp = inject(GameHttpService);
     private readonly tools = inject(EditorToolsService);
+    private readonly screenshot = inject(ScreenshotService);
+    private readonly notification = inject(NotificationService);
 
     grid$!: Observable<Grid>;
     activeTool$!: Observable<ActiveTool>;
@@ -89,6 +107,36 @@ export class EditGamePageComponent implements OnInit {
     }
     getYFromIndex(idx: number, grid: Grid): number {
         return Math.floor(idx / grid.width);
+    }
+
+    async testScreenshot() {
+        const gridPreviewImage = await this.screenshot.captureElementAsBase64(this.gridWrapper.nativeElement);
+        
+        const testGameData = {
+            name: 'Test Game ' + Date.now(),
+            description: 'Game créé pour tester la capture d\'écran',
+            size: MapSize.MEDIUM,
+            mode: 'classic' as const,
+            visibility: true,
+            gridPreviewImage,
+            tiles: [],
+            objects: []
+        };
+        
+        this.gameHttp.createGame(testGameData).subscribe({
+            next: () => {
+                this.notification.displaySuccess({
+                    title: 'Succès',
+                    message: 'Jeu créé avec succès avec capture d\'écran'
+                });
+            },
+            error: () => {
+                this.notification.displayError({
+                    title: 'Erreur',
+                    message: 'Échec de la création du jeu'
+                });
+            }
+        });
     }
 
     saveDraft() {

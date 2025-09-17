@@ -1,4 +1,4 @@
-<ui-page-layout 
+<app-ui-page-layout 
   [hasHeader]="true" 
   headerTitle="Éditeur de Jeu"
   headerSubtitle="Créez et modifiez votre carte de jeu"
@@ -47,6 +47,12 @@
   <div slot="footer">
     <div class="footer-content">
       <app-ui-button 
+        variant="secondary" 
+        size="md"
+        (buttonClick)="testScreenshot()">
+        Test Capture
+      </app-ui-button>
+      <app-ui-button 
         variant="primary" 
         size="lg"
         (buttonClick)="saveDraft()">
@@ -54,4 +60,4 @@
       </app-ui-button>
     </div>
   </div>
-</ui-page-layout>
+</app-ui-page-layout>

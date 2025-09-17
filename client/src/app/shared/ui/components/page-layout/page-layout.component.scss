@@ -1,12 +1,12 @@
 // Layout principal qui occupe toute la hauteur de l'écran
-.ui-page-layout {
+.uiPageLayout {
   display: flex;
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
   
   // Header fixe en haut
-  ui-header {
+  app-ui-header {
     flex-shrink: 0;
   }
   
@@ -17,7 +17,7 @@
     min-height: 0; // Important pour permettre le scroll du contenu
     
     // Sidebar optionnel
-    ui-sidebar {
+    app-ui-sidebar {
       flex-shrink: 0;
     }
     
@@ -31,12 +31,14 @@
   }
   
   // Footer fixe en bas
-  ui-footer {
+  app-ui-footer {
     flex-shrink: 0;
+    border-top: 1px solid #e0e0e0;
+    background-color: #f8f9fa;
   }
   
   // Variante avec sidebar
-  &.has-sidebar {
+  &.hasSidebar {
     .page-body {
       .page-content {
         padding-left: 1rem; // Réduction du padding quand sidebar présent

@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
 
 @Component({
-  selector: 'ui-text',
+  selector: 'app-ui-text',
   imports: [CommonModule],
   templateUrl: './text.component.html',
   styleUrl: './text.component.scss'
@@ -16,7 +16,7 @@ export class UiTextComponent extends UiBaseComponent {
   override get classes(): Record<string, boolean> {
     return {
       ...super.classes,
-      'ui-text': true,
+      uiText: true,
       [`text-variant-${this.textVariant}`]: true,
       [`weight-${this.weight}`]: true,
     };

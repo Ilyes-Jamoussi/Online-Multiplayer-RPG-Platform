@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
-  selector: 'ui-header',
+  selector: 'app-ui-header',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './header.component.html',

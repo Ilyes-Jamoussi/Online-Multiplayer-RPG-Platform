@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
 
 @Component({
-  selector: 'ui-container',
+  selector: 'app-ui-container',
   imports: [CommonModule],
   templateUrl: './container.component.html',
   styleUrl: './container.component.scss'
@@ -16,7 +16,7 @@ export class UiContainerComponent extends UiBaseComponent {
   override get classes(): Record<string, boolean> {
     return {
       ...super.classes,
-      'ui-container': true,
+      uiContainer: true,
       [`layout-${this.layout}`]: true,
       [`padding-${this.padding}`]: true,
       [`height-${this.height}`]: true,

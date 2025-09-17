@@ -3,7 +3,7 @@ import { Component, Output, EventEmitter } from '@angular/core';
 import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
 
 @Component({
-  selector: 'ui-sidebar',
+  selector: 'app-ui-sidebar',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './sidebar.component.html',
@@ -19,7 +19,7 @@ export class UiSidebarComponent extends UiBaseComponent {
   override get classes(): Record<string, boolean> {
     return {
       ...super.classes,
-      'ui-sidebar': true,
+      uiSidebar: true,
     };
   }
 }

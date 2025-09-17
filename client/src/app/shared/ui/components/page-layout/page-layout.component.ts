@@ -6,7 +6,7 @@ import { UiSidebarComponent } from '@app/shared/ui/components/sidebar/sidebar.co
 import { UiFooterComponent } from '@app/shared/ui/components/footer/footer.component';
 
 @Component({
-  selector: 'ui-page-layout',
+  selector: 'app-ui-page-layout',
   standalone: true,
   imports: [CommonModule, UiHeaderComponent, UiSidebarComponent, UiFooterComponent],
   templateUrl: './page-layout.component.html',
@@ -34,8 +34,8 @@ export class UiPageLayoutComponent extends UiBaseComponent {
   override get classes(): Record<string, boolean> {
     return {
       ...super.classes,
-      'ui-page-layout': true,
-      'has-sidebar': this.hasSidebar,
+      uiPageLayout: true,
+      hasSidebar: this.hasSidebar,
     };
   }
 }

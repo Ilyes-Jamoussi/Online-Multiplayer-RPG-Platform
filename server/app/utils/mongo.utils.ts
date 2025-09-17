@@ -30,7 +30,7 @@ export const GAME_PROJECTION = {
  * Projection for game display in UI
  * Includes fields needed for game listing and preview
  */
-export const DISPLAY_GAME_PROJECTION = {
+export const GAME_PREVIEW_PROJECTION = {
     _id: 1,
     name: 1,
     size: 1,
@@ -38,6 +38,7 @@ export const DISPLAY_GAME_PROJECTION = {
     mapImageUrl: 1,
     lastModified: 1,
     visibility: 1,
+    gridPreviewUrl: 1,
 } as const;
 
 /**
@@ -65,7 +66,7 @@ export const LIVE_SESSION_PROJECTION = {
  */
 const DTO_PROJECTIONS: Record<DtoType, Record<string, 1>> = {
     gameDto: GAME_PROJECTION,
-    displayGameDto: DISPLAY_GAME_PROJECTION,
+    displayGameDto: GAME_PREVIEW_PROJECTION,
     visibilityDto: VISIBILITY_PROJECTION,
     liveSessionDto: LIVE_SESSION_PROJECTION,
 };

@@ -45,4 +45,8 @@ export class GamePreviewCardComponent {
             minute: '2-digit',
         });
     }
+
+    getImageUrl(): string {
+        return `http://localhost:3000${this.game.gridPreviewUrl}`;
+    }
 }

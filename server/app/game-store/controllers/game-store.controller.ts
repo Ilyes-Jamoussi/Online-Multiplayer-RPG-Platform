@@ -2,14 +2,14 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
-import { SaveGameDto } from '@app/game-store/dto/save-game.dto';
 import { GameInitDto } from '@app/game-store/dto/game-init.dto';
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
+import { SaveGameDto } from '@app/game-store/dto/save-game.dto';
 import { ToggleVisibilityDto } from '@app/game-store/dto/toggle-visibility.dto';
 
 import { GameStoreGateway } from '@app/game-store/gateways/game-store.gateway';
 import { GameStoreService } from '@app/game-store/services/game-store.service';
-import { ReadGameDto } from '@app/game-store/dto/read-game.dto';
+import { ImageService } from '@app/game-store/services/image.service';
 
 @ApiTags('Games')
 @Controller('games')
@@ -17,6 +17,7 @@ export class GameStoreController {
     constructor(
         private readonly gameService: GameStoreService,
         private readonly gameStoreGateway: GameStoreGateway,
+        private readonly imageService: ImageService,
     ) {}
 
     @Get()
@@ -33,12 +34,12 @@ export class GameStoreController {
         return this.gameService.getGameInit(id);
     }
 
-    @Get(':id')
-    @ApiOperation({ summary: 'Get game by ID' })
-    @ApiResponse({ status: 200, type: ReadGameDto })
-    async getGameById(@Param('id') id: string): Promise<ReadGameDto> {
-        return this.gameService.getGameById(id);
-    }
+    // @Get(':id')
+    // @ApiOperation({ summary: 'Get game by ID' })
+    // @ApiResponse({ status: 200, type: ReadGameDto })
+    // async getGameById(@Param('id') id: string): Promise<ReadGameDto> {
+    //     return this.gameService.getGameById(id);
+    // }
 
     @Post()
     @ApiOperation({
