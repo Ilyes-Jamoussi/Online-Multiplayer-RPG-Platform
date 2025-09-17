@@ -12,6 +12,7 @@ import {
     computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { UI_CONSTANTS } from '@app/constants/ui.constants';
 
 type Bounds = 'viewport';
 
@@ -25,11 +26,11 @@ type Bounds = 'viewport';
 })
 export class DraggablePanelComponent implements AfterViewInit {
     @Input() title = '';
-    @Input() initialX = 120;
-    @Input() initialY = 32;
+    @Input() initialX = UI_CONSTANTS.draggablePanel.initialX;
+    @Input() initialY = UI_CONSTANTS.draggablePanel.initialY;
     @Input() clamp: Bounds = 'viewport';
     @Input() snap = 1;
-    @Input() zIndex = 1000;
+    @Input() zIndex = UI_CONSTANTS.draggablePanel.zIndex;
     @Input() disabled = false;
 
     /** Emits the position after drag ends */

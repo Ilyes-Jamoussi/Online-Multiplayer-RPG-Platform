@@ -1,4 +1,4 @@
-<app-draggable-panel title="Inventaire" storageKey="editor.inventory.pos" [initialX]="120" [initialY]="32" [snap]="1" [zIndex]="1000">
+<app-draggable-panel title="Inventaire" storageKey="editor.inventory.pos">
     @if (availableItems$ | async; as items) {
     <div class="list">
         <button

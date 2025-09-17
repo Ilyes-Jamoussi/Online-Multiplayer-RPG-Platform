@@ -1,0 +1,43 @@
+<div class="create-game-root">
+  <div class="header-bar">
+    <img src="assets/images/logo.png" alt="Logo" class="game-logo" />
+    <div class="header-actions">
+      <app-ui-button 
+        variant="primary" 
+        size="md"
+        (buttonClick)="goToAdmin()"
+      >
+        Administrer les jeux
+      </app-ui-button>
+    </div>
+  </div>
+
+  <h1 class="page-title">Sélection du jeu</h1>
+  <p class="page-subtitle">Choisissez un jeu pour créer une nouvelle partie !</p>
+
+  <div *ngIf="loading" class="loading-state">
+    <app-ui-spinner></app-ui-spinner>
+    <p>Chargement des jeux...</p>
+  </div>
+
+  <div *ngIf="!loading && games.length === 0" class="no-games-state">
+    <p>Aucun jeu disponible. Créez-en un dans l'administration !</p>
+    <app-ui-button 
+      variant="primary" 
+      size="lg"
+      (buttonClick)="goToAdmin()"
+    >
+      Créer un jeu
+    </app-ui-button>
+  </div>
+
+  <div *ngIf="!loading && games.length > 0" class="games-grid">
+    <app-game-preview-card 
+      *ngFor="let game of games" 
+      [game]="game"
+      [isAdmin]="false"
+      (startGame)="createGame($event)"
+      class="game-card">
+    </app-game-preview-card>
+  </div>
+</div>

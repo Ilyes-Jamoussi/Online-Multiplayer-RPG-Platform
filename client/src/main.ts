@@ -13,6 +13,7 @@ import { GameSessionCreationPageComponent } from '@app/pages/game-session-creati
 import { CharacterCreationPageComponent } from '@app/pages/character-creation-page/character-creation-page.component';
 import { GameParametersPageComponent } from '@app/pages/game-parameters-page/game-parameters-page.component';
 import { EditGamePageComponent } from '@app/pages/game-editor-page/view/edit-game-page.component';
+import { CreateGamePageComponent } from '@app/pages/create-game-page/game-creation-component/create-game-page.component';
 
 // import { CreateGameComponent } from './app/pages/create-game/create-game.component'; --- IGNORE ---
 
@@ -45,6 +46,7 @@ const routes: Routes = [
         path: removeLeadingSlash(ROUTES.gameParameters),
         component: GameParametersPageComponent,
     },
+    { path: removeLeadingSlash(ROUTES.createGamePage), component: CreateGamePageComponent },
     { path: '**', redirectTo: removeLeadingSlash(ROUTES.home) },
 ];
 

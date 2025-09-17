@@ -3,21 +3,10 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
+import { GameModeOption, MapSizeOption } from '@app/interfaces/game-parameters.interface';
 import { GameHttpService } from '@app/services/game/game-http/game-http.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
-
-interface MapSizeOption {
-    value: MapSize;
-    label: string;
-    maxPlayers: number;
-}
-
-interface GameModeOption {
-    value: GameMode;
-    label: string;
-    description: string;
-}
 
 @Component({
     selector: 'app-game-parameters-page',
