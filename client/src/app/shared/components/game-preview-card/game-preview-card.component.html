@@ -23,23 +23,23 @@
 
     <div class="game-actions">
         @if (isAdmin) {
-        <button class="edit-button" (click)="onEditGame()">
+        <app-ui-button variant="secondary" size="sm" (buttonClick)="onEditGame()">
             <app-ui-icon iconName="Edit"></app-ui-icon>
             Modifier
-        </button>
-        <button class="visibility-button" (click)="onToggleVisibility()">
+        </app-ui-button>
+        <app-ui-button variant="ghost" size="sm" (buttonClick)="onToggleVisibility()">
             <app-ui-icon [iconName]="game.visibility ? 'Eye' : 'EyeSlash'"></app-ui-icon>
             {{ game.visibility ? 'Masquer' : 'Publier' }}
-        </button>
-        <button class="delete-button" (click)="onDeleteGame()">
+        </app-ui-button>
+        <app-ui-button variant="error" size="sm" (buttonClick)="onDeleteGame()">
             <app-ui-icon iconName="Trash"></app-ui-icon>
             Supprimer
-        </button>
+        </app-ui-button>
         } @else {
-        <button class="start-button" (click)="onStartGame()">
+        <app-ui-button variant="primary" size="md" (buttonClick)="onStartGame()">
             <app-ui-icon iconName="Play"></app-ui-icon>
             Jouer
-        </button>
+        </app-ui-button>
         }
     </div>
 </div>

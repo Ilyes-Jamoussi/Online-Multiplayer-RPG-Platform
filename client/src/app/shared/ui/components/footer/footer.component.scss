@@ -1,0 +1,83 @@
+
+@use "variables" as *;
+
+.ui-footer {
+  background: linear-gradient(135deg, $secondary, rgba($white, 0.98));
+  backdrop-filter: blur(20px);
+  border-top: 3px solid rgba($primary, 0.2);
+  box-shadow: 0 -4px 20px rgba($black, 0.08);
+  padding: $space-8 $space-6;
+  margin-top: auto;
+  width: 100%;
+  min-height: 80px;
+  
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+// Styles globaux pour le contenu projeté dans le footer
+:host ::ng-deep .footer-content {
+  h2 {
+    margin: 0 0 $space-4 0;
+    font-size: $text-2xl;
+    font-weight: $font-bold;
+    color: $gray-800;
+    font-family: $font-gaming;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  
+  .members-list-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: $space-4;
+    margin-bottom: $space-6;
+  }
+  
+  .member-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $space-3;
+    background: rgba($primary, 0.1);
+    border: 1px solid rgba($primary, 0.2);
+    border-radius: $radius-lg;
+    min-width: 120px;
+    transition: all $transition-fast;
+    
+    &:hover {
+      background: rgba($primary, 0.15);
+      transform: translateY(-2px);
+      box-shadow: $shadow-md;
+    }
+    
+    .member-name {
+      font-weight: $font-semibold;
+      color: $gray-800;
+      margin-bottom: $space-1;
+      font-size: $text-sm;
+    }
+    
+    .member-role {
+      font-size: $text-xs;
+      color: $gray-600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+  }
+  
+  .copyright {
+    margin: 0;
+    color: $gray-600;
+    font-size: $text-sm;
+    opacity: 0.7;
+  }
+}

@@ -33,6 +33,9 @@
         "@ui/*": [
           "./src/app/shared/ui/*"
         ],
+        "@assets/*": [
+          "./src/assets/*"
+        ],
         "@common/*": [
           "../common/*"
         ],

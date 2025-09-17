@@ -1,4 +1,5 @@
-@use 'theme' as *;
+
+@use 'variables' as *;
 
 // ==================== ICON COMPONENT ====================
 .uiIcon {
@@ -17,20 +18,23 @@
     font-feature-settings: 'liga';
     -webkit-font-smoothing: antialiased;
 
-    // Apply all variant systems
-    @include ui-disabled-state;
-    @include ui-contrast-colors;
+    &:disabled,
+    &.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
 
     // Icon-specific size variants
     &.s-sm {
-        font-size: ui-size(sm, icon-size);
+        font-size: 1rem;
     }
 
     &.s-md {
-        font-size: ui-size(md, icon-size);
+        font-size: 1.5rem;
     }
 
     &.s-lg {
-        font-size: ui-size(lg, icon-size);
+        font-size: 2rem;
     }
 }

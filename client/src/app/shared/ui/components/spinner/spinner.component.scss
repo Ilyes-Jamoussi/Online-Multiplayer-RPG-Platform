@@ -1,4 +1,5 @@
-@use 'theme' as *;
+
+@use 'variables' as *;
 
 .uiSpinner {
     position: relative;
@@ -45,14 +46,25 @@
         width: 32px;
         height: 32px;
     }
-}
 
-/* Dynamic variants from the map */
-.uiSpinner {
-    @each $name, $bg in $ui-colors {
-        &.v-#{$name} {
-            color: ui-contrast($name); // the spinner takes the contrast color
-        }
+    /* color variants */
+    &.v-primary {
+        color: $primary;
+    }
+    &.v-secondary {
+        color: $secondary;
+    }
+    &.v-accent {
+        color: $accent;
+    }
+    &.v-success {
+        color: $success;
+    }
+    &.v-warning {
+        color: $warning;
+    }
+    &.v-error {
+        color: $error;
     }
 }
 

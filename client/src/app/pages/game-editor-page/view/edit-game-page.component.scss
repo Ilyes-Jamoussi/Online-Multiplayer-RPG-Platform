@@ -44,3 +44,10 @@
 .objects-overlay > * {
     pointer-events: auto;
 }
+
+// Styles pour le footer
+:host ::ng-deep .footer-content {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+}

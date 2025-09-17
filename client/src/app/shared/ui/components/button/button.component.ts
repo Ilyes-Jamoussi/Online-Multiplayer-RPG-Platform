@@ -1,36 +1,40 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
-import { UiSpinnerComponent } from '@app/shared/ui/components/spinner/spinner.component';
-import { UiShapeVariant } from '@ui/types/ui.types';
+
+export type ButtonVariant = 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error' | 'ghost';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
 @Component({
     selector: 'app-ui-button',
     standalone: true,
-    imports: [CommonModule, UiSpinnerComponent],
+    imports: [CommonModule],
     templateUrl: './button.component.html',
     styleUrls: ['./button.component.scss'],
 })
-export class UiButtonComponent extends UiBaseComponent {
-    @Input() text: string = 'Button';
-    @Input() icon?: string;
-    @Input() iconRight: boolean = false;
-    @Input() htmlType: 'button' | 'submit' | 'reset' = 'button';
-    @Input() shape: UiShapeVariant = 'pill';
+export class UiButtonComponent {
+    @Input() variant: ButtonVariant = 'primary';
+    @Input() size: ButtonSize = 'md';
+    @Input() disabled: boolean = false;
+    @Input() loading: boolean = false;
+    @Input() fullWidth: boolean = false;
+    @Input() type: 'button' | 'submit' | 'reset' = 'button';
+    
     @Output() buttonClick = new EventEmitter<MouseEvent>();
 
-    onClick(e: MouseEvent): void {
+    onClick(event: MouseEvent): void {
         if (!this.disabled && !this.loading) {
-            this?.buttonClick?.emit(e);
+            this.buttonClick.emit(event);
         }
     }
 
-    override get classes(): Record<string, boolean> {
-        return {
-            uiBtn: true,
-            ...super.classes,
-            iconRight: !!this.icon && this.iconRight,
-            iconLeft: !!this.icon && !this.iconRight,
-        };
+    get classes(): string {
+        return [
+            'ui-button',
+            `ui-button--${this.variant}`,
+            `ui-button--${this.size}`,
+            this.disabled ? 'ui-button--disabled' : '',
+            this.loading ? 'ui-button--loading' : '',
+            this.fullWidth ? 'ui-button--full-width' : ''
+        ].filter(Boolean).join(' ');
     }
 }

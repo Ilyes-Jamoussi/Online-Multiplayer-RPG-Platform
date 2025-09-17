@@ -3,15 +3,14 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
-import { UiCardContentComponent, UiCardTitleComponent } from '@app/shared/ui/components/card/card-sections.component';
-import { UiCardComponent } from '@app/shared/ui/components/card/card.component';
+import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 
 @Component({
     selector: 'app-home-page',
     templateUrl: './home-page.component.html',
     styleUrls: ['./home-page.component.scss'],
-    imports: [CommonModule, FormsModule, UiCardComponent, UiCardTitleComponent, UiCardContentComponent, UiButtonComponent],
+    imports: [CommonModule, FormsModule, UiButtonComponent, UiPageLayoutComponent],
     standalone: true,
 })
 export class HomePageComponent {

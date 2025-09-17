@@ -5,13 +5,15 @@ import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
 import { ROUTES } from '@app/constants/routes.constants';
 import { GameStoreService } from '@app/services/game/game-store/game-store.service';
 import { GamePreviewCardComponent } from '@app/shared/components/game-preview-card/game-preview-card.component';
+import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
+import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 
 @Component({
     selector: 'app-game-management-page',
     templateUrl: './game-management-page.component.html',
     styleUrls: ['./game-management-page.component.scss'],
     standalone: true,
-    imports: [CommonModule, GamePreviewCardComponent],
+    imports: [CommonModule, GamePreviewCardComponent, UiPageLayoutComponent, UiButtonComponent],
 })
 export class GameManagementPageComponent implements OnInit {
     private readonly router = inject(Router);
