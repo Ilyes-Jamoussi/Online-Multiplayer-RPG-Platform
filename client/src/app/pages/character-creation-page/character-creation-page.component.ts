@@ -9,6 +9,7 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { UiContainerComponent } from '@app/shared/ui/components/container/container.component';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 import { UiCheckboxComponent } from '@app/shared/ui/components/checkbox/checkbox.component';
+import { UiInputComponent } from '@app/shared/ui/components/input/input.component';
 import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
 
 @Component({
@@ -20,6 +21,7 @@ import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/pag
         UiButtonComponent,
         UiCheckboxComponent,
         UiContainerComponent,
+        UiInputComponent,
         UiPageLayoutComponent,
     ],
     templateUrl: './character-creation-page.component.html',

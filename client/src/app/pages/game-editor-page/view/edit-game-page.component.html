@@ -53,8 +53,12 @@
       <!-- Game Details Section -->
       <div class="game-details">
         <div class="input-group">
-          <label for="gameName">Nom du jeu</label>
-          <input id="gameName" type="text" [(ngModel)]="gameName" placeholder="Entrez le nom du jeu" />
+          <app-ui-input 
+            label="Nom du jeu"
+            type="text" 
+            [(ngModel)]="gameName" 
+            placeholder="Entrez le nom du jeu"
+          ></app-ui-input>
         </div>
         <div class="input-group">
           <label for="gameDescription">Description du jeu</label>

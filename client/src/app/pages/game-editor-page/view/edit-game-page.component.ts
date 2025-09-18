@@ -21,6 +21,7 @@ import { EditGameTileComponent } from '@app/pages/game-editor-page/components/ti
 import { EditGameToolbarComponent } from '@app/pages/game-editor-page/components/toolbar/edit-game-toolbar.component';
 import { TileSizeProbeDirective } from '@app/pages/game-editor-page/directives/tile-size-probe.directive';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
+import { UiInputComponent } from '@app/shared/ui/components/input/input.component';
 import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
 import { GameMode } from '@common/enums/game-mode.enum';
 
@@ -37,6 +38,7 @@ import { GameMode } from '@common/enums/game-mode.enum';
         EditBaseObjectComponent,
         UiPageLayoutComponent,
         UiButtonComponent,
+        UiInputComponent,
     ],
     templateUrl: './edit-game-page.component.html',
     styleUrls: ['./edit-game-page.component.scss'],

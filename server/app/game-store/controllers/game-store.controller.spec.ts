@@ -1,14 +1,15 @@
 import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
+import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 import { GameInitDto } from '@app/game-store/dto/game-init.dto';
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
 import { ToggleVisibilityDto } from '@app/game-store/dto/toggle-visibility.dto';
 import { GameStoreController } from '@app/game-store/controllers/game-store.controller';
 import { GameStoreGateway } from '@app/game-store/gateways/game-store.gateway';
 import { GameStoreService } from '@app/game-store/services/game-store.service';
+import { ImageService } from '@app/game-store/services/image.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Test, TestingModule } from '@nestjs/testing';
-import { SaveGameDto } from '@app/game-store/dto/save-game.dto';
 
 describe('GameStoreController', () => {
     let controller: GameStoreController;
@@ -23,6 +24,7 @@ describe('GameStoreController', () => {
         mode: GameMode.CLASSIC,
         lastModified: new Date(),
         visibility: true,
+        gridPreviewUrl: 'test-preview-url',
     };
 
     const mockGameInit: GameInitDto = {
@@ -37,16 +39,13 @@ describe('GameStoreController', () => {
         visibility: true,
         tiles: [],
         objects: [],
+        gridPreviewImage: 'test-preview-image',
     };
 
-    const mockUpdateGameDto: SaveGameDto = {
+    const mockUpdateGameDto: UpdateGameDto = {
         name: 'Updated Game',
         description: 'Updated Description',
-        size: MapSize.SMALL,
-        mode: GameMode.CLASSIC,
-        visibility: true,
-        tiles: [],
-        objects: [],
+        gridPreviewImage: 'updated-preview-image',
     };
 
     const mockToggleVisibilityDto: ToggleVisibilityDto = {
@@ -80,6 +79,13 @@ describe('GameStoreController', () => {
                 {
                     provide: GameStoreGateway,
                     useValue: mockGateway,
+                },
+                {
+                    provide: ImageService,
+                    useValue: {
+                        saveImage: jest.fn(),
+                        deleteImage: jest.fn(),
+                    },
                 },
             ],
         }).compile();
