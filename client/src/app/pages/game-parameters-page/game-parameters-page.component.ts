@@ -22,8 +22,6 @@ export class GameParametersPageComponent {
 
     selectedMapSize: MapSize = MapSize.MEDIUM;
     selectedGameMode: GameMode = GameMode.CLASSIC;
-    gameName: string = '';
-    gameDescription: string = '';
 
     readonly mapSizeOptions: MapSizeOption[] = [
         {

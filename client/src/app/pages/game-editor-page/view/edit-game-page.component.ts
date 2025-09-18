@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { AsyncPipe, NgStyle } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, distinctUntilChanged, map, switchMap, take, tap } from 'rxjs/operators';
@@ -31,6 +32,7 @@ import { GameMode } from '@common/enums/game-mode.enum';
     imports: [
         AsyncPipe,
         NgStyle,
+        FormsModule,
         EditGameToolbarComponent,
         EditGameTileComponent,
         EditorInventoryComponent,
@@ -45,6 +47,9 @@ import { GameMode } from '@common/enums/game-mode.enum';
 })
 export class EditGamePageComponent implements OnInit {
     @ViewChild('gridWrapper', { static: false }) gridWrapper!: ElementRef<HTMLElement>;
+
+    gameName: string = '';
+    gameDescription: string = '';
 
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);

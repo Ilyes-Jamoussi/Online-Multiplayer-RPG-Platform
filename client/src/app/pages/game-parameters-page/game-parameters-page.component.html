@@ -9,15 +9,6 @@
   <div class="parameters-content">
     <!-- Sélection de la taille de carte -->
     <section class="parameter-section">
-      <h2>Détails du jeu</h2>
-      <div class="input-group">
-        <label for="gameName">Nom du jeu</label>
-        <input id="gameName" type="text" [(ngModel)]="gameName" placeholder="Entrez le nom du jeu" />
-      </div>
-      <div class="input-group">
-        <label for="gameDescription">Description du jeu</label>
-        <textarea id="gameDescription" [(ngModel)]="gameDescription" placeholder="Entrez une description pour le jeu"></textarea>
-      </div>
       <h2>Taille de la carte</h2>
       <div class="options-grid">
         @for (option of mapSizeOptions; track option.value) {
