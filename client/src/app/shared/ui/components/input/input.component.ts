@@ -39,8 +39,12 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
     isDisabled = false;
     isTouched = false;
 
-    private onChange = (value: string) => {};
-    private onTouched = () => {};
+    private onChange = () => {
+        // Callback function for form control
+    };
+    private onTouched = () => {
+        // Callback function for form control
+    };
 
     writeValue(value: string): void {
         this.value = value || '';
