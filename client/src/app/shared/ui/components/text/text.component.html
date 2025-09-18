@@ -1,0 +1,8 @@
+<ng-container [ngSwitch]="element">
+  <h1 *ngSwitchCase="'h1'" [ngClass]="classes"><ng-content></ng-content></h1>
+  <h2 *ngSwitchCase="'h2'" [ngClass]="classes"><ng-content></ng-content></h2>
+  <h3 *ngSwitchCase="'h3'" [ngClass]="classes"><ng-content></ng-content></h3>
+  <p *ngSwitchCase="'p'" [ngClass]="classes"><ng-content></ng-content></p>
+  <div *ngSwitchCase="'div'" [ngClass]="classes"><ng-content></ng-content></div>
+  <span *ngSwitchDefault [ngClass]="classes"><ng-content></ng-content></span>
+</ng-container>

@@ -9,13 +9,7 @@
   overflow-y: auto;
 }
 
-.character-selection-container {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 2rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  overflow-y: auto;
-  height: auto;
-}
+// Container styles now handled by ui-container component
 
 .selection-header {
   text-align: center;
@@ -256,14 +250,14 @@
   }
 }
 
-/* Action Bar */
-.action-bar {
+// Styles pour le footer
+:host ::ng-deep .footer-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 1rem 2rem;
   max-width: 1400px;
-  margin: 2rem auto 0;
-  padding: 0 1rem;
+  margin: 0 auto;
 }
 
 /* Responsive */
@@ -277,7 +271,7 @@
     grid-template-columns: repeat(6, 1fr);
   }
   
-  .action-bar {
+  :host ::ng-deep .footer-content {
     flex-direction: column;
     gap: 1rem;
   }
@@ -294,5 +288,9 @@
   
   .character-grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+  
+  :host ::ng-deep .footer-content {
+    padding: 1rem;
   }
 }

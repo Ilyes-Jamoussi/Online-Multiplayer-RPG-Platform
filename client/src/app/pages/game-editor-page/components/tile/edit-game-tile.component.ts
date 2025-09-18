@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, Input, HostBinding, HostListener } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, HostBinding, HostListener, ElementRef, NgZone } from '@angular/core';
 import { NgStyle } from '@angular/common';
 import { TileSpec, DND_MIME } from '@app/interfaces/game/game-editor.interface';
 import { TileService } from '@app/services/game/game-editor/tile.service';
@@ -22,9 +22,15 @@ export class EditGameTileComponent extends TileSizeProbeDirective {
     @Input({ required: true }) x!: number;
     @Input({ required: true }) y!: number;
 
-    private readonly tiles = inject(TileService);
-    private readonly tools = inject(EditorToolsService);
-    private readonly objects = inject(ObjectService);
+    constructor(
+        private readonly tileService: TileService,
+        private readonly editorToolsService: EditorToolsService,
+        private readonly objectService: ObjectService,
+        el: ElementRef<HTMLElement>,
+        zone: NgZone,
+    ) {
+        super(el, zone);
+    }
 
     onRightClick(event: MouseEvent) {
         event.preventDefault();
@@ -33,26 +39,26 @@ export class EditGameTileComponent extends TileSizeProbeDirective {
     onMouseDown(event: MouseEvent) {
         event.preventDefault();
         if (event.button === 0) {
-            this.tiles.applyPaint(this.x, this.y);
-            this.tools.toggleDragging('left');
+            this.tileService.applyPaint(this.x, this.y);
+            this.editorToolsService.toggleDragging('left');
         } else if (event.button === 2) {
-            this.tiles.applyRightClick(this.x, this.y);
-            this.tools.toggleDragging('right');
+            this.tileService.applyRightClick(this.x, this.y);
+            this.editorToolsService.toggleDragging('right');
         }
     }
 
     onMouseUp(event: MouseEvent) {
         event.preventDefault();
         if (event.button === 0) {
-            this.tools.toggleDragging('left');
+            this.editorToolsService.toggleDragging('left');
         } else if (event.button === 2) {
-            this.tools.toggleDragging('right');
+            this.editorToolsService.toggleDragging('right');
         }
     }
 
     onMouseOver(event: MouseEvent) {
         event.preventDefault();
-        this.tiles.dragPaint(this.x, this.y);
+        this.tileService.dragPaint(this.x, this.y);
     }
 
     colorOf(kind: ReadTileDto.KindEnum): string {
@@ -103,7 +109,7 @@ export class EditGameTileComponent extends TileSizeProbeDirective {
         const kindStr = evt.dataTransfer.getData(DND_MIME);
         if (!kindStr) return;
         evt.preventDefault();
-        this.objects.tryPlaceObject(this.x, this.y, kindStr as PlaceableKind);
-        this.tools.setActiveTool({ type: 'TILE_BRUSH', tile: TileKind.BASE });
+        this.objectService.tryPlaceObject(this.x, this.y, kindStr as PlaceableKind);
+        this.editorToolsService.setActiveTool({ type: 'TILE_BRUSH', tile: TileKind.BASE });
     }
 }

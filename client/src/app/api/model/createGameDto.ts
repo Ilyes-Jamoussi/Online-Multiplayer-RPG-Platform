@@ -17,6 +17,7 @@ export interface CreateGameDto {
     name: string;
     description: string;
     visibility?: boolean;
+    gridPreviewImage: string;
     /**
      * Sparse tiles: only those different from BASE
      */

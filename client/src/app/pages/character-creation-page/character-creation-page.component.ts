@@ -2,11 +2,15 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ROUTES } from '@app/constants/routes.constants';
 import { UI_CONSTANTS } from '@app/constants/ui.constants';
 import { Character } from '@app/interfaces/character.interface';
 import { NotificationService } from '@app/services/notification/notification.service';
+import { UiContainerComponent } from '@app/shared/ui/components/container/container.component';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 import { UiCheckboxComponent } from '@app/shared/ui/components/checkbox/checkbox.component';
+import { UiInputComponent } from '@app/shared/ui/components/input/input.component';
+import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
 
 @Component({
     selector: 'app-character-creation-page',
@@ -16,6 +20,9 @@ import { UiCheckboxComponent } from '@app/shared/ui/components/checkbox/checkbox
         FormsModule,
         UiButtonComponent,
         UiCheckboxComponent,
+        UiContainerComponent,
+        UiInputComponent,
+        UiPageLayoutComponent,
     ],
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
@@ -162,7 +169,7 @@ export class CharacterCreationPageComponent implements OnInit {
     }
 
     goBack(): void {
-        this.router.navigate(['/create-game-page']);
+        this.router.navigate([ROUTES.gameSessionCreation]);
     }
 
     goToHome(): void {

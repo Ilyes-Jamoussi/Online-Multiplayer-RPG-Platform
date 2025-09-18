@@ -1,27 +1,45 @@
-<div class="home-modern-layout">
+<app-ui-page-layout [hasHeader]="false" [hasFooter]="true">
     <div class="home-left">
         <div class="game-title-block">
             <img src="assets/images/logo.png" alt="Game Logo" class="game-logo-modern" />
         </div>
         <div class="menu-buttons-modern">
-            <app-ui-button size="lg" [disabled]="true" variant="secondary"> Rejoindre une partie (Bientôt disponible) </app-ui-button>
-            <app-ui-button size="lg" (buttonClick)="navigateToCreateGame()" variant="primary"> Créer une partie </app-ui-button>
-            <app-ui-button size="lg" (buttonClick)="navigateToAdminPage()" variant="primary"> Administrer les jeux </app-ui-button>
+            <app-ui-button 
+                variant="ghost" 
+                size="lg" 
+                [disabled]="true" 
+                [fullWidth]="true">
+                Rejoindre une partie (Bientôt disponible)
+            </app-ui-button>
+            
+            <app-ui-button 
+                variant="primary" 
+                size="lg" 
+                [fullWidth]="true"
+                (buttonClick)="navigateToCreateGame()">
+                Créer une partie
+            </app-ui-button>
+            
+            <app-ui-button 
+                variant="secondary" 
+                size="lg" 
+                [fullWidth]="true"
+                (buttonClick)="navigateToAdminPage()">
+                Administrer les jeux
+            </app-ui-button>
         </div>
     </div>
-    <div class="home-right">
-        <div class="team-section-modern">
-            <h2 class="team-title-modern">Crédits : équipe {{ teamInfo.teamNumber }}</h2>
-            <div class="members-list-modern">
+    
+    <div slot="footer">
+        <div class="footer-content">
+            <h2>Équipe {{ teamInfo.teamNumber }}</h2>
+            <div class="members-list-footer">
                 @for (member of teamInfo.members; track member) {
-                <app-ui-card size="lg" variant="secondary">
-                    <app-ui-card-title>{{ member }}</app-ui-card-title>
-                    <app-ui-card-content>
-                        <p>Role: Developer</p>
-                    </app-ui-card-content>
-                </app-ui-card>
+                <div class="member-card">
+                    <span class="member-name">{{ member }}</span>
+                </div>
                 }
             </div>
         </div>
     </div>
-</div>
+</app-ui-page-layout>

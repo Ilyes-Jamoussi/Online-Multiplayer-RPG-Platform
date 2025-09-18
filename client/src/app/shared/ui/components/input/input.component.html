@@ -1,41 +1,62 @@
-<div class="uiInput" [ngClass]="classes">
+<div class="ui-input" [ngClass]="classes">
     @if (label) {
-    <label class="uiInput-label"> {{ label }} @if (required) { <span class="req">*</span> }</label>
+        <label class="ui-input__label">
+            {{ label }}
+            @if (required) {
+                <span class="ui-input__required">*</span>
+            }
+        </label>
     }
 
-    <div class="uiInput-field">
+    <div class="ui-input__field">
         @if (prefixIcon) {
-        <app-ui-icon [iconName]="prefixIcon" variant="secondary"></app-ui-icon>
+            <app-ui-icon 
+                class="ui-input__prefix-icon" 
+                [iconName]="prefixIcon" 
+                variant="secondary">
+            </app-ui-icon>
         }
 
-        <!-- <input
-            class="in-control"
-            [attr.type]="type"
-            [attr.placeholder]="placeholder"
-            [attr.maxLength]="maxLength ?? null"
-            [attr.minLength]="minLength ?? null"
-            [disabled]="disabled || isDisabled"
+        <input
+            class="ui-input__control"
+            [type]="type"
+            [placeholder]="placeholder"
+            [maxLength]="maxLength || null"
+            [minLength]="minLength || null"
+            [disabled]="isDisabled"
             [value]="value"
-            [style.text-align]="alignText ?? 'left'"
-            <!-- (input)="onInput($event)"
-            (blur)="onBlur()" -->
-        @if (suffixIcon) {
-        <app-ui-icon [iconName]="suffixIcon" variant="secondary"></app-ui-icon>
+            [required]="required"
+            (input)="onInput($event)"
+            (blur)="onBlur()"
+        />
+
+        @if (clearable && value && !isDisabled) {
+            <button
+                type="button"
+                class="ui-input__clear-btn"
+                (click)="onClear()"
+                aria-label="Clear input"
+            >
+                ×
+            </button>
         }
-        <button
-            type="button"
-            class="clear-btn"
-            [ngClass]="{ isHidden: !clearable || !value || disabled || isDisabled }"
-            (click)="onClear(); $event.stopPropagation()"
-            aria-label="Clear"
-        >
-            ×
-        </button>
+
+        @if (suffixIcon) {
+            <app-ui-icon 
+                class="ui-input__suffix-icon" 
+                [iconName]="suffixIcon" 
+                variant="secondary">
+            </app-ui-icon>
+        }
     </div>
+
+    @if (errorMessage && hasError) {
+        <div class="ui-input__error">{{ errorMessage }}</div>
+    }
 
     @if (maxLength) {
-    <div class="uiInput-meta">
-        <span class="counter">{{ value.length || 0 }}/{{ maxLength }}</span>
-    </div>
+        <div class="ui-input__counter">
+            {{ value.length }}/{{ maxLength }}
+        </div>
     }
 </div>

@@ -1,9 +1,0 @@
-<a class="uiButton2" [ngClass]="classes" [routerLink]="routerLink" [queryParams]="queryParams" [fragment]="fragment" [target]="target">
-    <span class="btn-inner" [ngClass]="classes">
-        @if (leftIcon) {
-        <app-ui-icon [ngClass]="classes" [iconName]="leftIcon" variant="primary" class="btn-icon left"></app-ui-icon>
-        }
-        <span class="btn-label"><ng-content></ng-content></span>
-        @if (rightIcon) { <app-ui-icon [ngClass]="classes" [iconName]="rightIcon" variant="primary" class="btn-icon right"></app-ui-icon> }
-    </span>
-</a>

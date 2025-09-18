@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 
 import { UiTooltipComponent } from '@app/shared/ui/components/tooltip/tooltip.component';
@@ -10,7 +10,7 @@ import { DraggablePanelComponent } from '@app/shared/ui/components/draggable-pan
 import { TileKind } from '@common/enums/tile-kind.enum';
 
 interface BrushItem {
-    emoji: string;
+    image: string;
     tool: ActiveTool;
     class: string;
 }
@@ -24,22 +24,24 @@ interface BrushItem {
     imports: [UiTooltipComponent, AsyncPipe, DraggablePanelComponent],
 })
 export class EditGameToolbarComponent {
-    private readonly draft = inject(GameDraftService);
-    private readonly tools = inject(EditorToolsService);
-
-    activeTool$ = this.draft.activeTool$;
+    activeTool$ = this.gameDraftService.activeTool$;
 
     brushes: BrushItem[] = [
-        { emoji: '🟩', class: 'base', tool: { type: 'TILE_BRUSH', tile: TileKind.BASE } },
-        { emoji: '🟫', class: 'wall', tool: { type: 'TILE_BRUSH', tile: TileKind.WALL } },
-        { emoji: '🚪', class: 'door', tool: { type: 'TILE_BRUSH', tile: TileKind.DOOR } },
-        { emoji: '💧', class: 'water', tool: { type: 'TILE_BRUSH', tile: TileKind.WATER } },
-        { emoji: '❄️', class: 'ice', tool: { type: 'TILE_BRUSH', tile: TileKind.ICE } },
-        { emoji: '🔮', class: 'teleport', tool: { type: 'TILE_BRUSH', tile: TileKind.TELEPORT } },
+        { image: '/assets/tiles/sand.png', class: 'base', tool: { type: 'TILE_BRUSH', tile: TileKind.BASE } },
+        { image: '/assets/tiles/wall.png', class: 'wall', tool: { type: 'TILE_BRUSH', tile: TileKind.WALL } },
+        { image: '/assets/tiles/closed-door.png', class: 'door', tool: { type: 'TILE_BRUSH', tile: TileKind.DOOR } },
+        { image: '/assets/tiles/water.png', class: 'water', tool: { type: 'TILE_BRUSH', tile: TileKind.WATER } },
+        { image: '/assets/tiles/ice.png', class: 'ice', tool: { type: 'TILE_BRUSH', tile: TileKind.ICE } },
+        { image: '/assets/tiles/teleport-portal.png', class: 'teleport', tool: { type: 'TILE_BRUSH', tile: TileKind.TELEPORT } },
     ];
 
+    constructor(
+        private readonly gameDraftService: GameDraftService,
+        private readonly editorToolsService: EditorToolsService,
+    ) {}
+
     select(item: BrushItem) {
-        this.tools.setActiveTool(item.tool);
+        this.editorToolsService.setActiveTool(item.tool);
     }
 
     isBrushSelected(brush: BrushItem, activeTool: ActiveTool): boolean {

@@ -1,5 +1,7 @@
 import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
+import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 import { Game, GameDocument } from '@app/game-store/entities/game.entity';
+import { ImageService } from '@app/game-store/services/image.service';
 import { GameStoreService } from '@app/game-store/services/game-store.service';
 import { getProjection } from '@app/utils/mongo.utils';
 import { GameMode } from '@common/enums/game-mode.enum';
@@ -8,11 +10,11 @@ import { NotFoundException } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Model, Types, Query } from 'mongoose';
-import { SaveGameDto } from '@app/game-store/dto/save-game.dto';
 
 describe('GameStoreService', () => {
     let service: GameStoreService;
     let gameModel: jest.Mocked<Model<GameDocument>>;
+    let module: TestingModule;
 
     const mockObjectId = new Types.ObjectId();
     const mockDate = new Date();
@@ -35,15 +37,13 @@ describe('GameStoreService', () => {
         mode: GameMode.CLASSIC,
         tiles: [],
         objects: [],
+        gridPreviewImage: 'test-preview-image',
     };
 
-    const mockUpdateGameDto: SaveGameDto = {
+    const mockUpdateGameDto: UpdateGameDto = {
         name: 'Updated Game',
         description: 'Updated Description',
-        size: MapSize.LARGE,
-        mode: GameMode.CTF,
-        tiles: [],
-        objects: [],
+        gridPreviewImage: 'updated-preview-image',
     };
 
     beforeEach(async () => {
@@ -55,12 +55,19 @@ describe('GameStoreService', () => {
             deleteOne: jest.fn(),
         };
 
-        const module: TestingModule = await Test.createTestingModule({
+        module = await Test.createTestingModule({
             providers: [
                 GameStoreService,
                 {
                     provide: getModelToken(Game.name),
                     useValue: mockGameModel,
+                },
+                {
+                    provide: ImageService,
+                    useValue: {
+                        saveImage: jest.fn(),
+                        deleteImage: jest.fn(),
+                    },
                 },
             ],
         }).compile();
@@ -159,6 +166,10 @@ describe('GameStoreService', () => {
         it('should update game and return GamePreviewDto', async () => {
             const mockGameDocument = createMockGameDocument();
             const updatedGame = { ...mockGameDocument, ...mockUpdateGameDto, lastModified: new Date() };
+            const mockImageService = module.get(ImageService);
+            
+            (gameModel.findById as jest.Mock).mockResolvedValue(mockGameDocument);
+            (mockImageService.saveImage as jest.Mock).mockResolvedValue('updated-image-url');
             (gameModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(updatedGame);
 
             const result = await service.updateGame(mockObjectId.toString(), mockUpdateGameDto);
@@ -166,7 +177,9 @@ describe('GameStoreService', () => {
             expect(gameModel.findByIdAndUpdate).toHaveBeenCalledWith(
                 mockObjectId.toString(),
                 expect.objectContaining({
-                    ...mockUpdateGameDto,
+                    name: mockUpdateGameDto.name,
+                    description: mockUpdateGameDto.description,
+                    gridPreviewUrl: expect.any(String),
                     lastModified: expect.any(Date),
                 }),
                 { new: true },
@@ -188,7 +201,9 @@ describe('GameStoreService', () => {
 
     describe('deleteGame', () => {
         it('should delete game successfully', async () => {
+            const mockGameDocument = createMockGameDocument();
             const mockResult = { deletedCount: 1 };
+            (gameModel.findById as jest.Mock).mockResolvedValue(mockGameDocument);
             (gameModel.deleteOne as jest.Mock).mockResolvedValue(mockResult);
 
             await service.deleteGame(mockObjectId.toString());

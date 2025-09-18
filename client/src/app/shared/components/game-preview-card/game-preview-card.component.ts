@@ -1,14 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Router } from '@angular/router';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
+import { ROUTES } from '@app/constants/routes.constants';
+import { GameStoreService } from '@app/services/game/game-store/game-store.service';
 import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
+import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 
 @Component({
     selector: 'app-game-preview-card',
     templateUrl: './game-preview-card.component.html',
     styleUrls: ['./game-preview-card.component.scss'],
     standalone: true,
-    imports: [CommonModule, UiIconComponent],
+    imports: [CommonModule, UiIconComponent, UiButtonComponent],
 })
 export class GamePreviewCardComponent {
     @Input() game!: GamePreviewDto;
@@ -19,12 +23,20 @@ export class GamePreviewCardComponent {
     @Output() deleteGame = new EventEmitter<string>();
     @Output() toggleVisibility = new EventEmitter<string>();
 
+    constructor(
+        private readonly router: Router,
+        private readonly gameStoreService: GameStoreService,
+    ) {}
+
     onStartGame(): void {
         this.startGame.emit(this.game.id);
     }
 
     onEditGame(): void {
-        this.editGame.emit(this.game.id);
+        this.gameStoreService.setGameId(this.game.id);
+        this.gameStoreService.setName(this.game.name);
+        this.gameStoreService.setDescription(this.game.description);
+        this.router.navigate([ROUTES.gameEditor]);
     }
 
     onDeleteGame(): void {
@@ -43,5 +55,9 @@ export class GamePreviewCardComponent {
             hour: '2-digit',
             minute: '2-digit',
         });
+    }
+
+    getImageUrl(): string {
+        return `http://localhost:3000${this.game.gridPreviewUrl}`;
     }
 }

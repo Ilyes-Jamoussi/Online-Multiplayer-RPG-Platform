@@ -35,7 +35,16 @@ describe('GameHttpService', () => {
     describe('getGamesDisplay', () => {
         it('should return games display', () => {
             const mockGames: GamePreviewDto[] = [
-                { id: '1', name: 'Game 1', description: 'Desc 1', size: 10, mode: 'classic', lastModified: '2023-01-01', visibility: true },
+                { 
+                    id: '1', 
+                    name: 'Game 1', 
+                    description: 'Desc 1', 
+                    size: 10, 
+                    mode: 'classic', 
+                    lastModified: '2023-01-01', 
+                    visibility: true, 
+                    gridPreviewUrl: '/assets/game1.png' 
+                },
             ];
 
             service.getGamesDisplay().subscribe((games) => {
@@ -65,7 +74,15 @@ describe('GameHttpService', () => {
 
     describe('createGame', () => {
         it('should create a game', () => {
-            const createDto: CreateGameDto = { name: 'New Game', description: 'New Desc', size: 10, mode: 'classic', tiles: [], objects: [] };
+            const createDto: CreateGameDto = { 
+                name: 'New Game', 
+                description: 'New Desc', 
+                size: 10, 
+                mode: 'classic', 
+                tiles: [], 
+                objects: [], 
+                gridPreviewImage: 'data:image/png;base64,test' 
+            };
 
             service.createGame(createDto).subscribe();
 
@@ -79,7 +96,15 @@ describe('GameHttpService', () => {
     describe('updateGame', () => {
         it('should update a game', () => {
             const gameId = '123';
-            const createDto: CreateGameDto = { name: 'Updated Game', description: 'Updated Desc', size: 10, mode: 'classic', tiles: [], objects: [] };
+            const createDto: CreateGameDto = { 
+                name: 'Updated Game', 
+                description: 'Updated Desc', 
+                size: 10, 
+                mode: 'classic', 
+                tiles: [], 
+                objects: [], 
+                gridPreviewImage: 'data:image/png;base64,test' 
+            };
 
             service.updateGame(gameId, createDto).subscribe();
 

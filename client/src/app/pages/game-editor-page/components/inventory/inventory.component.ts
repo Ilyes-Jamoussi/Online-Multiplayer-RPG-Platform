@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule, AsyncPipe } from '@angular/common';
 
 import { GameDraftService } from '@app/services/game/game-editor/game-draft.service';
@@ -17,11 +17,13 @@ import { PlaceableKind } from '@common/enums/placeable-kind.enum';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditorInventoryComponent implements AfterViewInit {
-    private readonly draft = inject(GameDraftService);
-    private readonly tools = inject(EditorToolsService);
-
-    availableItems$ = this.draft.inventoryCounts$;
+    availableItems$ = this.gameDraftService.inventoryCounts$;
     placeableKind = PlaceableKind;
+
+    constructor(
+        private readonly gameDraftService: GameDraftService,
+        private readonly editorToolsService: EditorToolsService,
+    ) {}
 
     ngAfterViewInit() {
         // no-op; kept if you later want to react after first render
@@ -30,7 +32,7 @@ export class EditorInventoryComponent implements AfterViewInit {
     /** Select an object type if it is available */
     select(kind: PlaceableKind, disabled: boolean) {
         if (disabled) return;
-        this.tools.setActiveTool({ type: 'OBJECT', kind });
+        this.editorToolsService.setActiveTool({ type: 'OBJECT', kind });
     }
 
     /** Begin a native DnD for placing objects on the canvas */
@@ -38,6 +40,6 @@ export class EditorInventoryComponent implements AfterViewInit {
         if (disabled || !evt.dataTransfer) return;
         evt.dataTransfer.effectAllowed = 'copy';
         evt.dataTransfer.setData(DND_MIME, kind);
-        this.tools.setActiveTool({ type: 'OBJECT', kind });
+        this.editorToolsService.setActiveTool({ type: 'OBJECT', kind });
     }
 }

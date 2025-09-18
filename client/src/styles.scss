@@ -1,20 +1,17 @@
-@use 'styles/theme' as *;
-@use 'styles/theme2' as *;
+// ==================== POINT D'ENTRÉE PRINCIPAL ====================
+// Import du design system complet
 
-html,
-body {
-    height: 100%;
-}
-body {
-    font-family: Roboto, 'Helvetica Neue', sans-serif;
-    margin: 0;
-    height: 100vh;
-    overflow: hidden;
-}
+@use 'styles/variables' as *;
 
-* {
-    box-sizing: border-box;
-    transition:
-        transform 0.1s ease,
-        box-shadow 0.1s ease;
+// ==================== STYLES GLOBAUX ====================
+body {
+  margin: 0;
+  padding: 0;
+  font-family: $font-primary;
+  background-image: url('/assets/images/background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  min-height: 100vh;
 }

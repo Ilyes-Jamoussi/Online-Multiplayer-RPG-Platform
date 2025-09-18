@@ -1,9 +1,9 @@
-<div class="game-session-container">
-    <div class="session-header">
-        <h1>Choisir un jeu</h1>
-        <p>Sélectionnez un jeu pour commencer une nouvelle partie</p>
-        <button class="btn btn-secondary" (click)="onBack()">Retour</button>
-    </div>
+<app-ui-page-layout 
+  [hasHeader]="true" 
+  headerTitle="Choisir un jeu"
+  headerSubtitle="Sélectionnez un jeu pour commencer une nouvelle partie"
+  [showBackButton]="true"
+  (backClick)="onBackClick()">
 
     <div class="games-section">
         @if (visibleGameDisplays() && visibleGameDisplays().length > 0) {
@@ -19,4 +19,4 @@
         </div>
         }
     </div>
-</div>
+</app-ui-page-layout>

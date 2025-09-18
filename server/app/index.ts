@@ -1,13 +1,21 @@
 import { AppModule } from '@app/app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { join } from 'path';
 
 const bootstrap = async () => {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
     app.setGlobalPrefix('api');
     app.useGlobalPipes(new ValidationPipe());
     app.enableCors();
+
+    // Servir les fichiers statiques depuis le dossier assets
+    const assetsPath = join(process.cwd(), 'assets');
+    app.useStaticAssets(assetsPath, {
+        prefix: '/assets/',
+    });
 
     const config = new DocumentBuilder()
         .setTitle('Cadriciel Serveur')

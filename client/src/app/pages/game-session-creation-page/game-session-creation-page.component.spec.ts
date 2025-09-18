@@ -22,6 +22,7 @@ describe('GameSessionCreationPageComponent', () => {
             mode: 'classic',
             lastModified: new Date().toISOString(),
             visibility: true,
+            gridPreviewUrl: '/assets/game1-preview.png',
         },
     ];
 
@@ -59,11 +60,7 @@ describe('GameSessionCreationPageComponent', () => {
         expect(visibleGames).toEqual(mockGames);
     });
 
-    it('should navigate back to home', () => {
-        component.onBack();
-
-        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.home]);
-    });
+    // Test removed - onBack method no longer exists
 
     it('should navigate to character creation', () => {
         component.onStartGame();

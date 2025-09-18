@@ -84,6 +84,11 @@ export class CreateGameDto {
     @IsBoolean()
     readonly visibility?: boolean;
 
+    @ApiProperty({ example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...' })
+    @IsString()
+    @IsNotEmpty()
+    readonly gridPreviewImage: string;
+
     @ApiProperty({
         type: [CreateTileDto],
         description: 'Sparse tiles: only those different from BASE',

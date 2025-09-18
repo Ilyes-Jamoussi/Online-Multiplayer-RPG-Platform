@@ -1,9 +1,8 @@
 <app-draggable-panel title="Outils" storageKey="editor.toolbar.pos">
     <div class="list">
-        @if (activeTool$ | async; as activeTool) { @for (b of brushes; track b.emoji) {
+        @if (activeTool$ | async; as activeTool) { @for (b of brushes; track b.image) {
         <app-ui-tooltip position="right" distance="md" [text]="b.tool.type === 'TILE_BRUSH' ? 'Tuile: ' + b.tool.type : b.tool.type">
-            <button class="tool-btn {{ b.class }}" [class.selected]="isBrushSelected(b, activeTool)" (click)="select(b)">
-                {{ b.emoji }}
+            <button class="tool-btn {{ b.class }}" [class.selected]="isBrushSelected(b, activeTool)" (click)="select(b)" [style.--bg-image]="'url(' + b.image + ')'">
             </button>
         </app-ui-tooltip>
         } }

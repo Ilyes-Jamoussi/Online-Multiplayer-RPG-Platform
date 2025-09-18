@@ -1,45 +1,53 @@
 <div class="game-card">
-    <div class="game-header">
-        <div class="game-info">
-            <h3 class="game-title">{{ game.name }}</h3>
-            <p class="game-description">ID : {{ game.id }}</p>
-            <p class="game-description">{{ game.description }}</p>
+    <div class="card-content">
+        <div class="game-preview">
+            <img [src]="getImageUrl()" [alt]="game.name + ' preview'" class="preview-image">
         </div>
-        <div class="visibility-badge" [class.visible]="game.visibility" [class.hidden]="!game.visibility">
-            {{ game.visibility ? 'Public' : 'Privé' }}
-        </div>
-    </div>
+        
+        <div class="game-info-section">
+            <div class="game-header">
+                <div class="game-info">
+                    <h3 class="game-title">{{ game.name }}</h3>
+                    <p class="game-description">ID : {{ game.id }}</p>
+                    <p class="game-description">{{ game.description }}</p>
+                </div>
+                <div class="visibility-badge" [class.visible]="game.visibility" [class.hidden]="!game.visibility">
+                    {{ game.visibility ? 'Public' : 'Privé' }}
+                </div>
+            </div>
 
-    <div class="game-meta">
-        <div class="meta-item">
-            <span class="meta-label">Taille</span>
-            <span class="meta-value">{{ game.size }}</span>
-        </div>
-        <div class="meta-item">
-            <span class="meta-label">Modifié</span>
-            <span class="meta-value">{{ formatDate(game.lastModified) }}</span>
-        </div>
-    </div>
+            <div class="game-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Taille</span>
+                    <span class="meta-value">{{ game.size }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Modifié</span>
+                    <span class="meta-value">{{ formatDate(game.lastModified) }}</span>
+                </div>
+            </div>
 
-    <div class="game-actions">
-        @if (isAdmin) {
-        <button class="edit-button" (click)="onEditGame()">
-            <app-ui-icon iconName="Edit"></app-ui-icon>
-            Modifier
-        </button>
-        <button class="visibility-button" (click)="onToggleVisibility()">
-            <app-ui-icon [iconName]="game.visibility ? 'Eye' : 'EyeSlash'"></app-ui-icon>
-            {{ game.visibility ? 'Masquer' : 'Publier' }}
-        </button>
-        <button class="delete-button" (click)="onDeleteGame()">
-            <app-ui-icon iconName="Trash"></app-ui-icon>
-            Supprimer
-        </button>
-        } @else {
-        <button class="start-button" (click)="onStartGame()">
-            <app-ui-icon iconName="Play"></app-ui-icon>
-            Jouer
-        </button>
-        }
+            <div class="game-actions">
+                @if (isAdmin) {
+                <app-ui-button variant="secondary" size="sm" (buttonClick)="onEditGame()">
+                    <app-ui-icon iconName="Edit"></app-ui-icon>
+                    Modifier
+                </app-ui-button>
+                <app-ui-button variant="ghost" size="sm" (buttonClick)="onToggleVisibility()">
+                    <app-ui-icon [iconName]="game.visibility ? 'Eye' : 'EyeSlash'"></app-ui-icon>
+                    {{ game.visibility ? 'Masquer' : 'Publier' }}
+                </app-ui-button>
+                <app-ui-button variant="error" size="sm" (buttonClick)="onDeleteGame()">
+                    <app-ui-icon iconName="Trash"></app-ui-icon>
+                    Supprimer
+                </app-ui-button>
+                } @else {
+                <app-ui-button variant="primary" size="md" (buttonClick)="onStartGame()">
+                    <app-ui-icon iconName="Play"></app-ui-icon>
+                    Jouer
+                </app-ui-button>
+                }
+            </div>
+        </div>
     </div>
 </div>

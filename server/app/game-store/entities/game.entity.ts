@@ -19,6 +19,8 @@ export class Game {
     @Prop({ required: true, default: false }) visibility: boolean;
     @Prop({ required: true, default: Date.now }) lastModified: Date;
 
+    @Prop({ required: true }) gridPreviewUrl: string;
+
     @Prop({ type: [tileSchema], default: [] }) tiles: Tile[];
 
     @Prop({ type: [placeableSchema], default: [] }) objects: Placeable[];
