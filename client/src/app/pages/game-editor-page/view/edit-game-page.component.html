@@ -20,8 +20,8 @@
           <div
             class="grid"
             [ngStyle]="{
-              'grid-template-columns': 'repeat(' + grid.width + ', 1fr)',
-              'grid-template-rows': 'repeat(' + grid.height + ', 1fr)'
+                'grid-template-columns': 'repeat(' + grid.width + ', minmax(0,1fr))',
+                'grid-template-rows': 'repeat(' + grid.height + ', minmax(0,1fr))'
             }"
           >
             @if (grid$ | async; as grid) { @for (tile of grid.tiles; track $index; let i = $index) {
