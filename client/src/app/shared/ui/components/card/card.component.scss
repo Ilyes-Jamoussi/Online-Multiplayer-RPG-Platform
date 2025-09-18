@@ -1,87 +1,23 @@
-
-// ==================== CARD COMPONENT ====================
-.uiCard {
-    // Base component setup
-    @include ui-component-base;
-    @include ui-popout-effects;
-
-    // Layout and display
-    display: flex;
-    flex-direction: column;
-    gap: ui-gap(sm);
-
-    // Default styling
-    background: ui-color(primary);
-    color: ui-contrast(primary);
-    box-shadow: ui-elevation(md);
-    border-radius: ui-shape(square);
-
-    // Default size
-    padding: ui-size(md, padding);
-    font-size: ui-size(md, font-size);
-
-    // Full width modifier
-    &.isFull {
-        width: 100%;
-    }
-
-    // Apply consistent states
-    @include ui-disabled-state;
-    @include ui-focus-state;
-
-    // Apply all variant systems
-    @include ui-variant-colors(true);
-    @include ui-size-variants;
-    @include ui-shape-variants;
-    @include ui-elevation-variants;
-    @include ui-gap-variants;
-    @include ui-contrast-colors;
+.ui-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    margin: 8px 0;
 }
 
-// ==================== CARD SECTIONS ====================
-.uiCard__title {
-    display: flex;
-    align-items: center;
-    gap: ui-gap(sm);
-    padding-bottom: ui-gap(sm);
-    border-bottom: 2px dashed $ui-border;
-    font-weight: 700;
-    text-transform: none;
-
-    .title-icon {
-        line-height: 1;
-        font-size: ui-size(md, icon-size);
-    }
-
-    .title-slot {
-        flex: 1;
-    }
-
-    &.icon-right {
-        flex-direction: row-reverse;
-    }
-
-    @include ui-alignment-variants;
-    @include ui-contrast-colors;
+.ui-card-header {
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
 }
 
-.uiCard__content {
-    display: flex;
-    flex-direction: column;
-    gap: ui-gap(sm);
-    flex: 1;
-
-    @include ui-alignment-variants;
-    @include ui-contrast-colors;
+.ui-card-content {
+    line-height: 1.5;
 }
 
-.uiCard__footer {
-    border-top: 2px dashed $ui-border;
-    display: flex;
-    align-items: center;
-    padding-top: ui-gap(sm);
-    gap: ui-gap(sm);
-
-    @include ui-alignment-variants;
-    @include ui-contrast-colors;
+.ui-card-footer {
+    border-top: 1px solid #e0e0e0;
+    padding-top: 12px;
+    margin-top: 16px;
 }

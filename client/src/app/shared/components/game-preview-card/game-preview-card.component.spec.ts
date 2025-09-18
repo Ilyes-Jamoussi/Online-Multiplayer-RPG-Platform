@@ -14,6 +14,7 @@ describe('GamePreviewCardComponent', () => {
         mode: 'classic',
         lastModified: '2023-01-01T10:00:00Z',
         visibility: true,
+        gridPreviewUrl: '/assets/test-game.png',
     };
 
     beforeEach(async () => {

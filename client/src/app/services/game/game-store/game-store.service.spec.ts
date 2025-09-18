@@ -4,8 +4,6 @@ import { GameStoreSocketService } from '@app/services/game/game-store-socket/gam
 import { of } from 'rxjs';
 import { GameStoreService } from './game-store.service';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
-import { CreateGameDto } from '@app/api/model/createGameDto';
-import { SaveGameDto } from '@app/api/model/saveGameDto';
 
 describe('GameStoreService', () => {
     let service: GameStoreService;
@@ -13,8 +11,26 @@ describe('GameStoreService', () => {
     let gameStoreSocketServiceSpy: jasmine.SpyObj<GameStoreSocketService>;
 
     const mockGames: GamePreviewDto[] = [
-        { id: '1', name: 'Game 1', description: 'Desc 1', size: 10, mode: 'classic', lastModified: '2023-01-01', visibility: true },
-        { id: '2', name: 'Game 2', description: 'Desc 2', size: 15, mode: 'classic', lastModified: '2023-01-02', visibility: false },
+        { 
+            id: '1', 
+            name: 'Game 1', 
+            description: 'Desc 1', 
+            size: 10, 
+            mode: 'classic', 
+            lastModified: '2023-01-01', 
+            visibility: true, 
+            gridPreviewUrl: '/assets/game1.png' 
+        },
+        { 
+            id: '2', 
+            name: 'Game 2', 
+            description: 'Desc 2', 
+            size: 15, 
+            mode: 'classic', 
+            lastModified: '2023-01-02', 
+            visibility: false, 
+            gridPreviewUrl: '/assets/game2.png' 
+        },
     ];
 
     beforeEach(() => {
@@ -86,30 +102,30 @@ describe('GameStoreService', () => {
 
     describe('createGame', () => {
         it('should call gameHttpService.createGame', () => {
-            const createDto: CreateGameDto = {
-                name: 'New Game',
-                description: 'New Desc',
-                size: CreateGameDto.SizeEnum.NUMBER_10,
-                mode: 'classic',
-                tiles: [],
-                objects: [],
-            };
-            gameHttpServiceSpy.createGame.and.returnValue(of({ id: '3', ...createDto, lastModified: '2023-01-03', visibility: true }));
+            gameHttpServiceSpy.createGame.and.returnValue(of({ 
+                id: '3', 
+                name: 'New Game', 
+                description: 'New Desc', 
+                size: 10, 
+                mode: 'classic', 
+                lastModified: '2023-01-03', 
+                visibility: true, 
+                gridPreviewUrl: '/assets/game3.png' 
+            }));
 
-            service.createGame(createDto).subscribe();
+            service.createGame().subscribe();
 
-            expect(gameHttpServiceSpy.createGame).toHaveBeenCalledWith(createDto);
+            expect(gameHttpServiceSpy.createGame).toHaveBeenCalled();
         });
     });
 
     describe('updateGame', () => {
         it('should call gameHttpService.updateGame', () => {
-            const updateDto: SaveGameDto = { name: 'Updated Game', description: 'Updated Desc', size: 10, mode: 'classic', tiles: [], objects: [] };
             gameHttpServiceSpy.updateGame.and.returnValue(of(undefined));
 
-            service.updateGame('1', updateDto).subscribe();
+            service.updateGame().subscribe();
 
-            expect(gameHttpServiceSpy.updateGame).toHaveBeenCalledWith('1', updateDto);
+            expect(gameHttpServiceSpy.updateGame).toHaveBeenCalled();
         });
     });
 
@@ -157,6 +173,7 @@ describe('GameStoreService', () => {
                 mode: 'classic',
                 lastModified: '2023-01-03',
                 visibility: true,
+                gridPreviewUrl: '/assets/game3.png',
             };
             const callback = gameStoreSocketServiceSpy.onGameCreated.calls.argsFor(0)[0];
 

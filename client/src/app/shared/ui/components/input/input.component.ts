@@ -39,7 +39,7 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
     isDisabled = false;
     isTouched = false;
 
-    private onChange = (value: string) => {
+    private onChange = () => {
         // Callback function for form control
     };
     private onTouched = () => {

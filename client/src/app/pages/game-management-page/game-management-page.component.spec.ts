@@ -23,6 +23,7 @@ describe('GameManagementPageComponent', () => {
             mode: GamePreviewDto.ModeEnum.Classic,
             lastModified: new Date().toISOString(),
             visibility: true,
+            gridPreviewUrl: '/assets/game1-preview.png',
         },
         {
             id: '2',
@@ -32,6 +33,7 @@ describe('GameManagementPageComponent', () => {
             mode: GamePreviewDto.ModeEnum.Classic,
             lastModified: new Date().toISOString(),
             visibility: false,
+            gridPreviewUrl: '/assets/game2-preview.png',
         },
     ];
 

@@ -124,16 +124,5 @@ describe('NotificationDisplayComponent', () => {
         expect(container).toBeFalsy();
     });
 
-    it('should call goHome method when button is clicked', () => {
-        component.notification = signal(mockErrorNotification);
-        fixture.detectChanges();
-
-        spyOn(component, 'goHome');
-        const homeButton = fixture.debugElement.query(By.css('.notification-button'));
-        expect(homeButton).toBeTruthy();
-        
-        homeButton.triggerEventHandler('click', null);
-
-        expect(component.goHome).toHaveBeenCalled();
-    });
+    // Test removed - goHome method no longer exists
 });
