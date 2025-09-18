@@ -1,12 +1,12 @@
 import { CommonModule, Location } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
 import { GameModeOption, MapSizeOption } from '@app/interfaces/game-parameters.interface';
+import { GameStoreService } from '@app/services/game/game-store/game-store.service';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
-// import { GameHttpService } from '@app/services/game/game-http/game-http.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
 
@@ -18,7 +18,7 @@ import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
     styleUrls: ['./game-parameters-page.component.scss'],
 })
 export class GameParametersPageComponent {
-    // private readonly gameHttpService = inject(GameHttpService);
+    private readonly gameStoreService = inject(GameStoreService);
 
     selectedMapSize: MapSize = MapSize.MEDIUM;
     selectedGameMode: GameMode = GameMode.CLASSIC;
@@ -60,22 +60,10 @@ export class GameParametersPageComponent {
     ) {}
 
     onCreate(): void {
-        // this.gameHttpService
-        //     .createGame({
-        //         name: this.gameName,
-        //         description: this.gameDescription,
-        //         size: this.selectedMapSize,
-        //         mode: this.selectedGameMode,
-        //         tiles: [],
-        //         objects: [],
-        //     })
-        //     .subscribe({
-        //         next: (game) => {
-        //             this.router.navigate([ROUTES.gameEditor]);
-        //         },
-        //     });
+        this.gameStoreService.setMapSize(this.selectedMapSize);
+        this.gameStoreService.setGameMode(this.selectedGameMode);
+        this.gameStoreService.resetGameData();
         this.router.navigate([ROUTES.gameEditor]);
-
     }
 
     onBack(): void {

@@ -1,7 +1,7 @@
 import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
 import { GameInitDto } from '@app/game-store/dto/game-init.dto';
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
-import { SaveGameDto } from '@app/game-store/dto/save-game.dto';
+import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 import { Game, GameDocument } from '@app/game-store/entities/game.entity';
 import { ImageService } from '@app/game-store/services/image.service';
 import { getProjection } from '@app/utils/mongo.utils';
@@ -21,7 +21,7 @@ export class GameStoreService {
     async createGame(dto: CreateGameDto): Promise<GamePreviewDto> {
         const gridPreviewUrl = await this.imageService.saveImage(
             dto.gridPreviewImage,
-            `${dto.name}-preview.png`,
+            `${dto.name}-${Date.now()}-preview.png`,
             'grid-previews'
         );
 
@@ -84,19 +84,35 @@ export class GameStoreService {
         await this.gameModel.deleteOne({ _id: id });
     }
 
-    async updateGame(id: string, dto: SaveGameDto): Promise<GamePreviewDto> {
+    async updateGame(id: string, dto: UpdateGameDto): Promise<GamePreviewDto> {
+        // Récupérer le jeu existant pour obtenir l'ancienne image
+        const existingGame = await this.gameModel.findById(id);
+        if (!existingGame) {
+            throw new NotFoundException('Game not found');
+        }
+
+        // Supprimer l'ancienne image si elle existe
+        if (existingGame.gridPreviewUrl) {
+            await this.imageService.deleteImage(existingGame.gridPreviewUrl);
+        }
+
+        // Sauvegarder la nouvelle image avec timestamp pour forcer la mise à jour
+        const gridPreviewUrl = await this.imageService.saveImage(
+            dto.gridPreviewImage,
+            `${dto.name}-${Date.now()}-preview.png`,
+            'grid-previews'
+        );
+
         const updatedGame = await this.gameModel.findByIdAndUpdate(
             id,
             {
-                ...dto,
+                name: dto.name,
+                description: dto.description,
+                gridPreviewUrl,
                 lastModified: new Date(),
             },
             { new: true },
         );
-
-        if (!updatedGame) {
-            throw new NotFoundException('Game not found');
-        }
 
         return this.toGamePreviewDto(updatedGame);
     }

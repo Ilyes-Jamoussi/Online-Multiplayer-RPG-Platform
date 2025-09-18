@@ -4,8 +4,8 @@ import { CreateGameDto } from '@app/api/model/createGameDto';
 import { GameInitDto } from '@app/api/model/gameInitDto';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
 import { ReadGameDto } from '@app/api/model/readGameDto';
-import { SaveGameDto } from '@app/api/model/saveGameDto';
 import { ToggleVisibilityDto } from '@app/api/model/toggleVisibilityDto';
+import { UpdateGameDto } from '@app/api/model/updateGameDto';
 import { API_PATHS } from '@common/constants/api-paths';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -33,7 +33,7 @@ export class GameHttpService {
         return this.http.post<GamePreviewDto>(this.gamesEndpoint, dto);
     }
 
-    updateGame(id: string, dto: SaveGameDto): Observable<void> {
+    updateGame(id: string, dto: UpdateGameDto): Observable<void> {
         return this.http.patch<void>(`${this.gamesEndpoint}/${id}`, dto);
     }
 

@@ -1,6 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
+import { ROUTES } from '@app/constants/routes.constants';
+import { GameStoreService } from '@app/services/game/game-store/game-store.service';
 import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 
@@ -20,12 +23,18 @@ export class GamePreviewCardComponent {
     @Output() deleteGame = new EventEmitter<string>();
     @Output() toggleVisibility = new EventEmitter<string>();
 
+    private readonly router = inject(Router);
+    private readonly gameStore = inject(GameStoreService);
+
     onStartGame(): void {
         this.startGame.emit(this.game.id);
     }
 
     onEditGame(): void {
-        this.editGame.emit(this.game.id);
+        this.gameStore.setGameId(this.game.id);
+        this.gameStore.setName(this.game.name);
+        this.gameStore.setDescription(this.game.description);
+        this.router.navigate([ROUTES.gameEditor]);
     }
 
     onDeleteGame(): void {

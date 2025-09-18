@@ -1,29 +1,27 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { AsyncPipe, NgStyle } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Observable, of } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, distinctUntilChanged, map, switchMap, take, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
 import { ROUTES } from '@app/constants/routes.constants';
-import { GameDraftService } from '@app/services/game/game-editor/game-draft.service';
-import { TileService } from '@app/services/game/game-editor/tile.service';
-import { ObjectService } from '@app/services/game/game-editor/object.service';
 import { EditorToolsService } from '@app/services/game/game-editor/editor-tools.service';
-import { GameSaveService } from '@app/services/game/game-editor/game-save.service';
-import { GameHttpService } from '@app/services/game/game-http/game-http.service';
-import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
+import { GameDraftService } from '@app/services/game/game-editor/game-draft.service';
+import { ObjectService } from '@app/services/game/game-editor/object.service';
+import { TileService } from '@app/services/game/game-editor/tile.service';
+import { GameStoreService } from '@app/services/game/game-store/game-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
-import { MapSize } from '@common/enums/map-size.enum';
+import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 
 import { ActiveTool, Grid, InventoryState, PlaceableObject } from '@app/interfaces/game/game-editor.interface';
-import { EditGameToolbarComponent } from '@app/pages/game-editor-page/components/toolbar/edit-game-toolbar.component';
-import { EditGameTileComponent } from '@app/pages/game-editor-page/components/tile/edit-game-tile.component';
-import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
-import { TileSizeProbeDirective } from '@app/pages/game-editor-page/directives/tile-size-probe.directive';
 import { EditorInventoryComponent } from '@app/pages/game-editor-page/components/inventory/inventory.component';
 import { EditBaseObjectComponent } from '@app/pages/game-editor-page/components/object/base-object/base-object.component';
+import { EditGameTileComponent } from '@app/pages/game-editor-page/components/tile/edit-game-tile.component';
+import { EditGameToolbarComponent } from '@app/pages/game-editor-page/components/toolbar/edit-game-toolbar.component';
+import { TileSizeProbeDirective } from '@app/pages/game-editor-page/directives/tile-size-probe.directive';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
+import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
 import { GameMode } from '@common/enums/game-mode.enum';
 
 @Component({
@@ -43,19 +41,31 @@ import { GameMode } from '@common/enums/game-mode.enum';
     templateUrl: './edit-game-page.component.html',
     styleUrls: ['./edit-game-page.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [GameDraftService, GameSaveService, TileService, EditorToolsService, ObjectService, TileSizeProbeDirective],
+    providers: [GameDraftService, TileService, EditorToolsService, ObjectService, TileSizeProbeDirective],
 })
 export class EditGamePageComponent implements OnInit {
     @ViewChild('gridWrapper', { static: false }) gridWrapper!: ElementRef<HTMLElement>;
 
-    gameName: string = '';
-    gameDescription: string = '';
+    get gameName(): string {
+        return this.gameStore.name();
+    }
+
+    set gameName(value: string) {
+        this.gameStore.setName(value);
+    }
+
+    get gameDescription(): string {
+        return this.gameStore.description();
+    }
+
+    set gameDescription(value: string) {
+        this.gameStore.setDescription(value);
+    }
 
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
     private readonly draft = inject(GameDraftService);
-    private readonly save = inject(GameSaveService);
-    private readonly gameHttp = inject(GameHttpService);
+    private readonly gameStore = inject(GameStoreService);
     private readonly tools = inject(EditorToolsService);
     private readonly screenshot = inject(ScreenshotService);
     private readonly notification = inject(NotificationService);
@@ -79,13 +89,9 @@ export class EditGamePageComponent implements OnInit {
                 distinctUntilChanged(),
                 switchMap((id) => {
                     if (id) {
-                        return this.save.loadGame$(id).pipe(
-                            tap((d) => this.draft.loadDraft(d)),
-                            catchError(() => {
-                                this.initNewDraft();
-                                return of(null);
-                            }),
-                        );
+                        // TODO: Implémenter le chargement du jeu depuis GameStoreService
+                        this.initNewDraft();
+                        return of(null);
                     } else {
                         this.initNewDraft();
                         return of(null);
@@ -114,48 +120,47 @@ export class EditGamePageComponent implements OnInit {
         return Math.floor(idx / grid.width);
     }
 
-    async testScreenshot() {
+    async saveDraft() {
+        // Capturer l'image de la grille
         const gridPreviewImage = await this.screenshot.captureElementAsBase64(this.gridWrapper.nativeElement);
-        
-        const testGameData = {
-            name: 'Test Game ' + Date.now(),
-            description: 'Game créé pour tester la capture d\'écran',
-            size: MapSize.MEDIUM,
-            mode: 'classic' as const,
-            visibility: true,
-            gridPreviewImage,
-            tiles: [],
-            objects: []
-        };
-        
-        this.gameHttp.createGame(testGameData).subscribe({
-            next: () => {
-                this.notification.displaySuccess({
-                    title: 'Succès',
-                    message: 'Jeu créé avec succès avec capture d\'écran'
-                });
-            },
-            error: () => {
-                this.notification.displayError({
-                    title: 'Erreur',
-                    message: 'Échec de la création du jeu'
-                });
-            }
-        });
-    }
+        this.gameStore.setGridPreviewImage(gridPreviewImage);
 
-    saveDraft() {
-        this.save
-            .updateGame()
-            .pipe(take(1))
-            .subscribe({
+        if (this.gameStore.gameId) {
+            // UPDATE - jeu existant
+            this.gameStore.updateGame().subscribe({
                 next: () => {
-                    // todo show success message, show notification
+                    this.notification.displaySuccess({
+                        title: 'Succès',
+                        message: 'Jeu mis à jour avec succès'
+                    });
                 },
                 error: () => {
-                    // todo handle error message, show error notification
+                    this.notification.displayError({
+                        title: 'Erreur',
+                        message: 'Échec de la mise à jour du jeu'
+                    });
                 },
             });
+        } else {
+            // CREATE - nouveau jeu
+            console.log('Creating game with DTO:', this.gameStore.buildCreateGameDto());
+            this.gameStore.createGame().subscribe({
+                next: (response) => {
+                    console.log('Game created successfully:', response);
+                    this.notification.displaySuccess({
+                        title: 'Succès',
+                        message: 'Jeu créé avec succès'
+                    });
+                },
+                error: (error) => {
+                    console.error('Error creating game:', error);
+                    this.notification.displayError({
+                        title: 'Erreur',
+                        message: 'Échec de la création du jeu'
+                    });
+                },
+            });
+        }
     }
 
     goBack(): void {
