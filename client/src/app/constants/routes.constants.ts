@@ -5,4 +5,5 @@ export const ROUTES = {
     gameSessionCreation: 'game-session-creation',
     gameManagement: 'game-management',
     characterCreation: 'character-creation',
+    createGamePage: 'game-session-creation',
 };
