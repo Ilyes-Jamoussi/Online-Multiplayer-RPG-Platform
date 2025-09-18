@@ -39,11 +39,11 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
     isDisabled = false;
     isTouched = false;
 
-    private onChange = (value: string) => {
-        // Callback function for form control
+    private onChangeCallback = (value: string): void => {
+        this.valueChange.emit(value);
     };
-    private onTouched = () => {
-        // Callback function for form control
+    private onTouchedCallback = (): void => {
+        this.isTouched = true;
     };
 
     writeValue(value: string): void {
@@ -51,11 +51,11 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
     }
 
     registerOnChange(fn: (value: string) => void): void {
-        this.onChange = fn;
+        this.onChangeCallback = fn;
     }
 
     registerOnTouched(fn: () => void): void {
-        this.onTouched = fn;
+        this.onTouchedCallback = fn;
     }
 
     setDisabledState(isDisabled: boolean): void {
@@ -65,19 +65,19 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
     onInput(event: Event): void {
         const input = event.target as HTMLInputElement;
         this.value = input.value;
-        this.onChange(this.value);
+        this.onChangeCallback(this.value);
         this.valueChange.emit(this.value);
     }
 
     onClear(): void {
         this.value = '';
-        this.onChange(this.value);
+        this.onChangeCallback(this.value);
         this.valueChange.emit(this.value);
     }
 
     onBlur(): void {
         this.isTouched = true;
-        this.onTouched();
+        this.onTouchedCallback();
     }
 
     get hasError(): boolean {

@@ -55,7 +55,6 @@ describe('NotificationDisplayComponent', () => {
     });
 
     it('should display error notification correctly', () => {
-        // Set notification and trigger change detection
         component.notification = signal(mockErrorNotification);
         fixture.detectChanges();
 
@@ -103,14 +102,18 @@ describe('NotificationDisplayComponent', () => {
         expect(icon.nativeElement.textContent).toBe('info');
     });
 
-    it('should navigate to home and reset notification when clicking home button', () => {
-        component.notification = signal(mockErrorNotification);
+    it('should reset notification and navigate when handleAction is called with redirectRoute', () => {
+        const mockNotificationWithRedirect = {
+            type: 'error' as const,
+            title: 'Error Title',
+            message: 'Error Message',
+            redirectRoute: 'home',
+        };
+
+        component.notification = signal(mockNotificationWithRedirect);
         fixture.detectChanges();
 
-        const homeButton = fixture.debugElement.query(By.css('.notification-button'));
-        expect(homeButton).toBeTruthy();
-        
-        homeButton.triggerEventHandler('click', null);
+        component.handleAction();
 
         expect(notificationService.reset).toHaveBeenCalled();
         expect(router.navigate).toHaveBeenCalledWith([ROUTES.home]);
@@ -123,6 +126,4 @@ describe('NotificationDisplayComponent', () => {
         const container = fixture.debugElement.query(By.css('.notification-container'));
         expect(container).toBeFalsy();
     });
-
-    // Test removed - goHome method no longer exists
 });
