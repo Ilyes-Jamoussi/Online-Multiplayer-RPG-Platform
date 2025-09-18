@@ -67,10 +67,16 @@
   <div slot="footer">
     <div class="footer-content">
       <app-ui-button 
+        variant="secondary" 
+        size="lg"
+        (buttonClick)="resetGrid()">
+        Réinitialiser la grille
+      </app-ui-button>
+      <app-ui-button 
         variant="primary" 
         size="lg"
-        (buttonClick)="saveDraft()">
-        Sauvegarder en Base de Données
+        (buttonClick)="gameStoreService.gameId ? updateGame() : createGame()">
+        {{ gameStoreService.gameId ? 'Mettre à jour le jeu' : 'Créer le jeu' }}
       </app-ui-button>
     </div>
   </div>

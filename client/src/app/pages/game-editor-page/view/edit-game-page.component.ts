@@ -1,5 +1,5 @@
 import { AsyncPipe, NgStyle } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -47,28 +47,20 @@ export class EditGamePageComponent implements OnInit {
     @ViewChild('gridWrapper', { static: false }) gridWrapper!: ElementRef<HTMLElement>;
 
     get gameName(): string {
-        return this.gameStore.name();
+        return this.gameStoreService.name();
     }
 
     set gameName(value: string) {
-        this.gameStore.setName(value);
+        this.gameStoreService.setName(value);
     }
 
     get gameDescription(): string {
-        return this.gameStore.description();
+        return this.gameStoreService.description();
     }
 
     set gameDescription(value: string) {
-        this.gameStore.setDescription(value);
+        this.gameStoreService.setDescription(value);
     }
-
-    private readonly route = inject(ActivatedRoute);
-    private readonly router = inject(Router);
-    private readonly draft = inject(GameDraftService);
-    private readonly gameStore = inject(GameStoreService);
-    private readonly tools = inject(EditorToolsService);
-    private readonly screenshot = inject(ScreenshotService);
-    private readonly notification = inject(NotificationService);
 
     grid$!: Observable<Grid>;
     activeTool$!: Observable<ActiveTool>;
@@ -76,12 +68,23 @@ export class EditGamePageComponent implements OnInit {
     tileSize$!: Observable<number>;
     objects$!: Observable<PlaceableObject[]>;
 
+    private readonly editorToolsService = inject(EditorToolsService);
+    private readonly notificationService = inject(NotificationService);
+
+    constructor(
+        private readonly route: ActivatedRoute,
+        private readonly router: Router,
+        private readonly gameDraftService: GameDraftService,
+        readonly gameStoreService: GameStoreService,
+        private readonly screenshotService: ScreenshotService,
+    ) {}
+
     ngOnInit(): void {
-        this.grid$ = this.draft.grid$;
-        this.activeTool$ = this.draft.activeTool$;
-        this.tileSize$ = this.draft.editorTileSize$;
-        this.inventory$ = this.draft.inventory$;
-        this.objects$ = this.draft.objectsArray$;
+        this.grid$ = this.gameDraftService.grid$;
+        this.activeTool$ = this.gameDraftService.activeTool$;
+        this.tileSize$ = this.gameDraftService.editorTileSize$;
+        this.inventory$ = this.gameDraftService.inventory$;
+        this.objects$ = this.gameDraftService.objectsArray$;
 
         this.route.paramMap
             .pipe(
@@ -102,16 +105,16 @@ export class EditGamePageComponent implements OnInit {
     }
 
     private initNewDraft(): void {
-        this.draft.initDraft('Nouveau jeu', 'Description…', 'l', GameMode.CLASSIC);
+        this.gameDraftService.initDraft('Nouveau jeu', 'Description…', 'l', GameMode.CLASSIC);
     }
 
     trackByIndex = (_: number, i: number) => i;
 
     selectTool(tool: ActiveTool) {
-        this.tools.setActiveTool(tool);
+        this.editorToolsService.setActiveTool(tool);
     }
     tileSizeUpdate(size: number) {
-        this.draft.setEditorTileSize(size);
+        this.gameDraftService.setEditorTileSize(size);
     }
     getXFromIndex(idx: number, grid: Grid): number {
         return idx % grid.width;
@@ -120,47 +123,52 @@ export class EditGamePageComponent implements OnInit {
         return Math.floor(idx / grid.width);
     }
 
-    async saveDraft() {
-        // Capturer l'image de la grille
-        const gridPreviewImage = await this.screenshot.captureElementAsBase64(this.gridWrapper.nativeElement);
-        this.gameStore.setGridPreviewImage(gridPreviewImage);
+    resetGrid(): void {
+        // Pour le moment, ne fait rien - à implémenter plus tard
+    }
 
-        if (this.gameStore.gameId) {
-            // UPDATE - jeu existant
-            this.gameStore.updateGame().subscribe({
-                next: () => {
-                    this.notification.displaySuccess({
-                        title: 'Succès',
-                        message: 'Jeu mis à jour avec succès'
-                    });
-                },
-                error: () => {
-                    this.notification.displayError({
-                        title: 'Erreur',
-                        message: 'Échec de la mise à jour du jeu'
-                    });
-                },
-            });
-        } else {
-            // CREATE - nouveau jeu
-            console.log('Creating game with DTO:', this.gameStore.buildCreateGameDto());
-            this.gameStore.createGame().subscribe({
-                next: (response) => {
-                    console.log('Game created successfully:', response);
-                    this.notification.displaySuccess({
-                        title: 'Succès',
-                        message: 'Jeu créé avec succès'
-                    });
-                },
-                error: (error) => {
-                    console.error('Error creating game:', error);
-                    this.notification.displayError({
-                        title: 'Erreur',
-                        message: 'Échec de la création du jeu'
-                    });
-                },
-            });
-        }
+    async createGame(): Promise<void> {
+        // Capturer l'image de la grille
+        const gridPreviewImage = await this.screenshotService.captureElementAsBase64(this.gridWrapper.nativeElement);
+        this.gameStoreService.setGridPreviewImage(gridPreviewImage);
+
+        this.gameStoreService.createGame().subscribe({
+            next: () => {
+                this.notificationService.displaySuccess({
+                    title: 'Succès',
+                    message: 'Jeu créé avec succès',
+                    redirectRoute: ROUTES.gameManagement
+                });
+            },
+            error: () => {
+                this.notificationService.displayError({
+                    title: 'Erreur',
+                    message: 'Échec de la création du jeu'
+                });
+            }
+        });
+    }
+
+    async updateGame(): Promise<void> {
+        // Capturer l'image de la grille
+        const gridPreviewImage = await this.screenshotService.captureElementAsBase64(this.gridWrapper.nativeElement);
+        this.gameStoreService.setGridPreviewImage(gridPreviewImage);
+
+        this.gameStoreService.updateGame().subscribe({
+            next: () => {
+                this.notificationService.displaySuccess({
+                    title: 'Succès',
+                    message: 'Jeu mis à jour avec succès',
+                    redirectRoute: ROUTES.gameManagement
+                });
+            },
+            error: () => {
+                this.notificationService.displayError({
+                    title: 'Erreur',
+                    message: 'Échec de la mise à jour du jeu'
+                });
+            }
+        });
     }
 
     goBack(): void {

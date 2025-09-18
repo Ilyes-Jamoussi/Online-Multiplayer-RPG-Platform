@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 
 import { UiTooltipComponent } from '@app/shared/ui/components/tooltip/tooltip.component';
@@ -24,10 +24,7 @@ interface BrushItem {
     imports: [UiTooltipComponent, AsyncPipe, DraggablePanelComponent],
 })
 export class EditGameToolbarComponent {
-    private readonly draft = inject(GameDraftService);
-    private readonly tools = inject(EditorToolsService);
-
-    activeTool$ = this.draft.activeTool$;
+    activeTool$ = this.gameDraftService.activeTool$;
 
     brushes: BrushItem[] = [
         { image: '/assets/tiles/sand.png', class: 'base', tool: { type: 'TILE_BRUSH', tile: TileKind.BASE } },
@@ -38,8 +35,13 @@ export class EditGameToolbarComponent {
         { image: '/assets/tiles/teleport-portal.png', class: 'teleport', tool: { type: 'TILE_BRUSH', tile: TileKind.TELEPORT } },
     ];
 
+    constructor(
+        private readonly gameDraftService: GameDraftService,
+        private readonly editorToolsService: EditorToolsService,
+    ) {}
+
     select(item: BrushItem) {
-        this.tools.setActiveTool(item.tool);
+        this.editorToolsService.setActiveTool(item.tool);
     }
 
     isBrushSelected(brush: BrushItem, activeTool: ActiveTool): boolean {

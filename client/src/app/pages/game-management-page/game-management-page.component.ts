@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, Signal } from '@angular/core';
+import { Component, OnInit, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
 import { ROUTES } from '@app/constants/routes.constants';
@@ -16,12 +16,14 @@ import { UiButtonComponent } from '@app/shared/ui/components/button/button.compo
     imports: [CommonModule, GamePreviewCardComponent, UiPageLayoutComponent, UiButtonComponent],
 })
 export class GameManagementPageComponent implements OnInit {
-    private readonly router = inject(Router);
-    private readonly gameStoreService = inject(GameStoreService);
-
     get gameDisplays(): Signal<GamePreviewDto[]> {
         return this.gameStoreService.gameDisplays;
     }
+
+    constructor(
+        private readonly router: Router,
+        private readonly gameStoreService: GameStoreService,
+    ) {}
 
     ngOnInit(): void {
         this.gameStoreService.loadGames().subscribe();

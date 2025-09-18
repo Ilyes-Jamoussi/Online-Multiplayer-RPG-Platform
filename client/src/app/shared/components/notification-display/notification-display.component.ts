@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
-import { ROUTES } from '@app/constants/routes.constants';
 import { NotificationService } from '@app/services/notification/notification.service';
 
 @Component({
@@ -20,8 +19,12 @@ export class NotificationDisplayComponent {
         private readonly router: Router,
     ) {}
 
-    goHome(): void {
+    handleAction(): void {
+        const currentNotification = this.notification();
         this.notificationService.reset();
-        this.router.navigate([ROUTES.home]);
+
+        if (currentNotification?.redirectRoute) {
+            this.router.navigate([currentNotification.redirectRoute]);
+        }
     }
 }

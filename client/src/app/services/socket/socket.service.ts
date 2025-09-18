@@ -1,4 +1,4 @@
-import { DestroyRef, inject, Injectable } from '@angular/core';
+import { DestroyRef, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GameStoreEvents } from '@common/constants/game-store-events';
 import { SocketResponse } from '@common/types/socket-response.type';
@@ -9,9 +9,8 @@ import { environment } from 'src/environments/environment';
 @Injectable({ providedIn: 'root' })
 export class SocketService {
     private socket: Socket;
-    private readonly destroyRef = inject(DestroyRef);
 
-    constructor() {
+    constructor(private readonly destroyRef: DestroyRef) {
         this.socket = io(environment.socketUrl);
     }
 
