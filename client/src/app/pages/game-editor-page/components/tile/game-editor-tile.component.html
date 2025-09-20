@@ -1,0 +1,17 @@
+<div
+  dropzone="something"
+  class="tile"
+  (mousedown)="onMouseDown($event)"
+  (mouseup)="onMouseUp($event)"
+  (mouseover)="onMouseOver($event)"
+  (contextmenu)="onRightClick($event)"
+  [ngStyle]="{
+    '--bg-image': 'url(' + imageOf(tile.kind) + ')'
+  }"
+>
+  @if (tile.kind === 'DOOR') {
+    <div class="door">
+      {{ tile.open ? '🚪' : '🔒' }}
+    </div>
+  }
+</div>

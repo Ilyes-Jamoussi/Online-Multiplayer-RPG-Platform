@@ -3,7 +3,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
 import { ROUTES } from '@app/constants/routes.constants';
-import { GameStoreService } from '@app/services/game/game-store/game-store.service';
+// import { GameStoreService } from '@app/services/game/game-store/game-store.service';
 import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 
@@ -25,7 +25,7 @@ export class GamePreviewCardComponent {
 
     constructor(
         private readonly router: Router,
-        private readonly gameStoreService: GameStoreService,
+        // private readonly gameStoreService: GameStoreService,
     ) {}
 
     onStartGame(): void {
@@ -33,10 +33,7 @@ export class GamePreviewCardComponent {
     }
 
     onEditGame(): void {
-        this.gameStoreService.setGameId(this.game.id);
-        this.gameStoreService.setName(this.game.name);
-        this.gameStoreService.setDescription(this.game.description);
-        this.router.navigate([ROUTES.gameEditor]);
+        this.router.navigate([ROUTES.gameEditor, this.game.id]);
     }
 
     onDeleteGame(): void {

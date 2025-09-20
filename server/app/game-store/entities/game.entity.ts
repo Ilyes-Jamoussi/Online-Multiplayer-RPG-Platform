@@ -10,7 +10,7 @@ export type GameDocument = Game & Document;
 
 @Schema({ versionKey: false })
 export class Game {
-    @Prop({ required: true, unique: true }) name: string;
+    @Prop({ required: true }) name: string;
     @Prop({ required: true }) description: string;
 
     @Prop({ required: true, enum: MapSize }) size: MapSize;
@@ -18,8 +18,9 @@ export class Game {
 
     @Prop({ required: true, default: false }) visibility: boolean;
     @Prop({ required: true, default: Date.now }) lastModified: Date;
+    @Prop({ required: true, default: Date.now }) createdAt: Date;
 
-    @Prop({ required: true }) gridPreviewUrl: string;
+    @Prop({ default: '' }) gridPreviewUrl: string;
 
     @Prop({ type: [tileSchema], default: [] }) tiles: Tile[];
 

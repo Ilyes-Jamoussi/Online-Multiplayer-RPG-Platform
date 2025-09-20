@@ -1,0 +1,38 @@
+<app-ui-page-layout
+    [hasHeader]="true"
+    headerTitle="Éditeur de Jeu"
+    headerSubtitle="Créez et modifiez votre carte de jeu"
+    [showBackButton]="true"
+    [hasFooter]="true"
+    (backClick)="goBack()"
+>
+    <div class="editor-container">
+        <!-- Editor Content -->
+        <div class="editor-content">
+            <app-editor-toolbar></app-editor-toolbar>
+            <div class="grid-container">
+                @if(store.tiles().length > 0) {
+                <div #gridWrapper class="grid-wrapper">
+                    <div
+                        class="grid"
+                        [ngStyle]="{
+                            'grid-template-columns': 'repeat(' + store.size() + ', minmax(0,1fr))',
+                            'grid-template-rows': 'repeat(' + store.size() + ', minmax(0,1fr))'
+                        }"
+                    >
+                        @for(tile of store.tiles(); track $index; let i = $index) {
+                        <app-editor-tile [tile]="tile" appTileSizeProbe [probeActive]="i === 0" (sizeChange)="onResize($event)"></app-editor-tile>
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div slot="footer">
+        <input type="text" placeholder="Nom de la carte" class="map-name-input" [(ngModel)]="mapName" />
+        <input type="text" placeholder="Description de la carte" class="map-description-input" [(ngModel)]="mapDescription" />
+        <app-ui-button (buttonClick)="onReset()">Réinitialiser la grille</app-ui-button>
+        <app-ui-button>Sauvegarder</app-ui-button>
+    </div>
+</app-ui-page-layout>

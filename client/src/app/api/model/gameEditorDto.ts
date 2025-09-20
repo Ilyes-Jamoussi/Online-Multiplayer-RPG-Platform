@@ -7,19 +7,21 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { GameEditorTileDto } from './gameEditorTileDto';
+import { GameEditorPlaceableDto } from './gameEditorPlaceableDto';
 
 
-export interface CreateGameDto { 
-    size: CreateGameDto.SizeEnum;
-    mode: CreateGameDto.ModeEnum;
+export interface GameEditorDto { 
+    id: string;
     name: string;
     description: string;
-    /**
-     * Public (true) ou privé (false)
-     */
-    visibility?: boolean;
+    size: GameEditorDto.SizeEnum;
+    mode: GameEditorDto.ModeEnum;
+    tiles: Array<GameEditorTileDto>;
+    objects: Array<GameEditorPlaceableDto>;
+    lastModified: string;
 }
-export namespace CreateGameDto {
+export namespace GameEditorDto {
     export const SizeEnum = {
         NUMBER_10: 10,
         NUMBER_15: 15,

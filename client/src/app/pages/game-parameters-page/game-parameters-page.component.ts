@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
 import { GameModeOption, MapSizeOption } from '@app/interfaces/game-parameters.interface';
-import { GameStoreService } from '@app/services/game/game-store/game-store.service';
+import { GameStoreService } from '@app/services/game-store/game-store.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
 import { GameMode } from '@common/enums/game-mode.enum';
@@ -57,13 +58,29 @@ export class GameParametersPageComponent {
     constructor(
         private readonly router: Router,
         private readonly location: Location,
+        private readonly notificationService: NotificationService,
     ) {}
 
     onCreate(): void {
-        this.gameStoreService.setMapSize(this.selectedMapSize);
-        this.gameStoreService.setGameMode(this.selectedGameMode);
-        this.gameStoreService.resetGameData();
-        this.router.navigate([ROUTES.gameEditor]);
+        this.gameStoreService
+            .createGame({
+                size: this.selectedMapSize,
+                mode: this.selectedGameMode,
+                name: 'Nouveau Jeu...',
+                description: 'Description du jeu...',
+                visibility: false,
+            })
+            .subscribe({
+                next: (gamePreview) => {
+                    this.router.navigate([ROUTES.gameEditor, gamePreview.id]);
+                },
+                error: (err) => {
+                    this.notificationService.displayError({
+                        title: 'Erreur lors de la création de la partie',
+                        message: err?.error?.message ?? 'Une erreur est survenue',
+                    });
+                },
+            });
     }
 
     onBack(): void {

@@ -1,7 +1,5 @@
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { ReadTileDto } from '@app/api/model/readTileDto';
-import { ReadPlaceableDto } from '@app/api/model/readPlaceableDto';
 import { GameMode } from '@common/enums/game-mode.enum';
 
 export type SizePreset = 's' | 'm' | 'l';
@@ -62,11 +60,11 @@ export const sizePresets: Record<
     },
 };
 
-export interface TileSpec extends Omit<ReadTileDto, 'x' | 'y' | 'id'> {
-    x?: number;
-    y?: number;
-    id?: string;
-}
+// export interface TileSpec extends Omit<ReadTileDto, 'x' | 'y' | 'id'> {
+//     x?: number;
+//     y?: number;
+//     id?: string;
+// }
 
 export type ObjectId = string;
 
@@ -83,26 +81,26 @@ export type ObjectId = string;
 //     | (PlaceableBase & { kind: PlaceableKind.FIGHT })
 //     | (PlaceableBase & { kind: PlaceableKind.BOAT });
 
-export type PlaceableObject = ReadPlaceableDto;
+// export type PlaceableObject = ReadPlaceableDto;
 
-export interface Objects {
-    byId: Record<ObjectId, PlaceableObject>;
-}
+// export interface Objects {
+//     byId: Record<ObjectId, PlaceableObject>;
+// }
 
-export interface Grid {
-    width: number;
-    height: number;
-    tiles: TileSpec[];
-    objectIds: (ObjectId | null)[];
-}
+// export interface Grid {
+//     width: number;
+//     height: number;
+//     tiles: TileSpec[];
+//     objectIds: (ObjectId | null)[];
+// }
 
-export interface Footprint {
-    w: number;
-    h: number;
-}
+// export interface Footprint {
+//     w: number;
+//     h: number;
+// }
 
-export const footprintOf = (k: ReadPlaceableDto.KindEnum): Footprint =>
-    k === PlaceableKind.HEAL || k === PlaceableKind.FIGHT ? { w: 2, h: 2 } : { w: 1, h: 1 };
+// export const footprintOf = (k: ReadPlaceableDto.KindEnum): Footprint =>
+//     k === PlaceableKind.HEAL || k === PlaceableKind.FIGHT ? { w: 2, h: 2 } : { w: 1, h: 1 };
 
 export interface GameMeta {
     id?: string;
@@ -119,22 +117,21 @@ export interface InventoryState {
     available: Record<PlaceableKind, number>;
 }
 
-export interface EditorState {
-    activeTool: ActiveTool;
-    // viewPort: { x: number; y: number };
-    tileSize: number;
-    stagingTeleport?: { pairId: string; firstIndex: number; underTile: TileSpec; label: string };
-}
+// export interface EditorState {
+//     activeTool: ActiveTool;
+//     tileSize: number;
+//     stagingTeleport?: { pairId: string; firstIndex: number; underTile: TileSpec; label: string };
+// }
 
-export interface GameDraft {
-    meta: GameMeta;
-    grid: Grid;
-    objects: Objects;
-    inventory: InventoryState;
-    // todo : implement teleports
-    // teleports?: something
-    editor: EditorState;
-}
+// export interface GameDraft {
+//     meta: GameMeta;
+//     grid: Grid;
+//     objects: Objects;
+//     inventory: InventoryState;
+//     todo : implement teleports
+//     teleports?: something
+//     editor: EditorState;
+// }
 
 /** 👉 Outils actifs */
 export type TileBrushTool = {
@@ -170,26 +167,3 @@ export interface TileActions {
 }
 
 export const DND_MIME = 'application/x-placeable-kind';
-
-// export interface GamePayload {
-//     name: string;
-//     description: string;
-//     size: MapSize;
-//     mode: GameMode;
-//     visibility: boolean;
-//     lastModified: Date;
-//     tiles: {
-//         x: number;
-//         y: number;
-//         kind: Exclude<TileKind, 'BASE'>;
-//         open?: boolean;
-//         endpointId?: number;
-//     }[];
-//     objects: {
-//         id: string;
-//         kind: 'START' | 'FLAG' | 'HEAL' | 'FIGHT' | 'BOAT';
-//         x: number;
-//         y: number;
-//         orientation?: 'N' | 'E' | 'S' | 'W';
-//     }[];
-// }
