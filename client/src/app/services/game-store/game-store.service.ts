@@ -8,7 +8,6 @@ import { GameSocketService } from '@app/services/game-socket/game-socket.service
 // import { MapSize } from '@common/enums/map-size.enum';
 import { Observable, tap } from 'rxjs';
 
-
 @Injectable({ providedIn: 'root' })
 export class GameStoreService {
     private readonly _gameDisplays = signal<GamePreviewDto[]>([]);

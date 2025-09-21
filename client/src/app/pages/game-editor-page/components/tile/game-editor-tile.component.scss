@@ -29,12 +29,13 @@
 
         filter: brightness(0.2) hue-rotate(-50deg) saturate(4);
     }
+
+    &.dropHover {
+        filter: brightness(0.75);
+    }
 }
 
 /* état quand un élément est draggé au-dessus */
-:host(.drop-hover) .tile {
-    filter: brightness(0.75);
-}
 
 .door {
     line-height: 1;

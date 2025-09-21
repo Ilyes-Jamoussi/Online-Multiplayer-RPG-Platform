@@ -19,7 +19,7 @@ describe('GameStoreService', () => {
             mode: 'classic',
             lastModified: '2023-01-01',
             visibility: true,
-            gridPreviewUrl: '/assets/game1.png'
+            gridPreviewUrl: '/assets/game1.png',
         },
         {
             id: '2',
@@ -29,7 +29,7 @@ describe('GameStoreService', () => {
             mode: 'classic',
             lastModified: '2023-01-02',
             visibility: false,
-            gridPreviewUrl: '/assets/game2.png'
+            gridPreviewUrl: '/assets/game2.png',
         },
     ];
 

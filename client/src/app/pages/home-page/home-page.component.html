@@ -4,32 +4,16 @@
             <img src="assets/images/logo.png" alt="Game Logo" class="game-logo-modern" />
         </div>
         <div class="menu-buttons-modern">
-            <app-ui-button 
-                variant="ghost" 
-                size="lg" 
-                [disabled]="true" 
-                [fullWidth]="true">
-                Rejoindre une partie (Bientôt disponible)
-            </app-ui-button>
-            
-            <app-ui-button 
-                variant="primary" 
-                size="lg" 
-                [fullWidth]="true"
-                (buttonClick)="navigateToCreateGame()">
-                Créer une partie
-            </app-ui-button>
-            
-            <app-ui-button 
-                variant="secondary" 
-                size="lg" 
-                [fullWidth]="true"
-                (buttonClick)="navigateToAdminPage()">
+            <app-ui-button variant="ghost" size="lg" [disabled]="true" [fullWidth]="true"> Rejoindre une partie (Bientôt disponible) </app-ui-button>
+
+            <app-ui-button variant="primary" size="lg" [fullWidth]="true" (buttonClick)="navigateToCreateGame()"> Créer une partie </app-ui-button>
+
+            <app-ui-button variant="secondary" size="lg" [fullWidth]="true" (buttonClick)="navigateToAdminPage()">
                 Administrer les jeux
             </app-ui-button>
         </div>
     </div>
-    
+
     <div slot="footer">
         <div class="footer-content">
             <h2>Équipe {{ teamInfo.teamNumber }}</h2>

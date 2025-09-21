@@ -3,23 +3,23 @@ import { Component, Output, EventEmitter } from '@angular/core';
 import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
 
 @Component({
-  selector: 'app-ui-sidebar',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.scss'
+    selector: 'app-ui-sidebar',
+    standalone: true,
+    imports: [CommonModule],
+    templateUrl: './sidebar.component.html',
+    styleUrl: './sidebar.component.scss',
 })
 export class UiSidebarComponent extends UiBaseComponent {
-  @Output() menuItemClick = new EventEmitter<string>();
+    @Output() menuItemClick = new EventEmitter<string>();
 
-  onMenuItemClick(item: string): void {
-    this.menuItemClick.emit(item);
-  }
+    onMenuItemClick(item: string): void {
+        this.menuItemClick.emit(item);
+    }
 
-  override get classes(): Record<string, boolean> {
-    return {
-      ...super.classes,
-      uiSidebar: true,
-    };
-  }
+    override get classes(): Record<string, boolean> {
+        return {
+            ...super.classes,
+            uiSidebar: true,
+        };
+    }
 }

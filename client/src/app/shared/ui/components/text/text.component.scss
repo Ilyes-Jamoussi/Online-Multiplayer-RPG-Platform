@@ -1,56 +1,55 @@
-
 .ui-text {
-  @include ui-component-base;
-  margin: 0;
-  
-  // Text variant styles
-  &.text-variant-title {
-    font-size: 2rem;
-    font-weight: bold;
-    line-height: 1.2;
-    color: ui-color(primary);
-  }
-  
-  &.text-variant-subtitle {
-    font-size: 1.5rem;
-    font-weight: 600;
-    line-height: 1.3;
-    color: ui-color(secondary);
-  }
-  
-  &.text-variant-body {
-    font-size: 1rem;
-    line-height: 1.5;
-    color: $ui-white;
-  }
-  
-  &.text-variant-caption {
-    font-size: 0.875rem;
-    line-height: 1.4;
-    color: $ui-gray;
-  }
-  
-  &.text-variant-label {
-    font-size: 0.875rem;
-    font-weight: 600;
-    line-height: 1.4;
-    color: $ui-white;
-  }
-  
-  // Weight variants
-  &.weight-light {
-    font-weight: 300;
-  }
-  
-  &.weight-normal {
-    font-weight: 400;
-  }
-  
-  &.weight-bold {
-    font-weight: 700;
-  }
-  
-  // Apply base variants
-  @include ui-variant-colors;
-  @include ui-disabled-state;
+    @include ui-component-base;
+    margin: 0;
+
+    // Text variant styles
+    &.text-variant-title {
+        font-size: 2rem;
+        font-weight: bold;
+        line-height: 1.2;
+        color: ui-color(primary);
+    }
+
+    &.text-variant-subtitle {
+        font-size: 1.5rem;
+        font-weight: 600;
+        line-height: 1.3;
+        color: ui-color(secondary);
+    }
+
+    &.text-variant-body {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: $ui-white;
+    }
+
+    &.text-variant-caption {
+        font-size: 0.875rem;
+        line-height: 1.4;
+        color: $ui-gray;
+    }
+
+    &.text-variant-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        line-height: 1.4;
+        color: $ui-white;
+    }
+
+    // Weight variants
+    &.weight-light {
+        font-weight: 300;
+    }
+
+    &.weight-normal {
+        font-weight: 400;
+    }
+
+    &.weight-bold {
+        font-weight: 700;
+    }
+
+    // Apply base variants
+    @include ui-variant-colors;
+    @include ui-disabled-state;
 }

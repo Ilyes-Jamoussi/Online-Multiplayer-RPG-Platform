@@ -9,7 +9,12 @@
     <div class="editor-container">
         <!-- Editor Content -->
         <div class="editor-content">
-            <app-editor-toolbar></app-editor-toolbar>
+            <app-draggable-panel title="Outils" storageKey="editor.toolbar.pos">
+                <app-editor-toolbar></app-editor-toolbar>
+            </app-draggable-panel>
+            <app-draggable-panel title="Inventaire" storageKey="editor.inventory.pos">
+                <app-editor-inventory></app-editor-inventory>
+            </app-draggable-panel>
             <div class="grid-container">
                 @if(store.tiles().length > 0) {
                 <div #gridWrapper class="grid-wrapper">
@@ -22,6 +27,17 @@
                     >
                         @for(tile of store.tiles(); track $index; let i = $index) {
                         <app-editor-tile [tile]="tile" appTileSizeProbe [probeActive]="i === 0" (sizeChange)="onResize($event)"></app-editor-tile>
+                        }
+                    </div>
+                    <div
+                        class="objects-overlay"
+                        [ngStyle]="{
+                            'grid-template-columns': 'repeat(' + store.size() + ', minmax(0,1fr))',
+                            'grid-template-rows': 'repeat(' + store.size() + ', minmax(0,1fr))'
+                        }"
+                    >
+                        @for (obj of store.placedObjects(); track obj.id) {
+                        <app-editor-placed-object [object]="obj" [tileSize]="store.tileSizePx" />
                         }
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { GameEditorDto } from '@app/api/model/gameEditorDto';
 import { GameEditorPlaceableDto } from '@app/api/model/gameEditorPlaceableDto';
 import { GameEditorTileDto } from '@app/api/model/gameEditorTileDto';
@@ -8,6 +8,8 @@ import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { take, tap } from 'rxjs/operators';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { PatchGameEditorDto } from '@app/api/model/patchGameEditorDto';
+import { InventoryItem, PLACEABLE_ORDER } from '@app/interfaces/game-editor.interface';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 
 @Injectable({ providedIn: 'root' })
 export class GameEditorStoreService {
@@ -31,6 +33,31 @@ export class GameEditorStoreService {
     private readonly _size = signal<MapSize>(MapSize.MEDIUM);
     private readonly _gridPreviewUrl = signal<string>('');
     private readonly _mode = signal<GameMode>(GameMode.CLASSIC);
+
+    private readonly _tileSizePx = signal<number>(0);
+
+    /** Placed objects in the editor */
+    readonly placedObjects = computed(() => this._objects().filter((o) => o.placed === true));
+
+    /** Unplaced objects in the editor */
+    readonly inventory = computed<InventoryItem[]>(() => {
+        const objs = this._objects();
+        const acc = new Map<PlaceableKind, { total: number; remaining: number }>();
+
+        for (const k of PLACEABLE_ORDER) acc.set(k, { total: 0, remaining: 0 });
+
+        for (const o of objs) {
+            const entry = acc.get(PlaceableKind[o.kind]) ?? { total: 0, remaining: 0 };
+            entry.total += 1;
+            if (!o.placed) entry.remaining += 1;
+            acc.set(PlaceableKind[o.kind], entry);
+        }
+
+        return PLACEABLE_ORDER.map((kind) => {
+            const { total, remaining } = acc.get(kind) ?? { total: 0, remaining: 0 };
+            return { kind, total, remaining, disabled: remaining === 0 };
+        });
+    });
 
     get initial() {
         return this._initial.asReadonly();
@@ -70,6 +97,13 @@ export class GameEditorStoreService {
         return this._mode.asReadonly();
     }
 
+    get tileSizePx() {
+        return this._tileSizePx();
+    }
+    set tileSizePx(value: number) {
+        this._tileSizePx.set(value);
+    }
+
     constructor(private readonly http: GameHttpService) {}
 
     loadGameById(id: string): void {
@@ -97,7 +131,7 @@ export class GameEditorStoreService {
             name: this._name() !== this._initial().name ? this._name() : undefined,
             description: this._description() !== this._initial().description ? this._description() : undefined,
             tiles: this._tiles() !== this._initial().tiles ? this._tiles() : undefined,
-            // objects: this._objects() !== this._initial().objects ? this._objects() : undefined,
+            objects: this._objects() !== this._initial().objects ? this._objects() : undefined,
         };
         this.http
             .patchGameEditorById(this._id(), game)
@@ -120,7 +154,7 @@ export class GameEditorStoreService {
     }
 
     setTileAt(x: number, y: number, kind: TileKind): void {
-        if(x < 0 || y < 0 || x >= this.size() || y >= this.size()) return;
+        if (x < 0 || y < 0 || x >= this.size() || y >= this.size()) return;
         const index = this.getIndexByCoord(x, y);
         const tiles = this.tiles();
         const newTiles = [...tiles];
@@ -132,7 +166,7 @@ export class GameEditorStoreService {
     }
 
     resetTileAt(x: number, y: number): void {
-        if(x < 0 || y < 0 || x >= this.size() || y >= this.size()) return;
+        if (x < 0 || y < 0 || x >= this.size() || y >= this.size()) return;
         const index = this.getIndexByCoord(x, y);
         const tiles = this.tiles();
         const newTiles = [...tiles];
@@ -147,6 +181,37 @@ export class GameEditorStoreService {
         this._tiles.set(initial.tiles);
         this._objects.set(initial.objects);
         this._size.set(initial.size);
+    }
+
+    getPlacedObjectAt(x: number, y: number): GameEditorPlaceableDto | undefined {
+        return this.placedObjects().find((o) => o.x === x && o.y === y && o.placed === true);
+    }
+
+    placeObject(kind: PlaceableKind, x: number, y: number): void {
+        const objects = this._objects();
+        const newObjects = [...objects];
+        const objIndex = newObjects.findIndex((o) => o.kind === PlaceableKind[kind] && !o.placed);
+        if (objIndex === -1) return;
+        newObjects[objIndex] = { ...newObjects[objIndex], x, y, placed: true };
+        this._objects.set(newObjects);
+    }
+
+    moveObject(id: string, x: number, y: number): void {
+        const objects = this.objects();
+        const newObjects = [...objects];
+        const objIndex = newObjects.findIndex((o) => o.id === id);
+        if (objIndex === -1) return;
+        newObjects[objIndex] = { ...newObjects[objIndex], x, y, placed: x >= 0 && y >= 0 };
+        this._objects.set(newObjects);
+    }
+
+    removeObject(id: string): void {
+        const objects = this.objects();
+        const newObjects = [...objects];
+        const objIndex = newObjects.findIndex((o) => o.id === id);
+        if (objIndex === -1) return;
+        newObjects[objIndex] = { ...newObjects[objIndex], x: -1, y: -1, placed: false };
+        this._objects.set(newObjects);
     }
 
     private getIndexByCoord(x: number, y: number): number {

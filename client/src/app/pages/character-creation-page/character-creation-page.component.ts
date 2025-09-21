@@ -15,15 +15,7 @@ import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/pag
 @Component({
     selector: 'app-character-creation-page',
     standalone: true,
-    imports: [
-        CommonModule,
-        FormsModule,
-        UiButtonComponent,
-        UiCheckboxComponent,
-        UiContainerComponent,
-        UiInputComponent,
-        UiPageLayoutComponent,
-    ],
+    imports: [CommonModule, FormsModule, UiButtonComponent, UiCheckboxComponent, UiContainerComponent, UiInputComponent, UiPageLayoutComponent],
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
 })
@@ -110,12 +102,12 @@ export class CharacterCreationPageComponent implements OnInit {
     generateRandomCharacter(): void {
         this.character.name = this.generateRandomName();
         this.character.avatar = Math.floor(Math.random() * this.avatars.length);
-        
+
         const randomBonus = Math.random() > UI_CONSTANTS.characterCreation.probabilityThreshold ? 'vie' : 'rapidite';
         this.character.bonus = randomBonus;
         this.bonusVie = randomBonus === 'vie';
         this.bonusRapidite = randomBonus === 'rapidite';
-        
+
         this.character.diceAssignment = {
             attaque: Math.random() > UI_CONSTANTS.characterCreation.probabilityThreshold ? 'D4' : 'D6',
             defense: Math.random() > UI_CONSTANTS.characterCreation.probabilityThreshold ? 'D4' : 'D6',
@@ -124,20 +116,7 @@ export class CharacterCreationPageComponent implements OnInit {
     }
 
     private generateRandomName(): string {
-        const names = [
-            'Aragorn',
-            'Legolas',
-            'Gimli',
-            'Gandalf',
-            'Frodo',
-            'Samwise',
-            'Boromir',
-            'Faramir',
-            'Éowyn',
-            'Arwen',
-            'Galadriel',
-            'Elrond',
-        ];
+        const names = ['Aragorn', 'Legolas', 'Gimli', 'Gandalf', 'Frodo', 'Samwise', 'Boromir', 'Faramir', 'Éowyn', 'Arwen', 'Galadriel', 'Elrond'];
         return names[Math.floor(Math.random() * names.length)];
     }
 
@@ -154,14 +133,14 @@ export class CharacterCreationPageComponent implements OnInit {
         if (!this.isFormValid()) {
             this.notificationService.displayError({
                 title: 'Erreur de validation',
-                message: 'Veuillez remplir tous les champs requis et sélectionner un bonus'
+                message: 'Veuillez remplir tous les champs requis et sélectionner un bonus',
             });
             return;
         }
 
         this.notificationService.displaySuccess({
             title: 'Personnage créé !',
-            message: `${this.character.name} est prêt pour l'aventure`
+            message: `${this.character.name} est prêt pour l'aventure`,
         });
 
         // TODO: Envoyer les données au serveur

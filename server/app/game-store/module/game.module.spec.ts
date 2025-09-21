@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { GameStoreModule } from './game-store.module';
+import { GameStoreModule } from './game.module';
 
 describe('GameStoreModule', () => {
     let module: TestingModule;

@@ -13,6 +13,9 @@ import { UiButtonComponent } from '@app/shared/ui/components/button/button.compo
 import { FormsModule } from '@angular/forms';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { NotificationService } from '@app/services/notification/notification.service';
+import { DraggablePanelComponent } from '@app/shared/ui/components/draggable-panel/draggable-panel.component';
+import { GameEditorInventoryComponent } from './components/inventory/game-editor-inventory.component';
+import { GameEditorObjectComponent } from './components/object/object.component';
 
 @Component({
     selector: 'app-edit-game-page',
@@ -25,6 +28,9 @@ import { NotificationService } from '@app/services/notification/notification.ser
         TileSizeProbeDirective,
         GameEditorToolbarComponent,
         UiButtonComponent,
+        DraggablePanelComponent,
+        GameEditorInventoryComponent,
+        GameEditorObjectComponent,
     ],
     templateUrl: './game-editor-page.component.html',
     styleUrls: ['./game-editor-page.component.scss'],
@@ -67,6 +73,10 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
 
     onReset(): void {
         this.store.reset();
+    }
+
+    onResize(newSize: number): void {
+        this.store.tileSizePx = newSize;
     }
 
     onSave(): void {

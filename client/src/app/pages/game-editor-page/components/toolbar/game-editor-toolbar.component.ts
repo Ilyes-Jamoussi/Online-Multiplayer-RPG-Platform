@@ -4,9 +4,8 @@
 import { Component } from '@angular/core';
 import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { TileKind } from '@common/enums/tile-kind.enum';
-import { DraggablePanelComponent } from '@app/shared/ui/components/draggable-panel/draggable-panel.component';
 import { UiTooltipComponent } from '@app/shared/ui/components/tooltip/tooltip.component';
-import { TileImage } from '@app/constants/ui.constants';
+import { TileSprite as TileImage } from '@common/enums/tile-sprite.enum';
 
 // import { UiTooltipComponent } from '@app/shared/ui/components/tooltip/tooltip.component';
 // import { GameDraftService } from '@app/services/game/game-editor/game-draft.service';
@@ -67,7 +66,7 @@ type BrushItem = {
     standalone: true,
     templateUrl: './game-editor-toolbar.component.html',
     styleUrls: ['./game-editor-toolbar.component.scss'],
-    imports: [DraggablePanelComponent, UiTooltipComponent],
+    imports: [UiTooltipComponent],
 })
 export class GameEditorToolbarComponent {
     constructor(readonly interactions: GameEditorInteractionsService) {}

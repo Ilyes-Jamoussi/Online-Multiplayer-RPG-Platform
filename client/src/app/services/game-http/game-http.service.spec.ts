@@ -43,7 +43,7 @@ describe('GameHttpService', () => {
                     mode: 'classic',
                     lastModified: '2023-01-01',
                     visibility: true,
-                    gridPreviewUrl: '/assets/game1.png'
+                    gridPreviewUrl: '/assets/game1.png',
                 },
             ];
 

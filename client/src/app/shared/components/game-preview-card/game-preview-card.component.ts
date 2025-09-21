@@ -23,10 +23,8 @@ export class GamePreviewCardComponent {
     @Output() deleteGame = new EventEmitter<string>();
     @Output() toggleVisibility = new EventEmitter<string>();
 
-    constructor(
-        private readonly router: Router,
-        // private readonly gameStoreService: GameStoreService,
-    ) {}
+    constructor(private readonly router: Router) // private readonly gameStoreService: GameStoreService,
+    {}
 
     onStartGame(): void {
         this.startGame.emit(this.game.id);
