@@ -1,19 +1,32 @@
 <div
     #root
     class="draggable-panel"
-    [class.dragging]="dragging()"
+    [class.dragging]="dragging"
+    [class.is-collapsed]="draggablePanelService.isCollapsed"
     [style.left]="styleLeft()"
     [style.top]="styleTop()"
     [style.zIndex]="styleZ()"
     role="dialog"
-    aria-modal="false"
+    [attr.aria-modal]="false"
 >
-    <div #handle class="panel-header" [attr.aria-label]="title || 'Panel'" (mousedown)="onMouseDown($event)" (touchstart)="onTouchStart($event)">
+    <div #handle class="panel-header" [attr.aria-label]="title || 'Panel'">
         <span class="panel-title">{{ title }}</span>
-        <span class="panel-dots" aria-hidden="true">···</span>
+
+        <button
+            class="panel-dots"
+            type="button"
+            aria-label="Réduire/agrandir"
+            [attr.aria-expanded]="!draggablePanelService.isCollapsed"
+            (pointerdown)="$event.stopPropagation()"
+            (click)="draggablePanelService.toggleCollapsed()"
+        >
+            <app-ui-icon [iconName]="draggablePanelService.isCollapsed ? 'ChevronDown' : 'ChevronUp'"></app-ui-icon>
+        </button>
     </div>
 
     <div class="panel-body">
-        <ng-content></ng-content>
+        <div class="panel-body-inner">
+            <ng-content></ng-content>
+        </div>
     </div>
 </div>
