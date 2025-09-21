@@ -4,6 +4,7 @@ import { CreateGameDto } from '@app/api/model/createGameDto';
 import { GameEditorDto } from '@app/api/model/gameEditorDto';
 import { GameInitDto } from '@app/api/model/gameInitDto';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
+import { PatchGameEditorDto } from '@app/api/model/patchGameEditorDto';
 import { ToggleVisibilityDto } from '@app/api/model/toggleVisibilityDto';
 import { UpdateGameDto } from '@app/api/model/updateGameDto';
 import { API_PATHS } from '@common/constants/api-paths';
@@ -27,6 +28,10 @@ export class GameHttpService {
 
     getGameEditorById(id: string): Observable<GameEditorDto> {
         return this.http.get<GameEditorDto>(`${this.gamesEndpoint}/${id}/editor/`);
+    }
+
+    patchGameEditorById(id: string, dto: PatchGameEditorDto): Observable<GameEditorDto> {
+        return this.http.patch<GameEditorDto>(`${this.gamesEndpoint}/${id}/editor/`, dto);
     }
 
     createGame(dto: CreateGameDto): Observable<GamePreviewDto> {

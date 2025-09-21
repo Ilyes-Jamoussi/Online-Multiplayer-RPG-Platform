@@ -36,5 +36,9 @@ export class GameEditorDto {
     objects!: GameEditorPlaceableDto[];
 
     @ApiProperty()
+    @IsString()
+    gridPreviewUrl!: string;
+
+    @ApiProperty()
     lastModified!: Date;
 }

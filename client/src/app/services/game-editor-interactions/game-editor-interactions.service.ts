@@ -26,13 +26,20 @@ export class GameEditorInteractionsService {
     constructor(private readonly store: GameEditorStoreService) {}
 
     private readonly _activeTool = signal<ActiveTool | null>(null);
+    private readonly _previousActiveTool = signal<ActiveTool | null>(null);
 
     get activeTool() {
         return this._activeTool.asReadonly();
     }
 
     setActiveTool(tool: ActiveTool): void {
+        this._previousActiveTool.set(this._activeTool());
         this._activeTool.set(tool);
+    }
+
+    revertToPreviousTool(): void {
+        this._activeTool.set(this._previousActiveTool());
+        this._previousActiveTool.set(null);
     }
 
     dragStart(x: number, y: number, click: 'left' | 'right'): void {
@@ -47,13 +54,13 @@ export class GameEditorInteractionsService {
         this.tilePaint(x, y);
     }
 
-    dragEnd(x: number, y: number, click: 'left' | 'right'): void {
+    dragEnd(): void {
         const tool = this._activeTool();
         if (!tool || tool.type !== ToolType.TileBrushTool) return;
         this._activeTool.set({
             ...tool,
-            leftDrag: click === 'left' ? false : tool.leftDrag,
-            rightDrag: click === 'right' ? false : tool.rightDrag,
+            leftDrag: false,
+            rightDrag: false,
         });
     }
 

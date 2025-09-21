@@ -11,6 +11,8 @@ import { TileSizeProbeDirective } from './directives/tile-size-probe.directive';
 import { GameEditorToolbarComponent } from './components/toolbar/game-editor-toolbar.component';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 import { FormsModule } from '@angular/forms';
+import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 
 @Component({
     selector: 'app-edit-game-page',
@@ -27,17 +29,16 @@ import { FormsModule } from '@angular/forms';
     templateUrl: './game-editor-page.component.html',
     styleUrls: ['./game-editor-page.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [GameEditorStoreService, GameEditorInteractionsService],
+    providers: [GameEditorStoreService, GameEditorInteractionsService, GameEditorCheckService],
 })
 export class GameEditorPageComponent implements OnInit, OnDestroy {
-    mapName = '';
-    mapDescription = '';
-
     private readonly destroy$ = new Subject<void>();
 
     constructor(
         private readonly route: ActivatedRoute,
         readonly store: GameEditorStoreService,
+        private readonly editorCheck: GameEditorCheckService,
+        private readonly notification: NotificationService,
     ) {}
 
     readonly gameId$ = this.route.paramMap.pipe(
@@ -68,9 +69,15 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
         this.store.reset();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onResize(tileSize: number) {
-        // do something later
+    onSave(): void {
+        if (this.editorCheck.canSave()) {
+            this.store.saveGame();
+        } else {
+            this.notification.displayError({
+                title: 'Problèmes dans la carte',
+                message: 'Veuillez corriger les problèmes dans la carte avant de sauvegarder.',
+            });
+        }
     }
 }
 

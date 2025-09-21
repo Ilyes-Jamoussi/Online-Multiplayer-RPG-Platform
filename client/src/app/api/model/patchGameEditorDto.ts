@@ -11,18 +11,16 @@ import { GameEditorTileDto } from './gameEditorTileDto';
 import { GameEditorPlaceableDto } from './gameEditorPlaceableDto';
 
 
-export interface GameEditorDto { 
-    id: string;
-    name: string;
-    description: string;
-    size: GameEditorDto.SizeEnum;
-    mode: GameEditorDto.ModeEnum;
-    tiles: Array<GameEditorTileDto>;
-    objects: Array<GameEditorPlaceableDto>;
-    gridPreviewUrl: string;
-    lastModified: string;
+export interface PatchGameEditorDto { 
+    name?: string;
+    description?: string;
+    size?: PatchGameEditorDto.SizeEnum;
+    mode?: PatchGameEditorDto.ModeEnum;
+    gridPreviewUrl?: string;
+    tiles?: Array<GameEditorTileDto>;
+    objects?: Array<GameEditorPlaceableDto>;
 }
-export namespace GameEditorDto {
+export namespace PatchGameEditorDto {
     export const SizeEnum = {
         NUMBER_10: 10,
         NUMBER_15: 15,

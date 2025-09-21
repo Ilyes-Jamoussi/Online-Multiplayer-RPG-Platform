@@ -1,6 +1,6 @@
 // server/src/schemas/game.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { Tile, tileSchema } from './tile.entity';
 import { Placeable, placeableSchema } from './placeable.entity';
 import { MapSize } from '@common/enums/map-size.enum';
@@ -10,6 +10,8 @@ export type GameDocument = Game & Document;
 
 @Schema({ versionKey: false })
 export class Game {
+    readonly _id?: Types.ObjectId;
+
     @Prop({ required: true }) name: string;
     @Prop({ required: true }) description: string;
 

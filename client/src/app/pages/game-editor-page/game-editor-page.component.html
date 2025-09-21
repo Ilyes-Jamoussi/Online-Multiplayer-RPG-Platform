@@ -30,9 +30,9 @@
         </div>
     </div>
     <div slot="footer">
-        <input type="text" placeholder="Nom de la carte" class="map-name-input" [(ngModel)]="mapName" />
-        <input type="text" placeholder="Description de la carte" class="map-description-input" [(ngModel)]="mapDescription" />
+        <input type="text" placeholder="Nom de la carte" class="map-name-input" [(ngModel)]="store.name" />
+        <input type="text" placeholder="Description de la carte" class="map-description-input" [(ngModel)]="store.description" />
         <app-ui-button (buttonClick)="onReset()">Réinitialiser la grille</app-ui-button>
-        <app-ui-button>Sauvegarder</app-ui-button>
+        <app-ui-button (buttonClick)="onSave()">Sauvegarder</app-ui-button>
     </div>
 </app-ui-page-layout>

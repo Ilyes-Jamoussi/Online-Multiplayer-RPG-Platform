@@ -15,9 +15,9 @@ import { TileKind } from '@common/enums/tile-kind.enum';
 import { TileSizeProbeDirective } from '@app/pages/game-editor-page/directives/tile-size-probe.directive';
 import { NgStyle } from '@angular/common';
 import { GameEditorTileDto } from '@app/api/model/gameEditorTileDto';
-import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { TileImage } from '@app/constants/ui.constants';
-import { DND_MIME } from '@app/interfaces/game/game-editor.interface';
+import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 
 // @Component({
 //     selector: 'app-edit-game-tile',
@@ -135,6 +135,7 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
     constructor(
         readonly store: GameEditorStoreService,
         readonly interactions: GameEditorInteractionsService,
+        readonly editorCheck: GameEditorCheckService,
         el: ElementRef<HTMLElement>,
         zone: NgZone,
     ) {
@@ -142,6 +143,10 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
     }
 
     @Input({ required: true }) tile: GameEditorTileDto;
+
+    hasProblem(): boolean {
+        return this.editorCheck.editorProblems().some((p) => p.locationX === this.tile.x && p.locationY === this.tile.y);
+    }
 
     // mouse events
     onRightClick(event: MouseEvent) {
@@ -153,16 +158,16 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         if (event.button === 0) {
             this.interactions.dragStart(this.tile.x, this.tile.y, 'left');
         } else if (event.button === 2) {
+            this.interactions.setActiveTool({ type: ToolType.TileBrushTool, tileKind: TileKind.BASE, leftDrag: false, rightDrag: false });
             this.interactions.dragStart(this.tile.x, this.tile.y, 'right');
         }
     }
 
     onMouseUp(event: MouseEvent) {
         event.preventDefault();
-        if (event.button === 0) {
-            this.interactions.dragEnd(this.tile.x, this.tile.y, 'left');
-        } else if (event.button === 2) {
-            this.interactions.dragEnd(this.tile.x, this.tile.y, 'right');
+        this.interactions.dragEnd();
+        if (event.button === 2) {
+            this.interactions.revertToPreviousTool();
         }
     }
 
@@ -197,28 +202,28 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
     @HostBinding('class.drop-hover')
     dropHover = false;
 
-    @HostListener('dragover', ['$event'])
-    onDragOver(evt: DragEvent) {
-        if (!evt.dataTransfer) return;
-        if (evt.dataTransfer.types.includes(DND_MIME)) {
-            evt.preventDefault();
-            evt.dataTransfer.dropEffect = 'copy';
-        }
-    }
+    // @HostListener('dragover', ['$event'])
+    // onDragOver(evt: DragEvent) {
+    //     if (!evt.dataTransfer) return;
+    //     if (evt.dataTransfer.types.includes(DND_MIME)) {
+    //         evt.preventDefault();
+    //         evt.dataTransfer.dropEffect = 'copy';
+    //     }
+    // }
 
-    @HostListener('dragenter', ['$event'])
-    onDragEnter(evt: DragEvent) {
-        if (evt.dataTransfer?.types.includes(DND_MIME)) this.dropHover = true;
-    }
+    // @HostListener('dragenter', ['$event'])
+    // onDragEnter(evt: DragEvent) {
+    //     if (evt.dataTransfer?.types.includes(DND_MIME)) this.dropHover = true;
+    // }
 
     @HostListener('dragleave')
     onDragLeave() {
         this.dropHover = false;
     }
-    @HostListener('drop', ['$event'])
-    // todo ondrop
-    onDrop(evt: DragEvent) {
-        // todo
-        this.dropHover = false;
-    }
+    // @HostListener('drop', ['$event'])
+    // // todo ondrop
+    // onDrop(evt: DragEvent) {
+    //     // todo
+    //     this.dropHover = false;
+    // }
 }

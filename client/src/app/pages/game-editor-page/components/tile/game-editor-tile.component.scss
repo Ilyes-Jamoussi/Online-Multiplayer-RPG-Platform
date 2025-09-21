@@ -1,36 +1,42 @@
 :host {
-  display: block;
-  min-width: 0;   /* important en grid */
-  min-height: 0;
+    display: block;
+    min-width: 0; /* important en grid */
+    min-height: 0;
 }
 
 .tile {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  box-sizing: border-box;
-  display: grid;
-  place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
 
-  /* gestion de l’image de fond via variable CSS */
-  background-color: transparent;
-  background-image: var(--bg-image);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+    /* gestion de l’image de fond via variable CSS */
+    background-color: transparent;
+    background-image: var(--bg-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 
-  &:hover {
-    filter: brightness(0.85);
-    cursor: pointer;
-  }
+    &:hover {
+        filter: brightness(0.85);
+        cursor: pointer;
+    }
+
+    &.problem {
+        // add a red filter overlay
+
+        filter: brightness(0.2) hue-rotate(-50deg) saturate(4);
+    }
 }
 
 /* état quand un élément est draggé au-dessus */
 :host(.drop-hover) .tile {
-  filter: brightness(0.75);
+    filter: brightness(0.75);
 }
 
 .door {
-  line-height: 1;
-  font-size: clamp(10px, 80%, 24px);
+    line-height: 1;
+    font-size: clamp(10px, 80%, 24px);
 }

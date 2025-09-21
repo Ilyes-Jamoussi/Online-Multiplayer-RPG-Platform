@@ -12,6 +12,7 @@
 export interface GameEditorPlaceableDto { 
     id: string;
     kind: GameEditorPlaceableDto.KindEnum;
+    orientation: string;
     x: number;
     y: number;
     placed: boolean;

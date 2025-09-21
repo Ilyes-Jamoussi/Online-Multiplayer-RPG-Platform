@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
 import { GameInitDto } from '@app/game-store/dto/game-init.dto';
@@ -10,7 +10,6 @@ import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 import { GameStoreGateway } from '@app/game-store/gateways/game-store.gateway';
 import { GameStoreService } from '@app/game-store/services/game-store.service';
 import { ImageService } from '@app/game-store/services/image.service';
-import { GameEditorDto } from '@app/game-store/dto/game-editor.dto';
 
 @ApiTags('Games')
 @Controller('games')
@@ -33,13 +32,6 @@ export class GameStoreController {
     @ApiResponse({ status: 200, type: GameInitDto })
     async getGameInit(@Param('id') id: string): Promise<GameInitDto> {
         return this.gameService.getGameInit(id);
-    }
-
-    @Get(':id/editor')
-    @ApiOperation({ summary: 'Load game data for the editor by game ID' })
-    @ApiResponse({ status: 200, type: GameEditorDto })
-    async getGameForEdit(@Param('id') id: string): Promise<GameEditorDto> {
-        return this.gameService.getEditByGameId(id);
     }
 
     @Post()

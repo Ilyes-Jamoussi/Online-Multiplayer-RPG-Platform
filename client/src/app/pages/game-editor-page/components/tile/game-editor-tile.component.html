@@ -1,17 +1,18 @@
 <div
-  dropzone="something"
-  class="tile"
-  (mousedown)="onMouseDown($event)"
-  (mouseup)="onMouseUp($event)"
-  (mouseover)="onMouseOver($event)"
-  (contextmenu)="onRightClick($event)"
-  [ngStyle]="{
-    '--bg-image': 'url(' + imageOf(tile.kind) + ')'
-  }"
+    [ngStyle]="{
+        '--bg-image': 'url(' + imageOf(tile.kind) + ')'
+    }"
+    dropzone="something"
+    class="tile"
+    [class.problem]="hasProblem()"
+    (mousedown)="onMouseDown($event)"
+    (mouseup)="onMouseUp($event)"
+    (mouseover)="onMouseOver($event)"
+    (contextmenu)="onRightClick($event)"
 >
-  @if (tile.kind === 'DOOR') {
+    @if (tile.kind === 'DOOR') {
     <div class="door">
-      {{ tile.open ? '🚪' : '🔒' }}
+        {{ tile.open ? '🚪' : '🔒' }}
     </div>
-  }
+    }
 </div>
