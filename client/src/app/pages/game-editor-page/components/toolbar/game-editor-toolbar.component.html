@@ -1,0 +1,12 @@
+<div class="list">
+    @for (b of brushes; track b.image) {
+    <app-ui-tooltip position="right" distance="md" [text]="b.tileKind">
+        <button
+            class="tool-btn {{ b.class }}"
+            [class.selected]="isBrushSelected(b)"
+            (click)="selectTileBrush(b.tileKind)"
+            [style.--bg-image]="'url(' + b.image + ')'"
+        ></button>
+    </app-ui-tooltip>
+    }
+</div>

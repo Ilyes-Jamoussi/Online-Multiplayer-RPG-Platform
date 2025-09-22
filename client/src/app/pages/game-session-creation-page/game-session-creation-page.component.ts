@@ -3,7 +3,7 @@ import { Component, OnInit, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
 import { ROUTES } from '@app/constants/routes.constants';
-import { GameStoreService } from '@app/services/game/game-store/game-store.service';
+import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
 import { GamePreviewCardComponent } from '@app/shared/components/game-preview-card/game-preview-card.component';
 

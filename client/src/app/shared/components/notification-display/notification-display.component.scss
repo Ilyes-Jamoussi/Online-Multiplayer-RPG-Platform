@@ -54,7 +54,9 @@ $text-gray: #666;
             background: linear-gradient(135deg, $error-red-light, $error-red);
             box-shadow: 0 12px 30px $error-red-transparent;
         }
-        .notification-title { color: $error-red; }
+        .notification-title {
+            color: $error-red;
+        }
         .notification-button {
             background: linear-gradient(135deg, $error-red, $error-red-dark);
             &:hover {
@@ -69,7 +71,9 @@ $text-gray: #666;
             background: linear-gradient(135deg, $success-green-light, $success-green);
             box-shadow: 0 12px 30px $success-green-transparent;
         }
-        .notification-title { color: $success-green; }
+        .notification-title {
+            color: $success-green;
+        }
         .notification-button {
             background: linear-gradient(135deg, $success-green, $success-green-dark);
             &:hover {
@@ -84,7 +88,9 @@ $text-gray: #666;
             background: linear-gradient(135deg, $info-blue-light, $info-blue);
             box-shadow: 0 12px 30px $info-blue-transparent;
         }
-        .notification-title { color: $info-blue; }
+        .notification-title {
+            color: $info-blue;
+        }
         .notification-button {
             background: linear-gradient(135deg, $info-blue, $info-blue-dark);
             &:hover {
@@ -155,7 +161,9 @@ $text-gray: #666;
     animation: fadeInUp 0.5s ease-out 0.5s forwards;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-    i { font-size: 22px; }
+    i {
+        font-size: 22px;
+    }
 
     &:hover {
         transform: translateY(-3px);
@@ -167,7 +175,9 @@ $text-gray: #666;
 }
 
 @keyframes fadeIn {
-    to { opacity: 1; }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideUpScale {
@@ -203,6 +213,11 @@ $text-gray: #666;
 }
 
 @keyframes pulseIcon {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.08); }
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
 }

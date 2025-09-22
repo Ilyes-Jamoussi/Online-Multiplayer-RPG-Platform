@@ -37,15 +37,12 @@ describe('GameStoreController', () => {
         size: MapSize.SMALL,
         mode: GameMode.CLASSIC,
         visibility: true,
-        tiles: [],
-        objects: [],
-        gridPreviewImage: 'test-preview-image',
     };
 
     const mockUpdateGameDto: UpdateGameDto = {
         name: 'Updated Game',
         description: 'Updated Description',
-        gridPreviewImage: 'updated-preview-image',
+        gridPreviewImage: 'base64string',
     };
 
     const mockToggleVisibilityDto: ToggleVisibilityDto = {

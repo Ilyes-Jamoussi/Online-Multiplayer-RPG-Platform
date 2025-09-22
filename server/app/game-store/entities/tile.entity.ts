@@ -5,15 +5,14 @@ import { TileKind } from '@common/enums/tile-kind.enum';
 
 export type TileDocument = Tile & Document;
 
-@Schema({ versionKey: false })
+@Schema({ versionKey: false, _id: false })
 export class Tile {
     @Prop({ required: true, min: 0 }) x: number;
     @Prop({ required: true, min: 0 }) y: number;
 
-    @Prop({ required: true, enum: TileKind })
-    kind: TileKind;
+    @Prop({ required: true, enum: TileKind }) kind: TileKind;
 
     @Prop() open?: boolean;
-    @Prop() endpointId?: number;
+    @Prop({ min: 1, max: 5 }) teleportChannel?: number;
 }
 export const tileSchema = SchemaFactory.createForClass(Tile);

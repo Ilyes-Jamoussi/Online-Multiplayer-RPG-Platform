@@ -5,12 +5,11 @@
     --panel-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     --handle-bg-hover: rgba(0, 0, 0, 0.04);
     --ring: #14b8a6;
-
     font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace;
 }
 
 .draggable-panel {
-    position: fixed; /* left/top are controlled by TS */
+    position: fixed;
     left: 0;
     top: 0;
     min-width: 180px;
@@ -21,6 +20,7 @@
     box-shadow: var(--panel-shadow);
     user-select: none;
     will-change: left, top;
+    z-index: 1000;
 
     &.dragging .panel-header {
         outline: 2px dashed var(--ring);
@@ -50,13 +50,48 @@
     opacity: 0.8;
 }
 
+/* bouton ... accessible, non-draggable */
 .panel-dots {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    font: inherit;
     font-size: 14px;
     line-height: 1;
-    opacity: 0.3;
+    opacity: 0.6;
+    padding: 2px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+        opacity: 0.9;
+        background: rgba(0, 0, 0, 0.04);
+    }
+    &:focus-visible {
+        outline: 2px dashed var(--ring);
+        outline-offset: 2px;
+    }
 }
 
 .panel-body {
+    /* animation de collapse via CSS grid */
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 180ms ease;
+}
+
+.panel-body-inner {
+    overflow: hidden;
     padding: 10px 12px 12px 12px;
-    user-select: text; /* allow selecting text inside the body */
+    user-select: text;
+}
+
+.is-collapsed .panel-body {
+    grid-template-rows: 0fr;
+}
+
+.is-collapsed .panel-body-inner {
+    padding-top: 0;
+    padding-bottom: 0; /* resserre le header quand réduit */
 }

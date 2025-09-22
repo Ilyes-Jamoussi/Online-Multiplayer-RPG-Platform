@@ -6,7 +6,7 @@ import { Routes, provideRouter, withHashLocation } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
 import { AppComponent } from '@app/pages/app/app.component';
 import { CharacterCreationPageComponent } from '@app/pages/character-creation-page/character-creation-page.component';
-import { EditGamePageComponent } from '@app/pages/game-editor-page/view/edit-game-page.component';
+import { GameEditorPageComponent } from '@app/pages/game-editor-page/game-editor-page.component';
 import { GameManagementPageComponent } from '@app/pages/game-management-page/game-management-page.component';
 import { GameParametersPageComponent } from '@app/pages/game-parameters-page/game-parameters-page.component';
 import { GameSessionCreationPageComponent } from '@app/pages/game-session-creation-page/game-session-creation-page.component';
@@ -27,9 +27,10 @@ const routes: Routes = [
         path: removeLeadingSlash(ROUTES.home),
         component: HomePageComponent,
     },
-    { path: removeLeadingSlash(ROUTES.gameEditor), component: EditGamePageComponent },
+    // { path: removeLeadingSlash(ROUTES.gameEditor), component: GameEditorPageComponent },
     {
-        path: removeLeadingSlash(ROUTES.gameEditor), component: EditGamePageComponent,
+        path: removeLeadingSlash(ROUTES.gameEditor) + '/:id',
+        component: GameEditorPageComponent,
     },
     { path: removeLeadingSlash(ROUTES.gameManagement), component: GameManagementPageComponent },
     {

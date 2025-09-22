@@ -10,16 +10,16 @@ describe('CharacterCreationPageComponent', () => {
     let fixture: ComponentFixture<CharacterCreationPageComponent>;
 
     const mockActivatedRoute = {
-        queryParams: of({ gameId: 'test-game-id' })
+        queryParams: of({ gameId: 'test-game-id' }),
     };
 
     const mockRouter = {
-        navigate: jasmine.createSpy('navigate')
+        navigate: jasmine.createSpy('navigate'),
     };
 
     const mockNotificationService = {
         displayError: jasmine.createSpy('displayError'),
-        displaySuccess: jasmine.createSpy('displaySuccess')
+        displaySuccess: jasmine.createSpy('displaySuccess'),
     };
 
     beforeEach(async () => {
@@ -28,8 +28,8 @@ describe('CharacterCreationPageComponent', () => {
             providers: [
                 { provide: ActivatedRoute, useValue: mockActivatedRoute },
                 { provide: Router, useValue: mockRouter },
-                { provide: NotificationService, useValue: mockNotificationService }
-            ]
+                { provide: NotificationService, useValue: mockNotificationService },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(CharacterCreationPageComponent);

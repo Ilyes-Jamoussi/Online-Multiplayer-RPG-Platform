@@ -1,20 +1,16 @@
 <div class="ui-input" [ngClass]="classes">
     @if (label) {
-        <label class="ui-input__label">
-            {{ label }}
-            @if (required) {
-                <span class="ui-input__required">*</span>
-            }
-        </label>
+    <label class="ui-input__label">
+        {{ label }}
+        @if (required) {
+        <span class="ui-input__required">*</span>
+        }
+    </label>
     }
 
     <div class="ui-input__field">
         @if (prefixIcon) {
-            <app-ui-icon 
-                class="ui-input__prefix-icon" 
-                [iconName]="prefixIcon" 
-                variant="secondary">
-            </app-ui-icon>
+        <app-ui-icon class="ui-input__prefix-icon" [iconName]="prefixIcon" variant="secondary"> </app-ui-icon>
         }
 
         <input
@@ -31,32 +27,15 @@
         />
 
         @if (clearable && value && !isDisabled) {
-            <button
-                type="button"
-                class="ui-input__clear-btn"
-                (click)="onClear()"
-                aria-label="Clear input"
-            >
-                ×
-            </button>
-        }
-
-        @if (suffixIcon) {
-            <app-ui-icon 
-                class="ui-input__suffix-icon" 
-                [iconName]="suffixIcon" 
-                variant="secondary">
-            </app-ui-icon>
+        <button type="button" class="ui-input__clear-btn" (click)="onClear()" aria-label="Clear input">×</button>
+        } @if (suffixIcon) {
+        <app-ui-icon class="ui-input__suffix-icon" [iconName]="suffixIcon" variant="secondary"> </app-ui-icon>
         }
     </div>
 
     @if (errorMessage && hasError) {
-        <div class="ui-input__error">{{ errorMessage }}</div>
-    }
-
-    @if (maxLength) {
-        <div class="ui-input__counter">
-            {{ value.length }}/{{ maxLength }}
-        </div>
+    <div class="ui-input__error">{{ errorMessage }}</div>
+    } @if (maxLength) {
+    <div class="ui-input__counter">{{ value.length }}/{{ maxLength }}</div>
     }
 </div>
