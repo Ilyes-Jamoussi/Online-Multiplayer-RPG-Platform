@@ -8,8 +8,8 @@ export interface EditorProblem {
 export interface InventoryItem {
     kind: PlaceableKind;
     total: number;
-    remaining: number; // non-placés (placed === false)
-    disabled: boolean; // remaining === 0
+    remaining: number;
+    disabled: boolean;
 }
 
 export const PLACEABLE_ORDER: PlaceableKind[] = [

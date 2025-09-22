@@ -1,24 +1,24 @@
-// ==================== DESIGN SYSTEM PROFESSIONNEL ====================
-// Source unique de vérité pour toute l'application
+// ==================== PROFESSIONAL DESIGN SYSTEM ====================
+// Single source of truth for the entire application
 
-// ==================== IMPORTS FONTS ====================
+// ==================== FONT IMPORTS ====================
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@400;600;800&family=Rajdhani:wght@400;600;700&display=swap');
 
-// ==================== COULEURS ====================
-// Palette principale - Thème bleu et blanc
-$primary: #2563eb; // Bleu royal
-$primary-light: #60a5fa; // Bleu clair
-$primary-dark: #1d4ed8; // Bleu foncé
+// ==================== COLORS ====================
+// Main palette - Blue and white theme
+$primary: #2563eb; // Royal blue
+$primary-light: #60a5fa; // Light blue
+$primary-dark: #1d4ed8; // Dark blue
 
-$secondary: #f8fafc; // Blanc cassé
-$secondary-light: #ffffff; // Blanc pur
-$secondary-dark: #e2e8f0; // Gris très clair
+$secondary: #f8fafc; // Off-white
+$secondary-light: #ffffff; // Pure white
+$secondary-dark: #e2e8f0; // Very light gray
 
-$accent: #0ea5e9; // Bleu ciel
-$accent-light: #38bdf8; // Bleu ciel clair
-$accent-dark: #0284c7; // Bleu ciel foncé
+$accent: #0ea5e9; // Sky blue
+$accent-light: #38bdf8; // Light sky blue
+$accent-dark: #0284c7; // Dark sky blue
 
-// Couleurs neutres
+// Neutral colors
 $white: #ffffff;
 $black: #000000;
 $gray-50: #f9fafb;
@@ -32,19 +32,19 @@ $gray-700: #374151;
 $gray-800: #1f2937;
 $gray-900: #111827;
 
-// États
+// States
 $success: #22c55e;
 $warning: #f59e0b;
 $error: #ef4444;
 $info: #3b82f6;
 
-// Couleurs avec transparence
+// Colors with transparency
 $overlay-light: rgba(255, 255, 255, 0.1);
 $overlay-medium: rgba(255, 255, 255, 0.2);
 $overlay-dark: rgba(0, 0, 0, 0.5);
 $overlay-darker: rgba(0, 0, 0, 0.8);
 
-// ==================== TYPOGRAPHIE ====================
+// ==================== TYPOGRAPHY ====================
 $font-primary:
     'Inter',
     'Segoe UI',
@@ -54,7 +54,7 @@ $font-primary:
 $font-secondary: 'Georgia', 'Times New Roman', serif;
 $font-gaming: 'Orbitron', 'Exo 2', 'Rajdhani', 'Russo One', monospace;
 
-// Tailles de texte
+// Text sizes
 $text-xs: 0.75rem; // 12px
 $text-sm: 0.875rem; // 14px
 $text-base: 1rem; // 16px
@@ -65,7 +65,7 @@ $text-3xl: 1.875rem; // 30px
 $text-4xl: 2.25rem; // 36px
 $text-5xl: 3rem; // 48px
 
-// Poids de police
+// Font weights
 $font-light: 300;
 $font-normal: 400;
 $font-medium: 500;
@@ -73,12 +73,12 @@ $font-semibold: 600;
 $font-bold: 700;
 $font-extrabold: 800;
 
-// Hauteur de ligne
+// Line height
 $leading-tight: 1.25;
 $leading-normal: 1.5;
 $leading-relaxed: 1.75;
 
-// ==================== ESPACEMENTS ====================
+// ==================== SPACING ====================
 $space-0: 0;
 $space-1: 0.25rem; // 4px
 $space-2: 0.5rem; // 8px
@@ -92,7 +92,7 @@ $space-12: 3rem; // 48px
 $space-16: 4rem; // 64px
 $space-20: 5rem; // 80px
 
-// ==================== BORDURES & RAYONS ====================
+// ==================== BORDERS & RADII ====================
 $radius-none: 0;
 $radius-sm: 0.25rem; // 4px
 $radius-md: 0.5rem; // 8px
@@ -105,7 +105,7 @@ $border-width: 1px;
 $border-width-2: 2px;
 $border-width-4: 4px;
 
-// ==================== OMBRES ====================
+// ==================== SHADOWS ====================
 $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 $shadow-md:
     0 4px 6px -1px rgba(0, 0, 0, 0.1),
@@ -118,7 +118,7 @@ $shadow-xl:
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
 $shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 
-// Ombres colorées
+// Colored shadows
 $shadow-primary: 0 4px 14px 0 rgba(139, 69, 19, 0.3);
 $shadow-secondary: 0 4px 14px 0 rgba(218, 165, 32, 0.3);
 
@@ -143,7 +143,7 @@ $z-modal: 1050;
 $z-popover: 1060;
 $z-tooltip: 1070;
 
-// ==================== STYLES GLOBAUX ====================
+// ==================== GLOBAL STYLES ====================
 html {
     box-sizing: border-box;
     font-size: 16px;
@@ -174,7 +174,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-// ==================== CLASSES UTILITAIRES ====================
+// ==================== UTILITY CLASSES ====================
 .text-center {
     text-align: center;
 }
