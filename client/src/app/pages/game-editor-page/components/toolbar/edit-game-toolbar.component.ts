@@ -27,12 +27,12 @@ export class EditGameToolbarComponent {
     activeTool$ = this.gameDraftService.activeTool$;
 
     brushes: BrushItem[] = [
-        { image: '/assets/tiles/sand.png', class: 'base', tool: { type: 'TILE_BRUSH', tile: TileKind.BASE } },
-        { image: '/assets/tiles/wall.png', class: 'wall', tool: { type: 'TILE_BRUSH', tile: TileKind.WALL } },
-        { image: '/assets/tiles/closed-door.png', class: 'door', tool: { type: 'TILE_BRUSH', tile: TileKind.DOOR } },
-        { image: '/assets/tiles/water.png', class: 'water', tool: { type: 'TILE_BRUSH', tile: TileKind.WATER } },
-        { image: '/assets/tiles/ice.png', class: 'ice', tool: { type: 'TILE_BRUSH', tile: TileKind.ICE } },
-        { image: '/assets/tiles/teleport-portal.png', class: 'teleport', tool: { type: 'TILE_BRUSH', tile: TileKind.TELEPORT } },
+        { image: 'assets/tiles/sand.png', class: 'base', tool: { type: 'TILE_BRUSH', tile: TileKind.BASE } },
+        { image: 'assets/tiles/wall.png', class: 'wall', tool: { type: 'TILE_BRUSH', tile: TileKind.WALL } },
+        { image: 'assets/tiles/closed-door.png', class: 'door', tool: { type: 'TILE_BRUSH', tile: TileKind.DOOR } },
+        { image: 'assets/tiles/water.png', class: 'water', tool: { type: 'TILE_BRUSH', tile: TileKind.WATER } },
+        { image: 'assets/tiles/ice.png', class: 'ice', tool: { type: 'TILE_BRUSH', tile: TileKind.ICE } },
+        { image: 'assets/tiles/teleport-portal.png', class: 'teleport', tool: { type: 'TILE_BRUSH', tile: TileKind.TELEPORT } },
     ];
 
     constructor(
