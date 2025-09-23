@@ -15,6 +15,7 @@
             class="icon-cell"
             [class.drag-over]="dragOver === item.kind"
             [draggable]="item.remaining > 0"
+            (dragend)="onDragEnd()"
             (dragstart)="onDragStart($event, item.kind, item.remaining === 0)"
             [attr.data-mime]="dndMime[item.kind]"
             [attr.data-kind]="item.kind"

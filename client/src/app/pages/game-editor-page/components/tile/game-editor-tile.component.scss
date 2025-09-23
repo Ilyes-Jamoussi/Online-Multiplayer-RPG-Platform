@@ -19,7 +19,7 @@
     background-position: center;
     background-repeat: no-repeat;
 
-    &:hover {
+    &.brushHover:hover {
         filter: brightness(0.85);
         cursor: pointer;
     }

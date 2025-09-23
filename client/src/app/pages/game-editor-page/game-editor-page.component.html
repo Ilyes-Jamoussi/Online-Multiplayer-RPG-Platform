@@ -9,10 +9,10 @@
     <div class="editor-container">
         <!-- Editor Content -->
         <div class="editor-content">
-            <app-draggable-panel title="Outils" storageKey="editor.toolbar.pos">
+            <app-draggable-panel title="Outils" storageKey="editor.toolbar.pos" [snap]="10">
                 <app-editor-toolbar></app-editor-toolbar>
             </app-draggable-panel>
-            <app-draggable-panel title="Inventaire" storageKey="editor.inventory.pos">
+            <app-draggable-panel title="Inventaire" storageKey="editor.inventory.pos" [snap]="10">
                 <app-editor-inventory></app-editor-inventory>
             </app-draggable-panel>
             <div class="grid-container">
@@ -49,6 +49,7 @@
         <input type="text" placeholder="Nom de la carte" class="map-name-input" [(ngModel)]="store.name" />
         <input type="text" placeholder="Description de la carte" class="map-description-input" [(ngModel)]="store.description" />
         <app-ui-button (buttonClick)="onReset()">Réinitialiser la grille</app-ui-button>
-        <app-ui-button (buttonClick)="onSave()">Sauvegarder</app-ui-button>
+        <app-ui-button (buttonClick)="onSave()" [disabled]="!editorCheck.canSave()">Sauvegarder</app-ui-button>
+        <app-editor-errors-badge></app-editor-errors-badge>
     </div>
 </app-ui-page-layout>

@@ -107,7 +107,12 @@ describe('GameStoreService', () => {
 
             const result = await service.getGames();
 
-            expect(gameModel.find).toHaveBeenCalledWith({}, getProjection('displayGameDto'));
+            expect(gameModel.find).toHaveBeenCalledWith(
+                {
+                    draft: false,
+                },
+                getProjection('displayGameDto'),
+            );
             expect(mockQuery.lean).toHaveBeenCalled();
             expect(result).toHaveLength(1);
             expect(result[0]).toEqual({

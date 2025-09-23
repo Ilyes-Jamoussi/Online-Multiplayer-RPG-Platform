@@ -1,0 +1,74 @@
+.errors-badge-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 100%;
+    z-index: 9999; // ensure wrapper is above most UI elements
+    position: relative;
+}
+
+.errors-badge {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #ffe5e5; // light red
+    color: #b91c1c; // strong red
+    border: 1.5px solid #ef4444; // red border
+    border-radius: 999px;
+    padding: 0 12px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    min-width: 40px;
+    min-height: 32px;
+    transition: box-shadow 0.15s;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
+    z-index: 10000; // ensure badge is above wrapper and most UI
+
+    .icon {
+        margin-right: 6px;
+        font-size: 20px;
+        /* Use a more "NO" icon: 🚫 */
+    }
+    .count {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    &:hover .errors-tooltip,
+    &:focus .errors-tooltip {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+}
+
+.errors-tooltip {
+    opacity: 0;
+    pointer-events: none;
+    position: fixed; // changed from absolute to fixed
+    right: 32px; // adjust as needed to align with badge (footer padding)
+    bottom: 64px; // adjust as needed to appear above footer
+    min-width: 260px;
+    background: #fff0f0;
+    color: #b91c1c;
+    border: 1.5px solid #ef4444;
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15);
+    padding: 12px 16px;
+    z-index: 10001; // ensure tooltip is above everything else
+    font-size: 14px;
+    transform: translateY(0); // no animation for fixed
+    transition: opacity 0.15s;
+
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style: disc inside;
+    }
+    li {
+        margin-bottom: 6px;
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}

@@ -38,7 +38,7 @@ export class GameEditorService {
     }
 
     async patchEditByGameId(id: string, body: PatchGameEditorDto): Promise<GameEditorDto | null> {
-        const update: GameEditorDto = {} as GameEditorDto;
+        const update: GameDocument = {} as GameDocument;
 
         if (body.name !== undefined) update.name = body.name;
         if (body.description !== undefined) update.description = body.description;
@@ -71,6 +71,7 @@ export class GameEditorService {
         }
 
         update.lastModified = new Date();
+        update.draft = false;
 
         const doc = await this.gameModel
             .findByIdAndUpdate(id, { $set: update }, { new: true, runValidators: true })

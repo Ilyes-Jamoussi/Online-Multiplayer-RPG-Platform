@@ -1,7 +1,8 @@
 <div
     class="tile"
     [class.problem]="hasProblem()"
-    [class.dropHover]="dropHover"
+    [class.dropHover]="isDropHovered()"
+    [class.brushHover]="isBrushHovered()"
     [ngStyle]="{ '--bg-image': 'url(' + imageOf(tile.kind) + ')' }"
     (mousedown)="onMouseDown($event)"
     (mouseup)="onMouseUp($event)"
@@ -9,7 +10,6 @@
     (contextmenu)="onRightClick($event)"
     (dragover)="onTileDragOver($event)"
     (dragenter)="onTileDragEnter($event)"
-    (dragleave)="onTileDragLeave()"
     (drop)="onTileDrop($event)"
 >
     @if (tile.kind === 'DOOR') {

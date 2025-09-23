@@ -16,6 +16,7 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { DraggablePanelComponent } from '@app/shared/ui/components/draggable-panel/draggable-panel.component';
 import { GameEditorInventoryComponent } from './components/inventory/game-editor-inventory.component';
 import { GameEditorObjectComponent } from './components/object/object.component';
+import { GameEditorErrorsDisplayComponent } from './components/errross-display/errors-display.component';
 
 @Component({
     selector: 'app-edit-game-page',
@@ -31,6 +32,7 @@ import { GameEditorObjectComponent } from './components/object/object.component'
         DraggablePanelComponent,
         GameEditorInventoryComponent,
         GameEditorObjectComponent,
+        GameEditorErrorsDisplayComponent,
     ],
     templateUrl: './game-editor-page.component.html',
     styleUrls: ['./game-editor-page.component.scss'],
@@ -43,7 +45,7 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     constructor(
         private readonly route: ActivatedRoute,
         readonly store: GameEditorStoreService,
-        private readonly editorCheck: GameEditorCheckService,
+        readonly editorCheck: GameEditorCheckService,
         private readonly notification: NotificationService,
     ) {}
 

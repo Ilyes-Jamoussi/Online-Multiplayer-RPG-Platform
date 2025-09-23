@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, HostBinding, Input } from '@angular
 import { CommonModule } from '@angular/common';
 import { GameEditorPlaceableDto } from '@app/api/model/gameEditorPlaceableDto';
 import { PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
+import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 
 @Component({
     selector: 'app-editor-placed-object',
@@ -17,21 +18,19 @@ export class GameEditorObjectComponent {
     /** taille tuile pour cohérence visuelle (emoji/sprite) */
     @Input() tileSize = 48;
 
-    isDragging = false;
+    constructor(private readonly interactions: GameEditorInteractionsService) {}
 
-    private footprintOf(kind: PlaceableKind) {
-        return kind === PlaceableKind.HEAL || kind === PlaceableKind.FIGHT ? { w: 2, h: 2 } : { w: 1, h: 1 };
-    }
+    isDragging = false;
 
     @HostBinding('style.grid-column')
     get gridCol() {
-        const w = this.footprintOf(PlaceableKind[this.object.kind]).w;
+        const w = this.interactions.getFootprintOf(PlaceableKind[this.object.kind]);
         return `${this.object.x + 1} / span ${w}`;
     }
 
     @HostBinding('style.grid-row')
     get gridRow() {
-        const h = this.footprintOf(PlaceableKind[this.object.kind]).h;
+        const h = this.interactions.getFootprintOf(PlaceableKind[this.object.kind]);
         return `${this.object.y + 1} / span ${h}`;
     }
 
@@ -45,9 +44,14 @@ export class GameEditorObjectComponent {
         evt.dataTransfer.effectAllowed = 'copy';
         evt.dataTransfer.setData(PlaceableMime[this.object.kind], this.object.id);
         this.isDragging = true;
+        this.interactions.setActiveTool({
+            type: ToolType.PlaceableTool,
+            placeableKind: PlaceableKind[this.object.kind],
+        });
     }
 
     onDragEnd() {
         this.isDragging = false;
+        this.interactions.revertToPreviousTool();
     }
 }

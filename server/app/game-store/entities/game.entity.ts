@@ -27,5 +27,7 @@ export class Game {
     @Prop({ type: [tileSchema], default: [] }) tiles: Tile[];
 
     @Prop({ type: [placeableSchema], default: [] }) objects: Placeable[];
+
+    @Prop({ required: true }) draft: boolean;
 }
 export const gameSchema = SchemaFactory.createForClass(Game);

@@ -32,6 +32,7 @@ export class GameStoreService {
             lastModified: new Date(),
             createdAt: new Date(),
             gridPreviewUrl: '',
+            draft: true,
         } as GameDocument;
 
         const createdGame = await this.gameModel.create(gameDocument);
@@ -40,7 +41,7 @@ export class GameStoreService {
     }
 
     async getGames(): Promise<GamePreviewDto[]> {
-        const games = await this.gameModel.find({}, getProjection('displayGameDto')).lean();
+        const games = await this.gameModel.find({ draft: false }, getProjection('displayGameDto')).sort({ createdAt: -1 }).lean();
         return games.map((game) => this.toGamePreviewDto(game));
     }
 
@@ -51,8 +52,6 @@ export class GameStoreService {
         }
 
         return {
-            // map: game.map,
-            // itemContainers: game.itemContainers,
             mapSize: game.size,
         };
     }
