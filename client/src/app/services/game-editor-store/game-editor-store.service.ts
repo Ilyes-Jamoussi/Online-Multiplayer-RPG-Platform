@@ -11,7 +11,7 @@ import { PatchGameEditorDto } from '@app/api/model/patchGameEditorDto';
 import { InventoryItem, PLACEABLE_ORDER } from '@app/interfaces/game-editor.interface';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class GameEditorStoreService {
     private readonly _initial = signal<GameEditorDto>({
         id: '',

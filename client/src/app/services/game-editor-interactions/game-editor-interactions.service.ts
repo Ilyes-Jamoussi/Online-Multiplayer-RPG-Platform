@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { ActiveTool, Vector2 } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { PlaceableMime, PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
 // import { PlaceableFootprint, PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
@@ -9,29 +10,20 @@ export enum ToolType {
     PlaceableTool = 'placeable-tool',
 }
 
-export type TileBrushTool = {
-    type: ToolType.TileBrushTool;
-    tileKind: TileKind;
-    leftDrag: boolean;
-    rightDrag: boolean;
-};
-
-export type PlaceableTool = {
-    type: ToolType.PlaceableTool;
-    placeableKind: string;
-};
-
-export type ActiveTool = TileBrushTool | PlaceableTool;
-
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class GameEditorInteractionsService {
     constructor(private readonly store: GameEditorStoreService) {}
 
     private readonly _activeTool = signal<ActiveTool | null>(null);
     private readonly _previousActiveTool = signal<ActiveTool | null>(null);
+    private readonly _hoveredTiles = signal<Vector2[] | null>(null);
 
     get activeTool() {
         return this._activeTool.asReadonly();
+    }
+
+    get hoveredTiles() {
+        return this._hoveredTiles.asReadonly();
     }
 
     setActiveTool(tool: ActiveTool): void {
@@ -42,6 +34,7 @@ export class GameEditorInteractionsService {
     revertToPreviousTool(): void {
         this._activeTool.set(this._previousActiveTool());
         this._previousActiveTool.set(null);
+        this._hoveredTiles.set(null);
     }
 
     dragStart(x: number, y: number, click: 'left' | 'right'): void {
@@ -73,16 +66,45 @@ export class GameEditorInteractionsService {
         this.store.setTileAt(x, y, tool.rightDrag ? TileKind.BASE : tool.tileKind);
     }
 
+    resolveHoveredTiles(evt: DragEvent, tileX: number, tileY: number) {
+        const tool = this.activeTool?.();
+        if (!tool || tool.type !== ToolType.PlaceableTool) return;
+
+        const footprint = PlaceableFootprint[tool.placeableKind];
+        if (!Number.isFinite(footprint) || footprint <= 0) return;
+        const hoveredTiles: Vector2[] = [];
+
+        if (footprint === 1) {
+            hoveredTiles.push({ x: tileX, y: tileY });
+        } else {
+            const offsetX = evt.offsetX;
+            const offsetY = evt.offsetY;
+
+            const { x: closestX, y: closestY } = this.getClosestTile(tileX, tileY, offsetX, offsetY);
+
+            for (let dy = 0; dy < footprint; dy++) {
+                for (let dx = 0; dx < footprint; dx++) {
+                    hoveredTiles.push({ x: closestX + dx, y: closestY + dy });
+                }
+            }
+        }
+        this._hoveredTiles.set(hoveredTiles);
+        return hoveredTiles;
+    }
+
     resolveDropAction(evt: DragEvent, x: number, y: number): void {
+        this._hoveredTiles.set(null);
         if (evt && evt.dataTransfer) {
             const mime = Object.values(PlaceableMime).find((m) => evt.dataTransfer?.types.includes(m));
             if (!mime) return;
             const data = evt.dataTransfer.getData(mime);
             if (!data) return;
             if (Object.values(PlaceableKind).includes(data as PlaceableKind)) {
-                this.tryPlaceObject(x, y, data as PlaceableKind);
+                const { x: closestX, y: closestY } = this.getClosestTile(x, y, evt.offsetX, evt.offsetY);
+                this.tryPlaceObject(closestX, closestY, data as PlaceableKind);
             } else {
-                this.tryMoveObject(x, y, data);
+                const { x: closestX, y: closestY } = this.getClosestTile(x, y, evt.offsetX, evt.offsetY);
+                this.tryMoveObject(closestX, closestY, data);
             }
         }
     }
@@ -91,49 +113,74 @@ export class GameEditorInteractionsService {
         this.store.removeObject(id);
     }
 
-    // can only place object if :
-    // - tile is not wall or water or door
-    // - tile is not already occupied by another object
-    // - PlaceableKind boat can only be placed on water tiles
+    getFootprintOf(kind: PlaceableKind): number {
+        return PlaceableFootprint[kind];
+    }
 
-    private canPlaceObject(x: number, y: number, kind: PlaceableKind): boolean {
-        const tile = this.store.getTileAt(x, y);
-        const footprint = PlaceableFootprint[kind];
+    hasMime(evt: DragEvent): boolean {
+        const types = Array.from(evt.dataTransfer?.types ?? []);
+        return Object.values(PlaceableMime).some((mime) => types.includes(mime));
+    }
 
-        // if footprint = 2 need to checkl 2x2 area
-        // etc...
+    private canPlaceObject(x: number, y: number, kind: PlaceableKind, excludeId?: string): boolean {
+        const footprint = PlaceableFootprint[kind] ?? 1;
 
-        if (!tile) return false;
+        for (let dy = 0; dy < footprint; dy++) {
+            for (let dx = 0; dx < footprint; dx++) {
+                const tx = x + dx;
+                const ty = y + dy;
 
-        if ([TileKind.WALL, TileKind.DOOR].includes(TileKind[tile.kind])) return false;
-        if (tile.kind === TileKind.WATER && kind !== PlaceableKind.BOAT) return false;
+                const tile = this.store.getTileAt(tx, ty);
+                if (!tile) return false;
 
-        // Check if tile is already occupied
-        if (this.store.getPlacedObjectAt(x, y)) return false;
-        if (footprint === 2) {
-            if (this.store.getPlacedObjectAt(x + 1, y)) return false;
-            if (this.store.getPlacedObjectAt(x, y + 1)) return false;
-            if (this.store.getPlacedObjectAt(x + 1, y + 1)) return false;
+                const tk = tile.kind as TileKind;
+
+                // Interdits terrain
+                if (tk === TileKind.WALL || tk === TileKind.DOOR) return false;
+
+                // Règles d'eau / bateau
+                if (kind === PlaceableKind.BOAT) {
+                    // Le bateau doit ENTIEREMENT être sur l'eau
+                    if (tk !== TileKind.WATER) return false;
+                } else {
+                    // Tout autre objet ne peut pas être sur l'eau
+                    if (tk === TileKind.WATER) return false;
+                }
+
+                // Occupation existante (en ignorant éventuellement l'objet qu'on déplace)
+                const occupant = this.store.getPlacedObjectAt(tx, ty);
+                if (occupant && occupant.id !== excludeId) return false;
+            }
         }
-
-        // Check specific rules for PlaceableKind
-        if (kind === PlaceableKind.BOAT && tile.kind !== TileKind.WATER) return false;
 
         return true;
     }
 
     private tryPlaceObject(x: number, y: number, kind: PlaceableKind): void {
-        if (kind === PlaceableKind.HEAL || kind === PlaceableKind.FIGHT) return;
-        const canPlace = this.canPlaceObject(x, y, kind);
-        if (!canPlace) return;
+        // HEAL et FIGHT sont maintenant gérés (footprint=2)
+        if (!this.canPlaceObject(x, y, kind)) return;
         this.store.placeObject(kind, x, y);
     }
 
     private tryMoveObject(x: number, y: number, id: string): void {
         const obj = this.store.placedObjects().find((o) => o.id === id);
         if (!obj) return;
-        const canPlace = this.canPlaceObject(x, y, PlaceableKind[obj.kind]);
-        if (!canPlace) return;
+
+        const kind = PlaceableKind[obj.kind]; // même mapping que ton code actuel
+        if (!this.canPlaceObject(x, y, kind, id)) return; // ignore l'occupation par soi-même
         this.store.moveObject(id, x, y);
+    }
+
+    private getClosestTile(tileX: number, tileY: number, offsetX: number, offsetY: number): Vector2 {
+        const tool = this.activeTool?.();
+        if (!tool || tool.type !== ToolType.PlaceableTool) return { x: tileX, y: tileY };
+        const footprint = PlaceableFootprint[tool.placeableKind];
+        if (!Number.isFinite(footprint) || footprint <= 0 || footprint === 1) {
+            return { x: tileX, y: tileY };
+        }
+        const tileSize = this.store.tileSizePx;
+        const closestX = offsetX < tileSize / 2 ? tileX - 1 : tileX;
+        const closestY = offsetY < tileSize / 2 ? tileY - 1 : tileY;
+        return { x: closestX, y: closestY };
     }
 }

@@ -7,7 +7,6 @@ import { GameEditorTileDto } from '@app/api/model/gameEditorTileDto';
 import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { TileSprite as TileImage } from '@common/enums/tile-sprite.enum';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
-import { PlaceableMime } from '@common/enums/placeable-kind.enum';
 
 @Component({
     selector: 'app-editor-tile',
@@ -30,7 +29,19 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
     @Input({ required: true }) tile: GameEditorTileDto;
 
     hasProblem(): boolean {
-        return this.editorCheck.editorProblems().some((p) => p.locationX === this.tile.x && p.locationY === this.tile.y);
+        return (
+            this.editorCheck.editorProblems().terrainAccessibility.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y) ||
+            this.editorCheck.editorProblems().doors.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y)
+        );
+    }
+
+    isDropHovered(): boolean {
+        return this.interactions.hoveredTiles()?.some((t) => t.x === this.tile.x && t.y === this.tile.y) ?? false;
+    }
+
+    isBrushHovered(): boolean {
+        const tool = this.interactions.activeTool();
+        return tool?.type === ToolType.TileBrushTool;
     }
 
     // mouse events
@@ -80,39 +91,31 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         }
     }
 
+    onTileDragOver(evt: DragEvent) {
+        if (!this.interactions.hasMime(evt)) return;
+        if (!evt.dataTransfer) return;
+        evt.preventDefault();
+        evt.dataTransfer.dropEffect = 'copy';
+        this.interactions.resolveHoveredTiles(evt, this.tile.x, this.tile.y);
+    }
+
+    onTileDragEnter(evt: DragEvent) {
+        if (!this.interactions.hasMime(evt)) return;
+    }
+
     imageOf(kind: GameEditorTileDto.KindEnum): string {
         return TileImage[kind];
     }
 
-    private hasMime(evt: DragEvent): boolean {
-        const types = Array.from(evt.dataTransfer?.types ?? []);
-        return Object.values(PlaceableMime).some((mime) => types.includes(mime));
-    }
+    // onTileDragLeave() {
 
-    dropHover = false;
-
-    onTileDragOver(evt: DragEvent) {
-        if (!this.hasMime(evt)) return;
-        if (!evt.dataTransfer) return;
-        evt.preventDefault();
-        evt.dataTransfer.dropEffect = 'copy';
-    }
-
-    onTileDragEnter(evt: DragEvent) {
-        if (!this.hasMime(evt)) return;
-        this.dropHover = true;
-    }
-
-    onTileDragLeave() {
-        this.dropHover = false;
-    }
+    // }
 
     onTileDrop(evt: DragEvent) {
-        if (!this.hasMime(evt)) return;
+        if (!this.interactions.hasMime(evt)) return;
         if (!evt.dataTransfer) return;
         evt.preventDefault();
         evt.stopPropagation();
-        this.dropHover = false;
 
         const x = this.tile.x;
         const y = this.tile.y;

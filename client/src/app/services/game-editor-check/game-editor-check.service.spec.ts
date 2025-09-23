@@ -6,7 +6,7 @@ import { TileKind } from '@common/enums/tile-kind.enum';
 import { GameEditorTileDto } from '@app/api/model/gameEditorTileDto';
 
 class MockGameEditorStoreService {
-    private _size = 5; // taille par défaut (5x5) pour les tests
+    private _size = 5;
     private _tiles: GameEditorTileDto[] = [];
 
     constructor(size = 5) {
@@ -47,6 +47,19 @@ class MockGameEditorStoreService {
         this._tiles[i] = { x, y, kind, open };
     }
 
+    inventory() {
+        // Return a default inventory with START placed (remaining: 0)
+        return [
+            { kind: 'START', total: 1, remaining: 0, disabled: false },
+            { kind: 'FLAG', total: 1, remaining: 0, disabled: false },
+        ];
+    }
+
+    mode() {
+        // Default to a mode that does not require flags (e.g., not CTF)
+        return 'CLASSIC';
+    }
+
     private index(x: number, y: number) {
         return y * this._size + x;
     }
@@ -74,8 +87,7 @@ describe('GameEditorCheckService', () => {
             store.setTile(3, 2, TileKind.WALL);
 
             const problems = service.editorProblems();
-            const doorProblems = problems.filter((p) => p.message.includes('Porte mal placée'));
-            expect(doorProblems.length).toBe(0);
+            expect(problems.doors.hasIssue).toBeFalse();
         });
 
         it('does NOT add a problem when a vertical door is correctly placed', () => {
@@ -84,8 +96,7 @@ describe('GameEditorCheckService', () => {
             store.setTile(2, 2, TileKind.DOOR);
             store.setTile(2, 3, TileKind.WALL);
             const problems = service.editorProblems();
-            const doorProblems = problems.filter((p) => p.message.includes('Porte mal placée'));
-            expect(doorProblems.length).toBe(0);
+            expect(problems.doors.hasIssue).toBeFalse();
         });
 
         it('adds a problem when a vertical door is incorrectly placed', () => {
@@ -94,9 +105,8 @@ describe('GameEditorCheckService', () => {
             store.setTile(1, 2, TileKind.WALL);
 
             const problems = service.editorProblems();
-            const doorProblems = problems.filter((p) => p.message.includes('Porte mal placée'));
-            expect(doorProblems.length).toBeGreaterThan(0);
-            expect(doorProblems[0]).toEqual(jasmine.objectContaining({ locationX: 2, locationY: 2 }));
+            expect(problems.doors.hasIssue).toBeTrue();
+            expect(problems.doors.tiles).toContain(jasmine.objectContaining({ x: 2, y: 2 }));
         });
 
         it('adds a problem when a horizontal door is incorrectly placed', () => {
@@ -105,9 +115,8 @@ describe('GameEditorCheckService', () => {
             store.setTile(2, 2, TileKind.DOOR);
             store.setTile(3, 2, TileKind.BASE);
             const problems = service.editorProblems();
-            const doorProblems = problems.filter((p) => p.message.includes('Porte mal placée'));
-            expect(doorProblems.length).toBeGreaterThan(0);
-            expect(doorProblems[0]).toEqual(jasmine.objectContaining({ locationX: 2, locationY: 2 }));
+            expect(problems.doors.hasIssue).toBeTrue();
+            expect(problems.doors.tiles).toContain(jasmine.objectContaining({ x: 2, y: 2 }));
         });
     });
 
@@ -127,8 +136,8 @@ describe('GameEditorCheckService', () => {
             coords.forEach(([x, y]) => store.setTile(x, y, TileKind.BASE));
 
             const problems = service.editorProblems();
-            const coverage = problems.find((p) => p.message.includes('Moins de 50%'));
-            expect(coverage).toBeTruthy();
+            expect(problems.terrainCoverage.hasIssue).toBeTrue();
+            expect(problems.terrainCoverage.message).toContain('Le ratio de tuiles de terrain est trop bas');
         });
 
         it('does not report a problem if > 50% terrain', () => {
@@ -148,8 +157,7 @@ describe('GameEditorCheckService', () => {
             coords.forEach(([x, y]) => store.setTile(x, y, TileKind.BASE));
 
             const problems = service.editorProblems();
-            const coverage = problems.find((p) => p.message.includes('Moins de 50%'));
-            expect(coverage).toBeFalsy();
+            expect(problems.terrainCoverage.hasIssue).toBeFalse();
         });
     });
 
@@ -163,8 +171,8 @@ describe('GameEditorCheckService', () => {
             store.setTile(3, 3, TileKind.WALL);
 
             const probs = service.editorProblems();
-            const inacc = probs.find((p) => p.message.includes('Tuile inaccessible'));
-            expect(inacc).toBeTruthy();
+            expect(probs.terrainAccessibility.hasIssue).toBeTrue();
+            expect(probs.terrainAccessibility.tiles.length).toBeGreaterThan(0);
         });
 
         it('does not report anything if all walkable tiles are reachable', () => {
@@ -172,8 +180,7 @@ describe('GameEditorCheckService', () => {
             store.fillGrid(TileKind.BASE);
 
             const probs = service.editorProblems();
-            const inacc = probs.find((p) => p.message.includes('Tuile inaccessible'));
-            expect(inacc).toBeFalsy();
+            expect(probs.terrainAccessibility.hasIssue).toBeFalse();
         });
     });
 

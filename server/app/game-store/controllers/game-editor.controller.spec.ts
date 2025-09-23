@@ -55,4 +55,3 @@ describe('GameEditorController', () => {
         await expect(controller.patchGameForEdit('1', {} as PatchGameEditorDto)).rejects.toThrow(NotFoundException);
     });
 });
-

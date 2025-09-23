@@ -12,10 +12,10 @@ export class ImageService {
 
         const base64Image = base64Data.replace(/^data:image\/\w+;base64,/, '');
         const buffer = Buffer.from(base64Image, 'base64');
-        
+
         // Nettoyer le nom de fichier (remplacer espaces et caractères spéciaux)
         const cleanFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '-');
-        
+
         const filePath = join(folderPath, cleanFilename);
         await fs.writeFile(filePath, buffer);
 

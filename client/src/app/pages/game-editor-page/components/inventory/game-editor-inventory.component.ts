@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
 
 @Component({
@@ -77,6 +77,15 @@ export class GameEditorInventoryComponent {
         document.body.appendChild(img);
         evt.dataTransfer.setDragImage(img, this.store.tileSizePx / 2, this.store.tileSizePx / 2);
         setTimeout(() => document.body.removeChild(img), 0);
+
+        this.interactions.setActiveTool({
+            type: ToolType.PlaceableTool,
+            placeableKind: kind,
+        });
+    }
+
+    onDragEnd() {
+        this.interactions.revertToPreviousTool();
     }
 
     onSlotDragOver(evt: DragEvent, kind: PlaceableKind) {
@@ -100,6 +109,7 @@ export class GameEditorInventoryComponent {
         evt.preventDefault();
         evt.stopPropagation();
         this.interactions.removeObject(id);
+        this.interactions.revertToPreviousTool();
         this.dragOver = '';
     }
 
