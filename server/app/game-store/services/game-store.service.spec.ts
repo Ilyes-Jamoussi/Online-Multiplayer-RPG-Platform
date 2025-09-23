@@ -100,20 +100,20 @@ describe('GameStoreService', () => {
     describe('getGames', () => {
         it('should return array of GamePreviewDto', async () => {
             const mockGameDocument = createMockGameDocument();
+
             const mockQuery = {
+                sort: jest.fn().mockReturnThis(), // <-- add this
                 lean: jest.fn().mockResolvedValue([mockGameDocument]),
             } as unknown as Query<GameDocument[], GameDocument>;
+
             gameModel.find.mockReturnValue(mockQuery);
 
             const result = await service.getGames();
 
-            expect(gameModel.find).toHaveBeenCalledWith(
-                {
-                    draft: false,
-                },
-                getProjection('displayGameDto'),
-            );
+            expect(gameModel.find).toHaveBeenCalledWith({ draft: false }, getProjection('displayGameDto'));
+            expect(mockQuery.sort).toHaveBeenCalledWith({ createdAt: -1 }); // <-- assert sort
             expect(mockQuery.lean).toHaveBeenCalled();
+
             expect(result).toHaveLength(1);
             expect(result[0]).toEqual({
                 id: mockObjectId.toString(),
@@ -128,7 +128,8 @@ describe('GameStoreService', () => {
 
         it('should return empty array when no games exist', async () => {
             const mockQuery = {
-                lean: jest.fn().mockResolvedValue([]),
+                sort: jest.fn().mockReturnThis(), // allows chaining
+                lean: jest.fn().mockResolvedValue([]), // resolves to empty array
             };
             (gameModel.find as jest.Mock).mockReturnValue(mockQuery);
 
