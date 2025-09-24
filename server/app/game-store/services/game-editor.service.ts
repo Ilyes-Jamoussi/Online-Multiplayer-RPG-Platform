@@ -7,7 +7,6 @@ import { GameEditorDto } from '@app/game-store/dto/game-editor.dto';
 import { PatchGameEditorDto } from '@app/game-store/dto/patch-game-editor.dto';
 import { Tile } from '@app/game-store/entities/tile.entity';
 import { Placeable } from '@app/game-store/entities/placeable.entity';
-import { GameEditorPlaceableDto } from '@app/game-store/dto/game-editor-placeable.dto';
 
 @Injectable()
 export class GameEditorService {
