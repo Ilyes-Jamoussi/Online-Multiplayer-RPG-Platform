@@ -32,6 +32,11 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
     @Input() prefixIcon?: FaIconKey;
     @Input() suffixIcon?: FaIconKey;
     @Input() errorMessage: string = '';
+    @Input() set initialValue(val: string) {
+        if (val !== undefined) {
+            this.value = val;
+        }
+    }
 
     @Output() valueChange = new EventEmitter<string>();
 

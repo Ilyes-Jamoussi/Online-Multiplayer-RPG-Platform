@@ -53,9 +53,13 @@
         <h3>Nom *</h3>
         <app-ui-input
           placeholder="Nom du héros"
-          [ngModel]="character.name"
+          [initialValue]="character.name"
           (valueChange)="onNameChange($event)"
+          [maxLength]="8"
         ></app-ui-input>
+        @if (store.getNameError()) {
+          <div class="error-message">{{ store.getNameError() }}</div>
+        }
       </div>
 
       <!-- Stats + Bonus -->

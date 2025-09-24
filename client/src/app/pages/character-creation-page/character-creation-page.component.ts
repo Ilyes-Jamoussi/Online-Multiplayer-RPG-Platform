@@ -36,10 +36,10 @@ export class CharacterCreationPageComponent implements OnInit {
     avatars = this.store.avatars;
 
     constructor(
-        private readonly store: CharacterStoreService,
+        public readonly store: CharacterStoreService,
         private readonly router: Router,
         private readonly notif: NotificationService,
-        public readonly assets: AssetsService,
+        readonly assets: AssetsService,
     ) {}
 
     getAvatarImage(avatarIndex: number): string {

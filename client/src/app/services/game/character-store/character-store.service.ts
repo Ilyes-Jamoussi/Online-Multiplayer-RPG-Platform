@@ -1,65 +1,48 @@
-import { computed, Injectable, Signal, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
+import { CHARACTER_AVATARS_COUNT } from '@app/constants/character.constants';
 
 export type BonusKey = 'life' | 'speed';
 export type Dice = 'D4' | 'D6';
 export type DiceAttr = 'attack' | 'defense';
 
-export interface Attributes {
-    life: number;
-    speed: number;
-    attack: number;
-    defense: number;
-}
-
-export interface CharacterForm {
+export interface Character {
     name: string;
     avatar: number | null;
     bonus: BonusKey | null;
     diceAssignment: { attack: Dice; defense: Dice };
-    attributes: Attributes;
+    attributes: { life: number; speed: number };
 }
-
-const BASE = 4;
-const BONUS = 2;
-const AVATAR_COUNT = 12;
 
 @Injectable({ providedIn: 'root' })
 export class CharacterStoreService {
-    // état
-    private readonly _name = signal<string>('');
+    private readonly _name = signal('');
     private readonly _avatar = signal<number | null>(null);
     private readonly _bonus = signal<BonusKey | null>(null);
     private readonly _dice = signal<{ attack: Dice; defense: Dice }>({ attack: 'D4', defense: 'D6' });
 
-    // attributs calculés
-    private readonly _attributes = computed<Attributes>(() => {
-        const a: Attributes = { life: BASE, speed: BASE, attack: BASE, defense: BASE };
-        const b = this._bonus();
-        const d = this._dice();
-        if (b) a[b] += BONUS;
-        if (d.attack === 'D6') a.attack += BONUS;
-        if (d.defense === 'D6') a.defense += BONUS;
-        return a;
+    private readonly _attributes = computed(() => {
+        const bonus = this._bonus();
+        return {
+            life: bonus === 'life' ? 6 : 4,
+            speed: bonus === 'speed' ? 6 : 4,
+        };
     });
 
-    // exposé au composant
-    get character(): Signal<CharacterForm> {
-        return computed(() => ({
-            name: this._name(),
-            avatar: this._avatar(),
-            bonus: this._bonus(),
-            diceAssignment: this._dice(),
-            attributes: this._attributes(),
-        }));
-    }
+    readonly character = computed<Character>(() => ({
+        name: this._name(),
+        avatar: this._avatar(),
+        bonus: this._bonus(),
+        diceAssignment: this._dice(),
+        attributes: this._attributes(),
+    }));
 
     get avatars(): number[] {
-        return Array.from({ length: AVATAR_COUNT }, (_, i) => i);
+        return Array.from({ length: CHARACTER_AVATARS_COUNT }, (_, i) => i);
     }
 
     // mutateurs
     setName(name: string) { this._name.set(name); }
-    selectAvatar(index: number) { if (index >= 0 && index < AVATAR_COUNT) this._avatar.set(index); }
+    selectAvatar(index: number) { if (index >= 0 && index < CHARACTER_AVATARS_COUNT) this._avatar.set(index); }
     resetAvatar() { this._avatar.set(null); }
     setBonus(bonus: BonusKey | null) { this._bonus.set(bonus); }
 
@@ -71,13 +54,27 @@ export class CharacterStoreService {
     generateRandom() {
         const names = ['Aragorn', 'Legolas', 'Gimli', 'Gandalf', 'Frodo', 'Samwise', 'Boromir', 'Faramir', 'Eowyn', 'Arwen', 'Galadriel', 'Elrond'];
         this._name.set(names[Math.floor(Math.random() * names.length)]);
-        this._avatar.set(Math.floor(Math.random() * AVATAR_COUNT));
-        this._bonus.set(Math.random() < 0.5 ? 'life' : 'speed');
-        this.setDice(Math.random() < 0.5 ? 'attack' : 'defense', 'D6');
+        this._avatar.set(Math.floor(Math.random() * CHARACTER_AVATARS_COUNT));
+        const RANDOM_THRESHOLD = 0.5;
+        this._bonus.set(Math.random() < RANDOM_THRESHOLD ? 'life' : 'speed');
+        this.setDice(Math.random() < RANDOM_THRESHOLD ? 'attack' : 'defense', 'D6');
     }
 
     isValid(): boolean {
-        return this._name().trim().length > 0 && this._bonus() !== null;
+        return this.isNameValid() && this._bonus() !== null;
+    }
+
+    isNameValid(): boolean {
+        const name = this._name().trim();
+        return name.length > 0 && name.length <= 8 && /^[a-zA-Z0-9]+$/.test(name);
+    }
+
+    getNameError(): string | null {
+        const name = this._name().trim();
+        if (name.length === 0) return 'Le nom est requis';
+        if (name.length > 8) return 'Maximum 8 caractères';
+        if (!/^[a-zA-Z0-9]+$/.test(name)) return 'Lettres et chiffres seulement';
+        return null;
     }
 
     resetForm() {
