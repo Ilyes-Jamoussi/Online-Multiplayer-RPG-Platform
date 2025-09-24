@@ -8,6 +8,8 @@ export interface GameEditorIssues {
     terrainAccessibility: AccessibilityProblem;
     startPlacement: EditorIssue;
     flagPlacement: EditorIssue;
+    nameValidation: EditorIssue;
+    descriptionValidation: EditorIssue;
 }
 export interface EditorIssue {
     message?: string;

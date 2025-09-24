@@ -31,7 +31,7 @@
                 <!-- Character Name -->
                 <div class="character-name-section">
                     <h3>Nom du Héros</h3>
-                    <app-ui-input type="text" [(ngModel)]="character.name" placeholder="Entrez le nom de votre héros"></app-ui-input>
+                    <app-ui-input type="name" [value]="character.name" (valueChange)="updateCharacterName($event)" placeholder="Entrez le nom de votre héros"></app-ui-input>
                 </div>
 
                 <!-- Stats Section -->

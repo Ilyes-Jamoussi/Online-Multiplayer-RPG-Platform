@@ -49,6 +49,10 @@ export class CharacterCreationPageComponent implements OnInit {
         private readonly notificationService: NotificationService,
     ) {}
 
+    updateCharacterName(name: string): void {
+        this.character.name = name;
+    }
+
     ngOnInit(): void {
         this.route.queryParams.subscribe((params) => {
             this.gameId = params.gameId || null;

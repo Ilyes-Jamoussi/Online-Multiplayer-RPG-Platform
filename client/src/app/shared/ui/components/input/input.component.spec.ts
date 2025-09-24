@@ -18,10 +18,4 @@ describe('UiInputComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
-
-    it('should handle registerOnChange with proper signature', () => {
-        const mockFn = jasmine.createSpy('onChange');
-        component.registerOnChange(mockFn);
-        expect(component).toBeTruthy();
-    });
 });

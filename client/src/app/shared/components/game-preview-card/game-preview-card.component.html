@@ -2,24 +2,20 @@
     <div class="card-content">
         <div class="game-preview">
             <img [src]="getImageUrl()" [alt]="game.name + ' preview'" class="preview-image" />
+            <div class="description-tooltip">{{ game.description }}</div>
         </div>
 
         <div class="game-info-section">
             <div class="game-header">
                 <div class="game-info">
                     <h3 class="game-title">{{ game.name }}</h3>
-                    <p class="game-description">ID : {{ game.id }}</p>
-                    <p class="game-description">{{ game.description }}</p>
-                </div>
-                <div class="visibility-badge" [class.visible]="game.visibility" [class.hidden]="!game.visibility">
-                    {{ game.visibility ? 'Public' : 'Privé' }}
                 </div>
             </div>
 
             <div class="game-meta">
                 <div class="meta-item">
                     <span class="meta-label">Taille</span>
-                    <span class="meta-value">{{ game.size }}</span>
+                    <span class="meta-value">{{ getMapSizeLabel() }}</span>
                 </div>
                 <div class="meta-item">
                     <span class="meta-label">Modifié</span>
