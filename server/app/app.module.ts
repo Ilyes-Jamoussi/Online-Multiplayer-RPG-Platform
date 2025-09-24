@@ -1,11 +1,11 @@
-import { GameStoreModule } from '@app/game-store/module/game-store.module';
+import { GameStoreModule } from '@app/game-store/module/game.module';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
     imports: [
-        ConfigModule.forRoot({ isGlobal: true }),
+        ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env.local', '.env'] }),
         MongooseModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],

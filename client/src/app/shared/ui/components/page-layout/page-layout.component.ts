@@ -6,36 +6,36 @@ import { UiSidebarComponent } from '@app/shared/ui/components/sidebar/sidebar.co
 import { UiFooterComponent } from '@app/shared/ui/components/footer/footer.component';
 
 @Component({
-  selector: 'app-ui-page-layout',
-  standalone: true,
-  imports: [CommonModule, UiHeaderComponent, UiSidebarComponent, UiFooterComponent],
-  templateUrl: './page-layout.component.html',
-  styleUrl: './page-layout.component.scss'
+    selector: 'app-ui-page-layout',
+    standalone: true,
+    imports: [CommonModule, UiHeaderComponent, UiSidebarComponent, UiFooterComponent],
+    templateUrl: './page-layout.component.html',
+    styleUrl: './page-layout.component.scss',
 })
 export class UiPageLayoutComponent extends UiBaseComponent {
-  @Input() hasHeader: boolean = false;
-  @Input() hasSidebar: boolean = false;
-  @Input() hasFooter: boolean = false;
-  @Input() headerTitle?: string;
-  @Input() headerSubtitle?: string;
-  @Input() showBackButton: boolean = false;
-  
-  @Output() backClick = new EventEmitter<void>();
-  @Output() menuItemClick = new EventEmitter<string>();
+    @Input() hasHeader: boolean = false;
+    @Input() hasSidebar: boolean = false;
+    @Input() hasFooter: boolean = false;
+    @Input() headerTitle?: string;
+    @Input() headerSubtitle?: string;
+    @Input() showBackButton: boolean = false;
 
-  onBackClick(): void {
-    this.backClick.emit();
-  }
+    @Output() backClick = new EventEmitter<void>();
+    @Output() menuItemClick = new EventEmitter<string>();
 
-  onMenuItemClick(item: string): void {
-    this.menuItemClick.emit(item);
-  }
+    onBackClick(): void {
+        this.backClick.emit();
+    }
 
-  override get classes(): Record<string, boolean> {
-    return {
-      ...super.classes,
-      uiPageLayout: true,
-      hasSidebar: this.hasSidebar,
-    };
-  }
+    onMenuItemClick(item: string): void {
+        this.menuItemClick.emit(item);
+    }
+
+    override get classes(): Record<string, boolean> {
+        return {
+            ...super.classes,
+            uiPageLayout: true,
+            hasSidebar: this.hasSidebar,
+        };
+    }
 }

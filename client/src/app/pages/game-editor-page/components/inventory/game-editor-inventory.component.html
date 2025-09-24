@@ -1,0 +1,32 @@
+<div class="inventory">
+    @for (item of store.inventory(); track item.kind) {
+    <div
+        class="slot"
+        [class.disabled]="item.remaining === 0"
+        [class.drag-over]="dragOver === item.kind"
+        [attr.title]="kindLabel(item.kind)"
+        #slotEl
+        (dragover)="onSlotDragOver($event, item.kind)"
+        (dragenter)="onSlotDragEnter($event, item.kind)"
+        (dragleave)="onSlotDragLeave()"
+        (drop)="onSlotDrop($event, item.kind)"
+    >
+        <div
+            class="icon-cell"
+            [class.drag-over]="dragOver === item.kind"
+            [draggable]="item.remaining > 0"
+            (dragend)="onDragEnd()"
+            (dragstart)="onDragStart($event, item.kind, item.remaining === 0)"
+            [attr.data-mime]="dndMime[item.kind]"
+            [attr.data-kind]="item.kind"
+        >
+            <span class="icon" [class.drag-over]="dragOver === item.kind">{{ iconOf(item.kind) }}</span>
+            <span class="badge" [class.drag-over]="dragOver === item.kind">{{ item.remaining }}</span>
+        </div>
+
+        <div class="label" [class.drag-over]="dragOver === item.kind">{{ kindLabel(item.kind) }}</div>
+    </div>
+    } @empty {
+    <div class="empty">Aucun objet disponible</div>
+    }
+</div>

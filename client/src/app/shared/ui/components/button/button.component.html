@@ -1,14 +1,9 @@
-<button 
-  [type]="type"
-  [disabled]="disabled || loading"
-  [class]="classes"
-  (click)="onClick($event)">
-  
-  @if (loading) {
+<button [type]="type" [disabled]="disabled || loading" [class]="classes" (click)="onClick($event)">
+    @if (loading) {
     <span class="ui-button__spinner">⟳</span>
-  }
-  
-  <span class="ui-button__content">
-    <ng-content></ng-content>
-  </span>
+    }
+
+    <span class="ui-button__content">
+        <ng-content></ng-content>
+    </span>
 </button>

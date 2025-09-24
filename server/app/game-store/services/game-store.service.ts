@@ -8,6 +8,8 @@ import { getProjection } from '@app/utils/mongo.utils';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { makeDefaultPlaceables } from '@app/game-store/factory/placeable.factory';
+import { makeDefaultTiles } from '@app/game-store/factory/tile.factory';
 
 @Injectable()
 export class GameStoreService {
@@ -19,44 +21,29 @@ export class GameStoreService {
     ) {}
 
     async createGame(dto: CreateGameDto): Promise<GamePreviewDto> {
-        const gridPreviewUrl = await this.imageService.saveImage(
-            dto.gridPreviewImage,
-            `${dto.name}-${Date.now()}-preview.png`,
-            'grid-previews'
-        );
+        const defaultObjects = makeDefaultPlaceables(dto.size, dto.mode);
+        const defaultTiles = makeDefaultTiles(dto.size);
 
-        const gameData = { ...dto, gridPreviewUrl };
-        const createdGame = await this.gameModel.create(gameData);
+        const gameDocument: GameDocument = {
+            ...dto,
+            tiles: defaultTiles,
+            objects: defaultObjects,
+            visibility: false,
+            lastModified: new Date(),
+            createdAt: new Date(),
+            gridPreviewUrl: '',
+            draft: true,
+        } as GameDocument;
+
+        const createdGame = await this.gameModel.create(gameDocument);
 
         return this.toGamePreviewDto(createdGame);
     }
 
     async getGames(): Promise<GamePreviewDto[]> {
-        const games = await this.gameModel.find({}, getProjection('displayGameDto')).lean();
+        const games = await this.gameModel.find({ draft: false }, getProjection('displayGameDto')).sort({ createdAt: -1 }).lean();
         return games.map((game) => this.toGamePreviewDto(game));
     }
-
-    // async getGameById(id: string): Promise<ReadGameDto> {
-    //     const game = await this.gameModel.findById(id).lean();
-    //     if (!game) {
-    //         throw new NotFoundException(`Game with id ${id} not found`);
-    //     }
-
-    //     const tiles = game.tiles.map((tile) => ({ ...tile, id: (tile as DbTile)._id.toString() }));
-    //     const objects = game.objects.map((obj) => ({ ...obj, id: (obj as DbPlaceable)._id.toString() }));
-
-    //     return {
-    //         id: game._id.toString(),
-    //         lastModified: game.lastModified,
-    //         name: game.name,
-    //         description: game.description,
-    //         size: game.size,
-    //         mode: game.mode,
-    //         visibility: game.visibility,
-    //         tiles,
-    //         objects,
-    //     };
-    // }
 
     async getGameInit(gameId: string): Promise<GameInitDto> {
         const game = await this.gameModel.findById(gameId, { map: 1, itemContainers: 1, size: 1 }).lean();
@@ -65,8 +52,6 @@ export class GameStoreService {
         }
 
         return {
-            // map: game.map,
-            // itemContainers: game.itemContainers,
             mapSize: game.size,
         };
     }
@@ -97,11 +82,7 @@ export class GameStoreService {
         }
 
         // Sauvegarder la nouvelle image avec timestamp pour forcer la mise à jour
-        const gridPreviewUrl = await this.imageService.saveImage(
-            dto.gridPreviewImage,
-            `${dto.name}-${Date.now()}-preview.png`,
-            'grid-previews'
-        );
+        const gridPreviewUrl = await this.imageService.saveImage(dto.gridPreviewImage, `${dto.name}-${Date.now()}-preview.png`, 'grid-previews');
 
         const updatedGame = await this.gameModel.findByIdAndUpdate(
             id,

@@ -1,0 +1,18 @@
+<div
+    class="tile"
+    [class.problem]="hasProblem()"
+    [class.dropHover]="isDropHovered()"
+    [class.brushHover]="isBrushHovered()"
+    [ngStyle]="{ '--bg-image': 'url(' + imageOf(tile.kind) + ')' }"
+    (mousedown)="onMouseDown($event)"
+    (mouseup)="onMouseUp($event)"
+    (mouseover)="onMouseOver($event)"
+    (contextmenu)="onRightClick($event)"
+    (dragover)="onTileDragOver($event)"
+    (dragenter)="onTileDragEnter($event)"
+    (drop)="onTileDrop($event)"
+>
+    @if (tile.kind === 'DOOR') {
+    <div class="door">{{ tile.open ? '🚪' : '🔒' }}</div>
+    }
+</div>

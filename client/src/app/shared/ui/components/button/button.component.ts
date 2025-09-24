@@ -18,7 +18,7 @@ export class UiButtonComponent {
     @Input() loading: boolean = false;
     @Input() fullWidth: boolean = false;
     @Input() type: 'button' | 'submit' | 'reset' = 'button';
-    
+
     @Output() buttonClick = new EventEmitter<MouseEvent>();
 
     onClick(event: MouseEvent): void {
@@ -34,7 +34,9 @@ export class UiButtonComponent {
             `ui-button--${this.size}`,
             this.disabled ? 'ui-button--disabled' : '',
             this.loading ? 'ui-button--loading' : '',
-            this.fullWidth ? 'ui-button--full-width' : ''
-        ].filter(Boolean).join(' ');
+            this.fullWidth ? 'ui-button--full-width' : '',
+        ]
+            .filter(Boolean)
+            .join(' ');
     }
 }

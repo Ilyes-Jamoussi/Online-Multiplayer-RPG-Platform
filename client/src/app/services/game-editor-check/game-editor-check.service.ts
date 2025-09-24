@@ -1,0 +1,213 @@
+import { computed, Injectable } from '@angular/core';
+import { GameEditorTileDto } from '@app/api/model/gameEditorTileDto';
+import { AccessibilityProblem, EditorIssue, GameEditorIssues } from '@app/interfaces/game-editor.interface';
+import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { TileKind } from '@common/enums/tile-kind.enum';
+
+@Injectable()
+export class GameEditorCheckService {
+    private static readonly minTerrainRatio = 0.5;
+    private static readonly percentBase = 100;
+
+    constructor(private readonly store: GameEditorStoreService) {}
+
+    readonly editorProblems = computed<GameEditorIssues>(() => {
+        const issues: GameEditorIssues = {
+            terrainCoverage: { hasIssue: false },
+            doors: { hasIssue: false, tiles: [] },
+            terrainAccessibility: { hasIssue: false, tiles: [] },
+            startPlacement: { hasIssue: false },
+            flagPlacement: { hasIssue: false },
+        };
+        const tiles = this.store.tiles();
+
+        issues.doors = this.checkDoors(tiles);
+        issues.terrainCoverage = this.checkTerrainCoverage(tiles);
+        issues.terrainAccessibility = this.checkTerrainAccessibility(tiles);
+        issues.startPlacement = this.checkAllStartPlaced();
+        issues.flagPlacement = this.checkAllFlagPlaced();
+
+        return issues;
+    });
+
+    canSave(): boolean {
+        return !Object.values(this.editorProblems()).some((p) => p.hasIssue);
+    }
+
+    getNeighborKind(x: number, y: number): GameEditorTileDto.KindEnum | null {
+        return this.store.getTileAt(x, y)?.kind ?? null;
+    }
+
+    isTerrain(kind: GameEditorTileDto.KindEnum): boolean {
+        return kind === TileKind.BASE || kind === TileKind.WATER || kind === TileKind.ICE;
+    }
+
+    private isValidHorizontalDoor(
+        left: GameEditorTileDto.KindEnum | null,
+        right: GameEditorTileDto.KindEnum | null,
+        top: GameEditorTileDto.KindEnum | null,
+        bottom: GameEditorTileDto.KindEnum | null,
+    ): boolean {
+        return left === TileKind.WALL && right === TileKind.WALL && top !== null && this.isTerrain(top) && bottom !== null && this.isTerrain(bottom);
+    }
+
+    private isValidVerticalDoor(
+        top: GameEditorTileDto.KindEnum | null,
+        bottom: GameEditorTileDto.KindEnum | null,
+        left: GameEditorTileDto.KindEnum | null,
+        right: GameEditorTileDto.KindEnum | null,
+    ): boolean {
+        return top === TileKind.WALL && bottom === TileKind.WALL && left !== null && this.isTerrain(left) && right !== null && this.isTerrain(right);
+    }
+
+    private checkAllStartPlaced(): EditorIssue {
+        const problem: EditorIssue = { hasIssue: false };
+        const inventory = this.store.inventory();
+        const startItem = inventory.find((item) => item.kind === 'START');
+        if (startItem && startItem.remaining > 0) {
+            problem.message = 'Tous les points de départ doivent être placés sur la carte.';
+            problem.hasIssue = true;
+        }
+        return problem;
+    }
+
+    private checkAllFlagPlaced(): EditorIssue {
+        const problem: EditorIssue = { hasIssue: false };
+        if (this.store.mode() === GameMode.CTF) {
+            const inventory = this.store.inventory();
+            const flagItem = inventory.find((item) => item.kind === 'FLAG');
+            if (flagItem && flagItem.remaining > 0) {
+                problem.message = 'Tous les drapeaux doivent être placés sur la carte.';
+                problem.hasIssue = true;
+            }
+        }
+        return problem;
+    }
+
+    private checkDoors(tiles: GameEditorTileDto[]): AccessibilityProblem {
+        const probs: AccessibilityProblem = {
+            tiles: [],
+            hasIssue: false,
+        };
+        for (const t of tiles) {
+            if (t.kind !== TileKind.DOOR) continue;
+            const { x, y } = t;
+
+            const leftKind = this.getNeighborKind(x - 1, y);
+            const rightKind = this.getNeighborKind(x + 1, y);
+            const topKind = this.getNeighborKind(x, y - 1);
+            const bottomKind = this.getNeighborKind(x, y + 1);
+
+            if (
+                !this.isValidHorizontalDoor(leftKind, rightKind, topKind, bottomKind) &&
+                !this.isValidVerticalDoor(topKind, bottomKind, leftKind, rightKind)
+            ) {
+                probs.tiles.push({
+                    x,
+                    y,
+                });
+                probs.hasIssue = true;
+                probs.message = 'Une porte doit être placée entre deux murs et adossée à des tuiles de terrain.';
+            }
+        }
+        return probs;
+    }
+
+    private checkTerrainCoverage(tiles: GameEditorTileDto[]): EditorIssue {
+        const size = this.store.size();
+        const total = size * size;
+        const terrainCount = tiles.filter((t) => this.isTerrain(t.kind)).length;
+        const ratio = terrainCount / total;
+        const probs: EditorIssue = { hasIssue: false };
+        if (ratio <= GameEditorCheckService.minTerrainRatio) {
+            probs.hasIssue = true;
+            probs.message = `Le ratio de tuiles de terrain est trop bas (${(ratio * GameEditorCheckService.percentBase).toFixed(
+                2,
+            )} %). Il doit être supérieur à ${GameEditorCheckService.minTerrainRatio * GameEditorCheckService.percentBase} %.`;
+        }
+        return probs;
+    }
+
+    private checkTerrainAccessibility(tiles: GameEditorTileDto[]): AccessibilityProblem {
+        const size = this.store.size();
+        const grid = this.buildTileKindGrid(tiles, size);
+        const components = this.connectedWalkableComponents(grid, size);
+        if (components.length === 0) return { hasIssue: true, tiles: [] };
+
+        let largest = components[0];
+        for (const comp of components) if (comp.size > largest.size) largest = comp;
+
+        const visited = largest;
+        return this.findInaccessibleTiles(tiles, visited.set);
+    }
+
+    private buildTileKindGrid(tiles: GameEditorTileDto[], size: number): TileKind[][] {
+        const grid: TileKind[][] = Array.from({ length: size }, () => Array<TileKind>(size).fill(TileKind.WALL));
+        for (const t of tiles) {
+            grid[t.y][t.x] = t.kind as TileKind;
+        }
+        return grid;
+    }
+
+    private isWalkableTile(kind: GameEditorTileDto.KindEnum | TileKind | undefined): boolean {
+        return kind === TileKind.BASE || kind === TileKind.ICE || kind === TileKind.WATER || kind === TileKind.DOOR || kind === TileKind.TELEPORT;
+    }
+
+    private connectedWalkableComponents(grid: TileKind[][], size: number): { set: Set<string>; size: number }[] {
+        const seen = new Set<string>();
+        const comps: { set: Set<string>; size: number }[] = [];
+        const dirs = [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1],
+        ] as const;
+
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                if (!this.isWalkableTile(grid[y][x])) continue;
+                const key0 = `${x}:${y}`;
+                if (seen.has(key0)) continue;
+
+                const q: [number, number][] = [[x, y]];
+                const comp = new Set<string>();
+                while (q.length) {
+                    const item = q.shift();
+                    if (!item) continue;
+                    const [cx, cy] = item;
+                    const k = `${cx}:${cy}`;
+                    if (seen.has(k)) continue;
+                    seen.add(k);
+                    comp.add(k);
+
+                    for (const [dx, dy] of dirs) {
+                        const nx = cx + dx;
+                        const ny = cy + dy;
+                        if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
+                        if (!this.isWalkableTile(grid[ny][nx])) continue;
+                        const nk = `${nx}:${ny}`;
+                        if (!seen.has(nk)) q.push([nx, ny]);
+                    }
+                }
+                comps.push({ set: comp, size: comp.size });
+            }
+        }
+        return comps;
+    }
+
+    private findInaccessibleTiles(tiles: GameEditorTileDto[], visited: Set<string>): AccessibilityProblem {
+        const probs: AccessibilityProblem = { hasIssue: false, tiles: [] };
+        for (const t of tiles) {
+            if (this.isWalkableTile(t.kind) && !visited.has(`${t.x}:${t.y}`)) {
+                probs.hasIssue = true;
+                probs.tiles.push({
+                    x: t.x,
+                    y: t.y,
+                });
+                probs.message = 'Certaines tuiles de terrain ne sont pas accessibles.';
+            }
+        }
+        return probs;
+    }
+}
