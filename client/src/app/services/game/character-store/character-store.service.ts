@@ -63,7 +63,7 @@ export class CharacterStoreService {
     }
 
     isValid(): boolean {
-        return this.isNameValid() && this._bonus() !== null;
+        return this.isNameValid() && this._avatar() !== null && this._bonus() !== null;
     }
 
     isNameValid(): boolean {

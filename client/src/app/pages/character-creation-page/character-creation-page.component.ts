@@ -96,7 +96,7 @@ export class CharacterCreationPageComponent implements OnInit {
         if (!this.store.isValid()) {
             this.notif.displayError({
                 title: 'Erreur de validation',
-                message: 'Nom requis et bonus à sélectionner.',
+                message: 'Nom, avatar et bonus requis.',
             });
             return;
         }
