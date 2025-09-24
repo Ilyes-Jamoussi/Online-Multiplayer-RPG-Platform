@@ -8,9 +8,4 @@ export const UI_CONSTANTS = {
         initialY: 32,
         zIndex: 1000,
     },
-    characterCreation: {
-        baseAttributeValue: 10,
-        bonusAttributeValue: 2,
-        probabilityThreshold: 0.5,
-    },
 } as const;

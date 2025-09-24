@@ -6,4 +6,5 @@ export const ROUTES = {
     gameManagement: 'game-management',
     characterCreation: 'character-creation',
     createGamePage: 'game-session-creation',
+    waitingRoom: 'waiting-room',
 };

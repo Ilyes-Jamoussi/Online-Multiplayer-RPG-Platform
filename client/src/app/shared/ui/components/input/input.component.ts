@@ -1,9 +1,9 @@
 import { NgClass } from '@angular/common';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, forwardRef, Input, Output, EventEmitter } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
-import { NAME_INVALID_CHARS_PATTERN, NAME_MAX_LENGTH, DESCRIPTION_MAX_LENGTH } from '@app/constants/validation.constants';
 
-type InputType = 'name' | 'description';
+type InputType = 'text' | 'number' | 'password' | 'email' | 'tel' | 'url' | 'name' | 'description';
 
 @Component({
     selector: 'app-ui-input',
@@ -11,35 +11,101 @@ type InputType = 'name' | 'description';
     styleUrls: ['./input.component.scss'],
     standalone: true,
     imports: [NgClass],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => UiInputComponent),
+            multi: true,
+        },
+    ],
 })
-export class UiInputComponent extends UiBaseComponent {
+export class UiInputComponent extends UiBaseComponent implements ControlValueAccessor {
+    @Input() label: string = '';
     @Input() placeholder: string = '';
-    @Input() type: InputType = 'name';
-    @Input() value: string = '';
-    @Input() disabled: boolean = false;
+    @Input() type: InputType = 'text';
+    @Input() required: boolean = false;
+    @Input() clearable: boolean = false;
+    @Input() maxLength?: number;
+    @Input() minLength?: number;
+    @Input() errorMessage: string = '';
+    @Input() set initialValue(val: string) {
+        if (val !== undefined) {
+            this._value = val;
+        }
+    }
+    @Input() set value(val: string) {
+        if (val !== undefined) {
+            this._value = val;
+        }
+    }
+    get value(): string {
+        return this._value;
+    }
 
     @Output() valueChange = new EventEmitter<string>();
 
+    private _value: string = '';
+    isDisabled = false;
+    isTouched = false;
+
+    private onChangeCallback = (value: string): void => {
+        this.valueChange.emit(value);
+    };
+    private onTouchedCallback = (): void => {
+        this.isTouched = true;
+    };
+
+    writeValue(value: string): void {
+        this._value = value || '';
+    }
+
+    registerOnChange(fn: (value: string) => void): void {
+        this.onChangeCallback = fn;
+    }
+
+    registerOnTouched(fn: () => void): void {
+        this.onTouchedCallback = fn;
+    }
+
+    setDisabledState(isDisabled: boolean): void {
+        this.isDisabled = isDisabled;
+    }
+
     onInput(event: Event): void {
         const input = event.target as HTMLInputElement;
-        let value = input.value;
+        this._value = input.value;
+        this.onChangeCallback(this._value);
+        this.valueChange.emit(this._value);
+    }
 
-        if (this.type === 'name') {
-            value = value.replace(NAME_INVALID_CHARS_PATTERN, '');
-            value = value.slice(0, NAME_MAX_LENGTH);
-        } else if (this.type === 'description') {
-            value = value.slice(0, DESCRIPTION_MAX_LENGTH);
-        }
+    onClear(): void {
+        this._value = '';
+        this.onChangeCallback(this._value);
+        this.valueChange.emit(this._value);
+    }
 
-        input.value = value;
-        this.valueChange.emit(value);
+    onBlur(): void {
+        this.isTouched = true;
+        this.onTouchedCallback();
+    }
+
+    get hasError(): boolean {
+        return this.isTouched && !!this.errorMessage;
+    }
+
+    get isValid(): boolean {
+        return this.isTouched && !this.errorMessage && this._value.length > 0;
     }
 
     override get classes(): Record<string, boolean> {
         return {
             uiInput: true,
             ...super.classes,
-            isDisabled: this.disabled,
+            isDisabled: this.isDisabled,
+            hasError: this.hasError,
+            isValid: this.isValid,
+            isClearable: this.clearable,
+            hasLabel: !!this.label,
         };
     }
 }

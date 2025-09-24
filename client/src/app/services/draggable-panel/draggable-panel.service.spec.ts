@@ -152,7 +152,7 @@ describe('DraggablePanelService', () => {
 
         pointerUpOn(handleEl);
         expect(service['_dragging']()).toBeFalse();
-        expect(committed.at(-1)).toEqual({ x: 160, y: 170 });
+        expect(committed[committed.length - 1]).toEqual({ x: 160, y: 170 });
 
         const raw = win.localStorage.getItem('panel:drag');
         expect(raw).toBeTruthy();
@@ -194,7 +194,7 @@ describe('DraggablePanelService', () => {
         // expected clamp (94,94)
         expect(service['_pos']()).toEqual({ x: 94, y: 94 });
         // commit + persist
-        expect(committed.at(-1)).toEqual({ x: 94, y: 94 });
+        expect(committed[committed.length - 1]).toEqual({ x: 94, y: 94 });
         const resizeItem = win.localStorage.getItem('panel:resize');
         expect(resizeItem).toBeTruthy();
         expect(JSON.parse(resizeItem ?? '{}')).toEqual({ x: 94, y: 94 });
