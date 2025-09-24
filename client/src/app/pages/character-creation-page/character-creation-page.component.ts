@@ -36,7 +36,7 @@ export class CharacterCreationPageComponent implements OnInit {
     avatars = this.store.avatars;
 
     constructor(
-        public readonly store: CharacterStoreService,
+        readonly store: CharacterStoreService,
         private readonly router: Router,
         private readonly notif: NotificationService,
         readonly assets: AssetsService,

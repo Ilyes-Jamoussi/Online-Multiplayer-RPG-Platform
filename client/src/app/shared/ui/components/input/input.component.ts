@@ -2,17 +2,15 @@ import { NgClass } from '@angular/common';
 import { Component, forwardRef, Input, Output, EventEmitter } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
-import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
-import { FaIconKey } from '@ui/types/ui.types';
 
-type InputType = 'text' | 'number' | 'password' | 'email' | 'tel' | 'url';
+type InputType = 'text' | 'number' | 'password' | 'email' | 'tel' | 'url' | 'name' | 'description';
 
 @Component({
     selector: 'app-ui-input',
     templateUrl: './input.component.html',
     styleUrls: ['./input.component.scss'],
     standalone: true,
-    imports: [NgClass, UiIconComponent],
+    imports: [NgClass],
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -29,18 +27,24 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
     @Input() clearable: boolean = false;
     @Input() maxLength?: number;
     @Input() minLength?: number;
-    @Input() prefixIcon?: FaIconKey;
-    @Input() suffixIcon?: FaIconKey;
     @Input() errorMessage: string = '';
     @Input() set initialValue(val: string) {
         if (val !== undefined) {
-            this.value = val;
+            this._value = val;
         }
+    }
+    @Input() set value(val: string) {
+        if (val !== undefined) {
+            this._value = val;
+        }
+    }
+    get value(): string {
+        return this._value;
     }
 
     @Output() valueChange = new EventEmitter<string>();
 
-    value: string = '';
+    private _value: string = '';
     isDisabled = false;
     isTouched = false;
 
@@ -52,7 +56,7 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
     };
 
     writeValue(value: string): void {
-        this.value = value || '';
+        this._value = value || '';
     }
 
     registerOnChange(fn: (value: string) => void): void {
@@ -69,15 +73,15 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
 
     onInput(event: Event): void {
         const input = event.target as HTMLInputElement;
-        this.value = input.value;
-        this.onChangeCallback(this.value);
-        this.valueChange.emit(this.value);
+        this._value = input.value;
+        this.onChangeCallback(this._value);
+        this.valueChange.emit(this._value);
     }
 
     onClear(): void {
-        this.value = '';
-        this.onChangeCallback(this.value);
-        this.valueChange.emit(this.value);
+        this._value = '';
+        this.onChangeCallback(this._value);
+        this.valueChange.emit(this._value);
     }
 
     onBlur(): void {
@@ -90,7 +94,7 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
     }
 
     get isValid(): boolean {
-        return this.isTouched && !this.errorMessage && this.value.length > 0;
+        return this.isTouched && !this.errorMessage && this._value.length > 0;
     }
 
     override get classes(): Record<string, boolean> {
@@ -100,8 +104,6 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
             isDisabled: this.isDisabled,
             hasError: this.hasError,
             isValid: this.isValid,
-            hasPrefixIcon: !!this.prefixIcon,
-            hasSuffixIcon: !!this.suffixIcon,
             isClearable: this.clearable,
             hasLabel: !!this.label,
         };

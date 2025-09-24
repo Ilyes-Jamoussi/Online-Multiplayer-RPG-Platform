@@ -1,5 +1,7 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { CHARACTER_AVATARS_COUNT } from '@app/constants/character.constants';
+import { CHARACTER_AVATARS_COUNT, CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
+
+const MAX_NAME_LENGTH = 8;
 
 export type BonusKey = 'life' | 'speed';
 export type Dice = 'D4' | 'D6';
@@ -23,8 +25,8 @@ export class CharacterStoreService {
     private readonly _attributes = computed(() => {
         const bonus = this._bonus();
         return {
-            life: bonus === 'life' ? 6 : 4,
-            speed: bonus === 'speed' ? 6 : 4,
+            life: bonus === 'life' ? CHARACTER_BASE + CHARACTER_PLUS : CHARACTER_BASE,
+            speed: bonus === 'speed' ? CHARACTER_BASE + CHARACTER_PLUS : CHARACTER_BASE,
         };
     });
 
@@ -66,13 +68,13 @@ export class CharacterStoreService {
 
     isNameValid(): boolean {
         const name = this._name().trim();
-        return name.length > 0 && name.length <= 8 && /^[a-zA-Z0-9]+$/.test(name);
+        return name.length > 0 && name.length <= MAX_NAME_LENGTH && /^[a-zA-Z0-9]+$/.test(name);
     }
 
     getNameError(): string | null {
         const name = this._name().trim();
         if (name.length === 0) return 'Le nom est requis';
-        if (name.length > 8) return 'Maximum 8 caractères';
+        if (name.length > MAX_NAME_LENGTH) return 'Maximum 8 caractères';
         if (!/^[a-zA-Z0-9]+$/.test(name)) return 'Lettres et chiffres seulement';
         return null;
     }

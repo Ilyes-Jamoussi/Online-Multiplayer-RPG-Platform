@@ -1,5 +1,12 @@
 import { TestBed } from '@angular/core/testing';
+import { CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
 import { CharacterStoreService } from './character-store.service';
+
+const EXPECTED_LIFE_BASE = CHARACTER_BASE;
+const EXPECTED_SPEED_BASE = CHARACTER_BASE;
+const EXPECTED_LIFE_BONUS = CHARACTER_BASE + CHARACTER_PLUS;
+const TEST_AVATAR_INDEX = 5;
+const TEST_AVATAR_RESET = 3;
 
 describe('CharacterStoreService', () => {
     let service: CharacterStoreService;
@@ -20,8 +27,8 @@ describe('CharacterStoreService', () => {
         expect(character.bonus).toBeNull();
         expect(character.diceAssignment.attack).toBe('D4');
         expect(character.diceAssignment.defense).toBe('D6');
-        expect(character.attributes.life).toBe(4);
-        expect(character.attributes.speed).toBe(4);
+        expect(character.attributes.life).toBe(EXPECTED_LIFE_BASE);
+        expect(character.attributes.speed).toBe(EXPECTED_SPEED_BASE);
     });
 
     it('should update name', () => {
@@ -30,16 +37,16 @@ describe('CharacterStoreService', () => {
     });
 
     it('should select avatar', () => {
-        service.selectAvatar(5);
-        expect(service.character().avatar).toBe(5);
+        service.selectAvatar(TEST_AVATAR_INDEX);
+        expect(service.character().avatar).toBe(TEST_AVATAR_INDEX);
     });
 
     it('should update bonus and attributes', () => {
         service.setBonus('life');
         const character = service.character();
         expect(character.bonus).toBe('life');
-        expect(character.attributes.life).toBe(6);
-        expect(character.attributes.speed).toBe(4);
+        expect(character.attributes.life).toBe(EXPECTED_LIFE_BONUS);
+        expect(character.attributes.speed).toBe(EXPECTED_SPEED_BASE);
     });
 
     it('should set dice assignment', () => {
@@ -64,12 +71,14 @@ describe('CharacterStoreService', () => {
         expect(character.name.length).toBeGreaterThan(0);
         expect(character.avatar).toBeGreaterThanOrEqual(0);
         expect(character.bonus).not.toBeNull();
-        expect(['life', 'speed']).toContain(character.bonus!);
+        if (character.bonus) {
+            expect(['life', 'speed']).toContain(character.bonus);
+        }
     });
 
     it('should reset form', () => {
         service.setName('Test');
-        service.selectAvatar(3);
+        service.selectAvatar(TEST_AVATAR_RESET);
         service.setBonus('speed');
         
         service.resetForm();
