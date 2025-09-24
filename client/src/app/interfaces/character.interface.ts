@@ -1,19 +1,15 @@
-export interface CharacterAttributes {
-    vie: number;
-    rapidite: number;
-    attaque: number;
-    defense: number;
+export type BonusKey = 'life' | 'speed';
+export type Dice = 'D4' | 'D6';
+export type DiceAttr = 'attack' | 'defense';
+
+export interface Attributes {
+    life: number; speed: number; attack: number; defense: number;
 }
 
-export interface DiceAssignment {
-    attaque: 'D4' | 'D6';
-    defense: 'D4' | 'D6';
-}
-
-export interface Character {
+export interface CharacterForm {
     name: string;
-    avatar: number;
-    attributes: CharacterAttributes;
-    bonus: 'vie' | 'rapidite' | null;
-    diceAssignment: DiceAssignment;
+    avatar: number | null;
+    bonus: BonusKey | null;
+    diceAssignment: { attack: Dice; defense: Dice };
+    attributes: Attributes;
 }

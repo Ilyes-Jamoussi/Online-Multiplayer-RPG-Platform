@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="200px" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="d6Gradient">
+            <stop stop-color="#4CAF50" offset="0%"/>
+            <stop stop-color="#388E3C" offset="100%"/>
+        </linearGradient>
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+            <feOffset dx="2" dy="2"/>
+            <feComponentTransfer>
+                <feFuncA type="linear" slope="0.3"/>
+            </feComponentTransfer>
+            <feMerge>
+                <feMergeNode/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    <g filter="url(#shadow)">
+        <rect fill="url(#d6Gradient)" x="20" y="20" width="160" height="160" rx="20"/>
+        <!-- Colonne gauche -->
+        <circle fill="white" cx="60" cy="60" r="12"/>
+        <circle fill="white" cx="60" cy="100" r="12"/>
+        <circle fill="white" cx="60" cy="140" r="12"/>
+        <!-- Colonne droite -->
+        <circle fill="white" cx="140" cy="60" r="12"/>
+        <circle fill="white" cx="140" cy="100" r="12"/>
+        <circle fill="white" cx="140" cy="140" r="12"/>
+    </g>
+</svg> 

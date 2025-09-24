@@ -1,0 +1,46 @@
+.stats-bar {
+  margin-bottom: 1rem;
+}
+
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.stats-label {
+  font-weight: 600;
+  color: #333;
+}
+
+.stats-value {
+  color: #666;
+}
+
+.dice-indicator {
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #555;
+}
+
+.segments-container {
+  display: flex;
+  gap: 2px;
+  height: 12px;
+}
+
+.segment {
+  flex: 1;
+  border-radius: 2px;
+  transition: background-color 0.2s ease;
+  border: 1px solid #ccc;
+}
+
+.segment.filled {
+  border-color: transparent;
+}
