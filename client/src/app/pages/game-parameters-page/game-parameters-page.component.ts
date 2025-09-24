@@ -7,6 +7,7 @@ import { GameModeOption, MapSizeOption } from '@app/interfaces/game-parameters.i
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
+import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
 import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
@@ -15,7 +16,7 @@ import { DEFAULT_DRAFT_GAME_NAME, DEFAULT_DRAFT_GAME_DESCRIPTION } from '@common
 @Component({
     selector: 'app-game-parameters-page',
     standalone: true,
-    imports: [CommonModule, FormsModule, UiButtonComponent, UiPageLayoutComponent],
+    imports: [CommonModule, FormsModule, UiButtonComponent, UiIconComponent, UiPageLayoutComponent],
     templateUrl: './game-parameters-page.component.html',
     styleUrls: ['./game-parameters-page.component.scss'],
 })
