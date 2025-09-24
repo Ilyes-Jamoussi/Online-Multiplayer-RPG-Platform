@@ -1,15 +1,18 @@
 import { computed, Injectable, signal } from '@angular/core';
+import { CreateGameDto } from '@app/api/model/createGameDto';
 import { GameEditorDto } from '@app/api/model/gameEditorDto';
 import { GameEditorPlaceableDto } from '@app/api/model/gameEditorPlaceableDto';
 import { GameEditorTileDto } from '@app/api/model/gameEditorTileDto';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { take, tap } from 'rxjs/operators';
+import { GameStoreService } from '@app/services/game-store/game-store.service';
+import { catchError, switchMap, take, tap } from 'rxjs/operators';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { PatchGameEditorDto } from '@app/api/model/patchGameEditorDto';
 import { InventoryItem, PLACEABLE_ORDER } from '@app/interfaces/game-editor.interface';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { DEFAULT_DRAFT_GAME_NAME, DEFAULT_DRAFT_GAME_DESCRIPTION } from '@common/constants/game.constants';
 
 @Injectable()
 export class GameEditorStoreService {
@@ -73,6 +76,14 @@ export class GameEditorStoreService {
     get description() {
         return this._description();
     }
+
+    setName(name: string): void {
+        this._name.set(name);
+    }
+
+    setDescription(description: string): void {
+        this._description.set(description);
+    }
     set description(value: string) {
         this._description.set(value);
     }
@@ -104,7 +115,10 @@ export class GameEditorStoreService {
         this._tileSizePx.set(value);
     }
 
-    constructor(private readonly http: GameHttpService) {}
+    constructor(
+        private readonly http: GameHttpService,
+        private readonly gameStoreService: GameStoreService,
+    ) {}
 
     loadGameById(id: string): void {
         this.http
@@ -114,8 +128,8 @@ export class GameEditorStoreService {
                 tap((game) => {
                     this._id.set(game.id);
                     this._initial.set(game);
-                    this._name.set(game.name);
-                    this._description.set(game.description);
+                    this._name.set(game.name === DEFAULT_DRAFT_GAME_NAME ? '' : game.name);
+                    this._description.set(game.description === DEFAULT_DRAFT_GAME_DESCRIPTION ? '' : game.description);
                     this._tiles.set(game.tiles);
                     this._objects.set(game.objects);
                     this._size.set(game.size);
@@ -126,16 +140,40 @@ export class GameEditorStoreService {
             .subscribe();
     }
 
-    saveGame(): void {
+    saveGame(gridPreviewImage?: string): void {
         const game: PatchGameEditorDto = {
             name: this._name() !== this._initial().name ? this._name() : undefined,
             description: this._description() !== this._initial().description ? this._description() : undefined,
             tiles: this._tiles() !== this._initial().tiles ? this._tiles() : undefined,
             objects: this._objects() !== this._initial().objects ? this._objects() : undefined,
+            gridPreviewUrl: gridPreviewImage,
         };
+        
         this.http
             .patchGameEditorById(this._id(), game)
-            .pipe(take(1))
+            .pipe(
+                take(1),
+                catchError(() => {
+                    const createDto: CreateGameDto = {
+                        name: this._name(),
+                        description: this._description(),
+                        size: this._size(),
+                        mode: this._mode(),
+                    };
+                    return this.gameStoreService.createGame(createDto).pipe(
+                        switchMap((newGame) => {
+                            this._id.set(newGame.id);
+                            // Mettre à jour le nouveau jeu avec l'image
+                            const updateGame: PatchGameEditorDto = {
+                                tiles: this._tiles(),
+                                objects: this._objects(),
+                                gridPreviewUrl: gridPreviewImage,
+                            };
+                            return this.http.patchGameEditorById(newGame.id, updateGame);
+                        })
+                    );
+                })
+            )
             .subscribe((updated) => {
                 this._initial.set(updated);
                 this._name.set(updated.name);
