@@ -61,6 +61,7 @@ describe('CharacterStoreService', () => {
         
         service.setName('Hero');
         service.setBonus('life');
+        service.selectAvatar(0);
         expect(service.isValid()).toBeTrue();
     });
 
