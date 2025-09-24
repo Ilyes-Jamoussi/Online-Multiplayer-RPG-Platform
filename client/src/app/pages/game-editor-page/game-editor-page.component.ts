@@ -1,5 +1,4 @@
-// make a mock component displaying the id retrieved in the route param
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NgStyle } from '@angular/common';
 import { distinctUntilChanged, filter, map, Subject, takeUntil, tap } from 'rxjs';
@@ -10,6 +9,7 @@ import { GameEditorInteractionsService } from '@app/services/game-editor-interac
 import { TileSizeProbeDirective } from './directives/tile-size-probe.directive';
 import { GameEditorToolbarComponent } from './components/toolbar/game-editor-toolbar.component';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
+import { UiInputComponent } from '@app/shared/ui/components/input/input.component';
 import { FormsModule } from '@angular/forms';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { NotificationService } from '@app/services/notification/notification.service';
@@ -17,6 +17,8 @@ import { DraggablePanelComponent } from '@app/shared/ui/components/draggable-pan
 import { GameEditorInventoryComponent } from './components/inventory/game-editor-inventory.component';
 import { GameEditorObjectComponent } from './components/object/object.component';
 import { GameEditorErrorsDisplayComponent } from './components/errross-display/errors-display.component';
+import { ROUTES } from '@app/constants/routes.constants';
+import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 
 @Component({
     selector: 'app-edit-game-page',
@@ -29,6 +31,7 @@ import { GameEditorErrorsDisplayComponent } from './components/errross-display/e
         TileSizeProbeDirective,
         GameEditorToolbarComponent,
         UiButtonComponent,
+        UiInputComponent,
         DraggablePanelComponent,
         GameEditorInventoryComponent,
         GameEditorObjectComponent,
@@ -40,6 +43,8 @@ import { GameEditorErrorsDisplayComponent } from './components/errross-display/e
     providers: [GameEditorStoreService, GameEditorInteractionsService, GameEditorCheckService],
 })
 export class GameEditorPageComponent implements OnInit, OnDestroy {
+    @ViewChild('gridWrapper', { static: false }) gridWrapper!: ElementRef<HTMLElement>;
+    
     private readonly destroy$ = new Subject<void>();
 
     constructor(
@@ -47,6 +52,7 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
         readonly store: GameEditorStoreService,
         readonly editorCheck: GameEditorCheckService,
         private readonly notification: NotificationService,
+        private readonly screenshotService: ScreenshotService,
     ) {}
 
     readonly gameId$ = this.route.paramMap.pipe(
@@ -81,9 +87,15 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
         this.store.tileSizePx = newSize;
     }
 
-    onSave(): void {
+    async onSave(): Promise<void> {
         if (this.editorCheck.canSave()) {
-            this.store.saveGame();
+            const gridPreviewImage = await this.screenshotService.captureElementAsBase64(this.gridWrapper.nativeElement);
+            this.store.saveGame(gridPreviewImage);
+            this.notification.displaySuccess({
+                title: 'Jeu sauvegardé',
+                message: 'Votre jeu a été sauvegardé avec succès !',
+                redirectRoute: ROUTES.gameManagement,
+            });
         } else {
             this.notification.displayError({
                 title: 'Problèmes dans la carte',

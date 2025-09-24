@@ -3,9 +3,11 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
 import { ROUTES } from '@app/constants/routes.constants';
+import { environment } from '@src/environments/environment';
 // import { GameStoreService } from '@app/services/game/game-store/game-store.service';
-import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
+import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
+import { MAP_SIZE_LABELS } from '@common/constants/game.constants';
 
 @Component({
     selector: 'app-game-preview-card',
@@ -54,6 +56,11 @@ export class GamePreviewCardComponent {
     }
 
     getImageUrl(): string {
-        return `http://localhost:3000${this.game.gridPreviewUrl}`;
+        const baseUrl = environment.socketUrl;
+        return `${baseUrl}${this.game.gridPreviewUrl}`;
+    }
+
+    getMapSizeLabel(): string {
+        return MAP_SIZE_LABELS[this.game.size] || `${this.game.size}x${this.game.size}`;
     }
 }

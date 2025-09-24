@@ -21,6 +21,16 @@ export class GameStoreService {
     ) {}
 
     async createGame(dto: CreateGameDto): Promise<GamePreviewDto> {
+        const existingDraft = await this.gameModel.findOne({ draft: true });
+        
+        if (existingDraft) {
+            return this.updateExistingDraft(existingDraft._id.toString(), dto);
+        }
+        
+        return this.createNewDraft(dto);
+    }
+
+    private async createNewDraft(dto: CreateGameDto): Promise<GamePreviewDto> {
         const defaultObjects = makeDefaultPlaceables(dto.size, dto.mode);
         const defaultTiles = makeDefaultTiles(dto.size);
 
@@ -36,8 +46,26 @@ export class GameStoreService {
         } as GameDocument;
 
         const createdGame = await this.gameModel.create(gameDocument);
-
         return this.toGamePreviewDto(createdGame);
+    }
+
+    private async updateExistingDraft(draftId: string, dto: CreateGameDto): Promise<GamePreviewDto> {
+        const defaultObjects = makeDefaultPlaceables(dto.size, dto.mode);
+        const defaultTiles = makeDefaultTiles(dto.size);
+        
+        const updatedDraft = await this.gameModel.findByIdAndUpdate(
+            draftId,
+            {
+                ...dto,
+                tiles: defaultTiles,
+                objects: defaultObjects,
+                lastModified: new Date(),
+                gridPreviewUrl: '',
+            },
+            { new: true }
+        );
+        
+        return this.toGamePreviewDto(updatedDraft);
     }
 
     async getGames(): Promise<GamePreviewDto[]> {

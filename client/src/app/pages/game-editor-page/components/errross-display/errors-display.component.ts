@@ -17,6 +17,8 @@ export class GameEditorErrorsDisplayComponent {
         if (problems.doors.hasIssue && problems.doors.message) messages.push(problems.doors.message);
         if (problems.terrainAccessibility.hasIssue && problems.terrainAccessibility.message) messages.push(problems.terrainAccessibility.message);
         if (problems.startPlacement.hasIssue && problems.startPlacement.message) messages.push(problems.startPlacement.message);
+        if (problems.nameValidation.hasIssue && problems.nameValidation.message) messages.push(problems.nameValidation.message);
+        if (problems.descriptionValidation.hasIssue && problems.descriptionValidation.message) messages.push(problems.descriptionValidation.message);
         return messages;
     }
 

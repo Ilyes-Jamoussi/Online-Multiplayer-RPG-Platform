@@ -46,8 +46,8 @@
         </div>
     </div>
     <div slot="footer">
-        <input type="text" placeholder="Nom de la carte" class="map-name-input" [(ngModel)]="store.name" />
-        <input type="text" placeholder="Description de la carte" class="map-description-input" [(ngModel)]="store.description" />
+        <app-ui-input type="name" placeholder="Saisissez le nom de votre jeu" [value]="store.name" (valueChange)="store.setName($event)"></app-ui-input>
+        <app-ui-input type="description" placeholder="Décrivez votre jeu en quelques mots" [value]="store.description" (valueChange)="store.setDescription($event)"></app-ui-input>
         <app-ui-button (buttonClick)="onReset()">Réinitialiser la grille</app-ui-button>
         <app-ui-button (buttonClick)="onSave()" [disabled]="!editorCheck.canSave()">Sauvegarder</app-ui-button>
         <app-editor-errors-badge></app-editor-errors-badge>

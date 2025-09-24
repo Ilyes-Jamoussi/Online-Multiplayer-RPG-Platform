@@ -1,41 +1,12 @@
 <div class="ui-input" [ngClass]="classes">
-    @if (label) {
-    <label class="ui-input__label">
-        {{ label }}
-        @if (required) {
-        <span class="ui-input__required">*</span>
-        }
-    </label>
-    }
-
     <div class="ui-input__field">
-        @if (prefixIcon) {
-        <app-ui-icon class="ui-input__prefix-icon" [iconName]="prefixIcon" variant="secondary"> </app-ui-icon>
-        }
-
         <input
             class="ui-input__control"
-            [type]="type"
+            type="text"
             [placeholder]="placeholder"
-            [maxLength]="maxLength || null"
-            [minLength]="minLength || null"
-            [disabled]="isDisabled"
+            [disabled]="disabled"
             [value]="value"
-            [required]="required"
             (input)="onInput($event)"
-            (blur)="onBlur()"
         />
-
-        @if (clearable && value && !isDisabled) {
-        <button type="button" class="ui-input__clear-btn" (click)="onClear()" aria-label="Clear input">×</button>
-        } @if (suffixIcon) {
-        <app-ui-icon class="ui-input__suffix-icon" [iconName]="suffixIcon" variant="secondary"> </app-ui-icon>
-        }
     </div>
-
-    @if (errorMessage && hasError) {
-    <div class="ui-input__error">{{ errorMessage }}</div>
-    } @if (maxLength) {
-    <div class="ui-input__counter">{{ value.length }}/{{ maxLength }}</div>
-    }
 </div>

@@ -7,7 +7,6 @@ import { GameEditorDto } from '@app/game-store/dto/game-editor.dto';
 import { PatchGameEditorDto } from '@app/game-store/dto/patch-game-editor.dto';
 import { Tile } from '@app/game-store/entities/tile.entity';
 import { Placeable } from '@app/game-store/entities/placeable.entity';
-import { GameEditorPlaceableDto } from '@app/game-store/dto/game-editor-placeable.dto';
 
 @Injectable()
 export class GameEditorService {
@@ -40,13 +39,17 @@ export class GameEditorService {
     async patchEditByGameId(id: string, body: PatchGameEditorDto): Promise<GameEditorDto | null> {
         const update: GameDocument = {} as GameDocument;
 
-        if (body.name !== undefined) update.name = body.name;
-        if (body.description !== undefined) update.description = body.description;
-        if (body.size !== undefined) update.size = body.size;
-        if (body.mode !== undefined) update.mode = body.mode;
-        if (body.gridPreviewUrl !== undefined) update.gridPreviewUrl = body.gridPreviewUrl;
+        if (body.name) update.name = body.name;
+        if (body.description) update.description = body.description;
+        if (body.size) update.size = body.size;
+        if (body.mode) update.mode = body.mode;
+        
+        if (body.gridPreviewUrl) {
+            const filename = `game-${id}-preview.png`;
+            update.gridPreviewUrl = await this.imageService.saveImage(body.gridPreviewUrl, filename, 'game-previews');
+        }
 
-        if (body.tiles !== undefined) {
+        if (body.tiles) {
             update.tiles = body.tiles.map((t) => ({
                 kind: t.kind,
                 x: t.x,
@@ -56,18 +59,15 @@ export class GameEditorService {
             }));
         }
 
-        if (body.objects !== undefined) {
-            update.objects = body.objects.map((o) => {
-                const mapped: GameEditorPlaceableDto = {
-                    id: o.id,
-                    kind: o.kind,
-                    x: o.x,
-                    y: o.y,
-                    placed: o.placed,
-                    orientation: o.orientation,
-                };
-                return mapped;
-            });
+        if (body.objects) {
+            update.objects = body.objects.map((o) => ({
+                id: o.id,
+                kind: o.kind,
+                x: o.x,
+                y: o.y,
+                placed: o.placed,
+                orientation: o.orientation,
+            }));
         }
 
         update.lastModified = new Date();
