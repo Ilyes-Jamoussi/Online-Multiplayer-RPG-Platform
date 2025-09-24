@@ -106,7 +106,7 @@ export class CharacterCreationPageComponent implements OnInit {
             message: `${this.character.name} est prêt pour l’aventure.`,
         });
 
-        this.router.navigate([ROUTES.gameSessionCreation]);
+        this.router.navigate([ROUTES.waitingRoom]);
     }
 
     onBackClick() {

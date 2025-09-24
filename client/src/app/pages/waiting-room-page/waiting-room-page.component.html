@@ -1,0 +1,20 @@
+<app-ui-page-layout
+    [hasHeader]="true"
+    headerTitle="Salle d'attente"
+    headerSubtitle="En attente d'autres joueurs..."
+    [showBackButton]="false"
+>
+    <div class="waiting-room-content">
+        <div class="waiting-message">
+            <h2>🎮 Partie en préparation</h2>
+            <p>Votre personnage a été créé avec succès !</p>
+            <p>La fonctionnalité multijoueur sera disponible au Sprint 2.</p>
+        </div>
+
+        <div class="actions">
+            <app-ui-button (buttonClick)="onBackToGameSelection()">
+                ← Retour à la sélection de jeu
+            </app-ui-button>
+        </div>
+    </div>
+</app-ui-page-layout>

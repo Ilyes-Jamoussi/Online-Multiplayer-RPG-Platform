@@ -11,6 +11,7 @@ import { GameManagementPageComponent } from '@app/pages/game-management-page/gam
 import { GameParametersPageComponent } from '@app/pages/game-parameters-page/game-parameters-page.component';
 import { GameSessionCreationPageComponent } from '@app/pages/game-session-creation-page/game-session-creation-page.component';
 import { HomePageComponent } from '@app/pages/home-page/home-page.component';
+import { WaitingRoomPageComponent } from '@app/pages/waiting-room-page/waiting-room-page.component';
 import { removeLeadingSlash } from '@src/utils/route/route.utils';
 import { environment } from './environments/environment';
 
@@ -40,6 +41,10 @@ const routes: Routes = [
     {
         path: removeLeadingSlash(ROUTES.characterCreation),
         component: CharacterCreationPageComponent,
+    },
+    {
+        path: removeLeadingSlash(ROUTES.waitingRoom),
+        component: WaitingRoomPageComponent,
     },
     {
         path: removeLeadingSlash(ROUTES.gameParameters),
