@@ -18,6 +18,7 @@ export interface GamePreviewDto {
     lastModified: string;
     visibility: boolean;
     gridPreviewUrl: string;
+    draft: boolean;
 }
 export namespace GamePreviewDto {
     export const SizeEnum = {

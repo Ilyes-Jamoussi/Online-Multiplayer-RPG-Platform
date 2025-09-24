@@ -40,4 +40,8 @@ export class GamePreviewDto {
     @IsString()
     @IsNotEmpty()
     readonly gridPreviewUrl: string;
+
+    @ApiProperty({ example: false })
+    @IsBoolean()
+    readonly draft: boolean;
 }

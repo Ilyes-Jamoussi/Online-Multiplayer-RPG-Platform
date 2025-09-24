@@ -24,6 +24,7 @@ describe('GameManagementPageComponent', () => {
             lastModified: new Date().toISOString(),
             visibility: true,
             gridPreviewUrl: '/assets/game1-preview.png',
+            draft: false,
         },
         {
             id: '2',
@@ -34,12 +35,13 @@ describe('GameManagementPageComponent', () => {
             lastModified: new Date().toISOString(),
             visibility: false,
             gridPreviewUrl: '/assets/game2-preview.png',
+            draft: false,
         },
     ];
 
     beforeEach(async () => {
         gameStoreServiceSpy = jasmine.createSpyObj('GameStoreService', ['loadGames', 'deleteGame', 'toggleGameVisibility'], {
-            gameDisplays: signal(mockGames),
+            managementGames: signal(mockGames),
         });
         gameStoreServiceSpy.loadGames.and.returnValue(of(mockGames));
         gameStoreServiceSpy.deleteGame.and.returnValue(of(undefined));

@@ -146,6 +146,7 @@ export class GameStoreService {
             lastModified: game.lastModified,
             visibility: game.visibility,
             gridPreviewUrl: game.gridPreviewUrl,
+            draft: game.draft,
         };
     }
 }

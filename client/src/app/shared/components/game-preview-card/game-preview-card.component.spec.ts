@@ -18,6 +18,7 @@ describe('GamePreviewCardComponent', () => {
         lastModified: '2023-01-01T10:00:00Z',
         visibility: true,
         gridPreviewUrl: '/assets/test-game.png',
+        draft: false,
     };
 
     beforeEach(async () => {

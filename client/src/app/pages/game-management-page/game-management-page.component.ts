@@ -17,7 +17,7 @@ import { UiButtonComponent } from '@app/shared/ui/components/button/button.compo
 })
 export class GameManagementPageComponent implements OnInit {
     get gameDisplays(): Signal<GamePreviewDto[]> {
-        return this.gameStoreService.gameDisplays;
+        return this.gameStoreService.managementGames;
     }
 
     constructor(
