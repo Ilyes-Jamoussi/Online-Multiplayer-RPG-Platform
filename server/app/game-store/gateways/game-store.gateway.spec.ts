@@ -38,6 +38,7 @@ describe('GameStoreGateway', () => {
                 lastModified: new Date(),
                 visibility: true,
                 gridPreviewUrl: 'test-preview-url',
+                draft: false,
             };
 
             gateway.emitGameCreated(mockDto);
@@ -57,6 +58,7 @@ describe('GameStoreGateway', () => {
                 lastModified: new Date(),
                 visibility: false,
                 gridPreviewUrl: 'updated-preview-url',
+                draft: false,
             };
 
             gateway.emitGameUpdated(mockDto);

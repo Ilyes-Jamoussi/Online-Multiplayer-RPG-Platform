@@ -25,6 +25,7 @@ describe('GameStoreController', () => {
         lastModified: new Date(),
         visibility: true,
         gridPreviewUrl: 'test-preview-url',
+        draft: false,
     };
 
     const mockGameInit: GameInitDto = {

@@ -29,8 +29,12 @@ export class GameStoreService {
         return this._gameDisplays.asReadonly();
     }
 
+    get managementGames(): Signal<GamePreviewDto[]> {
+        return computed(() => this._gameDisplays().filter((game) => !game.draft));
+    }
+
     get visibleGames(): Signal<GamePreviewDto[]> {
-        return computed(() => this._gameDisplays().filter((game) => game.visibility));
+        return computed(() => this._gameDisplays().filter((game) => !game.draft && game.visibility));
     }
 
     // get name(): Signal<string> {

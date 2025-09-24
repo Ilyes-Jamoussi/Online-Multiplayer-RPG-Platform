@@ -44,6 +44,7 @@ describe('GameHttpService', () => {
                     lastModified: '2023-01-01',
                     visibility: true,
                     gridPreviewUrl: '/assets/game1.png',
+                    draft: false,
                 },
             ];
 

@@ -20,6 +20,7 @@ describe('GameStoreService', () => {
             lastModified: '2023-01-01',
             visibility: true,
             gridPreviewUrl: '/assets/game1.png',
+            draft: false,
         },
         {
             id: '2',
@@ -30,6 +31,7 @@ describe('GameStoreService', () => {
             lastModified: '2023-01-02',
             visibility: false,
             gridPreviewUrl: '/assets/game2.png',
+            draft: false,
         },
     ];
 
@@ -174,6 +176,7 @@ describe('GameStoreService', () => {
                 lastModified: '2023-01-03',
                 visibility: true,
                 gridPreviewUrl: '/assets/game3.png',
+                draft: false,
             };
             const callback = gameStoreSocketServiceSpy.onGameCreated.calls.argsFor(0)[0];
 

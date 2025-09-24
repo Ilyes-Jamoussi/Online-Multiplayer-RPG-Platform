@@ -23,6 +23,7 @@ describe('GameSessionCreationPageComponent', () => {
             lastModified: new Date().toISOString(),
             visibility: true,
             gridPreviewUrl: '/assets/game1-preview.png',
+            draft: false,
         },
     ];
 
