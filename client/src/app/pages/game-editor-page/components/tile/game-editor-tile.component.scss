@@ -1,6 +1,6 @@
 :host {
     display: block;
-    min-width: 0; /* important en grid */
+    min-width: 0; 
     min-height: 0;
 }
 
@@ -12,7 +12,6 @@
     display: grid;
     place-items: center;
 
-    /* scss management of background image via CSS variable */
     background-color: transparent;
     background-image: var(--bg-image);
     background-size: cover;
@@ -25,8 +24,6 @@
     }
 
     &.problem {
-        // add a red filter overlay
-
         filter: brightness(0.2) hue-rotate(-50deg) saturate(4);
     }
 
@@ -34,8 +31,6 @@
         filter: brightness(0.75);
     }
 }
-
-/* state when an element is dragged over */
 
 .door {
     line-height: 1;

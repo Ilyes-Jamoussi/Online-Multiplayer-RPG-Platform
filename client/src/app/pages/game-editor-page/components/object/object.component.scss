@@ -1,8 +1,7 @@
-/* editor-placed-object.component.scss */
 :host {
     display: block;
     pointer-events: auto; 
-    z-index: 1; /* display above */
+    z-index: 1;
 }
 
 .obj {

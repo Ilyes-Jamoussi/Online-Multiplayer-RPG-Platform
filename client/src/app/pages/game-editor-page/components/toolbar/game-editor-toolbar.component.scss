@@ -6,11 +6,10 @@
         --ring: #14b8a6;
     }
 
-    --btn-size: 48px; /* square size */
-    --icon-size: 24px; /* emoji size */
+    --btn-size: 48px;
+    --icon-size: 24px;
     --gap: 12px;
 
-    /* soft backgrounds by type */
     --c-base: #eaffe1;
     --c-wall: #ffeede;
     --c-door: #fff3cf;
@@ -21,7 +20,6 @@
     font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace;
 }
 
-/* Single-column layout inside the panel body */
 .list {
     display: flex;
     flex-direction: column;
@@ -29,7 +27,6 @@
     align-items: flex-start; 
 }
 
-/* Square FAB-like buttons */
 .tool-btn {
     width: var(--btn-size);
     height: var(--btn-size);
@@ -75,23 +72,26 @@
     }
 }
 
-/* Type backgrounds (match your classes) */
 .tool-btn.base {
     background: var(--c-base);
 }
+
 .tool-btn.wall {
     background: var(--c-wall);
 }
+
 .tool-btn.door {
     background: var(--c-door);
 }
+
 .tool-btn.water {
     background: var(--c-water);
 }
+
 .tool-btn.ice {
     background: var(--c-ice);
 }
-/* Optional: define a specific look for teleport */
+
 .tool-btn.teleport {
     background: #efe9ff;
 }
