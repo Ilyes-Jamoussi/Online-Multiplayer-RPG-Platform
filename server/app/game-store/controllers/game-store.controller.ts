@@ -5,11 +5,12 @@ import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
 import { GameInitDto } from '@app/game-store/dto/game-init.dto';
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
 import { ToggleVisibilityDto } from '@app/game-store/dto/toggle-visibility.dto';
-import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
+// import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 
 import { GameStoreGateway } from '@app/game-store/gateways/game-store.gateway';
 import { GameStoreService } from '@app/game-store/services/game-store.service';
 import { ImageService } from '@app/game-store/services/image.service';
+import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 
 @ApiTags('Games')
 @Controller('games')
@@ -44,7 +45,6 @@ export class GameStoreController {
     @ApiResponse({ status: 409, description: 'Name already used' })
     async createGame(@Body() dto: CreateGameDto): Promise<GamePreviewDto> {
         const gamePreview = await this.gameService.createGame(dto);
-        this.gameStoreGateway.emitGameCreated(gamePreview);
         return gamePreview;
     }
 

@@ -4,6 +4,8 @@ import { GameEditorService } from '@app/game-store/services/game-editor.service'
 import { GameEditorDto } from '@app/game-store/dto/game-editor.dto';
 import { PatchGameEditorDto } from '@app/game-store/dto/patch-game-editor.dto';
 import { NotFoundException } from '@nestjs/common';
+import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
+import { GameStoreGateway } from '@app/game-store/gateways/game-store.gateway';
 
 describe('GameEditorController', () => {
     let controller: GameEditorController;
@@ -20,6 +22,12 @@ describe('GameEditorController', () => {
                         patchEditByGameId: jest.fn(),
                     },
                 },
+                {
+                    provide: GameStoreGateway,
+                    useValue: {
+                        emitGameUpdated: jest.fn(),
+                    },
+                }
             ],
         }).compile();
 
@@ -45,7 +53,7 @@ describe('GameEditorController', () => {
 
     it('should return patched game editor dto from patchGameForEdit', async () => {
         const patchDto = { name: 'Patched Game' } as PatchGameEditorDto;
-        const result = { id: '1', name: 'Patched Game' } as GameEditorDto;
+        const result = { id: '1', name: 'Patched Game' } as GamePreviewDto;
         jest.spyOn(service, 'patchEditByGameId').mockResolvedValue(result);
         expect(await controller.patchGameForEdit('1', patchDto)).toBe(result);
     });

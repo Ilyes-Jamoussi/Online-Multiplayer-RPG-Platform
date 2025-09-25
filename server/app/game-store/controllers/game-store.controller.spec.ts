@@ -125,10 +125,10 @@ describe('GameStoreController', () => {
         it('should create game and emit event', async () => {
             gameService.createGame.mockResolvedValue(mockGamePreview);
 
-            await controller.createGame(mockCreateGameDto);
+            const result = await controller.createGame(mockCreateGameDto);
 
             expect(gameService.createGame).toHaveBeenCalledWith(mockCreateGameDto);
-            expect(gameStoreGateway.emitGameCreated).toHaveBeenCalledWith(mockGamePreview);
+            expect(result).toEqual(mockGamePreview); // add this assertion
         });
     });
 

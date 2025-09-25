@@ -10,6 +10,7 @@ import { NotFoundException } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Model, Types, Query } from 'mongoose';
+import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
 
 describe('GameStoreService', () => {
     let service: GameStoreService;
@@ -55,6 +56,7 @@ describe('GameStoreService', () => {
         module = await Test.createTestingModule({
             providers: [
                 GameStoreService,
+                GameDtoMapper,
                 {
                     provide: getModelToken(Game.name),
                     useValue: mockGameModel,
