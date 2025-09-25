@@ -58,7 +58,7 @@ describe('CharacterStoreService', () => {
 
     it('should validate character correctly', () => {
         expect(service.isValid()).toBeFalse();
-        
+
         service.setName('Hero');
         service.setBonus('life');
         service.selectAvatar(0);
@@ -68,7 +68,7 @@ describe('CharacterStoreService', () => {
     it('should generate random character', () => {
         service.generateRandom();
         const character = service.character();
-        
+
         expect(character.name.length).toBeGreaterThan(0);
         expect(character.avatar).toBeGreaterThanOrEqual(0);
         expect(character.bonus).not.toBeNull();
@@ -81,9 +81,9 @@ describe('CharacterStoreService', () => {
         service.setName('Test');
         service.selectAvatar(TEST_AVATAR_RESET);
         service.setBonus('speed');
-        
+
         service.resetForm();
-        
+
         const character = service.character();
         expect(character.name).toBe('');
         expect(character.avatar).toBe(0);

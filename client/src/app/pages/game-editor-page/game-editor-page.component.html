@@ -7,7 +7,6 @@
     (backClick)="goBack()"
 >
     <div class="editor-container">
-        <!-- Editor Content -->
         <div class="editor-content">
             <app-draggable-panel title="Outils" storageKey="editor.toolbar.pos" [snap]="10">
                 <app-editor-toolbar></app-editor-toolbar>
@@ -46,8 +45,18 @@
         </div>
     </div>
     <div slot="footer">
-        <app-ui-input type="name" placeholder="Saisissez le nom de votre jeu" [value]="store.name" (valueChange)="store.setName($event)"></app-ui-input>
-        <app-ui-input type="description" placeholder="Décrivez votre jeu en quelques mots" [value]="store.description" (valueChange)="store.setDescription($event)"></app-ui-input>
+        <app-ui-input
+            type="name"
+            placeholder="Saisissez le nom de votre jeu"
+            [value]="store.name"
+            (valueChange)="store.setName($event)"
+        ></app-ui-input>
+        <app-ui-input
+            type="description"
+            placeholder="Décrivez votre jeu en quelques mots"
+            [value]="store.description"
+            (valueChange)="store.setDescription($event)"
+        ></app-ui-input>
         <app-ui-button (buttonClick)="onReset()">Réinitialiser la grille</app-ui-button>
         <app-ui-button (buttonClick)="onSave()" [disabled]="!editorCheck.canSave()">Sauvegarder</app-ui-button>
         <app-editor-errors-badge></app-editor-errors-badge>

@@ -17,14 +17,7 @@ import { StatsBarComponent } from '@app/shared/components/stats-bar/stats-bar.co
     selector: 'app-character-creation-page',
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
-    imports: [
-        CommonModule,
-        FormsModule,
-        UiButtonComponent,
-        UiInputComponent,
-        UiPageLayoutComponent,
-        StatsBarComponent,
-    ],
+    imports: [CommonModule, FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent],
 })
 export class CharacterCreationPageComponent implements OnInit {
     // Expose l'état lisible pour le template

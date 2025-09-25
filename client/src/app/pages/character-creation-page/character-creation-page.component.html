@@ -1,177 +1,167 @@
 <app-ui-page-layout [hasHeader]="true" [hasFooter]="false" headerTitle="Création de personnage" [showBackButton]="true" (backClick)="onBackClick()">
-  <!-- Layout 2 colonnes -->
-  <div class="selection-layout">
-    <!-- ===================== COLONNE GAUCHE : GRILLE D'AVATARS ===================== -->
-    <section class="character-grid-panel">
-      <h2>Choisir un avatar</h2>
+    <!-- Layout 2 colonnes -->
+    <div class="selection-layout">
+        <!-- ===================== COLONNE GAUCHE : GRILLE D'AVATARS ===================== -->
+        <section class="character-grid-panel">
+            <h2>Choisir un avatar</h2>
 
-      <!-- Case avatar sélectionné -->
-      <div class="selected-avatar-display">
-        <div class="selected-avatar-frame">
-          <div *ngIf="character.avatar === null; else selectedAvatar" class="no-selection">
-            <span>Not selected</span>
-          </div>
-          <ng-template #selectedAvatar>
-            <img 
-              [src]="getSelectedAvatarImage()" 
-              [alt]="'Avatar sélectionné ' + ((character.avatar ?? 0) + 1)"
-              class="selected-avatar-gif"
-            />
-          </ng-template>
-        </div>
-      </div>
-
-      <div class="character-grid">
-        <button
-          *ngFor="let avatar of avatars"
-          type="button"
-          class="character-slot"
-          [class.selected]="character.avatar === avatar"
-          (click)="selectAvatar(avatar)"
-          [attr.aria-label]="'Avatar ' + (avatar + 1)"
-        >
-          <div class="character-portrait">
-            <img 
-              [src]="getAvatarImage(avatar)" 
-              [alt]="'Avatar ' + (avatar + 1)"
-              class="avatar-gif"
-            />
-            <span class="avatar-number">{{ avatar + 1 }}</span>
-          </div>
-        </button>
-      </div>
-
-      <div style="margin-top: 1rem; display: flex; gap: .75rem;">
-        <app-ui-button (buttonClick)="generateRandomCharacter()">🎲 Générer aléatoire</app-ui-button>
-      </div>
-    </section>
-
-    <!-- ===================== COLONNE DROITE : NOM + STATS ===================== -->
-    <section class="character-info-panel">
-      <!-- Nom -->
-      <div class="character-name-section">
-        <h3>Nom *</h3>
-        <app-ui-input
-          placeholder="Nom du héros"
-          [initialValue]="character.name"
-          (valueChange)="onNameChange($event)"
-          [maxLength]="8"
-        ></app-ui-input>
-        @if (store.getNameError()) {
-          <div class="error-message">{{ store.getNameError() }}</div>
-        }
-      </div>
-
-      <!-- Stats + Bonus -->
-      <div class="stats-section">
-        <h3>Attributs</h3>
-        <p class="attributes-help">Tous les attributs commencent à 4. Ajoutez un bonus de +2 à Vie ou Rapidité.</p>
-
-        <div class="stats-grid">
-          <!-- Barres de stats -->
-          <div class="stats-bars">
-            <app-stats-bar 
-              label="Vie" 
-              [value]="character.attributes.life" 
-              [maxValue]="6" 
-              color="#e74c3c">
-            </app-stats-bar>
-            <div class="attribute-description">Points de vie du personnage</div>
-            
-            <app-stats-bar 
-              label="Rapidité" 
-              [value]="character.attributes.speed" 
-              [maxValue]="6" 
-              color="#2ecc71">
-            </app-stats-bar>
-            <div class="attribute-description">Vitesse de déplacement</div>
-          </div>
-
-          <!-- Sélection du bonus -->
-          <div class="bonus-selection">
-            <h4>Bonus (+2)</h4>
-            
-            <div class="bonus-options">
-              <label class="bonus-option" [class.selected]="character.bonus === 'life'">
-                <input
-                  type="radio"
-                  name="bonus"
-                  value="life"
-                  [checked]="character.bonus === 'life'"
-                  (change)="onBonusChange('life')"
-                />
-                <span>❤️ Vie</span>
-              </label>
-              
-              <label class="bonus-option" [class.selected]="character.bonus === 'speed'">
-                <input
-                  type="radio"
-                  name="bonus"
-                  value="speed"
-                  [checked]="character.bonus === 'speed'"
-                  (change)="onBonusChange('speed')"
-                />
-                <span>⚡ Rapidité</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Sélection des dés -->
-          <div class="dice-selection">
-            <h4>Choix des dés</h4>
-            <p class="dice-help">Assignez un seul D6 (l'autre sera D4 automatiquement)</p>
-            
-            <div class="dice-cards">
-              <div class="dice-card">
-                <label>Attaque</label>
-                <div class="attribute-description">Force d'attaque au combat</div>
-                <div class="dice-buttons">
-                  <button 
-                    type="button"
-                    class="dice-btn"
-                    [class.selected]="character.diceAssignment.attack === 'D4'"
-                    (click)="onAttackDiceChange('D4')">
-                    <img [src]="assets.getDiceImage('D4')" alt="D4" class="dice-img">
-                  </button>
-                  <button 
-                    type="button"
-                    class="dice-btn"
-                    [class.selected]="character.diceAssignment.attack === 'D6'"
-                    (click)="onAttackDiceChange('D6')">
-                    <img [src]="assets.getDiceImage('D6')" alt="D6" class="dice-img">
-                  </button>
+            <!-- Case avatar sélectionné -->
+            <div class="selected-avatar-display">
+                <div class="selected-avatar-frame">
+                    <div *ngIf="character.avatar === null; else selectedAvatar" class="no-selection">
+                        <span>Not selected</span>
+                    </div>
+                    <ng-template #selectedAvatar>
+                        <img
+                            [src]="getSelectedAvatarImage()"
+                            [alt]="'Avatar sélectionné ' + ((character.avatar ?? 0) + 1)"
+                            class="selected-avatar-gif"
+                        />
+                    </ng-template>
                 </div>
-              </div>
-
-              <div class="dice-card">
-                <label>Défense</label>
-                <div class="attribute-description">Résistance aux attaques</div>
-                <div class="dice-buttons">
-                  <button 
-                    type="button"
-                    class="dice-btn"
-                    [class.selected]="character.diceAssignment.defense === 'D4'"
-                    (click)="onDefenseDiceChange('D4')">
-                    <img [src]="assets.getDiceImage('D4')" alt="D4" class="dice-img">
-                  </button>
-                  <button 
-                    type="button"
-                    class="dice-btn"
-                    [class.selected]="character.diceAssignment.defense === 'D6'"
-                    (click)="onDefenseDiceChange('D6')">
-                    <img [src]="assets.getDiceImage('D6')" alt="D6" class="dice-img">
-                  </button>
-                </div>
-              </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Boutons d'action -->
-        <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
-          <app-ui-button (buttonClick)="onSubmit()">Créer le personnage →</app-ui-button>
-        </div>
-      </div>
-    </section>
-  </div>
+            <div class="character-grid">
+                <button
+                    *ngFor="let avatar of avatars"
+                    type="button"
+                    class="character-slot"
+                    [class.selected]="character.avatar === avatar"
+                    (click)="selectAvatar(avatar)"
+                    [attr.aria-label]="'Avatar ' + (avatar + 1)"
+                >
+                    <div class="character-portrait">
+                        <img [src]="getAvatarImage(avatar)" [alt]="'Avatar ' + (avatar + 1)" class="avatar-gif" />
+                        <span class="avatar-number">{{ avatar + 1 }}</span>
+                    </div>
+                </button>
+            </div>
+
+            <div style="margin-top: 1rem; display: flex; gap: 0.75rem">
+                <app-ui-button (buttonClick)="generateRandomCharacter()">🎲 Générer aléatoire</app-ui-button>
+            </div>
+        </section>
+
+        <!-- ===================== COLONNE DROITE : NOM + STATS ===================== -->
+        <section class="character-info-panel">
+            <!-- Nom -->
+            <div class="character-name-section">
+                <h3>Nom *</h3>
+                <app-ui-input
+                    placeholder="Nom du héros"
+                    [initialValue]="character.name"
+                    (valueChange)="onNameChange($event)"
+                    [maxLength]="8"
+                ></app-ui-input>
+                @if (store.getNameError()) {
+                <div class="error-message">{{ store.getNameError() }}</div>
+                }
+            </div>
+
+            <!-- Stats + Bonus -->
+            <div class="stats-section">
+                <h3>Attributs</h3>
+                <p class="attributes-help">Tous les attributs commencent à 4. Ajoutez un bonus de +2 à Vie ou Rapidité.</p>
+
+                <div class="stats-grid">
+                    <!-- Barres de stats -->
+                    <div class="stats-bars">
+                        <app-stats-bar label="Vie" [value]="character.attributes.life" [maxValue]="6" color="#e74c3c"> </app-stats-bar>
+                        <div class="attribute-description">Points de vie du personnage</div>
+
+                        <app-stats-bar label="Rapidité" [value]="character.attributes.speed" [maxValue]="6" color="#2ecc71"> </app-stats-bar>
+                        <div class="attribute-description">Vitesse de déplacement</div>
+                    </div>
+
+                    <!-- Sélection du bonus -->
+                    <div class="bonus-selection">
+                        <h4>Bonus (+2)</h4>
+
+                        <div class="bonus-options">
+                            <label class="bonus-option" [class.selected]="character.bonus === 'life'">
+                                <input
+                                    type="radio"
+                                    name="bonus"
+                                    value="life"
+                                    [checked]="character.bonus === 'life'"
+                                    (change)="onBonusChange('life')"
+                                />
+                                <span>❤️ Vie</span>
+                            </label>
+
+                            <label class="bonus-option" [class.selected]="character.bonus === 'speed'">
+                                <input
+                                    type="radio"
+                                    name="bonus"
+                                    value="speed"
+                                    [checked]="character.bonus === 'speed'"
+                                    (change)="onBonusChange('speed')"
+                                />
+                                <span>⚡ Rapidité</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Sélection des dés -->
+                    <div class="dice-selection">
+                        <h4>Choix des dés</h4>
+                        <p class="dice-help">Assignez un seul D6 (l'autre sera D4 automatiquement)</p>
+
+                        <div class="dice-cards">
+                            <div class="dice-card">
+                                <label>Attaque</label>
+                                <div class="attribute-description">Force d'attaque au combat</div>
+                                <div class="dice-buttons">
+                                    <button
+                                        type="button"
+                                        class="dice-btn"
+                                        [class.selected]="character.diceAssignment.attack === 'D4'"
+                                        (click)="onAttackDiceChange('D4')"
+                                    >
+                                        <img [src]="assets.getDiceImage('D4')" alt="D4" class="dice-img" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="dice-btn"
+                                        [class.selected]="character.diceAssignment.attack === 'D6'"
+                                        (click)="onAttackDiceChange('D6')"
+                                    >
+                                        <img [src]="assets.getDiceImage('D6')" alt="D6" class="dice-img" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="dice-card">
+                                <label>Défense</label>
+                                <div class="attribute-description">Résistance aux attaques</div>
+                                <div class="dice-buttons">
+                                    <button
+                                        type="button"
+                                        class="dice-btn"
+                                        [class.selected]="character.diceAssignment.defense === 'D4'"
+                                        (click)="onDefenseDiceChange('D4')"
+                                    >
+                                        <img [src]="assets.getDiceImage('D4')" alt="D4" class="dice-img" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="dice-btn"
+                                        [class.selected]="character.diceAssignment.defense === 'D6'"
+                                        (click)="onDefenseDiceChange('D6')"
+                                    >
+                                        <img [src]="assets.getDiceImage('D6')" alt="D6" class="dice-img" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div style="margin-top: 1rem; display: flex; justify-content: flex-end">
+                    <app-ui-button (buttonClick)="onSubmit()">Créer le personnage →</app-ui-button>
+                </div>
+            </div>
+        </section>
+    </div>
 </app-ui-page-layout>

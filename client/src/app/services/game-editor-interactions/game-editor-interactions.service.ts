@@ -8,6 +8,7 @@ import { TileKind } from '@common/enums/tile-kind.enum';
 export enum ToolType {
     TileBrushTool = 'tile-brush-tool',
     PlaceableTool = 'placeable-tool',
+    PlaceableEraserTool = 'placeable-eraser-tool',
 }
 
 @Injectable()
@@ -110,7 +111,10 @@ export class GameEditorInteractionsService {
     }
 
     removeObject(id: string): void {
+        const tool = this.activeTool?.();
+        if (!tool || tool.type !== ToolType.PlaceableEraserTool) return;
         this.store.removeObject(id);
+        this.revertToPreviousTool();
     }
 
     getFootprintOf(kind: PlaceableKind): number {

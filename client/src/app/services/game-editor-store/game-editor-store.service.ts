@@ -148,7 +148,7 @@ export class GameEditorStoreService {
             objects: this._objects() !== this._initial().objects ? this._objects() : undefined,
             gridPreviewUrl: gridPreviewImage,
         };
-        
+
         this.http
             .patchGameEditorById(this._id(), game)
             .pipe(
@@ -170,9 +170,9 @@ export class GameEditorStoreService {
                                 gridPreviewUrl: gridPreviewImage,
                             };
                             return this.http.patchGameEditorById(newGame.id, updateGame);
-                        })
+                        }),
                     );
-                })
+                }),
             )
             .subscribe((updated) => {
                 this._initial.set(updated);

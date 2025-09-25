@@ -27,7 +27,7 @@ describe('GameEditorController', () => {
                     useValue: {
                         emitGameUpdated: jest.fn(),
                     },
-                }
+                },
             ],
         }).compile();
 

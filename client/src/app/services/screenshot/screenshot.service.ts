@@ -8,7 +8,7 @@ import { SCREENSHOT_SCALE, SCREENSHOT_QUALITY } from '@app/constants/screenshot.
 export class ScreenshotService {
     async captureElementAsBase64(element: HTMLElement): Promise<string> {
         const canvas = await html2canvas(element, {
-            scale: SCREENSHOT_SCALE
+            scale: SCREENSHOT_SCALE,
         });
         return canvas.toDataURL('image/jpeg', SCREENSHOT_QUALITY);
     }

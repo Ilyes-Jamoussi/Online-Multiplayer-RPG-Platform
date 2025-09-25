@@ -16,7 +16,7 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { DraggablePanelComponent } from '@app/shared/ui/components/draggable-panel/draggable-panel.component';
 import { GameEditorInventoryComponent } from './components/inventory/game-editor-inventory.component';
 import { GameEditorObjectComponent } from './components/object/object.component';
-import { GameEditorErrorsDisplayComponent } from './components/errross-display/errors-display.component';
+import { GameEditorErrorsDisplayComponent } from './components/errors-display/errors-display.component';
 import { ROUTES } from '@app/constants/routes.constants';
 import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 
@@ -44,7 +44,7 @@ import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 })
 export class GameEditorPageComponent implements OnInit, OnDestroy {
     @ViewChild('gridWrapper', { static: false }) gridWrapper!: ElementRef<HTMLElement>;
-    
+
     private readonly destroy$ = new Subject<void>();
 
     constructor(

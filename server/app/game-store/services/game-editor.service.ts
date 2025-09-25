@@ -74,10 +74,7 @@ export class GameEditorService {
         update.lastModified = new Date();
         update.draft = false;
 
-        const doc = await this.gameModel
-            .findByIdAndUpdate(id, { $set: update }, { new: true, runValidators: true })
-            .lean()
-            .exec();
+        const doc = await this.gameModel.findByIdAndUpdate(id, { $set: update }, { new: true, runValidators: true }).lean().exec();
 
         if (!doc) return null;
         return this.gameDtoMapper.toGamePreviewDto(doc);
