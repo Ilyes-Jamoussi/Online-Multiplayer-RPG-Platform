@@ -1,8 +1,20 @@
-<ng-container [ngSwitch]="element">
-    <h1 *ngSwitchCase="'h1'" [ngClass]="classes"><ng-content></ng-content></h1>
-    <h2 *ngSwitchCase="'h2'" [ngClass]="classes"><ng-content></ng-content></h2>
-    <h3 *ngSwitchCase="'h3'" [ngClass]="classes"><ng-content></ng-content></h3>
-    <p *ngSwitchCase="'p'" [ngClass]="classes"><ng-content></ng-content></p>
-    <div *ngSwitchCase="'div'" [ngClass]="classes"><ng-content></ng-content></div>
-    <span *ngSwitchDefault [ngClass]="classes"><ng-content></ng-content></span>
-</ng-container>
+@switch (element) {
+    @case ('h1') {
+        <h1 [ngClass]="classes"><ng-content></ng-content></h1>
+    }
+    @case ('h2') {
+        <h2 [ngClass]="classes"><ng-content></ng-content></h2>
+    }
+    @case ('h3') {
+        <h3 [ngClass]="classes"><ng-content></ng-content></h3>
+    }
+    @case ('p') {
+        <p [ngClass]="classes"><ng-content></ng-content></p>
+    }
+    @case ('div') {
+        <div [ngClass]="classes"><ng-content></ng-content></div>
+    }
+    @default {
+        <span [ngClass]="classes"><ng-content></ng-content></span>
+    }
+}
