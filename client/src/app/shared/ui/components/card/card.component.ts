@@ -3,7 +3,6 @@ import { Component, InjectionToken } from '@angular/core';
 import { UiCardContext } from '@app/interfaces/ui-card.interface';
 import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
 
-// Token pour l'injection de dépendance
 export const UI_CARD_CONTEXT = new InjectionToken<UiCardContext>('UI_CARD_CONTEXT');
 
 @Component({

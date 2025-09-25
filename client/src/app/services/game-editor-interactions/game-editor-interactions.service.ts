@@ -2,7 +2,6 @@ import { Injectable, signal } from '@angular/core';
 import { ActiveTool, Vector2 } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { PlaceableMime, PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
-// import { PlaceableFootprint, PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
 
 export enum ToolType {
@@ -139,19 +138,14 @@ export class GameEditorInteractionsService {
 
                 const tk = tile.kind as TileKind;
 
-                // Interdits terrain
                 if (tk === TileKind.WALL || tk === TileKind.DOOR) return false;
 
-                // Règles d'eau / bateau
                 if (kind === PlaceableKind.BOAT) {
-                    // Le bateau doit ENTIEREMENT être sur l'eau
                     if (tk !== TileKind.WATER) return false;
                 } else {
-                    // Tout autre objet ne peut pas être sur l'eau
                     if (tk === TileKind.WATER) return false;
                 }
 
-                // Occupation existante (en ignorant éventuellement l'objet qu'on déplace)
                 const occupant = this.store.getPlacedObjectAt(tx, ty);
                 if (occupant && occupant.id !== excludeId) return false;
             }
@@ -170,8 +164,8 @@ export class GameEditorInteractionsService {
         const obj = this.store.placedObjects().find((o) => o.id === id);
         if (!obj) return;
 
-        const kind = PlaceableKind[obj.kind]; // même mapping que ton code actuel
-        if (!this.canPlaceObject(x, y, kind, id)) return; // ignore l'occupation par soi-même
+        const kind = PlaceableKind[obj.kind];
+        if (!this.canPlaceObject(x, y, kind, id)) return;
         this.store.moveObject(id, x, y);
     }
 
