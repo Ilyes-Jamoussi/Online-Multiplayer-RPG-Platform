@@ -54,4 +54,24 @@ export class GameEditorObjectComponent {
         this.isDragging = false;
         this.interactions.revertToPreviousTool();
     }
+
+    onContextMenu(evt: MouseEvent) {
+        evt.preventDefault();
+    }
+
+    onMouseDown(evt: MouseEvent) {
+        evt.stopPropagation();
+        if (evt.button === 2) {
+            this.interactions.setActiveTool({
+                type: ToolType.PlaceableEraserTool,
+            });
+        }
+    }
+
+    onMouseUp(evt: MouseEvent) {
+        evt.stopPropagation();
+        if (evt.button === 2) {
+            this.interactions.removeObject(this.object.id);
+        }
+    }
 }

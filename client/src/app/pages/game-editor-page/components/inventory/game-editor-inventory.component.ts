@@ -108,8 +108,10 @@ export class GameEditorInventoryComponent {
         if (!id) return;
         evt.preventDefault();
         evt.stopPropagation();
+        this.interactions.setActiveTool({
+            type: ToolType.PlaceableEraserTool,
+        });
         this.interactions.removeObject(id);
-        this.interactions.revertToPreviousTool();
         this.dragOver = '';
     }
 

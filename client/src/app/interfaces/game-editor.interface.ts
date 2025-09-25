@@ -2,20 +2,30 @@ import { ToolType } from '@app/services/game-editor-interactions/game-editor-int
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
 
-export interface GameEditorIssues {
-    terrainCoverage: EditorIssue;
-    doors: AccessibilityProblem;
-    terrainAccessibility: AccessibilityProblem;
-    startPlacement: EditorIssue;
-    flagPlacement: EditorIssue;
-    nameValidation: EditorIssue;
-    descriptionValidation: EditorIssue;
+export enum GameEditorIssuesEnum {
+    TerrainCoverage = 'terrainCoverage',
+    Doors = 'doors',
+    TerrainAccessibility = 'terrainAccessibility',
+    StartPlacement = 'startPlacement',
+    FlagPlacement = 'flagPlacement',
+    NameValidation = 'nameValidation',
+    DescriptionValidation = 'descriptionValidation',
 }
+
+export type GameEditorIssues = {
+    [GameEditorIssuesEnum.TerrainCoverage]: EditorIssue;
+    [GameEditorIssuesEnum.Doors]: AccesibilityIssue;
+    [GameEditorIssuesEnum.TerrainAccessibility]: AccesibilityIssue;
+    [GameEditorIssuesEnum.StartPlacement]: EditorIssue;
+    [GameEditorIssuesEnum.FlagPlacement]: EditorIssue;
+    [GameEditorIssuesEnum.NameValidation]: EditorIssue;
+    [GameEditorIssuesEnum.DescriptionValidation]: EditorIssue;
+};
 export interface EditorIssue {
     message?: string;
     hasIssue: boolean;
 }
-export interface AccessibilityProblem extends EditorIssue {
+export interface AccesibilityIssue extends EditorIssue {
     tiles: Vector2[];
 }
 
@@ -46,7 +56,11 @@ export interface PlaceableTool {
     placeableKind: PlaceableKind;
 }
 
-export type ActiveTool = TileBrushTool | PlaceableTool;
+export interface PlaceableEraserTool {
+    type: ToolType.PlaceableEraserTool;
+}
+
+export type ActiveTool = TileBrushTool | PlaceableTool | PlaceableEraserTool;
 
 export interface Vector2 {
     x: number;

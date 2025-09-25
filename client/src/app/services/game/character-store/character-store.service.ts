@@ -43,10 +43,18 @@ export class CharacterStoreService {
     }
 
     // mutateurs
-    setName(name: string) { this._name.set(name); }
-    selectAvatar(index: number) { if (index >= 0 && index < CHARACTER_AVATARS_COUNT) this._avatar.set(index); }
-    resetAvatar() { this._avatar.set(null); }
-    setBonus(bonus: BonusKey | null) { this._bonus.set(bonus); }
+    setName(name: string) {
+        this._name.set(name);
+    }
+    selectAvatar(index: number) {
+        if (index >= 0 && index < CHARACTER_AVATARS_COUNT) this._avatar.set(index);
+    }
+    resetAvatar() {
+        this._avatar.set(null);
+    }
+    setBonus(bonus: BonusKey | null) {
+        this._bonus.set(bonus);
+    }
 
     setDice(attr: DiceAttr, value: Dice) {
         if (attr === 'attack') this._dice.set({ attack: value, defense: value === 'D6' ? 'D4' : 'D6' });
