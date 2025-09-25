@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
+import { GamePreviewDto } from '@app/dto/gamePreviewDto';
 import { ROUTES } from '@app/constants/routes.constants';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';

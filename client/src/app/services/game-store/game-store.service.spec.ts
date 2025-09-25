@@ -3,7 +3,7 @@ import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
 import { of } from 'rxjs';
 import { GameStoreService } from './game-store.service';
-import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
+import { GamePreviewDto } from '@app/dto/gamePreviewDto';
 
 describe('GameStoreService', () => {
     let service: GameStoreService;

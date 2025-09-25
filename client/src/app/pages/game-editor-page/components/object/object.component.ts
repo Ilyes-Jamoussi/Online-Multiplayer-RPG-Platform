@@ -1,7 +1,7 @@
 // editor-placed-object.component.ts
 import { ChangeDetectionStrategy, Component, HostBinding, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GameEditorPlaceableDto } from '@app/api/model/gameEditorPlaceableDto';
+import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
 import { PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
 import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 

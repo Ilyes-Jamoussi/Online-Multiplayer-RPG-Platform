@@ -4,10 +4,10 @@ import { TestBed } from '@angular/core/testing';
 import { API_PATHS } from '@common/constants/api-paths';
 import { environment } from 'src/environments/environment';
 import { GameHttpService } from './game-http.service';
-import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
-import { CreateGameDto } from '@app/api/model/createGameDto';
-import { GameInitDto } from '@app/api/model/gameInitDto';
-import { ToggleVisibilityDto } from '@app/api/model/toggleVisibilityDto';
+import { GamePreviewDto } from '@app/dto/gamePreviewDto';
+import { CreateGameDto } from '@app/dto/createGameDto';
+import { GameInitDto } from '@app/dto/gameInitDto';
+import { ToggleVisibilityDto } from '@app/dto/toggleVisibilityDto';
 
 describe('GameHttpService', () => {
     let service: GameHttpService;

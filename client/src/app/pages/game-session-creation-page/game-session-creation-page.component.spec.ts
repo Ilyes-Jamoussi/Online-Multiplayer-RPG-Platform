@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { signal } from '@angular/core';
-import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
+import { GamePreviewDto } from '@app/dto/gamePreviewDto';
 import { ROUTES } from '@app/constants/routes.constants';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { of } from 'rxjs';
