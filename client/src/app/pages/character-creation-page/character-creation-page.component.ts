@@ -22,33 +22,41 @@ import { StatsBarComponent } from '@app/shared/components/stats-bar/stats-bar.co
 export class CharacterCreationPageComponent implements OnInit {
     // Expose l'état lisible pour le template
     get character() {
-        return this.store.character();
+        return this.characterStoreService.character();
+    }
+
+    get store() {
+        return this.characterStoreService;
+    }
+
+    get assets() {
+        return this.assetsService;
     }
 
     // Liste d'avatars (ex: [0..11])
-    avatars = this.store.avatars;
+    avatars = this.characterStoreService.avatars;
 
     constructor(
-        readonly store: CharacterStoreService,
+        private readonly characterStoreService: CharacterStoreService,
         private readonly router: Router,
-        private readonly notif: NotificationService,
-        readonly assets: AssetsService,
+        private readonly notificationService: NotificationService,
+        private readonly assetsService: AssetsService,
     ) {}
 
     getAvatarImage(avatarIndex: number): string {
-        return this.assets.getAvatarStaticByNumber(avatarIndex + 1);
+        return this.assetsService.getAvatarStaticByNumber(avatarIndex + 1);
     }
 
     getSelectedAvatarImage(): string {
         if (this.character.avatar === null) return '';
-        return this.assets.getAvatarAnimatedByNumber(this.character.avatar + 1);
+        return this.assetsService.getAvatarAnimatedByNumber(this.character.avatar + 1);
     }
 
     ngOnInit() {
         // Reset l'avatar pour qu'aucun ne soit sélectionné par défaut
-        this.store.resetAvatar();
+        this.characterStoreService.resetAvatar();
         // Définir 'life' comme bonus par défaut dès l'entrée sur la page
-        this.store.setBonus('life');
+        this.characterStoreService.setBonus('life');
     }
 
     // Navigation
@@ -58,43 +66,43 @@ export class CharacterCreationPageComponent implements OnInit {
 
     // Nom
     onNameChange(v: string) {
-        this.store.setName(v);
+        this.characterStoreService.setName(v);
     }
 
     // Avatar
     selectAvatar(index: number) {
-        this.store.selectAvatar(index);
+        this.characterStoreService.selectAvatar(index);
     }
 
     // Bonus exclusif (Life/Speed) via radios
     onBonusChange(bonus: 'life' | 'speed') {
-        this.store.setBonus(bonus);
+        this.characterStoreService.setBonus(bonus);
     }
 
     // Dés (radios)
     onAttackDiceChange(value: 'D4' | 'D6') {
-        this.store.setDice('attack', value);
+        this.characterStoreService.setDice('attack', value);
     }
     onDefenseDiceChange(value: 'D4' | 'D6') {
-        this.store.setDice('defense', value);
+        this.characterStoreService.setDice('defense', value);
     }
 
     // Aléatoire
     generateRandomCharacter() {
-        this.store.generateRandom();
+        this.characterStoreService.generateRandom();
     }
 
     // Soumission
     onSubmit() {
-        if (!this.store.isValid()) {
-            this.notif.displayError({
+        if (!this.characterStoreService.isValid()) {
+            this.notificationService.displayError({
                 title: 'Erreur de validation',
                 message: 'Nom, avatar et bonus requis.',
             });
             return;
         }
 
-        this.notif.displaySuccess({
+        this.notificationService.displaySuccess({
             title: 'Personnage créé',
             message: `${this.character.name} est prêt pour l’aventure.`,
         });
