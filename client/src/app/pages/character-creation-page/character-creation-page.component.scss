@@ -4,7 +4,7 @@
     height: 100%;
 }
 
-// Layout principal
+// Main layout
 .selection-layout {
     display: flex;
     gap: 3rem;
@@ -73,7 +73,7 @@
     height: 100%;
 }
 
-// Avatar sélectionné
+// Selected avatar
 .selected-avatar-display {
     flex: 1;
     display: flex;
@@ -142,7 +142,7 @@
     }
 }
 
-// Grille d'avatars
+// Avatar grid
 .character-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -213,7 +213,7 @@
     border: 2px solid white;
 }
 
-// Sections de configuration
+// Configuration sections
 .character-name-section {
     margin-bottom: 2rem;
     flex-shrink: 0;
@@ -230,7 +230,7 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-    
+
     .attributes-help {
         font-size: 1.3rem;
         font-family: inherit;
@@ -264,7 +264,7 @@
     margin-top: 0.25rem;
 }
 
-// Sélection du bonus
+// Bonus selection
 .bonus-selection {
     h4 {
         margin-bottom: 0.5rem;
@@ -312,7 +312,7 @@
     }
 }
 
-// Sélection des dés
+// Dice selection
 .dice-selection {
     h4 {
         margin-bottom: 0.5rem;
