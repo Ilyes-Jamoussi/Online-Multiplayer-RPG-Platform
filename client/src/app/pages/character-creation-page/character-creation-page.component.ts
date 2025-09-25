@@ -94,7 +94,7 @@ export class CharacterCreationPageComponent implements OnInit {
 
     // Soumission
     onSubmit() {
-        if (!this.characterStoreService.isValid()) {
+        if (!this.characterStoreService.isValid) {
             this.notificationService.displayError({
                 title: 'Erreur de validation',
                 message: 'Nom, avatar et bonus requis.',

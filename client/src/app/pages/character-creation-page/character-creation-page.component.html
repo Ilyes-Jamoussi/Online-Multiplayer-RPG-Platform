@@ -55,8 +55,8 @@
                     (valueChange)="onNameChange($event)"
                     [maxLength]="8"
                 ></app-ui-input>
-                @if (store.getNameError()) {
-                <div class="error-message">{{ store.getNameError() }}</div>
+                @if (store.nameError) {
+                <div class="error-message">{{ store.nameError }}</div>
                 }
             </div>
 
