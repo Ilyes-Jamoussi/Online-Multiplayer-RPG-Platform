@@ -3,7 +3,7 @@ import { GameEditorStoreService } from '@app/services/game-editor-store/game-edi
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { TileSizeProbeDirective } from '@app/pages/game-editor-page/directives/tile-size-probe.directive';
 import { NgStyle } from '@angular/common';
-import { GameEditorTileDto } from '@app/api/model/gameEditorTileDto';
+import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
 import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { TileSprite as TileImage } from '@common/enums/tile-sprite.enum';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';

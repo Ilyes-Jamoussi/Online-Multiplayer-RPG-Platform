@@ -1,7 +1,7 @@
 import { computed, Injectable, Signal, signal } from '@angular/core';
-import { CreateGameDto } from '@app/api/model/createGameDto';
-import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
-import { UpdateGameDto } from '@app/api/model/updateGameDto';
+import { CreateGameDto } from '@app/dto/createGameDto';
+import { GamePreviewDto } from '@app/dto/gamePreviewDto';
+import { UpdateGameDto } from '@app/dto/updateGameDto';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
 import { Observable, tap } from 'rxjs';

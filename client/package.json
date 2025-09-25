@@ -10,7 +10,7 @@
         "coverage": "ng test --code-coverage --source-map=true",
         "lint": "eslint --config eslint.config.mjs \"src/**/*.ts\"",
         "lint:fix": "eslint --config eslint.config.mjs \"src/**/*.ts\" --fix",
-        "generate-api": "openapi-generator-cli generate -i http://localhost:3000/api/docs-json -g typescript-angular -o src/app/api --global-property models"
+        "generate-dto": "shx rm -rf src/app/dto && openapi-generator-cli generate -i http://localhost:3000/api/docs-json -g typescript-angular -o src/app/dto --global-property models --model-package ."
     },
     "private": true,
     "dependencies": {
@@ -57,6 +57,7 @@
         "karma-jasmine-html-reporter": "2.1.0",
         "openapi-generator-cli": "^1.0.0",
         "prettier": "3.0.1",
+        "shx": "^0.4.0",
         "typescript": "5.8.3",
         "typescript-eslint": "8.38.0"
     }

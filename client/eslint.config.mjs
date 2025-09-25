@@ -46,7 +46,7 @@ export default [
         },
     },
     {
-        files: ['src/app/api/model/**/*.ts'],
+        files: ['src/app/dto/**/*.ts'],
         rules: {
             '@typescript-eslint/naming-convention': 'off',
             '@typescript-eslint/array-type': 'off',
