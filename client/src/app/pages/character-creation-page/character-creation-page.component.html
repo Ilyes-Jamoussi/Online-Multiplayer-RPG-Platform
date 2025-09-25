@@ -120,7 +120,7 @@
                                         [class.selected]="character.diceAssignment.attack === 'D4'"
                                         (click)="onAttackDiceChange('D4')"
                                     >
-                                        <img [src]="assets.getDiceImage('D4')" alt="D4" class="dice-img" />
+                                        <img [src]="assetsService.getDiceImage('D4')" alt="D4" class="dice-img" />
                                     </button>
                                     <button
                                         type="button"
@@ -128,7 +128,7 @@
                                         [class.selected]="character.diceAssignment.attack === 'D6'"
                                         (click)="onAttackDiceChange('D6')"
                                     >
-                                        <img [src]="assets.getDiceImage('D6')" alt="D6" class="dice-img" />
+                                        <img [src]="assetsService.getDiceImage('D6')" alt="D6" class="dice-img" />
                                     </button>
                                 </div>
                             </div>
@@ -143,7 +143,7 @@
                                         [class.selected]="character.diceAssignment.defense === 'D4'"
                                         (click)="onDefenseDiceChange('D4')"
                                     >
-                                        <img [src]="assets.getDiceImage('D4')" alt="D4" class="dice-img" />
+                                        <img [src]="assetsService.getDiceImage('D4')" alt="D4" class="dice-img" />
                                     </button>
                                     <button
                                         type="button"
@@ -151,7 +151,7 @@
                                         [class.selected]="character.diceAssignment.defense === 'D6'"
                                         (click)="onDefenseDiceChange('D6')"
                                     >
-                                        <img [src]="assets.getDiceImage('D6')" alt="D6" class="dice-img" />
+                                        <img [src]="assetsService.getDiceImage('D6')" alt="D6" class="dice-img" />
                                     </button>
                                 </div>
                             </div>

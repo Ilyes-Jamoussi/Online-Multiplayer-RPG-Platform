@@ -29,10 +29,6 @@ export class CharacterCreationPageComponent implements OnInit {
         return this.characterStoreService;
     }
 
-    get assets() {
-        return this.assetsService;
-    }
-
     // Liste d'avatars (ex: [0..11])
     avatars = this.characterStoreService.avatars;
 
@@ -40,7 +36,7 @@ export class CharacterCreationPageComponent implements OnInit {
         private readonly characterStoreService: CharacterStoreService,
         private readonly router: Router,
         private readonly notificationService: NotificationService,
-        private readonly assetsService: AssetsService,
+        readonly assetsService: AssetsService,
     ) {}
 
     getAvatarImage(avatarIndex: number): string {
