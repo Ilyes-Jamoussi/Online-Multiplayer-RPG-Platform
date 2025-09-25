@@ -66,7 +66,12 @@ export class GameEditorInteractionsService {
         if (!tool.leftDrag && !tool.rightDrag) return;
         this.store.setTileAt(x, y, tool.rightDrag ? TileKind.BASE : tool.tileKind);
         const object = this.store.getPlacedObjectAt(x, y);
-        if (object && (tool.tileKind === TileKind.WALL || tool.tileKind === TileKind.DOOR)) {
+        if (
+            object &&
+            ((object.kind === PlaceableKind.BOAT && tool.tileKind !== TileKind.WATER) ||
+                tool.tileKind === TileKind.WALL ||
+                tool.tileKind === TileKind.DOOR)
+        ) {
             this.store.removeObject(object.id);
         }
     }
