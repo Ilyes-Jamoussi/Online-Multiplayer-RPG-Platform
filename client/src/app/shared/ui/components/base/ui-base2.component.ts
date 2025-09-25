@@ -14,39 +14,39 @@ import {
 } from '@app/shared/ui/types/ui2.types';
 
 /**
- * Base abstraite pour les composants UI (pas de template).
- * Applique des classes BEM-like pilotant le SCSS du design system.
+ * Abstract base for UI components (no template).
+ * Applies BEM-like classes controlling the SCSS of the design system.
  */
 @Directive()
 export abstract class UiBase2Component {
-    /** Couleur (rôle) */
+    /** Color (role) */
     @Input() color: UiColor = 'primary';
 
-    /** Style visuel (filled / outline / ghost / soft / link) */
+    /** Visual style (filled / outline / ghost / soft / link) */
     @Input() style: UiStyle = 'filled';
 
-    /** Taille */
+    /** Size */
     @Input() size: UiSize = 'md';
 
-    /** Forme */
+    /** Shape */
     @Input() shape: UiShape = 'rounded';
 
-    /** Alignement (si pertinent) */
+    /** Alignment (if relevant) */
     @Input() alignContent: UiAlignment = 'center';
 
-    /** Espacement (si pertinent) */
+    /** Spacing (if relevant) */
     @Input() gap: UiSpacing = 'md';
 
-    /** Largeur déclarative */
+    /** Declarative width */
     @Input() width: UiWidth = 'custom';
 
-    /** Valeur de largeur pour w-custom (ex: '24rem' | '320px' | '70%') */
+    /** Width value for w-custom (e.g. '24rem' | '320px' | '70%') */
     @Input() widthValue?: string;
 
-    /** Élévation */
+    /** Elevation */
     @Input() elevation: UiElevation = 'none';
 
-    /** États */
+    /** States */
     @Input() disabled = false;
     @Input() loading = false;
 
@@ -54,16 +54,16 @@ export abstract class UiBase2Component {
     @Input() popOut = true;
     @Input() disableHoverEffects = false;
 
-    /** Poids de la police */
+    /** Font weight */
     @Input() fontWeight: UiFontWeight = 'normal';
 
-    /** Transformations de texte */
+    /** Text transformations */
     @Input() textTransform: UiTextTransform = 'none';
 
-    /** Font size (optionel) */
+    /** Font size (optional) */
     @Input() fontSize?: UiFontSize = undefined;
 
-    /** Classes à binder dans [ngClass] */
+    /** Classes to bind in [ngClass] */
     get classes(): Record<string, boolean> {
         return {
             [`c-${this.color}`]: true,
@@ -84,7 +84,7 @@ export abstract class UiBase2Component {
         };
     }
 
-    /** Variables CSS à binder dans [ngStyle] */
+    /** CSS variables to bind in [ngStyle] */
     get styleVars(): Record<string, string> {
         const vars: Record<string, string> = {};
         if (this.width === 'custom' && this.widthValue) vars['--ui-w'] = this.widthValue;

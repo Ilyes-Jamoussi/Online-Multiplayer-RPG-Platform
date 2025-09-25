@@ -2,14 +2,14 @@ import { NgClass } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { FaIconLibrary, FontAwesomeModule, SizeProp } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
-import { FaIcons } from '@ui/types/ui.types';
+import { FaIcons } from '@common/enums/fa-icons.enum';
 import { UiBase2Component } from '@ui/components/base/ui-base2.component';
 
-const ICON_SIZES = {
-    sm: 'xs' as SizeProp,
-    md: 'sm' as SizeProp,
-    lg: 'lg' as SizeProp,
-};
+export enum IconSizes {
+    SM = 'xs',
+    MD = 'sm',
+    LG = 'lg',
+}
 
 @Component({
     selector: 'app-ui-icon',
@@ -19,11 +19,11 @@ const ICON_SIZES = {
     styleUrls: ['./icon.component.scss'],
 })
 export class UiIconComponent extends UiBase2Component {
-    @Input() iconName: keyof typeof FaIcons = 'Coffee'; // Default to lowercase for FontAwesome compatibility
+    @Input() iconName: keyof typeof FaIcons = 'Coffee';
 
     constructor(library: FaIconLibrary) {
         super();
-        library.addIconPacks(fas); // Ensure FontAwesome icons are registered
+        library.addIconPacks(fas);
     }
 
     get iconValue(): string {
@@ -33,13 +33,13 @@ export class UiIconComponent extends UiBase2Component {
     get iconSize(): SizeProp {
         switch (this.size) {
             case 'sm':
-                return ICON_SIZES.sm;
+                return IconSizes.SM;
             case 'md':
-                return ICON_SIZES.md;
+                return IconSizes.MD;
             case 'lg':
-                return ICON_SIZES.lg;
+                return IconSizes.LG;
             default:
-                return ICON_SIZES.md; // Default size
+                return IconSizes.MD;
         }
     }
 }

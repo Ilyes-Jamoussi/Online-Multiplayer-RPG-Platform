@@ -50,7 +50,6 @@
     opacity: 0.8;
 }
 
-/* bouton ... accessible, non-draggable */
 .panel-dots {
     appearance: none;
     border: 0;
@@ -75,7 +74,6 @@
 }
 
 .panel-body {
-    /* animation de collapse via CSS grid */
     display: grid;
     grid-template-rows: 1fr;
     transition: grid-template-rows 180ms ease;
@@ -93,5 +91,5 @@
 
 .is-collapsed .panel-body-inner {
     padding-top: 0;
-    padding-bottom: 0; /* resserre le header quand réduit */
+    padding-bottom: 0;
 }

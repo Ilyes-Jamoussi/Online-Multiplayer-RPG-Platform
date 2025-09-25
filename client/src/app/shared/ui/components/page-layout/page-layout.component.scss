@@ -1,27 +1,27 @@
-// Layout principal qui occupe toute la hauteur de l'écran
+// Main layout that occupies the full height of the screen
 .uiPageLayout {
     display: flex;
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
 
-    // Header fixe en haut
+    // Fixed header at the top
     app-ui-header {
         flex-shrink: 0;
     }
 
-    // Corps de la page qui prend l'espace restant
+    // Page body that takes the remaining space
     .page-body {
         display: flex;
         flex: 1;
-        min-height: 0; // Important pour permettre le scroll du contenu
+        min-height: 0; // Important to allow content scrolling
 
-        // Sidebar optionnel
+        // Optional sidebar
         app-ui-sidebar {
             flex-shrink: 0;
         }
 
-        // Contenu principal scrollable
+        // Main scrollable content
         .page-content {
             flex: 1;
             padding: 2rem;
@@ -30,18 +30,18 @@
         }
     }
 
-    // Footer fixe en bas
+    // Fixed footer at the bottom
     app-ui-footer {
         flex-shrink: 0;
         border-top: 1px solid #e0e0e0;
         background-color: #f8f9fa;
     }
 
-    // Variante avec sidebar
+    // Variant with sidebar
     &.hasSidebar {
         .page-body {
             .page-content {
-                padding-left: 1rem; // Réduction du padding quand sidebar présent
+                padding-left: 1rem; // Reduced padding when sidebar is present
             }
         }
     }

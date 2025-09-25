@@ -1,9 +1,9 @@
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { GamePreviewCardComponent } from './game-preview-card.component';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('GamePreviewCardComponent', () => {
     let component: GamePreviewCardComponent;
@@ -26,8 +26,9 @@ describe('GamePreviewCardComponent', () => {
         const gameStoreSpy = jasmine.createSpyObj('GameStoreService', ['setGameId', 'setName', 'setDescription']);
 
         await TestBed.configureTestingModule({
-            imports: [GamePreviewCardComponent, HttpClientTestingModule],
+            imports: [GamePreviewCardComponent],
             providers: [
+                provideHttpClientTesting(),
                 { provide: Router, useValue: routerSpy },
                 { provide: GameStoreService, useValue: gameStoreSpy },
             ],
