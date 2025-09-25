@@ -11,9 +11,14 @@ import { catchError, switchMap, take, tap } from 'rxjs/operators';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { PatchGameEditorDto } from '@app/dto/patchGameEditorDto';
 import { InventoryItem, PLACEABLE_ORDER } from '@app/interfaces/game-editor.interface';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { DEFAULT_DRAFT_GAME_NAME, DEFAULT_DRAFT_GAME_DESCRIPTION } from '@common/constants/game.constants';
 
+interface ExtendedGameEditorPlaceableDto extends GameEditorPlaceableDto {
+    // Additional fields if needed
+    xs: number[];
+    ys: number[];
+}
 @Injectable()
 export class GameEditorStoreService {
     private readonly _initial = signal<GameEditorDto>({
@@ -39,8 +44,36 @@ export class GameEditorStoreService {
 
     private readonly _tileSizePx = signal<number>(0);
 
-    /** Placed objects in the editor */
-    readonly placedObjects = computed(() => this._objects().filter((o) => o.placed === true));
+    /** Placed objects in the editor with extended coordinates (if footprint > 1 need to add more x y coordinates) */
+    get placedObjects(): ExtendedGameEditorPlaceableDto[] {
+        const objs = this._objects();
+        const placed = objs.filter((o) => o.placed);
+        const acc: ExtendedGameEditorPlaceableDto[] = [];
+
+        for (const o of placed) {
+            const footprint = PlaceableFootprint[PlaceableKind[o.kind]];
+            const xs: number[] = [];
+            const ys: number[] = [];
+            for (let dx = 0; dx < footprint; dx++) {
+                for (let dy = 0; dy < footprint; dy++) {
+                    xs.push(o.x + dx);
+                    ys.push(o.y + dy);
+                }
+            }
+            acc.push({
+                id: o.id,
+                kind: o.kind,
+                orientation: o.orientation,
+                placed: o.placed,
+                x: o.x,
+                y: o.y,
+                xs,
+                ys,
+            });
+        }
+
+        return acc;
+    }
 
     /** Unplaced objects in the editor */
     readonly inventory = computed<InventoryItem[]>(() => {
@@ -222,7 +255,7 @@ export class GameEditorStoreService {
     }
 
     getPlacedObjectAt(x: number, y: number): GameEditorPlaceableDto | undefined {
-        return this.placedObjects().find((o) => o.x === x && o.y === y && o.placed === true);
+        return this.placedObjects.find((o) => o.xs.includes(x) && o.ys.includes(y));
     }
 
     placeObject(kind: PlaceableKind, x: number, y: number): void {

@@ -65,6 +65,10 @@ export class GameEditorInteractionsService {
         if (!tool || tool.type !== ToolType.TileBrushTool) return;
         if (!tool.leftDrag && !tool.rightDrag) return;
         this.store.setTileAt(x, y, tool.rightDrag ? TileKind.BASE : tool.tileKind);
+        const object = this.store.getPlacedObjectAt(x, y);
+        if (object && (tool.tileKind === TileKind.WALL || tool.tileKind === TileKind.DOOR)) {
+            this.store.removeObject(object.id);
+        }
     }
 
     resolveHoveredTiles(evt: DragEvent, tileX: number, tileY: number) {
@@ -139,21 +143,14 @@ export class GameEditorInteractionsService {
 
                 const tk = tile.kind as TileKind;
 
-                // Interdits terrain
                 if (tk === TileKind.WALL || tk === TileKind.DOOR) return false;
 
-                // Règles d'eau / bateau
                 if (kind === PlaceableKind.BOAT) {
-                    // Le bateau doit ENTIEREMENT être sur l'eau
                     if (tk !== TileKind.WATER) return false;
-                } else {
-                    // Tout autre objet ne peut pas être sur l'eau
-                    if (tk === TileKind.WATER) return false;
                 }
 
-                // Occupation existante (en ignorant éventuellement l'objet qu'on déplace)
-                const occupant = this.store.getPlacedObjectAt(tx, ty);
-                if (occupant && occupant.id !== excludeId) return false;
+                const object = this.store.getPlacedObjectAt(tx, ty);
+                if (object && object.id !== excludeId) return false;
             }
         }
 
@@ -161,17 +158,16 @@ export class GameEditorInteractionsService {
     }
 
     private tryPlaceObject(x: number, y: number, kind: PlaceableKind): void {
-        // HEAL et FIGHT sont maintenant gérés (footprint=2)
         if (!this.canPlaceObject(x, y, kind)) return;
         this.store.placeObject(kind, x, y);
     }
 
     private tryMoveObject(x: number, y: number, id: string): void {
-        const obj = this.store.placedObjects().find((o) => o.id === id);
+        const obj = this.store.placedObjects.find((o) => o.id === id);
         if (!obj) return;
 
-        const kind = PlaceableKind[obj.kind]; // même mapping que ton code actuel
-        if (!this.canPlaceObject(x, y, kind, id)) return; // ignore l'occupation par soi-même
+        const kind = PlaceableKind[obj.kind];
+        if (!this.canPlaceObject(x, y, kind, id)) return;
         this.store.moveObject(id, x, y);
     }
 
