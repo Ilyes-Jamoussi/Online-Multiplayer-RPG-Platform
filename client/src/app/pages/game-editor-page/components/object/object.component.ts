@@ -1,4 +1,3 @@
-// editor-placed-object.component.ts
 import { ChangeDetectionStrategy, Component, HostBinding, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GameEditorPlaceableDto } from '@app/api/model/gameEditorPlaceableDto';

@@ -42,7 +42,6 @@ export class CharacterStoreService {
         return Array.from({ length: CHARACTER_AVATARS_COUNT }, (_, i) => i);
     }
 
-    // mutateurs
     setName(name: string) {
         this._name.set(name);
     }

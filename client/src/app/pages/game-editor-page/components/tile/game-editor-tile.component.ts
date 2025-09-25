@@ -44,7 +44,6 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         return tool?.type === ToolType.TileBrushTool;
     }
 
-    // mouse events
     onRightClick(event: MouseEvent) {
         event.preventDefault();
     }
@@ -107,10 +106,6 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         return TileImage[kind];
     }
 
-    // onTileDragLeave() {
-
-    // }
-
     onTileDrop(evt: DragEvent) {
         if (!this.gameEditorInteractionsService.hasMime(evt)) return;
         if (!evt.dataTransfer) return;
@@ -122,32 +117,4 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
 
         this.gameEditorInteractionsService.resolveDropAction(evt, x, y);
     }
-
-    // @HostBinding('class.drop-hover')
-    // dropHover = false;
-
-    // @HostListener('dragover', ['$event'])
-    // onDragOver(evt: DragEvent) {
-    //     if (!evt.dataTransfer) return;
-    //     if (evt.dataTransfer.types.includes(DND_PLACEABLE_MIME)) {
-    //         evt.preventDefault();
-    //         evt.dataTransfer.dropEffect = 'copy';
-    //     }
-    // }
-
-    // @HostListener('dragenter', ['$event'])
-    // onDragEnter(evt: DragEvent) {
-    //     if (evt.dataTransfer?.types.includes(DND_PLACEABLE_MIME)) this.dropHover = true;
-    // }
-
-    // @HostListener('dragleave')
-    // onDragLeave() {
-    //     this.dropHover = false;
-    // }
-    // @HostListener('drop', ['$event'])
-    // // todo ondrop
-    // onDrop(evt: DragEvent) {
-    //     // todo
-    //     this.dropHover = false;
-    // }
 }

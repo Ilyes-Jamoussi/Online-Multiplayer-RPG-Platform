@@ -20,7 +20,6 @@ import { StatsBarComponent } from '@app/shared/components/stats-bar/stats-bar.co
     imports: [CommonModule, FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent],
 })
 export class CharacterCreationPageComponent implements OnInit {
-    // Expose l'état lisible pour le template
     get character() {
         return this.characterStoreService.character();
     }
@@ -29,7 +28,6 @@ export class CharacterCreationPageComponent implements OnInit {
         return this.characterStoreService;
     }
 
-    // Liste d'avatars (ex: [0..11])
     avatars = this.characterStoreService.avatars;
 
     constructor(
@@ -49,33 +47,26 @@ export class CharacterCreationPageComponent implements OnInit {
     }
 
     ngOnInit() {
-        // Reset l'avatar pour qu'aucun ne soit sélectionné par défaut
         this.characterStoreService.resetAvatar();
-        // Définir 'life' comme bonus par défaut dès l'entrée sur la page
         this.characterStoreService.setBonus('life');
     }
 
-    // Navigation
     goBack() {
         this.router.navigate([ROUTES.gameSessionCreation]);
     }
 
-    // Nom
     onNameChange(v: string) {
         this.characterStoreService.setName(v);
     }
 
-    // Avatar
     selectAvatar(index: number) {
         this.characterStoreService.selectAvatar(index);
     }
 
-    // Bonus exclusif (Life/Speed) via radios
     onBonusChange(bonus: 'life' | 'speed') {
         this.characterStoreService.setBonus(bonus);
     }
 
-    // Dés (radios)
     onAttackDiceChange(value: 'D4' | 'D6') {
         this.characterStoreService.setDice('attack', value);
     }
@@ -83,12 +74,10 @@ export class CharacterCreationPageComponent implements OnInit {
         this.characterStoreService.setDice('defense', value);
     }
 
-    // Aléatoire
     generateRandomCharacter() {
         this.characterStoreService.generateRandom();
     }
 
-    // Soumission
     onSubmit() {
         if (!this.characterStoreService.isValid) {
             this.notificationService.displayError({
