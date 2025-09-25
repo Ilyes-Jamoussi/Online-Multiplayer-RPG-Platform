@@ -10,6 +10,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { makeDefaultPlaceables } from '@app/game-store/factory/placeable.factory';
 import { makeDefaultTiles } from '@app/game-store/factory/tile.factory';
+import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
 
 @Injectable()
 export class GameStoreService {
@@ -18,15 +19,16 @@ export class GameStoreService {
     constructor(
         @InjectModel(Game.name) private readonly gameModel: Model<GameDocument>,
         private readonly imageService: ImageService,
+        private readonly gameDtoMapper: GameDtoMapper,
     ) {}
 
     async createGame(dto: CreateGameDto): Promise<GamePreviewDto> {
         const existingDraft = await this.gameModel.findOne({ draft: true });
-        
+
         if (existingDraft) {
             return this.updateExistingDraft(existingDraft._id.toString(), dto);
         }
-        
+
         return this.createNewDraft(dto);
     }
 
@@ -46,13 +48,13 @@ export class GameStoreService {
         } as GameDocument;
 
         const createdGame = await this.gameModel.create(gameDocument);
-        return this.toGamePreviewDto(createdGame);
+        return this.gameDtoMapper.toGamePreviewDto(createdGame);
     }
 
     private async updateExistingDraft(draftId: string, dto: CreateGameDto): Promise<GamePreviewDto> {
         const defaultObjects = makeDefaultPlaceables(dto.size, dto.mode);
         const defaultTiles = makeDefaultTiles(dto.size);
-        
+
         const updatedDraft = await this.gameModel.findByIdAndUpdate(
             draftId,
             {
@@ -62,15 +64,15 @@ export class GameStoreService {
                 lastModified: new Date(),
                 gridPreviewUrl: '',
             },
-            { new: true }
+            { new: true },
         );
-        
-        return this.toGamePreviewDto(updatedDraft);
+
+        return this.gameDtoMapper.toGamePreviewDto(updatedDraft);
     }
 
     async getGames(): Promise<GamePreviewDto[]> {
         const games = await this.gameModel.find({ draft: false }, getProjection('displayGameDto')).sort({ createdAt: -1 }).lean();
-        return games.map((game) => this.toGamePreviewDto(game));
+        return games.map((game) => this.gameDtoMapper.toGamePreviewDto(game));
     }
 
     async getGameInit(gameId: string): Promise<GameInitDto> {
@@ -98,18 +100,15 @@ export class GameStoreService {
     }
 
     async updateGame(id: string, dto: UpdateGameDto): Promise<GamePreviewDto> {
-        // Récupérer le jeu existant pour obtenir l'ancienne image
         const existingGame = await this.gameModel.findById(id);
         if (!existingGame) {
             throw new NotFoundException('Game not found');
         }
 
-        // Supprimer l'ancienne image si elle existe
         if (existingGame.gridPreviewUrl) {
             await this.imageService.deleteImage(existingGame.gridPreviewUrl);
         }
 
-        // Sauvegarder la nouvelle image avec timestamp pour forcer la mise à jour
         const gridPreviewUrl = await this.imageService.saveImage(dto.gridPreviewImage, `${dto.name}-${Date.now()}-preview.png`, 'grid-previews');
 
         const updatedGame = await this.gameModel.findByIdAndUpdate(
@@ -123,7 +122,7 @@ export class GameStoreService {
             { new: true },
         );
 
-        return this.toGamePreviewDto(updatedGame);
+        return this.gameDtoMapper.toGamePreviewDto(updatedGame);
     }
 
     async toggleVisibility(id: string, newVisibility: boolean): Promise<void> {
@@ -134,19 +133,5 @@ export class GameStoreService {
         if (!updated) {
             throw new NotFoundException('Game not found');
         }
-    }
-
-    private toGamePreviewDto(game: GameDocument): GamePreviewDto {
-        return {
-            id: game._id.toString(),
-            name: game.name,
-            description: game.description,
-            size: game.size,
-            mode: game.mode,
-            lastModified: game.lastModified,
-            visibility: game.visibility,
-            gridPreviewUrl: game.gridPreviewUrl,
-            draft: game.draft,
-        };
     }
 }

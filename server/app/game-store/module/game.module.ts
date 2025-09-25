@@ -7,11 +7,12 @@ import { GameStoreService } from '@app/game-store/services/game-store.service';
 import { ImageService } from '@app/game-store/services/image.service';
 import { GameEditorController } from '@app/game-store//controllers/game-editor.controller';
 import { GameEditorService } from '@app/game-store/services/game-editor.service';
+import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
 
 @Module({
     imports: [MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }])],
     controllers: [GameStoreController, GameEditorController],
-    providers: [GameStoreService, GameStoreGateway, ImageService, GameEditorService],
+    providers: [GameStoreService, GameStoreGateway, ImageService, GameEditorService, GameDtoMapper],
     exports: [GameStoreService, GameEditorService],
 })
 export class GameStoreModule {}
