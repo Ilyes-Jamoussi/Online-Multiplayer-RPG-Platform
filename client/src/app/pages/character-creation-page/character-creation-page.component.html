@@ -15,7 +15,7 @@
                     } @else {
                         <img
                             [src]="getSelectedAvatarImage()"
-                            [alt]="'Avatar sélectionné ' + ((character.avatar ?? 0) + 1)"
+                            [alt]="'Avatar sélectionné ' + (character.avatar + 1)"
                             class="selected-avatar-gif"
                         />
                     }
