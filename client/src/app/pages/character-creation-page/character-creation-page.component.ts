@@ -4,25 +4,42 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { ROUTES } from '@app/constants/routes.constants';
-import { CHARACTER_NAME_MIN_LENGTH, CHARACTER_NAME_MAX_LENGTH, WHITESPACE_PATTERN } from '@app/constants/validation.constants';
+import {
+    CHARACTER_NAME_MIN_LENGTH,
+    CHARACTER_NAME_MAX_LENGTH,
+    WHITESPACE_PATTERN,
+    NAME_ALLOWED_CHARS_PATTERN,
+} from '@app/constants/validation.constants';
 import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
+import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 import { UiInputComponent } from '@app/shared/ui/components/input/input.component';
 import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
 import { StatsBarComponent } from '@app/shared/components/stats-bar/stats-bar.component';
+import { ErrorsBadgeComponent } from '@app/shared/components/errors-badge/errors-badge.component';
 
 @Component({
     standalone: true,
     selector: 'app-character-creation-page',
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
-    imports: [CommonModule, FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent],
+    imports: [
+        CommonModule,
+        FormsModule,
+        UiButtonComponent,
+        UiInputComponent,
+        UiPageLayoutComponent,
+        StatsBarComponent,
+        ErrorsBadgeComponent,
+    ],
+    providers: [CharacterCreationCheckService],
 })
 export class CharacterCreationPageComponent implements OnInit {
-    readonly CHARACTER_NAME_MIN_LENGTH = CHARACTER_NAME_MIN_LENGTH;
-    readonly CHARACTER_NAME_MAX_LENGTH = CHARACTER_NAME_MAX_LENGTH;
+    readonly characterNameMinLength = CHARACTER_NAME_MIN_LENGTH;
+    readonly characterNameMaxLength = CHARACTER_NAME_MAX_LENGTH;
+    readonly nameAllowedCharsPattern = NAME_ALLOWED_CHARS_PATTERN;
 
     get character() {
         return this.characterStoreService.character();
@@ -36,6 +53,7 @@ export class CharacterCreationPageComponent implements OnInit {
 
     constructor(
         readonly assetsService: AssetsService,
+        readonly characterCreationCheckService: CharacterCreationCheckService,
         private readonly characterStoreService: CharacterStoreService,
         private readonly router: Router,
         private readonly notificationService: NotificationService,
@@ -95,7 +113,7 @@ export class CharacterCreationPageComponent implements OnInit {
     }
 
     onSubmit() {
-        if (!this.characterStoreService.isValid) {
+        if (!this.characterCreationCheckService.canCreate()) {
             this.notificationService.displayError({
                 title: 'Erreur de validation',
                 message: 'Nom, avatar et bonus requis.',

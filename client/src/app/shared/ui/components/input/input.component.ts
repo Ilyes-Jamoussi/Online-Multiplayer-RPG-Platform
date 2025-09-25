@@ -26,7 +26,7 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
     @Input() required: boolean = false;
     @Input() clearable: boolean = false;
     @Input() maxLength?: number;
-    @Input() minLength?: number;
+    @Input() allowedCharsPattern?: RegExp;
     @Input() errorMessage: string = '';
     @Input() set initialValue(val: string) {
         if (val !== undefined) {
@@ -76,6 +76,12 @@ export class UiInputComponent extends UiBaseComponent implements ControlValueAcc
         this._value = input.value;
         this.onChangeCallback(this._value);
         this.valueChange.emit(this._value);
+    }
+
+    onKeyPress(event: KeyboardEvent): void {
+        if (this.allowedCharsPattern && !this.allowedCharsPattern.test(event.key)) {
+            event.preventDefault();
+        }
     }
 
     onClear(): void {

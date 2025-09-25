@@ -50,6 +50,8 @@
             placeholder="Saisissez le nom de votre jeu"
             [value]="gameEditorStoreService.name"
             (valueChange)="gameEditorStoreService.setName($event)"
+            [maxLength]="gameNameMaxLength"
+            [allowedCharsPattern]="nameAllowedCharsPattern"
         ></app-ui-input>
         <app-ui-input
             type="description"
@@ -59,6 +61,6 @@
         ></app-ui-input>
         <app-ui-button (buttonClick)="onReset()">Réinitialiser la grille</app-ui-button>
         <app-ui-button (buttonClick)="onSave()" [disabled]="!gameEditorCheckService.canSave()">Sauvegarder</app-ui-button>
-        <app-editor-errors-badge></app-editor-errors-badge>
+        <app-errors-badge validationType="game-editor"></app-errors-badge>
     </div>
 </app-ui-page-layout>

@@ -57,12 +57,12 @@ describe('CharacterStoreService', () => {
     });
 
     it('should validate character correctly', () => {
-        expect(service.isValid()).toBeFalse();
+        expect(service.isValid).toBeFalse();
 
         service.setName('Hero');
         service.setBonus('life');
         service.selectAvatar(0);
-        expect(service.isValid()).toBeTrue();
+        expect(service.isValid).toBeTrue();
     });
 
     it('should generate random character', () => {

@@ -53,7 +53,12 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         if (event.button === 0) {
             this.gameEditorInteractionsService.dragStart(this.tile.x, this.tile.y, 'left');
         } else if (event.button === 2) {
-            this.gameEditorInteractionsService.setActiveTool({ type: ToolType.TileBrushTool, tileKind: TileKind.BASE, leftDrag: false, rightDrag: false });
+            this.gameEditorInteractionsService.setActiveTool({
+                type: ToolType.TileBrushTool,
+                tileKind: TileKind.BASE,
+                leftDrag: false,
+                rightDrag: false,
+            });
             this.gameEditorInteractionsService.dragStart(this.tile.x, this.tile.y, 'right');
         }
     }
