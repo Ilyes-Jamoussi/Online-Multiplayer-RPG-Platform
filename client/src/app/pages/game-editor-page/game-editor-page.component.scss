@@ -99,6 +99,10 @@
     pointer-events: auto;
 }
 
+.objects-overlay.disable-pointer-events > * {
+    pointer-events: none;
+}
+
 :host ::ng-deep .footer-content {
     display: flex;
     justify-content: center;

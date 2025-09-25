@@ -15,28 +15,29 @@
                 <app-editor-inventory></app-editor-inventory>
             </app-draggable-panel>
             <div class="grid-container">
-                @if(store.tiles().length > 0) {
+                @if(gameEditorStoreService.tiles().length > 0) {
                 <div #gridWrapper class="grid-wrapper">
                     <div
                         class="grid"
                         [ngStyle]="{
-                            'grid-template-columns': 'repeat(' + store.size() + ', minmax(0,1fr))',
-                            'grid-template-rows': 'repeat(' + store.size() + ', minmax(0,1fr))'
+                            'grid-template-columns': 'repeat(' + gameEditorStoreService.size() + ', minmax(0,1fr))',
+                            'grid-template-rows': 'repeat(' + gameEditorStoreService.size() + ', minmax(0,1fr))'
                         }"
                     >
-                        @for(tile of store.tiles(); track $index; let i = $index) {
+                        @for(tile of gameEditorStoreService.tiles(); track $index; let i = $index) {
                         <app-editor-tile [tile]="tile" appTileSizeProbe [probeActive]="i === 0" (sizeChange)="onResize($event)"></app-editor-tile>
                         }
                     </div>
                     <div
                         class="objects-overlay"
+                        [class.disable-pointer-events]="disableOverlayPointerEvents"
                         [ngStyle]="{
-                            'grid-template-columns': 'repeat(' + store.size() + ', minmax(0,1fr))',
-                            'grid-template-rows': 'repeat(' + store.size() + ', minmax(0,1fr))'
+                            'grid-template-columns': 'repeat(' + gameEditorStoreService.size() + ', minmax(0,1fr))',
+                            'grid-template-rows': 'repeat(' + gameEditorStoreService.size() + ', minmax(0,1fr))'
                         }"
                     >
-                        @for (obj of store.placedObjects(); track obj.id) {
-                        <app-editor-placed-object [object]="obj" [tileSize]="store.tileSizePx" />
+                        @for (obj of gameEditorStoreService.placedObjects; track obj.id) {
+                        <app-editor-placed-object [object]="obj" [tileSize]="gameEditorStoreService.tileSizePx" />
                         }
                     </div>
                 </div>
@@ -48,17 +49,17 @@
         <app-ui-input
             type="name"
             placeholder="Saisissez le nom de votre jeu"
-            [value]="store.name"
-            (valueChange)="store.setName($event)"
+            [value]="gameEditorStoreService.name"
+            (valueChange)="gameEditorStoreService.setName($event)"
         ></app-ui-input>
         <app-ui-input
             type="description"
             placeholder="Décrivez votre jeu en quelques mots"
-            [value]="store.description"
-            (valueChange)="store.setDescription($event)"
+            [value]="gameEditorStoreService.description"
+            (valueChange)="gameEditorStoreService.setDescription($event)"
         ></app-ui-input>
         <app-ui-button (buttonClick)="onReset()">Réinitialiser la grille</app-ui-button>
-        <app-ui-button (buttonClick)="onSave()" [disabled]="!editorCheck.canSave()">Sauvegarder</app-ui-button>
+        <app-ui-button (buttonClick)="onSave()" [disabled]="!gameEditorCheckService.canSave()">Sauvegarder</app-ui-button>
         <app-editor-errors-badge></app-editor-errors-badge>
     </div>
 </app-ui-page-layout>

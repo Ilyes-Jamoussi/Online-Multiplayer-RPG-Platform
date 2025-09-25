@@ -15,7 +15,6 @@ import { GameEditorInteractionsService, ToolType } from '@app/services/game-edit
 })
 export class GameEditorObjectComponent {
     @Input({ required: true }) object!: GameEditorPlaceableDto;
-    /** taille tuile pour cohérence visuelle (emoji/sprite) */
     @Input() tileSize = 48;
 
     constructor(private readonly interactions: GameEditorInteractionsService) {}

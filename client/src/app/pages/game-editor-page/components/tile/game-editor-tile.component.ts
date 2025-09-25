@@ -44,7 +44,6 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         return tool?.type === ToolType.TileBrushTool;
     }
 
-    // mouse events
     onRightClick(event: MouseEvent) {
         event.preventDefault();
     }
