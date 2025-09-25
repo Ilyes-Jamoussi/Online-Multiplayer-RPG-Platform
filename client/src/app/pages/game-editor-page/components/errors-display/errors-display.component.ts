@@ -9,10 +9,10 @@ import { GameEditorCheckService } from '@app/services/game-editor-check/game-edi
     styleUrls: ['./errors-display.component.scss'],
 })
 export class GameEditorErrorsDisplayComponent {
-    constructor(readonly editorCheck: GameEditorCheckService) {}
+    constructor(readonly gameEditorCheckService: GameEditorCheckService) {}
 
     get errorList(): string[] {
-        const problems = this.editorCheck.editorProblems();
+        const problems = this.gameEditorCheckService.editorProblems();
         const messages: string[] = [];
         for (const issue of Object.values(GameEditorIssuesEnum)) {
             const problem = problems[issue];

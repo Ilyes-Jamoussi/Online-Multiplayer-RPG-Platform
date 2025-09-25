@@ -12,8 +12,8 @@ import { PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum'
 })
 export class GameEditorInventoryComponent {
     constructor(
-        readonly store: GameEditorStoreService,
-        private readonly interactions: GameEditorInteractionsService,
+        readonly gameEditorStoreService: GameEditorStoreService,
+        private readonly gameEditorInteractionsService: GameEditorInteractionsService,
     ) {}
 
     readonly dndMime = PlaceableMime;
@@ -62,10 +62,10 @@ export class GameEditorInventoryComponent {
         evt.dataTransfer.setData(this.dndMime[kind], kind);
 
         const img = document.createElement('div');
-        img.style.fontSize = `${this.store.tileSizePx}px`;
+        img.style.fontSize = `${this.gameEditorStoreService.tileSizePx}px`;
         img.style.lineHeight = '1';
-        img.style.width = `${this.store.tileSizePx}px`;
-        img.style.height = `${this.store.tileSizePx}px`;
+        img.style.width = `${this.gameEditorStoreService.tileSizePx}px`;
+        img.style.height = `${this.gameEditorStoreService.tileSizePx}px`;
         img.style.display = 'flex';
         img.style.alignItems = 'center';
         img.style.justifyContent = 'center';
@@ -75,17 +75,17 @@ export class GameEditorInventoryComponent {
 
         img.textContent = this.iconOf(kind);
         document.body.appendChild(img);
-        evt.dataTransfer.setDragImage(img, this.store.tileSizePx / 2, this.store.tileSizePx / 2);
+        evt.dataTransfer.setDragImage(img, this.gameEditorStoreService.tileSizePx / 2, this.gameEditorStoreService.tileSizePx / 2);
         setTimeout(() => document.body.removeChild(img), 0);
 
-        this.interactions.setActiveTool({
+        this.gameEditorInteractionsService.setActiveTool({
             type: ToolType.PlaceableTool,
             placeableKind: kind,
         });
     }
 
     onDragEnd() {
-        this.interactions.revertToPreviousTool();
+        this.gameEditorInteractionsService.revertToPreviousTool();
     }
 
     onSlotDragOver(evt: DragEvent, kind: PlaceableKind) {
@@ -108,10 +108,10 @@ export class GameEditorInventoryComponent {
         if (!id) return;
         evt.preventDefault();
         evt.stopPropagation();
-        this.interactions.setActiveTool({
+        this.gameEditorInteractionsService.setActiveTool({
             type: ToolType.PlaceableEraserTool,
         });
-        this.interactions.removeObject(id);
+        this.gameEditorInteractionsService.removeObject(id);
         this.dragOver = '';
     }
 

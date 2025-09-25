@@ -18,19 +18,19 @@ export class GameEditorObjectComponent {
     /** taille tuile pour cohérence visuelle (emoji/sprite) */
     @Input() tileSize = 48;
 
-    constructor(private readonly interactions: GameEditorInteractionsService) {}
+    constructor(private readonly gameEditorInteractionsService: GameEditorInteractionsService) {}
 
     isDragging = false;
 
     @HostBinding('style.grid-column')
     get gridCol() {
-        const w = this.interactions.getFootprintOf(PlaceableKind[this.object.kind]);
+        const w = this.gameEditorInteractionsService.getFootprintOf(PlaceableKind[this.object.kind]);
         return `${this.object.x + 1} / span ${w}`;
     }
 
     @HostBinding('style.grid-row')
     get gridRow() {
-        const h = this.interactions.getFootprintOf(PlaceableKind[this.object.kind]);
+        const h = this.gameEditorInteractionsService.getFootprintOf(PlaceableKind[this.object.kind]);
         return `${this.object.y + 1} / span ${h}`;
     }
 
@@ -44,7 +44,7 @@ export class GameEditorObjectComponent {
         evt.dataTransfer.effectAllowed = 'copy';
         evt.dataTransfer.setData(PlaceableMime[this.object.kind], this.object.id);
         this.isDragging = true;
-        this.interactions.setActiveTool({
+        this.gameEditorInteractionsService.setActiveTool({
             type: ToolType.PlaceableTool,
             placeableKind: PlaceableKind[this.object.kind],
         });
@@ -52,7 +52,7 @@ export class GameEditorObjectComponent {
 
     onDragEnd() {
         this.isDragging = false;
-        this.interactions.revertToPreviousTool();
+        this.gameEditorInteractionsService.revertToPreviousTool();
     }
 
     onContextMenu(evt: MouseEvent) {
@@ -62,7 +62,7 @@ export class GameEditorObjectComponent {
     onMouseDown(evt: MouseEvent) {
         evt.stopPropagation();
         if (evt.button === 2) {
-            this.interactions.setActiveTool({
+            this.gameEditorInteractionsService.setActiveTool({
                 type: ToolType.PlaceableEraserTool,
             });
         }
@@ -71,7 +71,7 @@ export class GameEditorObjectComponent {
     onMouseUp(evt: MouseEvent) {
         evt.stopPropagation();
         if (evt.button === 2) {
-            this.interactions.removeObject(this.object.id);
+            this.gameEditorInteractionsService.removeObject(this.object.id);
         }
     }
 }

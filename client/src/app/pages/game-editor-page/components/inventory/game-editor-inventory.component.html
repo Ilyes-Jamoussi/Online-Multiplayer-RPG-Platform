@@ -1,5 +1,5 @@
 <div class="inventory">
-    @for (item of store.inventory(); track item.kind) {
+    @for (item of gameEditorStoreService.inventory(); track item.kind) {
     <div
         class="slot"
         [class.disabled]="item.remaining === 0"
