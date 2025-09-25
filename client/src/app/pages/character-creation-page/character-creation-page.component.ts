@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { ROUTES } from '@app/constants/routes.constants';
+import { CHARACTER_NAME_MIN_LENGTH, CHARACTER_NAME_MAX_LENGTH, WHITESPACE_PATTERN } from '@app/constants/validation.constants';
 import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { NotificationService } from '@app/services/notification/notification.service';
@@ -20,6 +21,9 @@ import { StatsBarComponent } from '@app/shared/components/stats-bar/stats-bar.co
     imports: [CommonModule, FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent],
 })
 export class CharacterCreationPageComponent implements OnInit {
+    readonly CHARACTER_NAME_MIN_LENGTH = CHARACTER_NAME_MIN_LENGTH;
+    readonly CHARACTER_NAME_MAX_LENGTH = CHARACTER_NAME_MAX_LENGTH;
+
     get character() {
         return this.characterStoreService.character();
     }
@@ -57,6 +61,18 @@ export class CharacterCreationPageComponent implements OnInit {
 
     onNameChange(v: string) {
         this.characterStoreService.setName(v);
+    }
+
+    getNameErrorMessage(): string {
+        const name = this.character.name.trim();
+        if (name.length === 0) return '';
+        if (name.length < CHARACTER_NAME_MIN_LENGTH || name.length > CHARACTER_NAME_MAX_LENGTH) {
+            return `Le nom doit contenir entre ${CHARACTER_NAME_MIN_LENGTH} et ${CHARACTER_NAME_MAX_LENGTH} caractères.`;
+        }
+        if (name.replace(WHITESPACE_PATTERN, '').length === 0) {
+            return 'Le nom ne peut pas être composé uniquement d\'espaces.';
+        }
+        return '';
     }
 
     selectAvatar(index: number) {

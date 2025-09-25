@@ -50,14 +50,14 @@
             <div class="character-name-section">
                 <h3>Nom *</h3>
                 <app-ui-input
+                    type="name"
                     placeholder="Nom du héros"
-                    [initialValue]="character.name"
+                    [value]="character.name"
                     (valueChange)="onNameChange($event)"
-                    [maxLength]="8"
+                    [minLength]="CHARACTER_NAME_MIN_LENGTH"
+                    [maxLength]="CHARACTER_NAME_MAX_LENGTH"
+                    [errorMessage]="getNameErrorMessage()"
                 ></app-ui-input>
-                @if (store.nameError) {
-                <div class="error-message">{{ store.nameError }}</div>
-                }
             </div>
 
             <!-- Stats + Bonus -->
