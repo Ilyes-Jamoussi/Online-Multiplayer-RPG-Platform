@@ -49,9 +49,9 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
 
     constructor(
         private readonly route: ActivatedRoute,
-        readonly store: GameEditorStoreService,
-        readonly editorCheck: GameEditorCheckService,
-        private readonly notification: NotificationService,
+        readonly gameEditorStoreService: GameEditorStoreService,
+        readonly gameEditorCheckService: GameEditorCheckService,
+        private readonly notificationService: NotificationService,
         private readonly screenshotService: ScreenshotService,
     ) {}
 
@@ -64,7 +64,7 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.gameId$
             .pipe(
-                tap((id) => this.store.loadGameById(id)),
+                tap((id) => this.gameEditorStoreService.loadGameById(id)),
                 takeUntil(this.destroy$),
             )
             .subscribe();
@@ -80,24 +80,24 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     }
 
     onReset(): void {
-        this.store.reset();
+        this.gameEditorStoreService.reset();
     }
 
     onResize(newSize: number): void {
-        this.store.tileSizePx = newSize;
+        this.gameEditorStoreService.tileSizePx = newSize;
     }
 
     async onSave(): Promise<void> {
-        if (this.editorCheck.canSave()) {
+        if (this.gameEditorCheckService.canSave()) {
             const gridPreviewImage = await this.screenshotService.captureElementAsBase64(this.gridWrapper.nativeElement);
-            this.store.saveGame(gridPreviewImage);
-            this.notification.displaySuccess({
+            this.gameEditorStoreService.saveGame(gridPreviewImage);
+            this.notificationService.displaySuccess({
                 title: 'Jeu sauvegardé',
                 message: 'Votre jeu a été sauvegardé avec succès !',
                 redirectRoute: ROUTES.gameManagement,
             });
         } else {
-            this.notification.displayError({
+            this.notificationService.displayError({
                 title: 'Problèmes dans la carte',
                 message: 'Veuillez corriger les problèmes dans la carte avant de sauvegarder.',
             });
