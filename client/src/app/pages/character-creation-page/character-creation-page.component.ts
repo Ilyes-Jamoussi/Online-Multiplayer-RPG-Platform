@@ -124,9 +124,9 @@ export class CharacterCreationPageComponent implements OnInit {
         this.notificationService.displaySuccess({
             title: 'Personnage créé',
             message: `${this.character.name} est prêt pour l’aventure.`,
-        });
+            redirectRoute: ROUTES.waitingRoom,        });
 
-        this.router.navigate([ROUTES.waitingRoom]);
+
     }
 
     onBackClick() {
