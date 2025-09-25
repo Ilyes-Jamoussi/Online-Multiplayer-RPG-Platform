@@ -102,35 +102,6 @@ describe('GameStoreService', () => {
         });
     });
 
-    // describe('createGame', () => {
-    //     it('should call gameHttpService.createGame', () => {
-    //         gameHttpServiceSpy.createGame.and.returnValue(of({
-    //             id: '3',
-    //             name: 'New Game',
-    //             description: 'New Desc',
-    //             size: 10,
-    //             mode: 'classic',
-    //             lastModified: '2023-01-03',
-    //             visibility: true,
-    //             gridPreviewUrl: '/assets/game3.png'
-    //         }));
-
-    //         service.createGame().subscribe();
-
-    //         expect(gameHttpServiceSpy.createGame).toHaveBeenCalled();
-    //     });
-    // });
-
-    // describe('updateGame', () => {
-    //     it('should call gameHttpService.updateGame', () => {
-    //         gameHttpServiceSpy.updateGame.and.returnValue(of(undefined));
-
-    //         service.updateGame().subscribe();
-
-    //         expect(gameHttpServiceSpy.updateGame).toHaveBeenCalled();
-    //     });
-    // });
-
     describe('deleteGame', () => {
         it('should call gameHttpService.deleteGame', () => {
             gameHttpServiceSpy.deleteGame.and.returnValue(of(undefined));

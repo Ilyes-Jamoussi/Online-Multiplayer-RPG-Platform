@@ -12,7 +12,6 @@ describe('SocketService', () => {
     beforeEach(() => {
         mockSocket = jasmine.createSpyObj('Socket', ['emit']);
 
-        // Mock the io function globally before service creation
         (globalThis as unknown as { io: jasmine.Spy }).io = jasmine.createSpy('io').and.returnValue(mockSocket);
 
         TestBed.configureTestingModule({
@@ -30,7 +29,6 @@ describe('SocketService', () => {
         const event = GameStoreEvents.GameCreated;
         const data = { test: 'data' };
 
-        // Spy on the actual socket instance
         spyOn(service['socket'], 'emit');
 
         service.emit(event, data);

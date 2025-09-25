@@ -163,7 +163,7 @@ export class GameEditorStoreService {
                     return this.gameStoreService.createGame(createDto).pipe(
                         switchMap((newGame) => {
                             this._id.set(newGame.id);
-                            // Mettre à jour le nouveau jeu avec l'image
+                            // update the draft game with the editor data
                             const updateGame: PatchGameEditorDto = {
                                 tiles: this._tiles(),
                                 objects: this._objects(),

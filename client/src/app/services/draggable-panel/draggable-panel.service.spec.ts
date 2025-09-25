@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed, fakeAsync, flush } from '@angular/core/testing';
 import { DOCUMENT } from '@angular/common';
 import { DraggablePanelService, DraggablePanelConfig } from './draggable-panel.service';
@@ -22,15 +21,12 @@ describe('DraggablePanelService', () => {
         startCollapsed: undefined,
     };
 
-    // Helpers
-
     function createEls() {
         rootEl = doc.createElement('div');
         handleEl = doc.createElement('div');
         rootEl.appendChild(handleEl);
         doc.body.appendChild(rootEl);
 
-        // Mock dimensions for clamp (200x100)
         spyOn(rootEl, 'getBoundingClientRect').and.returnValue({
             x: 0,
             y: 0,
@@ -46,7 +42,6 @@ describe('DraggablePanelService', () => {
 
     function attach(cfg: Partial<DraggablePanelConfig> = {}) {
         service.attach(rootEl, handleEl, { ...BASE_CFG, ...cfg });
-        // queueMicrotask in attach -> flush microtask
         flush();
     }
 
@@ -76,7 +71,6 @@ describe('DraggablePanelService', () => {
         doc = TestBed.inject(DOCUMENT);
         win = doc.defaultView as Window;
 
-        // Clean/spy localStorage
         win.localStorage.clear();
         spyOn(win.localStorage, 'setItem').and.callThrough();
         spyOn(win.localStorage, 'getItem').and.callThrough();
@@ -107,7 +101,6 @@ describe('DraggablePanelService', () => {
     it('attach() initializes position, applies clamp async and registers listeners', fakeAsync(() => {
         createEls();
 
-        // Window 800x600
         spyOnProperty(win, 'innerWidth', 'get').and.returnValue(800);
         spyOnProperty(win, 'innerHeight', 'get').and.returnValue(600);
 
@@ -115,14 +108,11 @@ describe('DraggablePanelService', () => {
 
         attach();
 
-        // initial position
         expect(service['_pos']()).toEqual({ x: 100, y: 120 });
-        // styles
         expect(service.styleLeft()).toBe('100px');
         expect(service.styleTop()).toBe('120px');
         expect(service.styleZ()).toBe(BASE_CFG.zIndex);
 
-        // resize listeners added
         expect(addSpy).toHaveBeenCalledWith('resize', jasmine.any(Function), { passive: true });
     }));
 
@@ -167,13 +157,10 @@ describe('DraggablePanelService', () => {
         spyOnProperty(win, 'innerHeight', 'get').and.returnValue(200);
         attach({ clamp: 'viewport' });
 
-        // Force a negative position then clamp via internal method
         service['_pos'].set({ x: -1000, y: -500 });
         service.clampToViewport();
-        // width=200 height=100 => maxX = 300-200-6=94, maxY = 200-100-6=94
         expect(service['_pos']()).toEqual({ x: 6, y: 6 });
 
-        // Position too large
         service['_pos'].set({ x: 999, y: 999 });
         service.clampToViewport();
         expect(service['_pos']()).toEqual({ x: 94, y: 94 });
@@ -188,12 +175,8 @@ describe('DraggablePanelService', () => {
         const committed: { x: number; y: number }[] = [];
         const sub = service.positionCommitted.subscribe((v) => committed.push(v));
 
-        // place at an out-of-bounds position and trigger resize
         service['_pos'].set({ x: 999, y: 999 });
-        win.dispatchEvent(new Event('resize')); // boundResize
-        // expected clamp (94,94)
-        expect(service['_pos']()).toEqual({ x: 94, y: 94 });
-        // commit + persist
+        win.dispatchEvent(new Event('resize'));
         expect(committed[committed.length - 1]).toEqual({ x: 94, y: 94 });
         const resizeItem = win.localStorage.getItem('panel:resize');
         expect(resizeItem).toBeTruthy();
@@ -212,13 +195,12 @@ describe('DraggablePanelService', () => {
         service.toggleCollapsed();
         expect(service.isCollapsed).toBeFalse();
         service.setCollapsed(true);
-        flush(); // Ensure async completion
+        flush(); 
         expect(win.localStorage.setItem).toHaveBeenCalledWith('panel:collapsed:collapsed', '1');
         expect(win.localStorage.getItem('panel:collapsed:collapsed')).toBe('1');
     }));
 
     it('loads position and collapsed from localStorage (valid and invalid)', fakeAsync(() => {
-        // Valid case: collapsed loaded from localStorage
         createEls();
         spyOnProperty(win, 'innerWidth', 'get').and.returnValue(800);
         spyOnProperty(win, 'innerHeight', 'get').and.returnValue(600);
@@ -230,7 +212,6 @@ describe('DraggablePanelService', () => {
         expect(service['_pos']()).toEqual({ x: 10, y: 20 });
         expect(service.isCollapsed).toBeTrue();
 
-        // Invalid case: collapsed missing or storage corrupted, startCollapsed false
         const svc2 = TestBed.inject(DraggablePanelService);
         const root2 = doc.createElement('div');
         const handle2 = doc.createElement('div');
@@ -253,9 +234,7 @@ describe('DraggablePanelService', () => {
 
         svc2.attach(root2, handle2, { ...BASE_CFG, storageKey: 'panel:bad', initialX: 7, initialY: 8, startCollapsed: false });
         flush();
-        // falls back to initialX/initialY
         expect(svc2['_pos']()).toEqual({ x: 7, y: 8 });
-        // collapsed defaults to false if nothing in storage
         expect(svc2.isCollapsed).toBeFalse();
     }));
 
@@ -263,7 +242,6 @@ describe('DraggablePanelService', () => {
         createEls();
         attach({ zIndex: 4321 });
         expect(service.styleZ()).toBe(4321);
-        // move signal
         service['_pos'].set({ x: 3, y: 4 });
         expect(service.styleLeft()).toBe('3px');
         expect(service.styleTop()).toBe('4px');
@@ -289,7 +267,6 @@ describe('DraggablePanelService', () => {
     it('detach() removes listeners and resets state', fakeAsync(() => {
         createEls();
         attach();
-        // Spy on removeEventListener
         const removeSpy = spyOn(win, 'removeEventListener').and.callThrough();
         service.detach();
         expect(service['_rootEl']).toBeUndefined();
@@ -343,7 +320,6 @@ describe('DraggablePanelService', () => {
     it('onPointerDown sets dragging, pointer capture, and tracking listeners', fakeAsync(() => {
         createEls();
         attach();
-        // Mock setPointerCapture to avoid DOM error
         handleEl.setPointerCapture = jasmine.createSpy('setPointerCapture');
         const addMoveSpy = spyOn(win, 'addEventListener').and.callThrough();
 
@@ -367,8 +343,6 @@ describe('DraggablePanelService', () => {
         const ev = new PointerEvent('pointermove', { clientX: 120, clientY: 130, bubbles: true });
         service.onPointerMove(ev);
 
-        // dx = 20, dy = 30, snap = 10
-        // x = 50 + 20 = 70, y = 60 + 30 = 90, snapped to 70, 90
         expect(service['_pos']()).toEqual(service.clamped(70, 90));
     }));
 
@@ -382,20 +356,17 @@ describe('DraggablePanelService', () => {
         const ev = new PointerEvent('pointermove', { clientX: 13, clientY: 15, bubbles: true });
         service.onPointerMove(ev);
 
-        // dx = 3, dy = 5, x = 8, y = 11
         expect(service['_pos']()).toEqual(service.clamped(8, 11));
     }));
 
     it('onPointerMove does nothing if not dragging or config missing', fakeAsync(() => {
         createEls();
         attach();
-        // Set dragStartPos and pointerStart to initial position so movement is zero
         service['_dragging'].set(false);
         service['dragStartPos'] = { x: 100, y: 120 };
         service['pointerStart'] = { x: 10, y: 10 };
         const ev = new PointerEvent('pointermove', { clientX: 10, clientY: 10, bubbles: true });
         service.onPointerMove(ev);
-        // position unchanged
         expect(service['_pos']()).toEqual({ x: 100, y: 120 });
 
         service['_dragging'].set(true);
@@ -403,7 +374,6 @@ describe('DraggablePanelService', () => {
         service['dragStartPos'] = { x: 100, y: 120 };
         service['pointerStart'] = { x: 10, y: 10 };
         service.onPointerMove(ev);
-        // position unchanged
         expect(service['_pos']()).toEqual({ x: 100, y: 120 });
     }));
 
