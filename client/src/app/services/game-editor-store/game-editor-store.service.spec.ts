@@ -4,13 +4,13 @@ import { of } from 'rxjs';
 
 import { GameEditorStoreService } from './game-editor-store.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { GameEditorDto } from '@app/api/model/gameEditorDto';
-import { PatchGameEditorDto } from '@app/api/model/patchGameEditorDto';
+import { GameEditorDto } from '@app/dto/gameEditorDto';
+import { PatchGameEditorDto } from '@app/dto/patchGameEditorDto';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
-import { GameEditorTileDto } from '@app/api/model/gameEditorTileDto';
-import { GameEditorPlaceableDto } from '@app/api/model/gameEditorPlaceableDto';
+import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
+import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
 
 describe('GameEditorStoreService', () => {
     let service: GameEditorStoreService;

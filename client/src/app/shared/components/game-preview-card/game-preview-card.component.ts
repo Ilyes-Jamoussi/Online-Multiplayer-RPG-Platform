@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
+import { GamePreviewDto } from '@app/dto/gamePreviewDto';
 import { ROUTES } from '@app/constants/routes.constants';
 import { environment } from '@src/environments/environment';
 // import { GameStoreService } from '@app/services/game/game-store/game-store.service';

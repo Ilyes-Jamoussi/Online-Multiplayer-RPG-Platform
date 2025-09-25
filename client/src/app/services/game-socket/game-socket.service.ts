@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GamePreviewDto } from '@app/api/model/gamePreviewDto';
+import { GamePreviewDto } from '@app/dto/gamePreviewDto';
 import { SocketService } from '@app/services/socket/socket.service';
 import { GameStoreEvents } from '@common/constants/game-store-events';
 
