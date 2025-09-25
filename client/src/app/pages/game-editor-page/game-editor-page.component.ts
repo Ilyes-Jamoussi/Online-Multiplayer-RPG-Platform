@@ -48,9 +48,9 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     private readonly destroy$ = new Subject<void>();
 
     constructor(
-        private readonly route: ActivatedRoute,
         readonly gameEditorStoreService: GameEditorStoreService,
         readonly gameEditorCheckService: GameEditorCheckService,
+        private readonly route: ActivatedRoute,
         private readonly notificationService: NotificationService,
         private readonly screenshotService: ScreenshotService,
     ) {}
