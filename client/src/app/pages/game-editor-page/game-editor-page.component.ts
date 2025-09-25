@@ -59,6 +59,7 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
         private readonly screenshotService: ScreenshotService,
     ) {}
 
+    // variable plus descriptive
     readonly gameId$ = this.route.paramMap.pipe(
         map((p) => p.get('id')),
         filter((id): id is string => !!id),
