@@ -12,7 +12,7 @@
     display: grid;
     place-items: center;
 
-    /* gestion de l’image de fond via variable CSS */
+    /* scss management of background image via CSS variable */
     background-color: transparent;
     background-image: var(--bg-image);
     background-size: cover;
@@ -35,7 +35,7 @@
     }
 }
 
-/* état quand un élément est draggé au-dessus */
+/* state when an element is dragged over */
 
 .door {
     line-height: 1;

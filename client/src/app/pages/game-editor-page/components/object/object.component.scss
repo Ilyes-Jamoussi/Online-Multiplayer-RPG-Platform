@@ -1,8 +1,8 @@
 /* editor-placed-object.component.scss */
 :host {
-    display: block; /* requis pour le placement grid via host bindings */
-    pointer-events: auto; /* on veut pouvoir la saisir */
-    z-index: 1; /* au-dessus de la tuile */
+    display: block;
+    pointer-events: auto; 
+    z-index: 1; /* display above */
 }
 
 .obj {
