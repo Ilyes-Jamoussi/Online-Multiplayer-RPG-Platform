@@ -119,10 +119,6 @@ export class GameEditorInteractionsService {
         if (!Number.isFinite(footprint) || footprint <= 0) return;
         const hoveredTiles: Vector2[] = [];
 
-        // if (footprint === 1) {
-        //     console.log('Hovering tile:', tileX, tileY);
-        //     hoveredTiles.push({ x: tileX, y: tileY });
-        // } else {
         const offsetX = evt.offsetX;
         const offsetY = evt.offsetY;
 
@@ -135,7 +131,7 @@ export class GameEditorInteractionsService {
                 hoveredTiles.push({ x: closestX + dx, y: closestY + dy });
             }
         }
-        // }
+
         this._hoveredTiles.set(hoveredTiles);
         return hoveredTiles;
     }
