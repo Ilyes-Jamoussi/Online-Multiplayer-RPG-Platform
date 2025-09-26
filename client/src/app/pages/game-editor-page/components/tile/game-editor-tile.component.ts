@@ -40,7 +40,7 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
     }
 
     isBrushHovered(): boolean {
-        const tool = this.interactions.activeTool();
+        const tool = this.interactions.activeTool;
         return tool?.type === ToolType.TileBrushTool;
     }
 
@@ -53,7 +53,7 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         if (event.button === 0) {
             this.interactions.dragStart(this.tile.x, this.tile.y, 'left');
         } else if (event.button === 2) {
-            this.interactions.setActiveTool({ type: ToolType.TileBrushTool, tileKind: TileKind.BASE, leftDrag: false, rightDrag: false });
+            this.interactions.activeTool = { type: ToolType.TileBrushTool, tileKind: TileKind.BASE, leftDrag: false, rightDrag: false };
             this.interactions.dragStart(this.tile.x, this.tile.y, 'right');
         }
     }
@@ -94,7 +94,7 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         if (!this.interactions.hasMime(evt)) return;
         if (!evt.dataTransfer) return;
         evt.preventDefault();
-        evt.dataTransfer.dropEffect = 'copy';
+        evt.dataTransfer.dropEffect = 'move';
         this.interactions.resolveHoveredTiles(evt, this.tile.x, this.tile.y);
     }
 
@@ -106,47 +106,12 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         return TileImage[kind];
     }
 
-    // onTileDragLeave() {
-
-    // }
-
     onTileDrop(evt: DragEvent) {
         if (!this.interactions.hasMime(evt)) return;
         if (!evt.dataTransfer) return;
         evt.preventDefault();
         evt.stopPropagation();
 
-        const x = this.tile.x;
-        const y = this.tile.y;
-
-        this.interactions.resolveDropAction(evt, x, y);
+        this.interactions.resolveDropAction(evt);
     }
-
-    // @HostBinding('class.drop-hover')
-    // dropHover = false;
-
-    // @HostListener('dragover', ['$event'])
-    // onDragOver(evt: DragEvent) {
-    //     if (!evt.dataTransfer) return;
-    //     if (evt.dataTransfer.types.includes(DND_PLACEABLE_MIME)) {
-    //         evt.preventDefault();
-    //         evt.dataTransfer.dropEffect = 'copy';
-    //     }
-    // }
-
-    // @HostListener('dragenter', ['$event'])
-    // onDragEnter(evt: DragEvent) {
-    //     if (evt.dataTransfer?.types.includes(DND_PLACEABLE_MIME)) this.dropHover = true;
-    // }
-
-    // @HostListener('dragleave')
-    // onDragLeave() {
-    //     this.dropHover = false;
-    // }
-    // @HostListener('drop', ['$event'])
-    // // todo ondrop
-    // onDrop(evt: DragEvent) {
-    //     // todo
-    //     this.dropHover = false;
-    // }
 }

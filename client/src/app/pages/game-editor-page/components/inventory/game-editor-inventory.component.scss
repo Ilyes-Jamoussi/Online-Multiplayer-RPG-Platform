@@ -38,8 +38,6 @@
     display: grid;
     place-items: center;
     border: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: 8px;
-    background: #f8fafc;
     cursor: grab;
     user-select: none;
 
@@ -49,10 +47,13 @@
 }
 .icon-cell:active {
     cursor: grabbing;
+    .badge {
+        display: none;
+    }
 }
 
 .icon {
-    font-size: 28px; /* remplace par background-image si tu as des sprites */
+    font-size: calc(var(--tile-px, 48) * 0.7 * 1px);
     line-height: 1;
 }
 
