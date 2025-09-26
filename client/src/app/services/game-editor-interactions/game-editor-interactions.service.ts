@@ -214,57 +214,6 @@ export class GameEditorInteractionsService {
         this.store.moveObject(id, x, y);
     }
 
-    // private processDropTile(tileX: number, tileY: number, offsetX: number, offsetY: number): Vector2 {
-    //     const tool = this.activeTool;
-    //     if (!tool || tool.type !== ToolType.PlaceableTool) return { x: tileX, y: tileY };
-    //     const footprint = PlaceableFootprint[tool.placeableKind];
-    //     if (!Number.isFinite(footprint)) {
-    //         return { x: tileX, y: tileY };
-    //     }
-    //     if (footprint === 1) {
-    //         const { x: dx, y: dy } = this.objectGrabOffset;
-    //         const { x: d, y: e } = this.processClosestTile(tileX, tileY, offsetX, offsetY);
-
-    //         const offsetXAdjusted = offsetX - dx;
-    //         const offsetYAdjusted = offsetY - dy;
-
-    //         const delta = {
-    //             x: Math.round(offsetXAdjusted / (this.store.tileSizePx * footprint)),
-    //             y: Math.round(offsetYAdjusted / (this.store.tileSizePx * footprint)),
-    //         };
-
-    //         console.log('Adjusted offset:', offsetXAdjusted, offsetYAdjusted);
-    //         console.log('DELTA:', Math.round(offsetXAdjusted / this.store.tileSizePx), Math.round(offsetYAdjusted / this.store.tileSizePx));
-
-    //         return {
-    //             x: d + delta.x,
-    //             y: e + delta.y,
-    //         };
-    //     } else {
-    //         // distance to top left corner of object
-    //         const { x: dx, y: dy } = this.objectGrabOffset;
-    //         // offset on the hovered tile
-
-    //         // hovered tile
-
-    //         // offset x and y within the tile
-    //         const offsetXInTile = offsetX / this.store.tileSizePx;
-    //         const offsetYInTile = offsetY / this.store.tileSizePx;
-    //         // round it
-    //         const offsetXRounded = Math.round(offsetXInTile);
-    //         const offsetYRounded = Math.round(offsetYInTile);
-
-    //         // grab offset in tiles rounded
-    //         const grabOffsetXInTiles = Math.round(dx / this.store.tileSizePx);
-    //         const grabOffsetYInTiles = Math.round(dy / this.store.tileSizePx);
-
-    //         return {
-    //             x: tileX - grabOffsetXInTiles + (offsetXRounded === 0 ? 0 : offsetXRounded > 0 ? 1 : -1),
-    //             y: tileY - grabOffsetYInTiles + (offsetYRounded === 0 ? 0 : offsetYRounded > 0 ? 1 : -1),
-    //         };
-    //     }
-    // }
-
     private processDropTile(tileX: number, tileY: number, offsetX: number, offsetY: number): Vector2 {
         const tool = this.activeTool;
         if (!tool || tool.type !== ToolType.PlaceableTool) return { x: tileX, y: tileY };
@@ -276,8 +225,8 @@ export class GameEditorInteractionsService {
 
         const pointerPxX = tileX * tileSize + offsetX;
         const pointerPxY = tileY * tileSize + offsetY;
-        const grab = this.objectGrabOffset; // { x, y } en px
-        const objectGrabIsFromCenter = false; // ← passe à true si ton offset est centré
+        const grab = this.objectGrabOffset;
+        const objectGrabIsFromCenter = false;
 
         const halfSizePx = (footprint * tileSize) / 2;
         const topLeftPxX = pointerPxX - grab.x - (objectGrabIsFromCenter ? halfSizePx : 0);
@@ -288,17 +237,4 @@ export class GameEditorInteractionsService {
 
         return { x: snappedTopLeftTileX, y: snappedTopLeftTileY };
     }
-
-    // private processClosestTile(tileX: number, tileY: number, offsetX: number, offsetY: number): Vector2 {
-    //     const tool = this.activeTool;
-    //     if (!tool || tool.type !== ToolType.PlaceableTool) return { x: tileX, y: tileY };
-    //     const footprint = PlaceableFootprint[tool.placeableKind];
-    //     if (!Number.isFinite(footprint) || footprint <= 0 || footprint === 1) {
-    //         return { x: tileX, y: tileY };
-    //     }
-    //     const tileSize = this.store.tileSizePx;
-    //     const closestX = offsetX < tileSize / 2 ? tileX - 1 : tileX;
-    //     const closestY = offsetY < tileSize / 2 ? tileY - 1 : tileY;
-    //     return { x: closestX, y: closestY };
-    // }
 }
