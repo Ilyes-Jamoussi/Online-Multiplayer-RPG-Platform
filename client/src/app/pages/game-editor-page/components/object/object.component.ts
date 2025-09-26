@@ -1,4 +1,3 @@
-// editor-placed-object.component.ts
 import { ChangeDetectionStrategy, Component, HostBinding, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
@@ -14,22 +13,22 @@ import { GameEditorInteractionsService, ToolType } from '@app/services/game-edit
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GameEditorObjectComponent {
-    @Input({ required: true }) object!: GameEditorPlaceableDto;
-    @Input({ required: true }) tileSize!: number;
+    @Input({ required: true }) object: GameEditorPlaceableDto;
+    @Input({ required: true }) tileSize: number;
 
-    constructor(private readonly interactions: GameEditorInteractionsService) {}
+    constructor(private readonly gameEditorInteractionsService: GameEditorInteractionsService) {}
 
     isDragging = false;
 
     @HostBinding('style.grid-column')
     get gridCol() {
-        const w = this.interactions.getFootprintOf(PlaceableKind[this.object.kind]);
+        const w = this.gameEditorInteractionsService.getFootprintOf(PlaceableKind[this.object.kind]);
         return `${this.object.x + 1} / span ${w}`;
     }
 
     @HostBinding('style.grid-row')
     get gridRow() {
-        const h = this.interactions.getFootprintOf(PlaceableKind[this.object.kind]);
+        const h = this.gameEditorInteractionsService.getFootprintOf(PlaceableKind[this.object.kind]);
         return `${this.object.y + 1} / span ${h}`;
     }
 
@@ -40,13 +39,13 @@ export class GameEditorObjectComponent {
 
     onDragStart(evt: DragEvent) {
         if (!evt.dataTransfer) return;
-        this.interactions.setupObjectDrag(this.object, evt);
+        this.gameEditorInteractionsService.setupObjectDrag(this.object, evt);
         this.isDragging = true;
     }
 
     onDragEnd() {
         this.isDragging = false;
-        this.interactions.revertToPreviousTool();
+        this.gameEditorInteractionsService.revertToPreviousTool();
     }
 
     onContextMenu(evt: MouseEvent) {
@@ -56,7 +55,7 @@ export class GameEditorObjectComponent {
     onMouseDown(evt: MouseEvent) {
         evt.stopPropagation();
         if (evt.button === 2) {
-            this.interactions.activeTool = {
+            this.gameEditorInteractionsService.activeTool = {
                 type: ToolType.PlaceableEraserTool,
             };
         }
@@ -65,7 +64,7 @@ export class GameEditorObjectComponent {
     onMouseUp(evt: MouseEvent) {
         evt.stopPropagation();
         if (evt.button === 2) {
-            this.interactions.removeObject(this.object.id);
+            this.gameEditorInteractionsService.removeObject(this.object.id);
         }
     }
 }

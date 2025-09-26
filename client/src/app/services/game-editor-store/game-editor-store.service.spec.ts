@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
@@ -9,6 +8,11 @@ import { PatchGameEditorDto } from '@app/dto/patchGameEditorDto';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
+
+const testConstants = {
+    gridSize3: 3,
+    gridSize4: 4
+};
 import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
 import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
 
@@ -184,13 +188,13 @@ describe('GameEditorStoreService', () => {
         });
 
         it('resetTileAt sets the tile back to BASE', () => {
-            service.setTileAt(3, 3, TileKind.WALL);
-            const t = service.getTileAt(3, 3) as GameEditorTileDto;
+            service.setTileAt(testConstants.gridSize3, testConstants.gridSize3, TileKind.WALL);
+            const t = service.getTileAt(testConstants.gridSize3, testConstants.gridSize3) as GameEditorTileDto;
             expect(t).toBeDefined();
             expect(t.kind).toBe(TileKind.WALL);
 
-            service.resetTileAt(3, 3);
-            const t2 = service.getTileAt(3, 3) as GameEditorTileDto;
+            service.resetTileAt(testConstants.gridSize3, testConstants.gridSize3);
+            const t2 = service.getTileAt(testConstants.gridSize3, testConstants.gridSize3) as GameEditorTileDto;
             expect(t2).toBeDefined();
             expect(t2.kind).toBe(TileKind.BASE);
         });
@@ -224,15 +228,15 @@ describe('GameEditorStoreService', () => {
             service.setTileAt(0, 0, TileKind.WALL);
             service.setTileAt(1, 1, TileKind.WALL);
             service.setTileAt(2, 2, TileKind.WALL);
-            service.setTileAt(3, 3, TileKind.WALL);
-            service.setTileAt(4, 4, TileKind.WALL);
+            service.setTileAt(testConstants.gridSize3, testConstants.gridSize3, TileKind.WALL);
+            service.setTileAt(testConstants.gridSize4, testConstants.gridSize4, TileKind.WALL);
             service.setTileAt(0, 1, TileKind.WALL);
             service.setTileAt(1, 0, TileKind.WALL);
             service.setTileAt(1, 2, TileKind.WALL);
             service.setTileAt(2, 1, TileKind.WALL);
-            service.setTileAt(2, 3, TileKind.WALL);
-            service.setTileAt(3, 2, TileKind.WALL);
-            service.setTileAt(3, 4, TileKind.WALL);
+            service.setTileAt(2, testConstants.gridSize3, TileKind.WALL);
+            service.setTileAt(testConstants.gridSize3, 2, TileKind.WALL);
+            service.setTileAt(testConstants.gridSize3, testConstants.gridSize4, TileKind.WALL);
             service.reset();
 
             expect(service.name).toBe(initialDto.name);

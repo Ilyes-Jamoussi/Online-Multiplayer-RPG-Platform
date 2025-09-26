@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, View
 import { ActivatedRoute } from '@angular/router';
 import { NgStyle } from '@angular/common';
 import { distinctUntilChanged, filter, map, Subject, takeUntil, tap } from 'rxjs';
+import { GAME_NAME_MAX_LENGTH, NAME_ALLOWED_CHARS_PATTERN } from '@app/constants/validation.constants';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
 import { GameEditorTileComponent } from './components/tile/game-editor-tile.component';
@@ -16,7 +17,7 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { DraggablePanelComponent } from '@app/shared/ui/components/draggable-panel/draggable-panel.component';
 import { GameEditorInventoryComponent } from './components/inventory/game-editor-inventory.component';
 import { GameEditorObjectComponent } from './components/object/object.component';
-import { GameEditorErrorsDisplayComponent } from './components/errors-display/errors-display.component';
+import { ErrorsBadgeComponent } from '@app/shared/components/errors-badge/errors-badge.component';
 import { ROUTES } from '@app/constants/routes.constants';
 import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 
@@ -35,7 +36,7 @@ import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
         DraggablePanelComponent,
         GameEditorInventoryComponent,
         GameEditorObjectComponent,
-        GameEditorErrorsDisplayComponent,
+        ErrorsBadgeComponent,
     ],
     templateUrl: './game-editor-page.component.html',
     styleUrls: ['./game-editor-page.component.scss'],
@@ -43,6 +44,9 @@ import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
     providers: [GameEditorStoreService, GameEditorInteractionsService, GameEditorCheckService],
 })
 export class GameEditorPageComponent implements OnInit, OnDestroy {
+    readonly gameNameMaxLength = GAME_NAME_MAX_LENGTH;
+    readonly nameAllowedCharsPattern = NAME_ALLOWED_CHARS_PATTERN;
+
     @ViewChild('gridWrapper', { static: false }) gridWrapper!: ElementRef<HTMLElement>;
 
     private readonly destroy$ = new Subject<void>();

@@ -1,0 +1,12 @@
+@if (hasErrors) {
+<div class="errors-badge">
+    {{ errorCount }}
+    <div class="errors-tooltip">
+        <ul>
+            @for (msg of errorList; track $index) {
+            <li>{{ msg }}</li>
+            }
+        </ul>
+    </div>
+</div>
+}

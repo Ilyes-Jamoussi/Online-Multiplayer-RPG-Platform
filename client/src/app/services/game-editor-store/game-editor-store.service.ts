@@ -149,12 +149,12 @@ export class GameEditorStoreService {
     }
 
     constructor(
-        private readonly http: GameHttpService,
+        private readonly gameHttpService: GameHttpService,
         private readonly gameStoreService: GameStoreService,
     ) {}
 
     loadGameById(id: string): void {
-        this.http
+        this.gameHttpService
             .getGameEditorById(id)
             .pipe(
                 take(1),
@@ -182,7 +182,7 @@ export class GameEditorStoreService {
             gridPreviewUrl: gridPreviewImage,
         };
 
-        this.http
+        this.gameHttpService
             .patchGameEditorById(this._id(), game)
             .pipe(
                 take(1),
@@ -196,13 +196,13 @@ export class GameEditorStoreService {
                     return this.gameStoreService.createGame(createDto).pipe(
                         switchMap((newGame) => {
                             this._id.set(newGame.id);
-                            // Mettre à jour le nouveau jeu avec l'image
+                            // update the draft game with the editor data
                             const updateGame: PatchGameEditorDto = {
                                 tiles: this._tiles(),
                                 objects: this._objects(),
                                 gridPreviewUrl: gridPreviewImage,
                             };
-                            return this.http.patchGameEditorById(newGame.id, updateGame);
+                            return this.gameHttpService.patchGameEditorById(newGame.id, updateGame);
                         }),
                     );
                 }),

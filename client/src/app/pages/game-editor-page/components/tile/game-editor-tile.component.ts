@@ -17,9 +17,9 @@ import { GameEditorCheckService } from '@app/services/game-editor-check/game-edi
 })
 export class GameEditorTileComponent extends TileSizeProbeDirective {
     constructor(
-        readonly store: GameEditorStoreService,
-        readonly interactions: GameEditorInteractionsService,
-        readonly editorCheck: GameEditorCheckService,
+        readonly gameEditorStoreService: GameEditorStoreService,
+        readonly gameEditorInteractionsService: GameEditorInteractionsService,
+        readonly gameEditorCheckService: GameEditorCheckService,
         el: ElementRef<HTMLElement>,
         zone: NgZone,
     ) {
@@ -30,17 +30,17 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
 
     hasProblem(): boolean {
         return (
-            this.editorCheck.editorProblems().terrainAccessibility.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y) ||
-            this.editorCheck.editorProblems().doors.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y)
+            this.gameEditorCheckService.editorProblems().terrainAccessibility.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y) ||
+            this.gameEditorCheckService.editorProblems().doors.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y)
         );
     }
 
     isDropHovered(): boolean {
-        return this.interactions.hoveredTiles()?.some((t) => t.x === this.tile.x && t.y === this.tile.y) ?? false;
+        return this.gameEditorInteractionsService.hoveredTiles()?.some((t) => t.x === this.tile.x && t.y === this.tile.y) ?? false;
     }
 
     isBrushHovered(): boolean {
-        const tool = this.interactions.activeTool;
+        const tool = this.gameEditorInteractionsService.activeTool;
         return tool?.type === ToolType.TileBrushTool;
     }
 
@@ -51,24 +51,29 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
     onMouseDown(event: MouseEvent) {
         event.preventDefault();
         if (event.button === 0) {
-            this.interactions.dragStart(this.tile.x, this.tile.y, 'left');
+            this.gameEditorInteractionsService.dragStart(this.tile.x, this.tile.y, 'left');
         } else if (event.button === 2) {
-            this.interactions.activeTool = { type: ToolType.TileBrushTool, tileKind: TileKind.BASE, leftDrag: false, rightDrag: false };
-            this.interactions.dragStart(this.tile.x, this.tile.y, 'right');
+            this.gameEditorInteractionsService.activeTool = {
+                type: ToolType.TileBrushTool,
+                tileKind: TileKind.BASE,
+                leftDrag: false,
+                rightDrag: false,
+            };
+            this.gameEditorInteractionsService.dragStart(this.tile.x, this.tile.y, 'right');
         }
     }
 
     onMouseUp(event: MouseEvent) {
         event.preventDefault();
-        this.interactions.dragEnd();
+        this.gameEditorInteractionsService.dragEnd();
         if (event.button === 2) {
-            this.interactions.revertToPreviousTool();
+            this.gameEditorInteractionsService.revertToPreviousTool();
         }
     }
 
     onMouseOver(event: MouseEvent) {
         event.preventDefault();
-        this.interactions.tilePaint(this.tile.x, this.tile.y);
+        this.gameEditorInteractionsService.tilePaint(this.tile.x, this.tile.y);
     }
 
     colorOf(kind: GameEditorTileDto.KindEnum): string {
@@ -91,15 +96,15 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
     }
 
     onTileDragOver(evt: DragEvent) {
-        if (!this.interactions.hasMime(evt)) return;
+        if (!this.gameEditorInteractionsService.hasMime(evt)) return;
         if (!evt.dataTransfer) return;
         evt.preventDefault();
         evt.dataTransfer.dropEffect = 'move';
-        this.interactions.resolveHoveredTiles(evt, this.tile.x, this.tile.y);
+        this.gameEditorInteractionsService.resolveHoveredTiles(evt, this.tile.x, this.tile.y);
     }
 
     onTileDragEnter(evt: DragEvent) {
-        if (!this.interactions.hasMime(evt)) return;
+        if (!this.gameEditorInteractionsService.hasMime(evt)) return;
     }
 
     imageOf(kind: GameEditorTileDto.KindEnum): string {
@@ -107,11 +112,11 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
     }
 
     onTileDrop(evt: DragEvent) {
-        if (!this.interactions.hasMime(evt)) return;
+        if (!this.gameEditorInteractionsService.hasMime(evt)) return;
         if (!evt.dataTransfer) return;
         evt.preventDefault();
         evt.stopPropagation();
 
-        this.interactions.resolveDropAction(evt);
+        this.gameEditorInteractionsService.resolveDropAction(evt);
     }
 }

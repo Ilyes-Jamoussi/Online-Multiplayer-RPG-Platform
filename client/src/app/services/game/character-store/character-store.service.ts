@@ -42,7 +42,6 @@ export class CharacterStoreService {
         return Array.from({ length: CHARACTER_AVATARS_COUNT }, (_, i) => i);
     }
 
-    // mutateurs
     setName(name: string) {
         this._name.set(name);
     }
@@ -70,16 +69,16 @@ export class CharacterStoreService {
         this.setDice(Math.random() < RANDOM_THRESHOLD ? 'attack' : 'defense', 'D6');
     }
 
-    isValid(): boolean {
-        return this.isNameValid() && this._avatar() !== null && this._bonus() !== null;
+    get isValid(): boolean {
+        return this.isNameValid && this._avatar() !== null && this._bonus() !== null;
     }
 
-    isNameValid(): boolean {
+    get isNameValid(): boolean {
         const name = this._name().trim();
         return name.length > 0 && name.length <= MAX_NAME_LENGTH && /^[a-zA-Z0-9]+$/.test(name);
     }
 
-    getNameError(): string | null {
+    get nameError(): string | null {
         const name = this._name().trim();
         if (name.length === 0) return 'Le nom est requis';
         if (name.length > MAX_NAME_LENGTH) return 'Maximum 8 caractères';

@@ -1,8 +1,7 @@
 @use 'sass:color';
-@use 'variables' as *;
+    @use 'variables' as *;
 
 .ui-button {
-    // Base styles
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -22,7 +21,6 @@
         box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.3);
     }
 
-    // Sizes
     &--sm {
         padding: $space-2 $space-4;
         font-size: $text-sm;
@@ -41,7 +39,6 @@
         min-height: 48px;
     }
 
-    // Variants
     &--primary {
         background: linear-gradient(135deg, $primary 0%, $primary-dark 100%);
         color: $white;
@@ -144,7 +141,6 @@
         }
     }
 
-    // States
     &--disabled {
         opacity: 0.5;
         cursor: not-allowed;
@@ -164,7 +160,6 @@
         width: 100%;
     }
 
-    // Elements
     &__spinner {
         animation: spin 1s linear infinite;
         font-size: 1em;

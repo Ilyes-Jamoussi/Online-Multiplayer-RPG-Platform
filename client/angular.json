@@ -20,6 +20,9 @@
                 "build": {
                     "builder": "@angular/build:application",
                     "options": {
+                        "allowedCommonJsDependencies": [
+                            "html2canvas"
+                        ],
                         "stylePreprocessorOptions": {
                             "includePaths": ["src/styles"]
                         },

@@ -3,7 +3,6 @@ import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
 import { ActiveTool, Vector2 } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { PlaceableMime, PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
-// import { PlaceableFootprint, PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
 
 export enum ToolType {

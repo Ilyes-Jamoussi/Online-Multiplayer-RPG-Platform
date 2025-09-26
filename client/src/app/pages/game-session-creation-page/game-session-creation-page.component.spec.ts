@@ -61,8 +61,6 @@ describe('GameSessionCreationPageComponent', () => {
         expect(visibleGames).toEqual(mockGames);
     });
 
-    // Test removed - onBack method no longer exists
-
     it('should navigate to character creation', () => {
         component.onStartGame();
 

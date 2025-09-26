@@ -2,15 +2,18 @@
     <div class="stats-header">
         <span class="stats-label">{{ label }}</span>
         <span class="stats-value">{{ value }}/{{ maxValue }}</span>
-        <span *ngIf="showDice" class="dice-indicator">{{ diceType }}</span>
+        @if (showDice) {
+            <span class="dice-indicator">{{ diceType }}</span>
+        }
     </div>
 
     <div class="segments-container">
-        <div
-            *ngFor="let filled of segments; let i = index"
-            class="segment"
-            [class.filled]="filled"
-            [style.background-color]="filled ? color : '#e0e0e0'"
-        ></div>
+        @for (filled of segments; track $index) {
+            <div
+                class="segment"
+                [class.filled]="filled"
+                [style.background-color]="filled ? color : '#e0e0e0'"
+            ></div>
+        }
     </div>
 </div>

@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { GamePreviewDto } from '@app/dto/gamePreviewDto';
 import { ROUTES } from '@app/constants/routes.constants';
 import { environment } from '@src/environments/environment';
-// import { GameStoreService } from '@app/services/game/game-store/game-store.service';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
 import { MAP_SIZE_LABELS } from '@common/constants/game.constants';
@@ -26,7 +25,7 @@ export class GamePreviewCardComponent {
     @Output() toggleVisibility = new EventEmitter<string>();
 
     constructor(
-        private readonly router: Router, // private readonly gameStoreService: GameStoreService,
+        private readonly router: Router,
     ) {}
 
     onStartGame(): void {

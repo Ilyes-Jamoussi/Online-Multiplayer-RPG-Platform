@@ -16,13 +16,14 @@ export class GameEditorInventoryComponent {
     dragOver = '';
 
     constructor(
-        readonly store: GameEditorStoreService,
-        private readonly interactions: GameEditorInteractionsService,
+        readonly gameEditorStoreService: GameEditorStoreService,
+        private readonly gameEditorInteractionsService: GameEditorInteractionsService,
     ) {}
+
 
     @HostBinding('style.--tile-px')
     get tileVar() {
-        return this.store.tileSizePx;
+        return this.gameEditorStoreService.tileSizePx;
     }
 
     kindLabel(k: PlaceableKind): string {
@@ -65,7 +66,7 @@ export class GameEditorInventoryComponent {
             return;
         }
 
-        this.interactions.setupObjectDrag(
+        this.gameEditorInteractionsService.setupObjectDrag(
             {
                 kind,
                 id: '',
@@ -79,7 +80,7 @@ export class GameEditorInventoryComponent {
     }
 
     onDragEnd() {
-        this.interactions.revertToPreviousTool();
+        this.gameEditorInteractionsService.revertToPreviousTool();
     }
 
     onSlotDragOver(evt: DragEvent, kind: PlaceableKind) {
@@ -102,10 +103,10 @@ export class GameEditorInventoryComponent {
         if (!id) return;
         evt.preventDefault();
         evt.stopPropagation();
-        this.interactions.activeTool = {
+        this.gameEditorInteractionsService.activeTool = {
             type: ToolType.PlaceableEraserTool,
         };
-        this.interactions.removeObject(id);
+        this.gameEditorInteractionsService.removeObject(id);
         this.dragOver = '';
     }
 

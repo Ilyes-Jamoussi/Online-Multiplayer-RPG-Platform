@@ -1,5 +1,5 @@
 import { CommonModule, Location } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
@@ -21,8 +21,6 @@ import { DEFAULT_DRAFT_GAME_NAME, DEFAULT_DRAFT_GAME_DESCRIPTION } from '@common
     styleUrls: ['./game-parameters-page.component.scss'],
 })
 export class GameParametersPageComponent {
-    private readonly gameStoreService = inject(GameStoreService);
-
     selectedMapSize: MapSize = MapSize.MEDIUM;
     selectedGameMode: GameMode = GameMode.CLASSIC;
 
@@ -61,6 +59,7 @@ export class GameParametersPageComponent {
         private readonly router: Router,
         private readonly location: Location,
         private readonly notificationService: NotificationService,
+        private readonly gameStoreService: GameStoreService,
     ) {}
 
     onCreate(): void {

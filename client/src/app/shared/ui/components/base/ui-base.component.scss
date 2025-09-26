@@ -1,12 +1,7 @@
-// ==================== BASE UI COMPONENT STYLES ====================
-// Shared styling patterns for all UI components
-
-// Component base class (applied via mixins)
 %ui-component-base {
     @include ui-component-base;
 }
 
-// Common modifier classes that can be applied to any component
 .isFull {
     width: 100% !important;
 }
@@ -34,7 +29,6 @@
     }
 }
 
-// Common animations
 @keyframes ui-spin {
     0% {
         transform: rotate(0deg);
@@ -67,7 +61,6 @@
     }
 }
 
-// Utility classes for quick styling
 .ui-text-center {
     text-align: center !important;
 }
@@ -117,7 +110,6 @@
     justify-content: space-between !important;
 }
 
-// Responsive utilities
 @media (max-width: 768px) {
     .ui-mobile-full {
         width: 100% !important;
@@ -134,7 +126,6 @@
     }
 }
 
-// Color utilities
 @each $name, $color in $ui-colors {
     .ui-color-#{$name} {
         color: $color !important;
@@ -150,7 +141,6 @@
     }
 }
 
-// Spacing utilities
 @each $name, $value in $ui-gaps {
     .ui-m-#{$name} {
         margin: $value !important;
@@ -205,14 +195,12 @@
     }
 }
 
-// Border radius utilities
 @each $name, $value in $ui-shapes {
     .ui-rounded-#{$name} {
         border-radius: $value !important;
     }
 }
 
-// Shadow utilities
 @each $name, $value in $ui-elevations {
     .ui-shadow-#{$name} {
         box-shadow: $value !important;

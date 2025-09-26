@@ -1,8 +1,6 @@
 @use 'variables' as *;
 
-// ==================== ICON COMPONENT ====================
 .uiIcon {
-    // Material Icons font setup
     font-family: 'Material Icons';
     font-weight: normal;
     font-style: normal;
@@ -24,7 +22,6 @@
         pointer-events: none;
     }
 
-    // Icon-specific size variants
     &.s-sm {
         font-size: 1rem;
     }

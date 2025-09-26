@@ -4,102 +4,129 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { ROUTES } from '@app/constants/routes.constants';
+import {
+    CHARACTER_NAME_MIN_LENGTH,
+    CHARACTER_NAME_MAX_LENGTH,
+    WHITESPACE_PATTERN,
+    NAME_ALLOWED_CHARS_PATTERN,
+} from '@app/constants/validation.constants';
 import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
+import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 import { UiInputComponent } from '@app/shared/ui/components/input/input.component';
 import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
 import { StatsBarComponent } from '@app/shared/components/stats-bar/stats-bar.component';
+import { ErrorsBadgeComponent } from '@app/shared/components/errors-badge/errors-badge.component';
 
 @Component({
     standalone: true,
     selector: 'app-character-creation-page',
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
-    imports: [CommonModule, FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent],
+    imports: [
+        CommonModule,
+        FormsModule,
+        UiButtonComponent,
+        UiInputComponent,
+        UiPageLayoutComponent,
+        StatsBarComponent,
+        ErrorsBadgeComponent,
+    ],
+    providers: [CharacterCreationCheckService],
 })
 export class CharacterCreationPageComponent implements OnInit {
-    // Expose l'état lisible pour le template
+    readonly characterNameMinLength = CHARACTER_NAME_MIN_LENGTH;
+    readonly characterNameMaxLength = CHARACTER_NAME_MAX_LENGTH;
+    readonly nameAllowedCharsPattern = NAME_ALLOWED_CHARS_PATTERN;
+
     get character() {
-        return this.store.character();
+        return this.characterStoreService.character();
     }
 
-    // Liste d'avatars (ex: [0..11])
-    avatars = this.store.avatars;
+    get store() {
+        return this.characterStoreService;
+    }
+
+    avatars = this.characterStoreService.avatars;
 
     constructor(
-        readonly store: CharacterStoreService,
+        readonly assetsService: AssetsService,
+        readonly characterCreationCheckService: CharacterCreationCheckService,
+        private readonly characterStoreService: CharacterStoreService,
         private readonly router: Router,
-        private readonly notif: NotificationService,
-        readonly assets: AssetsService,
+        private readonly notificationService: NotificationService,
     ) {}
 
     getAvatarImage(avatarIndex: number): string {
-        return this.assets.getAvatarStaticByNumber(avatarIndex + 1);
+        return this.assetsService.getAvatarStaticByNumber(avatarIndex + 1);
     }
 
     getSelectedAvatarImage(): string {
         if (this.character.avatar === null) return '';
-        return this.assets.getAvatarAnimatedByNumber(this.character.avatar + 1);
+        return this.assetsService.getAvatarAnimatedByNumber(this.character.avatar + 1);
     }
 
     ngOnInit() {
-        // Reset l'avatar pour qu'aucun ne soit sélectionné par défaut
-        this.store.resetAvatar();
-        // Définir 'life' comme bonus par défaut dès l'entrée sur la page
-        this.store.setBonus('life');
+        this.characterStoreService.resetAvatar();
+        this.characterStoreService.setBonus('life');
     }
 
-    // Navigation
     goBack() {
         this.router.navigate([ROUTES.gameSessionCreation]);
     }
 
-    // Nom
     onNameChange(v: string) {
-        this.store.setName(v);
+        this.characterStoreService.setName(v);
     }
 
-    // Avatar
+    getNameErrorMessage(): string {
+        const name = this.character.name.trim();
+        if (name.length === 0) return '';
+        if (name.length < CHARACTER_NAME_MIN_LENGTH || name.length > CHARACTER_NAME_MAX_LENGTH) {
+            return `Le nom doit contenir entre ${CHARACTER_NAME_MIN_LENGTH} et ${CHARACTER_NAME_MAX_LENGTH} caractères.`;
+        }
+        if (name.replace(WHITESPACE_PATTERN, '').length === 0) {
+            return 'Le nom ne peut pas être composé uniquement d\'espaces.';
+        }
+        return '';
+    }
+
     selectAvatar(index: number) {
-        this.store.selectAvatar(index);
+        this.characterStoreService.selectAvatar(index);
     }
 
-    // Bonus exclusif (Life/Speed) via radios
     onBonusChange(bonus: 'life' | 'speed') {
-        this.store.setBonus(bonus);
+        this.characterStoreService.setBonus(bonus);
     }
 
-    // Dés (radios)
     onAttackDiceChange(value: 'D4' | 'D6') {
-        this.store.setDice('attack', value);
+        this.characterStoreService.setDice('attack', value);
     }
     onDefenseDiceChange(value: 'D4' | 'D6') {
-        this.store.setDice('defense', value);
+        this.characterStoreService.setDice('defense', value);
     }
 
-    // Aléatoire
     generateRandomCharacter() {
-        this.store.generateRandom();
+        this.characterStoreService.generateRandom();
     }
 
-    // Soumission
     onSubmit() {
-        if (!this.store.isValid()) {
-            this.notif.displayError({
+        if (!this.characterCreationCheckService.canCreate()) {
+            this.notificationService.displayError({
                 title: 'Erreur de validation',
                 message: 'Nom, avatar et bonus requis.',
             });
             return;
         }
 
-        this.notif.displaySuccess({
+        this.notificationService.displaySuccess({
             title: 'Personnage créé',
             message: `${this.character.name} est prêt pour l’aventure.`,
-        });
+            redirectRoute: ROUTES.waitingRoom,        });
 
-        this.router.navigate([ROUTES.waitingRoom]);
+
     }
 
     onBackClick() {

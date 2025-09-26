@@ -91,28 +91,6 @@ describe('GameHttpService', () => {
         });
     });
 
-    // describe('updateGame', () => {
-    //     it('should update a game', () => {
-    //         const gameId = '123';
-    //         const createDto: CreateGameDto = {
-    //             name: 'Updated Game',
-    //             description: 'Updated Desc',
-    //             size: 10,
-    //             mode: 'classic',
-    //             tiles: [],
-    //             objects: [],
-    //             gridPreviewImage: 'data:image/png;base64,test'
-    //         };
-
-    //         service.updateGame(gameId, createDto).subscribe();
-
-    //         const req = httpMock.expectOne(`${gamesEndpoint}/${gameId}`);
-    //         expect(req.request.method).toBe('PATCH');
-    //         expect(req.request.body).toEqual(createDto);
-    //         req.flush(null);
-    //     });
-    // });
-
     describe('deleteGame', () => {
         it('should delete a game', () => {
             const gameId = '123';
