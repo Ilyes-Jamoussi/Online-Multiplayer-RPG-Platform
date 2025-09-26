@@ -40,7 +40,7 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
     }
 
     isBrushHovered(): boolean {
-        const tool = this.gameEditorInteractionsService.activeTool();
+        const tool = this.gameEditorInteractionsService.activeTool;
         return tool?.type === ToolType.TileBrushTool;
     }
 
@@ -53,12 +53,12 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         if (event.button === 0) {
             this.gameEditorInteractionsService.dragStart(this.tile.x, this.tile.y, 'left');
         } else if (event.button === 2) {
-            this.gameEditorInteractionsService.setActiveTool({
+            this.gameEditorInteractionsService.activeTool = {
                 type: ToolType.TileBrushTool,
                 tileKind: TileKind.BASE,
                 leftDrag: false,
                 rightDrag: false,
-            });
+            };
             this.gameEditorInteractionsService.dragStart(this.tile.x, this.tile.y, 'right');
         }
     }
@@ -99,7 +99,7 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         if (!this.gameEditorInteractionsService.hasMime(evt)) return;
         if (!evt.dataTransfer) return;
         evt.preventDefault();
-        evt.dataTransfer.dropEffect = 'copy';
+        evt.dataTransfer.dropEffect = 'move';
         this.gameEditorInteractionsService.resolveHoveredTiles(evt, this.tile.x, this.tile.y);
     }
 
@@ -117,9 +117,6 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         evt.preventDefault();
         evt.stopPropagation();
 
-        const x = this.tile.x;
-        const y = this.tile.y;
-
-        this.gameEditorInteractionsService.resolveDropAction(evt, x, y);
+        this.gameEditorInteractionsService.resolveDropAction(evt);
     }
 }

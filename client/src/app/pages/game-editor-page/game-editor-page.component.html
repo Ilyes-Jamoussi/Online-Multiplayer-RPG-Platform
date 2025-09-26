@@ -30,12 +30,13 @@
                     </div>
                     <div
                         class="objects-overlay"
+                        [class.disable-pointer-events]="disableOverlayPointerEvents"
                         [ngStyle]="{
                             'grid-template-columns': 'repeat(' + gameEditorStoreService.size() + ', minmax(0,1fr))',
                             'grid-template-rows': 'repeat(' + gameEditorStoreService.size() + ', minmax(0,1fr))'
                         }"
                     >
-                        @for (obj of gameEditorStoreService.placedObjects(); track obj.id) {
+                        @for (obj of gameEditorStoreService.placedObjects; track obj.id) {
                         <app-editor-placed-object [object]="obj" [tileSize]="gameEditorStoreService.tileSizePx" />
                         }
                     </div>
@@ -50,8 +51,6 @@
             placeholder="Saisissez le nom de votre jeu"
             [value]="gameEditorStoreService.name"
             (valueChange)="gameEditorStoreService.setName($event)"
-            [maxLength]="gameNameMaxLength"
-            [allowedCharsPattern]="nameAllowedCharsPattern"
         ></app-ui-input>
         <app-ui-input
             type="description"

@@ -6,7 +6,7 @@ import { GAME_NAME_MAX_LENGTH, NAME_ALLOWED_CHARS_PATTERN } from '@app/constants
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
 import { GameEditorTileComponent } from './components/tile/game-editor-tile.component';
-import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { TileSizeProbeDirective } from './directives/tile-size-probe.directive';
 import { GameEditorToolbarComponent } from './components/toolbar/game-editor-toolbar.component';
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
@@ -46,25 +46,31 @@ import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 export class GameEditorPageComponent implements OnInit, OnDestroy {
     readonly gameNameMaxLength = GAME_NAME_MAX_LENGTH;
     readonly nameAllowedCharsPattern = NAME_ALLOWED_CHARS_PATTERN;
-    
+
     @ViewChild('gridWrapper', { static: false }) gridWrapper!: ElementRef<HTMLElement>;
 
     private readonly destroy$ = new Subject<void>();
 
+    // eslint-disable-next-line max-params
     constructor(
+        private readonly activatedRoute: ActivatedRoute,
         readonly gameEditorStoreService: GameEditorStoreService,
         readonly gameEditorCheckService: GameEditorCheckService,
-        private readonly route: ActivatedRoute,
         private readonly notificationService: NotificationService,
         private readonly screenshotService: ScreenshotService,
+        private readonly gameEditorInteractionsService: GameEditorInteractionsService,
     ) {}
 
-    // variable plus descriptive
-    readonly gameId$ = this.route.paramMap.pipe(
+    readonly gameId$ = this.activatedRoute.paramMap.pipe(
         map((p) => p.get('id')),
         filter((id): id is string => !!id),
         distinctUntilChanged(),
     );
+
+    get disableOverlayPointerEvents() {
+        const tool = this.gameEditorInteractionsService.activeTool;
+        return tool !== null && ((tool.type === ToolType.TileBrushTool && (tool.leftDrag || tool.rightDrag)));
+    }
 
     ngOnInit(): void {
         this.gameId$

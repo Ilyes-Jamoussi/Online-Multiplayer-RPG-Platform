@@ -21,12 +21,12 @@ export class GameEditorToolbarComponent {
     constructor(readonly gameEditorInteractionsService: GameEditorInteractionsService) {}
 
     selectTileBrush(tileKind: TileKind) {
-        this.gameEditorInteractionsService.setActiveTool({
+        this.gameEditorInteractionsService.activeTool = {
             type: ToolType.TileBrushTool,
             tileKind,
             leftDrag: false,
             rightDrag: false,
-        });
+        };
     }
 
     brushes: BrushItem[] = [
@@ -38,7 +38,7 @@ export class GameEditorToolbarComponent {
     ];
 
     isBrushSelected(brush: BrushItem): boolean {
-        const activeTool = this.gameEditorInteractionsService.activeTool();
+        const activeTool = this.gameEditorInteractionsService.activeTool;
         if (!activeTool) return false;
         if (activeTool.type !== ToolType.TileBrushTool) return false;
         if ('tileKind' in activeTool) {
