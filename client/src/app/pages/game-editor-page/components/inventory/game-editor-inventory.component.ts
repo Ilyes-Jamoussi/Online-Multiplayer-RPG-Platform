@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
+import { PlaceableFootprint, PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
 
 @Component({
     selector: 'app-editor-inventory',
@@ -11,13 +11,19 @@ import { PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum'
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GameEditorInventoryComponent {
+    readonly dndMime = PlaceableMime;
+    readonly placeableFootprint = PlaceableFootprint;
+    dragOver = '';
+
     constructor(
         readonly store: GameEditorStoreService,
         private readonly interactions: GameEditorInteractionsService,
     ) {}
 
-    readonly dndMime = PlaceableMime;
-    dragOver = '';
+    @HostBinding('style.--tile-px')
+    get tileVar() {
+        return this.store.tileSizePx;
+    }
 
     kindLabel(k: PlaceableKind): string {
         switch (k) {
@@ -58,30 +64,18 @@ export class GameEditorInventoryComponent {
             evt?.preventDefault();
             return;
         }
-        evt.dataTransfer.effectAllowed = 'copy';
-        evt.dataTransfer.setData(this.dndMime[kind], kind);
 
-        const img = document.createElement('div');
-        img.style.fontSize = `${this.store.tileSizePx}px`;
-        img.style.lineHeight = '1';
-        img.style.width = `${this.store.tileSizePx}px`;
-        img.style.height = `${this.store.tileSizePx}px`;
-        img.style.display = 'flex';
-        img.style.alignItems = 'center';
-        img.style.justifyContent = 'center';
-        img.style.pointerEvents = 'none';
-        img.style.position = 'absolute';
-        img.style.top = '-1000px';
-
-        img.textContent = this.iconOf(kind);
-        document.body.appendChild(img);
-        evt.dataTransfer.setDragImage(img, this.store.tileSizePx / 2, this.store.tileSizePx / 2);
-        setTimeout(() => document.body.removeChild(img), 0);
-
-        this.interactions.setActiveTool({
-            type: ToolType.PlaceableTool,
-            placeableKind: kind,
-        });
+        this.interactions.setupObjectDrag(
+            {
+                kind,
+                id: '',
+                x: 0,
+                y: 0,
+                placed: false,
+                orientation: 'N',
+            },
+            evt,
+        );
     }
 
     onDragEnd() {
@@ -92,7 +86,7 @@ export class GameEditorInventoryComponent {
         if (!evt.dataTransfer) return;
         if (!this.slotAccepts(evt, kind)) return;
         evt.preventDefault();
-        evt.dataTransfer.dropEffect = 'copy';
+        evt.dataTransfer.dropEffect = 'move';
     }
     onSlotDragEnter(evt: DragEvent, kind: PlaceableKind) {
         if (!this.slotAccepts(evt, kind)) return;
@@ -108,9 +102,9 @@ export class GameEditorInventoryComponent {
         if (!id) return;
         evt.preventDefault();
         evt.stopPropagation();
-        this.interactions.setActiveTool({
+        this.interactions.activeTool = {
             type: ToolType.PlaceableEraserTool,
-        });
+        };
         this.interactions.removeObject(id);
         this.dragOver = '';
     }

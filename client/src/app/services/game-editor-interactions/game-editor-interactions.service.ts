@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
 import { ActiveTool, Vector2 } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { PlaceableMime, PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
@@ -18,18 +19,52 @@ export class GameEditorInteractionsService {
     private readonly _activeTool = signal<ActiveTool | null>(null);
     private readonly _previousActiveTool = signal<ActiveTool | null>(null);
     private readonly _hoveredTiles = signal<Vector2[] | null>(null);
+    private readonly _objectGrabOffset = signal<Vector2>({ x: 0, y: 0 });
+    private readonly _objectDropVec2 = signal<Vector2>({ x: 0, y: 0 });
 
-    get activeTool() {
-        return this._activeTool.asReadonly();
+    get activeTool(): ActiveTool | null {
+        return this._activeTool();
+    }
+
+    set activeTool(tool: ActiveTool) {
+        this._previousActiveTool.set(this._activeTool());
+        this._activeTool.set(tool);
+    }
+
+    get objectGrabOffset(): Vector2 {
+        return this._objectGrabOffset();
+    }
+
+    set objectGrabOffset(offset: Vector2) {
+        this._objectGrabOffset.set(offset);
+    }
+
+    get objectDropVec2(): Vector2 {
+        return this._objectDropVec2();
+    }
+
+    set objectDropVec2(vec: Vector2) {
+        this._objectDropVec2.set(vec);
     }
 
     get hoveredTiles() {
         return this._hoveredTiles.asReadonly();
     }
 
-    setActiveTool(tool: ActiveTool): void {
-        this._previousActiveTool.set(this._activeTool());
-        this._activeTool.set(tool);
+    setupObjectDrag(object: GameEditorPlaceableDto, evt: DragEvent): void {
+        if (!evt.dataTransfer) return;
+        evt.dataTransfer.effectAllowed = 'move';
+        evt.dataTransfer.setData(PlaceableMime[object.kind], object.id || object.kind);
+        const footprint = this.getFootprintOf(PlaceableKind[object.kind]);
+        if (!Number.isFinite(footprint) || footprint <= 0) return;
+        this.objectGrabOffset = {
+            x: evt.offsetX,
+            y: evt.offsetY,
+        };
+        this.activeTool = {
+            type: ToolType.PlaceableTool,
+            placeableKind: PlaceableKind[object.kind],
+        };
     }
 
     revertToPreviousTool(): void {
@@ -77,32 +112,35 @@ export class GameEditorInteractionsService {
     }
 
     resolveHoveredTiles(evt: DragEvent, tileX: number, tileY: number) {
-        const tool = this.activeTool?.();
+        const tool = this.activeTool;
         if (!tool || tool.type !== ToolType.PlaceableTool) return;
 
         const footprint = PlaceableFootprint[tool.placeableKind];
         if (!Number.isFinite(footprint) || footprint <= 0) return;
         const hoveredTiles: Vector2[] = [];
 
-        if (footprint === 1) {
-            hoveredTiles.push({ x: tileX, y: tileY });
-        } else {
-            const offsetX = evt.offsetX;
-            const offsetY = evt.offsetY;
+        // if (footprint === 1) {
+        //     console.log('Hovering tile:', tileX, tileY);
+        //     hoveredTiles.push({ x: tileX, y: tileY });
+        // } else {
+        const offsetX = evt.offsetX;
+        const offsetY = evt.offsetY;
 
-            const { x: closestX, y: closestY } = this.getClosestTile(tileX, tileY, offsetX, offsetY);
+        const { x: closestX, y: closestY } = this.processDropTile(tileX, tileY, offsetX, offsetY);
 
-            for (let dy = 0; dy < footprint; dy++) {
-                for (let dx = 0; dx < footprint; dx++) {
-                    hoveredTiles.push({ x: closestX + dx, y: closestY + dy });
-                }
+        this.objectDropVec2 = { x: closestX, y: closestY };
+
+        for (let dy = 0; dy < footprint; dy++) {
+            for (let dx = 0; dx < footprint; dx++) {
+                hoveredTiles.push({ x: closestX + dx, y: closestY + dy });
             }
         }
+        // }
         this._hoveredTiles.set(hoveredTiles);
         return hoveredTiles;
     }
 
-    resolveDropAction(evt: DragEvent, x: number, y: number): void {
+    resolveDropAction(evt: DragEvent): void {
         this._hoveredTiles.set(null);
         if (evt && evt.dataTransfer) {
             const mime = Object.values(PlaceableMime).find((m) => evt.dataTransfer?.types.includes(m));
@@ -110,17 +148,17 @@ export class GameEditorInteractionsService {
             const data = evt.dataTransfer.getData(mime);
             if (!data) return;
             if (Object.values(PlaceableKind).includes(data as PlaceableKind)) {
-                const { x: closestX, y: closestY } = this.getClosestTile(x, y, evt.offsetX, evt.offsetY);
+                const { x: closestX, y: closestY } = this.objectDropVec2;
                 this.tryPlaceObject(closestX, closestY, data as PlaceableKind);
             } else {
-                const { x: closestX, y: closestY } = this.getClosestTile(x, y, evt.offsetX, evt.offsetY);
+                const { x: closestX, y: closestY } = this.objectDropVec2;
                 this.tryMoveObject(closestX, closestY, data);
             }
         }
     }
 
     removeObject(id: string): void {
-        const tool = this.activeTool?.();
+        const tool = this.activeTool;
         if (!tool || tool.type !== ToolType.PlaceableEraserTool) return;
         this.store.removeObject(id);
         this.revertToPreviousTool();
@@ -176,16 +214,91 @@ export class GameEditorInteractionsService {
         this.store.moveObject(id, x, y);
     }
 
-    private getClosestTile(tileX: number, tileY: number, offsetX: number, offsetY: number): Vector2 {
-        const tool = this.activeTool?.();
+    // private processDropTile(tileX: number, tileY: number, offsetX: number, offsetY: number): Vector2 {
+    //     const tool = this.activeTool;
+    //     if (!tool || tool.type !== ToolType.PlaceableTool) return { x: tileX, y: tileY };
+    //     const footprint = PlaceableFootprint[tool.placeableKind];
+    //     if (!Number.isFinite(footprint)) {
+    //         return { x: tileX, y: tileY };
+    //     }
+    //     if (footprint === 1) {
+    //         const { x: dx, y: dy } = this.objectGrabOffset;
+    //         const { x: d, y: e } = this.processClosestTile(tileX, tileY, offsetX, offsetY);
+
+    //         const offsetXAdjusted = offsetX - dx;
+    //         const offsetYAdjusted = offsetY - dy;
+
+    //         const delta = {
+    //             x: Math.round(offsetXAdjusted / (this.store.tileSizePx * footprint)),
+    //             y: Math.round(offsetYAdjusted / (this.store.tileSizePx * footprint)),
+    //         };
+
+    //         console.log('Adjusted offset:', offsetXAdjusted, offsetYAdjusted);
+    //         console.log('DELTA:', Math.round(offsetXAdjusted / this.store.tileSizePx), Math.round(offsetYAdjusted / this.store.tileSizePx));
+
+    //         return {
+    //             x: d + delta.x,
+    //             y: e + delta.y,
+    //         };
+    //     } else {
+    //         // distance to top left corner of object
+    //         const { x: dx, y: dy } = this.objectGrabOffset;
+    //         // offset on the hovered tile
+
+    //         // hovered tile
+
+    //         // offset x and y within the tile
+    //         const offsetXInTile = offsetX / this.store.tileSizePx;
+    //         const offsetYInTile = offsetY / this.store.tileSizePx;
+    //         // round it
+    //         const offsetXRounded = Math.round(offsetXInTile);
+    //         const offsetYRounded = Math.round(offsetYInTile);
+
+    //         // grab offset in tiles rounded
+    //         const grabOffsetXInTiles = Math.round(dx / this.store.tileSizePx);
+    //         const grabOffsetYInTiles = Math.round(dy / this.store.tileSizePx);
+
+    //         return {
+    //             x: tileX - grabOffsetXInTiles + (offsetXRounded === 0 ? 0 : offsetXRounded > 0 ? 1 : -1),
+    //             y: tileY - grabOffsetYInTiles + (offsetYRounded === 0 ? 0 : offsetYRounded > 0 ? 1 : -1),
+    //         };
+    //     }
+    // }
+
+    private processDropTile(tileX: number, tileY: number, offsetX: number, offsetY: number): Vector2 {
+        const tool = this.activeTool;
         if (!tool || tool.type !== ToolType.PlaceableTool) return { x: tileX, y: tileY };
+
         const footprint = PlaceableFootprint[tool.placeableKind];
-        if (!Number.isFinite(footprint) || footprint <= 0 || footprint === 1) {
-            return { x: tileX, y: tileY };
-        }
+        if (!Number.isFinite(footprint) || footprint <= 0) return { x: tileX, y: tileY };
+
         const tileSize = this.store.tileSizePx;
-        const closestX = offsetX < tileSize / 2 ? tileX - 1 : tileX;
-        const closestY = offsetY < tileSize / 2 ? tileY - 1 : tileY;
-        return { x: closestX, y: closestY };
+
+        const pointerPxX = tileX * tileSize + offsetX;
+        const pointerPxY = tileY * tileSize + offsetY;
+        const grab = this.objectGrabOffset; // { x, y } en px
+        const objectGrabIsFromCenter = false; // ← passe à true si ton offset est centré
+
+        const halfSizePx = (footprint * tileSize) / 2;
+        const topLeftPxX = pointerPxX - grab.x - (objectGrabIsFromCenter ? halfSizePx : 0);
+        const topLeftPxY = pointerPxY - grab.y - (objectGrabIsFromCenter ? halfSizePx : 0);
+
+        const snappedTopLeftTileX = Math.round(topLeftPxX / tileSize);
+        const snappedTopLeftTileY = Math.round(topLeftPxY / tileSize);
+
+        return { x: snappedTopLeftTileX, y: snappedTopLeftTileY };
     }
+
+    // private processClosestTile(tileX: number, tileY: number, offsetX: number, offsetY: number): Vector2 {
+    //     const tool = this.activeTool;
+    //     if (!tool || tool.type !== ToolType.PlaceableTool) return { x: tileX, y: tileY };
+    //     const footprint = PlaceableFootprint[tool.placeableKind];
+    //     if (!Number.isFinite(footprint) || footprint <= 0 || footprint === 1) {
+    //         return { x: tileX, y: tileY };
+    //     }
+    //     const tileSize = this.store.tileSizePx;
+    //     const closestX = offsetX < tileSize / 2 ? tileX - 1 : tileX;
+    //     const closestY = offsetY < tileSize / 2 ? tileY - 1 : tileY;
+    //     return { x: closestX, y: closestY };
+    // }
 }

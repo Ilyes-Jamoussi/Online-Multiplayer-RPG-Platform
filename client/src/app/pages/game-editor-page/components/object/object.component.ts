@@ -2,7 +2,7 @@
 import { ChangeDetectionStrategy, Component, HostBinding, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
-import { PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 
 @Component({
@@ -15,7 +15,7 @@ import { GameEditorInteractionsService, ToolType } from '@app/services/game-edit
 })
 export class GameEditorObjectComponent {
     @Input({ required: true }) object!: GameEditorPlaceableDto;
-    @Input() tileSize = 48;
+    @Input({ required: true }) tileSize!: number;
 
     constructor(private readonly interactions: GameEditorInteractionsService) {}
 
@@ -40,13 +40,8 @@ export class GameEditorObjectComponent {
 
     onDragStart(evt: DragEvent) {
         if (!evt.dataTransfer) return;
-        evt.dataTransfer.effectAllowed = 'copy';
-        evt.dataTransfer.setData(PlaceableMime[this.object.kind], this.object.id);
+        this.interactions.setupObjectDrag(this.object, evt);
         this.isDragging = true;
-        this.interactions.setActiveTool({
-            type: ToolType.PlaceableTool,
-            placeableKind: PlaceableKind[this.object.kind],
-        });
     }
 
     onDragEnd() {
@@ -61,9 +56,9 @@ export class GameEditorObjectComponent {
     onMouseDown(evt: MouseEvent) {
         evt.stopPropagation();
         if (evt.button === 2) {
-            this.interactions.setActiveTool({
+            this.interactions.activeTool = {
                 type: ToolType.PlaceableEraserTool,
-            });
+            };
         }
     }
 

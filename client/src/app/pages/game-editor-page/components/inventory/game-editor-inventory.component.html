@@ -19,9 +19,11 @@
             (dragstart)="onDragStart($event, item.kind, item.remaining === 0)"
             [attr.data-mime]="dndMime[item.kind]"
             [attr.data-kind]="item.kind"
+            [style.width.px]="store.tileSizePx * placeableFootprint[item.kind]"
+            [style.height.px]="store.tileSizePx * placeableFootprint[item.kind]"
         >
             <span class="icon" [class.drag-over]="dragOver === item.kind">{{ iconOf(item.kind) }}</span>
-            <span class="badge" [class.drag-over]="dragOver === item.kind">{{ item.remaining }}</span>
+            <span  class="badge" [class.drag-over]="dragOver === item.kind">{{ item.remaining }}</span>
         </div>
 
         <div class="label" [class.drag-over]="dragOver === item.kind">{{ kindLabel(item.kind) }}</div>
