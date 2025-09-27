@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, View
 import { ActivatedRoute } from '@angular/router';
 import { NgStyle } from '@angular/common';
 import { distinctUntilChanged, filter, map, Subject, takeUntil, tap } from 'rxjs';
-import { GAME_NAME_MAX_LENGTH } from '@app/constants/validation.constants';
+import { GAME_NAME_MAX_LENGTH, DESCRIPTION_MAX_LENGTH } from '@app/constants/validation.constants';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
 import { GameEditorTileComponent } from './components/tile/game-editor-tile.component';
@@ -45,6 +45,7 @@ import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 })
 export class GameEditorPageComponent implements OnInit, OnDestroy {
     readonly gameNameMaxLength = GAME_NAME_MAX_LENGTH;
+    readonly descriptionMaxLength = DESCRIPTION_MAX_LENGTH;
 
     @ViewChild('gridWrapper', { static: false }) gridWrapper!: ElementRef<HTMLElement>;
 
