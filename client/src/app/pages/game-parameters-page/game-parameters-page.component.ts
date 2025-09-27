@@ -11,7 +11,6 @@ import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
 import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
-import { DEFAULT_DRAFT_GAME_NAME, DEFAULT_DRAFT_GAME_DESCRIPTION } from '@common/constants/game.constants';
 
 @Component({
     selector: 'app-game-parameters-page',
@@ -67,8 +66,8 @@ export class GameParametersPageComponent {
             .createGame({
                 size: this.selectedMapSize,
                 mode: this.selectedGameMode,
-                name: DEFAULT_DRAFT_GAME_NAME,
-                description: DEFAULT_DRAFT_GAME_DESCRIPTION,
+                name: '',
+                description: '',
                 visibility: false,
             })
             .subscribe({

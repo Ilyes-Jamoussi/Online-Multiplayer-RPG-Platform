@@ -50,13 +50,13 @@
             type="name"
             placeholder="Saisissez le nom de votre jeu"
             [value]="gameEditorStoreService.name"
-            (valueChange)="gameEditorStoreService.setName($event)"
+            (valueChange)="gameEditorStoreService.name = $event"
         ></app-ui-input>
         <app-ui-input
             type="description"
             placeholder="Décrivez votre jeu en quelques mots"
             [value]="gameEditorStoreService.description"
-            (valueChange)="gameEditorStoreService.setDescription($event)"
+            (valueChange)="gameEditorStoreService.description = $event"
         ></app-ui-input>
         <app-ui-button (buttonClick)="onReset()">Réinitialiser la grille</app-ui-button>
         <app-ui-button (buttonClick)="onSave()" [disabled]="!gameEditorCheckService.canSave()">Sauvegarder</app-ui-button>

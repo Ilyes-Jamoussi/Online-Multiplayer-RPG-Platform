@@ -12,8 +12,8 @@ export type GameDocument = Game & Document;
 export class Game {
     readonly _id?: Types.ObjectId;
 
-    @Prop({ required: true }) name: string;
-    @Prop({ required: true }) description: string;
+    @Prop({ type: String, required: true }) name: string;
+    @Prop({ type: String, required: true }) description: string;
 
     @Prop({ required: true, enum: MapSize }) size: MapSize;
     @Prop({ required: true, enum: GameMode }) mode: GameMode;

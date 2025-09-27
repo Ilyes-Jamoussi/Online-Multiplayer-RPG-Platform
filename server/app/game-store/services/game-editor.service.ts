@@ -7,6 +7,7 @@ import { GameEditorDto } from '@app/game-store/dto/game-editor.dto';
 import { PatchGameEditorDto } from '@app/game-store/dto/patch-game-editor.dto';
 import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
+import { DEFAULT_DRAFT_GAME_DESCRIPTION, DEFAULT_DRAFT_GAME_NAME } from '@common/constants/game.constants';
 
 @Injectable()
 export class GameEditorService {
@@ -27,8 +28,8 @@ export class GameEditorService {
         return {
             id: game._id.toString(),
             lastModified: game.lastModified,
-            name: game.name,
-            description: game.description,
+            name: game.name === DEFAULT_DRAFT_GAME_NAME ? '' : game.name,
+            description: game.description === DEFAULT_DRAFT_GAME_DESCRIPTION ? '' : game.description,
             size: game.size,
             mode: game.mode,
             tiles: game.tiles,

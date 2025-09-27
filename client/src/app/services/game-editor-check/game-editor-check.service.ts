@@ -75,7 +75,7 @@ export class GameEditorCheckService {
     private checkAllStartPlaced(): EditorIssue {
         const problem: EditorIssue = { hasIssue: false };
         const inventory = this.store.inventory();
-        const startItem = inventory.find((item) => item.kind === 'START');
+        const startItem = inventory.START;
         if (startItem && startItem.remaining > 0) {
             problem.message = 'Tous les points de départ doivent être placés sur la carte.';
             problem.hasIssue = true;
@@ -87,7 +87,7 @@ export class GameEditorCheckService {
         const problem: EditorIssue = { hasIssue: false };
         if (this.store.mode() === GameMode.CTF) {
             const inventory = this.store.inventory();
-            const flagItem = inventory.find((item) => item.kind === 'FLAG');
+            const flagItem = inventory.FLAG;
             if (flagItem && flagItem.remaining > 0) {
                 problem.message = 'Tous les drapeaux doivent être placés sur la carte.';
                 problem.hasIssue = true;

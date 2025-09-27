@@ -11,6 +11,7 @@ import { Model } from 'mongoose';
 import { makeDefaultPlaceables } from '@app/game-store/factory/placeable.factory';
 import { makeDefaultTiles } from '@app/game-store/factory/tile.factory';
 import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
+import { DEFAULT_DRAFT_GAME_DESCRIPTION, DEFAULT_DRAFT_GAME_NAME } from '@common/constants/game.constants';
 
 @Injectable()
 export class GameStoreService {
@@ -38,6 +39,8 @@ export class GameStoreService {
 
         const gameDocument: GameDocument = {
             ...dto,
+            name: DEFAULT_DRAFT_GAME_NAME,
+            description: DEFAULT_DRAFT_GAME_DESCRIPTION,
             tiles: defaultTiles,
             objects: defaultObjects,
             visibility: false,

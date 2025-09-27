@@ -16,12 +16,12 @@ export class CreateGameDto {
 
     @ApiProperty({ example: 'New game' })
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     readonly name: string;
 
     @ApiProperty({ example: 'Description…' })
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     readonly description: string;
 
     @ApiPropertyOptional({ example: false, description: 'Public (true) ou privé (false)' })
