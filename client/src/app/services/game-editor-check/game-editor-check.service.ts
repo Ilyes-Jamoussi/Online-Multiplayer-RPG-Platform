@@ -3,10 +3,10 @@ import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
 import { AccesibilityIssue, EditorIssue, GameEditorIssues } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import {
-    GAME_NAME_MIN_LENGTH,
+    NAME_MIN_LENGTH,
     GAME_NAME_MAX_LENGTH,
-    GAME_DESCRIPTION_MIN_LENGTH,
-    GAME_DESCRIPTION_MAX_LENGTH,
+    DESCRIPTION_MIN_LENGTH,
+    DESCRIPTION_MAX_LENGTH,
     WHITESPACE_PATTERN,
 } from '@app/constants/validation.constants';
 import { GameMode } from '@common/enums/game-mode.enum';
@@ -224,11 +224,11 @@ export class GameEditorCheckService {
 
     private checkNameValidation(): EditorIssue {
         const name = this.store.name.trim();
-        return name.length < GAME_NAME_MIN_LENGTH || name.length > GAME_NAME_MAX_LENGTH || name.replace(WHITESPACE_PATTERN, '').length === 0
+        return name.length < NAME_MIN_LENGTH || name.length > GAME_NAME_MAX_LENGTH || name.replace(WHITESPACE_PATTERN, '').length === 0
             ? {
                   hasIssue: true,
                   message:
-                      `Le nom doit contenir entre ${GAME_NAME_MIN_LENGTH} et ${GAME_NAME_MAX_LENGTH} caractères ` +
+                      `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${GAME_NAME_MAX_LENGTH} caractères ` +
                       `et ne pas être composé uniquement d'espaces.`,
               }
             : { hasIssue: false };
@@ -236,13 +236,13 @@ export class GameEditorCheckService {
 
     private checkDescriptionValidation(): EditorIssue {
         const description = this.store.description.trim();
-        return description.length < GAME_DESCRIPTION_MIN_LENGTH ||
-            description.length > GAME_DESCRIPTION_MAX_LENGTH ||
+        return description.length < DESCRIPTION_MIN_LENGTH ||
+            description.length > DESCRIPTION_MAX_LENGTH ||
             description.replace(WHITESPACE_PATTERN, '').length === 0
             ? {
                   hasIssue: true,
                   message:
-                      `La description doit contenir entre ${GAME_DESCRIPTION_MIN_LENGTH} et ${GAME_DESCRIPTION_MAX_LENGTH} caractères ` +
+                      `La description doit contenir entre ${DESCRIPTION_MIN_LENGTH} et ${DESCRIPTION_MAX_LENGTH} caractères ` +
                       `et ne pas être composée uniquement d'espaces.`,
               }
             : { hasIssue: false };

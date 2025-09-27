@@ -247,8 +247,6 @@ export class GameEditorStoreService {
 
     reset(): void {
         const initial = this._initial();
-        this._name.set(initial.name);
-        this._description.set(initial.description);
         this._tiles.set(initial.tiles);
         this._objects.set(initial.objects);
         this._size.set(initial.size);

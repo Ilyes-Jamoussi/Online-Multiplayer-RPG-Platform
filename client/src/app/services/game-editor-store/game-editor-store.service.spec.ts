@@ -239,8 +239,8 @@ describe('GameEditorStoreService', () => {
             service.setTileAt(testConstants.gridSize3, testConstants.gridSize4, TileKind.WALL);
             service.reset();
 
-            expect(service.name).toBe(initialDto.name);
-            expect(service.description).toBe(initialDto.description);
+            expect(service.name).toBe('temp');
+            expect(service.description).toBe('temp');
             expect(service.tiles()[0].kind).toBe(TileKind.BASE);
             expect(service.size()).toBe(initialDto.size);
             expect(service.objects()).toEqual(initialDto.objects);

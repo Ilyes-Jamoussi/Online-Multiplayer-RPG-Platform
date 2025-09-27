@@ -1,5 +1,5 @@
 import { computed, Injectable } from '@angular/core';
-import { CHARACTER_NAME_MIN_LENGTH, CHARACTER_NAME_MAX_LENGTH, WHITESPACE_PATTERN } from '@app/constants/validation.constants';
+import { NAME_MIN_LENGTH, CHARACTER_NAME_MAX_LENGTH, WHITESPACE_PATTERN } from '@app/constants/validation.constants';
 import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
 
 @Injectable()
@@ -36,10 +36,10 @@ export class CharacterCreationCheckService {
     }
 
     private checkNameValidation(name: string): { hasIssue: boolean; message?: string } {
-        if (name.length < CHARACTER_NAME_MIN_LENGTH || name.length > CHARACTER_NAME_MAX_LENGTH || name.replace(WHITESPACE_PATTERN, '').length === 0) {
+        if (name.length < NAME_MIN_LENGTH || name.length > CHARACTER_NAME_MAX_LENGTH || name.replace(WHITESPACE_PATTERN, '').length === 0) {
             return {
                 hasIssue: true,
-                message: `Le nom doit contenir entre ${CHARACTER_NAME_MIN_LENGTH} et ${CHARACTER_NAME_MAX_LENGTH} caractères ` +
+                message: `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${CHARACTER_NAME_MAX_LENGTH} caractères ` +
                     `et ne pas être composé uniquement d'espaces.`,
             };
         }

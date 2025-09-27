@@ -1,117 +1,78 @@
-import { NgClass } from '@angular/common';
-import { Component, forwardRef, Input, Output, EventEmitter } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { UiBaseComponent } from '@app/shared/ui/components/base/ui-base.component';
-
-type InputType = 'text' | 'number' | 'password' | 'email' | 'tel' | 'url' | 'name' | 'description';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { NUMBER_ALLOWED_CHARS_PATTERN, TEXT_ALLOWED_CHARS_PATTERN } from '@app/constants/validation.constants';
 
 @Component({
     selector: 'app-ui-input',
     templateUrl: './input.component.html',
     styleUrls: ['./input.component.scss'],
     standalone: true,
-    imports: [NgClass],
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => UiInputComponent),
-            multi: true,
-        },
-    ],
 })
-export class UiInputComponent extends UiBaseComponent implements ControlValueAccessor {
-    @Input() label: string = '';
+export class UiInputComponent {
+    private _value: string = '';
+
     @Input() placeholder: string = '';
-    @Input() type: InputType = 'text';
-    @Input() required: boolean = false;
-    @Input() clearable: boolean = false;
+    @Input() type: 'text' | 'number' = 'text';
     @Input() maxLength?: number;
-    @Input() allowedCharsPattern?: RegExp;
-    @Input() errorMessage: string = '';
-    @Input() set initialValue(val: string) {
-        if (val !== undefined) {
-            this._value = val;
-        }
-    }
+
     @Input() set value(val: string) {
         if (val !== undefined) {
             this._value = val;
         }
     }
+
+    @Output() valueChange = new EventEmitter<string>();
+
     get value(): string {
         return this._value;
     }
 
-    @Output() valueChange = new EventEmitter<string>();
-
-    private _value: string = '';
-    isDisabled = false;
-    isTouched = false;
-
-    private onChangeCallback = (value: string): void => {
-        this.valueChange.emit(value);
-    };
-    private onTouchedCallback = (): void => {
-        this.isTouched = true;
-    };
-
-    writeValue(value: string): void {
-        this._value = value || '';
-    }
-
-    registerOnChange(fn: (value: string) => void): void {
-        this.onChangeCallback = fn;
-    }
-
-    registerOnTouched(fn: () => void): void {
-        this.onTouchedCallback = fn;
-    }
-
-    setDisabledState(isDisabled: boolean): void {
-        this.isDisabled = isDisabled;
-    }
-
-    onInput(event: Event): void {
+    onKeyDown(event: KeyboardEvent): void {
         const input = event.target as HTMLInputElement;
-        this._value = input.value;
-        this.onChangeCallback(this._value);
-        this.valueChange.emit(this._value);
-    }
+        const selectionStart = input.selectionStart ?? 0;
+        const selectionEnd = input.selectionEnd ?? 0;
+        const hasSelection = selectionStart !== selectionEnd;
 
-    onKeyPress(event: KeyboardEvent): void {
-        if (this.allowedCharsPattern && !this.allowedCharsPattern.test(event.key)) {
+        if (event.key === ' ' && this.isSpaceInvalid(input.value, hasSelection, selectionStart)) {
+            event.preventDefault();
+            return;
+        }
+
+        if (event.key.length === 1 && !this.isValidChar(event.key)) {
             event.preventDefault();
         }
     }
 
-    onClear(): void {
-        this._value = '';
-        this.onChangeCallback(this._value);
+    onInput(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const SPACE_DOT_LENGTH = 2;
+        let value = input.value;
+
+        if (value.endsWith('. ')) {
+            value = value.slice(0, - SPACE_DOT_LENGTH) + ' ';
+            input.value = value;
+        }
+
+        value = this.filterInvalidChars(value);
+
+        this._value = value;
         this.valueChange.emit(this._value);
     }
 
-    onBlur(): void {
-        this.isTouched = true;
-        this.onTouchedCallback();
+    private isValidChar(char: string): boolean {
+        const pattern = this.type === 'number' ? NUMBER_ALLOWED_CHARS_PATTERN : TEXT_ALLOWED_CHARS_PATTERN;
+        return pattern.test(char);
     }
 
-    get hasError(): boolean {
-        return this.isTouched && !!this.errorMessage;
+    private isSpaceInvalid(value: string, hasSelection: boolean, selectionStart: number): boolean {
+        return (
+            this.type === 'number' ||
+            (!hasSelection && (value.length === 0 || value.endsWith(' '))) ||
+            (hasSelection && selectionStart === 0)
+        );
     }
 
-    get isValid(): boolean {
-        return this.isTouched && !this.errorMessage && this._value.length > 0;
-    }
-
-    override get classes(): Record<string, boolean> {
-        return {
-            uiInput: true,
-            ...super.classes,
-            isDisabled: this.isDisabled,
-            hasError: this.hasError,
-            isValid: this.isValid,
-            isClearable: this.clearable,
-            hasLabel: !!this.label,
-        };
+    private filterInvalidChars(value: string): string {
+        const pattern = this.type === 'number' ? NUMBER_ALLOWED_CHARS_PATTERN : TEXT_ALLOWED_CHARS_PATTERN;
+        return [...value].filter((c) => pattern.test(c) || c === ' ').join('');
     }
 }
