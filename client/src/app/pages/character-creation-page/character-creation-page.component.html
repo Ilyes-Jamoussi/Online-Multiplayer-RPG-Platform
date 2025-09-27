@@ -6,36 +6,32 @@
                 <div class="selected-avatar-display">
                     <div class="selected-avatar-frame">
                         @if (character.avatar === null) {
-                            <div class="no-selection">
-                                <div class="selection-icon">👤</div>
-                                <h4>Sélectionner un avatar</h4>
-                            </div>
+                        <div class="no-selection">
+                            <div class="selection-icon">👤</div>
+                            <h4>Sélectionner un avatar</h4>
+                        </div>
                         } @else {
-                            <img
-                                [src]="getSelectedAvatarImage()"
-                                [alt]="'Avatar sélectionné ' + (character.avatar + 1)"
-                                class="selected-avatar-gif"
-                            />
+                        <img [src]="getSelectedAvatarImage()" [alt]="'Avatar sélectionné ' + (character.avatar + 1)" class="selected-avatar-gif" />
                         }
                     </div>
                 </div>
 
                 <div class="character-grid" role="grid" aria-label="Grille des avatars disponibles">
                     @for (avatar of avatars; track avatar) {
-                        <button
-                            type="button"
-                            class="character-slot"
-                            [class.selected]="character.avatar === avatar"
-                            (click)="selectAvatar(avatar)"
-                            [attr.aria-label]="'Avatar ' + (avatar + 1)"
-                            [attr.aria-pressed]="character.avatar === avatar"
-                            role="gridcell"
-                        >
-                            <div class="character-portrait">
-                                <img [src]="getAvatarImage(avatar)" [alt]="'Avatar ' + (avatar + 1)" class="avatar-gif" />
-                                <span class="avatar-number">{{ avatar + 1 }}</span>
-                            </div>
-                        </button>
+                    <button
+                        type="button"
+                        class="character-slot"
+                        [class.selected]="character.avatar === avatar"
+                        (click)="selectAvatar(avatar)"
+                        [attr.aria-label]="'Avatar ' + (avatar + 1)"
+                        [attr.aria-pressed]="character.avatar === avatar"
+                        role="gridcell"
+                    >
+                        <div class="character-portrait">
+                            <img [src]="getAvatarImage(avatar)" [alt]="'Avatar ' + (avatar + 1)" class="avatar-gif" />
+                            <span class="avatar-number">{{ avatar + 1 }}</span>
+                        </div>
+                    </button>
                     }
                 </div>
             </div>

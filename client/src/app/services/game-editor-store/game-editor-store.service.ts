@@ -80,9 +80,9 @@ export class GameEditorStoreService {
             if (!inv[kind]) {
                 inv[kind] = { kind, total: 0, remaining: 0, disabled: false };
             }
-            inv[kind]!.total += 1;
+            inv[kind].total += 1;
             if (!o.placed) {
-                inv[kind]!.remaining += 1;
+                inv[kind].remaining += 1;
             }
         }
 
@@ -90,7 +90,7 @@ export class GameEditorStoreService {
             if (!inv[k]) {
                 inv[k] = { total: 0, remaining: 0, kind: k, disabled: true };
             } else {
-                inv[k]!.disabled = inv[k]!.remaining === 0;
+                inv[k].disabled = inv[k].remaining === 0;
             }
         }
 
@@ -112,6 +112,7 @@ export class GameEditorStoreService {
     get name() {
         return this._name();
     }
+
     set name(value: string) {
         this._name.set(value);
     }
@@ -196,7 +197,7 @@ export class GameEditorStoreService {
             gridPreviewUrl: gridPreviewImage,
         };
 
-       this.gameHttpService.patchGameEditorById(this._id(), game).subscribe();
+        this.gameHttpService.patchGameEditorById(this._id(), game).subscribe();
     }
 
     getTileAt(x: number, y: number): GameEditorTileDto | undefined {

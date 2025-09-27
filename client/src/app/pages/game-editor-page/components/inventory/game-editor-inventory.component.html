@@ -22,11 +22,17 @@
             [style.width.px]="gameEditorStoreService.tileSizePx * placeableFootprint[gameEditorStoreService.inventory()[item].kind]"
             [style.height.px]="gameEditorStoreService.tileSizePx * placeableFootprint[gameEditorStoreService.inventory()[item].kind]"
         >
-            <span class="icon" [class.drag-over]="dragOver === gameEditorStoreService.inventory()[item].kind">{{ iconOf(gameEditorStoreService.inventory()[item].kind) }}</span>
-            <span class="badge" [class.drag-over]="dragOver === gameEditorStoreService.inventory()[item].kind">{{ gameEditorStoreService.inventory()[item].remaining }}</span>
+            <span class="icon" [class.drag-over]="dragOver === gameEditorStoreService.inventory()[item].kind">{{
+                iconOf(gameEditorStoreService.inventory()[item].kind)
+            }}</span>
+            <span class="badge" [class.drag-over]="dragOver === gameEditorStoreService.inventory()[item].kind">{{
+                gameEditorStoreService.inventory()[item].remaining
+            }}</span>
         </div>
 
-        <div class="label" [class.drag-over]="dragOver === gameEditorStoreService.inventory()[item].kind">{{ kindLabel(gameEditorStoreService.inventory()[item].kind) }}</div>
+        <div class="label" [class.drag-over]="dragOver === gameEditorStoreService.inventory()[item].kind">
+            {{ kindLabel(gameEditorStoreService.inventory()[item].kind) }}
+        </div>
     </div>
     } @empty {
     <div class="empty">Aucun objet disponible</div>

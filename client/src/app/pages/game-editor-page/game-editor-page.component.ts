@@ -69,7 +69,7 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
 
     get disableOverlayPointerEvents() {
         const tool = this.gameEditorInteractionsService.activeTool;
-        return tool !== null && ((tool.type === ToolType.TileBrushTool && (tool.leftDrag || tool.rightDrag)));
+        return tool !== null && tool.type === ToolType.TileBrushTool && (tool.leftDrag || tool.rightDrag);
     }
 
     ngOnInit(): void {

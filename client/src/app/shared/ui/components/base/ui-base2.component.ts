@@ -13,7 +13,6 @@ import {
     UiFontSize,
 } from '@app/shared/ui/types/ui2.types';
 
-
 @Directive()
 export abstract class UiBase2Component {
     @Input() color: UiColor = 'primary';

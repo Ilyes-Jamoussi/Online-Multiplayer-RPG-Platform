@@ -1,6 +1,5 @@
-// server/src/games/dto/create-game.dto.ts
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 
 import { MapSize } from '@common/enums/map-size.enum';
 import { GameMode } from '@common/enums/game-mode.enum';

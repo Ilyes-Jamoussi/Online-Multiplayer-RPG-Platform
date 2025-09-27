@@ -89,8 +89,8 @@ describe('GameEditorStoreService', () => {
 
         it('should get and set tile size', () => {
             expect(service.tileSizePx).toBe(0);
-            service.tileSizePx = 32;
-            expect(service.tileSizePx).toBe(32);
+            service.tileSizePx = 1;
+            expect(service.tileSizePx).toBe(1);
         });
 
         it('should get correct gridPreviewUrl', () => {
@@ -616,32 +616,44 @@ describe('GameEditorStoreService', () => {
             subject.complete();
         });
 
-        it('should return the correct inventory counts per item', () => {
+        it('should return the correct inventory counts for FLAG', () => {
             const inventory = service.inventory();
             expect(inventory.FLAG).toBeDefined();
             expect(inventory.FLAG?.kind).toBe(PlaceableKind.FLAG);
             expect(inventory.FLAG?.total).toBe(1);
             expect(inventory.FLAG?.remaining).toBe(1);
             expect(inventory.FLAG?.disabled).toBeFalse();
+        });
 
+        it('should return the correct inventory counts for START', () => {
+            const inventory = service.inventory();
             expect(inventory.START).toBeDefined();
             expect(inventory.START?.kind).toBe(PlaceableKind.START);
             expect(inventory.START?.total).toBe(1);
             expect(inventory.START?.remaining).toBe(0);
             expect(inventory.START?.disabled).toBeTrue();
+        });
 
+        it('should return the correct inventory counts for BOAT', () => {
+            const inventory = service.inventory();
             expect(inventory.BOAT).toBeDefined();
             expect(inventory.BOAT?.kind).toBe(PlaceableKind.BOAT);
             expect(inventory.BOAT?.total).toBe(1);
             expect(inventory.BOAT?.remaining).toBe(0);
             expect(inventory.BOAT?.disabled).toBeTrue();
+        });
 
+        it('should return the correct inventory counts for FIGHT', () => {
+            const inventory = service.inventory();
             expect(inventory.FIGHT).toBeDefined();
             expect(inventory.FIGHT?.kind).toBe(PlaceableKind.FIGHT);
             expect(inventory.FIGHT?.total).toBe(0);
             expect(inventory.FIGHT?.remaining).toBe(0);
             expect(inventory.FIGHT?.disabled).toBeTrue();
+        });
 
+        it('should return the correct inventory counts for HEAL', () => {
+            const inventory = service.inventory();
             expect(inventory.HEAL).toBeDefined();
             expect(inventory.HEAL?.kind).toBe(PlaceableKind.HEAL);
             expect(inventory.HEAL?.total).toBe(0);

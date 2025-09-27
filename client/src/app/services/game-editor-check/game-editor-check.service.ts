@@ -17,7 +17,7 @@ export class GameEditorCheckService {
     private static readonly minTerrainRatio = 0.5;
     private static readonly percentBase = 100;
 
-    constructor(private readonly store: GameEditorStoreService) {}
+    constructor(private readonly gameEditorStoreService: GameEditorStoreService) {}
 
     readonly editorProblems = computed<GameEditorIssues>(() => {
         const issues: GameEditorIssues = {
@@ -29,7 +29,7 @@ export class GameEditorCheckService {
             nameValidation: { hasIssue: false },
             descriptionValidation: { hasIssue: false },
         };
-        const tiles = this.store.tiles();
+        const tiles = this.gameEditorStoreService.tiles();
 
         issues.doors = this.checkDoors(tiles);
         issues.terrainCoverage = this.checkTerrainCoverage(tiles);
@@ -38,7 +38,6 @@ export class GameEditorCheckService {
         issues.flagPlacement = this.checkAllFlagPlaced();
         issues.nameValidation = this.checkNameValidation();
         issues.descriptionValidation = this.checkDescriptionValidation();
-
         return issues;
     });
 
@@ -46,35 +45,45 @@ export class GameEditorCheckService {
         return !Object.values(this.editorProblems()).some((p) => p.hasIssue);
     }
 
-    getNeighborKind(x: number, y: number): GameEditorTileDto.KindEnum | null {
-        return this.store.getTileAt(x, y)?.kind ?? null;
-    }
-
-    isTerrain(kind: GameEditorTileDto.KindEnum): boolean {
+    private isTerrain(kind: GameEditorTileDto.KindEnum): boolean {
         return kind === TileKind.BASE || kind === TileKind.WATER || kind === TileKind.ICE;
     }
 
     private isValidHorizontalDoor(
-        left: GameEditorTileDto.KindEnum | null,
-        right: GameEditorTileDto.KindEnum | null,
-        top: GameEditorTileDto.KindEnum | null,
-        bottom: GameEditorTileDto.KindEnum | null,
+        left: GameEditorTileDto.KindEnum | undefined,
+        right: GameEditorTileDto.KindEnum | undefined,
+        top: GameEditorTileDto.KindEnum | undefined,
+        bottom: GameEditorTileDto.KindEnum | undefined,
     ): boolean {
-        return left === TileKind.WALL && right === TileKind.WALL && top !== null && this.isTerrain(top) && bottom !== null && this.isTerrain(bottom);
+        return (
+            left === TileKind.WALL &&
+            right === TileKind.WALL &&
+            top !== undefined &&
+            this.isTerrain(top) &&
+            bottom !== undefined &&
+            this.isTerrain(bottom)
+        );
     }
 
     private isValidVerticalDoor(
-        top: GameEditorTileDto.KindEnum | null,
-        bottom: GameEditorTileDto.KindEnum | null,
-        left: GameEditorTileDto.KindEnum | null,
-        right: GameEditorTileDto.KindEnum | null,
+        top: GameEditorTileDto.KindEnum | undefined,
+        bottom: GameEditorTileDto.KindEnum | undefined,
+        left: GameEditorTileDto.KindEnum | undefined,
+        right: GameEditorTileDto.KindEnum | undefined,
     ): boolean {
-        return top === TileKind.WALL && bottom === TileKind.WALL && left !== null && this.isTerrain(left) && right !== null && this.isTerrain(right);
+        return (
+            top === TileKind.WALL &&
+            bottom === TileKind.WALL &&
+            left !== undefined &&
+            this.isTerrain(left) &&
+            right !== undefined &&
+            this.isTerrain(right)
+        );
     }
 
     private checkAllStartPlaced(): EditorIssue {
         const problem: EditorIssue = { hasIssue: false };
-        const inventory = this.store.inventory();
+        const inventory = this.gameEditorStoreService.inventory();
         const startItem = inventory.START;
         if (startItem && startItem.remaining > 0) {
             problem.message = 'Tous les points de départ doivent être placés sur la carte.';
@@ -85,8 +94,8 @@ export class GameEditorCheckService {
 
     private checkAllFlagPlaced(): EditorIssue {
         const problem: EditorIssue = { hasIssue: false };
-        if (this.store.mode() === GameMode.CTF) {
-            const inventory = this.store.inventory();
+        if (this.gameEditorStoreService.mode() === GameMode.CTF) {
+            const inventory = this.gameEditorStoreService.inventory();
             const flagItem = inventory.FLAG;
             if (flagItem && flagItem.remaining > 0) {
                 problem.message = 'Tous les drapeaux doivent être placés sur la carte.';
@@ -105,10 +114,10 @@ export class GameEditorCheckService {
             if (t.kind !== TileKind.DOOR) continue;
             const { x, y } = t;
 
-            const leftKind = this.getNeighborKind(x - 1, y);
-            const rightKind = this.getNeighborKind(x + 1, y);
-            const topKind = this.getNeighborKind(x, y - 1);
-            const bottomKind = this.getNeighborKind(x, y + 1);
+            const leftKind = this.gameEditorStoreService.getTileAt(x - 1, y)?.kind;
+            const rightKind = this.gameEditorStoreService.getTileAt(x + 1, y)?.kind;
+            const topKind = this.gameEditorStoreService.getTileAt(x, y - 1)?.kind;
+            const bottomKind = this.gameEditorStoreService.getTileAt(x, y + 1)?.kind;
 
             if (
                 !this.isValidHorizontalDoor(leftKind, rightKind, topKind, bottomKind) &&
@@ -126,7 +135,7 @@ export class GameEditorCheckService {
     }
 
     private checkTerrainCoverage(tiles: GameEditorTileDto[]): EditorIssue {
-        const size = this.store.size();
+        const size = this.gameEditorStoreService.size();
         const total = size * size;
         const terrainCount = tiles.filter((t) => this.isTerrain(t.kind)).length;
         const ratio = terrainCount / total;
@@ -141,7 +150,7 @@ export class GameEditorCheckService {
     }
 
     private checkTerrainAccessibility(tiles: GameEditorTileDto[]): AccesibilityIssue {
-        const size = this.store.size();
+        const size = this.gameEditorStoreService.size();
         const grid = this.buildTileKindGrid(tiles, size);
         const components = this.connectedWalkableComponents(grid, size);
         if (components.length === 0) return { hasIssue: true, tiles: [] };
@@ -185,20 +194,21 @@ export class GameEditorCheckService {
                 const comp = new Set<string>();
                 while (q.length) {
                     const item = q.shift();
-                    if (!item) continue;
-                    const [cx, cy] = item;
-                    const k = `${cx}:${cy}`;
-                    if (seen.has(k)) continue;
-                    seen.add(k);
-                    comp.add(k);
+                    if (item) {
+                        const [cx, cy] = item;
+                        const k = `${cx}:${cy}`;
+                        if (seen.has(k)) continue;
+                        seen.add(k);
+                        comp.add(k);
 
-                    for (const [dx, dy] of dirs) {
-                        const nx = cx + dx;
-                        const ny = cy + dy;
-                        if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
-                        if (!this.isWalkableTile(grid[ny][nx])) continue;
-                        const nk = `${nx}:${ny}`;
-                        if (!seen.has(nk)) q.push([nx, ny]);
+                        for (const [dx, dy] of dirs) {
+                            const nx = cx + dx;
+                            const ny = cy + dy;
+                            if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
+                            if (!this.isWalkableTile(grid[ny][nx])) continue;
+                            const nk = `${nx}:${ny}`;
+                            if (!seen.has(nk)) q.push([nx, ny]);
+                        }
                     }
                 }
                 comps.push({ set: comp, size: comp.size });
@@ -223,7 +233,7 @@ export class GameEditorCheckService {
     }
 
     private checkNameValidation(): EditorIssue {
-        const name = this.store.name.trim();
+        const name = this.gameEditorStoreService.name.trim();
         return name.length < GAME_NAME_MIN_LENGTH || name.length > GAME_NAME_MAX_LENGTH || name.replace(WHITESPACE_PATTERN, '').length === 0
             ? {
                   hasIssue: true,
@@ -235,7 +245,7 @@ export class GameEditorCheckService {
     }
 
     private checkDescriptionValidation(): EditorIssue {
-        const description = this.store.description.trim();
+        const description = this.gameEditorStoreService.description.trim();
         return description.length < GAME_DESCRIPTION_MIN_LENGTH ||
             description.length > GAME_DESCRIPTION_MAX_LENGTH ||
             description.replace(WHITESPACE_PATTERN, '').length === 0

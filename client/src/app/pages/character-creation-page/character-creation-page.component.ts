@@ -25,15 +25,7 @@ import { ErrorsBadgeComponent } from '@app/shared/components/errors-badge/errors
     selector: 'app-character-creation-page',
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
-    imports: [
-        CommonModule,
-        FormsModule,
-        UiButtonComponent,
-        UiInputComponent,
-        UiPageLayoutComponent,
-        StatsBarComponent,
-        ErrorsBadgeComponent,
-    ],
+    imports: [CommonModule, FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent],
     providers: [CharacterCreationCheckService],
 })
 export class CharacterCreationPageComponent implements OnInit {
@@ -88,7 +80,7 @@ export class CharacterCreationPageComponent implements OnInit {
             return `Le nom doit contenir entre ${CHARACTER_NAME_MIN_LENGTH} et ${CHARACTER_NAME_MAX_LENGTH} caractères.`;
         }
         if (name.replace(WHITESPACE_PATTERN, '').length === 0) {
-            return 'Le nom ne peut pas être composé uniquement d\'espaces.';
+            return "Le nom ne peut pas être composé uniquement d'espaces.";
         }
         return '';
     }
@@ -124,9 +116,8 @@ export class CharacterCreationPageComponent implements OnInit {
         this.notificationService.displaySuccess({
             title: 'Personnage créé',
             message: `${this.character.name} est prêt pour l’aventure.`,
-            redirectRoute: ROUTES.waitingRoom,        });
-
-
+            redirectRoute: ROUTES.waitingRoom,
+        });
     }
 
     onBackClick() {
