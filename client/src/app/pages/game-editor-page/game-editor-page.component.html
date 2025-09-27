@@ -47,13 +47,14 @@
     </div>
     <div slot="footer">
         <app-ui-input
-            type="name"
+            type="text"
             placeholder="Saisissez le nom de votre jeu"
             [value]="gameEditorStoreService.name"
             (valueChange)="gameEditorStoreService.setName($event)"
+            [maxLength]="gameNameMaxLength"
         ></app-ui-input>
         <app-ui-input
-            type="description"
+            type="text"
             placeholder="Décrivez votre jeu en quelques mots"
             [value]="gameEditorStoreService.description"
             (valueChange)="gameEditorStoreService.setDescription($event)"

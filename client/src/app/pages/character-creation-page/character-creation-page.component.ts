@@ -5,10 +5,9 @@ import { Router } from '@angular/router';
 
 import { ROUTES } from '@app/constants/routes.constants';
 import {
-    CHARACTER_NAME_MIN_LENGTH,
+    NAME_MIN_LENGTH,
     CHARACTER_NAME_MAX_LENGTH,
     WHITESPACE_PATTERN,
-    NAME_ALLOWED_CHARS_PATTERN,
 } from '@app/constants/validation.constants';
 import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
@@ -37,9 +36,8 @@ import { ErrorsBadgeComponent } from '@app/shared/components/errors-badge/errors
     providers: [CharacterCreationCheckService],
 })
 export class CharacterCreationPageComponent implements OnInit {
-    readonly characterNameMinLength = CHARACTER_NAME_MIN_LENGTH;
+    readonly characterNameMinLength = NAME_MIN_LENGTH;
     readonly characterNameMaxLength = CHARACTER_NAME_MAX_LENGTH;
-    readonly nameAllowedCharsPattern = NAME_ALLOWED_CHARS_PATTERN;
 
     get character() {
         return this.characterStoreService.character();
@@ -84,8 +82,8 @@ export class CharacterCreationPageComponent implements OnInit {
     getNameErrorMessage(): string {
         const name = this.character.name.trim();
         if (name.length === 0) return '';
-        if (name.length < CHARACTER_NAME_MIN_LENGTH || name.length > CHARACTER_NAME_MAX_LENGTH) {
-            return `Le nom doit contenir entre ${CHARACTER_NAME_MIN_LENGTH} et ${CHARACTER_NAME_MAX_LENGTH} caractères.`;
+        if (name.length < NAME_MIN_LENGTH || name.length > CHARACTER_NAME_MAX_LENGTH) {
+            return `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${CHARACTER_NAME_MAX_LENGTH} caractères.`;
         }
         if (name.replace(WHITESPACE_PATTERN, '').length === 0) {
             return 'Le nom ne peut pas être composé uniquement d\'espaces.';

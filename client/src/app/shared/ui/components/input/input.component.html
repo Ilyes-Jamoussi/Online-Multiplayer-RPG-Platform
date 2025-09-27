@@ -1,14 +1,3 @@
-<div class="ui-input" [ngClass]="classes">
-    <div class="ui-input__field">
-        <input 
-            class="ui-input__control" 
-            type="text" 
-            [placeholder]="placeholder" 
-            [disabled]="disabled" 
-            [value]="value" 
-            [attr.maxlength]="maxLength"
-            (input)="onInput($event)"
-            (keypress)="onKeyPress($event)"
-        />
-    </div>
+<div class="ui-input">
+    <input [placeholder]="placeholder" [value]="value" (input)="onInput($event)" (keydown)="onKeyDown($event)" [attr.maxlength]="maxLength" />
 </div>
