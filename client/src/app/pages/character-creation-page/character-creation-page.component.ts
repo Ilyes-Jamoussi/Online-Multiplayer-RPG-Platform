@@ -127,7 +127,7 @@ export class CharacterCreationPageComponent implements OnInit {
 
     }
 
-    onBackClick() {
+    onBack() {
         this.router.navigate(['/']);
     }
 }

@@ -86,10 +86,6 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
-    goBack(): void {
-        window.history.back();
-    }
-
     onReset(): void {
         this.gameEditorStoreService.reset();
     }

@@ -4,7 +4,7 @@
     headerSubtitle="Gérez vos jeux et créez de nouvelles aventures"
     [showBackButton]="true"
     [hasFooter]="true"
-    (backClick)="goBack()"
+    (backClick)="onBack()"
 >
     <div class="games-section">
         @if (gameDisplays() && gameDisplays().length > 0) {

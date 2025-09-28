@@ -97,7 +97,7 @@ describe('GameManagementPageComponent', () => {
     });
 
     it('should navigate to home on go back', () => {
-        component.goBack();
+        component.onBack();
         expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.home]);
     });
 });

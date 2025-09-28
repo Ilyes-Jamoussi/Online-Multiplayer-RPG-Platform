@@ -45,7 +45,7 @@ export class GameManagementPageComponent implements OnInit {
         this.gameStoreService.toggleGameVisibility(gameId).subscribe();
     }
 
-    goBack(): void {
+    onBack(): void {
         this.router.navigate([ROUTES.home]);
     }
 }

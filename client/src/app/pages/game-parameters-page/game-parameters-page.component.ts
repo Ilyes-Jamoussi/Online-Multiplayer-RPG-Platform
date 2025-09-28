@@ -1,4 +1,4 @@
-import { CommonModule, Location } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,9 +9,9 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
 import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
 import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
+import { DEFAULT_DRAFT_GAME_DESCRIPTION, DEFAULT_DRAFT_GAME_NAME } from '@common/constants/game.constants';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
-import { DEFAULT_DRAFT_GAME_NAME, DEFAULT_DRAFT_GAME_DESCRIPTION } from '@common/constants/game.constants';
 
 @Component({
     selector: 'app-game-parameters-page',
@@ -57,7 +57,6 @@ export class GameParametersPageComponent {
 
     constructor(
         private readonly router: Router,
-        private readonly location: Location,
         private readonly notificationService: NotificationService,
         private readonly gameStoreService: GameStoreService,
     ) {}
@@ -82,9 +81,5 @@ export class GameParametersPageComponent {
                     });
                 },
             });
-    }
-
-    onBack(): void {
-        this.location.back();
     }
 }

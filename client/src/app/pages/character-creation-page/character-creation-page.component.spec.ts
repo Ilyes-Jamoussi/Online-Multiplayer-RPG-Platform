@@ -200,8 +200,8 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
         expect(successArg.title).toContain('Personnage');
     });
 
-    it('onBackClick navigates to root', () => {
-        component.onBackClick();
+    it('onBack navigates to root', () => {
+        component.onBack();
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
     });
 });

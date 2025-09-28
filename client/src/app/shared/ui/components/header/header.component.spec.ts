@@ -1,17 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
+import { Location } from '@angular/common';
 import { UiHeaderComponent } from './header.component';
 
 describe('UiHeaderComponent', () => {
     let fixture: ComponentFixture<UiHeaderComponent>;
     let component: UiHeaderComponent;
+    let locationSpy: jasmine.SpyObj<Location>;
 
     beforeEach(async () => {
+        const spy = jasmine.createSpyObj('Location', ['back']);
+
         await TestBed.configureTestingModule({
             imports: [UiHeaderComponent],
+            providers: [{ provide: Location, useValue: spy }],
         }).compileComponents();
+
         fixture = TestBed.createComponent(UiHeaderComponent);
         component = fixture.componentInstance;
+        locationSpy = TestBed.inject(Location) as jasmine.SpyObj<Location>;
     });
 
     it('should create with default inputs', () => {
@@ -33,17 +39,20 @@ describe('UiHeaderComponent', () => {
         expect(el.textContent).toContain(testSubtitle);
     });
 
-    it('should show back button when showBackButton is true and emit on click', () => {
+    it('should emit backClick when observed', () => {
         component.showBackButton = true;
         fixture.detectChanges();
-
-        const btn = fixture.debugElement.query(By.css('button'));
-        expect(btn).toBeTruthy();
 
         let emitted = false;
         component.backClick.subscribe(() => (emitted = true));
 
-        component.onBackClick();
+        component.onBack();
         expect(emitted).toBeTrue();
+        expect(locationSpy.back).not.toHaveBeenCalled();
+    });
+
+    it('should call location.back() when backClick not observed', () => {
+        component.onBack();
+        expect(locationSpy.back).toHaveBeenCalled();
     });
 });

@@ -13,7 +13,7 @@ import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/pag
 export class WaitingRoomPageComponent {
     constructor(private readonly router: Router) {}
 
-    onBackToGameSelection(): void {
-        this.router.navigate([ROUTES.gameSessionCreation]);
+    onBack(): void {
+        this.router.navigate([ROUTES.home]);
     }
 }
