@@ -1,8 +1,8 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { signal } from '@angular/core';
-import { GamePreviewDto } from '@app/dto/gamePreviewDto';
 import { ROUTES } from '@app/constants/routes.constants';
+import { GamePreviewDto } from '@app/dto/gamePreviewDto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { of } from 'rxjs';
 import { GameSessionCreationPageComponent } from './game-session-creation-page.component';
@@ -57,8 +57,15 @@ describe('GameSessionCreationPageComponent', () => {
     });
 
     it('should return visible game displays', () => {
-        const visibleGames = component.visibleGameDisplays();
-        expect(visibleGames).toEqual(mockGames);
+        const signalRef = component.visibleGameDisplays;
+        expect(signalRef).toBe(gameStoreServiceSpy.visibleGames);
+        expect(signalRef()).toEqual(mockGames);
+    });
+
+    it('should navigate back to home when back is clicked', () => {
+        component.onBackClick();
+
+        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.home]);
     });
 
     it('should navigate to character creation', () => {
