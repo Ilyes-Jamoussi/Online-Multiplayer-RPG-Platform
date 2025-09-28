@@ -63,7 +63,7 @@ describe('GameSessionCreationPageComponent', () => {
     });
 
     it('should navigate back to home when back is clicked', () => {
-        component.onBackClick();
+        component.onBack();
 
         expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.home]);
     });

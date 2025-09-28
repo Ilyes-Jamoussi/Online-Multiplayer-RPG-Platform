@@ -1,4 +1,4 @@
-import { CommonModule, Location } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,9 +6,9 @@ import { ROUTES } from '@app/constants/routes.constants';
 import { GameModeOption, MapSizeOption } from '@app/interfaces/game-parameters.interface';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
-import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
-import { UiIconComponent } from '@app/shared/ui/components/icon/icon.component';
-import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
+import { UiButtonComponent } from '@app/components/ui/button/button.component';
+import { UiIconComponent } from '@app/components/ui/icon/icon.component';
+import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
 
@@ -56,7 +56,6 @@ export class GameParametersPageComponent {
 
     constructor(
         private readonly router: Router,
-        private readonly location: Location,
         private readonly notificationService: NotificationService,
         private readonly gameStoreService: GameStoreService,
     ) {}
@@ -81,9 +80,5 @@ export class GameParametersPageComponent {
                     });
                 },
             });
-    }
-
-    onBack(): void {
-        this.location.back();
     }
 }

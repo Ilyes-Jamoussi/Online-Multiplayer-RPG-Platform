@@ -1,6 +1,5 @@
-<app-ui-page-layout [hasHeader]="true" [hasFooter]="true" headerTitle="Création de personnage" [showBackButton]="true" (backClick)="onBackClick()">
+<app-ui-page-layout [hasHeader]="true" [hasFooter]="true" headerTitle="Création de personnage" [showBackButton]="true">
     <div class="selection-layout">
-        <!-- Avatar selection panel -->
         <section class="character-grid-panel" aria-label="Sélection d'avatar">
             <div class="avatar-card">
                 <div class="selected-avatar-display">
@@ -37,7 +36,6 @@
             </div>
         </section>
 
-        <!-- Character configuration panel -->
         <section class="character-info-panel" aria-label="Configuration du personnage">
             <div class="info-card">
                 <div class="character-name-section">
