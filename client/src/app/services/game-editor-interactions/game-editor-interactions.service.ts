@@ -18,6 +18,7 @@ export class GameEditorInteractionsService {
     private readonly _hoveredTiles = signal<Vector2[]>([]);
     private readonly _objectGrabOffset = signal<Vector2>({ x: 0, y: 0 });
     private readonly _objectDropVec2 = signal<Vector2>({ x: 0, y: 0 });
+    private readonly _draggedObject = signal<PlaceableKind | string>('');
 
     get activeTool(): ActiveTool | null {
         return this._activeTool();
@@ -68,6 +69,7 @@ export class GameEditorInteractionsService {
             x: evt.offsetX,
             y: evt.offsetY,
         };
+        this._draggedObject.set(object.id || object.kind);
         this.activeTool = {
             type: ToolType.PlaceableTool,
             placeableKind: PlaceableKind[object.kind],
@@ -159,10 +161,10 @@ export class GameEditorInteractionsService {
         }
     }
 
-    removeObject(id: string): void {
+    removeObject(id?: string): void {
         const tool = this.activeTool;
         if (!tool || tool.type !== ToolType.PlaceableEraserTool) return;
-        this.store.removeObject(id);
+        this.store.removeObject(id || this._draggedObject());
         this.revertToPreviousTool();
     }
 

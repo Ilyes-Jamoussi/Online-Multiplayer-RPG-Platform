@@ -78,12 +78,15 @@ export class GameEditorInventoryComponent {
     }
 
     onSlotDragOver(evt: DragEvent, kind: PlaceableKind) {
+        evt.preventDefault();
+        evt.stopPropagation();
         if (!evt.dataTransfer) return;
         if (!this.slotAccepts(evt, kind)) return;
-        evt.preventDefault();
         evt.dataTransfer.dropEffect = 'move';
     }
     onSlotDragEnter(evt: DragEvent, kind: PlaceableKind) {
+        evt.preventDefault();
+        evt.stopPropagation();
         if (!this.slotAccepts(evt, kind)) return;
         this.dragOver = kind;
     }
@@ -92,11 +95,11 @@ export class GameEditorInventoryComponent {
     }
 
     onSlotDrop(evt: DragEvent, kind: PlaceableKind) {
+        evt.preventDefault();
+        evt.stopPropagation();
         if (!evt.dataTransfer) return;
         const id = evt.dataTransfer.getData(this.dndMime[kind]);
         if (!id) return;
-        evt.preventDefault();
-        evt.stopPropagation();
         this.gameEditorInteractionsService.activeTool = {
             type: ToolType.PlaceableEraserTool,
         };

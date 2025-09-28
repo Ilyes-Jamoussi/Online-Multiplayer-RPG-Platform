@@ -670,6 +670,17 @@ describe('GameEditorInteractionsService', () => {
             service.removeObject('id-456');
             expect(store.removeObject).not.toHaveBeenCalled();
         });
+
+        it('removes the object based on the _draggedObject signal if id is not provided', () => {
+            const obj: GameEditorPlaceableDto = { id: 'obj-1', kind: PlaceableKind.HEAL, x: 1, y: 1, placed: true, orientation: 'N' };
+            store.setPlacedObjects([obj]);
+            service['_draggedObject'].set(obj.id);
+
+            service.activeTool = { type: ToolType.PlaceableEraserTool };
+            store.removeObject.calls.reset();
+            service.removeObject();
+            expect(store.removeObject).toHaveBeenCalledWith('obj-1');
+        });
     });
 
     describe('hasMime', () => {
