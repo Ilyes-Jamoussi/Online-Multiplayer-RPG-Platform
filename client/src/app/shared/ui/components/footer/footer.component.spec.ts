@@ -20,12 +20,13 @@ describe('UiFooterComponent', () => {
     });
 
     it('should render with the component selector as host element', () => {
-        const meta = UiFooterComponent as unknown as {
-            __annotations__?: Array<{ selector?: string }>;
-            ɵcmp?: { selectors?: string[][] };
-        };
+        const legacyMeta = UiFooterComponent as unknown as Record<string, unknown>;
+        const annotations = legacyMeta['__annotations__'] as ({ selector?: string }[]) | undefined;
 
-        const selector = meta.__annotations__?.[0]?.selector || meta.ɵcmp?.selectors?.[0]?.[0];
+        const ivy = UiFooterComponent as unknown as { ɵcmp?: { selectors?: string[][] } };
+        const ivySelector = ivy.ɵcmp?.selectors?.[0]?.[0];
+
+        const selector = annotations?.[0]?.selector || ivySelector;
 
         const hostTag = fixture.nativeElement.tagName.toLowerCase();
         if (typeof selector === 'string' && selector.includes('-')) {
