@@ -185,6 +185,18 @@ describe('GameEditorInteractionsService', () => {
         expect(service).toBeTruthy();
     });
 
+    describe('getToolbarBrushes', () => {
+        it('returns one ToolbarItem per TileKind with correct image and class', () => {
+            const brushes = service.getToolbarBrushes();
+            expect(brushes.length).toBe(Object.keys(TileKind).length - 1);
+            brushes.forEach((b) => {
+                expect(b.image).toBeTruthy();
+                expect(b.class).toBe(b.tileKind.toLowerCase());
+                expect(b.tileKind).toBe(TileKind[b.tileKind]);
+            });
+        });
+    });
+
     describe('setupObjectDrag', () => {
         it('sets effectAllowed="move" and sets the MIME when footprint > 0', () => {
             const obj: GameEditorPlaceableDto = { id: 'boat-1', kind: PlaceableKind.BOAT, x: 1, y: 1, placed: true, orientation: 'N' };
@@ -469,7 +481,7 @@ describe('GameEditorInteractionsService', () => {
             expect(store.movePlacedObject).not.toHaveBeenCalled();
         });
 
-        it('resolveDropAction can\'t place a boat if tile is not water', () => {
+        it("resolveDropAction can't place a boat if tile is not water", () => {
             service.activeTool = {
                 type: ToolType.PlaceableTool,
                 placeableKind: PlaceableKind.BOAT,
@@ -601,7 +613,7 @@ describe('GameEditorInteractionsService', () => {
             expect(store.placeObjectFromInventory).toHaveBeenCalledWith(PlaceableKind.START, 2, 3);
         });
 
-        it('resolveDropAction shouldn\'t move object if id is not found', () => {
+        it("resolveDropAction shouldn't move object if id is not found", () => {
             const obj: GameEditorPlaceableDto = { id: 'obj-1', kind: PlaceableKind.HEAL, x: 1, y: 1, placed: true, orientation: 'N' };
             store.setPlacedObjects([obj]);
             service.objectDropVec2 = { x: 6, y: 7 };
@@ -612,7 +624,7 @@ describe('GameEditorInteractionsService', () => {
             expect(store.movePlacedObject).not.toHaveBeenCalled();
         });
 
-        it('resolveDropAction shouldn\'t move object if drop position is occupied', () => {
+        it("resolveDropAction shouldn't move object if drop position is occupied", () => {
             const obj: GameEditorPlaceableDto = { id: 'obj-1', kind: PlaceableKind.HEAL, x: 1, y: 1, placed: true, orientation: 'N' };
             store.setPlacedObjects([obj, { id: 'obj-2', kind: PlaceableKind.FIGHT, x: 6, y: 7, placed: true, orientation: 'N' }]);
             service.objectDropVec2 = { x: 6, y: 7 };
@@ -623,7 +635,7 @@ describe('GameEditorInteractionsService', () => {
             expect(store.movePlacedObject).not.toHaveBeenCalled();
         });
 
-        it('resolveDropAction shouldn\'t place object if drop position is occupied', () => {
+        it("resolveDropAction shouldn't place object if drop position is occupied", () => {
             store.setPlacedObjects([{ id: 'obj-2', kind: PlaceableKind.FIGHT, x: 6, y: 7, placed: true, orientation: 'N' }]);
             service.activeTool = {
                 type: ToolType.PlaceableTool,

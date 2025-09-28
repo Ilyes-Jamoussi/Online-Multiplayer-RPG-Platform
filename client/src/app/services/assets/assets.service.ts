@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
-import { AVATAR_ANIMATED_PATH, AVATAR_STATIC_PATH, DICE_PATH } from '@app/constants/assets-paths.constants';
+import { AVATAR_ANIMATED_PATH, AVATAR_STATIC_PATH, DICE_PATH, OBJECT_PATH, TILE_PATH } from '@app/constants/assets-paths.constants';
 import { Avatar } from '@common/enums/avatar.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile-kind.enum';
 
 @Injectable({ providedIn: 'root' })
 export class AssetsService {
@@ -24,5 +26,17 @@ export class AssetsService {
 
     getDiceImage(diceType: string): string {
         return `${DICE_PATH}/${diceType.toLowerCase()}.svg`;
+    }
+
+    getTileImage(kind: TileKind, opened: boolean = false): string {
+        if (kind === TileKind.DOOR) {
+            const state = opened ? 'opened' : 'closed';
+            return `${TILE_PATH}/${state}-door.png`;
+        }
+        return `${TILE_PATH}/${kind.toLowerCase()}.png`;
+    }
+
+    getPlaceableImage(kind: PlaceableKind): string {
+        return `${OBJECT_PATH}/${kind.toLowerCase()}.png`;
     }
 }

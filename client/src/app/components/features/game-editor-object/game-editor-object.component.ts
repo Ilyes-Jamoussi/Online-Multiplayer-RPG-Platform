@@ -4,22 +4,30 @@ import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { ToolType } from '@app/interfaces/game-editor.interface';
+import { AssetsService } from '@app/services/assets/assets.service';
 
 @Component({
     selector: 'app-editor-placed-object',
     standalone: true,
     imports: [CommonModule],
-    templateUrl: './object.component.html',
-    styleUrls: ['./object.component.scss'],
+    templateUrl: './game-editor-object.component.html',
+    styleUrls: ['./game-editor-object.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GameEditorObjectComponent {
     @Input({ required: true }) object: GameEditorPlaceableDto;
     @Input({ required: true }) tileSize: number;
 
-    constructor(private readonly gameEditorInteractionsService: GameEditorInteractionsService) {}
+    constructor(
+        private readonly gameEditorInteractionsService: GameEditorInteractionsService,
+        private readonly assetsService: AssetsService,
+    ) {}
 
     isDragging = false;
+
+    get image() {
+        return this.assetsService.getPlaceableImage(PlaceableKind[this.object.kind]);
+    }
 
     @HostBinding('style.grid-column')
     get gridCol() {

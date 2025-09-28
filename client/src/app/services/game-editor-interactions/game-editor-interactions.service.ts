@@ -1,13 +1,17 @@
 import { Injectable, signal } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
-import { ActiveTool, ToolType, Vector2 } from '@app/interfaces/game-editor.interface';
+import { ActiveTool, ToolbarItem, ToolType, Vector2 } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { PlaceableMime, PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
+import { AssetsService } from '@app/services/assets/assets.service';
 
 @Injectable()
 export class GameEditorInteractionsService {
-    constructor(private readonly store: GameEditorStoreService) {}
+    constructor(
+        private readonly store: GameEditorStoreService,
+        private readonly assetService: AssetsService,
+    ) {}
 
     private readonly _activeTool = signal<ActiveTool | null>(null);
     private readonly _previousActiveTool = signal<ActiveTool | null>(null);
@@ -42,6 +46,16 @@ export class GameEditorInteractionsService {
 
     get hoveredTiles() {
         return this._hoveredTiles.asReadonly();
+    }
+
+    getToolbarBrushes(): ToolbarItem[] {
+        return Object.values(TileKind)
+            .filter((tk) => tk !== TileKind.BASE)
+            .map((tk) => ({
+                image: this.assetService.getTileImage(tk),
+                tileKind: tk,
+                class: tk.toLowerCase(),
+            }));
     }
 
     setupObjectDrag(object: GameEditorPlaceableDto, evt: DragEvent): void {

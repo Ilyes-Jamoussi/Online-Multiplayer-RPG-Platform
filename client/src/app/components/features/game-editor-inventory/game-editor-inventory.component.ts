@@ -3,6 +3,7 @@ import { GameEditorStoreService } from '@app/services/game-editor-store/game-edi
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { PlaceableFootprint, PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
 import { ToolType } from '@app/interfaces/game-editor.interface';
+import { NgStyle } from '@angular/common';
 
 @Component({
     selector: 'app-editor-inventory',
@@ -10,10 +11,11 @@ import { ToolType } from '@app/interfaces/game-editor.interface';
     templateUrl: './game-editor-inventory.component.html',
     styleUrls: ['./game-editor-inventory.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgStyle],
 })
 export class GameEditorInventoryComponent {
     constructor(
-        readonly gameEditorStoreService: GameEditorStoreService,
+        private readonly gameEditorStoreService: GameEditorStoreService,
         private readonly gameEditorInteractionsService: GameEditorInteractionsService,
     ) {}
 
@@ -21,6 +23,14 @@ export class GameEditorInventoryComponent {
     readonly placeableFootprint = PlaceableFootprint;
     readonly invKeys = Object.keys(this.gameEditorStoreService.inventory()) as PlaceableKind[];
     dragOver = '';
+
+    get inventory() {
+        return this.gameEditorStoreService.inventory();
+    }
+
+    get tileSizePx() {
+        return this.gameEditorStoreService.tileSizePx;
+    }
 
     @HostBinding('style.--tile-px')
     get tileVar() {
@@ -41,23 +51,6 @@ export class GameEditorInventoryComponent {
                 return 'Bateau';
             default:
                 return String(k);
-        }
-    }
-
-    iconOf(k: PlaceableKind): string {
-        switch (k) {
-            case 'START':
-                return '🏁';
-            case 'FLAG':
-                return '🚩';
-            case 'HEAL':
-                return '🏥';
-            case 'FIGHT':
-                return '⚔️';
-            case 'BOAT':
-                return '🛶';
-            default:
-                return '❓';
         }
     }
 
