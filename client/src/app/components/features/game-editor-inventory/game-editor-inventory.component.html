@@ -2,36 +2,34 @@
     @for (item of invKeys; track item) {
     <div
         class="slot"
-        [class.disabled]="gameEditorStoreService.inventory()[item].remaining === 0"
+        [class.disabled]="this.inventory[item].remaining === 0"
         [class.drag-over]="dragOver === item"
         [attr.title]="kindLabel(item)"
         #slotEl
         (dragover)="onSlotDragOver($event, item)"
         (dragenter)="onSlotDragEnter($event, item)"
         (dragleave)="onSlotDragLeave()"
-        (drop)="onSlotDrop($event, gameEditorStoreService.inventory()[item].kind)"
+        (drop)="onSlotDrop($event, this.inventory[item].kind)"
     >
         <div
             class="icon-cell"
-            [class.drag-over]="dragOver === gameEditorStoreService.inventory()[item].kind"
-            [draggable]="gameEditorStoreService.inventory()[item].remaining > 0"
+            [class.drag-over]="dragOver === this.inventory[item].kind"
+            [draggable]="this.inventory[item].remaining > 0"
+            [ngStyle]="{ 'background-image': 'url(' + this.inventory[item].image + ')' }"
             (dragend)="onDragEnd()"
-            (dragstart)="onDragStart($event, gameEditorStoreService.inventory()[item].kind, gameEditorStoreService.inventory()[item].remaining === 0)"
-            [attr.data-mime]="dndMime[gameEditorStoreService.inventory()[item].kind]"
-            [attr.data-kind]="gameEditorStoreService.inventory()[item].kind"
-            [style.width.px]="gameEditorStoreService.tileSizePx * placeableFootprint[gameEditorStoreService.inventory()[item].kind]"
-            [style.height.px]="gameEditorStoreService.tileSizePx * placeableFootprint[gameEditorStoreService.inventory()[item].kind]"
+            (dragstart)="onDragStart($event, this.inventory[item].kind, this.inventory[item].remaining === 0)"
+            [attr.data-mime]="dndMime[this.inventory[item].kind]"
+            [attr.data-kind]="this.inventory[item].kind"
+            [style.width.px]="this.tileSizePx * placeableFootprint[this.inventory[item].kind]"
+            [style.height.px]="this.tileSizePx * placeableFootprint[this.inventory[item].kind]"
         >
-            <span class="icon" [class.drag-over]="dragOver === gameEditorStoreService.inventory()[item].kind">{{
-                iconOf(gameEditorStoreService.inventory()[item].kind)
-            }}</span>
-            <span class="badge" [class.drag-over]="dragOver === gameEditorStoreService.inventory()[item].kind">{{
-                gameEditorStoreService.inventory()[item].remaining
+            <span class="badge" [class.drag-over]="dragOver === this.inventory[item].kind">{{
+                this.inventory[item].remaining
             }}</span>
         </div>
 
-        <div class="label" [class.drag-over]="dragOver === gameEditorStoreService.inventory()[item].kind">
-            {{ kindLabel(gameEditorStoreService.inventory()[item].kind) }}
+        <div class="label" [class.drag-over]="dragOver === this.inventory[item].kind">
+            {{ kindLabel(this.inventory[item].kind) }}
         </div>
     </div>
     } @empty {

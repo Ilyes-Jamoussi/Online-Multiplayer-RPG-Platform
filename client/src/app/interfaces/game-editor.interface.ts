@@ -44,6 +44,7 @@ export interface InventoryItem {
     total: number;
     remaining: number;
     disabled: boolean;
+    image: string;
 }
 
 export const PLACEABLE_ORDER: PlaceableKind[] = [

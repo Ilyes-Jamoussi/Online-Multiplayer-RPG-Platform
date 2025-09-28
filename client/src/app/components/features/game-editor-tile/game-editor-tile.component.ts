@@ -33,6 +33,10 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
 
     readonly tileKinds = TileKind;
 
+    get image() {
+        return this.assetService.getTileImage(TileKind[this.tile.kind]);
+    }
+
     hasProblem(): boolean {
         return (
             this.gameEditorCheckService.editorProblems().terrainAccessibility.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y) ||
@@ -100,9 +104,5 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         evt.stopPropagation();
 
         this.gameEditorInteractionsService.resolveDropAction(evt);
-    }
-
-    imageOf(kind: TileKind): string {
-        return this.assetService.getTileImage(kind, this.tile.open);
     }
 }

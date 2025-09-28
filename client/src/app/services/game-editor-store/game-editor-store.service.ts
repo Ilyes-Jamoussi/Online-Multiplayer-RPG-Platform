@@ -11,10 +11,14 @@ import { PatchGameEditorDto } from '@app/dto/patchGameEditorDto';
 import { ExtendedGameEditorPlaceableDto, Inventory, PLACEABLE_ORDER } from '@app/interfaces/game-editor.interface';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { of } from 'rxjs';
+import { AssetsService } from '@app/services/assets/assets.service';
 
 @Injectable()
 export class GameEditorStoreService {
-    constructor(private readonly gameHttpService: GameHttpService) {}
+    constructor(
+        private readonly gameHttpService: GameHttpService,
+        private readonly assetsService: AssetsService,
+    ) {}
 
     private readonly _initial = signal<GameEditorDto>({
         id: '',
@@ -79,7 +83,7 @@ export class GameEditorStoreService {
         for (const o of objs) {
             const kind = PlaceableKind[o.kind];
             if (!inv[kind]) {
-                inv[kind] = { kind, total: 0, remaining: 0, disabled: false };
+                inv[kind] = { kind, total: 0, remaining: 0, disabled: false, image: this.assetsService.getPlaceableImage(kind) };
             }
             inv[kind].total += 1;
             if (!o.placed) {
@@ -89,7 +93,7 @@ export class GameEditorStoreService {
 
         for (const k of PLACEABLE_ORDER) {
             if (!inv[k]) {
-                inv[k] = { total: 0, remaining: 0, kind: k, disabled: true };
+                inv[k] = { total: 0, remaining: 0, kind: k, disabled: true, image: this.assetsService.getPlaceableImage(k) };
             } else {
                 inv[k].disabled = inv[k].remaining === 0;
             }

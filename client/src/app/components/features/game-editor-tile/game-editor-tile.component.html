@@ -3,7 +3,7 @@
     [class.problem]="hasProblem()"
     [class.dropHover]="isDropHovered()"
     [class.brushHover]="isBrushHovered()"
-    [ngStyle]="{ '--bg-image': 'url(' + imageOf(tileKinds[tile.kind]) + ')' }"
+    [ngStyle]="{ '--bg-image': 'url(' + this.image + ')' }"
     (mousedown)="onMouseDown($event)"
     (mouseup)="onMouseUp($event)"
     (mouseover)="onMouseOver($event)"

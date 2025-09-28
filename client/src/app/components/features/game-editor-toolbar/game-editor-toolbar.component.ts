@@ -3,7 +3,6 @@ import { GameEditorInteractionsService } from '@app/services/game-editor-interac
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { UiTooltipComponent } from '@app/components/ui/tooltip/tooltip.component';
 import { ToolbarItem, ToolType } from '@app/interfaces/game-editor.interface';
-import { AssetsService } from '@app/services/assets/assets.service';
 
 @Component({
     selector: 'app-editor-toolbar',
@@ -14,9 +13,12 @@ import { AssetsService } from '@app/services/assets/assets.service';
 })
 export class GameEditorToolbarComponent {
     constructor(
-        readonly gameEditorInteractionsService: GameEditorInteractionsService,
-        private readonly assetsService: AssetsService,
+        private readonly gameEditorInteractionsService: GameEditorInteractionsService,
     ) {}
+
+    get brushes () {
+        return this.gameEditorInteractionsService.getToolbarBrushes();
+    }
 
     selectTileBrush(tileKind: TileKind) {
         this.gameEditorInteractionsService.activeTool = {
@@ -26,14 +28,6 @@ export class GameEditorToolbarComponent {
             rightDrag: false,
         };
     }
-
-    brushes: ToolbarItem[] = [
-        { image: this.assetsService.getTileImage(TileKind.WALL), class: 'wall', tileKind: TileKind.WALL },
-        { image: this.assetsService.getTileImage(TileKind.DOOR), class: 'door', tileKind: TileKind.DOOR },
-        { image: this.assetsService.getTileImage(TileKind.WATER), class: 'water', tileKind: TileKind.WATER },
-        { image: this.assetsService.getTileImage(TileKind.ICE), class: 'ice', tileKind: TileKind.ICE },
-        { image: this.assetsService.getTileImage(TileKind.TELEPORT), class: 'teleport', tileKind: TileKind.TELEPORT },
-    ];
 
     isBrushSelected(brush: ToolbarItem): boolean {
         const activeTool = this.gameEditorInteractionsService.activeTool;

@@ -6,7 +6,10 @@
 
 .obj {
     width: 100%;
-    background-color: rgba(255, 255, 255, 0.452);
+    background-image: var(--bg-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     height: 100%;
     display: grid;
     place-items: center;
