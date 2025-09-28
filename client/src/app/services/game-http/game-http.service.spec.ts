@@ -11,6 +11,7 @@ import { UpdateGameDto } from '@app/dto/updateGameDto';
 import { API_PATHS } from '@common/constants/api-paths';
 import { environment } from 'src/environments/environment';
 import { GameHttpService } from './game-http.service';
+import { GameMode } from '@common/enums/game-mode.enum';
 
 describe('GameHttpService', () => {
     let service: GameHttpService;
@@ -121,17 +122,17 @@ describe('GameHttpService', () => {
         it('should patch editor and return updated dto', () => {
             const id = 'editor-2';
             const dto: PatchGameEditorDto = { name: 'Patched' } as unknown as PatchGameEditorDto;
-            const updated: GameEditorDto = (
-                {
-                    id,
-                    name: dto.name,
-                    description: 'd',
-                    size: 10,
-                    mode: 'classic',
-                    grid: [],
-                    inventory: [],
-                } as unknown
-            ) as GameEditorDto;
+            const updated: GamePreviewDto = {
+                id,
+                name: dto.name as string,
+                description: 'd',
+                size: 10,
+                mode: GameMode.CLASSIC,
+                lastModified: new Date().toISOString(),
+                visibility: false,
+                draft: false,
+                gridPreviewUrl: '/assets/game.png',
+            };
 
             service.patchGameEditorById(id, dto).subscribe((resp) => {
                 expect(resp).toEqual(updated);
@@ -147,7 +148,7 @@ describe('GameHttpService', () => {
     describe('updateGame', () => {
         it('should update game and return void', () => {
             const id = 'upd-1';
-            const dto: UpdateGameDto = ({ name: 'New' } as unknown) as UpdateGameDto;
+            const dto: UpdateGameDto = { name: 'New' } as unknown as UpdateGameDto;
 
             service.updateGame(id, dto).subscribe((r) => {
                 expect(r).toBeNull();

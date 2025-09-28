@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { PlaceableFootprint, PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
+import { ToolType } from '@app/interfaces/game-editor.interface';
 
 @Component({
     selector: 'app-editor-inventory',
@@ -11,15 +12,15 @@ import { PlaceableFootprint, PlaceableKind, PlaceableMime } from '@common/enums/
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GameEditorInventoryComponent {
-    readonly dndMime = PlaceableMime;
-    readonly placeableFootprint = PlaceableFootprint;
-    dragOver = '';
-
     constructor(
         readonly gameEditorStoreService: GameEditorStoreService,
         private readonly gameEditorInteractionsService: GameEditorInteractionsService,
     ) {}
 
+    readonly dndMime = PlaceableMime;
+    readonly placeableFootprint = PlaceableFootprint;
+    readonly invKeys = Object.keys(this.gameEditorStoreService.inventory()) as PlaceableKind[];
+    dragOver = '';
 
     @HostBinding('style.--tile-px')
     get tileVar() {

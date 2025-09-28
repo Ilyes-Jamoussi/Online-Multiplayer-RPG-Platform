@@ -31,11 +31,7 @@ describe('GamePreviewCardComponent', () => {
 
         await TestBed.configureTestingModule({
             imports: [GamePreviewCardComponent],
-            providers: [
-                provideHttpClientTesting(),
-                { provide: Router, useValue: routerSpy },
-                { provide: GameStoreService, useValue: gameStoreSpy },
-            ],
+            providers: [provideHttpClientTesting(), { provide: Router, useValue: routerSpy }, { provide: GameStoreService, useValue: gameStoreSpy }],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GamePreviewCardComponent);

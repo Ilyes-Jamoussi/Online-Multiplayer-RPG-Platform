@@ -21,7 +21,7 @@ export class ErrorsBadgeComponent {
         if (this.validationType === 'character-creation' && this.characterCreationCheckService) {
             return this.characterCreationCheckService.getErrorMessages();
         }
-        
+
         if (this.validationType === 'game-editor' && this.gameEditorCheckService) {
             const problems = this.gameEditorCheckService.editorProblems();
             const messages: string[] = [];
@@ -33,7 +33,7 @@ export class ErrorsBadgeComponent {
             }
             return messages;
         }
-        
+
         return [];
     }
 

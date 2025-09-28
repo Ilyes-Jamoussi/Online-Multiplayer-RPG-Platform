@@ -26,7 +26,6 @@ export abstract class UiBaseComponent {
 
     @Input() popOut: boolean = true;
 
-    
     get classes(): Record<string, boolean> {
         return {
             [`v-${this.variant || 'primary'}`]: true,

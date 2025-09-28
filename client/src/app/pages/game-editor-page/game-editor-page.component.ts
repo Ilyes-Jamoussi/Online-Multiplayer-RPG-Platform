@@ -6,7 +6,7 @@ import { ErrorsBadgeComponent } from '@app/components/features/errors-badge/erro
 import { ROUTES } from '@app/constants/routes.constants';
 import { DESCRIPTION_MAX_LENGTH, GAME_NAME_MAX_LENGTH } from '@app/constants/validation.constants';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
-import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
@@ -20,6 +20,7 @@ import { GameEditorObjectComponent } from '@app/components/features/object/objec
 import { GameEditorTileComponent } from '@app/components/features/tile/game-editor-tile.component';
 import { GameEditorToolbarComponent } from '@app/components/features/toolbar/game-editor-toolbar.component';
 import { TileSizeProbeDirective } from '@app/directives/tile-size-probe.directive';
+import { ToolType } from '@app/interfaces/game-editor.interface';
 
 @Component({
     selector: 'app-edit-game-page',
@@ -69,7 +70,7 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
 
     get disableOverlayPointerEvents() {
         const tool = this.gameEditorInteractionsService.activeTool;
-        return tool !== null && ((tool.type === ToolType.TileBrushTool && (tool.leftDrag || tool.rightDrag)));
+        return tool !== null && tool.type === ToolType.TileBrushTool && (tool.leftDrag || tool.rightDrag);
     }
 
     ngOnInit(): void {

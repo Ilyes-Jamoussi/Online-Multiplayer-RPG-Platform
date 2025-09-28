@@ -8,14 +8,13 @@ import { makeDefaultTiles } from '@app/game-store/factory/tile/tile.factory';
 import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
 import { ImageService } from '@app/game-store/services/image/image.service';
 import { getProjection } from '@app/utils/mongo.utils';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { DEFAULT_DRAFT_GAME_DESCRIPTION, DEFAULT_DRAFT_GAME_NAME } from '@common/constants/game.constants';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 @Injectable()
 export class GameStoreService {
-    private readonly logger = new Logger(GameStoreService.name);
-
     constructor(
         @InjectModel(Game.name) private readonly gameModel: Model<GameDocument>,
         private readonly imageService: ImageService,
@@ -38,6 +37,8 @@ export class GameStoreService {
 
         const gameDocument: GameDocument = {
             ...dto,
+            name: DEFAULT_DRAFT_GAME_NAME,
+            description: DEFAULT_DRAFT_GAME_DESCRIPTION,
             tiles: defaultTiles,
             objects: defaultObjects,
             visibility: false,

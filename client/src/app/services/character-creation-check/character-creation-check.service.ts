@@ -9,7 +9,7 @@ export class CharacterCreationCheckService {
     readonly validationProblems = computed(() => {
         const character = this.characterStoreService.character();
         const name = character.name.trim();
-        
+
         return {
             nameValidation: this.checkNameValidation(name),
             avatarSelection: this.checkAvatarSelection(character.avatar),
@@ -23,15 +23,15 @@ export class CharacterCreationCheckService {
     getErrorMessages(): string[] {
         const problems = this.validationProblems();
         const messages: string[] = [];
-        
+
         if (problems.nameValidation.hasIssue && problems.nameValidation.message) {
             messages.push(problems.nameValidation.message);
         }
-        
+
         if (problems.avatarSelection.hasIssue && problems.avatarSelection.message) {
             messages.push(problems.avatarSelection.message);
         }
-        
+
         return messages;
     }
 
@@ -43,7 +43,7 @@ export class CharacterCreationCheckService {
                     `et ne pas être composé uniquement d'espaces.`,
             };
         }
-        
+
         return { hasIssue: false };
     }
 
@@ -54,7 +54,7 @@ export class CharacterCreationCheckService {
                 message: 'Un avatar doit être sélectionné.',
             };
         }
-        
+
         return { hasIssue: false };
     }
 }

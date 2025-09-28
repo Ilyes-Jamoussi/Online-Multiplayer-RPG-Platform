@@ -1,15 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
-import { ActiveTool, Vector2 } from '@app/interfaces/game-editor.interface';
+import { ActiveTool, ToolType, Vector2 } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { PlaceableMime, PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
-
-export enum ToolType {
-    TileBrushTool = 'tile-brush-tool',
-    PlaceableTool = 'placeable-tool',
-    PlaceableEraserTool = 'placeable-eraser-tool',
-}
 
 @Injectable()
 export class GameEditorInteractionsService {
@@ -17,7 +11,7 @@ export class GameEditorInteractionsService {
 
     private readonly _activeTool = signal<ActiveTool | null>(null);
     private readonly _previousActiveTool = signal<ActiveTool | null>(null);
-    private readonly _hoveredTiles = signal<Vector2[] | null>(null);
+    private readonly _hoveredTiles = signal<Vector2[]>([]);
     private readonly _objectGrabOffset = signal<Vector2>({ x: 0, y: 0 });
     private readonly _objectDropVec2 = signal<Vector2>({ x: 0, y: 0 });
 
@@ -69,7 +63,7 @@ export class GameEditorInteractionsService {
     revertToPreviousTool(): void {
         this._activeTool.set(this._previousActiveTool());
         this._previousActiveTool.set(null);
-        this._hoveredTiles.set(null);
+        this._hoveredTiles.set([]);
     }
 
     dragStart(x: number, y: number, click: 'left' | 'right'): void {
@@ -115,7 +109,6 @@ export class GameEditorInteractionsService {
         if (!tool || tool.type !== ToolType.PlaceableTool) return;
 
         const footprint = PlaceableFootprint[tool.placeableKind];
-        if (!Number.isFinite(footprint) || footprint <= 0) return;
         const hoveredTiles: Vector2[] = [];
 
         const offsetX = evt.offsetX;
@@ -132,11 +125,11 @@ export class GameEditorInteractionsService {
         }
 
         this._hoveredTiles.set(hoveredTiles);
-        return hoveredTiles;
+        return;
     }
 
     resolveDropAction(evt: DragEvent): void {
-        this._hoveredTiles.set(null);
+        this._hoveredTiles.set([]);
         if (evt && evt.dataTransfer) {
             const mime = Object.values(PlaceableMime).find((m) => evt.dataTransfer?.types.includes(m));
             if (!mime) return;
@@ -169,7 +162,7 @@ export class GameEditorInteractionsService {
     }
 
     private canPlaceObject(x: number, y: number, kind: PlaceableKind, excludeId?: string): boolean {
-        const footprint = PlaceableFootprint[kind] ?? 1;
+        const footprint = PlaceableFootprint[kind];
 
         for (let dy = 0; dy < footprint; dy++) {
             for (let dx = 0; dx < footprint; dx++) {
@@ -197,7 +190,7 @@ export class GameEditorInteractionsService {
 
     private tryPlaceObject(x: number, y: number, kind: PlaceableKind): void {
         if (!this.canPlaceObject(x, y, kind)) return;
-        this.store.placeObject(kind, x, y);
+        this.store.placeObjectFromInventory(kind, x, y);
     }
 
     private tryMoveObject(x: number, y: number, id: string): void {
@@ -206,26 +199,18 @@ export class GameEditorInteractionsService {
 
         const kind = PlaceableKind[obj.kind];
         if (!this.canPlaceObject(x, y, kind, id)) return;
-        this.store.moveObject(id, x, y);
+        this.store.movePlacedObject(id, x, y);
     }
 
     private processDropTile(tileX: number, tileY: number, offsetX: number, offsetY: number): Vector2 {
-        const tool = this.activeTool;
-        if (!tool || tool.type !== ToolType.PlaceableTool) return { x: tileX, y: tileY };
-
-        const footprint = PlaceableFootprint[tool.placeableKind];
-        if (!Number.isFinite(footprint) || footprint <= 0) return { x: tileX, y: tileY };
-
         const tileSize = this.store.tileSizePx;
 
         const pointerPxX = tileX * tileSize + offsetX;
         const pointerPxY = tileY * tileSize + offsetY;
         const grab = this.objectGrabOffset;
-        const objectGrabIsFromCenter = false;
 
-        const halfSizePx = (footprint * tileSize) / 2;
-        const topLeftPxX = pointerPxX - grab.x - (objectGrabIsFromCenter ? halfSizePx : 0);
-        const topLeftPxY = pointerPxY - grab.y - (objectGrabIsFromCenter ? halfSizePx : 0);
+        const topLeftPxX = pointerPxX - grab.x;
+        const topLeftPxY = pointerPxY - grab.y;
 
         const snappedTopLeftTileX = Math.round(topLeftPxX / tileSize);
         const snappedTopLeftTileY = Math.round(topLeftPxY / tileSize);

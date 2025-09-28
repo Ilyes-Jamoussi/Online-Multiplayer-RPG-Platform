@@ -1,382 +1,676 @@
+/* eslint-disable max-lines */
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { GameHttpService } from '@app/services/game-http/game-http.service';
+import { EMPTY, Subject, throwError } from 'rxjs';
+import { GameStoreService } from '@app/services/game-store/game-store.service';
 
 import { GameEditorDto } from '@app/dto/gameEditorDto';
-import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
-import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
-import { GamePreviewDto } from '@app/dto/gamePreviewDto';
-import { PatchGameEditorDto } from '@app/dto/patchGameEditorDto';
-import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { GameStoreService } from '@app/services/game-store/game-store.service';
-import { GameMode } from '@common/enums/game-mode.enum';
-import { MapSize } from '@common/enums/map-size.enum';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
 import { GameEditorStoreService } from './game-editor-store.service';
-
-const testConstants = {
-    gridSize3: 3,
-    gridSize4: 4,
-};
-
-const TILE_SIZE_PX = 42;
-const NON_EXISTENT_COORD = 5;
+import { MapSize } from '@common/enums/map-size.enum';
+import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
+import { TileKind } from '@common/enums/tile-kind.enum';
+import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 
 describe('GameEditorStoreService', () => {
     let service: GameEditorStoreService;
-    let http: jasmine.SpyObj<GameHttpService>;
-    let store: jasmine.SpyObj<GameStoreService>;
-
-    const size = MapSize.MEDIUM;
-    const mkGrid = (n: number, fill: TileKind = TileKind.BASE): GameEditorTileDto[] =>
-        Array.from({ length: n * n }, (_, i) => {
-            const x = i % n;
-            const y = Math.floor(i / n);
-            return { x, y, kind: fill };
-        });
-
-    const initialObjects: GameEditorPlaceableDto[] = [{ id: 'o1', kind: 'START', x: -1, y: -1, placed: false, orientation: 'N' }];
-
-    const initialDto: GameEditorDto = {
-        id: 'game-1',
-        name: 'Nouveau Jeu...',
-        description: 'Desc...',
-        size,
-        mode: 'classic',
-        tiles: mkGrid(size, TileKind.BASE),
-        objects: initialObjects,
-        gridPreviewUrl: '',
-        lastModified: new Date().toISOString(),
-    };
+    let gameHttpServiceSpy: jasmine.SpyObj<GameHttpService>;
+    let gameStoreServiceSpy: jasmine.SpyObj<GameStoreService>;
 
     beforeEach(() => {
-        http = jasmine.createSpyObj<GameHttpService>('GameHttpService', ['getGameEditorById', 'patchGameEditorById']);
-
-        store = jasmine.createSpyObj<GameStoreService>('GameStoreService', ['createGame']);
+        gameHttpServiceSpy = jasmine.createSpyObj('GameHttpService', ['getGameEditorById', 'patchGameEditorById']);
+        gameStoreServiceSpy = jasmine.createSpyObj('GameStoreService', ['selectGame', 'deselectGame', 'createGame']);
 
         TestBed.configureTestingModule({
-            providers: [GameEditorStoreService, { provide: GameHttpService, useValue: http }, { provide: GameStoreService, useValue: store }],
+            providers: [
+                GameEditorStoreService,
+                { provide: GameHttpService, useValue: gameHttpServiceSpy },
+                { provide: GameStoreService, useValue: gameStoreServiceSpy },
+            ],
         });
 
         service = TestBed.inject(GameEditorStoreService);
     });
 
-    describe('loadGameById', () => {
-        it('hydrates signals with backend data and maps the mode', () => {
-            http.getGameEditorById.and.returnValue(of(initialDto));
+    it('should be created', () => {
+        expect(service).toBeTruthy();
+    });
 
-            service.loadGameById('game-1');
+    const mkTiles = () => {
+        const size = MapSize.SMALL;
+        const array: GameEditorTileDto[] = [];
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                array.push({ kind: TileKind.BASE, x: i, y: j });
+            }
+        }
+        return array;
+    };
 
-            expect(http.getGameEditorById).toHaveBeenCalledWith('game-1');
-            expect(service.initial().id).toBe('game-1');
-            expect(service.name).toBe('Nouveau Jeu...');
-            expect(service.description).toBe('Desc...');
-            expect(service.size()).toBe(size);
+    const mkObjects = () => {
+        const array: GameEditorPlaceableDto[] = [];
+        array.push({ id: 'start1', kind: PlaceableKind.START, x: 0, y: 0, placed: true, orientation: 'N' });
+        array.push({ id: 'flag1', kind: PlaceableKind.FLAG, x: -1, y: -1, placed: false, orientation: 'N' });
+        array.push({ id: 'boat1', kind: PlaceableKind.BOAT, x: 2, y: 2, placed: true, orientation: 'N' });
+        return array;
+    };
+
+    const invalidTile = 100;
+
+    const mockEditorData: GameEditorDto = {
+        id: '1',
+        name: 'Test Game',
+        description: 'A game for testing',
+        size: MapSize.SMALL,
+        tiles: mkTiles(),
+        objects: mkObjects(),
+        mode: GameMode.CTF,
+        lastModified: new Date().toISOString(),
+        gridPreviewUrl: '/assets/test-game.png',
+    };
+
+    describe('getters/setters', () => {
+        it('should get and set name and description', () => {
+            expect(service.name).toBe('');
+            expect(service.description).toBe('');
+
+            service.name = 'New Name';
+            service.description = 'New Description';
+
+            expect(service.name).toBe('New Name');
+            expect(service.description).toBe('New Description');
+        });
+
+        it('should return correct loadingGame and loadError states', () => {
+            expect(service.loadingGame()).toBe(false);
+            expect(service.loadError()).toBe('');
+        });
+
+        it('should get and set tile size', () => {
+            expect(service.tileSizePx).toBe(0);
+            service.tileSizePx = 1;
+            expect(service.tileSizePx).toBe(1);
+        });
+
+        it('should get correct gridPreviewUrl', () => {
             expect(service.gridPreviewUrl()).toBe('');
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+            service.loadGameById('1');
+            subject.next(mockEditorData);
+            subject.complete();
+            expect(service.gridPreviewUrl()).toBe('/assets/test-game.png');
+        });
+
+        it('should get correct size and mode', () => {
+            expect(service.size()).toBe(MapSize.MEDIUM);
             expect(service.mode()).toBe(GameMode.CLASSIC);
-            expect(service.tiles().length).toBe(size * size);
-            expect(service.objects().length).toBe(1);
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+            service.loadGameById('1');
+            subject.next(mockEditorData);
+            subject.complete();
+            expect(service.size()).toBe(MapSize.SMALL);
+            expect(service.mode()).toBe(GameMode.CTF);
+        });
+    });
+
+    describe('loadGame', () => {
+        it('should load game data and update state (sans fakeAsync)', () => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+
+            expect(service.loadingGame()).toBe(false);
+            service.loadGameById('1');
+
+            expect(service.loadingGame()).toBe(true);
+
+            subject.next(mockEditorData);
+            subject.complete();
+
+            expect(service.loadingGame()).toBe(false);
+
+            const initial = service.initial();
+            expect(initial.id).toBe('1');
+            expect(initial.name).toBe('Test Game');
+            expect(initial.description).toBe('A game for testing');
+            expect(initial.size).toBe(MapSize.SMALL);
+            expect(initial.mode).toBe(GameMode.CTF);
+            expect(service.tiles().length).toBe(mockEditorData.tiles.length);
+            expect(service.objects().length).toBe(mockEditorData.objects.length);
+        });
+        it('should handle error when id not found', () => {
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(throwError(() => new Error('Game with ID 999 not found')));
+
+            expect(service.loadingGame()).toBe(false);
+            expect(service.loadError()).toBe('');
+
+            service.loadGameById('999');
+            expect(service.loadingGame()).toBe(false);
+            expect(service.loadError()).toBe('Game with ID 999 not found');
+        });
+        it('should set loadError to true when game is undefined / null', () => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+
+            expect(service.loadingGame()).toBe(false);
+            expect(service.loadError()).toBe('');
+
+            service.loadGameById('1');
+            expect(service.loadingGame()).toBe(true);
+
+            subject.next(undefined as unknown as GameEditorDto);
+            subject.complete();
+
+            expect(service.loadingGame()).toBe(false);
+            expect(service.loadError()).toBe('Game with ID 1 not found');
         });
     });
 
     describe('saveGame', () => {
-        it('if name changed, sends only the name in the body', () => {
-            http.getGameEditorById.and.returnValue(of(initialDto));
-            service.loadGameById(initialDto.id);
-            service.name = 'new name';
-            http.patchGameEditorById.and.callFake((id: string, body: PatchGameEditorDto) => {
-                expect(id).toBe('game-1');
-                expect(body.name).toBe('new name');
-                expect(body.description).toBeUndefined();
-                expect(body.size).toBeUndefined();
-                expect(body.tiles).toBeUndefined();
-                expect(body.objects).toBeUndefined();
-                expect(body.gridPreviewUrl).toBeUndefined();
-                expect(body.mode).toBeUndefined();
-                return of({ ...initialDto, name: 'new name' });
-            });
+        beforeEach(() => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
 
-            service.saveGame();
-            expect(http.patchGameEditorById).toHaveBeenCalledTimes(1);
-            expect(service.initial().name).toBe('new name');
+            gameHttpServiceSpy.patchGameEditorById.and.returnValue(EMPTY);
+
+            service.loadGameById('1');
+            subject.next(mockEditorData);
+            subject.complete();
         });
 
-        it('if description changed, sends only the description in the body', () => {
-            service.description = 'new desc';
-            http.patchGameEditorById.and.callFake((id: string, body: PatchGameEditorDto) => {
-                expect(body.description).toBe('new desc');
-                expect(body.name).toBeUndefined();
-                return of({ ...initialDto, description: 'new desc' });
-            });
+        it('should call the API to save the game', () => {
+            expect(service.initial().name).toBe('Test Game');
+            expect(service.initial().description).toBe('A game for testing');
+
+            service.name = 'Modified Name';
+            service.description = 'Modified Description';
 
             service.saveGame();
-            expect(service.initial().description).toBe('new desc');
+
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
+                name: 'Modified Name',
+                description: 'Modified Description',
+            });
         });
 
-        it('if tiles changed, sends only the tiles in the body', () => {
-            http.getGameEditorById.and.returnValue(of(initialDto));
-            service.loadGameById(initialDto.id);
+        it('should include gridPreviewUrl when provided', () => {
+            expect(service.initial().name).toBe('Test Game');
+            expect(service.initial().description).toBe('A game for testing');
 
-            service.setTileAt(0, 0, TileKind.WALL);
-            service.setTileAt(1, 1, TileKind.WALL);
-            service.setTileAt(2, 2, TileKind.WALL);
+            service.name = 'Modified Name';
+            service.description = 'Modified Description';
 
-            http.patchGameEditorById.and.callFake((id: string, body: PatchGameEditorDto) => {
-                expect(body.tiles).toBeDefined();
-                expect(body.tiles?.length).toBe(initialDto.tiles.length);
-                expect(body.tiles?.some((t) => t.x === 0 && t.y === 0 && t.kind === TileKind.WALL)).toBeTrue();
-                expect(body.tiles?.some((t) => t.x === 1 && t.y === 1 && t.kind === TileKind.WALL)).toBeTrue();
-                expect(body.tiles?.some((t) => t.x === 2 && t.y === 2 && t.kind === TileKind.WALL)).toBeTrue();
-                expect(body.name).toBeUndefined();
-                expect(body.description).toBeUndefined();
-                expect(body.size).toBeUndefined();
-                expect(body.objects).toBeUndefined();
-                expect(body.gridPreviewUrl).toBeUndefined();
-                expect(body.mode).toBeUndefined();
-                return of({ ...initialDto, tiles: body.tiles as GameEditorTileDto[] });
+            const newPreviewUrl = '/assets/new-preview.png';
+            service.saveGame(newPreviewUrl);
+
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
+                name: 'Modified Name',
+                description: 'Modified Description',
+                gridPreviewUrl: newPreviewUrl,
             });
-
-            service.saveGame();
-            expect(http.patchGameEditorById).toHaveBeenCalledTimes(1);
-            expect(service.initial().tiles.some((t) => t.x === 0 && t.y === 0 && t.kind === TileKind.WALL)).toBeTrue();
         });
 
-        it('if nothing changed, sends a body with all fields undefined', () => {
-            http.getGameEditorById.and.returnValue(of(initialDto));
-            service.loadGameById(initialDto.id);
+        it('should send only name if only name was modified', () => {
+            expect(service.initial().name).toBe('Test Game');
+            expect(service.initial().description).toBe('A game for testing');
 
-            http.patchGameEditorById.and.callFake((_id: string, body: PatchGameEditorDto) => {
-                expect(body.name).toBeUndefined();
-                expect(body.description).toBeUndefined();
-                expect(body.size).toBeUndefined();
-                expect(body.tiles).toBeUndefined();
-                expect(body.objects).toBeUndefined();
-                expect(body.gridPreviewUrl).toBeUndefined();
-                expect(body.mode).toBeUndefined();
-                return of(initialDto);
-            });
+            service.name = 'Modified Name';
 
             service.saveGame();
 
-            expect(http.patchGameEditorById).toHaveBeenCalledTimes(1);
-            expect(service.initial().name).toBe(initialDto.name);
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
+                name: 'Modified Name',
+            });
+        });
+
+        it('should send only description if only description was modified', () => {
+            expect(service.initial().name).toBe('Test Game');
+            expect(service.initial().description).toBe('A game for testing');
+
+            service.description = 'Modified Description';
+
+            service.saveGame();
+
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
+                description: 'Modified Description',
+            });
+        });
+
+        it('should send only tiles if only tiles were modified', () => {
+            expect(service.initial().name).toBe('Test Game');
+            expect(service.initial().description).toBe('A game for testing');
+            expect(service.tiles()).toEqual(mockEditorData.tiles);
+            expect(service.objects()).toEqual(mockEditorData.objects);
+
+            service.setTileAt(0, 0, TileKind.WATER);
+
+            expect(service.getTileAt(0, 0)?.kind).toBe(TileKind.WATER);
+            expect(service.tiles()).not.toEqual(mockEditorData.tiles);
+            expect(service.objects()).toEqual(mockEditorData.objects);
+
+            service.saveGame();
+
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
+                tiles: service.tiles(),
+            });
+        });
+
+        it('should send only objects if only objects were modified', () => {
+            expect(service.initial().name).toBe('Test Game');
+            expect(service.initial().description).toBe('A game for testing');
+            expect(service.tiles()).toEqual(mockEditorData.tiles);
+            expect(service.objects()).toEqual(mockEditorData.objects);
+
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
+
+            expect(service.getPlacedObjectAt(1, 1)?.kind).toBe(PlaceableKind.FLAG);
+            expect(service.tiles()).toEqual(mockEditorData.tiles);
+            expect(service.objects()).not.toEqual(mockEditorData.objects);
+
+            service.saveGame();
+
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
+                objects: service.objects(),
+            });
         });
     });
 
-    describe('Tiles helpers', () => {
+    describe('getTileAt', () => {
+        it('should return the correct tile or undefined', () => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+            service.loadGameById('1');
+            subject.next(mockEditorData);
+            subject.complete();
+
+            const tile = service.getTileAt(0, 0);
+            expect(tile).toBeDefined();
+            expect(tile?.x).toBe(0);
+            expect(tile?.y).toBe(0);
+            expect(tile?.kind).toBe(TileKind.BASE);
+
+            const noTile = service.getTileAt(invalidTile, invalidTile);
+            expect(noTile).toBeUndefined();
+        });
+
+        it('should return undefined if tiles are not loaded', () => {
+            const tile = service.getTileAt(0, 0);
+            expect(tile).toBeUndefined();
+        });
+    });
+
+    describe('setTileAt', () => {
         beforeEach(() => {
-            http.getGameEditorById.and.returnValue(of(initialDto));
-            service.loadGameById(initialDto.id);
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+            service.loadGameById('1');
+            subject.next(mockEditorData);
+            subject.complete();
         });
 
-        it('getTileAt returns undefined out-of-bounds and the expected tile in-bounds', () => {
-            const n = service.size();
-            expect(service.getTileAt(-1, 0)).toBeUndefined();
-            expect(service.getTileAt(0, -1)).toBeUndefined();
-            expect(service.getTileAt(n, 0)).toBeUndefined();
-            expect(service.getTileAt(0, n)).toBeUndefined();
+        it('should update the tile at specified coordinates', () => {
+            service.setTileAt(0, 0, TileKind.WATER);
+            const updatedTile = service.getTileAt(0, 0);
+            expect(updatedTile).toBeDefined();
+            expect(updatedTile?.kind).toBe(TileKind.WATER);
 
-            const t = service.getTileAt(0, 0) as GameEditorTileDto;
-            expect(t).toBeDefined();
-            expect(t.x).toBe(0);
-            expect(t.y).toBe(0);
-            expect(t.kind).toBe(TileKind.BASE);
+            const otherTile = service.getTileAt(1, 1);
+            expect(otherTile).toBeDefined();
+            expect(otherTile?.kind).toBe(TileKind.BASE);
         });
 
-        it('setTileAt ignores if same tile non-door; toggles open if DOOR', () => {
-            const before = service.tiles();
-
-            service.setTileAt(1, 1, TileKind.BASE);
-            expect(service.tiles()).toBe(before);
-            service.setTileAt(2, 2, TileKind.DOOR);
-            service.setTileAt(2, 2, TileKind.DOOR);
-            const after = service.getTileAt(2, 2) as GameEditorTileDto;
-            expect(after).toBeDefined();
-            expect(after.kind).toBe(TileKind.DOOR);
-            expect(after.open).toBeTrue();
+        it('should do nothing if coordinates are invalid', () => {
+            const beforeTile = service.getTileAt(0, 0);
+            service.setTileAt(invalidTile, invalidTile, TileKind.WATER);
+            const afterTile = service.getTileAt(0, 0);
+            expect(afterTile).toEqual(beforeTile);
         });
 
-        it('resetTileAt sets the tile back to BASE', () => {
-            service.setTileAt(testConstants.gridSize3, testConstants.gridSize3, TileKind.WALL);
-            const t = service.getTileAt(testConstants.gridSize3, testConstants.gridSize3) as GameEditorTileDto;
-            expect(t).toBeDefined();
-            expect(t.kind).toBe(TileKind.WALL);
+        it('should do nothing if trying to set the same kind (except for DOOR)', () => {
+            const beforeTile = service.getTileAt(0, 0);
+            expect(beforeTile).toBeDefined();
+            expect(beforeTile?.kind).toBe(TileKind.BASE);
 
-            service.resetTileAt(testConstants.gridSize3, testConstants.gridSize3);
-            const t2 = service.getTileAt(testConstants.gridSize3, testConstants.gridSize3) as GameEditorTileDto;
-            expect(t2).toBeDefined();
-            expect(t2.kind).toBe(TileKind.BASE);
+            service.setTileAt(0, 0, TileKind.BASE);
+            const afterTile = service.getTileAt(0, 0);
+            expect(afterTile).toEqual(beforeTile);
         });
 
-        it('setTileAt out of bounds is ignored and returns void', () => {
-            const before = service.tiles();
-            service.setTileAt(-1, 0, TileKind.WALL);
-            service.setTileAt(0, -1, TileKind.WALL);
-            service.setTileAt(size + 1, 0, TileKind.WALL);
-            service.setTileAt(0, size + 1, TileKind.WALL);
-            expect(service.tiles()).toEqual(before);
+        it('should toggle DOOR open state if setting DOOR on a DOOR tile', () => {
+            service.setTileAt(0, 0, TileKind.DOOR);
+            const doorTile = service.getTileAt(0, 0);
+            expect(doorTile).toBeDefined();
+            expect(doorTile?.kind).toBe(TileKind.DOOR);
+            expect(doorTile?.open).toBeFalse();
+
+            service.setTileAt(0, 0, TileKind.DOOR);
+            const toggledDoorTile = service.getTileAt(0, 0);
+            expect(toggledDoorTile).toBeDefined();
+            expect(toggledDoorTile?.kind).toBe(TileKind.DOOR);
+            expect(toggledDoorTile?.open).toBeTrue();
         });
 
-        it('resetTileAt out of bounds is ignored and returns void', () => {
-            const before = service.tiles();
-            service.resetTileAt(-1, 0);
-            service.resetTileAt(0, -1);
-            service.resetTileAt(size + 1, 0);
-            service.resetTileAt(0, size + 1);
-            expect(service.tiles()).toEqual(before);
+        it('should return early if currentTile is falsy (no tile at index)', () => {
+            service['_tiles'].set([]);
+            service.setTileAt(0, 0, TileKind.WATER);
+            expect(service.tiles()).toEqual([]);
+        });
+    });
+
+    describe('resetTileAt', () => {
+        beforeEach(() => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+            service.loadGameById('1');
+            subject.next(mockEditorData);
+            subject.complete();
+        });
+
+        it('should reset the tile at specified coordinates to BASE', () => {
+            service.setTileAt(0, 0, TileKind.WATER);
+            const modifiedTile = service.getTileAt(0, 0);
+            expect(modifiedTile).toBeDefined();
+            expect(modifiedTile?.kind).toBe(TileKind.WATER);
+
+            service.resetTileAt(0, 0);
+            const resetTile = service.getTileAt(0, 0);
+            expect(resetTile).toBeDefined();
+            expect(resetTile?.kind).toBe(TileKind.BASE);
+        });
+
+        it('should do nothing if coordinates are invalid', () => {
+            const beforeTile = service.getTileAt(0, 0);
+            service.resetTileAt(invalidTile, invalidTile);
+            const afterTile = service.getTileAt(0, 0);
+            expect(afterTile).toEqual(beforeTile);
         });
     });
 
     describe('reset', () => {
-        it('reapplies exactly _initial', () => {
-            http.getGameEditorById.and.returnValue(of(initialDto));
-            service.loadGameById(initialDto.id);
+        beforeEach(() => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+            service.loadGameById('1');
+            subject.next(mockEditorData);
+            subject.complete();
+        });
+        it('should reset the store to initial state', () => {
+            expect(service.initial().id).toBe('1');
+            expect(service.tiles().length).toBe(mockEditorData.tiles.length);
+            expect(service.objects().length).toBe(mockEditorData.objects.length);
 
-            service.name = 'temp';
-            service.description = 'temp';
-            service.setTileAt(0, 0, TileKind.WALL);
-            service.setTileAt(1, 1, TileKind.WALL);
-            service.setTileAt(2, 2, TileKind.WALL);
-            service.setTileAt(testConstants.gridSize3, testConstants.gridSize3, TileKind.WALL);
-            service.setTileAt(testConstants.gridSize4, testConstants.gridSize4, TileKind.WALL);
-            service.setTileAt(0, 1, TileKind.WALL);
-            service.setTileAt(1, 0, TileKind.WALL);
-            service.setTileAt(1, 2, TileKind.WALL);
-            service.setTileAt(2, 1, TileKind.WALL);
-            service.setTileAt(2, testConstants.gridSize3, TileKind.WALL);
-            service.setTileAt(testConstants.gridSize3, 2, TileKind.WALL);
-            service.setTileAt(testConstants.gridSize3, testConstants.gridSize4, TileKind.WALL);
+            service.setTileAt(0, 0, TileKind.WATER);
+            expect(service.getTileAt(0, 0)?.kind).toBe(TileKind.WATER);
+            service.setTileAt(1, 1, TileKind.WATER);
+            expect(service.getTileAt(1, 1)?.kind).toBe(TileKind.WATER);
+            service.name = 'Modified Name';
+            expect(service.name).toBe('Modified Name');
+            service.description = 'Modified Description';
+            expect(service.description).toBe('Modified Description');
+
             service.reset();
 
-            expect(service.name).toBe('temp');
-            expect(service.description).toBe('temp');
-            expect(service.tiles()[0].kind).toBe(TileKind.BASE);
-            expect(service.size()).toBe(initialDto.size);
-            expect(service.objects()).toEqual(initialDto.objects);
+            expect(service.initial().id).toBe('1');
+            expect(service.name).toBe('Test Game');
+            expect(service.description).toBe('A game for testing');
+            expect(service.tiles().length).toBe(mockEditorData.tiles.length);
+            expect(service.objects().length).toBe(mockEditorData.objects.length);
+            expect(service.getTileAt(0, 0)?.kind).toBe(TileKind.BASE);
+            expect(service.getTileAt(1, 1)?.kind).toBe(TileKind.BASE);
         });
     });
 
-    describe('placed objects, inventory and misc setters', () => {
-        it('computes placedObjects and inventory correctly and setters work', () => {
-            const objs: GameEditorPlaceableDto[] = [
-                { id: 'p1', kind: PlaceableKind.START, x: 1, y: 1, placed: true, orientation: 'N' },
-                { id: 'p2', kind: PlaceableKind.FLAG, x: -1, y: -1, placed: false, orientation: 'N' },
-                { id: 'p3', kind: PlaceableKind.HEAL, x: -1, y: -1, placed: false, orientation: 'N' },
-            ];
-
-            http.getGameEditorById.and.returnValue(of({ ...initialDto, objects: objs } as GameEditorDto));
-            service.loadGameById(initialDto.id);
-
-            const placed = service.placedObjects;
-            expect(placed.length).toBe(1);
-            expect(placed[0].id).toBe('p1');
-            expect(placed[0].xs).toContain(1);
-            expect(placed[0].ys).toContain(1);
-
-            const inv = service.inventory();
-            const startIndex = inv.findIndex((i) => i.kind === PlaceableKind.START);
-            const flagIndex = inv.findIndex((i) => i.kind === PlaceableKind.FLAG);
-            const healIndex = inv.findIndex((i) => i.kind === PlaceableKind.HEAL);
-            expect(startIndex).not.toBe(-1);
-            expect(flagIndex).not.toBe(-1);
-            expect(healIndex).not.toBe(-1);
-            const startEntry = inv[startIndex];
-            const flagEntry = inv[flagIndex];
-            const healEntry = inv[healIndex];
-            expect(startEntry.total).toBe(1);
-            expect(startEntry.remaining).toBe(0);
-            expect(flagEntry.total).toBe(1);
-            expect(flagEntry.remaining).toBe(1);
-            expect(healEntry.total).toBe(1);
-            expect(healEntry.remaining).toBe(1);
-
-            service.setName('abc');
-            expect(service.name).toBe('abc');
-            service.setDescription('desc');
-            expect(service.description).toBe('desc');
-            service.description = 'desc2';
-            expect(service.description).toBe('desc2');
-
-            service.tileSizePx = TILE_SIZE_PX;
-            expect(service.tileSizePx).toBe(TILE_SIZE_PX);
+    describe('getPlacedObjectAt', () => {
+        beforeEach(() => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+            service.loadGameById('1');
+            subject.next(mockEditorData);
+            subject.complete();
         });
 
-        it('saveGame fallback: when patch fails createGame is used and patch retried with new id', () => {
-            http.getGameEditorById.and.returnValue(of(initialDto));
-            service.loadGameById(initialDto.id);
+        it('should return the correct placed object or undefined', () => {
+            const placedObject = service.getPlacedObjectAt(0, 0);
+            expect(placedObject).toBeDefined();
+            expect(placedObject?.id).toBe('start1');
+            expect(placedObject?.kind).toBe(PlaceableKind.START);
 
-            http.patchGameEditorById.and.returnValue(throwError(() => new Error('server down')));
-
-            const newGamePreview: GamePreviewDto = { id: 'new-game-123', draft: true, visibility: false, name: 'x' } as GamePreviewDto;
-            store.createGame.and.returnValue(of(newGamePreview));
-
-            const patched = { ...initialDto, id: newGamePreview.id } as GameEditorDto;
-            http.patchGameEditorById.and.callFake((id: string, body: PatchGameEditorDto) => {
-                if (id === initialDto.id) {
-                    return throwError(() => new Error('first-fail'));
-                }
-                expect(body.tiles).toBeDefined();
-                expect(body.objects).toBeDefined();
-                return of(patched);
-            });
-
-            service.saveGame('data:image/png;base64,abc');
-
-            expect(store.createGame).toHaveBeenCalledTimes(1);
-            expect(http.patchGameEditorById).toHaveBeenCalled();
-            expect(service.initial().id).toBe(newGamePreview.id);
+            const noObject = service.getPlacedObjectAt(1, 1);
+            expect(noObject).toBeUndefined();
         });
 
-        it('place/move/remove/getPlacedObjectAt behave correctly', () => {
-            const objs: GameEditorPlaceableDto[] = [
-                { id: 'a', kind: PlaceableKind.START, x: -1, y: -1, placed: false, orientation: 'N' },
-                { id: 'b', kind: PlaceableKind.FLAG, x: -1, y: -1, placed: false, orientation: 'N' },
-            ];
-            http.getGameEditorById.and.returnValue(of({ ...initialDto, objects: objs } as GameEditorDto));
-            service.loadGameById(initialDto.id);
+        it('should return undefined if if index out of bounds', () => {
+            const noObject = service.getPlacedObjectAt(invalidTile, invalidTile);
+            expect(noObject).toBeUndefined();
+        });
+    });
 
-            service.placeObject(PlaceableKind.START, 2, 2);
-            const aIndex = service.objects().findIndex((o) => o.id === 'a');
-            expect(aIndex).not.toBe(-1);
-            expect(service.objects()[aIndex].placed).toBeTrue();
-            const placed = service.getPlacedObjectAt(2, 2);
-            expect(placed).toBeDefined();
-            expect(placed?.id).toBe('a');
-
-            service.moveObject('b', 1, 1);
-            const bIndex = service.objects().findIndex((o) => o.id === 'b');
-            expect(bIndex).not.toBe(-1);
-            const bObj = service.objects()[bIndex];
-            expect(bObj.x).toBe(1);
-            expect(bObj.y).toBe(1);
-            expect(bObj.placed).toBeTrue();
-
-            service.removeObject('a');
-            const aIndex2 = service.objects().findIndex((o) => o.id === 'a');
-            expect(aIndex2).not.toBe(-1);
-            const aObj = service.objects()[aIndex2];
-            expect(aObj.x).toBe(-1);
-            expect(aObj.y).toBe(-1);
-            expect(aObj.placed).toBeFalse();
+    describe('placeObjectFromInventory', () => {
+        beforeEach(() => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+            service.loadGameById('1');
+            subject.next(mockEditorData);
+            subject.complete();
         });
 
-        it('no-op when target object or kind is missing (covers early returns)', () => {
-            const objs: GameEditorPlaceableDto[] = [
-                { id: 'only-one', kind: PlaceableKind.START, x: -1, y: -1, placed: false, orientation: 'N' },
-            ];
-            http.getGameEditorById.and.returnValue(of({ ...initialDto, objects: objs } as GameEditorDto));
-            service.loadGameById(initialDto.id);
+        it('should place the object at specified coordinates', () => {
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
+            const placedObject = service.getPlacedObjectAt(1, 1);
+            expect(placedObject).toBeDefined();
+            expect(placedObject?.id).toBe('flag1');
+            expect(placedObject?.kind).toBe(PlaceableKind.FLAG);
+            expect(placedObject?.orientation).toBe('N');
+            expect(placedObject?.placed).toBeTrue();
 
-            const before = service.objects();
+            const otherObject = service.getPlacedObjectAt(0, 0);
+            expect(otherObject).toBeDefined();
+            expect(otherObject?.id).toBe('start1');
+        });
 
-            service.placeObject(PlaceableKind.FLAG, 0, 0);
-            expect(service.objects()).toEqual(before);
+        it('should do nothing if coordinates are invalid', () => {
+            const beforeObject = service.getPlacedObjectAt(0, 0);
+            service.placeObjectFromInventory(PlaceableKind.FLAG, invalidTile, invalidTile);
+            const afterObject = service.getPlacedObjectAt(0, 0);
+            expect(afterObject).toEqual(beforeObject);
+        });
 
-            service.moveObject('no-such-id', NON_EXISTENT_COORD, NON_EXISTENT_COORD);
-            expect(service.objects()).toEqual(before);
+        it('shouldnt do anything if no more object of that kind are unplaced', () => {
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
+            const placedObject = service.getPlacedObjectAt(1, 1);
+            expect(placedObject).toBeDefined();
 
-            service.removeObject('no-such-id');
-            expect(service.objects()).toEqual(before);
+            const xy = 3;
+            service.placeObjectFromInventory(PlaceableKind.FLAG, xy, xy);
+            const afterSecondPlacement = service.getPlacedObjectAt(xy, xy);
+            expect(afterSecondPlacement).toBeUndefined();
+        });
+
+        it('shouldnt do anything if another object is already placed at the target coordinates', () => {
+            const beforeObject = service.getPlacedObjectAt(0, 0);
+            expect(beforeObject).toBeDefined();
+            expect(beforeObject?.id).toBe('start1');
+
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 0, 0);
+            const afterObject = service.getPlacedObjectAt(0, 0);
+            expect(afterObject).toEqual(beforeObject);
+        });
+    });
+
+    describe('movePlacedObject', () => {
+        beforeEach(() => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+            service.loadGameById('1');
+            subject.next(mockEditorData);
+            subject.complete();
+        });
+
+        it('should move the object to specified coordinates', () => {
+            const beforeObject = service.getPlacedObjectAt(0, 0);
+            expect(beforeObject).toBeDefined();
+            expect(beforeObject?.id).toBe('start1');
+
+            const xy = 4;
+
+            service.movePlacedObject('start1', xy, xy);
+            const movedObject = service.getPlacedObjectAt(xy, xy);
+            expect(movedObject).toBeDefined();
+            expect(movedObject?.id).toBe('start1');
+            expect(movedObject?.x).toBe(xy);
+            expect(movedObject?.y).toBe(xy);
+
+            const noObject = service.getPlacedObjectAt(0, 0);
+            expect(noObject).toBeUndefined();
+        });
+
+        it('should do nothing if coordinates are invalid', () => {
+            const beforeObject = service.getPlacedObjectAt(0, 0);
+            expect(beforeObject).toBeDefined();
+            expect(beforeObject?.id).toBe('start1');
+
+            service.movePlacedObject('start1', invalidTile, invalidTile);
+            const afterObject = service.getPlacedObjectAt(0, 0);
+            expect(afterObject).toEqual(beforeObject);
+        });
+
+        it('should do nothing if no object with the specified id is found', () => {
+            const beforeObject = service.getPlacedObjectAt(0, 0);
+            expect(beforeObject).toBeDefined();
+            expect(beforeObject?.id).toBe('start1');
+
+            const xy = 4;
+
+            service.movePlacedObject('nonexistent-id', xy, xy);
+            const afterObject = service.getPlacedObjectAt(0, 0);
+            expect(afterObject).toEqual(beforeObject);
+        });
+
+        it('shouldnt do anything if another object is already placed at the target coordinates', () => {
+            const beforeStart = service.getPlacedObjectAt(0, 0);
+            expect(beforeStart).toBeDefined();
+            expect(beforeStart?.id).toBe('start1');
+
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
+            const beforeFlag = service.getPlacedObjectAt(1, 1);
+            expect(beforeFlag).toBeDefined();
+            expect(beforeFlag?.id).toBe('flag1');
+
+            service.movePlacedObject('start1', 1, 1);
+            const afterStart = service.getPlacedObjectAt(0, 0);
+            expect(afterStart).toEqual(beforeStart);
+
+            const stillFlag = service.getPlacedObjectAt(1, 1);
+            expect(stillFlag).toEqual(beforeFlag);
+        });
+    });
+
+    describe('removeObject', () => {
+        beforeEach(() => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+            service.loadGameById('1');
+            subject.next(mockEditorData);
+            subject.complete();
+        });
+
+        it('should remove the object with the specified id', () => {
+            const beforeObject = service.getPlacedObjectAt(0, 0);
+            expect(beforeObject).toBeDefined();
+            expect(beforeObject?.id).toBe('start1');
+
+            service.removeObject('start1');
+            const afterObject = service.getPlacedObjectAt(0, 0);
+            expect(afterObject).toBeUndefined();
+        });
+
+        it('should do nothing if no object with the specified id is found', () => {
+            const beforeObject = service.getPlacedObjectAt(0, 0);
+            expect(beforeObject).toBeDefined();
+            expect(beforeObject?.id).toBe('start1');
+
+            service.removeObject('nonexistent-id');
+            const afterObject = service.getPlacedObjectAt(0, 0);
+            expect(afterObject).toEqual(beforeObject);
+        });
+    });
+
+    describe('inventory', () => {
+        beforeEach(() => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+            service.loadGameById('1');
+            subject.next(mockEditorData);
+            subject.complete();
+        });
+
+        it('should return the correct inventory counts for FLAG', () => {
+            const inventory = service.inventory();
+            expect(inventory.FLAG).toBeDefined();
+            expect(inventory.FLAG?.kind).toBe(PlaceableKind.FLAG);
+            expect(inventory.FLAG?.total).toBe(1);
+            expect(inventory.FLAG?.remaining).toBe(1);
+            expect(inventory.FLAG?.disabled).toBeFalse();
+        });
+
+        it('should return the correct inventory counts for START', () => {
+            const inventory = service.inventory();
+            expect(inventory.START).toBeDefined();
+            expect(inventory.START?.kind).toBe(PlaceableKind.START);
+            expect(inventory.START?.total).toBe(1);
+            expect(inventory.START?.remaining).toBe(0);
+            expect(inventory.START?.disabled).toBeTrue();
+        });
+
+        it('should return the correct inventory counts for BOAT', () => {
+            const inventory = service.inventory();
+            expect(inventory.BOAT).toBeDefined();
+            expect(inventory.BOAT?.kind).toBe(PlaceableKind.BOAT);
+            expect(inventory.BOAT?.total).toBe(1);
+            expect(inventory.BOAT?.remaining).toBe(0);
+            expect(inventory.BOAT?.disabled).toBeTrue();
+        });
+
+        it('should return the correct inventory counts for FIGHT', () => {
+            const inventory = service.inventory();
+            expect(inventory.FIGHT).toBeDefined();
+            expect(inventory.FIGHT?.kind).toBe(PlaceableKind.FIGHT);
+            expect(inventory.FIGHT?.total).toBe(0);
+            expect(inventory.FIGHT?.remaining).toBe(0);
+            expect(inventory.FIGHT?.disabled).toBeTrue();
+        });
+
+        it('should return the correct inventory counts for HEAL', () => {
+            const inventory = service.inventory();
+            expect(inventory.HEAL).toBeDefined();
+            expect(inventory.HEAL?.kind).toBe(PlaceableKind.HEAL);
+            expect(inventory.HEAL?.total).toBe(0);
+            expect(inventory.HEAL?.remaining).toBe(0);
+            expect(inventory.HEAL?.disabled).toBeTrue();
+        });
+
+        it('should update inventory counts after placing an object', () => {
+            const inventory = service.inventory();
+            expect(inventory.FLAG?.remaining).toBe(1);
+            expect(inventory.FLAG?.disabled).toBeFalse();
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
+            const afterInventory = service.inventory();
+            expect(afterInventory.FLAG?.remaining).toBe(0);
+            expect(afterInventory.FLAG?.disabled).toBeTrue();
+        });
+
+        it('should update inventory counts after removing an object', () => {
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
+            let inventory = service.inventory();
+            expect(inventory.FLAG?.remaining).toBe(0);
+            expect(inventory.FLAG?.disabled).toBeTrue();
+
+            service.removeObject('flag1');
+            inventory = service.inventory();
+            expect(inventory.FLAG?.remaining).toBe(1);
+            expect(inventory.FLAG?.disabled).toBeFalse();
         });
     });
 });

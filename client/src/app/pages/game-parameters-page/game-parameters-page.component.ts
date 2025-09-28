@@ -9,7 +9,6 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiIconComponent } from '@app/components/ui/icon/icon.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
-import { DEFAULT_DRAFT_GAME_DESCRIPTION, DEFAULT_DRAFT_GAME_NAME } from '@common/constants/game.constants';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
 
@@ -66,8 +65,8 @@ export class GameParametersPageComponent {
             .createGame({
                 size: this.selectedMapSize,
                 mode: this.selectedGameMode,
-                name: DEFAULT_DRAFT_GAME_NAME,
-                description: DEFAULT_DRAFT_GAME_DESCRIPTION,
+                name: '',
+                description: '',
                 visibility: false,
             })
             .subscribe({

@@ -8,11 +8,7 @@ import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiInputComponent } from '@app/components/ui/input/input.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { ROUTES } from '@app/constants/routes.constants';
-import {
-    CHARACTER_NAME_MAX_LENGTH,
-    NAME_MIN_LENGTH,
-    WHITESPACE_PATTERN,
-} from '@app/constants/validation.constants';
+import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH, WHITESPACE_PATTERN } from '@app/constants/validation.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
@@ -23,15 +19,7 @@ import { NotificationService } from '@app/services/notification/notification.ser
     selector: 'app-character-creation-page',
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
-    imports: [
-        CommonModule,
-        FormsModule,
-        UiButtonComponent,
-        UiInputComponent,
-        UiPageLayoutComponent,
-        StatsBarComponent,
-        ErrorsBadgeComponent,
-    ],
+    imports: [CommonModule, FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent],
     providers: [CharacterCreationCheckService],
 })
 export class CharacterCreationPageComponent implements OnInit {
@@ -80,7 +68,7 @@ export class CharacterCreationPageComponent implements OnInit {
             return `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${CHARACTER_NAME_MAX_LENGTH} caractères.`;
         }
         if (name.replace(WHITESPACE_PATTERN, '').length === 0) {
-            return 'Le nom ne peut pas être composé uniquement d\'espaces.';
+            return "Le nom ne peut pas être composé uniquement d'espaces.";
         }
         return '';
     }
@@ -118,7 +106,5 @@ export class CharacterCreationPageComponent implements OnInit {
             message: `${this.character.name} est prêt pour l’aventure.`,
             redirectRoute: ROUTES.waitingRoom,
         });
-
-
     }
 }

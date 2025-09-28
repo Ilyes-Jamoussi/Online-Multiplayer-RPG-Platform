@@ -1,6 +1,12 @@
-import { ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
+
+export enum ToolType {
+    TileBrushTool = 'tile-brush-tool',
+    PlaceableTool = 'placeable-tool',
+    PlaceableEraserTool = 'placeable-eraser-tool',
+}
 
 export enum GameEditorIssuesEnum {
     TerrainCoverage = 'terrainCoverage',
@@ -28,6 +34,10 @@ export interface EditorIssue {
 export interface AccesibilityIssue extends EditorIssue {
     tiles: Vector2[];
 }
+
+export type Inventory = {
+    [key in PlaceableKind]: InventoryItem;
+};
 
 export interface InventoryItem {
     kind: PlaceableKind;
@@ -65,4 +75,9 @@ export type ActiveTool = TileBrushTool | PlaceableTool | PlaceableEraserTool;
 export interface Vector2 {
     x: number;
     y: number;
+}
+
+export interface ExtendedGameEditorPlaceableDto extends GameEditorPlaceableDto {
+    xs: number[];
+    ys: number[];
 }

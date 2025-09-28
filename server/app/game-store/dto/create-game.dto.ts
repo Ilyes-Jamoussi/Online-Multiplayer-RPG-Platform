@@ -1,6 +1,5 @@
-// server/src/games/dto/create-game.dto.ts
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 
 import { MapSize } from '@common/enums/map-size.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
@@ -16,12 +15,12 @@ export class CreateGameDto {
 
     @ApiProperty({ example: 'New game' })
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     readonly name: string;
 
     @ApiProperty({ example: 'Description…' })
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     readonly description: string;
 
     @ApiPropertyOptional({ example: false, description: 'Public (true) ou privé (false)' })

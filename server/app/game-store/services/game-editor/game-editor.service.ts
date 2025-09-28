@@ -3,15 +3,14 @@ import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
 import { PatchGameEditorDto } from '@app/game-store/dto/patch-game-editor.dto';
 import { Game, GameDocument } from '@app/game-store/entities/game.entity';
 import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ImageService } from '@app/game-store/services/image/image.service';
+import { DEFAULT_DRAFT_GAME_DESCRIPTION, DEFAULT_DRAFT_GAME_NAME } from '@common/constants/game.constants';
 
 @Injectable()
 export class GameEditorService {
-    private readonly logger = new Logger(GameEditorService.name);
-
     constructor(
         @InjectModel(Game.name) private readonly gameModel: Model<GameDocument>,
         private readonly imageService: ImageService,
@@ -27,8 +26,8 @@ export class GameEditorService {
         return {
             id: game._id.toString(),
             lastModified: game.lastModified,
-            name: game.name,
-            description: game.description,
+            name: game.name === DEFAULT_DRAFT_GAME_NAME ? '' : game.name,
+            description: game.description === DEFAULT_DRAFT_GAME_DESCRIPTION ? '' : game.description,
             size: game.size,
             mode: game.mode,
             tiles: game.tiles,
