@@ -21,7 +21,7 @@ describe('UiBase2Component', () => {
         comp.widthValue = '';
         expect(Object.keys(comp.styleVars).length).toBe(0);
 
-        comp.widthValue = null as any;
+        comp.widthValue = null as unknown as string;
         expect(Object.keys(comp.styleVars).length).toBe(0);
     });
 });
