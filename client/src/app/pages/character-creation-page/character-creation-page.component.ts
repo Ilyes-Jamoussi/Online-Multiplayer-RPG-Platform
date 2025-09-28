@@ -1,23 +1,22 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 
+import { ErrorsBadgeComponent } from '@app/components/features/errors-badge/errors-badge.component';
+import { StatsBarComponent } from '@app/components/features/stats-bar/stats-bar.component';
+import { UiButtonComponent } from '@app/components/ui/button/button.component';
+import { UiInputComponent } from '@app/components/ui/input/input.component';
+import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { ROUTES } from '@app/constants/routes.constants';
 import {
-    NAME_MIN_LENGTH,
     CHARACTER_NAME_MAX_LENGTH,
+    NAME_MIN_LENGTH,
     WHITESPACE_PATTERN,
 } from '@app/constants/validation.constants';
-import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
-import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { AssetsService } from '@app/services/assets/assets.service';
+import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
+import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
-import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
-import { UiInputComponent } from '@app/shared/ui/components/input/input.component';
-import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
-import { StatsBarComponent } from '@app/shared/components/stats-bar/stats-bar.component';
-import { ErrorsBadgeComponent } from '@app/shared/components/errors-badge/errors-badge.component';
 
 @Component({
     standalone: true,
@@ -53,7 +52,6 @@ export class CharacterCreationPageComponent implements OnInit {
         readonly assetsService: AssetsService,
         readonly characterCreationCheckService: CharacterCreationCheckService,
         private readonly characterStoreService: CharacterStoreService,
-        private readonly router: Router,
         private readonly notificationService: NotificationService,
     ) {}
 
@@ -69,10 +67,6 @@ export class CharacterCreationPageComponent implements OnInit {
     ngOnInit() {
         this.characterStoreService.resetAvatar();
         this.characterStoreService.setBonus('life');
-    }
-
-    goBack() {
-        this.router.navigate([ROUTES.gameSessionCreation]);
     }
 
     onNameChange(v: string) {
@@ -122,12 +116,9 @@ export class CharacterCreationPageComponent implements OnInit {
         this.notificationService.displaySuccess({
             title: 'Personnage créé',
             message: `${this.character.name} est prêt pour l’aventure.`,
-            redirectRoute: ROUTES.waitingRoom,        });
+            redirectRoute: ROUTES.waitingRoom,
+        });
 
 
-    }
-
-    onBackClick() {
-        this.router.navigate(['/']);
     }
 }

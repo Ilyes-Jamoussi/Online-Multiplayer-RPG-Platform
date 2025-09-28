@@ -1,25 +1,25 @@
-import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { NgStyle } from '@angular/common';
-import { distinctUntilChanged, filter, map, Subject, takeUntil, tap } from 'rxjs';
-import { GAME_NAME_MAX_LENGTH, DESCRIPTION_MAX_LENGTH } from '@app/constants/validation.constants';
-import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
-import { GameEditorTileComponent } from './components/tile/game-editor-tile.component';
-import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { TileSizeProbeDirective } from './directives/tile-size-probe.directive';
-import { GameEditorToolbarComponent } from './components/toolbar/game-editor-toolbar.component';
-import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
-import { UiInputComponent } from '@app/shared/ui/components/input/input.component';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
-import { NotificationService } from '@app/services/notification/notification.service';
-import { DraggablePanelComponent } from '@app/shared/ui/components/draggable-panel/draggable-panel.component';
-import { GameEditorInventoryComponent } from './components/inventory/game-editor-inventory.component';
-import { GameEditorObjectComponent } from './components/object/object.component';
-import { ErrorsBadgeComponent } from '@app/shared/components/errors-badge/errors-badge.component';
+import { ActivatedRoute } from '@angular/router';
+import { ErrorsBadgeComponent } from '@app/components/features/errors-badge/errors-badge.component';
 import { ROUTES } from '@app/constants/routes.constants';
+import { DESCRIPTION_MAX_LENGTH, GAME_NAME_MAX_LENGTH } from '@app/constants/validation.constants';
+import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
+import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
+import { UiButtonComponent } from '@app/components/ui/button/button.component';
+import { DraggablePanelComponent } from '@app/components/ui/draggable-panel/draggable-panel.component';
+import { UiInputComponent } from '@app/components/ui/input/input.component';
+import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
+import { distinctUntilChanged, filter, map, Subject, takeUntil, tap } from 'rxjs';
+import { GameEditorInventoryComponent } from '@app/components/features/inventory/game-editor-inventory.component';
+import { GameEditorObjectComponent } from '@app/components/features/object/object.component';
+import { GameEditorTileComponent } from '@app/components/features/tile/game-editor-tile.component';
+import { GameEditorToolbarComponent } from '@app/components/features/toolbar/game-editor-toolbar.component';
+import { TileSizeProbeDirective } from '@app/directives/tile-size-probe.directive';
 
 @Component({
     selector: 'app-edit-game-page',
@@ -84,10 +84,6 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
-    }
-
-    goBack(): void {
-        window.history.back();
     }
 
     onReset(): void {

@@ -1,4 +1,4 @@
-import { UiVariant, UiSize, UiShapeVariant, UiAlignment, UiSpacing, UiElevation } from '@app/shared/ui/types/ui.types';
+import { UiVariant, UiSize, UiShapeVariant, UiAlignment, UiSpacing, UiElevation } from '@app/types/ui.types';
 
 export interface UiCardContext {
     variant: UiVariant;

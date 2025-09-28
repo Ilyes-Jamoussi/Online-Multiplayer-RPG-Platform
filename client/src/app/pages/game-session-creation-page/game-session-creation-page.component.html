@@ -3,7 +3,7 @@
     headerTitle="Choisir un jeu"
     headerSubtitle="Sélectionnez un jeu pour commencer une nouvelle partie"
     [showBackButton]="true"
-    (backClick)="onBackClick()"
+    (backClick)="onBack()"
 >
     <div class="games-section">
         @if (visibleGameDisplays() && visibleGameDisplays().length > 0) {
