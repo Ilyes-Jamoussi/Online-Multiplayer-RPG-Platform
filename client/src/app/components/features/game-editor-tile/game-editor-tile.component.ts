@@ -6,7 +6,6 @@ import { ToolType } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { TileKind } from '@common/enums/tile-kind.enum';
 
 @Component({
@@ -17,11 +16,9 @@ import { TileKind } from '@common/enums/tile-kind.enum';
     imports: [NgStyle],
 })
 export class GameEditorTileComponent extends TileSizeProbeDirective {
-    // eslint-disable-next-line max-params
     constructor(
-        readonly gameEditorStoreService: GameEditorStoreService,
-        readonly gameEditorInteractionsService: GameEditorInteractionsService,
-        readonly gameEditorCheckService: GameEditorCheckService,
+        private readonly gameEditorInteractionsService: GameEditorInteractionsService,
+        private readonly gameEditorCheckService: GameEditorCheckService,
         private readonly assetService: AssetsService,
         el: ElementRef<HTMLElement>,
         zone: NgZone,

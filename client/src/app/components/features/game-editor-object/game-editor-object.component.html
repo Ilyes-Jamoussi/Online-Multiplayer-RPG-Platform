@@ -2,7 +2,7 @@
     class="obj"
     draggable="true"
     [class.dragging]="isDragging"
-    [ngStyle]="{ '--bg-image': 'url(' + this.image + ')' }"
+    [ngStyle]="{ '--bg-image': 'url(' + image + ')' }"
     (dragstart)="onDragStart($event)"
     (dragend)="onDragEnd()"
     (mousedown)="onMouseDown($event)"
