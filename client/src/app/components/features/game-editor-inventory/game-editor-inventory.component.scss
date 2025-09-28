@@ -2,6 +2,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
     gap: 12px;
+    background-color: transparent;
 }
 
 .slot {
@@ -9,21 +10,23 @@
     grid-template-rows: auto auto;
     justify-items: center;
     gap: 8px;
+    background-color: transparent;
 
     &.drag-over {
         outline: 2px dashed #3b82f6;
         outline-offset: 4px;
+        background-color: transparent;
 
         background-color: rgba(59, 130, 246, 0.1);
 
         *.drag-over {
             pointer-events: none;
+            background-color: transparent;
         }
     }
 
     .icon-cell {
-        width: 64px;
-        height: 64px;
+        background-color: transparent;
     }
 }
 
@@ -33,9 +36,13 @@
 
 .icon-cell {
     position: relative;
-    width: 56px;
-    height: 56px;
+    width: var(--tile-size);
+    height: var(--tile-size);
     display: grid;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: transparent;
     place-items: center;
     border: 1px solid rgba(0, 0, 0, 0.12);
     cursor: grab;
@@ -53,7 +60,6 @@
 }
 
 .icon {
-    font-size: calc(var(--tile-px, 48) * 0.7 * 1px);
     line-height: 1;
 }
 

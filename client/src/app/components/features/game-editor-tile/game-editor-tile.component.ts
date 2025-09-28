@@ -3,11 +3,10 @@ import { Component, ElementRef, Input, NgZone } from '@angular/core';
 import { TileSizeProbeDirective } from '@app/directives/tile-size-probe.directive';
 import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
 import { ToolType } from '@app/interfaces/game-editor.interface';
+import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { TileKind } from '@common/enums/tile-kind.enum';
-import { TileSprite as TileImage } from '@common/enums/tile-sprite.enum';
 
 @Component({
     selector: 'app-editor-tile',
@@ -18,9 +17,9 @@ import { TileSprite as TileImage } from '@common/enums/tile-sprite.enum';
 })
 export class GameEditorTileComponent extends TileSizeProbeDirective {
     constructor(
-        readonly gameEditorStoreService: GameEditorStoreService,
-        readonly gameEditorInteractionsService: GameEditorInteractionsService,
-        readonly gameEditorCheckService: GameEditorCheckService,
+        private readonly gameEditorInteractionsService: GameEditorInteractionsService,
+        private readonly gameEditorCheckService: GameEditorCheckService,
+        private readonly assetService: AssetsService,
         el: ElementRef<HTMLElement>,
         zone: NgZone,
     ) {
@@ -28,6 +27,12 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
     }
 
     @Input({ required: true }) tile: GameEditorTileDto;
+
+    readonly tileKinds = TileKind;
+
+    get image() {
+        return this.assetService.getTileImage(TileKind[this.tile.kind]);
+    }
 
     hasProblem(): boolean {
         return (
@@ -77,25 +82,6 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         this.gameEditorInteractionsService.tilePaint(this.tile.x, this.tile.y);
     }
 
-    colorOf(kind: GameEditorTileDto.KindEnum): string {
-        switch (kind) {
-            case TileKind.BASE:
-                return '#a3e635';
-            case TileKind.WALL:
-                return '#374151';
-            case TileKind.DOOR:
-                return '#fbbf24';
-            case TileKind.WATER:
-                return '#60a5fa';
-            case TileKind.ICE:
-                return '#93c5fd';
-            case TileKind.TELEPORT:
-                return '#f472b6';
-            default:
-                return '#ffffff';
-        }
-    }
-
     onTileDragOver(evt: DragEvent) {
         if (!this.gameEditorInteractionsService.hasMime(evt)) return;
         if (!evt.dataTransfer) return;
@@ -106,10 +92,6 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
 
     onTileDragEnter(evt: DragEvent) {
         if (!this.gameEditorInteractionsService.hasMime(evt)) return;
-    }
-
-    imageOf(kind: GameEditorTileDto.KindEnum): string {
-        return TileImage[kind];
     }
 
     onTileDrop(evt: DragEvent) {

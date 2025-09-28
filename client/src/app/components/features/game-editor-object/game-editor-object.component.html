@@ -1,0 +1,13 @@
+<div
+    class="obj"
+    draggable="true"
+    [class.dragging]="isDragging"
+    [ngStyle]="{ '--bg-image': 'url(' + image + ')' }"
+    (dragstart)="onDragStart($event)"
+    (dragend)="onDragEnd()"
+    (mousedown)="onMouseDown($event)"
+    (mouseup)="onMouseUp($event)"
+    (contextmenu)="onContextMenu($event)"
+    [attr.data-id]="object.id"
+    [attr.data-kind]="object.kind"
+></div>

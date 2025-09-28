@@ -185,6 +185,18 @@ describe('GameEditorInteractionsService', () => {
         expect(service).toBeTruthy();
     });
 
+    describe('getToolbarBrushes', () => {
+        it('returns one ToolbarItem per TileKind with correct image and class', () => {
+            const brushes = service.getToolbarBrushes();
+            expect(brushes.length).toBe(Object.keys(TileKind).length - 1);
+            brushes.forEach((b) => {
+                expect(b.image).toBeTruthy();
+                expect(b.class).toBe(b.tileKind.toLowerCase());
+                expect(b.tileKind).toBe(TileKind[b.tileKind]);
+            });
+        });
+    });
+
     describe('setupObjectDrag', () => {
         it('sets effectAllowed="move" and sets the MIME when footprint > 0', () => {
             const obj: GameEditorPlaceableDto = { id: 'boat-1', kind: PlaceableKind.BOAT, x: 1, y: 1, placed: true, orientation: 'N' };

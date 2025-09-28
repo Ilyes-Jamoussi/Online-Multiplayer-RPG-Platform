@@ -31,9 +31,9 @@ describe('GameEditorService', () => {
         Object.keys(mockModel).forEach((k) => delete mockModel[k]);
 
         mockImageService.saveImage = jest.fn().mockResolvedValue('some-url.png');
-        mockMapper.toGamePreviewDto = jest.fn().mockImplementation(
-            (g: { _id: { toString: () => string }; name: string }) => ({ id: g._id.toString(), name: g.name } as GamePreviewDto),
-        );
+        mockMapper.toGamePreviewDto = jest
+            .fn()
+            .mockImplementation((g: { _id: { toString: () => string }; name: string }) => ({ id: g._id.toString(), name: g.name }) as GamePreviewDto);
 
         service = new GameEditorService(mockModel as unknown as Model<GameDocument>, mockImageService as ImageService, mockMapper as GameDtoMapper);
     });
@@ -121,12 +121,8 @@ describe('GameEditorService', () => {
                 size: MapSize.LARGE,
                 mode: GameMode.CTF,
                 gridPreviewUrl: 'data',
-                tiles: [
-                    { kind: TileKind.BASE, x: 1, y: 2, open: true, teleportChannel: 1 },
-                ],
-                objects: [
-                    { id: 'obj1', kind: PlaceableKind.FLAG, x: 3, y: 4, placed: true, orientation: Orientation.S },
-                ],
+                tiles: [{ kind: TileKind.BASE, x: 1, y: 2, open: true, teleportChannel: 1 }],
+                objects: [{ id: 'obj1', kind: PlaceableKind.FLAG, x: 3, y: 4, placed: true, orientation: Orientation.S }],
             };
 
             const returnedDoc = { _id: { toString: () => id } } as const;
@@ -139,16 +135,12 @@ describe('GameEditorService', () => {
 
             const preview = await service.patchEditByGameId(id, body);
 
-            expect(mockImageService.saveImage).toHaveBeenCalledWith(
-                body.gridPreviewUrl,
-                `game-${id}-preview.png`,
-                'game-previews',
-            );
+            expect(mockImageService.saveImage).toHaveBeenCalledWith(body.gridPreviewUrl, `game-${id}-preview.png`, 'game-previews');
 
             expect(mockModel.findByIdAndUpdate).toHaveBeenCalled();
             expect(capturedSet).not.toBeNull();
 
-            const setObj = ((capturedSet as unknown) as { $set?: PatchSet }).$set ?? (capturedSet as PatchSet);
+            const setObj = (capturedSet as unknown as { $set?: PatchSet }).$set ?? (capturedSet as PatchSet);
             expect(setObj.name).toBe(body.name);
             expect(setObj.description).toBe(body.description);
             expect(setObj.size).toBe(body.size);

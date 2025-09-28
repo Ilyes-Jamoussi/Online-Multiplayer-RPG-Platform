@@ -19,19 +19,19 @@ export enum GameEditorIssuesEnum {
 }
 
 export type GameEditorIssues = {
-    [GameEditorIssuesEnum.TerrainCoverage]: EditorIssue;
+    [GameEditorIssuesEnum.TerrainCoverage]: GameEditorIssue;
     [GameEditorIssuesEnum.Doors]: AccesibilityIssue;
     [GameEditorIssuesEnum.TerrainAccessibility]: AccesibilityIssue;
-    [GameEditorIssuesEnum.StartPlacement]: EditorIssue;
-    [GameEditorIssuesEnum.FlagPlacement]: EditorIssue;
-    [GameEditorIssuesEnum.NameValidation]: EditorIssue;
-    [GameEditorIssuesEnum.DescriptionValidation]: EditorIssue;
+    [GameEditorIssuesEnum.StartPlacement]: GameEditorIssue;
+    [GameEditorIssuesEnum.FlagPlacement]: GameEditorIssue;
+    [GameEditorIssuesEnum.NameValidation]: GameEditorIssue;
+    [GameEditorIssuesEnum.DescriptionValidation]: GameEditorIssue;
 };
-export interface EditorIssue {
+export interface GameEditorIssue {
     message?: string;
     hasIssue: boolean;
 }
-export interface AccesibilityIssue extends EditorIssue {
+export interface AccesibilityIssue extends GameEditorIssue {
     tiles: Vector2[];
 }
 
@@ -44,6 +44,7 @@ export interface InventoryItem {
     total: number;
     remaining: number;
     disabled: boolean;
+    image: string;
 }
 
 export const PLACEABLE_ORDER: PlaceableKind[] = [
@@ -81,3 +82,9 @@ export interface ExtendedGameEditorPlaceableDto extends GameEditorPlaceableDto {
     xs: number[];
     ys: number[];
 }
+
+export type ToolbarItem = {
+    image: string;
+    tileKind: TileKind;
+    class: string;
+};

@@ -1,11 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
-import {
-    CHARACTER_NAME_MAX_LENGTH,
-    NAME_MIN_LENGTH,
-    WHITESPACE_PATTERN,
-} from '@app/constants/validation.constants';
+import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH, WHITESPACE_PATTERN } from '@app/constants/validation.constants';
 import type { CharacterForm } from '@app/interfaces/character.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
@@ -37,8 +33,8 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
     };
 
     const mockAssetsService = {
-        getAvatarStaticByNumber: jasmine.createSpy('getAvatarStaticByNumber').and.callFake(n => `static-${n}`),
-        getAvatarAnimatedByNumber: jasmine.createSpy('getAvatarAnimatedByNumber').and.callFake(n => `anim-${n}`),
+        getAvatarStaticByNumber: jasmine.createSpy('getAvatarStaticByNumber').and.callFake((n) => `static-${n}`),
+        getAvatarAnimatedByNumber: jasmine.createSpy('getAvatarAnimatedByNumber').and.callFake((n) => `anim-${n}`),
         getDiceImage: jasmine.createSpy('getDiceImage').and.callFake((type: string, value: string) => `dice-${type}-${value}`),
     };
 
@@ -98,9 +94,9 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
     it("getNameErrorMessage returns the 'only spaces' message when trimmed value contains only whitespace chars", () => {
         Object.defineProperty(component, 'character', {
             get: () =>
-            ({
-                name: { trim: () => ' '.repeat(NAME_MIN_LENGTH) },
-            } as unknown as CharacterForm),
+                ({
+                    name: { trim: () => ' '.repeat(NAME_MIN_LENGTH) },
+                }) as unknown as CharacterForm,
         });
 
         const msg = component.getNameErrorMessage();
@@ -109,14 +105,14 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
 
     it('getNameErrorMessage returns empty string for empty name after trim', () => {
         Object.defineProperty(component, 'character', {
-            get: () => ({ name: { trim: () => '' } } as unknown as CharacterForm),
+            get: () => ({ name: { trim: () => '' } }) as unknown as CharacterForm,
         });
         expect(component.getNameErrorMessage()).toBe('');
     });
 
     it('getNameErrorMessage returns empty string for a valid name', () => {
         Object.defineProperty(component, 'character', {
-            get: () => ({ name: { trim: () => 'ValidName' } } as unknown as CharacterForm),
+            get: () => ({ name: { trim: () => 'ValidName' } }) as unknown as CharacterForm,
         });
         expect(component.getNameErrorMessage()).toBe('');
     });
@@ -193,5 +189,4 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
         expect(successArg.redirectRoute).toBe(ROUTES.waitingRoom);
         expect(successArg.title).toContain('Personnage');
     });
-
 });

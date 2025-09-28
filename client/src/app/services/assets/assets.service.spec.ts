@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { AVATAR_ANIMATED_PATH, AVATAR_STATIC_PATH, DICE_PATH } from '@app/constants/assets-paths.constants';
+import { AVATAR_ANIMATED_PATH, AVATAR_STATIC_PATH, DICE_PATH, OBJECT_PATH, TILE_PATH } from '@app/constants/assets-paths.constants';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice-type.enum';
 import { AssetsService } from './assets.service';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile-kind.enum';
 
 describe('AssetsService', () => {
     let service: AssetsService;
@@ -67,6 +69,42 @@ describe('AssetsService', () => {
             expect(result).toContain(DICE_PATH);
             expect(result).toContain(dice.toLowerCase());
             expect(result.endsWith('.svg')).toBeTrue();
+        });
+    });
+
+    describe('tile images', () => {
+        it('should return tile image path using a variable', () => {
+            const tileKind = TileKind.BASE;
+            const result = service.getTileImage(tileKind);
+            expect(result).toContain(TILE_PATH);
+            expect(result).toContain(tileKind.toLowerCase());
+            expect(result.endsWith('.png')).toBeTrue();
+        });
+
+        it('should return closed door image path when tile kind is DOOR and opened is false', () => {
+            const tileKind = TileKind.DOOR;
+            const result = service.getTileImage(tileKind, false);
+            expect(result).toContain(TILE_PATH);
+            expect(result).toContain('closed-door');
+            expect(result.endsWith('.png')).toBeTrue();
+        });
+
+        it('should return open door image path when tile kind is DOOR and opened is true', () => {
+            const tileKind = TileKind.DOOR;
+            const result = service.getTileImage(tileKind, true);
+            expect(result).toContain(TILE_PATH);
+            expect(result).toContain('opened-door');
+            expect(result.endsWith('.png')).toBeTrue();
+        });
+    });
+
+    describe('object images', () => {
+        it('should return object image path using a variable', () => {
+            const objectKind = PlaceableKind.START;
+            const result = service.getPlaceableImage(objectKind);
+            expect(result).toContain(OBJECT_PATH);
+            expect(result).toContain(PlaceableKind.START.toLowerCase());
+            expect(result.endsWith('.png')).toBeTrue();
         });
     });
 });
