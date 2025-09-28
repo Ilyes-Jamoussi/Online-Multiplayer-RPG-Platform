@@ -1,5 +1,5 @@
 import { NgStyle } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ErrorsBadgeComponent } from '@app/components/features/errors-badge/errors-badge.component';
@@ -55,8 +55,8 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     // eslint-disable-next-line max-params
     constructor(
         private readonly activatedRoute: ActivatedRoute,
-        readonly gameEditorStoreService: GameEditorStoreService,
-        readonly gameEditorCheckService: GameEditorCheckService,
+        private readonly gameEditorStoreService: GameEditorStoreService,
+        private readonly gameEditorCheckService: GameEditorCheckService,
         private readonly notificationService: NotificationService,
         private readonly screenshotService: ScreenshotService,
         private readonly gameEditorInteractionsService: GameEditorInteractionsService,
@@ -71,6 +71,42 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
     get disableOverlayPointerEvents() {
         const tool = this.gameEditorInteractionsService.activeTool;
         return tool !== null && tool.type === ToolType.TileBrushTool && (tool.leftDrag || tool.rightDrag);
+    }
+
+    get tiles() {
+        return this.gameEditorStoreService.tiles();
+    }
+
+    get size() {
+        return this.gameEditorStoreService.size();
+    }
+
+    get placedObjects() {
+        return this.gameEditorStoreService.placedObjects;
+    }
+
+    get tileSizePx() {
+        return this.gameEditorStoreService.tileSizePx;
+    }
+
+    get name() {
+        return this.gameEditorStoreService.name;
+    }
+
+    set name(newName: string) {
+        this.gameEditorStoreService.name = newName;
+    }
+
+    get description() {
+        return this.gameEditorStoreService.description;
+    }
+
+    set description(newDescription: string) {
+        this.gameEditorStoreService.description = newDescription;
+    }
+
+    get canSave() {
+        return this.gameEditorCheckService.canSave();
     }
 
     ngOnInit(): void {
@@ -93,6 +129,20 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
 
     onResize(newSize: number): void {
         this.gameEditorStoreService.tileSizePx = newSize;
+    }
+
+    @HostListener('drop', ['$event'])
+    onDropOutsideOfGrid(evt: DragEvent): void {
+        evt.preventDefault();
+        this.gameEditorInteractionsService.activeTool = {
+            type: ToolType.PlaceableEraserTool,
+        };
+        this.gameEditorInteractionsService.removeObject();
+    }
+
+    @HostListener('dragover', ['$event'])
+    onDragOver(evt: DragEvent): void {
+        evt.preventDefault();
     }
 
     async onSave(): Promise<void> {

@@ -4,6 +4,7 @@
     [class.dragging]="isDragging"
     (dragstart)="onDragStart($event)"
     (dragend)="onDragEnd()"
+    (drop)="onDrop($event)"
     (mousedown)="onMouseDown($event)"
     (mouseup)="onMouseUp($event)"
     (contextmenu)="onContextMenu($event)"

@@ -68,4 +68,9 @@ export class GameEditorObjectComponent {
             this.gameEditorInteractionsService.removeObject(this.object.id);
         }
     }
+
+    onDrop(evt: DragEvent) {
+        evt.preventDefault();
+        evt.stopPropagation();
+    }
 }

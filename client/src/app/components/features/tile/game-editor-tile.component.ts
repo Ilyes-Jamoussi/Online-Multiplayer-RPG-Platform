@@ -117,7 +117,6 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         if (!evt.dataTransfer) return;
         evt.preventDefault();
         evt.stopPropagation();
-
         this.gameEditorInteractionsService.resolveDropAction(evt);
     }
 }
