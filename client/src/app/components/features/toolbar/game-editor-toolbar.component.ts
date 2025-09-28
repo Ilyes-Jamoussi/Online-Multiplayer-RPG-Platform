@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
-import { GameEditorInteractionsService, ToolType } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { UiTooltipComponent } from '@app/components/ui/tooltip/tooltip.component';
 import { TileSprite as TileImage } from '@common/enums/tile-sprite.enum';
+import { ToolType } from '@app/interfaces/game-editor.interface';
 
 type BrushItem = {
     image: string;
