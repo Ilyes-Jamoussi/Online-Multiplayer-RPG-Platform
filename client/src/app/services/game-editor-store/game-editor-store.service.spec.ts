@@ -82,9 +82,9 @@ describe('GameEditorStoreService', () => {
             expect(service.description).toBe('New Description');
         });
 
-        it('should return correct isLoading and loadError states', () => {
-            expect(service.isLoading()).toBe(false);
-            expect(service.loadError()).toBeNull();
+        it('should return correct loadingGame and loadError states', () => {
+            expect(service.loadingGame()).toBe(false);
+            expect(service.loadError()).toBe('');
         });
 
         it('should get and set tile size', () => {
@@ -121,15 +121,15 @@ describe('GameEditorStoreService', () => {
             const subject = new Subject<GameEditorDto>();
             gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
 
-            expect(service.isLoading()).toBe(false);
+            expect(service.loadingGame()).toBe(false);
             service.loadGameById('1');
 
-            expect(service.isLoading()).toBe(true);
+            expect(service.loadingGame()).toBe(true);
 
             subject.next(mockEditorData);
             subject.complete();
 
-            expect(service.isLoading()).toBe(false);
+            expect(service.loadingGame()).toBe(false);
 
             const initial = service.initial();
             expect(initial.id).toBe('1');
@@ -143,27 +143,27 @@ describe('GameEditorStoreService', () => {
         it('should handle error when id not found', () => {
             gameHttpServiceSpy.getGameEditorById.and.returnValue(throwError(() => new Error('Game with ID 999 not found')));
 
-            expect(service.isLoading()).toBe(false);
-            expect(service.loadError()).toBeNull();
+            expect(service.loadingGame()).toBe(false);
+            expect(service.loadError()).toBe('');
 
             service.loadGameById('999');
-            expect(service.isLoading()).toBe(false);
+            expect(service.loadingGame()).toBe(false);
             expect(service.loadError()).toBe('Game with ID 999 not found');
         });
         it('should set loadError to true when game is undefined / null', () => {
             const subject = new Subject<GameEditorDto>();
             gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
 
-            expect(service.isLoading()).toBe(false);
-            expect(service.loadError()).toBeNull();
+            expect(service.loadingGame()).toBe(false);
+            expect(service.loadError()).toBe('');
 
             service.loadGameById('1');
-            expect(service.isLoading()).toBe(true);
+            expect(service.loadingGame()).toBe(true);
 
             subject.next(undefined as unknown as GameEditorDto);
             subject.complete();
 
-            expect(service.isLoading()).toBe(false);
+            expect(service.loadingGame()).toBe(false);
             expect(service.loadError()).toBe('Game with ID 1 not found');
         });
     });
@@ -192,9 +192,6 @@ describe('GameEditorStoreService', () => {
             expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
                 name: 'Modified Name',
                 description: 'Modified Description',
-                tiles: undefined,
-                objects: undefined,
-                gridPreviewUrl: undefined,
             });
         });
 
@@ -211,8 +208,6 @@ describe('GameEditorStoreService', () => {
             expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
                 name: 'Modified Name',
                 description: 'Modified Description',
-                tiles: undefined,
-                objects: undefined,
                 gridPreviewUrl: newPreviewUrl,
             });
         });
@@ -227,10 +222,6 @@ describe('GameEditorStoreService', () => {
 
             expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
                 name: 'Modified Name',
-                description: undefined,
-                tiles: undefined,
-                objects: undefined,
-                gridPreviewUrl: undefined,
             });
         });
 
@@ -243,11 +234,7 @@ describe('GameEditorStoreService', () => {
             service.saveGame();
 
             expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
-                name: undefined,
                 description: 'Modified Description',
-                tiles: undefined,
-                objects: undefined,
-                gridPreviewUrl: undefined,
             });
         });
 
@@ -266,11 +253,7 @@ describe('GameEditorStoreService', () => {
             service.saveGame();
 
             expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
-                name: undefined,
-                description: undefined,
                 tiles: service.tiles(),
-                objects: undefined,
-                gridPreviewUrl: undefined,
             });
         });
 
@@ -280,7 +263,7 @@ describe('GameEditorStoreService', () => {
             expect(service.tiles()).toEqual(mockEditorData.tiles);
             expect(service.objects()).toEqual(mockEditorData.objects);
 
-            service.placeObject(PlaceableKind.FLAG, 1, 1);
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
 
             expect(service.getPlacedObjectAt(1, 1)?.kind).toBe(PlaceableKind.FLAG);
             expect(service.tiles()).toEqual(mockEditorData.tiles);
@@ -289,11 +272,7 @@ describe('GameEditorStoreService', () => {
             service.saveGame();
 
             expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
-                name: undefined,
-                description: undefined,
-                tiles: undefined,
                 objects: service.objects(),
-                gridPreviewUrl: undefined,
             });
         });
     });
@@ -371,6 +350,12 @@ describe('GameEditorStoreService', () => {
             expect(toggledDoorTile).toBeDefined();
             expect(toggledDoorTile?.kind).toBe(TileKind.DOOR);
             expect(toggledDoorTile?.open).toBeTrue();
+        });
+
+        it('should return early if currentTile is falsy (no tile at index)', () => {
+            service['_tiles'].set([]);
+            service.setTileAt(0, 0, TileKind.WATER);
+            expect(service.tiles()).toEqual([]);
         });
     });
 
@@ -455,9 +440,14 @@ describe('GameEditorStoreService', () => {
             const noObject = service.getPlacedObjectAt(1, 1);
             expect(noObject).toBeUndefined();
         });
+
+        it('should return undefined if if index out of bounds', () => {
+            const noObject = service.getPlacedObjectAt(invalidTile, invalidTile);
+            expect(noObject).toBeUndefined();
+        });
     });
 
-    describe('placeObject', () => {
+    describe('placeObjectFromInventory', () => {
         beforeEach(() => {
             const subject = new Subject<GameEditorDto>();
             gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
@@ -467,7 +457,7 @@ describe('GameEditorStoreService', () => {
         });
 
         it('should place the object at specified coordinates', () => {
-            service.placeObject(PlaceableKind.FLAG, 1, 1);
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
             const placedObject = service.getPlacedObjectAt(1, 1);
             expect(placedObject).toBeDefined();
             expect(placedObject?.id).toBe('flag1');
@@ -482,18 +472,18 @@ describe('GameEditorStoreService', () => {
 
         it('should do nothing if coordinates are invalid', () => {
             const beforeObject = service.getPlacedObjectAt(0, 0);
-            service.placeObject(PlaceableKind.FLAG, invalidTile, invalidTile);
+            service.placeObjectFromInventory(PlaceableKind.FLAG, invalidTile, invalidTile);
             const afterObject = service.getPlacedObjectAt(0, 0);
             expect(afterObject).toEqual(beforeObject);
         });
 
         it('shouldnt do anything if no more object of that kind are unplaced', () => {
-            service.placeObject(PlaceableKind.FLAG, 1, 1);
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
             const placedObject = service.getPlacedObjectAt(1, 1);
             expect(placedObject).toBeDefined();
 
             const xy = 3;
-            service.placeObject(PlaceableKind.FLAG, xy, xy);
+            service.placeObjectFromInventory(PlaceableKind.FLAG, xy, xy);
             const afterSecondPlacement = service.getPlacedObjectAt(xy, xy);
             expect(afterSecondPlacement).toBeUndefined();
         });
@@ -503,13 +493,13 @@ describe('GameEditorStoreService', () => {
             expect(beforeObject).toBeDefined();
             expect(beforeObject?.id).toBe('start1');
 
-            service.placeObject(PlaceableKind.FLAG, 0, 0);
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 0, 0);
             const afterObject = service.getPlacedObjectAt(0, 0);
             expect(afterObject).toEqual(beforeObject);
         });
     });
 
-    describe('moveObject', () => {
+    describe('movePlacedObject', () => {
         beforeEach(() => {
             const subject = new Subject<GameEditorDto>();
             gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
@@ -525,7 +515,7 @@ describe('GameEditorStoreService', () => {
 
             const xy = 4;
 
-            service.moveObject('start1', xy, xy);
+            service.movePlacedObject('start1', xy, xy);
             const movedObject = service.getPlacedObjectAt(xy, xy);
             expect(movedObject).toBeDefined();
             expect(movedObject?.id).toBe('start1');
@@ -541,7 +531,7 @@ describe('GameEditorStoreService', () => {
             expect(beforeObject).toBeDefined();
             expect(beforeObject?.id).toBe('start1');
 
-            service.moveObject('start1', invalidTile, invalidTile);
+            service.movePlacedObject('start1', invalidTile, invalidTile);
             const afterObject = service.getPlacedObjectAt(0, 0);
             expect(afterObject).toEqual(beforeObject);
         });
@@ -553,7 +543,7 @@ describe('GameEditorStoreService', () => {
 
             const xy = 4;
 
-            service.moveObject('nonexistent-id', xy, xy);
+            service.movePlacedObject('nonexistent-id', xy, xy);
             const afterObject = service.getPlacedObjectAt(0, 0);
             expect(afterObject).toEqual(beforeObject);
         });
@@ -563,12 +553,12 @@ describe('GameEditorStoreService', () => {
             expect(beforeStart).toBeDefined();
             expect(beforeStart?.id).toBe('start1');
 
-            service.placeObject(PlaceableKind.FLAG, 1, 1);
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
             const beforeFlag = service.getPlacedObjectAt(1, 1);
             expect(beforeFlag).toBeDefined();
             expect(beforeFlag?.id).toBe('flag1');
 
-            service.moveObject('start1', 1, 1);
+            service.movePlacedObject('start1', 1, 1);
             const afterStart = service.getPlacedObjectAt(0, 0);
             expect(afterStart).toEqual(beforeStart);
 
@@ -665,14 +655,14 @@ describe('GameEditorStoreService', () => {
             const inventory = service.inventory();
             expect(inventory.FLAG?.remaining).toBe(1);
             expect(inventory.FLAG?.disabled).toBeFalse();
-            service.placeObject(PlaceableKind.FLAG, 1, 1);
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
             const afterInventory = service.inventory();
             expect(afterInventory.FLAG?.remaining).toBe(0);
             expect(afterInventory.FLAG?.disabled).toBeTrue();
         });
 
         it('should update inventory counts after removing an object', () => {
-            service.placeObject(PlaceableKind.FLAG, 1, 1);
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
             let inventory = service.inventory();
             expect(inventory.FLAG?.remaining).toBe(0);
             expect(inventory.FLAG?.disabled).toBeTrue();

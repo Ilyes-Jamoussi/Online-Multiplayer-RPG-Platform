@@ -43,13 +43,11 @@
                 <div class="character-name-section">
                     <h3>Nom *</h3>
                     <app-ui-input
-                        type="name"
+                        type="text"
                         placeholder="Nom du héros"
                         [value]="character.name"
                         (valueChange)="onNameChange($event)"
                         [maxLength]="characterNameMaxLength"
-                        [allowedCharsPattern]="nameAllowedCharsPattern"
-                        [errorMessage]="getNameErrorMessage()"
                     ></app-ui-input>
                 </div>
 

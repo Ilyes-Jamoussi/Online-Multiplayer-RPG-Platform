@@ -197,7 +197,7 @@ export class GameEditorInteractionsService {
 
     private tryPlaceObject(x: number, y: number, kind: PlaceableKind): void {
         if (!this.canPlaceObject(x, y, kind)) return;
-        this.store.placeObject(kind, x, y);
+        this.store.placeObjectFromInventory(kind, x, y);
     }
 
     private tryMoveObject(x: number, y: number, id: string): void {
@@ -206,7 +206,7 @@ export class GameEditorInteractionsService {
 
         const kind = PlaceableKind[obj.kind];
         if (!this.canPlaceObject(x, y, kind, id)) return;
-        this.store.moveObject(id, x, y);
+        this.store.movePlacedObject(id, x, y);
     }
 
     private processDropTile(tileX: number, tileY: number, offsetX: number, offsetY: number): Vector2 {

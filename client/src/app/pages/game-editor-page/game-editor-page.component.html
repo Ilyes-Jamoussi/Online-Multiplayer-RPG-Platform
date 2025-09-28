@@ -47,16 +47,18 @@
     </div>
     <div slot="footer">
         <app-ui-input
-            type="name"
+            type="text"
             placeholder="Saisissez le nom de votre jeu"
             [value]="gameEditorStoreService.name"
             (valueChange)="gameEditorStoreService.name = $event"
+            [maxLength]="gameNameMaxLength"
         ></app-ui-input>
         <app-ui-input
-            type="description"
+            type="text"
             placeholder="Décrivez votre jeu en quelques mots"
             [value]="gameEditorStoreService.description"
             (valueChange)="gameEditorStoreService.description = $event"
+            [maxLength]="descriptionMaxLength"
         ></app-ui-input>
         <app-ui-button (buttonClick)="onReset()">Réinitialiser la grille</app-ui-button>
         <app-ui-button (buttonClick)="onSave()" [disabled]="!gameEditorCheckService.canSave()">Sauvegarder</app-ui-button>

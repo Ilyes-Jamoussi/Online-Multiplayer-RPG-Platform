@@ -1,9 +1,13 @@
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { ROUTES } from '@app/constants/routes.constants';
 import { GamePreviewDto } from '@app/dto/gamePreviewDto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
+import { MAP_SIZE_LABELS } from '@common/constants/game.constants';
+import { MapSize } from '@common/enums/map-size.enum';
+import { environment } from '@src/environments/environment';
 import { GamePreviewCardComponent } from './game-preview-card.component';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('GamePreviewCardComponent', () => {
     let component: GamePreviewCardComponent;
@@ -89,5 +93,33 @@ describe('GamePreviewCardComponent', () => {
     it('should accept isAdmin input', () => {
         component.isAdmin = true;
         expect(component.isAdmin).toBe(true);
+    });
+
+    it('should navigate to game editor on edit', () => {
+        const router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+
+        component.onEditGame();
+
+        expect(router.navigate).toHaveBeenCalledWith([ROUTES.gameEditor, mockGame.id]);
+    });
+
+    it('should build image url from environment socketUrl and game preview path', () => {
+        const expected = `${environment.socketUrl}${mockGame.gridPreviewUrl}`;
+        expect(component.getImageUrl()).toBe(expected);
+    });
+
+    it('should return a map size label when available and fallback to NxN when missing', () => {
+        const labels = MAP_SIZE_LABELS as Record<string, string>;
+        const knownKey = Object.keys(labels).find((k) => labels[k] && labels[k].length > 0);
+        if (knownKey) {
+            const keyAsNumber = Number(knownKey) as unknown as MapSize;
+            component.game.size = keyAsNumber;
+            expect(component.getMapSizeLabel()).toBe(labels[knownKey]);
+        }
+
+        let candidate = MapSize.SMALL as number;
+        while (labels[candidate as unknown as string as keyof typeof labels]) candidate += 1;
+        component.game.size = candidate as unknown as MapSize;
+        expect(component.getMapSizeLabel()).toBe(`${candidate}x${candidate}`);
     });
 });

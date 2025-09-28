@@ -14,6 +14,8 @@ import { of } from 'rxjs';
 
 @Injectable()
 export class GameEditorStoreService {
+    constructor(private readonly gameHttpService: GameHttpService) {}
+
     private readonly _initial = signal<GameEditorDto>({
         id: '',
         name: '',
@@ -38,7 +40,7 @@ export class GameEditorStoreService {
     private readonly _tileSizePx = signal<number>(0);
 
     private readonly _loadingGame = signal<boolean>(false);
-    private readonly _loadError = signal<string | null>(null);
+    private readonly _loadError = signal<string>('');
 
     get placedObjects(): ExtendedGameEditorPlaceableDto[] {
         const objs = this._objects();
@@ -70,7 +72,6 @@ export class GameEditorStoreService {
         return acc;
     }
 
-    /** Unplaced objects in the editor */
     readonly inventory = computed<Inventory>(() => {
         const objs = this._objects();
         const inv: Inventory = {} as Inventory;
@@ -97,7 +98,7 @@ export class GameEditorStoreService {
         return inv;
     });
 
-    get isLoading() {
+    get loadingGame() {
         return this._loadingGame.asReadonly();
     }
 
@@ -152,11 +153,9 @@ export class GameEditorStoreService {
         this._tileSizePx.set(value);
     }
 
-    constructor(private readonly gameHttpService: GameHttpService) {}
-
     loadGameById(id: string): void {
         this._loadingGame.set(true);
-        this._loadError.set(null);
+        this._loadError.set('');
 
         this.gameHttpService
             .getGameEditorById(id)
@@ -189,92 +188,144 @@ export class GameEditorStoreService {
     }
 
     saveGame(gridPreviewImage?: string): void {
-        const game: PatchGameEditorDto = {
-            name: this._name() !== this._initial().name ? this._name() : undefined,
-            description: this._description() !== this._initial().description ? this._description() : undefined,
-            tiles: this._tiles() !== this._initial().tiles ? this._tiles() : undefined,
-            objects: this._objects() !== this._initial().objects ? this._objects() : undefined,
-            gridPreviewUrl: gridPreviewImage,
+        const current = {
+            name: this._name(),
+            description: this._description(),
+            tiles: this._tiles(),
+            objects: this._objects(),
+            gridPreviewUrl: gridPreviewImage ?? this._gridPreviewUrl(),
         };
-
+        const game: PatchGameEditorDto = this.pickChangedProperties(current, this._initial());
         this.gameHttpService.patchGameEditorById(this._id(), game).subscribe();
     }
 
     getTileAt(x: number, y: number): GameEditorTileDto | undefined {
-        if (x < 0 || y < 0 || x >= this.size() || y >= this.size()) return undefined;
+        if (!this.inBounds(x, y)) return undefined;
         const index = this.getIndexByCoord(x, y);
         return this._tiles()[index];
     }
 
     setTileAt(x: number, y: number, kind: TileKind): void {
-        if (x < 0 || y < 0 || x >= this.size() || y >= this.size()) return;
-        const index = this.getIndexByCoord(x, y);
-        const tiles = this.tiles();
-        const newTiles = [...tiles];
-        const currentTile = newTiles[index];
-        if (currentTile.kind !== TileKind.DOOR && currentTile.kind === kind) return;
-        const open = currentTile.kind !== TileKind.DOOR ? false : !currentTile.open;
-        newTiles[index] = { x, y, kind, open };
-        this._tiles.set(newTiles);
+        this.withBounds(x, y, () => {
+            this.updateTiles((draft) => {
+                const idx = this.getIndexByCoord(x, y);
+                const currentTile = draft[idx];
+                if (!currentTile) return;
+
+                if (currentTile.kind !== TileKind.DOOR && currentTile.kind === kind) return;
+
+                const open = currentTile.kind === TileKind.DOOR ? !currentTile.open : false;
+                draft[idx] = { x, y, kind, open };
+            });
+        });
     }
 
     resetTileAt(x: number, y: number): void {
-        if (x < 0 || y < 0 || x >= this.size() || y >= this.size()) return;
-        const index = this.getIndexByCoord(x, y);
-        const tiles = this.tiles();
-        const newTiles = [...tiles];
-        newTiles[index] = { x, y, kind: TileKind.BASE };
-        this._tiles.set(newTiles);
+        this.withBounds(x, y, () => {
+            this.updateTiles((draft) => {
+                const idx = this.getIndexByCoord(x, y);
+                draft[idx] = { x, y, kind: TileKind.BASE };
+            });
+        });
     }
 
     reset(): void {
         const initial = this._initial();
-        this._name.set(initial.name);
-        this._description.set(initial.description);
         this._tiles.set(initial.tiles);
         this._objects.set(initial.objects);
         this._size.set(initial.size);
+        this._name.set(initial.name);
+        this._description.set(initial.description);
+        this._mode.set(initial.mode as GameMode);
+        this._gridPreviewUrl.set(initial.gridPreviewUrl);
     }
 
     getPlacedObjectAt(x: number, y: number): GameEditorPlaceableDto | undefined {
+        if (!this.inBounds(x, y)) return undefined;
         return this.placedObjects.find((o) => o.xs.includes(x) && o.ys.includes(y));
     }
 
-    placeObject(kind: PlaceableKind, x: number, y: number): void {
-        if (x < 0 || y < 0 || x >= this.size() || y >= this.size()) return;
-        const objects = this._objects();
-        const newObjects = [...objects];
-        const objIndex = newObjects.findIndex((o) => o.kind === PlaceableKind[kind] && !o.placed);
-        if (objIndex === -1) return;
-        const existing = this.getPlacedObjectAt(x, y);
-        if (existing) return;
-        newObjects[objIndex] = { ...newObjects[objIndex], x, y, placed: true };
-        this._objects.set(newObjects);
+    placeObjectFromInventory(kind: PlaceableKind, x: number, y: number): void {
+        this.withBounds(x, y, () => {
+            if (this.isOccupiedByOther(null, x, y)) return;
+
+            this.updateObjects((draft) => {
+                const idx = this.findFirstUnplacedIndexByKind(draft, kind);
+                if (idx === -1) return;
+                draft[idx] = { ...draft[idx], x, y, placed: true };
+            });
+        });
     }
 
-    moveObject(id: string, x: number, y: number): void {
-        if (x < 0 || y < 0 || x >= this.size() || y >= this.size()) return;
-        const objects = this.objects();
-        const newObjects = [...objects];
-        const objIndex = newObjects.findIndex((o) => o.id === id);
-        if (objIndex === -1) return;
-        const existing = this.getPlacedObjectAt(x, y);
-        if (existing && existing.id !== id) return;
-        newObjects[objIndex] = { ...newObjects[objIndex], x, y, placed: x >= 0 && y >= 0 };
-        this._objects.set(newObjects);
+    movePlacedObject(id: string, x: number, y: number): void {
+        this.withBounds(x, y, () => {
+            if (this.isOccupiedByOther(id, x, y)) return;
+
+            this.updateObjects((draft) => {
+                const idx = this.findObjectIndexById(draft, id);
+                if (idx === -1) return;
+                draft[idx] = { ...draft[idx], x, y, placed: x >= 0 && y >= 0 };
+            });
+        });
     }
 
     removeObject(id: string): void {
-        const objects = this.objects();
-        const newObjects = [...objects];
-        const objIndex = newObjects.findIndex((o) => o.id === id);
-        if (objIndex === -1) return;
-        newObjects[objIndex] = { ...newObjects[objIndex], x: -1, y: -1, placed: false };
-        this._objects.set(newObjects);
+        this.updateObjects((draft) => {
+            const idx = this.findObjectIndexById(draft, id);
+            if (idx === -1) return;
+            draft[idx] = { ...draft[idx], x: -1, y: -1, placed: false };
+        });
     }
 
     private getIndexByCoord(x: number, y: number): number {
         const width = this.size();
         return y * width + x;
+    }
+
+    private inBounds(x: number, y: number): boolean {
+        const n = this.size();
+        return x >= 0 && y >= 0 && x < n && y < n;
+    }
+
+    private withBounds<T>(x: number, y: number, fn: () => T): T | undefined {
+        if (!this.inBounds(x, y)) return undefined;
+        return fn();
+    }
+
+    private updateTiles(mutator: (draft: GameEditorTileDto[]) => void): void {
+        this._tiles.update((tiles) => {
+            const draft = [...tiles];
+            mutator(draft);
+            return draft;
+        });
+    }
+
+    private updateObjects(mutator: (draft: GameEditorPlaceableDto[]) => void): void {
+        this._objects.update((objects) => {
+            const draft = [...objects];
+            mutator(draft);
+            return draft;
+        });
+    }
+
+    private findObjectIndexById(draft: GameEditorPlaceableDto[], id: string): number {
+        return draft.findIndex((o) => o.id === id);
+    }
+
+    private findFirstUnplacedIndexByKind(draft: GameEditorPlaceableDto[], kind: PlaceableKind): number {
+        return draft.findIndex((o) => o.kind === PlaceableKind[kind] && !o.placed);
+    }
+
+    private isOccupiedByOther(id: string | null, x: number, y: number): boolean {
+        const occ = this.getPlacedObjectAt(x, y);
+        return !!occ && (!id || occ.id !== id);
+    }
+
+    private pickChangedProperties<T extends object>(current: T, initial: T): Partial<T> {
+        const out: Partial<T> = {};
+        for (const k of Object.keys(current) as (keyof T)[]) {
+            if (current[k] !== initial[k]) out[k] = current[k];
+        }
+        return out;
     }
 }
