@@ -11,7 +11,6 @@ const bootstrap = async () => {
     app.useGlobalPipes(new ValidationPipe());
     app.enableCors();
 
-    // Servir les fichiers statiques depuis le dossier assets
     const assetsPath = join(process.cwd(), 'assets');
     app.useStaticAssets(assetsPath, {
         prefix: '/assets/',

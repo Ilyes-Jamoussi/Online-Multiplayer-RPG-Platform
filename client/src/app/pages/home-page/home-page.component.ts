@@ -3,8 +3,8 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
-import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
-import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
+import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
+import { UiButtonComponent } from '@app/components/ui/button/button.component';
 
 @Component({
     selector: 'app-home-page',

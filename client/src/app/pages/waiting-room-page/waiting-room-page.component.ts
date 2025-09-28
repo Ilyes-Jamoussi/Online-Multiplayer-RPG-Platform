@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
-import { UiButtonComponent } from '@app/shared/ui/components/button/button.component';
-import { UiPageLayoutComponent } from '@app/shared/ui/components/page-layout/page-layout.component';
+import { UiButtonComponent } from '@app/components/ui/button/button.component';
+import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 
 @Component({
     selector: 'app-waiting-room-page',

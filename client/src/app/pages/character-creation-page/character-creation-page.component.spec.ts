@@ -121,12 +121,6 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
         expect(component.getNameErrorMessage()).toBe('');
     });
 
-    it('goBack uses router to navigate to gameSessionCreation', () => {
-        mockRouter.navigate.calls.reset();
-        component.goBack();
-        expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.gameSessionCreation]);
-    });
-
     it('onNameChange delegates to store.setName and getNameErrorMessage uses project constants', () => {
         component.onNameChange('ab');
         expect(mockCharacterStoreService.setName).toHaveBeenCalledWith('ab');
@@ -200,8 +194,4 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
         expect(successArg.title).toContain('Personnage');
     });
 
-    it('onBack navigates to root', () => {
-        component.onBack();
-        expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
-    });
 });

@@ -1,4 +1,4 @@
-import { GameStoreModule } from '@app/game-store/module/game.module';
+import { GameStoreModule } from '@app/game-store/module/game-store.module';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -10,7 +10,7 @@ import { MongooseModule } from '@nestjs/mongoose';
             imports: [ConfigModule],
             inject: [ConfigService],
             useFactory: async (config: ConfigService) => ({
-                uri: config.get<string>('DATABASE_CONNECTION_STRING'), // Loaded from .env
+                uri: config.get<string>('DATABASE_CONNECTION_STRING'),
             }),
         }),
         GameStoreModule,

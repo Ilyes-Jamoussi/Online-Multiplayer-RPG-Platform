@@ -1,10 +1,10 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { GamePreviewDto } from '@app/dto/gamePreviewDto';
+import { GamePreviewCardComponent } from '@app/components/features/game-preview-card/game-preview-card.component';
 import { ROUTES } from '@app/constants/routes.constants';
+import { GamePreviewDto } from '@app/dto/gamePreviewDto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
-import { GamePreviewCardComponent } from '@app/shared/components/game-preview-card/game-preview-card.component';
 import { of } from 'rxjs';
 import { GameManagementPageComponent } from './game-management-page.component';
 
