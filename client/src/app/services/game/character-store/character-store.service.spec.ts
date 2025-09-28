@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
+import { CHARACTER_AVATARS_COUNT, CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
 import { CharacterStoreService } from './character-store.service';
 
 const EXPECTED_LIFE_BASE = CHARACTER_BASE;
@@ -88,5 +88,105 @@ describe('CharacterStoreService', () => {
         expect(character.name).toBe('');
         expect(character.avatar).toBe(0);
         expect(character.bonus).toBeNull();
+    });
+
+    it('should expose avatars array from constant', () => {
+        const avatars = service.avatars;
+        const expected = Array.from({ length: CHARACTER_AVATARS_COUNT }, (_, i) => i);
+        expect(avatars.length).toBe(CHARACTER_AVATARS_COUNT);
+        expect(avatars).toEqual(expected);
+    });
+
+    it('should reset avatar to null with resetAvatar and ignore invalid indices', () => {
+        service.selectAvatar(TEST_AVATAR_INDEX);
+        expect(service.character().avatar).toBe(TEST_AVATAR_INDEX);
+        service.resetAvatar();
+        expect(service.character().avatar).toBeNull();
+
+        service.selectAvatar(-1);
+        expect(service.character().avatar).toBeNull();
+        service.selectAvatar(CHARACTER_AVATARS_COUNT);
+        expect(service.character().avatar).toBeNull();
+    });
+
+    it('should set dice assignment when setting defense (other branch)', () => {
+        service.setDice('defense', 'D6');
+        const character = service.character();
+        expect(character.diceAssignment.defense).toBe('D6');
+        expect(character.diceAssignment.attack).toBe('D4');
+    });
+
+    it('should set dice assignment correctly for attack variants', () => {
+        service.setDice('attack', 'D4');
+        let character = service.character();
+        expect(character.diceAssignment.attack).toBe('D4');
+        expect(character.diceAssignment.defense).toBe('D6');
+
+        service.setDice('attack', 'D6');
+        character = service.character();
+        expect(character.diceAssignment.attack).toBe('D6');
+        expect(character.diceAssignment.defense).toBe('D4');
+    });
+
+    it('resetForm should restore default dice assignment', () => {
+        service.setDice('attack', 'D6');
+        expect(service.character().diceAssignment.attack).toBe('D6');
+
+        service.resetForm();
+        const character = service.character();
+        expect(character.diceAssignment.attack).toBe('D4');
+        expect(character.diceAssignment.defense).toBe('D6');
+    });
+
+    it('should allow selecting first and last avatar indices', () => {
+        service.selectAvatar(0);
+        expect(service.character().avatar).toBe(0);
+
+        const lastIndex = CHARACTER_AVATARS_COUNT - 1;
+        service.selectAvatar(lastIndex);
+        expect(service.character().avatar).toBe(lastIndex);
+    });
+
+    it('generateRandom should set predictable values when Math.random is stubbed', () => {
+        const randName = 0.01;
+        const randAvatar = 0.23;
+        const randBonus = 0.1;
+        const randDice = 0.9;
+
+        spyOn(Math, 'random').and.returnValues(randName, randAvatar, randBonus, randDice);
+
+        service.generateRandom();
+
+        const character = service.character();
+
+        const expectedAvatar = Math.floor(randAvatar * CHARACTER_AVATARS_COUNT);
+        expect(character.avatar).toBe(expectedAvatar);
+
+        expect(character.bonus).toBe('life');
+
+        expect(character.diceAssignment.defense).toBe('D6');
+        expect(character.diceAssignment.attack).toBe('D4');
+    });
+
+    it('should return appropriate nameError messages for empty, too long and invalid names', () => {
+        service.setName('');
+        expect(service.nameError).toBe('Le nom est requis');
+
+        let longName = 'a';
+        service.setName(longName);
+        while (service.isNameValid) {
+            longName += 'a';
+            service.setName(longName);
+            if (!service.isNameValid) break;
+        }
+        expect(service.nameError).toBe('Maximum 8 caractères');
+
+        service.setName('inv@lid');
+        expect(service.nameError).toBe('Lettres et chiffres seulement');
+
+        const validName = longName.slice(0, -1);
+        service.setName(validName);
+        expect(service.isNameValid).toBeTrue();
+        expect(service.nameError).toBeNull();
     });
 });
