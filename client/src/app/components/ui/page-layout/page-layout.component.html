@@ -1,6 +1,10 @@
 <div [ngClass]="classes">
     @if (hasHeader && headerTitle) {
-    <app-ui-header [title]="headerTitle" [subtitle]="headerSubtitle" [showBackButton]="showBackButton" (backClick)="onBackClick()"> </app-ui-header>
+        @if (backClick.observed) {
+            <app-ui-header [title]="headerTitle" [subtitle]="headerSubtitle" [showBackButton]="showBackButton" (backClick)="onBackClick()"> </app-ui-header>
+        } @else {
+            <app-ui-header [title]="headerTitle" [subtitle]="headerSubtitle" [showBackButton]="showBackButton"> </app-ui-header>
+        }
     }
 
     <div class="page-body">
