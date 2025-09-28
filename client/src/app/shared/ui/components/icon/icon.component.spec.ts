@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { UiSize } from '@app/shared/ui/types/ui.types';
 import { FaIcons } from '@common/enums/fa-icons.enum';
 import { IconSizes, UiIconComponent } from './icon.component';
 
@@ -14,10 +15,6 @@ describe('UiIconComponent', () => {
         fixture = TestBed.createComponent(UiIconComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
-    });
-
-    it('should create', () => {
-        expect(component).toBeTruthy();
     });
 
     it('should have default values', () => {
@@ -44,18 +41,15 @@ describe('UiIconComponent', () => {
     });
 
     it('iconValue should reflect FaIcons mapping and fallback to FaceMeh', () => {
-        // use concrete enum keys to avoid magic strings
         component.iconName = Object.keys(FaIcons)[0] as keyof typeof FaIcons;
         const firstKey = component.iconName;
         expect(component.iconValue).toBe(FaIcons[firstKey]);
 
-        // invalid key simulated by casting an unknown key should fallback
         component.iconName = 'NonExistingKey' as keyof typeof FaIcons;
         expect(component.iconValue).toBe(FaIcons.FaceMeh);
     });
 
     it('iconSize should map size input to IconSizes correctly', () => {
-        // test all known sizes using the enum mapping
         component.size = 'sm';
         expect(component.iconSize).toBe(IconSizes.SM);
 
@@ -65,8 +59,7 @@ describe('UiIconComponent', () => {
         component.size = 'lg';
         expect(component.iconSize).toBe(IconSizes.LG);
 
-        // default when size unknown
-        component.size = 'unknown' as any;
+        component.size = 'unknown' as unknown as UiSize;
         expect(component.iconSize).toBe(IconSizes.MD);
     });
 });
