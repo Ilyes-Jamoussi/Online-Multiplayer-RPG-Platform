@@ -1,26 +1,41 @@
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
+import { GameDocument } from '@app/game-store/entities/game.entity';
 import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { NotFoundException } from '@nestjs/common';
+import { Model } from 'mongoose';
 import { GameEditorService } from './game-editor.service';
 import { ImageService } from './image.service';
 
 describe('GameEditorService', () => {
     let service: GameEditorService;
-    const mockModel: any = {};
+    const mockModel: Record<string, unknown> = {};
     const mockImageService: Partial<ImageService> = {};
     const mockMapper: Partial<GameDtoMapper> = {};
+
+    type PatchSet = {
+        name: string;
+        description: string;
+        size: MapSize;
+        mode: GameMode;
+        gridPreviewUrl: string;
+        tiles: { kind: TileKind; x: number; y: number; open: boolean; teleportChannel: number }[];
+        objects: { id: string; kind: PlaceableKind; x: number; y: number; placed: boolean; orientation: Orientation }[];
+    };
 
     beforeEach(() => {
         Object.keys(mockModel).forEach((k) => delete mockModel[k]);
 
         mockImageService.saveImage = jest.fn().mockResolvedValue('some-url.png');
-        mockMapper.toGamePreviewDto = jest.fn().mockImplementation((g: any) => ({ id: g._id.toString(), name: g.name } as GamePreviewDto));
+        mockMapper.toGamePreviewDto = jest.fn().mockImplementation(
+            (g: { _id: { toString: () => string }; name: string }) => ({ id: g._id.toString(), name: g.name } as GamePreviewDto),
+        );
 
-        service = new GameEditorService(mockModel as any, mockImageService as ImageService, mockMapper as GameDtoMapper);
+        service = new GameEditorService(mockModel as unknown as Model<GameDocument>, mockImageService as ImageService, mockMapper as GameDtoMapper);
     });
 
     describe('getEditByGameId', () => {
@@ -33,8 +48,8 @@ describe('GameEditorService', () => {
 
         it('returns mapped editor dto when game exists', async () => {
             const now = new Date();
-            const gameDoc: any = {
-                _id: { toString: () => 'abc123' } as any,
+            const gameDoc = {
+                _id: { toString: () => 'abc123' },
                 lastModified: now,
                 name: 'name',
                 description: 'desc',
@@ -43,7 +58,7 @@ describe('GameEditorService', () => {
                 tiles: [{ x: 0, y: 0, kind: TileKind.BASE }],
                 gridPreviewUrl: 'preview.png',
                 objects: [{ _id: { toString: () => 'obj1' }, x: 0, y: 0, kind: PlaceableKind.START, placed: false }],
-            };
+            } as const;
 
             mockModel.findById = jest.fn().mockReturnValue({ lean: () => Promise.resolve(gameDoc) });
 
@@ -61,7 +76,7 @@ describe('GameEditorService', () => {
         it('returns null when update does not find a document', async () => {
             mockModel.findByIdAndUpdate = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
 
-            const res = await service.patchEditByGameId('nope', { name: 'x' } as any);
+            const res = await service.patchEditByGameId('nope', { name: 'x' });
             expect(res).toBeNull();
             expect(mockModel.findByIdAndUpdate).toHaveBeenCalled();
         });
@@ -80,11 +95,11 @@ describe('GameEditorService', () => {
                 visibility: true,
                 gridPreviewUrl: 'game-gameid-preview.png',
                 draft: false,
-            } as any;
+            } as const;
 
             mockModel.findByIdAndUpdate = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(returnedDoc) }) });
 
-            const body = { gridPreviewUrl: 'data', name: 'newname' } as any;
+            const body = { gridPreviewUrl: 'data', name: 'newname' };
 
             const preview = await service.patchEditByGameId(id, body);
 
@@ -107,29 +122,33 @@ describe('GameEditorService', () => {
                 mode: GameMode.CTF,
                 gridPreviewUrl: 'data',
                 tiles: [
-                    { kind: TileKind.BASE, x: 1, y: 2, open: true, teleportChannel: 'chan' },
+                    { kind: TileKind.BASE, x: 1, y: 2, open: true, teleportChannel: 1 },
                 ],
                 objects: [
-                    { id: 'obj1', kind: PlaceableKind.FLAG, x: 3, y: 4, placed: true, orientation: 'SOUTH' },
+                    { id: 'obj1', kind: PlaceableKind.FLAG, x: 3, y: 4, placed: true, orientation: Orientation.S },
                 ],
-            } as any;
+            };
 
-            const returnedDoc = { _id: { toString: () => id } } as any;
+            const returnedDoc = { _id: { toString: () => id } } as const;
 
-            let capturedSet: any = null;
-            mockModel.findByIdAndUpdate = jest.fn().mockImplementation((passedId: string, setArg: any, opts: any) => {
+            let capturedSet: unknown = null;
+            mockModel.findByIdAndUpdate = jest.fn().mockImplementation((passedId: string, setArg: unknown) => {
                 capturedSet = setArg;
                 return { lean: () => ({ exec: jest.fn().mockResolvedValue(returnedDoc) }) };
             });
 
             const preview = await service.patchEditByGameId(id, body);
 
-            expect(mockImageService.saveImage).toHaveBeenCalledWith(body.gridPreviewUrl, `game-${id}-preview.png`, 'game-previews');
+            expect(mockImageService.saveImage).toHaveBeenCalledWith(
+                body.gridPreviewUrl,
+                `game-${id}-preview.png`,
+                'game-previews',
+            );
 
             expect(mockModel.findByIdAndUpdate).toHaveBeenCalled();
             expect(capturedSet).not.toBeNull();
 
-            const setObj = capturedSet.$set ?? capturedSet;
+            const setObj = ((capturedSet as unknown) as { $set?: PatchSet }).$set ?? (capturedSet as PatchSet);
             expect(setObj.name).toBe(body.name);
             expect(setObj.description).toBe(body.description);
             expect(setObj.size).toBe(body.size);
@@ -139,13 +158,28 @@ describe('GameEditorService', () => {
 
             expect(setObj.tiles).toBeDefined();
             expect(setObj.tiles.length).toBe(body.tiles.length);
-            expect(setObj.tiles[0]).toEqual({ kind: body.tiles[0].kind, x: body.tiles[0].x, y: body.tiles[0].y, open: body.tiles[0].open, teleportChannel: body.tiles[0].teleportChannel });
+            const expectedTile = {
+                kind: body.tiles[0].kind,
+                x: body.tiles[0].x,
+                y: body.tiles[0].y,
+                open: body.tiles[0].open,
+                teleportChannel: body.tiles[0].teleportChannel,
+            };
+            expect(setObj.tiles[0]).toEqual(expectedTile);
 
             expect(setObj.objects).toBeDefined();
             expect(setObj.objects.length).toBe(body.objects.length);
-            expect(setObj.objects[0]).toEqual({ id: body.objects[0].id, kind: body.objects[0].kind, x: body.objects[0].x, y: body.objects[0].y, placed: body.objects[0].placed, orientation: body.objects[0].orientation });
+            const expectedObject = {
+                id: body.objects[0].id,
+                kind: body.objects[0].kind,
+                x: body.objects[0].x,
+                y: body.objects[0].y,
+                placed: body.objects[0].placed,
+                orientation: body.objects[0].orientation,
+            };
+            expect(setObj.objects[0]).toEqual(expectedObject);
 
-            expect(mockMapper.toGamePreviewDto).toHaveBeenCalledWith(returnedDoc);
+            expect(mockMapper.toGamePreviewDto).toHaveBeenCalledWith(returnedDoc as unknown as GameDocument);
             expect(preview).toBeDefined();
             if (preview) expect(preview.id).toBe(id);
         });
