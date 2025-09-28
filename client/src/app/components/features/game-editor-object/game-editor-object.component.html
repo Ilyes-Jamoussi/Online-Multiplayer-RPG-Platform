@@ -3,6 +3,7 @@
     draggable="true"
     [class.dragging]="isDragging"
     [ngStyle]="{ '--bg-image': 'url(' + image + ')' }"
+    (drop)="onDrop($event)"
     (dragstart)="onDragStart($event)"
     (dragend)="onDragEnd()"
     (mousedown)="onMouseDown($event)"
