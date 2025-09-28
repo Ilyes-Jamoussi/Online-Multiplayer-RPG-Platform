@@ -1,9 +1,12 @@
 import { TestBed } from '@angular/core/testing';
+import { CreateGameDto } from '@app/dto/createGameDto';
+import { GamePreviewDto } from '@app/dto/gamePreviewDto';
+import { UpdateGameDto } from '@app/dto/updateGameDto';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
+import { MapSize } from '@common/enums/map-size.enum';
 import { of } from 'rxjs';
 import { GameStoreService } from './game-store.service';
-import { GamePreviewDto } from '@app/dto/gamePreviewDto';
 
 describe('GameStoreService', () => {
     let service: GameStoreService;
@@ -89,6 +92,20 @@ describe('GameStoreService', () => {
             const visibleGames = service.visibleGames();
             expect(visibleGames).toEqual([mockGames[0]]);
         });
+
+        it('managementGames should return only non-draft games', () => {
+            const mixed: GamePreviewDto[] = [
+                { ...mockGames[0], draft: false },
+                { ...mockGames[1], draft: true },
+            ];
+            gameHttpServiceSpy.getGamesDisplay.and.returnValue(of(mixed));
+
+            service.loadGames().subscribe();
+
+            const management = service.managementGames();
+            expect(management.every((g) => !g.draft)).toBeTrue();
+            expect(management).toEqual([mixed[0]]);
+        });
     });
 
     describe('loadGames', () => {
@@ -109,6 +126,30 @@ describe('GameStoreService', () => {
             service.deleteGame('1').subscribe();
 
             expect(gameHttpServiceSpy.deleteGame).toHaveBeenCalledWith('1');
+        });
+    });
+
+    describe('create/update wrappers', () => {
+        it('createGame should call http createGame with payload', () => {
+            const payload: CreateGameDto = { name: 'C1', description: 'd', size: 10, mode: 'classic' } as CreateGameDto;
+            gameHttpServiceSpy.createGame.and.returnValue(of(mockGames[0]));
+
+            service.createGame(payload).subscribe((res) => {
+                expect(res).toBe(mockGames[0]);
+            });
+
+            expect(gameHttpServiceSpy.createGame).toHaveBeenCalledWith(payload);
+        });
+
+        it('updateGame should call http updateGame with stored _gameId', () => {
+            const update: UpdateGameDto = { name: 'U1' } as UpdateGameDto;
+            const NEW_ID = 'stored-id-123';
+            (service as unknown as { _gameId: string })._gameId = NEW_ID;
+            gameHttpServiceSpy.updateGame.and.returnValue(of(undefined));
+
+            service.updateGame(update).subscribe(() => {
+                expect(gameHttpServiceSpy.updateGame).toHaveBeenCalledWith(NEW_ID, update);
+            });
         });
     });
 
@@ -142,7 +183,7 @@ describe('GameStoreService', () => {
                 id: '3',
                 name: 'Game 3',
                 description: 'Desc 3',
-                size: 20,
+                size: MapSize.LARGE,
                 mode: 'classic',
                 lastModified: '2023-01-03',
                 visibility: true,
@@ -163,6 +204,26 @@ describe('GameStoreService', () => {
             callback(updatedGame);
 
             expect(service.gameDisplays()[0].name).toBe('Updated Game 1');
+        });
+
+        it('should add updated game when it does not exist (replace branch else)', () => {
+            const newGame: GamePreviewDto = {
+                id: 'new-99',
+                name: 'Brand New',
+                description: 'new',
+                size: MapSize.MEDIUM,
+                mode: 'classic',
+                lastModified: '2023-01-04',
+                visibility: true,
+                gridPreviewUrl: '/assets/new.png',
+                draft: false,
+            };
+
+            const callback = gameStoreSocketServiceSpy.onGameUpdated.calls.argsFor(0)[0];
+
+            callback(newGame);
+
+            expect(service.gameDisplays().some((g) => g.id === newGame.id)).toBeTrue();
         });
 
         it('should handle game deleted event', () => {

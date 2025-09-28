@@ -1,16 +1,16 @@
-// import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
+import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
 import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 import { Game, GameDocument } from '@app/game-store/entities/game.entity';
-import { ImageService } from '@app/game-store/services/image.service';
+import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
 import { GameStoreService } from '@app/game-store/services/game-store.service';
+import { ImageService } from '@app/game-store/services/image.service';
 import { getProjection } from '@app/utils/mongo.utils';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { NotFoundException } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Model, Types, Query } from 'mongoose';
-import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
+import { Model, Query, Types } from 'mongoose';
 
 describe('GameStoreService', () => {
     let service: GameStoreService;
@@ -31,12 +31,12 @@ describe('GameStoreService', () => {
         ...overrides,
     });
 
-    // const mockCreateGameDto: CreateGameDto = {
-    //     name: 'New Game',
-    //     description: 'New Description',
-    //     size: MapSize.SMALL,
-    //     mode: GameMode.CLASSIC,
-    // };
+    const mockCreateGameDto: CreateGameDto = {
+        name: 'New Game',
+        description: 'New Description',
+        size: MapSize.SMALL,
+        mode: GameMode.CLASSIC,
+    };
 
     const mockUpdateGameDto: UpdateGameDto = {
         name: 'Updated Game',
@@ -48,6 +48,7 @@ describe('GameStoreService', () => {
         const mockGameModel = {
             create: jest.fn(),
             find: jest.fn(),
+            findOne: jest.fn(),
             findById: jest.fn(),
             findByIdAndUpdate: jest.fn(),
             deleteOne: jest.fn(),
@@ -79,26 +80,6 @@ describe('GameStoreService', () => {
         expect(service).toBeDefined();
     });
 
-    // describe('createGame', () => {
-    //     it('should create a game and return GamePreviewDto', async () => {
-    //         const mockGameDocument = createMockGameDocument();
-    //         (gameModel.create as jest.Mock).mockResolvedValue(mockGameDocument);
-
-    //         const result = await service.createGame(mockCreateGameDto);
-
-    //         expect(gameModel.create).toHaveBeenCalledWith(mockCreateGameDto);
-    //         expect(result).toEqual({
-    //             id: mockObjectId.toString(),
-    //             name: mockGameDocument.name,
-    //             description: mockGameDocument.description,
-    //             size: mockGameDocument.size,
-    //             mode: mockGameDocument.mode,
-    //             lastModified: mockGameDocument.lastModified,
-    //             visibility: mockGameDocument.visibility,
-    //         });
-    //     });
-    // });
-
     describe('getGames', () => {
         it('should return array of GamePreviewDto', async () => {
             const mockGameDocument = createMockGameDocument();
@@ -113,7 +94,7 @@ describe('GameStoreService', () => {
             const result = await service.getGames();
 
             expect(gameModel.find).toHaveBeenCalledWith({ draft: false }, getProjection('displayGameDto'));
-            expect(mockQuery.sort).toHaveBeenCalledWith({ createdAt: -1 }); // <-- assert sort
+            expect(mockQuery.sort).toHaveBeenCalledWith({ createdAt: -1 });
             expect(mockQuery.lean).toHaveBeenCalled();
 
             expect(result).toHaveLength(1);
@@ -130,14 +111,48 @@ describe('GameStoreService', () => {
 
         it('should return empty array when no games exist', async () => {
             const mockQuery = {
-                sort: jest.fn().mockReturnThis(), // allows chaining
-                lean: jest.fn().mockResolvedValue([]), // resolves to empty array
+                sort: jest.fn().mockReturnThis(), 
+                lean: jest.fn().mockResolvedValue([]),
             };
             (gameModel.find as jest.Mock).mockReturnValue(mockQuery);
 
             const result = await service.getGames();
 
             expect(result).toEqual([]);
+        });
+    });
+
+    describe('createGame', () => {
+        it('should create a new draft when no existing draft', async () => {
+            const mockGameDocument = createMockGameDocument();
+
+            (gameModel.findOne as jest.Mock).mockResolvedValue(null);
+            (gameModel.create as jest.Mock).mockResolvedValue(mockGameDocument);
+
+            const result = await service.createGame(mockCreateGameDto);
+
+            expect(gameModel.findOne).toHaveBeenCalledWith({ draft: true });
+            expect(gameModel.create).toHaveBeenCalled();
+            expect(result).toEqual(
+                expect.objectContaining({
+                    id: mockObjectId.toString(),
+                    name: mockGameDocument.name,
+                }),
+            );
+        });
+
+        it('should update existing draft when one exists', async () => {
+            const existingDraft = createMockGameDocument({ draft: true });
+            const updatedDraft = { ...existingDraft, name: 'Draft Updated' } as Partial<GameDocument>;
+
+            (gameModel.findOne as jest.Mock).mockResolvedValue(existingDraft);
+            (gameModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(updatedDraft);
+
+            const result = await service.createGame(mockCreateGameDto);
+
+            expect(gameModel.findOne).toHaveBeenCalledWith({ draft: true });
+            expect(gameModel.findByIdAndUpdate).toHaveBeenCalled();
+            expect(result).toEqual(expect.objectContaining({ id: mockObjectId.toString(), name: updatedDraft.name }));
         });
     });
 
@@ -198,9 +213,30 @@ describe('GameStoreService', () => {
         });
 
         it('should throw NotFoundException when game not found', async () => {
-            (gameModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(null);
+            (gameModel.findById as jest.Mock).mockResolvedValue(null);
 
             await expect(service.updateGame('nonexistent-id', mockUpdateGameDto)).rejects.toThrow(new NotFoundException('Game not found'));
+        });
+
+        it('should delete previous image when updating game with existing gridPreviewUrl', async () => {
+            const mockGameDocument = createMockGameDocument({ gridPreviewUrl: 'old-image-url' });
+            const mockImageService = module.get(ImageService);
+            const updatedGame = { ...mockGameDocument, ...mockUpdateGameDto, lastModified: new Date() };
+
+            (gameModel.findById as jest.Mock).mockResolvedValue(mockGameDocument);
+            (mockImageService.saveImage as jest.Mock).mockResolvedValue('new-image-url');
+            (mockImageService.deleteImage as jest.Mock).mockResolvedValue(undefined);
+            (gameModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(updatedGame);
+
+            const result = await service.updateGame(mockObjectId.toString(), mockUpdateGameDto);
+
+            expect(mockImageService.deleteImage).toHaveBeenCalledWith(mockGameDocument.gridPreviewUrl);
+            expect(mockImageService.saveImage).toHaveBeenCalledWith(
+                mockUpdateGameDto.gridPreviewImage,
+                expect.stringContaining(`${mockUpdateGameDto.name}-`),
+                'grid-previews',
+            );
+            expect(result).toEqual(expect.objectContaining({ name: mockUpdateGameDto.name }));
         });
     });
 
@@ -213,6 +249,21 @@ describe('GameStoreService', () => {
 
             await service.deleteGame(mockObjectId.toString());
 
+            expect(gameModel.deleteOne).toHaveBeenCalledWith({ _id: mockObjectId.toString() });
+        });
+
+        it('should delete associated image when gridPreviewUrl exists', async () => {
+            const mockGameDocument = createMockGameDocument({ gridPreviewUrl: 'to-delete-url' });
+            const mockImageService = module.get(ImageService);
+            const mockResult = { deletedCount: 1 };
+
+            (gameModel.findById as jest.Mock).mockResolvedValue(mockGameDocument);
+            (mockImageService.deleteImage as jest.Mock).mockResolvedValue(undefined);
+            (gameModel.deleteOne as jest.Mock).mockResolvedValue(mockResult);
+
+            await service.deleteGame(mockObjectId.toString());
+
+            expect(mockImageService.deleteImage).toHaveBeenCalledWith(mockGameDocument.gridPreviewUrl);
             expect(gameModel.deleteOne).toHaveBeenCalledWith({ _id: mockObjectId.toString() });
         });
 

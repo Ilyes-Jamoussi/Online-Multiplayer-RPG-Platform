@@ -1,24 +1,31 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
-import { GameEditorStoreService } from './game-editor-store.service';
-import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { GameEditorDto } from '@app/dto/gameEditorDto';
+import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
+import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
+import { GamePreviewDto } from '@app/dto/gamePreviewDto';
 import { PatchGameEditorDto } from '@app/dto/patchGameEditorDto';
+import { GameHttpService } from '@app/services/game-http/game-http.service';
+import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
+import { GameEditorStoreService } from './game-editor-store.service';
 
 const testConstants = {
     gridSize3: 3,
-    gridSize4: 4
+    gridSize4: 4,
 };
-import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
-import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
+
+const TILE_SIZE_PX = 42;
+const NON_EXISTENT_COORD = 5;
 
 describe('GameEditorStoreService', () => {
     let service: GameEditorStoreService;
     let http: jasmine.SpyObj<GameHttpService>;
+    let store: jasmine.SpyObj<GameStoreService>;
 
     const size = MapSize.MEDIUM;
     const mkGrid = (n: number, fill: TileKind = TileKind.BASE): GameEditorTileDto[] =>
@@ -45,8 +52,10 @@ describe('GameEditorStoreService', () => {
     beforeEach(() => {
         http = jasmine.createSpyObj<GameHttpService>('GameHttpService', ['getGameEditorById', 'patchGameEditorById']);
 
+        store = jasmine.createSpyObj<GameStoreService>('GameStoreService', ['createGame']);
+
         TestBed.configureTestingModule({
-            providers: [GameEditorStoreService, { provide: GameHttpService, useValue: http }],
+            providers: [GameEditorStoreService, { provide: GameHttpService, useValue: http }, { provide: GameStoreService, useValue: store }],
         });
 
         service = TestBed.inject(GameEditorStoreService);
@@ -244,6 +253,130 @@ describe('GameEditorStoreService', () => {
             expect(service.tiles()[0].kind).toBe(TileKind.BASE);
             expect(service.size()).toBe(initialDto.size);
             expect(service.objects()).toEqual(initialDto.objects);
+        });
+    });
+
+    describe('placed objects, inventory and misc setters', () => {
+        it('computes placedObjects and inventory correctly and setters work', () => {
+            const objs: GameEditorPlaceableDto[] = [
+                { id: 'p1', kind: PlaceableKind.START, x: 1, y: 1, placed: true, orientation: 'N' },
+                { id: 'p2', kind: PlaceableKind.FLAG, x: -1, y: -1, placed: false, orientation: 'N' },
+                { id: 'p3', kind: PlaceableKind.HEAL, x: -1, y: -1, placed: false, orientation: 'N' },
+            ];
+
+            http.getGameEditorById.and.returnValue(of({ ...initialDto, objects: objs } as GameEditorDto));
+            service.loadGameById(initialDto.id);
+
+            const placed = service.placedObjects;
+            expect(placed.length).toBe(1);
+            expect(placed[0].id).toBe('p1');
+            expect(placed[0].xs).toContain(1);
+            expect(placed[0].ys).toContain(1);
+
+            const inv = service.inventory();
+            const startIndex = inv.findIndex((i) => i.kind === PlaceableKind.START);
+            const flagIndex = inv.findIndex((i) => i.kind === PlaceableKind.FLAG);
+            const healIndex = inv.findIndex((i) => i.kind === PlaceableKind.HEAL);
+            expect(startIndex).not.toBe(-1);
+            expect(flagIndex).not.toBe(-1);
+            expect(healIndex).not.toBe(-1);
+            const startEntry = inv[startIndex];
+            const flagEntry = inv[flagIndex];
+            const healEntry = inv[healIndex];
+            expect(startEntry.total).toBe(1);
+            expect(startEntry.remaining).toBe(0);
+            expect(flagEntry.total).toBe(1);
+            expect(flagEntry.remaining).toBe(1);
+            expect(healEntry.total).toBe(1);
+            expect(healEntry.remaining).toBe(1);
+
+            service.setName('abc');
+            expect(service.name).toBe('abc');
+            service.setDescription('desc');
+            expect(service.description).toBe('desc');
+            service.description = 'desc2';
+            expect(service.description).toBe('desc2');
+
+            service.tileSizePx = TILE_SIZE_PX;
+            expect(service.tileSizePx).toBe(TILE_SIZE_PX);
+        });
+
+        it('saveGame fallback: when patch fails createGame is used and patch retried with new id', () => {
+            http.getGameEditorById.and.returnValue(of(initialDto));
+            service.loadGameById(initialDto.id);
+
+            http.patchGameEditorById.and.returnValue(throwError(() => new Error('server down')));
+
+            const newGamePreview: GamePreviewDto = { id: 'new-game-123', draft: true, visibility: false, name: 'x' } as GamePreviewDto;
+            store.createGame.and.returnValue(of(newGamePreview));
+
+            const patched = { ...initialDto, id: newGamePreview.id } as GameEditorDto;
+            http.patchGameEditorById.and.callFake((id: string, body: PatchGameEditorDto) => {
+                if (id === initialDto.id) {
+                    return throwError(() => new Error('first-fail'));
+                }
+                expect(body.tiles).toBeDefined();
+                expect(body.objects).toBeDefined();
+                return of(patched);
+            });
+
+            service.saveGame('data:image/png;base64,abc');
+
+            expect(store.createGame).toHaveBeenCalledTimes(1);
+            expect(http.patchGameEditorById).toHaveBeenCalled();
+            expect(service.initial().id).toBe(newGamePreview.id);
+        });
+
+        it('place/move/remove/getPlacedObjectAt behave correctly', () => {
+            const objs: GameEditorPlaceableDto[] = [
+                { id: 'a', kind: PlaceableKind.START, x: -1, y: -1, placed: false, orientation: 'N' },
+                { id: 'b', kind: PlaceableKind.FLAG, x: -1, y: -1, placed: false, orientation: 'N' },
+            ];
+            http.getGameEditorById.and.returnValue(of({ ...initialDto, objects: objs } as GameEditorDto));
+            service.loadGameById(initialDto.id);
+
+            service.placeObject(PlaceableKind.START, 2, 2);
+            const aIndex = service.objects().findIndex((o) => o.id === 'a');
+            expect(aIndex).not.toBe(-1);
+            expect(service.objects()[aIndex].placed).toBeTrue();
+            const placed = service.getPlacedObjectAt(2, 2);
+            expect(placed).toBeDefined();
+            expect(placed?.id).toBe('a');
+
+            service.moveObject('b', 1, 1);
+            const bIndex = service.objects().findIndex((o) => o.id === 'b');
+            expect(bIndex).not.toBe(-1);
+            const bObj = service.objects()[bIndex];
+            expect(bObj.x).toBe(1);
+            expect(bObj.y).toBe(1);
+            expect(bObj.placed).toBeTrue();
+
+            service.removeObject('a');
+            const aIndex2 = service.objects().findIndex((o) => o.id === 'a');
+            expect(aIndex2).not.toBe(-1);
+            const aObj = service.objects()[aIndex2];
+            expect(aObj.x).toBe(-1);
+            expect(aObj.y).toBe(-1);
+            expect(aObj.placed).toBeFalse();
+        });
+
+        it('no-op when target object or kind is missing (covers early returns)', () => {
+            const objs: GameEditorPlaceableDto[] = [
+                { id: 'only-one', kind: PlaceableKind.START, x: -1, y: -1, placed: false, orientation: 'N' },
+            ];
+            http.getGameEditorById.and.returnValue(of({ ...initialDto, objects: objs } as GameEditorDto));
+            service.loadGameById(initialDto.id);
+
+            const before = service.objects();
+
+            service.placeObject(PlaceableKind.FLAG, 0, 0);
+            expect(service.objects()).toEqual(before);
+
+            service.moveObject('no-such-id', NON_EXISTENT_COORD, NON_EXISTENT_COORD);
+            expect(service.objects()).toEqual(before);
+
+            service.removeObject('no-such-id');
+            expect(service.objects()).toEqual(before);
         });
     });
 });

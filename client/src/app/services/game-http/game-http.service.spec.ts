@@ -1,13 +1,16 @@
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { CreateGameDto } from '@app/dto/createGameDto';
+import { GameEditorDto } from '@app/dto/gameEditorDto';
+import { GameInitDto } from '@app/dto/gameInitDto';
+import { GamePreviewDto } from '@app/dto/gamePreviewDto';
+import { PatchGameEditorDto } from '@app/dto/patchGameEditorDto';
+import { ToggleVisibilityDto } from '@app/dto/toggleVisibilityDto';
+import { UpdateGameDto } from '@app/dto/updateGameDto';
 import { API_PATHS } from '@common/constants/api-paths';
 import { environment } from 'src/environments/environment';
 import { GameHttpService } from './game-http.service';
-import { GamePreviewDto } from '@app/dto/gamePreviewDto';
-import { CreateGameDto } from '@app/dto/createGameDto';
-import { GameInitDto } from '@app/dto/gameInitDto';
-import { ToggleVisibilityDto } from '@app/dto/toggleVisibilityDto';
 
 describe('GameHttpService', () => {
     let service: GameHttpService;
@@ -87,6 +90,72 @@ describe('GameHttpService', () => {
             const req = httpMock.expectOne(gamesEndpoint);
             expect(req.request.method).toBe('POST');
             expect(req.request.body).toEqual(createDto);
+            req.flush(null);
+        });
+    });
+
+    describe('getGameEditorById', () => {
+        it('should return game editor dto for id', () => {
+            const id = 'editor-1';
+            const mockEditor: GameEditorDto = {
+                id,
+                name: 'Editor Name',
+                description: 'Editor Desc',
+                size: 10,
+                mode: 'classic',
+                grid: [],
+                inventory: [],
+            } as unknown as GameEditorDto;
+
+            service.getGameEditorById(id).subscribe((editor) => {
+                expect(editor).toEqual(mockEditor);
+            });
+
+            const req = httpMock.expectOne(`${gamesEndpoint}/${id}/editor/`);
+            expect(req.request.method).toBe('GET');
+            req.flush(mockEditor);
+        });
+    });
+
+    describe('patchGameEditorById', () => {
+        it('should patch editor and return updated dto', () => {
+            const id = 'editor-2';
+            const dto: PatchGameEditorDto = { name: 'Patched' } as unknown as PatchGameEditorDto;
+            const updated: GameEditorDto = (
+                {
+                    id,
+                    name: dto.name,
+                    description: 'd',
+                    size: 10,
+                    mode: 'classic',
+                    grid: [],
+                    inventory: [],
+                } as unknown
+            ) as GameEditorDto;
+
+            service.patchGameEditorById(id, dto).subscribe((resp) => {
+                expect(resp).toEqual(updated);
+            });
+
+            const req = httpMock.expectOne(`${gamesEndpoint}/${id}/editor/`);
+            expect(req.request.method).toBe('PATCH');
+            expect(req.request.body).toEqual(dto);
+            req.flush(updated);
+        });
+    });
+
+    describe('updateGame', () => {
+        it('should update game and return void', () => {
+            const id = 'upd-1';
+            const dto: UpdateGameDto = ({ name: 'New' } as unknown) as UpdateGameDto;
+
+            service.updateGame(id, dto).subscribe((r) => {
+                expect(r).toBeNull();
+            });
+
+            const req = httpMock.expectOne(`${gamesEndpoint}/${id}`);
+            expect(req.request.method).toBe('PATCH');
+            expect(req.request.body).toEqual(dto);
             req.flush(null);
         });
     });
