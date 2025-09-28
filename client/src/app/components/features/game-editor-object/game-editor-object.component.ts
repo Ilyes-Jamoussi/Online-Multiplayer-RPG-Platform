@@ -9,8 +9,8 @@ import { ToolType } from '@app/interfaces/game-editor.interface';
     selector: 'app-editor-placed-object',
     standalone: true,
     imports: [CommonModule],
-    templateUrl: './object.component.html',
-    styleUrls: ['./object.component.scss'],
+    templateUrl: './game-editor-object.component.html',
+    styleUrls: ['./game-editor-object.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GameEditorObjectComponent {

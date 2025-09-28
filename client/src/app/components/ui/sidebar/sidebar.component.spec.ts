@@ -16,7 +16,6 @@ describe('UiSidebarComponent', () => {
         fixture.detectChanges();
     });
 
-
     it('should emit menuItemClick with ROUTES.home when onMenuItemClick is called', (done) => {
         const expected = ROUTES.home;
         component.menuItemClick.subscribe((value: string) => {

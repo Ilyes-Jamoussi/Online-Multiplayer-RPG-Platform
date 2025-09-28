@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AccesibilityIssue, EditorIssue, GameEditorIssuesEnum } from '@app/interfaces/game-editor.interface';
+import { AccesibilityIssue, GameEditorIssue, GameEditorIssuesEnum } from '@app/interfaces/game-editor.interface';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { ErrorsBadgeComponent } from './errors-badge.component';
@@ -12,14 +12,14 @@ class StubCharacterCreationCheckService {
 }
 
 class StubGameEditorCheckService {
-    private problems: Record<string, EditorIssue | AccesibilityIssue> = {};
+    private problems: Record<string, GameEditorIssue | AccesibilityIssue> = {};
 
     constructor() {
         for (const k of Object.values(GameEditorIssuesEnum)) {
             if (k === GameEditorIssuesEnum.Doors || k === GameEditorIssuesEnum.TerrainAccessibility) {
                 this.problems[k as GameEditorIssuesEnum] = { hasIssue: false, tiles: [] } as AccesibilityIssue;
             } else {
-                this.problems[k as GameEditorIssuesEnum] = { hasIssue: false } as EditorIssue;
+                this.problems[k as GameEditorIssuesEnum] = { hasIssue: false } as GameEditorIssue;
             }
         }
     }
@@ -28,11 +28,11 @@ class StubGameEditorCheckService {
         if (issue === GameEditorIssuesEnum.Doors || issue === GameEditorIssuesEnum.TerrainAccessibility) {
             this.problems[issue] = { hasIssue: !!message, message, tiles: [] } as AccesibilityIssue;
         } else {
-            this.problems[issue] = { hasIssue: !!message, message } as EditorIssue;
+            this.problems[issue] = { hasIssue: !!message, message } as GameEditorIssue;
         }
     }
 
-    editorProblems(): Record<string, EditorIssue | AccesibilityIssue> {
+    editorProblems(): Record<string, GameEditorIssue | AccesibilityIssue> {
         return this.problems;
     }
 }
@@ -84,8 +84,8 @@ describe('ErrorsBadgeComponent', () => {
         component.validationType = 'game-editor';
 
         const expected = Object.values(GameEditorIssuesEnum)
-            .map((k) => editorStub.editorProblems()[k] as EditorIssue | AccesibilityIssue | undefined)
-            .filter((p): p is EditorIssue | AccesibilityIssue => !!p && p.hasIssue && !!p.message)
+            .map((k) => editorStub.editorProblems()[k] as GameEditorIssue | AccesibilityIssue | undefined)
+            .filter((p): p is GameEditorIssue | AccesibilityIssue => !!p && p.hasIssue && !!p.message)
             .map((p) => p.message as string);
 
         expect(component.errorList).toEqual(expected);
@@ -93,4 +93,3 @@ describe('ErrorsBadgeComponent', () => {
         expect(component.hasErrors).toBeTrue();
     });
 });
-

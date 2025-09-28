@@ -48,7 +48,6 @@ describe('placeable.factory', () => {
         const outClassic = makeDefaultPlaceables(size, GameMode.CLASSIC);
         const outCtf = makeDefaultPlaceables(size, GameMode.CTF);
 
-
         const baseClassic = PLACEABLE_COUNTS[size] ?? {};
         const flagExtra = FLAG_COUNTS[GameMode.CTF]?.[size] ?? {};
 

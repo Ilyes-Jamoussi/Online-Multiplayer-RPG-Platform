@@ -39,7 +39,8 @@ export class CharacterCreationCheckService {
         if (name.length < NAME_MIN_LENGTH || name.length > CHARACTER_NAME_MAX_LENGTH || name.replace(WHITESPACE_PATTERN, '').length === 0) {
             return {
                 hasIssue: true,
-                message: `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${CHARACTER_NAME_MAX_LENGTH} caractères ` +
+                message:
+                    `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${CHARACTER_NAME_MAX_LENGTH} caractères ` +
                     `et ne pas être composé uniquement d'espaces.`,
             };
         }

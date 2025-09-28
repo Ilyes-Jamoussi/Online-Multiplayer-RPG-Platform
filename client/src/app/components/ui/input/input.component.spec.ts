@@ -80,7 +80,7 @@ describe('UiInputComponent', () => {
 
         it('should handle space-dot replacement', () => {
             spyOn(component.valueChange, 'emit');
-            
+
             inputElement.value = 'test. ';
             inputElement.dispatchEvent(new Event('input'));
 
@@ -91,7 +91,7 @@ describe('UiInputComponent', () => {
         it('should filter invalid characters on input for text type', () => {
             component.type = 'text';
             spyOn(component.valueChange, 'emit');
-            
+
             inputElement.value = 'test123!@#';
             inputElement.dispatchEvent(new Event('input'));
 
@@ -102,7 +102,7 @@ describe('UiInputComponent', () => {
         it('should filter invalid characters on input for number type', () => {
             component.type = 'number';
             spyOn(component.valueChange, 'emit');
-            
+
             inputElement.value = '123abc456';
             inputElement.dispatchEvent(new Event('input'));
 
@@ -119,30 +119,30 @@ describe('UiInputComponent', () => {
 
         it('should allow valid text characters', () => {
             const validChars = ['a', 'A', 'é', 'À', '-', "'"];
-            
-            validChars.forEach(char => {
+
+            validChars.forEach((char) => {
                 const mockInput = { selectionStart: 1, selectionEnd: 1, value: 'test' } as HTMLInputElement;
                 const event = new KeyboardEvent('keydown', { key: char });
                 Object.defineProperty(event, 'target', { value: mockInput });
                 spyOn(event, 'preventDefault');
-                
+
                 component.onKeyDown(event);
-                
+
                 expect(event.preventDefault).not.toHaveBeenCalled();
             });
         });
 
         it('should prevent invalid text characters', () => {
             const invalidChars = ['1', '!', '@', '#'];
-            
-            invalidChars.forEach(char => {
+
+            invalidChars.forEach((char) => {
                 const mockInput = { selectionStart: 1, selectionEnd: 1, value: 'test' } as HTMLInputElement;
                 const event = new KeyboardEvent('keydown', { key: char });
                 Object.defineProperty(event, 'target', { value: mockInput });
                 spyOn(event, 'preventDefault');
-                
+
                 component.onKeyDown(event);
-                
+
                 expect(event.preventDefault).toHaveBeenCalled();
             });
         });
@@ -152,9 +152,9 @@ describe('UiInputComponent', () => {
             const event = new KeyboardEvent('keydown', { key: ' ' });
             Object.defineProperty(event, 'target', { value: mockInput });
             spyOn(event, 'preventDefault');
-            
+
             component.onKeyDown(event);
-            
+
             expect(event.preventDefault).toHaveBeenCalled();
         });
 
@@ -163,9 +163,9 @@ describe('UiInputComponent', () => {
             const event = new KeyboardEvent('keydown', { key: ' ' });
             Object.defineProperty(event, 'target', { value: mockInput });
             spyOn(event, 'preventDefault');
-            
+
             component.onKeyDown(event);
-            
+
             expect(event.preventDefault).toHaveBeenCalled();
         });
 
@@ -174,9 +174,9 @@ describe('UiInputComponent', () => {
             const event = new KeyboardEvent('keydown', { key: ' ' });
             Object.defineProperty(event, 'target', { value: mockInput });
             spyOn(event, 'preventDefault');
-            
+
             component.onKeyDown(event);
-            
+
             expect(event.preventDefault).not.toHaveBeenCalled();
         });
     });
@@ -189,30 +189,30 @@ describe('UiInputComponent', () => {
 
         it('should allow valid number characters', () => {
             const validChars = ['0', '1', '2', '9'];
-            
-            validChars.forEach(char => {
+
+            validChars.forEach((char) => {
                 const mockInput = { selectionStart: 1, selectionEnd: 1, value: '123' } as HTMLInputElement;
                 const event = new KeyboardEvent('keydown', { key: char });
                 Object.defineProperty(event, 'target', { value: mockInput });
                 spyOn(event, 'preventDefault');
-                
+
                 component.onKeyDown(event);
-                
+
                 expect(event.preventDefault).not.toHaveBeenCalled();
             });
         });
 
         it('should prevent invalid number characters', () => {
             const invalidChars = ['a', 'A', '-', "'", '!'];
-            
-            invalidChars.forEach(char => {
+
+            invalidChars.forEach((char) => {
                 const mockInput = { selectionStart: 1, selectionEnd: 1, value: '123' } as HTMLInputElement;
                 const event = new KeyboardEvent('keydown', { key: char });
                 Object.defineProperty(event, 'target', { value: mockInput });
                 spyOn(event, 'preventDefault');
-                
+
                 component.onKeyDown(event);
-                
+
                 expect(event.preventDefault).toHaveBeenCalled();
             });
         });
@@ -222,9 +222,9 @@ describe('UiInputComponent', () => {
             const event = new KeyboardEvent('keydown', { key: ' ' });
             Object.defineProperty(event, 'target', { value: mockInput });
             spyOn(event, 'preventDefault');
-            
+
             component.onKeyDown(event);
-            
+
             expect(event.preventDefault).toHaveBeenCalled();
         });
     });
@@ -232,15 +232,15 @@ describe('UiInputComponent', () => {
     describe('Special Key Handling', () => {
         it('should allow control keys', () => {
             const controlKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
-            
-            controlKeys.forEach(key => {
+
+            controlKeys.forEach((key) => {
                 const mockInput = { selectionStart: 1, selectionEnd: 1, value: 'test' } as HTMLInputElement;
                 const event = new KeyboardEvent('keydown', { key });
                 Object.defineProperty(event, 'target', { value: mockInput });
                 spyOn(event, 'preventDefault');
-                
+
                 component.onKeyDown(event);
-                
+
                 expect(event.preventDefault).not.toHaveBeenCalled();
             });
         });
@@ -250,9 +250,9 @@ describe('UiInputComponent', () => {
             const event = new KeyboardEvent('keydown', { key: ' ' });
             Object.defineProperty(event, 'target', { value: mockInput });
             spyOn(event, 'preventDefault');
-            
+
             component.onKeyDown(event);
-            
+
             expect(event.preventDefault).not.toHaveBeenCalled();
         });
 
@@ -261,9 +261,9 @@ describe('UiInputComponent', () => {
             const event = new KeyboardEvent('keydown', { key: ' ' });
             Object.defineProperty(event, 'target', { value: mockInput });
             spyOn(event, 'preventDefault');
-            
+
             component.onKeyDown(event);
-            
+
             expect(event.preventDefault).toHaveBeenCalled();
         });
     });

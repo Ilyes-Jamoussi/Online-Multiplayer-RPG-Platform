@@ -17,7 +17,6 @@ export class UiHeaderComponent {
 
     constructor(private readonly location: Location) {}
 
-
     onBack(): void {
         if (this.backClick.observed) {
             this.backClick.emit();
@@ -26,4 +25,3 @@ export class UiHeaderComponent {
         }
     }
 }
-

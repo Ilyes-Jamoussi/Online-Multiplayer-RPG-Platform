@@ -15,10 +15,10 @@ import { DraggablePanelComponent } from '@app/components/ui/draggable-panel/drag
 import { UiInputComponent } from '@app/components/ui/input/input.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { distinctUntilChanged, filter, map, Subject, takeUntil, tap } from 'rxjs';
-import { GameEditorInventoryComponent } from '@app/components/features/inventory/game-editor-inventory.component';
-import { GameEditorObjectComponent } from '@app/components/features/object/object.component';
-import { GameEditorTileComponent } from '@app/components/features/tile/game-editor-tile.component';
-import { GameEditorToolbarComponent } from '@app/components/features/toolbar/game-editor-toolbar.component';
+import { GameEditorInventoryComponent } from '@app/components/features/game-editor-inventory/game-editor-inventory.component';
+import { GameEditorObjectComponent } from '@app/components/features/game-editor-object/game-editor-object.component';
+import { GameEditorTileComponent } from '@app/components/features/game-editor-tile/game-editor-tile.component';
+import { GameEditorToolbarComponent } from '@app/components/features/game-editor-toolbar/game-editor-toolbar.component';
 import { TileSizeProbeDirective } from '@app/directives/tile-size-probe.directive';
 import { ToolType } from '@app/interfaces/game-editor.interface';
 

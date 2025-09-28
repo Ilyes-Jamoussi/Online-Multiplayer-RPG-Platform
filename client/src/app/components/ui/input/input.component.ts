@@ -48,7 +48,7 @@ export class UiInputComponent {
         let value = input.value;
 
         if (value.endsWith('. ')) {
-            value = value.slice(0, - SPACE_DOT_LENGTH) + ' ';
+            value = value.slice(0, -SPACE_DOT_LENGTH) + ' ';
             input.value = value;
         }
 
@@ -64,11 +64,7 @@ export class UiInputComponent {
     }
 
     private isSpaceInvalid(value: string, hasSelection: boolean, selectionStart: number): boolean {
-        return (
-            this.type === 'number' ||
-            (!hasSelection && (value.length === 0 || value.endsWith(' '))) ||
-            (hasSelection && selectionStart === 0)
-        );
+        return this.type === 'number' || (!hasSelection && (value.length === 0 || value.endsWith(' '))) || (hasSelection && selectionStart === 0);
     }
 
     private filterInvalidChars(value: string): string {

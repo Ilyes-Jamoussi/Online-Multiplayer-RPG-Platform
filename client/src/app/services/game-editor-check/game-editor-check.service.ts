@@ -1,6 +1,6 @@
 import { computed, Injectable } from '@angular/core';
 import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
-import { AccesibilityIssue, EditorIssue, GameEditorIssues } from '@app/interfaces/game-editor.interface';
+import { AccesibilityIssue, GameEditorIssue, GameEditorIssues } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import {
     NAME_MIN_LENGTH,
@@ -81,8 +81,8 @@ export class GameEditorCheckService {
         );
     }
 
-    private checkAllStartPlaced(): EditorIssue {
-        const problem: EditorIssue = { hasIssue: false };
+    private checkAllStartPlaced(): GameEditorIssue {
+        const problem: GameEditorIssue = { hasIssue: false };
         const inventory = this.gameEditorStoreService.inventory();
         const startItem = inventory.START;
         if (startItem && startItem.remaining > 0) {
@@ -92,8 +92,8 @@ export class GameEditorCheckService {
         return problem;
     }
 
-    private checkAllFlagPlaced(): EditorIssue {
-        const problem: EditorIssue = { hasIssue: false };
+    private checkAllFlagPlaced(): GameEditorIssue {
+        const problem: GameEditorIssue = { hasIssue: false };
         if (this.gameEditorStoreService.mode() === GameMode.CTF) {
             const inventory = this.gameEditorStoreService.inventory();
             const flagItem = inventory.FLAG;
@@ -134,12 +134,12 @@ export class GameEditorCheckService {
         return probs;
     }
 
-    private checkTerrainCoverage(tiles: GameEditorTileDto[]): EditorIssue {
+    private checkTerrainCoverage(tiles: GameEditorTileDto[]): GameEditorIssue {
         const size = this.gameEditorStoreService.size();
         const total = size * size;
         const terrainCount = tiles.filter((t) => this.isTerrain(t.kind)).length;
         const ratio = terrainCount / total;
-        const probs: EditorIssue = { hasIssue: false };
+        const probs: GameEditorIssue = { hasIssue: false };
         if (ratio <= GameEditorCheckService.minTerrainRatio) {
             probs.hasIssue = true;
             probs.message = `Le ratio de tuiles de terrain est trop bas (${(ratio * GameEditorCheckService.percentBase).toFixed(
@@ -232,7 +232,7 @@ export class GameEditorCheckService {
         return probs;
     }
 
-    private checkNameValidation(): EditorIssue {
+    private checkNameValidation(): GameEditorIssue {
         const name = this.gameEditorStoreService.name.trim();
         return name.length < NAME_MIN_LENGTH || name.length > GAME_NAME_MAX_LENGTH || name.replace(WHITESPACE_PATTERN, '').length === 0
             ? {
@@ -244,7 +244,7 @@ export class GameEditorCheckService {
             : { hasIssue: false };
     }
 
-    private checkDescriptionValidation(): EditorIssue {
+    private checkDescriptionValidation(): GameEditorIssue {
         const description = this.gameEditorStoreService.description.trim();
         return description.length < DESCRIPTION_MIN_LENGTH ||
             description.length > DESCRIPTION_MAX_LENGTH ||
