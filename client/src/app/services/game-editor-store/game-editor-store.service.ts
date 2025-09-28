@@ -15,7 +15,6 @@ import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.
 import { DEFAULT_DRAFT_GAME_NAME, DEFAULT_DRAFT_GAME_DESCRIPTION } from '@common/constants/game.constants';
 
 interface ExtendedGameEditorPlaceableDto extends GameEditorPlaceableDto {
-    // Additional fields if needed
     xs: number[];
     ys: number[];
 }
@@ -44,7 +43,6 @@ export class GameEditorStoreService {
 
     private readonly _tileSizePx = signal<number>(0);
 
-    /** Placed objects in the editor with extended coordinates (if footprint > 1 need to add more x y coordinates) */
     get placedObjects(): ExtendedGameEditorPlaceableDto[] {
         const objs = this._objects();
         const placed = objs.filter((o) => o.placed);
@@ -75,7 +73,6 @@ export class GameEditorStoreService {
         return acc;
     }
 
-    /** Unplaced objects in the editor */
     readonly inventory = computed<InventoryItem[]>(() => {
         const objs = this._objects();
         const acc = new Map<PlaceableKind, { total: number; remaining: number }>();
