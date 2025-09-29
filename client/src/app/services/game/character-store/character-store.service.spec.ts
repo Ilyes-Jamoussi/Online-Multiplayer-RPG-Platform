@@ -192,17 +192,17 @@ describe('CharacterStoreService', () => {
     });
 
     it('should update attributes when bonus is speed', () => {
-        service.setBonus('speed');
+        service.setBonus(BonusType.Speed);
         const c = service.character();
         expect(c.attributes.life).toBe(CHARACTER_BASE);
         expect(c.attributes.speed).toBe(CHARACTER_BASE + CHARACTER_PLUS);
     });
 
     it('should set dice assignment when setting defense to D4', () => {
-        service.setDice('defense', 'D4');
+        service.setDice('defense', DiceType.D4);
         const c = service.character();
-        expect(c.diceAssignment.defense).toBe('D4');
-        expect(c.diceAssignment.attack).toBe('D6');
+        expect(c.diceAssignment.defense).toBe(DiceType.D4);
+        expect(c.diceAssignment.attack).toBe(DiceType.D6);
     });
 
     it('generateRandom should set bonus to speed when random >= threshold', () => {
@@ -213,6 +213,6 @@ describe('CharacterStoreService', () => {
         spyOn(Math, 'random').and.returnValues(rName, rAvatar, rBonus, rDice);
 
         service.generateRandom();
-        expect(service.character().bonus).toBe('speed');
+        expect(service.character().bonus).toBe(BonusType.Speed);
     });
 });
