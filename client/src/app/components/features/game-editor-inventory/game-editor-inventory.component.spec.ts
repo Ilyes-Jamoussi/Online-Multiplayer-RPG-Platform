@@ -45,8 +45,6 @@ function makeDragEvent(init?: DragEvtInit): DragEvent {
     return evt;
 }
 
-/* -------------------------------------------------------------------------- */
-
 const MOCK_TILE_SIZE = 64;
 
 describe('GameEditorInventoryComponent', () => {
@@ -70,7 +68,6 @@ describe('GameEditorInventoryComponent', () => {
         tileSize = MOCK_TILE_SIZE;
         activeToolState = null;
 
-        // IMPORTANT: donner au moins un nom de méthode (dummy) pour éviter l’erreur Jasmine
         storeSpy = jasmine.createSpyObj<GameEditorStoreService>('GameEditorStoreService', ['tileSizePx', 'inventory']);
         interactionsSpy = jasmine.createSpyObj<GameEditorInteractionsService>('GameEditorInteractionsService', [
             'setupObjectDrag',
@@ -78,7 +75,6 @@ describe('GameEditorInventoryComponent', () => {
             'removeObject',
         ]);
 
-        // Propriétés définies via defineProperty (getters/setters)
         Object.defineProperty(storeSpy, 'inventory', {
             get: (): Signal<Inventory> => invSig,
             configurable: true,
