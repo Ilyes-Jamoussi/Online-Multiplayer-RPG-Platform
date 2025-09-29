@@ -1,4 +1,3 @@
-// game-editor-object.component.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameEditorObjectComponent } from './game-editor-object.component';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
@@ -62,7 +61,7 @@ function makeMouseEvent(init?: MouseEvtInit): MouseEvent {
     return evt;
 }
 
-describe('GameEditorObjectComponent (with Jasmine spies)', () => {
+describe('GameEditorObjectComponent', () => {
     let fixture: ComponentFixture<GameEditorObjectComponent>;
     let component: GameEditorObjectComponent;
 

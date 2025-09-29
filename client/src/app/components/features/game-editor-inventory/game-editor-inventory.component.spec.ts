@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-// game-editor-inventory.component.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameEditorInventoryComponent } from './game-editor-inventory.component';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
@@ -7,10 +6,6 @@ import { GameEditorInteractionsService } from '@app/services/game-editor-interac
 import { ActiveTool, Inventory, ToolType } from '@app/interfaces/game-editor.interface';
 import { PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
 import { Signal, signal } from '@angular/core';
-
-/* -------------------------------------------------------------------------- */
-/* Helpers factorisés                                                         */
-/* -------------------------------------------------------------------------- */
 
 const NOOP = (): void => {
     /** no-op */
@@ -24,15 +19,9 @@ function createDataTransferStub(types: readonly string[], data: Readonly<Record<
         items: {} as DataTransferItemList,
         types: Array.from(types),
         getData: (format: string): string => data[format] ?? '',
-        setData: (): void => {
-            /** no-op */
-        },
-        clearData: (): void => {
-            /** no-op */
-        },
-        setDragImage: (): void => {
-            /** no-op */
-        },
+        setData: NOOP,
+        clearData: NOOP,
+        setDragImage: NOOP,
     } as unknown as DataTransfer;
 
     return dt;
@@ -60,7 +49,7 @@ function makeDragEvent(init?: DragEvtInit): DragEvent {
 
 const MOCK_TILE_SIZE = 64;
 
-describe('GameEditorInventoryComponent (with Jasmine spies)', () => {
+describe('GameEditorInventoryComponent', () => {
     let fixture: ComponentFixture<GameEditorInventoryComponent>;
     let component: GameEditorInventoryComponent;
 
@@ -167,9 +156,7 @@ describe('GameEditorInventoryComponent (with Jasmine spies)', () => {
 
         const evt = makeDragEvent({
             dataTransfer: null,
-            preventDefault: (): void => {
-                /** no-op */
-            },
+            preventDefault: NOOP,
         });
 
         component.onDragStart(evt, kind, false);
@@ -182,9 +169,7 @@ describe('GameEditorInventoryComponent (with Jasmine spies)', () => {
 
         const evt = makeDragEvent({
             dataTransfer: createDataTransferStub([], {}),
-            preventDefault: (): void => {
-                /** no-op */
-            },
+            preventDefault: NOOP,
             offsetX: 0,
             offsetY: 0,
         });

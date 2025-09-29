@@ -62,7 +62,7 @@ function makeMouseEvent(init?: MouseEvtInit): MouseEvent {
     return evt;
 }
 
-describe('GameEditorTileComponent (with Jasmine spies)', () => {
+describe('GameEditorTileComponent', () => {
     let fixture: ComponentFixture<GameEditorTileComponent>;
     let component: GameEditorTileComponent;
 
