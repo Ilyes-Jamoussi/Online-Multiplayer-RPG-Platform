@@ -24,6 +24,8 @@ import { BonusType, DiceType } from '@common/enums/character-creation.enum';
     providers: [CharacterCreationCheckService],
 })
 export class CharacterCreationPageComponent implements OnInit {
+    readonly DiceType = DiceType;
+    readonly BonusType = BonusType;
     readonly characterNameMinLength = NAME_MIN_LENGTH;
     readonly characterNameMaxLength = CHARACTER_NAME_MAX_LENGTH;
 
