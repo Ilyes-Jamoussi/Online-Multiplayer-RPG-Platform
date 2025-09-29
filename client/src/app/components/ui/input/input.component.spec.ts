@@ -277,4 +277,70 @@ describe('UiInputComponent', () => {
             expect(event.preventDefault).toHaveBeenCalled();
         });
     });
+
+    describe('Selection defaults (selectionStart ?? 0 / selectionEnd ?? 0)', () => {
+        it('uses 0 when selectionStart is undefined (property missing) and prevents space because selection starts at 0 with a selection', () => {
+            component.type = 'text';
+            const fakeEvent = {
+                key: ' ',
+                target: {
+                    value: 'abc',
+                    selectionEnd: 1,
+                } as unknown as HTMLInputElement,
+                preventDefault: jasmine.createSpy(),
+            } as unknown as KeyboardEvent;
+
+            component.onKeyDown(fakeEvent);
+            expect(fakeEvent.preventDefault).toHaveBeenCalled();
+        });
+
+        it('uses 0 when selectionStart is null and prevents space for selection starting at 0', () => {
+            component.type = 'text';
+
+            const fakeEvent = {
+                key: ' ',
+                target: {
+                    value: 'hello',
+                    selectionStart: null,
+                    selectionEnd: 2,
+                } as unknown as HTMLInputElement,
+                preventDefault: jasmine.createSpy(),
+            } as unknown as KeyboardEvent;
+
+            component.onKeyDown(fakeEvent);
+            expect(fakeEvent.preventDefault).toHaveBeenCalled();
+        });
+
+        it('does NOT fallback when selectionStart is defined (no prevent when selection starts not at 0)', () => {
+            component.type = 'text';
+
+            const fakeEvent = {
+                key: ' ',
+                target: {
+                    value: 'abcdef',
+                    selectionStart: 2,
+                    selectionEnd: 4,
+                } as unknown as HTMLInputElement,
+                preventDefault: jasmine.createSpy(),
+            } as unknown as KeyboardEvent;
+
+            component.onKeyDown(fakeEvent);
+            expect(fakeEvent.preventDefault).not.toHaveBeenCalled();
+        });
+
+        it('falls back both selectionStart and selectionEnd to 0 when both are undefined (no selection)', () => {
+            component.type = 'text';
+
+            const fakeEvent = {
+                key: ' ',
+                target: {
+                    value: '',
+                } as unknown as HTMLInputElement,
+                preventDefault: jasmine.createSpy(),
+            } as unknown as KeyboardEvent;
+
+            component.onKeyDown(fakeEvent);
+            expect(fakeEvent.preventDefault).toHaveBeenCalled();
+        });
+    });
 });
