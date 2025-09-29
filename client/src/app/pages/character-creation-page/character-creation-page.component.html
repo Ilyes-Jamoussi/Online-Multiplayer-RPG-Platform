@@ -1,169 +1,108 @@
 <app-ui-page-layout [hasHeader]="true" [hasFooter]="true" headerTitle="Création de personnage" [showBackButton]="true">
-    <div class="selection-layout">
-        <section class="character-grid-panel" aria-label="Sélection d'avatar">
-            <div class="avatar-card">
-                <div class="selected-avatar-display">
-                    <div class="selected-avatar-frame">
-                        @if (character.avatar === null) {
-                        <div class="no-selection">
-                            <div class="selection-icon">👤</div>
-                            <h4>Sélectionner un avatar</h4>
-                        </div>
-                        } @else {
-                        <img [src]="getSelectedAvatarImage()" [alt]="'Avatar sélectionné ' + (character.avatar + 1)" class="selected-avatar-gif" />
-                        }
-                    </div>
-                </div>
+  <div class="layout">
+    <section class="card" aria-label="Sélection d'avatar">
+      <div class="card-body">
+        <div class="selected">
+          @if (character.avatar === null) {
+            <div class="selected-empty">👤</div>
+          } @else {
+            <img class="selected-img" [src]="getSelectedAvatarImage()" [alt]="'Avatar ' + (character.avatar + 1)" />
+          }
+        </div>
 
-                <div class="character-grid" role="grid" aria-label="Grille des avatars disponibles">
-                    @for (avatar of avatars; track avatar) {
-                    <button
-                        type="button"
-                        class="character-slot"
-                        [class.selected]="character.avatar === avatar"
-                        (click)="selectAvatar(avatar)"
-                        [attr.aria-label]="'Avatar ' + (avatar + 1)"
-                        [attr.aria-pressed]="character.avatar === avatar"
-                        role="gridcell"
-                    >
-                        <div class="character-portrait">
-                            <img [src]="getAvatarImage(avatar)" [alt]="'Avatar ' + (avatar + 1)" class="avatar-gif" />
-                            <span class="avatar-number">{{ avatar + 1 }}</span>
-                        </div>
-                    </button>
-                    }
-                </div>
+        <div class="grid" role="grid" aria-label="Avatars">
+          @for (a of avatars; track a) {
+            <button
+              type="button"
+              class="cell"
+              [class.active]="character.avatar === a"
+              (click)="selectAvatar(a)"
+              role="gridcell"
+              [attr.aria-label]="'Avatar ' + (a + 1)"
+              [attr.aria-pressed]="character.avatar === a"
+            >
+              <img class="cell-img" [src]="getAvatarImage(a)" [alt]="'Avatar ' + (a + 1)" />
+              <span class="cell-num">{{ a + 1 }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-label="Paramètres du personnage">
+      <div class="card-body">
+        <div class="field">
+          <h3>Nom *</h3>
+          <app-ui-input
+            type="text"
+            placeholder="Nom du héros"
+            [value]="character.name"
+            (valueChange)="onNameChange($event)"
+            [maxLength]="characterNameMaxLength"
+          ></app-ui-input>
+        </div>
+
+        <div class="field">
+          <h3>Vie</h3>
+          <app-stats-bar label="Vie" [value]="character.attributes.life" [maxValue]="6" color="#e74c3c"></app-stats-bar>
+        </div>
+
+        <div class="field">
+          <h3>Vitesse</h3>
+          <app-stats-bar label="Rapidité" [value]="character.attributes.speed" [maxValue]="6" color="#2ecc71"></app-stats-bar>
+        </div>
+
+        <div class="field">
+          <h3>Bonus (+2)</h3>
+          <div class="radio-row" role="radiogroup">
+            <label class="radio" [class.on]="character.bonus === 'life'">
+              <input type="radio" name="bonus" value="life" [checked]="character.bonus === 'life'" (change)="onBonusChange('life')" />
+              <span>❤️ Vie</span>
+            </label>
+            <label class="radio" [class.on]="character.bonus === 'speed'">
+              <input type="radio" name="bonus" value="speed" [checked]="character.bonus === 'speed'" (change)="onBonusChange('speed')" />
+              <span>⚡ Rapidité</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <h3>Choix des dés</h3>
+          <p class="sub">Assignez un seul D6 (l'autre sera D4 automatiquement)</p>
+
+          <div class="dice-rows">
+            <div class="dice-card">
+              <span>Attaque</span>
+              <div class="dice-row">
+                <button type="button" class="dice-btn" [class.sel]="character.diceAssignment.attack === 'D4'" (click)="onAttackDiceChange('D4')">
+                  <img [src]="assetsService.getDiceImage('D4')" alt="D4" />
+                </button>
+                <button type="button" class="dice-btn" [class.sel]="character.diceAssignment.attack === 'D6'" (click)="onAttackDiceChange('D6')">
+                  <img [src]="assetsService.getDiceImage('D6')" alt="D6" />
+                </button>
+              </div>
             </div>
-        </section>
 
-        <section class="character-info-panel" aria-label="Configuration du personnage">
-            <div class="info-card">
-                <div class="character-name-section">
-                    <h3>Nom *</h3>
-                    <app-ui-input
-                        type="text"
-                        placeholder="Nom du héros"
-                        [value]="character.name"
-                        (valueChange)="onNameChange($event)"
-                        [maxLength]="characterNameMaxLength"
-                    ></app-ui-input>
-                </div>
-
-                <div class="stats-section">
-                    <h3>Attributs</h3>
-                    <p class="attributes-help">Tous les attributs commencent à 4. Ajoutez un bonus de +2 à Vie ou Rapidité.</p>
-
-                    <div class="stats-grid">
-                        <div class="stats-bars">
-                            <div class="stat-item">
-                                <app-stats-bar label="Vie" [value]="character.attributes.life" [maxValue]="6" color="#e74c3c"></app-stats-bar>
-                                <div class="attribute-description">Points de vie du personnage</div>
-                            </div>
-
-                            <div class="stat-item">
-                                <app-stats-bar label="Rapidité" [value]="character.attributes.speed" [maxValue]="6" color="#2ecc71"></app-stats-bar>
-                                <div class="attribute-description">Vitesse de déplacement</div>
-                            </div>
-                        </div>
-
-                        <div class="bonus-selection">
-                            <h4>Bonus (+2)</h4>
-                            <div class="bonus-options" role="radiogroup" aria-label="Sélection du bonus d'attribut">
-                                <label class="bonus-option" [class.selected]="character.bonus === 'life'">
-                                    <input
-                                        type="radio"
-                                        name="bonus"
-                                        value="life"
-                                        [checked]="character.bonus === 'life'"
-                                        (change)="onBonusChange('life')"
-                                        aria-label="Bonus de vie"
-                                    />
-                                    <span>❤️ Vie</span>
-                                </label>
-
-                                <label class="bonus-option" [class.selected]="character.bonus === 'speed'">
-                                    <input
-                                        type="radio"
-                                        name="bonus"
-                                        value="speed"
-                                        [checked]="character.bonus === 'speed'"
-                                        (change)="onBonusChange('speed')"
-                                        aria-label="Bonus de rapidité"
-                                    />
-                                    <span>⚡ Rapidité</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="dice-selection">
-                            <h4>Choix des dés</h4>
-                            <p class="dice-help">Assignez un seul D6 (l'autre sera D4 automatiquement)</p>
-
-                            <div class="dice-cards">
-                                <div class="dice-card">
-                                    <label>Attaque</label>
-                                    <div class="attribute-description">Force d'attaque au combat</div>
-                                    <div class="dice-buttons" role="radiogroup" aria-label="Dé d'attaque">
-                                        <button
-                                            type="button"
-                                            class="dice-btn"
-                                            [class.selected]="character.diceAssignment.attack === 'D4'"
-                                            (click)="onAttackDiceChange('D4')"
-                                            [attr.aria-pressed]="character.diceAssignment.attack === 'D4'"
-                                            aria-label="Dé D4 pour l'attaque"
-                                        >
-                                            <img [src]="assetsService.getDiceImage('D4')" alt="D4" class="dice-img" />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="dice-btn"
-                                            [class.selected]="character.diceAssignment.attack === 'D6'"
-                                            (click)="onAttackDiceChange('D6')"
-                                            [attr.aria-pressed]="character.diceAssignment.attack === 'D6'"
-                                            aria-label="Dé D6 pour l'attaque"
-                                        >
-                                            <img [src]="assetsService.getDiceImage('D6')" alt="D6" class="dice-img" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="dice-card">
-                                    <label>Défense</label>
-                                    <div class="attribute-description">Résistance aux attaques</div>
-                                    <div class="dice-buttons" role="radiogroup" aria-label="Dé de défense">
-                                        <button
-                                            type="button"
-                                            class="dice-btn"
-                                            [class.selected]="character.diceAssignment.defense === 'D4'"
-                                            (click)="onDefenseDiceChange('D4')"
-                                            [attr.aria-pressed]="character.diceAssignment.defense === 'D4'"
-                                            aria-label="Dé D4 pour la défense"
-                                        >
-                                            <img [src]="assetsService.getDiceImage('D4')" alt="D4" class="dice-img" />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="dice-btn"
-                                            [class.selected]="character.diceAssignment.defense === 'D6'"
-                                            (click)="onDefenseDiceChange('D6')"
-                                            [attr.aria-pressed]="character.diceAssignment.defense === 'D6'"
-                                            aria-label="Dé D6 pour la défense"
-                                        >
-                                            <img [src]="assetsService.getDiceImage('D6')" alt="D6" class="dice-img" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="dice-card">
+              <span>Défense</span>
+              <div class="dice-row">
+                <button type="button" class="dice-btn" [class.sel]="character.diceAssignment.defense === 'D4'" (click)="onDefenseDiceChange('D4')">
+                  <img [src]="assetsService.getDiceImage('D4')" alt="D4" />
+                </button>
+                <button type="button" class="dice-btn" [class.sel]="character.diceAssignment.defense === 'D6'" (click)="onDefenseDiceChange('D6')">
+                  <img [src]="assetsService.getDiceImage('D6')" alt="D6" />
+                </button>
+              </div>
             </div>
-        </section>
-    </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 
-    <div slot="footer">
-        <app-ui-button (buttonClick)="generateRandomCharacter()">🎲 Générer aléatoire</app-ui-button>
-        <app-ui-button (buttonClick)="onSubmit()" [disabled]="!characterCreationCheckService.canCreate()">Créer le personnage →</app-ui-button>
-        <app-errors-badge validationType="character-creation"></app-errors-badge>
-    </div>
+  <div slot="footer" class="actions">
+    <app-ui-button (buttonClick)="generateRandomCharacter()">🎲 Générer aléatoire</app-ui-button>
+    <app-ui-button (buttonClick)="onSubmit()" [disabled]="!characterCreationCheckService.canCreate()">Créer le personnage →</app-ui-button>
+    <app-errors-badge validationType="character-creation"></app-errors-badge>
+  </div>
 </app-ui-page-layout>
