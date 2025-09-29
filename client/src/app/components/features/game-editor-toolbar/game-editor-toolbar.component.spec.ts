@@ -93,7 +93,9 @@ describe('GameEditorToolbarComponent', () => {
         const tool = { type: ToolType.TileBrushTool, leftDrag: false, rightDrag: false } as unknown as ActiveTool;
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => tool,
-            set: () => { /** no-op */ },
+            set: () => {
+                /** no-op */
+            },
             configurable: true,
         });
         expect(component.isBrushSelected(brush)).toBeFalse();

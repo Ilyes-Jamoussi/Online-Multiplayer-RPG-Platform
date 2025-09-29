@@ -37,8 +37,8 @@ export class GameStoreService {
 
         const gameDocument: GameDocument = {
             ...dto,
-            name: DEFAULT_DRAFT_GAME_NAME,
-            description: DEFAULT_DRAFT_GAME_DESCRIPTION,
+            name: dto?.name || DEFAULT_DRAFT_GAME_NAME,
+            description: dto?.description || DEFAULT_DRAFT_GAME_DESCRIPTION,
             tiles: defaultTiles,
             objects: defaultObjects,
             visibility: false,

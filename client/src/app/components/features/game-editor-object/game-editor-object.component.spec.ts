@@ -136,7 +136,6 @@ describe('GameEditorObjectComponent', () => {
         expect(label).toBe(expected);
     });
 
-
     it('should set grid-column based on footprint and x', () => {
         fixture.detectChanges();
         const host = fixture.nativeElement as HTMLElement;
@@ -156,7 +155,6 @@ describe('GameEditorObjectComponent', () => {
         fixture.detectChanges();
         expect(getComputedStyle(host).getPropertyValue('--tile-px').trim()).toBe('72');
     });
-
 
     it('onDragStart should do nothing without dataTransfer', () => {
         const evt = makeDragEvent({
@@ -212,7 +210,6 @@ describe('GameEditorObjectComponent', () => {
         expect(prevented).toBeTrue();
         expect(stopped).toBeTrue();
     });
-
 
     it('onContextMenu should prevent default', () => {
         let prevented = false;

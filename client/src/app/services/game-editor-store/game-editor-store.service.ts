@@ -5,13 +5,14 @@ import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { catchError, finalize, take, tap } from 'rxjs/operators';
+import { catchError, finalize, switchMap, take, tap } from 'rxjs/operators';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { PatchGameEditorDto } from '@app/dto/patchGameEditorDto';
 import { ExtendedGameEditorPlaceableDto, Inventory, PLACEABLE_ORDER } from '@app/interfaces/game-editor.interface';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { of } from 'rxjs';
 import { AssetsService } from '@app/services/assets/assets.service';
+import { CreateGameDto } from '@app/dto/createGameDto';
 
 @Injectable()
 export class GameEditorStoreService {
@@ -201,7 +202,31 @@ export class GameEditorStoreService {
             gridPreviewUrl: gridPreviewImage ?? this._gridPreviewUrl(),
         };
         const game: PatchGameEditorDto = this.pickChangedProperties(current, this._initial());
-        this.gameHttpService.patchGameEditorById(this._id(), game).subscribe();
+        this.gameHttpService
+            .patchGameEditorById(this._id(), game)
+            .pipe(
+                take(1),
+                catchError(() => {
+                    const createDto: CreateGameDto = {
+                        name: this._name(),
+                        description: this._description(),
+                        size: this._size(),
+                        mode: this._mode(),
+                    };
+                    return this.gameHttpService.createGame(createDto).pipe(
+                        switchMap((newGame) => {
+                            this._id.set(newGame.id);
+                            const updateGame: PatchGameEditorDto = {
+                                tiles: this._tiles(),
+                                objects: this._objects(),
+                                gridPreviewUrl: gridPreviewImage,
+                            };
+                            return this.gameHttpService.patchGameEditorById(newGame.id, updateGame);
+                        }),
+                    );
+                }),
+            )
+            .subscribe();
     }
 
     getTileAt(x: number, y: number): GameEditorTileDto | undefined {
