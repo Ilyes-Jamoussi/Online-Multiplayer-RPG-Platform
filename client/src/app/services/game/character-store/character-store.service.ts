@@ -80,6 +80,6 @@ export class CharacterStoreService {
         this._name.set('');
         this._avatar.set(0);
         this._bonus.set(null);
-        this._dice.set({ attack: 'D4', defense: 'D6' });
+        this._dice.set({ attack: DiceType.D4, defense: DiceType.D6 });
     }
 }

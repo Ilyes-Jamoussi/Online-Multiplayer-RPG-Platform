@@ -6,7 +6,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
-import { DiceType } from '@common/enums/character-creation.enum';
+import { BonusType, DiceType } from '@common/enums/character-creation.enum';
 import { Character } from '@common/interfaces/character.interface';
 import { CharacterCreationPageComponent } from './character-creation-page.component';
 
@@ -97,7 +97,7 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
             get: () =>
                 ({
                     name: { trim: () => ' '.repeat(NAME_MIN_LENGTH) },
-                }) as unknown as CharacterForm,
+                }) as unknown as Character,
         });
 
         const msg = component.getNameErrorMessage();
@@ -106,14 +106,14 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
 
     it('getNameErrorMessage returns empty string for empty name after trim', () => {
         Object.defineProperty(component, 'character', {
-            get: () => ({ name: { trim: () => '' } }) as unknown as CharacterForm,
+            get: () => ({ name: { trim: () => '' } }) as unknown as Character,
         });
         expect(component.getNameErrorMessage()).toBe('');
     });
 
     it('getNameErrorMessage returns empty string for a valid name', () => {
         Object.defineProperty(component, 'character', {
-            get: () => ({ name: { trim: () => 'ValidName' } }) as unknown as CharacterForm,
+            get: () => ({ name: { trim: () => 'ValidName' } }) as unknown as Character,
         });
         expect(component.getNameErrorMessage()).toBe('');
     });
@@ -140,8 +140,8 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
         component.selectAvatar(2);
         expect(mockCharacterStoreService.selectAvatar).toHaveBeenCalledWith(2);
 
-        component.onBonusChange('speed');
-        expect(mockCharacterStoreService.setBonus).toHaveBeenCalledWith('speed');
+        component.onBonusChange(BonusType.Speed);
+        expect(mockCharacterStoreService.setBonus).toHaveBeenCalledWith(BonusType.Speed);
 
         component.onAttackDiceChange(DiceType.D6);
         expect(mockCharacterStoreService.setDice).toHaveBeenCalledWith('attack', DiceType.D6);

@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { CHARACTER_AVATARS_COUNT, CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
+import { BonusType, DiceType } from '@common/enums/character-creation.enum';
 import { CharacterStoreService } from './character-store.service';
 
 const EXPECTED_LIFE_BASE = CHARACTER_BASE;
@@ -42,25 +43,25 @@ describe('CharacterStoreService', () => {
     });
 
     it('should update bonus and attributes', () => {
-        service.setBonus('life');
+        service.setBonus(BonusType.Life);
         const character = service.character();
-        expect(character.bonus).toBe('life');
+        expect(character.bonus).toBe(BonusType.Life);
         expect(character.attributes.life).toBe(EXPECTED_LIFE_BONUS);
         expect(character.attributes.speed).toBe(EXPECTED_SPEED_BASE);
     });
 
     it('should set dice assignment', () => {
-        service.setDice('attack', 'D6');
+        service.setDice('attack', DiceType.D6);
         const character = service.character();
-        expect(character.diceAssignment.attack).toBe('D6');
-        expect(character.diceAssignment.defense).toBe('D4');
+        expect(character.diceAssignment.attack).toBe(DiceType.D6);
+        expect(character.diceAssignment.defense).toBe(DiceType.D4);
     });
 
     it('should validate character correctly', () => {
         expect(service.isValid).toBeFalse();
 
         service.setName('Hero');
-        service.setBonus('life');
+        service.setBonus(BonusType.Life);
         service.selectAvatar(0);
         expect(service.isValid).toBeTrue();
     });
@@ -80,7 +81,7 @@ describe('CharacterStoreService', () => {
     it('should reset form', () => {
         service.setName('Test');
         service.selectAvatar(TEST_AVATAR_RESET);
-        service.setBonus('speed');
+        service.setBonus(BonusType.Speed);
 
         service.resetForm();
 
@@ -110,27 +111,27 @@ describe('CharacterStoreService', () => {
     });
 
     it('should set dice assignment when setting defense (other branch)', () => {
-        service.setDice('defense', 'D6');
+        service.setDice('defense', DiceType.D6);
         const character = service.character();
-        expect(character.diceAssignment.defense).toBe('D6');
-        expect(character.diceAssignment.attack).toBe('D4');
+        expect(character.diceAssignment.defense).toBe(DiceType.D6);
+        expect(character.diceAssignment.attack).toBe(DiceType.D4);
     });
 
     it('should set dice assignment correctly for attack variants', () => {
-        service.setDice('attack', 'D4');
+        service.setDice('attack', DiceType.D4);
         let character = service.character();
-        expect(character.diceAssignment.attack).toBe('D4');
-        expect(character.diceAssignment.defense).toBe('D6');
+        expect(character.diceAssignment.attack).toBe(DiceType.D4);
+        expect(character.diceAssignment.defense).toBe(DiceType.D6);
 
-        service.setDice('attack', 'D6');
+        service.setDice('attack', DiceType.D6);
         character = service.character();
-        expect(character.diceAssignment.attack).toBe('D6');
-        expect(character.diceAssignment.defense).toBe('D4');
+        expect(character.diceAssignment.attack).toBe(DiceType.D6);
+        expect(character.diceAssignment.defense).toBe(DiceType.D4);
     });
 
     it('resetForm should restore default dice assignment', () => {
-        service.setDice('attack', 'D6');
-        expect(service.character().diceAssignment.attack).toBe('D6');
+        service.setDice('attack', DiceType.D6);
+        expect(service.character().diceAssignment.attack).toBe(DiceType.D6);
 
         service.resetForm();
         const character = service.character();
@@ -162,7 +163,7 @@ describe('CharacterStoreService', () => {
         const expectedAvatar = Math.floor(randAvatar * CHARACTER_AVATARS_COUNT);
         expect(character.avatar).toBe(expectedAvatar);
 
-        expect(character.bonus).toBe('life');
+        expect(character.bonus).toBe(BonusType.Life);
 
         expect(character.diceAssignment.defense).toBe('D6');
         expect(character.diceAssignment.attack).toBe('D4');

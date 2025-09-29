@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AVATAR_ANIMATED_PATH, AVATAR_STATIC_PATH, DICE_PATH, OBJECT_PATH, TILE_PATH } from '@app/constants/assets-paths.constants';
 import { Avatar } from '@common/enums/avatar.enum';
+import { DiceType } from '@common/enums/character-creation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
 
@@ -24,7 +25,7 @@ export class AssetsService {
         return `${AVATAR_ANIMATED_PATH}/avatar${avatarNumber}.gif`;
     }
 
-    getDiceImage(diceType: string): string {
+    getDiceImage(diceType: DiceType): string {
         return `${DICE_PATH}/${diceType.toLowerCase()}.svg`;
     }
 
