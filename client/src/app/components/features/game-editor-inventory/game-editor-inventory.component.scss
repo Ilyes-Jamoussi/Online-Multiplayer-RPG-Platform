@@ -1,52 +1,86 @@
+:host {
+    --tile-size: 72;
+    --gap: 8px;
+    --radius: 16px;
+    --panel-px: 16px;
+    --ring: #3b82f6;
+    --ring-weak: rgba(59, 130, 246, 0.12);
+    --card-bg: #fff;
+    --card-border: rgba(17, 24, 39, 0.08);
+    --text: #0f172a;
+    --muted: #64748b;
+}
+
 .inventory {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-    gap: 12px;
-    background-color: transparent;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--gap);
+    padding: var(--panel-px);
+    background: transparent;
+    max-width: 90%;
+    box-sizing: border-box;
 }
 
 .slot {
+    justify-self: stretch;
     display: grid;
     grid-template-rows: auto auto;
     justify-items: center;
-    gap: 8px;
-    background-color: transparent;
+    gap: 1px;
+
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    box-shadow:
+        0 4px 8px rgba(17, 24, 39, 0.06),
+        0 2px 4px rgba(17, 24, 39, 0.06);
+    padding: 10px;
+    transition:
+        box-shadow 0.2s ease,
+        transform 0.12s ease,
+        border-color 0.2s ease;
+    contain: paint;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow:
+            0 8px 16px rgba(17, 24, 39, 0.1),
+            0 4px 8px rgba(17, 24, 39, 0.08);
+    }
+
+    &.disabled {
+        opacity: 0.55;
+        filter: grayscale(0.15);
+    }
 
     &.drag-over {
-        outline: 2px dashed #3b82f6;
+        outline: 2px dashed var(--ring);
         outline-offset: 4px;
-        background-color: transparent;
-
-        background-color: rgba(59, 130, 246, 0.1);
-
-        *.drag-over {
-            pointer-events: none;
-            background-color: transparent;
-        }
+        background: var(--ring-weak);
     }
-
-    .icon-cell {
-        background-color: transparent;
-    }
-}
-
-.slot.disabled {
-    opacity: 0.5;
 }
 
 .icon-cell {
+    --footprint: 1;
+    inline-size: calc(var(--tile-size) * var(--footprint));
+    block-size: calc(var(--tile-size) * var(--footprint));
+
     position: relative;
-    width: var(--tile-size);
-    height: var(--tile-size);
     display: grid;
+    place-items: center;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-color: transparent;
-    place-items: center;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+
+    border: 1px solid var(--card-border);
+    border-radius: calc(var(--radius) - 6px);
+
+    /* garde la  mais permet au badge de dépasser */
+    overflow: visible;
+
     cursor: grab;
     user-select: none;
+    transition: transform 0.08s ease;
 
     &.drag-over {
         pointer-events: none;
@@ -54,36 +88,44 @@
 }
 .icon-cell:active {
     cursor: grabbing;
+    transform: scale(0.97);
     .badge {
         display: none;
     }
 }
 
-.icon {
-    line-height: 1;
-}
-
 .badge {
     position: absolute;
-    top: -6px;
-    right: -6px;
-    min-width: 20px;
-    height: 20px;
+    top: -8px;
+    right: -8px;
+    min-inline-size: 22px;
+    block-size: 22px;
     padding: 0 6px;
     border-radius: 999px;
     background: #111827;
     color: #fff;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 12px;
-    line-height: 20px;
+    line-height: 22px;
     text-align: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    z-index: 2;
 }
 
 .label {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     text-align: center;
+    color: var(--text);
+    opacity: 0.9;
+    inline-size: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &.drag-over {
+        color: var(--ring);
+    }
 }
 
 .empty {
@@ -91,4 +133,5 @@
     opacity: 0.7;
     text-align: center;
     padding: 8px 0;
+    color: var(--muted);
 }

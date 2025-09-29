@@ -1,11 +1,4 @@
-<app-ui-page-layout
-    [hasHeader]="true"
-    headerTitle="Administration des Jeux"
-    headerSubtitle="Gérez vos jeux et créez de nouvelles aventures"
-    [showBackButton]="true"
-    [hasFooter]="true"
-    (backClick)="onBack()"
->
+<app-ui-page-layout [hasHeader]="true" headerTitle="Administration des Jeux" [showBackButton]="true" [hasFooter]="true" (backClick)="onBack()">
     <div class="games-section">
         @if (gameDisplays() && gameDisplays().length > 0) {
         <div class="games-grid">

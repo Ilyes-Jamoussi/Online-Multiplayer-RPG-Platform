@@ -2,25 +2,33 @@
     display: block;
     pointer-events: auto;
     z-index: 1;
+    overflow: visible;
 }
 
 .obj {
     width: 100%;
-    background-image: var(--bg-image);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     height: 100%;
     display: grid;
     place-items: center;
     cursor: grab;
     user-select: none;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+
+    background-image: var(--bg-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    position: relative;
+    overflow: visible;
+    -webkit-tap-highlight-color: transparent;
+
+    z-index: 0;
 
     &.dragging {
         opacity: 0.5;
     }
 }
+
 .obj:active {
     cursor: grabbing;
 }
@@ -28,4 +36,53 @@
 .placeholder {
     line-height: 1;
     user-select: none;
+}
+
+.obj::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 50%;
+    top: 15px;
+    transform: translate(-50%, -100%) scale(0.98);
+    margin-bottom: 6px;
+
+    background: rgba(17, 17, 17, 0.92);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+
+    pointer-events: none;
+    user-select: none;
+
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease,
+        visibility 0.15s;
+    will-change: transform, opacity;
+
+    z-index: 10000;
+}
+
+.obj:hover,
+.obj:focus-visible {
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+.obj:hover::after,
+.obj:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -110%) scale(1);
+}
+
+.obj.dragging::after {
+    opacity: 0 !important;
+    visibility: hidden !important;
 }

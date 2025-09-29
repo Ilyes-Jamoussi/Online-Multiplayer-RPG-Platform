@@ -4,7 +4,8 @@ import { UiInputComponent } from './input.component';
 describe('UiInputComponent', () => {
     let component: UiInputComponent;
     let fixture: ComponentFixture<UiInputComponent>;
-    let inputElement: HTMLInputElement;
+
+    const getControl = <T extends HTMLInputElement | HTMLTextAreaElement>() => fixture.nativeElement.querySelector('input, textarea') as T;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -13,7 +14,6 @@ describe('UiInputComponent', () => {
 
         fixture = TestBed.createComponent(UiInputComponent);
         component = fixture.componentInstance;
-        inputElement = fixture.nativeElement.querySelector('input');
         fixture.detectChanges();
     });
 
@@ -30,17 +30,19 @@ describe('UiInputComponent', () => {
         });
 
         it('should render input element', () => {
-            expect(inputElement).toBeTruthy();
+            const el = getControl();
+            expect(el).toBeTruthy();
+            expect(el.tagName.toLowerCase()).toBe('input');
         });
     });
 
     describe('Input Properties', () => {
         it('should set placeholder', () => {
-            const placeholder = 'Test placeholder';
-            component.placeholder = placeholder;
+            component.placeholder = 'Test placeholder';
             fixture.detectChanges();
 
-            expect(inputElement.placeholder).toBe(placeholder);
+            const el = getControl<HTMLInputElement>();
+            expect(el.placeholder).toBe('Test placeholder');
         });
 
         it('should set maxLength', () => {
@@ -48,16 +50,17 @@ describe('UiInputComponent', () => {
             component.maxLength = maxLength;
             fixture.detectChanges();
 
-            expect(inputElement.maxLength).toBe(maxLength);
+            const el = getControl<HTMLInputElement>();
+            expect(el.maxLength).toBe(maxLength);
         });
 
         it('should set value', () => {
-            const value = 'test value';
-            component.value = value;
+            component.value = 'test value';
             fixture.detectChanges();
 
-            expect(component.value).toBe(value);
-            expect(inputElement.value).toBe(value);
+            const el = getControl<HTMLInputElement>();
+            expect(component.value).toBe('test value');
+            expect(el.value).toBe('test value');
         });
 
         it('should handle undefined value', () => {
@@ -69,20 +72,23 @@ describe('UiInputComponent', () => {
     describe('Value Changes', () => {
         it('should emit valueChange on input', () => {
             spyOn(component.valueChange, 'emit');
-            const testValue = 'test';
 
-            inputElement.value = testValue;
-            inputElement.dispatchEvent(new Event('input'));
+            const el = getControl<HTMLInputElement>();
+            el.value = 'test';
+            el.dispatchEvent(new Event('input'));
+            fixture.detectChanges();
 
-            expect(component.valueChange.emit).toHaveBeenCalledWith(testValue);
-            expect(component.value).toBe(testValue);
+            expect(component.valueChange.emit).toHaveBeenCalledWith('test');
+            expect(component.value).toBe('test');
         });
 
         it('should handle space-dot replacement', () => {
             spyOn(component.valueChange, 'emit');
 
-            inputElement.value = 'test. ';
-            inputElement.dispatchEvent(new Event('input'));
+            const el = getControl<HTMLInputElement>();
+            el.value = 'test. ';
+            el.dispatchEvent(new Event('input'));
+            fixture.detectChanges();
 
             expect(component.value).toBe('test ');
             expect(component.valueChange.emit).toHaveBeenCalledWith('test ');
@@ -90,10 +96,12 @@ describe('UiInputComponent', () => {
 
         it('should filter invalid characters on input for text type', () => {
             component.type = 'text';
-            spyOn(component.valueChange, 'emit');
+            fixture.detectChanges();
 
-            inputElement.value = 'test123!@#';
-            inputElement.dispatchEvent(new Event('input'));
+            spyOn(component.valueChange, 'emit');
+            const el = getControl<HTMLInputElement>();
+            el.value = 'test123!@#';
+            el.dispatchEvent(new Event('input'));
 
             expect(component.value).toBe('test');
             expect(component.valueChange.emit).toHaveBeenCalledWith('test');
@@ -101,10 +109,12 @@ describe('UiInputComponent', () => {
 
         it('should filter invalid characters on input for number type', () => {
             component.type = 'number';
-            spyOn(component.valueChange, 'emit');
+            fixture.detectChanges();
 
-            inputElement.value = '123abc456';
-            inputElement.dispatchEvent(new Event('input'));
+            spyOn(component.valueChange, 'emit');
+            const el = getControl<HTMLInputElement>();
+            el.value = '123abc456';
+            el.dispatchEvent(new Event('input'));
 
             expect(component.value).toBe('123456');
             expect(component.valueChange.emit).toHaveBeenCalledWith('123456');
