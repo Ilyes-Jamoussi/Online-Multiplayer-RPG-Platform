@@ -13,6 +13,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
+import { BonusType, DiceType } from '@common/enums/character-creation.enum';
 
 @Component({
     standalone: true,
@@ -54,7 +55,7 @@ export class CharacterCreationPageComponent implements OnInit {
 
     ngOnInit() {
         this.characterStoreService.resetAvatar();
-        this.characterStoreService.setBonus('life');
+        this.characterStoreService.setBonus(BonusType.Life);
     }
 
     onNameChange(v: string) {
@@ -77,14 +78,14 @@ export class CharacterCreationPageComponent implements OnInit {
         this.characterStoreService.selectAvatar(index);
     }
 
-    onBonusChange(bonus: 'life' | 'speed') {
+    onBonusChange(bonus: BonusType) {
         this.characterStoreService.setBonus(bonus);
     }
 
-    onAttackDiceChange(value: 'D4' | 'D6') {
+    onAttackDiceChange(value: DiceType) {
         this.characterStoreService.setDice('attack', value);
     }
-    onDefenseDiceChange(value: 'D4' | 'D6') {
+    onDefenseDiceChange(value: DiceType) {
         this.characterStoreService.setDice('defense', value);
     }
 
