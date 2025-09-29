@@ -76,15 +76,7 @@ describe('GameEditorService', () => {
         it('returns null when update does not find a document', async () => {
             mockModel.findByIdAndUpdate = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
 
-            const res = await service.patchEditByGameId('nope', {
-                name: 'x',
-                description: 'y',
-                size: MapSize.SMALL,
-                mode: GameMode.CLASSIC,
-                gridPreviewUrl: '',
-                tiles: [],
-                objects: [],
-            });
+            const res = await service.patchEditByGameId('nope', { name: 'x' });
             expect(res).toBeNull();
             expect(mockModel.findByIdAndUpdate).toHaveBeenCalled();
         });
@@ -107,15 +99,7 @@ describe('GameEditorService', () => {
 
             mockModel.findByIdAndUpdate = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(returnedDoc) }) });
 
-            const body = {
-                gridPreviewUrl: 'data',
-                name: 'newname',
-                description: 'newdesc',
-                size: MapSize.SMALL,
-                mode: GameMode.CLASSIC,
-                tiles: [],
-                objects: [],
-            };
+            const body = { gridPreviewUrl: 'data', name: 'newname' };
 
             const preview = await service.patchEditByGameId(id, body);
 
