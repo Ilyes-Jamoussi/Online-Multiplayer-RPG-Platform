@@ -3,9 +3,11 @@ import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
 import { PatchGameEditorDto } from '@app/game-store/dto/patch-game-editor.dto';
 import { GameStoreGateway } from '@app/game-store/gateways/game-store.gateway';
 import { GameEditorService } from '@app/game-store/services/game-editor/game-editor.service';
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GameEditorController } from './game-editor.controller';
+import { GameStoreService } from '@app/game-store/services/game-store/game-store.service';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 
 describe('GameEditorController', () => {
     let controller: GameEditorController;
@@ -26,6 +28,12 @@ describe('GameEditorController', () => {
                     provide: GameStoreGateway,
                     useValue: {
                         emitGameUpdated: jest.fn(),
+                    },
+                },
+                {
+                    provide: GameStoreService,
+                    useValue: {
+                        createGame: jest.fn(),
                     },
                 },
             ],
@@ -58,8 +66,50 @@ describe('GameEditorController', () => {
         expect(await controller.patchGameForEdit('1', patchDto)).toBe(result);
     });
 
-    it('should throw NotFoundException if patchGameForEdit returns null', async () => {
-        jest.spyOn(service, 'patchEditByGameId').mockResolvedValue(null);
-        await expect(controller.patchGameForEdit('1', {} as PatchGameEditorDto)).rejects.toThrow(NotFoundException);
+    it('should create a new game if patchGameForEdit returns null', async () => {
+        const patchBody = { name: 'New Game' } as PatchGameEditorDto;
+
+        const patchSpy = jest
+            .spyOn(controller['gameEditorService'], 'patchEditByGameId')
+            .mockResolvedValueOnce(null)
+            .mockResolvedValueOnce({
+                id: '2',
+                name: 'New Game',
+                description: '',
+                size: MapSize.SMALL,
+                mode: GameMode.CLASSIC,
+                visibility: false,
+                lastModified: new Date(),
+                draft: true,
+                gridPreviewUrl: '',
+            } as GamePreviewDto);
+
+        const createGameSpy = jest.spyOn(controller['gameStoreService'], 'createGame').mockResolvedValue({
+            id: '2',
+            name: 'New Game',
+            description: '',
+            size: MapSize.SMALL,
+            mode: GameMode.CLASSIC,
+            visibility: false,
+            lastModified: new Date(),
+            draft: true,
+            gridPreviewUrl: '',
+        });
+
+        jest.spyOn(controller['gameStoreGateway'], 'emitGameUpdated').mockImplementation(() => undefined);
+
+        const result = await controller.patchGameForEdit('1', patchBody);
+
+        expect(createGameSpy).toHaveBeenCalledWith({
+            name: patchBody.name,
+            description: patchBody.description,
+            size: patchBody.size,
+            mode: patchBody.mode,
+            visibility: false,
+        });
+
+        expect(patchSpy).toHaveBeenNthCalledWith(2, '2', patchBody);
+
+        expect(result).toEqual(expect.objectContaining({ id: '2', name: 'New Game' }));
     });
 });
