@@ -2,7 +2,6 @@ import { NgStyle } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { ErrorsBadgeComponent } from '@app/components/features/errors-badge/errors-badge.component';
 import { ROUTES } from '@app/constants/routes.constants';
 import { DESCRIPTION_MAX_LENGTH, GAME_NAME_MAX_LENGTH } from '@app/constants/validation.constants';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
@@ -10,8 +9,6 @@ import { GameEditorInteractionsService } from '@app/services/game-editor-interac
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
-import { UiButtonComponent } from '@app/components/ui/button/button.component';
-import { DraggablePanelComponent } from '@app/components/ui/draggable-panel/draggable-panel.component';
 import { UiInputComponent } from '@app/components/ui/input/input.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { distinctUntilChanged, filter, map, Subject, takeUntil, tap } from 'rxjs';
@@ -21,6 +18,8 @@ import { GameEditorTileComponent } from '@app/components/features/game-editor-ti
 import { GameEditorToolbarComponent } from '@app/components/features/game-editor-toolbar/game-editor-toolbar.component';
 import { TileSizeProbeDirective } from '@app/directives/tile-size-probe.directive';
 import { ToolType } from '@app/interfaces/game-editor.interface';
+import { UiButtonComponent } from '@app/components/ui/button/button.component';
+import { ErrorsBadgeComponent } from '@app/components/features/errors-badge/errors-badge.component';
 
 @Component({
     selector: 'app-edit-game-page',
@@ -32,11 +31,10 @@ import { ToolType } from '@app/interfaces/game-editor.interface';
         GameEditorTileComponent,
         TileSizeProbeDirective,
         GameEditorToolbarComponent,
-        UiButtonComponent,
         UiInputComponent,
-        DraggablePanelComponent,
         GameEditorInventoryComponent,
         GameEditorObjectComponent,
+        UiButtonComponent,
         ErrorsBadgeComponent,
     ],
     templateUrl: './game-editor-page.component.html',

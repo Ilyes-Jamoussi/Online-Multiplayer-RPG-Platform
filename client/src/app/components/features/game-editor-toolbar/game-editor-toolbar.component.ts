@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { TileKind } from '@common/enums/tile-kind.enum';
-import { UiTooltipComponent } from '@app/components/ui/tooltip/tooltip.component';
+import { TileKind, TileLabel } from '@common/enums/tile-kind.enum';
 import { ToolbarItem, ToolType } from '@app/interfaces/game-editor.interface';
 
 @Component({
@@ -9,14 +8,13 @@ import { ToolbarItem, ToolType } from '@app/interfaces/game-editor.interface';
     standalone: true,
     templateUrl: './game-editor-toolbar.component.html',
     styleUrls: ['./game-editor-toolbar.component.scss'],
-    imports: [UiTooltipComponent],
 })
 export class GameEditorToolbarComponent {
-    constructor(
-        private readonly gameEditorInteractionsService: GameEditorInteractionsService,
-    ) {}
+    constructor(private readonly gameEditorInteractionsService: GameEditorInteractionsService) {}
 
-    get brushes () {
+    readonly tileLabel = TileLabel;
+
+    get brushes() {
         return this.gameEditorInteractionsService.getToolbarBrushes();
     }
 

@@ -1,10 +1,4 @@
-<app-ui-page-layout
-    [hasHeader]="true"
-    headerTitle="Choisir un jeu"
-    headerSubtitle="Sélectionnez un jeu pour commencer une nouvelle partie"
-    [showBackButton]="true"
-    (backClick)="onBack()"
->
+<app-ui-page-layout [hasHeader]="true" headerTitle="Choisir un jeu" [showBackButton]="true" (backClick)="onBack()">
     <div class="games-section">
         @if (visibleGameDisplays() && visibleGameDisplays().length > 0) {
         <div class="games-grid">
