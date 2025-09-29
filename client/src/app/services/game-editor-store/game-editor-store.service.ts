@@ -7,7 +7,6 @@ import { MapSize } from '@common/enums/map-size.enum';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { catchError, finalize, take, tap } from 'rxjs/operators';
 import { TileKind } from '@common/enums/tile-kind.enum';
-import { PatchGameEditorDto } from '@app/dto/patchGameEditorDto';
 import { ExtendedGameEditorPlaceableDto, Inventory, PLACEABLE_ORDER } from '@app/interfaces/game-editor.interface';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { of } from 'rxjs';
@@ -195,12 +194,16 @@ export class GameEditorStoreService {
         const current = {
             name: this._name(),
             description: this._description(),
+            size: this._size(),
+            mode: this._mode(),
             tiles: this._tiles(),
             objects: this._objects(),
             gridPreviewUrl: gridPreviewImage ?? this._gridPreviewUrl(),
         };
-        const game: PatchGameEditorDto = this.pickChangedProperties(current, this._initial());
-        this.gameHttpService.patchGameEditorById(this._id(), game).subscribe();
+        this.gameHttpService.patchGameEditorById(this._id(), {
+            ...this._initial(),
+            ...current,
+        }).subscribe();
     }
 
     getTileAt(x: number, y: number): GameEditorTileDto | undefined {
@@ -323,13 +326,5 @@ export class GameEditorStoreService {
     private isOccupiedByOther(id: string | null, x: number, y: number): boolean {
         const occ = this.getPlacedObjectAt(x, y);
         return !!occ && (!id || occ.id !== id);
-    }
-
-    private pickChangedProperties<T extends object>(current: T, initial: T): Partial<T> {
-        const out: Partial<T> = {};
-        for (const k of Object.keys(current) as (keyof T)[]) {
-            if (current[k] !== initial[k]) out[k] = current[k];
-        }
-        return out;
     }
 }

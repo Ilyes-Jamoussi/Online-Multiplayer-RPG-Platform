@@ -11,39 +11,39 @@ export class PatchGameEditorDto {
     @ApiPropertyOptional()
     @IsOptional()
     @IsString()
-    name?: string;
+    name: string;
 
     @ApiPropertyOptional()
     @IsOptional()
     @IsString()
-    description?: string;
+    description: string;
 
     @ApiPropertyOptional({ enum: MapSize })
     @IsOptional()
     @IsEnum(MapSize)
-    size?: MapSize;
+    size: MapSize;
 
     @ApiPropertyOptional({ enum: GameMode })
     @IsOptional()
     @IsEnum(GameMode)
-    mode?: GameMode;
+    mode: GameMode;
 
     @ApiPropertyOptional()
     @IsOptional()
     @IsString()
-    gridPreviewUrl?: string;
+    gridPreviewUrl: string;
 
     @ApiPropertyOptional({ type: [GameEditorTileDto] })
     @IsOptional()
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => GameEditorTileDto)
-    tiles?: GameEditorTileDto[];
+    tiles: GameEditorTileDto[];
 
     @ApiPropertyOptional({ type: [GameEditorPlaceableDto] })
     @IsOptional()
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => GameEditorPlaceableDto)
-    objects?: GameEditorPlaceableDto[];
+    objects: GameEditorPlaceableDto[];
 }
