@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import { TestBed } from '@angular/core/testing';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { EMPTY, Subject, throwError } from 'rxjs';
+import { EMPTY, of, Subject, throwError } from 'rxjs';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 
 import { GameEditorDto } from '@app/dto/gameEditorDto';
@@ -19,8 +19,8 @@ describe('GameEditorStoreService', () => {
     let gameStoreServiceSpy: jasmine.SpyObj<GameStoreService>;
 
     beforeEach(() => {
-        gameHttpServiceSpy = jasmine.createSpyObj('GameHttpService', ['getGameEditorById', 'patchGameEditorById']);
-        gameStoreServiceSpy = jasmine.createSpyObj('GameStoreService', ['selectGame', 'deselectGame', 'createGame']);
+        gameHttpServiceSpy = jasmine.createSpyObj('GameHttpService', ['getGameEditorById', 'patchGameEditorById', 'createGame']);
+        gameStoreServiceSpy = jasmine.createSpyObj('GameStoreService', ['selectGame', 'deselectGame']);
 
         TestBed.configureTestingModule({
             providers: [
@@ -190,10 +190,127 @@ describe('GameEditorStoreService', () => {
             service.saveGame();
 
             expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
-                ...mockEditorData,
                 name: 'Modified Name',
                 description: 'Modified Description',
             });
+        });
+
+        it('should include gridPreviewUrl when provided', () => {
+            expect(service.initial().name).toBe('Test Game');
+            expect(service.initial().description).toBe('A game for testing');
+
+            service.name = 'Modified Name';
+            service.description = 'Modified Description';
+
+            const newPreviewUrl = '/assets/new-preview.png';
+            service.saveGame(newPreviewUrl);
+
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
+                name: 'Modified Name',
+                description: 'Modified Description',
+                gridPreviewUrl: newPreviewUrl,
+            });
+        });
+
+        it('should send only name if only name was modified', () => {
+            expect(service.initial().name).toBe('Test Game');
+            expect(service.initial().description).toBe('A game for testing');
+
+            service.name = 'Modified Name';
+
+            service.saveGame();
+
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
+                name: 'Modified Name',
+            });
+        });
+
+        it('should send only description if only description was modified', () => {
+            expect(service.initial().name).toBe('Test Game');
+            expect(service.initial().description).toBe('A game for testing');
+
+            service.description = 'Modified Description';
+
+            service.saveGame();
+
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
+                description: 'Modified Description',
+            });
+        });
+
+        it('should send only tiles if only tiles were modified', () => {
+            expect(service.initial().name).toBe('Test Game');
+            expect(service.initial().description).toBe('A game for testing');
+            expect(service.tiles()).toEqual(mockEditorData.tiles);
+            expect(service.objects()).toEqual(mockEditorData.objects);
+
+            service.setTileAt(0, 0, TileKind.WATER);
+
+            expect(service.getTileAt(0, 0)?.kind).toBe(TileKind.WATER);
+            expect(service.tiles()).not.toEqual(mockEditorData.tiles);
+            expect(service.objects()).toEqual(mockEditorData.objects);
+
+            service.saveGame();
+
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
+                tiles: service.tiles(),
+            });
+        });
+
+        it('should send only objects if only objects were modified', () => {
+            expect(service.initial().name).toBe('Test Game');
+            expect(service.initial().description).toBe('A game for testing');
+            expect(service.tiles()).toEqual(mockEditorData.tiles);
+            expect(service.objects()).toEqual(mockEditorData.objects);
+
+            service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
+
+            expect(service.getPlacedObjectAt(1, 1)?.kind).toBe(PlaceableKind.FLAG);
+            expect(service.tiles()).toEqual(mockEditorData.tiles);
+            expect(service.objects()).not.toEqual(mockEditorData.objects);
+
+            service.saveGame();
+
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
+                objects: service.objects(),
+            });
+        });
+
+        it('should create a new game if patchGameEditorById throws a not found error', () => {
+            gameHttpServiceSpy.patchGameEditorById.and.returnValues(
+                throwError(() => new Error('Game with ID 1 not found')),
+                EMPTY,
+            );
+
+            const created = {
+                id: '2',
+                name: 'Test Game',
+                description: 'A game for testing',
+                size: MapSize.SMALL,
+                mode: GameMode.CTF,
+                visibility: false,
+                lastModified: new Date().toISOString(),
+                gridPreviewUrl: '',
+                draft: true,
+            };
+            gameHttpServiceSpy.createGame.and.returnValue(of(created));
+
+            service.saveGame();
+
+            expect(gameHttpServiceSpy.createGame).toHaveBeenCalledWith({
+                name: 'Test Game',
+                description: 'A game for testing',
+                size: MapSize.SMALL,
+                mode: GameMode.CTF,
+            });
+
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith(
+                '2',
+                jasmine.objectContaining({
+                    tiles: service.tiles(),
+                    objects: service.objects(),
+                }),
+            );
         });
     });
 

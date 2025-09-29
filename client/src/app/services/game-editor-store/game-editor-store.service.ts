@@ -18,7 +18,6 @@ import { CreateGameDto } from '@app/dto/createGameDto';
 export class GameEditorStoreService {
     constructor(
         private readonly gameHttpService: GameHttpService,
-        private readonly gameStoreService: GameHttpService,
         private readonly assetsService: AssetsService,
     ) {}
 
@@ -214,7 +213,7 @@ export class GameEditorStoreService {
                         size: this._size(),
                         mode: this._mode(),
                     };
-                    return this.gameStoreService.createGame(createDto).pipe(
+                    return this.gameHttpService.createGame(createDto).pipe(
                         switchMap((newGame) => {
                             this._id.set(newGame.id);
                             const updateGame: PatchGameEditorDto = {
