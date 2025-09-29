@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import { TestBed } from '@angular/core/testing';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { EMPTY, Subject, throwError } from 'rxjs';
+import { EMPTY, of, Subject, throwError } from 'rxjs';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 
 import { GameEditorDto } from '@app/dto/gameEditorDto';
@@ -19,8 +19,8 @@ describe('GameEditorStoreService', () => {
     let gameStoreServiceSpy: jasmine.SpyObj<GameStoreService>;
 
     beforeEach(() => {
-        gameHttpServiceSpy = jasmine.createSpyObj('GameHttpService', ['getGameEditorById', 'patchGameEditorById']);
-        gameStoreServiceSpy = jasmine.createSpyObj('GameStoreService', ['selectGame', 'deselectGame', 'createGame']);
+        gameHttpServiceSpy = jasmine.createSpyObj('GameHttpService', ['getGameEditorById', 'patchGameEditorById', 'createGame']);
+        gameStoreServiceSpy = jasmine.createSpyObj('GameStoreService', ['selectGame', 'deselectGame']);
 
         TestBed.configureTestingModule({
             providers: [
@@ -274,6 +274,43 @@ describe('GameEditorStoreService', () => {
             expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
                 objects: service.objects(),
             });
+        });
+
+        it('should create a new game if patchGameEditorById throws a not found error', () => {
+            gameHttpServiceSpy.patchGameEditorById.and.returnValues(
+                throwError(() => new Error('Game with ID 1 not found')),
+                EMPTY,
+            );
+
+            const created = {
+                id: '2',
+                name: 'Test Game',
+                description: 'A game for testing',
+                size: MapSize.SMALL,
+                mode: GameMode.CTF,
+                visibility: false,
+                lastModified: new Date().toISOString(),
+                gridPreviewUrl: '',
+                draft: true,
+            };
+            gameHttpServiceSpy.createGame.and.returnValue(of(created));
+
+            service.saveGame();
+
+            expect(gameHttpServiceSpy.createGame).toHaveBeenCalledWith({
+                name: 'Test Game',
+                description: 'A game for testing',
+                size: MapSize.SMALL,
+                mode: GameMode.CTF,
+            });
+
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith(
+                '2',
+                jasmine.objectContaining({
+                    tiles: service.tiles(),
+                    objects: service.objects(),
+                }),
+            );
         });
     });
 
