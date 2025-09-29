@@ -39,7 +39,7 @@
 }
 
 .obj::after {
-    content: attr(data-label);
+    content: attr(data-tooltip);
     position: absolute;
     left: 50%;
     top: 15px;

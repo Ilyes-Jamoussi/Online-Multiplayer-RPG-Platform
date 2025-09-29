@@ -29,7 +29,7 @@ export class GameEditorObjectComponent {
         return this.assetsService.getPlaceableImage(PlaceableKind[this.object.kind]);
     }
 
-    get label() {
+    get tooltip() {
         return PlaceableLabel[this.object.kind];
     }
 

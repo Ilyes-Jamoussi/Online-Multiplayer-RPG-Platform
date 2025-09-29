@@ -4,7 +4,7 @@
         class="slot"
         [class.disabled]="inventory[item].remaining === 0"
         [class.drag-over]="dragOver === item"
-        [attr.title]="kindLabel(item)"
+        [attr.title]="placeableLabel[inventory[item].kind]"
         (dragover)="onSlotDragOver($event, item)"
         (dragenter)="onSlotDragEnter($event, item)"
         (dragleave)="onSlotDragLeave()"
@@ -20,14 +20,11 @@
             [attr.data-mime]="dndMime[inventory[item].kind]"
             [attr.data-kind]="inventory[item].kind"
             [style.--footprint]="placeableFootprint[inventory[item].kind]"
+            [attr.data-tooltip]="placeableLabel[inventory[item].kind]"
         >
             <span class="badge" [class.drag-over]="dragOver === inventory[item].kind">
                 {{ inventory[item].remaining }}
             </span>
-        </div>
-
-        <div class="label" [class.drag-over]="dragOver === inventory[item].kind">
-            {{ kindLabel(inventory[item].kind) }}
         </div>
     </div>
     } @empty {
