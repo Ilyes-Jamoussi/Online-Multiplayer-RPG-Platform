@@ -152,6 +152,7 @@ export class GameEditorStoreService {
     get tileSizePx() {
         return this._tileSizePx();
     }
+
     set tileSizePx(value: number) {
         this._tileSizePx.set(value);
     }

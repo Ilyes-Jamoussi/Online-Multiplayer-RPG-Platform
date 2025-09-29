@@ -21,3 +21,11 @@ export enum PlaceableMime {
     FIGHT = 'application/x-placeable-fight',
     BOAT = 'application/x-placeable-boat',
 }
+
+export enum PlaceableLabel {
+    START = 'Départ',
+    FLAG = 'Drapeau',
+    HEAL = 'Sanctuaire Soin',
+    FIGHT = 'Sanctuaire Combat',
+    BOAT = 'Bateau',
+}

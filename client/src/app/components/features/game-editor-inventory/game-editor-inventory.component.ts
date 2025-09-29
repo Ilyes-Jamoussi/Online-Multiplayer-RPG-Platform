@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { PlaceableFootprint, PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
+import { PlaceableFootprint, PlaceableKind, PlaceableLabel, PlaceableMime } from '@common/enums/placeable-kind.enum';
 import { ToolType } from '@app/interfaces/game-editor.interface';
 import { NgStyle } from '@angular/common';
 
@@ -19,6 +19,7 @@ export class GameEditorInventoryComponent {
         private readonly gameEditorInteractionsService: GameEditorInteractionsService,
     ) {}
 
+    readonly placeableLabel = PlaceableLabel;
     readonly dndMime = PlaceableMime;
     readonly placeableFootprint = PlaceableFootprint;
     readonly invKeys = Object.keys(this.gameEditorStoreService.inventory()) as PlaceableKind[];
@@ -35,23 +36,6 @@ export class GameEditorInventoryComponent {
     @HostBinding('style.--tile-px')
     get tileVar() {
         return this.gameEditorStoreService.tileSizePx;
-    }
-
-    kindLabel(k: PlaceableKind): string {
-        switch (k) {
-            case 'START':
-                return 'Point de départ';
-            case 'FLAG':
-                return 'Drapeau';
-            case 'HEAL':
-                return 'Sanctuaire de soin';
-            case 'FIGHT':
-                return 'Sanctuaire de combat';
-            case 'BOAT':
-                return 'Bateau';
-            default:
-                return String(k);
-        }
     }
 
     onDragStart(evt: DragEvent, kind: PlaceableKind, disabled: boolean): void {

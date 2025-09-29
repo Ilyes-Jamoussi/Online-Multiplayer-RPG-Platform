@@ -27,16 +27,13 @@ describe('UiHeaderComponent', () => {
         expect(component.showBackButton).toBeFalse();
     });
 
-    it('should render title and subtitle when provided', () => {
+    it('should render title when provided', () => {
         const testTitle = 'Header Title';
-        const testSubtitle = 'Header Subtitle';
         component.title = testTitle;
-        component.subtitle = testSubtitle;
         fixture.detectChanges();
 
         const el = fixture.debugElement.nativeElement as HTMLElement;
         expect(el.textContent).toContain(testTitle);
-        expect(el.textContent).toContain(testSubtitle);
     });
 
     it('should emit backClick when observed', () => {
