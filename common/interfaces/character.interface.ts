@@ -1,29 +1,9 @@
-import { AvatarName } from '../enums/avatar-name.enum';
+import { BonusType, DiceType } from '@common/enums/character-creation.enum';
 
-export enum DiceType {
-    D4 = 'D4',
-    D6 = 'D6',
-}
-
-export enum Stat {
-    Life = 'life',
-    Speed = 'speed',
-    Attack = 'attack',
-    Defence = 'defence',
-}
-
-export interface Attribute {
-    value: number;
-    dice?: DiceType;
-}
-
-export interface CharacterAttributes {
+export interface Character {
     name: string;
-    avatar: AvatarName;
-    stats: {
-        vie: Attribute;
-        rapidite: Attribute;
-        attaque: Attribute;
-        defense: Attribute;
-    };
+    avatar: number | null;
+    bonus: BonusType | null;
+    diceAssignment: { attack: DiceType; defense: DiceType };
+    attributes: { life: number; speed: number };
 }

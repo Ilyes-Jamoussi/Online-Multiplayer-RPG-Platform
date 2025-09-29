@@ -13,6 +13,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
+import { BonusType, DiceType } from '@common/enums/character-creation.enum';
 
 @Component({
     standalone: true,
@@ -23,6 +24,48 @@ import { NotificationService } from '@app/services/notification/notification.ser
     providers: [CharacterCreationCheckService],
 })
 export class CharacterCreationPageComponent implements OnInit {
+    readonly diceType = DiceType;
+    readonly bonusType = BonusType;
+
+    get hasSelectedAvatar(): boolean {
+        return this.character.avatar !== null;
+    }
+
+    get showAvatarPlaceholder(): boolean {
+        return !this.hasSelectedAvatar;
+    }
+
+    get isLifeBonusSelected(): boolean {
+        return this.character.bonus === BonusType.Life;
+    }
+
+    get isSpeedBonusSelected(): boolean {
+        return this.character.bonus === BonusType.Speed;
+    }
+
+    get isAttackD4Selected(): boolean {
+        return this.character.diceAssignment.attack === DiceType.D4;
+    }
+
+    get isAttackD6Selected(): boolean {
+        return this.character.diceAssignment.attack === DiceType.D6;
+    }
+
+    get isDefenseD4Selected(): boolean {
+        return this.character.diceAssignment.defense === DiceType.D4;
+    }
+
+    get isDefenseD6Selected(): boolean {
+        return this.character.diceAssignment.defense === DiceType.D6;
+    }
+
+    isAvatarSelected(avatar: number): boolean {
+        return this.character.avatar === avatar;
+    }
+
+    getSelectedAvatarAltText(): string {
+        return this.character.avatar !== null ? `Avatar sélectionné ${this.character.avatar + 1}` : '';
+    }
     readonly characterNameMinLength = NAME_MIN_LENGTH;
     readonly characterNameMaxLength = CHARACTER_NAME_MAX_LENGTH;
 
@@ -54,7 +97,7 @@ export class CharacterCreationPageComponent implements OnInit {
 
     ngOnInit() {
         this.characterStoreService.resetAvatar();
-        this.characterStoreService.setBonus('life');
+        this.characterStoreService.setBonus(BonusType.Life);
     }
 
     onNameChange(v: string) {
@@ -77,14 +120,14 @@ export class CharacterCreationPageComponent implements OnInit {
         this.characterStoreService.selectAvatar(index);
     }
 
-    onBonusChange(bonus: 'life' | 'speed') {
+    onBonusChange(bonus: BonusType) {
         this.characterStoreService.setBonus(bonus);
     }
 
-    onAttackDiceChange(value: 'D4' | 'D6') {
+    onAttackDiceChange(value: DiceType) {
         this.characterStoreService.setDice('attack', value);
     }
-    onDefenseDiceChange(value: 'D4' | 'D6') {
+    onDefenseDiceChange(value: DiceType) {
         this.characterStoreService.setDice('defense', value);
     }
 

@@ -1,5 +1,5 @@
 import { AvatarName } from '@common/enums/avatar-name.enum';
-import { DiceType } from '@common/enums/dice-type.enum';
+import { DiceType } from '@common/enums/character-creation.enum';
 import { ItemType } from '@common/enums/item-type.enum';
 import { Position } from '@common/interfaces/position.interface';
 

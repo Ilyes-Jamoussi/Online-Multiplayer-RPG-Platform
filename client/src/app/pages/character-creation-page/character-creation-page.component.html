@@ -3,26 +3,26 @@
     <section class="card" aria-label="Sélection d'avatar">
       <div class="card-body">
         <div class="selected">
-          @if (character.avatar === null) {
+          @if (showAvatarPlaceholder) {
             <div class="selected-empty">👤</div>
           } @else {
-            <img class="selected-img" [src]="getSelectedAvatarImage()" [alt]="'Avatar ' + (character.avatar + 1)" />
+            <img class="selected-img" [src]="getSelectedAvatarImage()" [alt]="getSelectedAvatarAltText()" />
           }
         </div>
 
         <div class="grid" role="grid" aria-label="Avatars">
-          @for (a of avatars; track a) {
+          @for (avatar of avatars; track avatar) {
             <button
               type="button"
               class="cell"
-              [class.active]="character.avatar === a"
-              (click)="selectAvatar(a)"
+              [class.active]="isAvatarSelected(avatar)"
+              (click)="selectAvatar(avatar)"
               role="gridcell"
-              [attr.aria-label]="'Avatar ' + (a + 1)"
-              [attr.aria-pressed]="character.avatar === a"
+              [attr.aria-label]="'Avatar ' + (avatar + 1)"
+              [attr.aria-pressed]="isAvatarSelected(avatar)"
             >
-              <img class="cell-img" [src]="getAvatarImage(a)" [alt]="'Avatar ' + (a + 1)" />
-              <span class="cell-num">{{ a + 1 }}</span>
+              <img class="cell-img" [src]="getAvatarImage(avatar)" [alt]="'Avatar ' + (avatar + 1)" />
+              <span class="cell-num">{{ avatar + 1 }}</span>
             </button>
           }
         </div>
@@ -55,12 +55,12 @@
         <div class="field">
           <h3>Bonus (+2)</h3>
           <div class="radio-row" role="radiogroup">
-            <label class="radio" [class.on]="character.bonus === 'life'">
-              <input type="radio" name="bonus" value="life" [checked]="character.bonus === 'life'" (change)="onBonusChange('life')" />
+            <label class="radio" [class.on]="isLifeBonusSelected">
+              <input type="radio" name="bonus" value="life" [checked]="isLifeBonusSelected" (change)="onBonusChange(bonusType.Life)" />
               <span>❤️ Vie</span>
             </label>
-            <label class="radio" [class.on]="character.bonus === 'speed'">
-              <input type="radio" name="bonus" value="speed" [checked]="character.bonus === 'speed'" (change)="onBonusChange('speed')" />
+            <label class="radio" [class.on]="isSpeedBonusSelected">
+              <input type="radio" name="bonus" value="speed" [checked]="isSpeedBonusSelected" (change)="onBonusChange(bonusType.Speed)" />
               <span>⚡ Rapidité</span>
             </label>
           </div>
@@ -74,11 +74,11 @@
             <div class="dice-card">
               <span>Attaque</span>
               <div class="dice-row">
-                <button type="button" class="dice-btn" [class.sel]="character.diceAssignment.attack === 'D4'" (click)="onAttackDiceChange('D4')">
-                  <img [src]="assetsService.getDiceImage('D4')" alt="D4" />
+                <button type="button" class="dice-btn" [class.sel]="isAttackD4Selected" (click)="onAttackDiceChange(diceType.D4)">
+                  <img [src]="assetsService.getDiceImage(diceType.D4)" alt="D4" />
                 </button>
-                <button type="button" class="dice-btn" [class.sel]="character.diceAssignment.attack === 'D6'" (click)="onAttackDiceChange('D6')">
-                  <img [src]="assetsService.getDiceImage('D6')" alt="D6" />
+                <button type="button" class="dice-btn" [class.sel]="isAttackD6Selected" (click)="onAttackDiceChange(diceType.D6)">
+                  <img [src]="assetsService.getDiceImage(diceType.D6)" alt="D6" />
                 </button>
               </div>
             </div>
@@ -86,11 +86,11 @@
             <div class="dice-card">
               <span>Défense</span>
               <div class="dice-row">
-                <button type="button" class="dice-btn" [class.sel]="character.diceAssignment.defense === 'D4'" (click)="onDefenseDiceChange('D4')">
-                  <img [src]="assetsService.getDiceImage('D4')" alt="D4" />
+                <button type="button" class="dice-btn" [class.sel]="isDefenseD4Selected" (click)="onDefenseDiceChange(diceType.D4)">
+                  <img [src]="assetsService.getDiceImage(diceType.D4)" alt="D4" />
                 </button>
-                <button type="button" class="dice-btn" [class.sel]="character.diceAssignment.defense === 'D6'" (click)="onDefenseDiceChange('D6')">
-                  <img [src]="assetsService.getDiceImage('D6')" alt="D6" />
+                <button type="button" class="dice-btn" [class.sel]="isDefenseD6Selected" (click)="onDefenseDiceChange(diceType.D6)">
+                  <img [src]="assetsService.getDiceImage(diceType.D6)" alt="D6" />
                 </button>
               </div>
             </div>

@@ -2,11 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
 import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH, WHITESPACE_PATTERN } from '@app/constants/validation.constants';
-import type { CharacterForm } from '@app/interfaces/character.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
+import { BonusType, DiceType } from '@common/enums/character-creation.enum';
+import { Character } from '@common/interfaces/character.interface';
 import { CharacterCreationPageComponent } from './character-creation-page.component';
 
 describe('CharacterCreationPageComponent (high coverage)', () => {
@@ -96,7 +97,7 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
             get: () =>
                 ({
                     name: { trim: () => ' '.repeat(NAME_MIN_LENGTH) },
-                }) as unknown as CharacterForm,
+                }) as unknown as Character,
         });
 
         const msg = component.getNameErrorMessage();
@@ -105,14 +106,14 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
 
     it('getNameErrorMessage returns empty string for empty name after trim', () => {
         Object.defineProperty(component, 'character', {
-            get: () => ({ name: { trim: () => '' } }) as unknown as CharacterForm,
+            get: () => ({ name: { trim: () => '' } }) as unknown as Character,
         });
         expect(component.getNameErrorMessage()).toBe('');
     });
 
     it('getNameErrorMessage returns empty string for a valid name', () => {
         Object.defineProperty(component, 'character', {
-            get: () => ({ name: { trim: () => 'ValidName' } }) as unknown as CharacterForm,
+            get: () => ({ name: { trim: () => 'ValidName' } }) as unknown as Character,
         });
         expect(component.getNameErrorMessage()).toBe('');
     });
@@ -139,14 +140,121 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
         component.selectAvatar(2);
         expect(mockCharacterStoreService.selectAvatar).toHaveBeenCalledWith(2);
 
-        component.onBonusChange('speed');
-        expect(mockCharacterStoreService.setBonus).toHaveBeenCalledWith('speed');
+        component.onBonusChange(BonusType.Speed);
+        expect(mockCharacterStoreService.setBonus).toHaveBeenCalledWith(BonusType.Speed);
 
-        component.onAttackDiceChange('D6');
-        expect(mockCharacterStoreService.setDice).toHaveBeenCalledWith('attack', 'D6');
+        component.onAttackDiceChange(DiceType.D6);
+        expect(mockCharacterStoreService.setDice).toHaveBeenCalledWith('attack', DiceType.D6);
 
-        component.onDefenseDiceChange('D4');
-        expect(mockCharacterStoreService.setDice).toHaveBeenCalledWith('defense', 'D4');
+        component.onDefenseDiceChange(DiceType.D4);
+        expect(mockCharacterStoreService.setDice).toHaveBeenCalledWith('defense', DiceType.D4);
+    });
+
+    describe('getter methods', () => {
+        it('hasSelectedAvatar should return true when avatar is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ avatar: 1 }) as Character,
+                configurable: true,
+            });
+            expect(component.hasSelectedAvatar).toBe(true);
+        });
+
+        it('hasSelectedAvatar should return false when no avatar is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ avatar: null }) as Character,
+                configurable: true,
+            });
+            expect(component.hasSelectedAvatar).toBe(false);
+        });
+
+        it('showAvatarPlaceholder should return false when avatar is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ avatar: 1 }) as Character,
+                configurable: true,
+            });
+            expect(component.showAvatarPlaceholder).toBe(false);
+        });
+
+        it('showAvatarPlaceholder should return true when no avatar is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ avatar: null }) as Character,
+                configurable: true,
+            });
+            expect(component.showAvatarPlaceholder).toBe(true);
+        });
+
+        it('isLifeBonusSelected should return true when life bonus is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ bonus: BonusType.Life }) as Character,
+                configurable: true,
+            });
+            expect(component.isLifeBonusSelected).toBe(true);
+        });
+
+        it('isSpeedBonusSelected should return true when speed bonus is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ bonus: BonusType.Speed }) as Character,
+                configurable: true,
+            });
+            expect(component.isSpeedBonusSelected).toBe(true);
+        });
+
+        it('isAttackD4Selected should return true when attack dice is D4', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ diceAssignment: { attack: DiceType.D4 } }) as Character,
+                configurable: true,
+            });
+            expect(component.isAttackD4Selected).toBe(true);
+        });
+
+        it('isAttackD6Selected should return true when attack dice is D6', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ diceAssignment: { attack: DiceType.D6 } }) as Character,
+                configurable: true,
+            });
+            expect(component.isAttackD6Selected).toBe(true);
+        });
+
+        it('isDefenseD4Selected should return true when defense dice is D4', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ diceAssignment: { defense: DiceType.D4 } }) as Character,
+                configurable: true,
+            });
+            expect(component.isDefenseD4Selected).toBe(true);
+        });
+
+        it('isDefenseD6Selected should return true when defense dice is D6', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ diceAssignment: { defense: DiceType.D6 } }) as Character,
+                configurable: true,
+            });
+            expect(component.isDefenseD6Selected).toBe(true);
+        });
+
+        it('isAvatarSelected should return true when given avatar matches selected avatar', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ avatar: 2 }) as Character,
+                configurable: true,
+            });
+            expect(component.isAvatarSelected(2)).toBe(true);
+            expect(component.isAvatarSelected(1)).toBe(false);
+        });
+
+        it('getSelectedAvatarAltText should return correct text when avatar is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ avatar: 2 }) as Character,
+                configurable: true,
+            });
+            expect(component.getSelectedAvatarAltText()).toBe('Avatar sélectionné 3');
+        });
+
+        it('getSelectedAvatarAltText should return empty string when no avatar is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ avatar: null }) as Character,
+                configurable: true,
+            });
+            expect(component.getSelectedAvatarAltText()).toBe('');
+        });
     });
 
     it('generateRandomCharacter delegates to store.generateRandom', () => {
