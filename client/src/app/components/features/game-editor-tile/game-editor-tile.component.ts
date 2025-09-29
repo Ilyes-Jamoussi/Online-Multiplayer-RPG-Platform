@@ -31,7 +31,7 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
     readonly tileKinds = TileKind;
 
     get image() {
-        return this.assetService.getTileImage(TileKind[this.tile.kind]);
+        return this.assetService.getTileImage(TileKind[this.tile.kind], this.tile.open);
     }
 
     hasProblem(): boolean {

@@ -1,9 +1,6 @@
 import { Directive, Input } from '@angular/core';
 import { UiVariant, UiSize, UiShapeVariant, UiAlignment, UiSpacing, UiElevation } from '@app/types/ui.types';
 
-/**
- * Abstract base class for UI components (no template, not instantiable directly)
- */
 @Directive()
 export abstract class UiBaseComponent {
     @Input() variant: UiVariant = 'primary';

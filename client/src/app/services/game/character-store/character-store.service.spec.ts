@@ -190,4 +190,29 @@ describe('CharacterStoreService', () => {
         expect(service.isNameValid).toBeTrue();
         expect(service.nameError).toBeNull();
     });
+
+    it('should update attributes when bonus is speed', () => {
+        service.setBonus('speed');
+        const c = service.character();
+        expect(c.attributes.life).toBe(CHARACTER_BASE);
+        expect(c.attributes.speed).toBe(CHARACTER_BASE + CHARACTER_PLUS);
+    });
+
+    it('should set dice assignment when setting defense to D4', () => {
+        service.setDice('defense', 'D4');
+        const c = service.character();
+        expect(c.diceAssignment.defense).toBe('D4');
+        expect(c.diceAssignment.attack).toBe('D6');
+    });
+
+    it('generateRandom should set bonus to speed when random >= threshold', () => {
+        const rName = 0.2;
+        const rAvatar = 0.3;
+        const rBonus = 0.9;
+        const rDice = 0.2;
+        spyOn(Math, 'random').and.returnValues(rName, rAvatar, rBonus, rDice);
+
+        service.generateRandom();
+        expect(service.character().bonus).toBe('speed');
+    });
 });

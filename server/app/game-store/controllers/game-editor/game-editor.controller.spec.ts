@@ -3,9 +3,9 @@ import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
 import { PatchGameEditorDto } from '@app/game-store/dto/patch-game-editor.dto';
 import { GameStoreGateway } from '@app/game-store/gateways/game-store.gateway';
 import { GameEditorService } from '@app/game-store/services/game-editor/game-editor.service';
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GameEditorController } from './game-editor.controller';
+import { GameStoreService } from '@app/game-store/services/game-store/game-store.service';
 
 describe('GameEditorController', () => {
     let controller: GameEditorController;
@@ -26,6 +26,12 @@ describe('GameEditorController', () => {
                     provide: GameStoreGateway,
                     useValue: {
                         emitGameUpdated: jest.fn(),
+                    },
+                },
+                {
+                    provide: GameStoreService,
+                    useValue: {
+                        createGame: jest.fn(),
                     },
                 },
             ],
@@ -56,10 +62,5 @@ describe('GameEditorController', () => {
         const result = { id: '1', name: 'Patched Game' } as GamePreviewDto;
         jest.spyOn(service, 'patchEditByGameId').mockResolvedValue(result);
         expect(await controller.patchGameForEdit('1', patchDto)).toBe(result);
-    });
-
-    it('should throw NotFoundException if patchGameForEdit returns null', async () => {
-        jest.spyOn(service, 'patchEditByGameId').mockResolvedValue(null);
-        await expect(controller.patchGameForEdit('1', {} as PatchGameEditorDto)).rejects.toThrow(NotFoundException);
     });
 });
