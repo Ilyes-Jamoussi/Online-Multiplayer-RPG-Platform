@@ -2,11 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
 import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH, WHITESPACE_PATTERN } from '@app/constants/validation.constants';
-import type { CharacterForm } from '@app/interfaces/character.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
+import { DiceType } from '@common/enums/character-creation.enum';
+import { Character } from '@common/interfaces/character.interface';
 import { CharacterCreationPageComponent } from './character-creation-page.component';
 
 describe('CharacterCreationPageComponent (high coverage)', () => {
@@ -142,11 +143,11 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
         component.onBonusChange('speed');
         expect(mockCharacterStoreService.setBonus).toHaveBeenCalledWith('speed');
 
-        component.onAttackDiceChange('D6');
-        expect(mockCharacterStoreService.setDice).toHaveBeenCalledWith('attack', 'D6');
+        component.onAttackDiceChange(DiceType.D6);
+        expect(mockCharacterStoreService.setDice).toHaveBeenCalledWith('attack', DiceType.D6);
 
-        component.onDefenseDiceChange('D4');
-        expect(mockCharacterStoreService.setDice).toHaveBeenCalledWith('defense', 'D4');
+        component.onDefenseDiceChange(DiceType.D4);
+        expect(mockCharacterStoreService.setDice).toHaveBeenCalledWith('defense', DiceType.D4);
     });
 
     it('generateRandomCharacter delegates to store.generateRandom', () => {
