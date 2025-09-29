@@ -4,13 +4,13 @@
             <div class="avatar-card">
                 <div class="selected-avatar-display">
                     <div class="selected-avatar-frame">
-                        @if (character.avatar === null) {
+                        @if (showAvatarPlaceholder) {
                         <div class="no-selection">
                             <div class="selection-icon">👤</div>
                             <h4>Sélectionner un avatar</h4>
                         </div>
                         } @else {
-                        <img [src]="getSelectedAvatarImage()" [alt]="'Avatar sélectionné ' + (character.avatar + 1)" class="selected-avatar-gif" />
+                        <img [src]="getSelectedAvatarImage()" [alt]="getSelectedAvatarAltText()" class="selected-avatar-gif" />
                         }
                     </div>
                 </div>
@@ -20,10 +20,10 @@
                     <button
                         type="button"
                         class="character-slot"
-                        [class.selected]="character.avatar === avatar"
+                        [class.selected]="isAvatarSelected(avatar)"
                         (click)="selectAvatar(avatar)"
                         [attr.aria-label]="'Avatar ' + (avatar + 1)"
-                        [attr.aria-pressed]="character.avatar === avatar"
+                        [attr.aria-pressed]="isAvatarSelected(avatar)"
                         role="gridcell"
                     >
                         <div class="character-portrait">
@@ -69,25 +69,25 @@
                         <div class="bonus-selection">
                             <h4>Bonus (+2)</h4>
                             <div class="bonus-options" role="radiogroup" aria-label="Sélection du bonus d'attribut">
-                                <label class="bonus-option" [class.selected]="character.bonus === BonusType.Life">
+                                <label class="bonus-option" [class.selected]="isLifeBonusSelected">
                                     <input
                                         type="radio"
                                         name="bonus"
                                         value="life"
-                                        [checked]="character.bonus === BonusType.Life"
-                                        (change)="onBonusChange(BonusType.Life)"
+                                        [checked]="isLifeBonusSelected"
+                                        (change)="onBonusChange(bonusType.Life)"
                                         aria-label="Bonus de vie"
                                     />
                                     <span>❤️ Vie</span>
                                 </label>
 
-                                <label class="bonus-option" [class.selected]="character.bonus === BonusType.Speed">
+                                <label class="bonus-option" [class.selected]="isSpeedBonusSelected">
                                     <input
                                         type="radio"
                                         name="bonus"
                                         value="speed"
-                                        [checked]="character.bonus === BonusType.Speed"
-                                        (change)="onBonusChange(BonusType.Speed)"
+                                        [checked]="isSpeedBonusSelected"
+                                        (change)="onBonusChange(bonusType.Speed)"
                                         aria-label="Bonus de rapidité"
                                     />
                                     <span>⚡ Rapidité</span>
@@ -107,22 +107,22 @@
                                         <button
                                             type="button"
                                             class="dice-btn"
-                                            [class.selected]="character.diceAssignment.attack === DiceType.D4"
-                                            (click)="onAttackDiceChange(DiceType.D4)"
-                                            [attr.aria-pressed]="character.diceAssignment.attack === DiceType.D4"
+                                            [class.selected]="isAttackD4Selected"
+                                            (click)="onAttackDiceChange(diceType.D4)"
+                                            [attr.aria-pressed]="isAttackD4Selected"
                                             aria-label="Dé D4 pour l'attaque"
                                         >
-                                            <img [src]="assetsService.getDiceImage(DiceType.D4)" alt="D4" class="dice-img" />
+                                            <img [src]="assetsService.getDiceImage(diceType.D4)" alt="D4" class="dice-img" />
                                         </button>
                                         <button
                                             type="button"
                                             class="dice-btn"
-                                            [class.selected]="character.diceAssignment.attack === DiceType.D6"
-                                            (click)="onAttackDiceChange(DiceType.D6)"
-                                            [attr.aria-pressed]="character.diceAssignment.attack === DiceType.D6"
+                                            [class.selected]="isAttackD6Selected"
+                                            (click)="onAttackDiceChange(diceType.D6)"
+                                            [attr.aria-pressed]="isAttackD6Selected"
                                             aria-label="Dé D6 pour l'attaque"
                                         >
-                                            <img [src]="assetsService.getDiceImage(DiceType.D6)" alt="D6" class="dice-img" />
+                                            <img [src]="assetsService.getDiceImage(diceType.D6)" alt="D6" class="dice-img" />
                                         </button>
                                     </div>
                                 </div>
@@ -134,22 +134,22 @@
                                         <button
                                             type="button"
                                             class="dice-btn"
-                                            [class.selected]="character.diceAssignment.defense === DiceType.D4"
-                                            (click)="onDefenseDiceChange(DiceType.D4)"
-                                            [attr.aria-pressed]="character.diceAssignment.defense === DiceType.D4"
+                                            [class.selected]="isDefenseD4Selected"
+                                            (click)="onDefenseDiceChange(diceType.D4)"
+                                            [attr.aria-pressed]="isDefenseD4Selected"
                                             aria-label="Dé D4 pour la défense"
                                         >
-                                            <img [src]="assetsService.getDiceImage(DiceType.D4)" alt="D4" class="dice-img" />
+                                            <img [src]="assetsService.getDiceImage(diceType.D4)" alt="D4" class="dice-img" />
                                         </button>
                                         <button
                                             type="button"
                                             class="dice-btn"
-                                            [class.selected]="character.diceAssignment.defense === DiceType.D6"
-                                            (click)="onDefenseDiceChange(DiceType.D6)"
-                                            [attr.aria-pressed]="character.diceAssignment.defense === DiceType.D6"
+                                            [class.selected]="isDefenseD6Selected"
+                                            (click)="onDefenseDiceChange(diceType.D6)"
+                                            [attr.aria-pressed]="isDefenseD6Selected"
                                             aria-label="Dé D6 pour la défense"
                                         >
-                                            <img [src]="assetsService.getDiceImage(DiceType.D6)" alt="D6" class="dice-img" />
+                                            <img [src]="assetsService.getDiceImage(diceType.D6)" alt="D6" class="dice-img" />
                                         </button>
                                     </div>
                                 </div>

@@ -150,6 +150,113 @@ describe('CharacterCreationPageComponent (high coverage)', () => {
         expect(mockCharacterStoreService.setDice).toHaveBeenCalledWith('defense', DiceType.D4);
     });
 
+    describe('getter methods', () => {
+        it('hasSelectedAvatar should return true when avatar is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ avatar: 1 }) as Character,
+                configurable: true,
+            });
+            expect(component.hasSelectedAvatar).toBe(true);
+        });
+
+        it('hasSelectedAvatar should return false when no avatar is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ avatar: null }) as Character,
+                configurable: true,
+            });
+            expect(component.hasSelectedAvatar).toBe(false);
+        });
+
+        it('showAvatarPlaceholder should return false when avatar is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ avatar: 1 }) as Character,
+                configurable: true,
+            });
+            expect(component.showAvatarPlaceholder).toBe(false);
+        });
+
+        it('showAvatarPlaceholder should return true when no avatar is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ avatar: null }) as Character,
+                configurable: true,
+            });
+            expect(component.showAvatarPlaceholder).toBe(true);
+        });
+
+        it('isLifeBonusSelected should return true when life bonus is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ bonus: BonusType.Life }) as Character,
+                configurable: true,
+            });
+            expect(component.isLifeBonusSelected).toBe(true);
+        });
+
+        it('isSpeedBonusSelected should return true when speed bonus is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ bonus: BonusType.Speed }) as Character,
+                configurable: true,
+            });
+            expect(component.isSpeedBonusSelected).toBe(true);
+        });
+
+        it('isAttackD4Selected should return true when attack dice is D4', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ diceAssignment: { attack: DiceType.D4 } }) as Character,
+                configurable: true,
+            });
+            expect(component.isAttackD4Selected).toBe(true);
+        });
+
+        it('isAttackD6Selected should return true when attack dice is D6', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ diceAssignment: { attack: DiceType.D6 } }) as Character,
+                configurable: true,
+            });
+            expect(component.isAttackD6Selected).toBe(true);
+        });
+
+        it('isDefenseD4Selected should return true when defense dice is D4', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ diceAssignment: { defense: DiceType.D4 } }) as Character,
+                configurable: true,
+            });
+            expect(component.isDefenseD4Selected).toBe(true);
+        });
+
+        it('isDefenseD6Selected should return true when defense dice is D6', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ diceAssignment: { defense: DiceType.D6 } }) as Character,
+                configurable: true,
+            });
+            expect(component.isDefenseD6Selected).toBe(true);
+        });
+
+        it('isAvatarSelected should return true when given avatar matches selected avatar', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ avatar: 2 }) as Character,
+                configurable: true,
+            });
+            expect(component.isAvatarSelected(2)).toBe(true);
+            expect(component.isAvatarSelected(1)).toBe(false);
+        });
+
+        it('getSelectedAvatarAltText should return correct text when avatar is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ avatar: 2 }) as Character,
+                configurable: true,
+            });
+            expect(component.getSelectedAvatarAltText()).toBe('Avatar sélectionné 3');
+        });
+
+        it('getSelectedAvatarAltText should return empty string when no avatar is selected', () => {
+            Object.defineProperty(component, 'character', {
+                get: () => ({ avatar: null }) as Character,
+                configurable: true,
+            });
+            expect(component.getSelectedAvatarAltText()).toBe('');
+        });
+    });
+
     it('generateRandomCharacter delegates to store.generateRandom', () => {
         component.generateRandomCharacter();
         expect(mockCharacterStoreService.generateRandom).toHaveBeenCalled();

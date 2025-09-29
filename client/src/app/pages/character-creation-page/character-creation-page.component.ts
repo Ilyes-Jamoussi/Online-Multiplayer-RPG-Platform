@@ -24,8 +24,48 @@ import { BonusType, DiceType } from '@common/enums/character-creation.enum';
     providers: [CharacterCreationCheckService],
 })
 export class CharacterCreationPageComponent implements OnInit {
-    readonly DiceType = DiceType;
-    readonly BonusType = BonusType;
+    readonly diceType = DiceType;
+    readonly bonusType = BonusType;
+
+    get hasSelectedAvatar(): boolean {
+        return this.character.avatar !== null;
+    }
+
+    get showAvatarPlaceholder(): boolean {
+        return !this.hasSelectedAvatar;
+    }
+
+    get isLifeBonusSelected(): boolean {
+        return this.character.bonus === BonusType.Life;
+    }
+
+    get isSpeedBonusSelected(): boolean {
+        return this.character.bonus === BonusType.Speed;
+    }
+
+    get isAttackD4Selected(): boolean {
+        return this.character.diceAssignment.attack === DiceType.D4;
+    }
+
+    get isAttackD6Selected(): boolean {
+        return this.character.diceAssignment.attack === DiceType.D6;
+    }
+
+    get isDefenseD4Selected(): boolean {
+        return this.character.diceAssignment.defense === DiceType.D4;
+    }
+
+    get isDefenseD6Selected(): boolean {
+        return this.character.diceAssignment.defense === DiceType.D6;
+    }
+
+    isAvatarSelected(avatar: number): boolean {
+        return this.character.avatar === avatar;
+    }
+
+    getSelectedAvatarAltText(): string {
+        return this.character.avatar !== null ? `Avatar sélectionné ${this.character.avatar + 1}` : '';
+    }
     readonly characterNameMinLength = NAME_MIN_LENGTH;
     readonly characterNameMaxLength = CHARACTER_NAME_MAX_LENGTH;
 
