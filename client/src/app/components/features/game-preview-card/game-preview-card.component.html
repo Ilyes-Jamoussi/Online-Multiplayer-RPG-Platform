@@ -1,7 +1,7 @@
 <div class="game-card">
     <div class="card-content">
         <div class="game-preview">
-            <img [src]="getImageUrl()" [alt]="game.name + ' preview'" class="preview-image" />
+            <img [src]="imageUrl" [alt]="game.name + ' preview'" class="preview-image" />
             <div class="description-tooltip">{{ game.description }}</div>
         </div>
 
@@ -15,7 +15,7 @@
             <div class="game-meta">
                 <div class="meta-item">
                     <span class="meta-label">Taille</span>
-                    <span class="meta-value">{{ getMapSizeLabel() }}</span>
+                    <span class="meta-value">{{ mapSizeLabel }}</span>
                 </div>
                 <div class="meta-item">
                     <span class="meta-label">Modifié</span>

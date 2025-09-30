@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, HostBinding, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, HostBinding, Input } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
-import { PlaceableKind, PlaceableLabel } from '@common/enums/placeable-kind.enum';
-import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { ToolType } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
+import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { PlaceableKind, PlaceableLabel } from '@common/enums/placeable-kind.enum';
 
 @Component({
     selector: 'app-editor-placed-object',
@@ -18,12 +18,12 @@ export class GameEditorObjectComponent {
     @Input({ required: true }) object: GameEditorPlaceableDto;
     @Input({ required: true }) tileSize: number;
 
+    isDragging = false;
+
     constructor(
         private readonly gameEditorInteractionsService: GameEditorInteractionsService,
         private readonly assetsService: AssetsService,
     ) {}
-
-    isDragging = false;
 
     get image() {
         return this.assetsService.getPlaceableImage(PlaceableKind[this.object.kind]);

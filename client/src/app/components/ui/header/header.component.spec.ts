@@ -22,7 +22,7 @@ describe('UiHeaderComponent', () => {
 
     it('should create with default inputs', () => {
         expect(component).toBeTruthy();
-        expect(component.title).toBeUndefined();
+        expect(component.title).toBe('');
         expect(component.subtitle).toBeUndefined();
         expect(component.showBackButton).toBeFalse();
     });

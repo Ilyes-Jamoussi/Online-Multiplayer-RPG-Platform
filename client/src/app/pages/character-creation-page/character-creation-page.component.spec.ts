@@ -210,9 +210,9 @@ describe('CharacterCreationPageComponent', () => {
 
     it('should return correct aria-pressed for avatars', () => {
         const avatarIndex = 2;
-        expect(component.getisAvatarSelected(avatarIndex)).toBeFalse();
+        expect(component.getIsAvatarSelected(avatarIndex)).toBeFalse();
         component.selectAvatar(avatarIndex);
-        expect(component.getisAvatarSelected(avatarIndex)).toBeTrue();
+        expect(component.getIsAvatarSelected(avatarIndex)).toBeTrue();
     });
 
     it('should have correct character name length constants', () => {
@@ -227,6 +227,12 @@ describe('CharacterCreationPageComponent', () => {
         component.selectAvatar(1);
         expect(component.hasSelectedAvatar).toBeTrue();
         expect(component.showAvatarPlaceholder).toBeFalse();
+    });
+
+    it('should return dice image from assets service', () => {
+        const result = component.getDiceImage(DiceType.D4);
+        expect(assetsServiceSpy.getDiceImage).toHaveBeenCalledWith(DiceType.D4);
+        expect(result).toBe('/dice/d4.svg');
     });
 
     it('should reflect bonus selection flags (isLifeBonusSelected / isSpeedBonusSelected)', () => {
@@ -301,5 +307,13 @@ describe('CharacterCreationPageComponent', () => {
                 redirectRoute: 'waiting-room',
             }),
         );
+    });
+
+    it('should return canCreate from service for canCreateCharacter getter', () => {
+        creationCheckServiceSpy.canCreate.and.returnValue(true);
+        expect(component.canCreateCharacter).toBe(true);
+
+        creationCheckServiceSpy.canCreate.and.returnValue(false);
+        expect(component.canCreateCharacter).toBe(false);
     });
 });

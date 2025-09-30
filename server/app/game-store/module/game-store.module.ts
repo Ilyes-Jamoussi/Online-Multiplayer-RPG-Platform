@@ -1,4 +1,4 @@
-import { GameEditorController } from '@app/game-store//controllers/game-editor/game-editor.controller';
+import { GameEditorController } from '@app/game-store/controllers/game-editor/game-editor.controller';
 import { GameStoreController } from '@app/game-store/controllers/game-store/game-store.controller';
 import { Game, gameSchema } from '@app/game-store/entities/game.entity';
 import { GameStoreGateway } from '@app/game-store/gateways/game-store.gateway';

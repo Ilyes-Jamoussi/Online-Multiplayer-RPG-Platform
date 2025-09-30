@@ -121,7 +121,7 @@ describe('placeable.factory', () => {
     it('treats undefined extra flag count as 0 in CTF', () => {
         const size = MapSize.MEDIUM;
         const original = (FLAG_COUNTS[GameMode.CTF]?.[size] ?? {})[PlaceableKind.FLAG];
-        (FLAG_COUNTS[GameMode.CTF][size])[PlaceableKind.FLAG] = undefined;
+        FLAG_COUNTS[GameMode.CTF][size][PlaceableKind.FLAG] = undefined;
 
         try {
             const out = makeDefaultPlaceables(size, GameMode.CTF);
@@ -129,7 +129,7 @@ describe('placeable.factory', () => {
             const flags = out.filter((p) => p.kind === PlaceableKind.FLAG).length;
             expect(flags).toBe(base);
         } finally {
-            (FLAG_COUNTS[GameMode.CTF][size])[PlaceableKind.FLAG] = original;
+            FLAG_COUNTS[GameMode.CTF][size][PlaceableKind.FLAG] = original;
         }
     });
 });

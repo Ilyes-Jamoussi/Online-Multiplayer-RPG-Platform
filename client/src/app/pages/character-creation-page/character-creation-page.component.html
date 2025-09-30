@@ -15,11 +15,11 @@
                     <button
                         type="button"
                         class="cell"
-                        [class.active]="getisAvatarSelected(avatar)"
+                        [class.active]="getIsAvatarSelected(avatar)"
                         (click)="selectAvatar(avatar)"
                         role="gridcell"
                         [attr.aria-label]="'Avatar ' + (avatar + 1)"
-                        [attr.aria-pressed]="getisAvatarSelected(avatar)"
+                        [attr.aria-pressed]="getIsAvatarSelected(avatar)"
                     >
                         <img class="cell-img" [src]="getAvatarImage(avatar)" [alt]="'Avatar ' + (avatar + 1)" />
                         <span class="cell-num">{{ avatar + 1 }}</span>
@@ -86,10 +86,10 @@
                             <span>Attaque</span>
                             <div class="dice-row">
                                 <button type="button" class="dice-btn" [class.sel]="isAttackD4Selected" (click)="onAttackDiceChange(diceType.D4)">
-                                    <img [src]="assetsService.getDiceImage(diceType.D4)" alt="D4" />
+                                    <img [src]="getDiceImage(diceType.D4)" [alt]="diceType.D4" />
                                 </button>
                                 <button type="button" class="dice-btn" [class.sel]="isAttackD6Selected" (click)="onAttackDiceChange(diceType.D6)">
-                                    <img [src]="assetsService.getDiceImage(diceType.D6)" alt="D6" />
+                                    <img [src]="getDiceImage(diceType.D6)" [alt]="diceType.D6" />
                                 </button>
                             </div>
                         </div>
@@ -98,10 +98,10 @@
                             <span>Défense</span>
                             <div class="dice-row">
                                 <button type="button" class="dice-btn" [class.sel]="isDefenseD4Selected" (click)="onDefenseDiceChange(diceType.D4)">
-                                    <img [src]="assetsService.getDiceImage(diceType.D4)" alt="D4" />
+                                    <img [src]="getDiceImage(diceType.D4)" [alt]="diceType.D4" />
                                 </button>
                                 <button type="button" class="dice-btn" [class.sel]="isDefenseD6Selected" (click)="onDefenseDiceChange(diceType.D6)">
-                                    <img [src]="assetsService.getDiceImage(diceType.D6)" alt="D6" />
+                                    <img [src]="getDiceImage(diceType.D6)" [alt]="diceType.D6" />
                                 </button>
                             </div>
                         </div>
@@ -113,7 +113,7 @@
 
     <div slot="footer" class="actions">
         <app-ui-button (buttonClick)="generateRandomCharacter()">🎲 Générer aléatoire</app-ui-button>
-        <app-ui-button (buttonClick)="onSubmit()" [disabled]="!characterCreationCheckService.canCreate()">Créer le personnage →</app-ui-button>
+        <app-ui-button (buttonClick)="onSubmit()" [disabled]="!canCreateCharacter">Créer le personnage →</app-ui-button>
         <app-errors-badge validationType="character-creation"></app-errors-badge>
     </div>
 </app-ui-page-layout>

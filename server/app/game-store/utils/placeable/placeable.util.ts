@@ -11,7 +11,7 @@ export function makeDefaultPlaceables(size: MapSize, mode: GameMode): Placeable[
 
     for (const [kindStr, count] of Object.entries(counts)) {
         const kind = kindStr as PlaceableKind;
-        for (let i = 0; i < (count); i++) {
+        for (let i = 0; i < count; i++) {
             out.push({ kind, placed: false, x: PLACEABLE_UNPLACED_COORDINATE, y: PLACEABLE_UNPLACED_COORDINATE });
         }
     }

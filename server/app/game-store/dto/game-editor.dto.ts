@@ -1,4 +1,3 @@
-// editor-game.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsString, IsArray } from 'class-validator';
 import { GameMode } from '@common/enums/game-mode.enum';

@@ -8,13 +8,10 @@ import { NUMBER_ALLOWED_CHARS_PATTERN, TEXT_ALLOWED_CHARS_PATTERN } from '@app/c
     standalone: true,
 })
 export class UiInputComponent {
-    private _value: string = '';
-
     @Input() placeholder: string = '';
     @Input() type: 'text' | 'number' | 'textarea' = 'text';
     @Input() maxLength?: number;
     @Input() fullWidth: boolean = false;
-
     @Input() set value(val: string) {
         if (val !== undefined) {
             this._value = val;
@@ -22,6 +19,8 @@ export class UiInputComponent {
     }
 
     @Output() valueChange = new EventEmitter<string>();
+
+    private _value: string = '';
 
     @HostBinding('class.full-width')
     get isFullWidth() {

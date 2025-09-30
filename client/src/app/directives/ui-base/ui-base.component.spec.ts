@@ -11,28 +11,29 @@ describe('UiBaseComponent', () => {
     });
 
     it('should initialize with default inputs', () => {
-        expect(comp.variant).toBe('primary');
+        expect(comp.variant).toBeUndefined();
         expect(comp.size).toBe('md');
-        expect(comp.shape).toBe('rounded');
+        expect(comp.shape).toBeUndefined();
         expect(comp.disabled).toBe(false);
-        expect(comp.fullWidth).toBe(false);
+        expect(comp.fullWidth).toBeUndefined();
         expect(comp.alignContent).toBe('center');
-        expect(comp.gap).toBe('sm');
+        expect(comp.gap).toBe('md');
         expect(comp.loading).toBe(false);
-        expect(comp.elevation).toBe('xs');
+        expect(comp.elevation).toBe('none');
         expect(comp.popOut).toBe(true);
     });
 
     it('classes should reflect defaults', () => {
         const c = comp.classes;
-        expect(c['v-primary']).toBeTrue();
+        expect(c['c-primary']).toBeTrue();
+        expect(c['st-filled']).toBeTrue();
         expect(c['s-md']).toBeTrue();
         expect(c['sh-rounded']).toBeTrue();
         expect(c['isDisabled']).toBeFalse();
-        expect(c['isFull']).toBeFalse();
+        expect(c['isFull']).toBeFalsy();
         expect(c['al-center']).toBeTrue();
-        expect(c['gap-sm']).toBeTrue();
-        expect(c['elev-xs']).toBeTrue();
+        expect(c['gap-md']).toBeTrue();
+        expect(c['elev-none']).toBeTrue();
         expect(c['popOut']).toBeTrue();
         expect(c['disableHoverEffects']).toBeFalse();
     });
@@ -45,6 +46,28 @@ describe('UiBaseComponent', () => {
         expect(c['isDisabled']).toBeTrue();
         expect(c['isFull']).toBeTrue();
         expect(c['popOut']).toBeFalse();
+    });
+
+    it('should return empty styleVars when width is not custom', () => {
+        const vars = comp.styleVars;
+        expect(vars).toEqual({});
+    });
+
+    it('should return styleVars with custom width when width is custom and widthValue is set', () => {
+        comp.width = 'custom';
+        comp.widthValue = '200px';
+        const vars = comp.styleVars;
+        expect(vars).toEqual({ ['--ui-w']: '200px' });
+    });
+
+    it('should return color when color input is set', () => {
+        comp.color = 'danger';
+        expect(comp.computedColor).toBe('danger');
+    });
+
+    it('should return computed color based on variant when color is not set', () => {
+        comp.variant = 'danger';
+        expect(comp.computedColor).toBe('danger');
     });
 
     it('classes should use provided non-default values', () => {
@@ -71,11 +94,12 @@ describe('UiBaseComponent', () => {
         comp.gap = '' as unknown as UiSpacing;
         comp.elevation = '' as unknown as UiElevation;
         const c = comp.classes;
-        expect(c['v-primary']).toBeTrue();
+        expect(c['c-primary']).toBeTrue();
+        expect(c['st-filled']).toBeTrue();
         expect(c['s-md']).toBeTrue();
         expect(c['sh-rounded']).toBeTrue();
         expect(c['al-center']).toBeTrue();
-        expect(c['gap-sm']).toBeTrue();
-        expect(c['elev-xs']).toBeTrue();
+        expect(c['gap-md']).toBeTrue();
+        expect(c['elev-none']).toBeTrue();
     });
 });

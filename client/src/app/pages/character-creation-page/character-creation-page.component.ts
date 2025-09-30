@@ -31,8 +31,8 @@ export class CharacterCreationPageComponent {
     readonly avatars = this.characterStoreService.avatars;
 
     constructor(
-        readonly assetsService: AssetsService,
-        readonly characterCreationCheckService: CharacterCreationCheckService,
+        private readonly assetsService: AssetsService,
+        private readonly characterCreationCheckService: CharacterCreationCheckService,
         private readonly characterStoreService: CharacterStoreService,
         private readonly notificationService: NotificationService,
     ) {}
@@ -69,10 +69,6 @@ export class CharacterCreationPageComponent {
         return this.character.diceAssignment.defense === DiceType.D6;
     }
 
-    getisAvatarSelected(avatar: number): boolean {
-        return this.character.avatar === avatar;
-    }
-
     get selectedAvatarAltText(): string {
         return this.character.avatar !== null ? `Avatar sélectionné ${this.character.avatar + 1}` : '';
     }
@@ -90,8 +86,20 @@ export class CharacterCreationPageComponent {
         return this.assetsService.getAvatarAnimatedByNumber(this.character.avatar + 1);
     }
 
+    get canCreateCharacter(): boolean {
+        return this.characterCreationCheckService.canCreate();
+    }
+
+    getIsAvatarSelected(avatar: number): boolean {
+        return this.character.avatar === avatar;
+    }
+
     getAvatarImage(avatarIndex: number): string {
         return this.assetsService.getAvatarStaticByNumber(avatarIndex + 1);
+    }
+
+    getDiceImage(diceType: DiceType): string {
+        return this.assetsService.getDiceImage(diceType);
     }
 
     onNameChange(v: string) {
