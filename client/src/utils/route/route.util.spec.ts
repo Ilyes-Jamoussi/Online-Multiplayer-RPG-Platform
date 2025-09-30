@@ -1,4 +1,4 @@
-import { removeLeadingSlash } from './route.utils';
+import { removeLeadingSlash } from './route.util';
 
 describe('Route Utils', () => {
     describe('removeLeadingSlash', () => {
