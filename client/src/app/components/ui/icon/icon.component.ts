@@ -21,7 +21,7 @@ export enum IconSizes {
 export class UiIconComponent extends UiBaseComponent {
     @Input() iconName: keyof typeof FaIcons = 'Coffee';
 
-    constructor(library: FaIconLibrary) {
+    constructor(readonly library: FaIconLibrary) {
         super();
         library.addIconPacks(fas);
     }

@@ -9,7 +9,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
     styleUrl: './header.component.scss',
 })
 export class UiHeaderComponent {
-    @Input() title: string;
+    @Input() title: string = '';
     @Input() subtitle?: string;
     @Input() showBackButton: boolean = false;
 

@@ -57,7 +57,7 @@ describe('UiBaseComponent', () => {
         comp.width = 'custom';
         comp.widthValue = '200px';
         const vars = comp.styleVars;
-        expect(vars).toEqual({ '--ui-w': '200px' });
+        expect(vars).toEqual({ ['--ui-w']: '200px' });
     });
 
     it('should return color when color input is set', () => {

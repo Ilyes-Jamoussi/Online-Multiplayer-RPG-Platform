@@ -308,4 +308,12 @@ describe('CharacterCreationPageComponent', () => {
             }),
         );
     });
+
+    it('should return canCreate from service for canCreateCharacter getter', () => {
+        creationCheckServiceSpy.canCreate.and.returnValue(true);
+        expect(component.canCreateCharacter).toBe(true);
+
+        creationCheckServiceSpy.canCreate.and.returnValue(false);
+        expect(component.canCreateCharacter).toBe(false);
+    });
 });
