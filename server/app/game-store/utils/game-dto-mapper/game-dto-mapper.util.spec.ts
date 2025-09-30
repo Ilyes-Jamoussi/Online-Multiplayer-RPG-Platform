@@ -1,10 +1,10 @@
-import { GameDtoMapper } from './game-dto.mappers';
+import { GameDocument } from '@app/game-store/entities/game.entity';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { GameDocument } from '@app/game-store/entities/game.entity';
-import { TileKind } from '@common/enums/tile-kind.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile-kind.enum';
 import { Types } from 'mongoose';
+import { GameDtoMapper } from './game-dto-mapper.util';
 
 describe('GameDtoMapper', () => {
     let mapper: GameDtoMapper;
@@ -25,8 +25,8 @@ describe('GameDtoMapper', () => {
             { x: 1, y: 0, kind: TileKind.WALL },
         ],
         objects: [
-            { x: 0, y: 1, kind: PlaceableKind.START, placed: true },
-            { x: 1, y: 1, kind: PlaceableKind.FLAG, placed: false },
+            { x: 0, y: 1, kind: PlaceableKind.START, placed: true, _id: new Types.ObjectId('507f1f77bcf86cd799439012') },
+            { x: 1, y: 1, kind: PlaceableKind.FLAG, placed: false, _id: new Types.ObjectId('507f1f77bcf86cd799439013') },
         ],
         gridPreviewUrl: '/assets/grid-previews/game-123-preview.png',
         lastModified: new Date('2024-01-15T10:30:00Z'),
@@ -48,8 +48,8 @@ describe('GameDtoMapper', () => {
                 { x: 1, y: 0, kind: 'WALL' },
             ],
             objects: [
-                { x: 0, y: 1, kind: 'START', placed: true },
-                { x: 1, y: 1, kind: 'FLAG', placed: false },
+                { x: 0, y: 1, kind: 'START', placed: true, id: '507f1f77bcf86cd799439012' },
+                { x: 1, y: 1, kind: 'FLAG', placed: false, id: '507f1f77bcf86cd799439013' },
             ],
             gridPreviewUrl: '/assets/grid-previews/game-123-preview.png',
             lastModified: new Date('2024-01-15T10:30:00Z'),
@@ -74,6 +74,18 @@ describe('GameDtoMapper', () => {
     it('should handle missing description', () => {
         const doc = { ...mockGameDocument, description: undefined };
         const dto = mapper.toGamePreviewDto(doc as GameDocument);
+        expect(dto.description).toBe('');
+    });
+
+    it('should return empty string for default draft game name', () => {
+        const doc = { ...mockGameDocument, name: 'Nom...' };
+        const dto = mapper.toGameEditorDto(doc as GameDocument);
+        expect(dto.name).toBe('');
+    });
+
+    it('should return empty string for default draft game description', () => {
+        const doc = { ...mockGameDocument, description: 'Description du jeu...' };
+        const dto = mapper.toGameEditorDto(doc as GameDocument);
         expect(dto.description).toBe('');
     });
 });

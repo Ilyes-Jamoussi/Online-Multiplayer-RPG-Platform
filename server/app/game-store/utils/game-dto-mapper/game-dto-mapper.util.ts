@@ -16,7 +16,10 @@ export class GameDtoMapper {
             mode: game.mode,
             tiles: game.tiles,
             gridPreviewUrl: game.gridPreviewUrl,
-            objects: game.objects.map((obj) => ({ ...obj, id: obj._id.toString() })),
+            objects: game.objects.map((obj) => {
+                const { _id: objectId, ...objWithoutId } = obj;
+                return { ...objWithoutId, id: objectId.toString() };
+            }),
         };
     }
 

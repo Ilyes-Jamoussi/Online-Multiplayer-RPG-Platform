@@ -1,6 +1,6 @@
 import { MapSize } from '@common/enums/map-size.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
-import { makeDefaultTiles } from './tile.factory';
+import { makeDefaultTiles } from './tile.util';
 
 describe('tile.factory', () => {
     it('creates a square grid of tiles for each MapSize with correct coordinates and kind', () => {

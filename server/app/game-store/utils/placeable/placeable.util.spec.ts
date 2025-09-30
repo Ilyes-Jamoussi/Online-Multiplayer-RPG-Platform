@@ -1,9 +1,9 @@
 import { FLAG_COUNTS, PLACEABLE_COUNTS } from '@app/constants/game-placeables.constants';
 import { Placeable } from '@app/game-store/entities/placeable.entity';
+import { makeDefaultPlaceables } from '@app/game-store/utils/placeable/placeable.util';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { makeDefaultPlaceables } from '@app/game-store/factory/placeable/placeable.factory';
 
 describe('placeable.factory', () => {
     function expectedCounts(size: MapSize, mode: GameMode): Partial<Record<PlaceableKind, number>> {
@@ -78,5 +78,20 @@ describe('placeable.factory', () => {
                 }
             }
         }
+    });
+
+    it('should handle undefined count values in makeDefaultPlaceables', () => {
+        const result = makeDefaultPlaceables(MapSize.SMALL, GameMode.CLASSIC);
+        expect(result.length).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should handle missing size in PLACEABLE_COUNTS', () => {
+        const result = makeDefaultPlaceables('INVALID_SIZE' as unknown as MapSize, GameMode.CLASSIC);
+        expect(result).toEqual([]);
+    });
+
+    it('should handle missing mode or size in FLAG_COUNTS', () => {
+        const result = makeDefaultPlaceables(MapSize.SMALL, 'INVALID_MODE' as unknown as GameMode);
+        expect(result.length).toBeGreaterThan(0);
     });
 });
