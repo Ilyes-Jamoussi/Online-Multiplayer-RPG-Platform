@@ -1,4 +1,3 @@
-// button.component.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UiButtonComponent, ButtonVariant, ButtonSize } from './button.component';
 

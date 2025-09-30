@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameEditorInventoryComponent } from './game-editor-inventory.component';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
@@ -60,8 +59,8 @@ describe('GameEditorInventoryComponent', () => {
 
     beforeEach(async () => {
         const inv: Inventory = {
-            BOAT: { kind: 'BOAT', total: 1, remaining: 1, disabled: false, image: 'boat.png' },
-            FLAG: { kind: 'FLAG', total: 2, remaining: 0, disabled: true, image: 'flag.png' },
+            [PlaceableKind.BOAT]: { kind: 'BOAT', total: 1, remaining: 1, disabled: false, image: 'boat.png' },
+            [PlaceableKind.FLAG]: { kind: 'FLAG', total: 2, remaining: 0, disabled: true, image: 'flag.png' },
         } as Inventory;
 
         invSig = signal<Inventory>(inv);
