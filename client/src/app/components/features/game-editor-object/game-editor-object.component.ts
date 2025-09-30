@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, HostBinding, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
+import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { PlaceableKind, PlaceableLabel } from '@common/enums/placeable-kind.enum';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { ToolType } from '@app/interfaces/game-editor.interface';

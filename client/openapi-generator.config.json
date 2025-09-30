@@ -1,0 +1,16 @@
+{
+    "fileNaming": "kebab-case",
+    "importMappings": {
+        "GameMode": "@common/enums/game-mode.enum",
+        "MapSize": "@common/enums/map-size.enum",
+        "TileKind": "@common/enums/tile-kind.enum",
+        "PlaceableKind": "@common/enums/placeable-kind.enum"
+    },
+    "typeMappings": {
+        "GameMode": "GameMode",
+        "MapSize": "MapSize",
+        "TileKind": "TileKind",
+        "PlaceableKind": "PlaceableKind"
+    },
+    "templateDir": "openapi-templates/ts-angular"
+}

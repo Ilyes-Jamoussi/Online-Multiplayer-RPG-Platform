@@ -1,18 +1,18 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { GameEditorDto } from '@app/dto/gameEditorDto';
-import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
-import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
+import { GameEditorDto } from '@app/dto/game-editor-dto';
+import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { catchError, finalize, switchMap, take, tap } from 'rxjs/operators';
 import { TileKind } from '@common/enums/tile-kind.enum';
-import { PatchGameEditorDto } from '@app/dto/patchGameEditorDto';
+import { PatchGameEditorDto } from '@app/dto/patch-game-editor-dto';
 import { ExtendedGameEditorPlaceableDto, Inventory, PLACEABLE_ORDER } from '@app/interfaces/game-editor.interface';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { of } from 'rxjs';
 import { AssetsService } from '@app/services/assets/assets.service';
-import { CreateGameDto } from '@app/dto/createGameDto';
+import { CreateGameDto } from '@app/dto/create-game-dto';
 
 @Injectable()
 export class GameEditorStoreService {

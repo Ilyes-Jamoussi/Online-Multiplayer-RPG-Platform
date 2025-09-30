@@ -3,7 +3,7 @@ import { GameEditorTileComponent } from './game-editor-tile.component';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { AssetsService } from '@app/services/assets/assets.service';
-import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { ActiveTool, GameEditorIssues, ToolType, Vector2 } from '@app/interfaces/game-editor.interface';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { signal } from '@angular/core';
@@ -73,7 +73,7 @@ describe('GameEditorTileComponent', () => {
     const tile: GameEditorTileDto = {
         x: 2,
         y: 3,
-        kind: TileKind.BASE as unknown as GameEditorTileDto.KindEnum,
+        kind: TileKind.BASE,
         open: false,
     };
 
@@ -147,7 +147,7 @@ describe('GameEditorTileComponent', () => {
     });
 
     it('image getter should use AssetsService with kind and open', () => {
-        component.tile = { ...tile, kind: TileKind.DOOR as unknown as GameEditorTileDto.KindEnum, open: true };
+        component.tile = { ...tile, kind: TileKind.DOOR, open: true };
         fixture.detectChanges();
         const src = component.image;
         expect(assetsSpy.getTileImage).toHaveBeenCalledWith(TileKind.DOOR, true);

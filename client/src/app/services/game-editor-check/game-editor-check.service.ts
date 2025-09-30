@@ -1,5 +1,5 @@
 import { computed, Injectable } from '@angular/core';
-import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { AccesibilityIssue, GameEditorIssue, GameEditorIssues } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import {
@@ -45,15 +45,15 @@ export class GameEditorCheckService {
         return !Object.values(this.editorProblems()).some((p) => p.hasIssue);
     }
 
-    private isTerrainTile(kind: GameEditorTileDto.KindEnum): boolean {
+    private isTerrainTile(kind: TileKind): boolean {
         return kind === TileKind.BASE || kind === TileKind.WATER || kind === TileKind.ICE;
     }
 
     private isValidHorizontalDoor(
-        left: GameEditorTileDto.KindEnum | undefined,
-        right: GameEditorTileDto.KindEnum | undefined,
-        top: GameEditorTileDto.KindEnum | undefined,
-        bottom: GameEditorTileDto.KindEnum | undefined,
+        left: TileKind | undefined,
+        right: TileKind | undefined,
+        top: TileKind | undefined,
+        bottom: TileKind | undefined,
     ): boolean {
         return (
             left === TileKind.WALL &&
@@ -66,10 +66,10 @@ export class GameEditorCheckService {
     }
 
     private isValidVerticalDoor(
-        top: GameEditorTileDto.KindEnum | undefined,
-        bottom: GameEditorTileDto.KindEnum | undefined,
-        left: GameEditorTileDto.KindEnum | undefined,
-        right: GameEditorTileDto.KindEnum | undefined,
+        top: TileKind | undefined,
+        bottom: TileKind | undefined,
+        left: TileKind | undefined,
+        right: TileKind | undefined,
     ): boolean {
         return (
             top === TileKind.WALL &&
@@ -170,7 +170,7 @@ export class GameEditorCheckService {
         return grid;
     }
 
-    private isWalkableTile(kind: GameEditorTileDto.KindEnum | TileKind | undefined): boolean {
+    private isWalkableTile(kind: TileKind | TileKind | undefined): boolean {
         return kind === TileKind.BASE || kind === TileKind.ICE || kind === TileKind.WATER || kind === TileKind.DOOR || kind === TileKind.TELEPORT;
     }
 

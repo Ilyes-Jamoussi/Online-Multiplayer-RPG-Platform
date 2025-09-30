@@ -1,4 +1,4 @@
-import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
+import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
 

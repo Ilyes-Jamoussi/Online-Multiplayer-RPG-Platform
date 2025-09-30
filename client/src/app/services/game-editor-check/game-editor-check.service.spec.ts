@@ -3,12 +3,12 @@ import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { GameEditorCheckService } from './game-editor-check.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { Inventory } from '@app/interfaces/game-editor.interface';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
-import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
+import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 
 export class GameEditorStoreStub implements Partial<GameEditorStoreService> {

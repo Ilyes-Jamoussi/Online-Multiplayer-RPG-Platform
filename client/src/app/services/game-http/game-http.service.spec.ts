@@ -1,13 +1,13 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { CreateGameDto } from '@app/dto/createGameDto';
-import { GameEditorDto } from '@app/dto/gameEditorDto';
-import { GameInitDto } from '@app/dto/gameInitDto';
-import { GamePreviewDto } from '@app/dto/gamePreviewDto';
-import { PatchGameEditorDto } from '@app/dto/patchGameEditorDto';
-import { ToggleVisibilityDto } from '@app/dto/toggleVisibilityDto';
-import { UpdateGameDto } from '@app/dto/updateGameDto';
+import { CreateGameDto } from '@app/dto/create-game-dto';
+import { GameEditorDto } from '@app/dto/game-editor-dto';
+import { GameInitDto } from '@app/dto/game-init-dto';
+import { GamePreviewDto } from '@app/dto/game-preview-dto';
+import { PatchGameEditorDto } from '@app/dto/patch-game-editor-dto';
+import { ToggleVisibilityDto } from '@app/dto/toggle-visibility-dto';
+import { UpdateGameDto } from '@app/dto/update-game-dto';
 import { API_PATHS } from '@common/constants/api-paths';
 import { environment } from 'src/environments/environment';
 import { GameHttpService } from './game-http.service';
@@ -44,7 +44,7 @@ describe('GameHttpService', () => {
                     name: 'Game 1',
                     description: 'Desc 1',
                     size: 10,
-                    mode: 'classic',
+                    mode: GameMode.CLASSIC,
                     lastModified: '2023-01-01',
                     visibility: true,
                     gridPreviewUrl: '/assets/game1.png',
@@ -83,7 +83,7 @@ describe('GameHttpService', () => {
                 name: 'New Game',
                 description: 'New Desc',
                 size: 10,
-                mode: 'classic',
+                mode: GameMode.CLASSIC,
             };
 
             service.createGame(createDto).subscribe();

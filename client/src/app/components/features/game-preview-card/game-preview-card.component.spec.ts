@@ -2,12 +2,13 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
-import { GamePreviewDto } from '@app/dto/gamePreviewDto';
+import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { MAP_SIZE_LABELS } from '@common/constants/game.constants';
 import { MapSize } from '@common/enums/map-size.enum';
 import { environment } from '@src/environments/environment';
 import { GamePreviewCardComponent } from './game-preview-card.component';
+import { GameMode } from '@common/enums/game-mode.enum';
 
 describe('GamePreviewCardComponent', () => {
     let component: GamePreviewCardComponent;
@@ -18,7 +19,7 @@ describe('GamePreviewCardComponent', () => {
         name: 'Test Game',
         description: 'Test Description',
         size: 10,
-        mode: 'classic',
+        mode: GameMode.CLASSIC,
         lastModified: '2023-01-01T10:00:00Z',
         visibility: true,
         gridPreviewUrl: '/assets/test-game.png',

@@ -9,7 +9,7 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { ROUTES } from '@app/constants/routes.constants';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize, MAP_SIZE_TO_MAX_PLAYERS } from '@common/enums/map-size.enum';
-import { GamePreviewDto } from '@app/dto/gamePreviewDto';
+import { GamePreviewDto } from '@app/dto/game-preview-dto';
 
 describe('GameParametersPageComponent', () => {
     let component: GameParametersPageComponent;
@@ -21,8 +21,8 @@ describe('GameParametersPageComponent', () => {
     const mockGamePreview: GamePreviewDto = {
         id: 'test-game-id',
         name: 'Test Game',
-        size: GamePreviewDto.SizeEnum.NUMBER_15,
-        mode: GamePreviewDto.ModeEnum.Classic,
+        size: MapSize.MEDIUM,
+        mode: GameMode.CLASSIC,
         description: 'Test Description',
         lastModified: '2024-01-01T00:00:00Z',
         visibility: false,
@@ -96,12 +96,12 @@ describe('GameParametersPageComponent', () => {
 
     it('should create game successfully and navigate to editor', () => {
         mockGameStoreService.createGame.and.returnValue(of(mockGamePreview));
-        
+
         component.selectedMapSize = MapSize.LARGE;
         component.selectedGameMode = GameMode.CTF;
-        
+
         component.onCreate();
-        
+
         expect(mockGameStoreService.createGame).toHaveBeenCalledWith({
             size: MapSize.LARGE,
             mode: GameMode.CTF,
@@ -115,9 +115,9 @@ describe('GameParametersPageComponent', () => {
     it('should handle create game error with error message', () => {
         const errorResponse = { error: { message: 'Custom error message' } };
         mockGameStoreService.createGame.and.returnValue(throwError(() => errorResponse));
-        
+
         component.onCreate();
-        
+
         expect(mockGameStoreService.createGame).toHaveBeenCalled();
         expect(mockNotificationService.displayError).toHaveBeenCalledWith({
             title: 'Erreur lors de la création de la partie',
@@ -129,9 +129,9 @@ describe('GameParametersPageComponent', () => {
     it('should handle create game error without error message', () => {
         const errorResponse = {};
         mockGameStoreService.createGame.and.returnValue(throwError(() => errorResponse));
-        
+
         component.onCreate();
-        
+
         expect(mockGameStoreService.createGame).toHaveBeenCalled();
         expect(mockNotificationService.displayError).toHaveBeenCalledWith({
             title: 'Erreur lors de la création de la partie',
@@ -142,9 +142,9 @@ describe('GameParametersPageComponent', () => {
 
     it('should handle create game error with null error', () => {
         mockGameStoreService.createGame.and.returnValue(throwError(() => null));
-        
+
         component.onCreate();
-        
+
         expect(mockGameStoreService.createGame).toHaveBeenCalled();
         expect(mockNotificationService.displayError).toHaveBeenCalledWith({
             title: 'Erreur lors de la création de la partie',
@@ -155,9 +155,9 @@ describe('GameParametersPageComponent', () => {
 
     it('should create game with default parameters when onCreate is called', () => {
         mockGameStoreService.createGame.and.returnValue(of(mockGamePreview));
-        
+
         component.onCreate();
-        
+
         expect(mockGameStoreService.createGame).toHaveBeenCalledWith({
             size: MapSize.MEDIUM,
             mode: GameMode.CLASSIC,

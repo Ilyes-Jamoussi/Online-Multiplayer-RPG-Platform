@@ -19,11 +19,11 @@ export class GameEditorDto {
     @IsString()
     description!: string;
 
-    @ApiProperty({ enum: MapSize })
+    @ApiProperty({ enum: MapSize, enumName: 'MapSize' })
     @IsEnum(MapSize)
     size!: MapSize;
 
-    @ApiProperty({ enum: GameMode })
+    @ApiProperty({ enum: GameMode, enumName: 'GameMode' })
     @IsEnum(GameMode)
     mode!: GameMode;
 

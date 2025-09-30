@@ -10,7 +10,7 @@
         "coverage": "ng test --code-coverage --source-map=true",
         "lint": "eslint --config eslint.config.mjs \"src/**/*.ts\"",
         "lint:fix": "eslint --config eslint.config.mjs \"src/**/*.ts\" --fix",
-        "generate-dto": "shx rm -rf src/app/dto && openapi-generator-cli generate -i http://localhost:3000/api/docs-json -g typescript-angular -o src/app/dto --global-property models --model-package ."
+        "generate-dto": "shx rm -rf src/app/dto && openapi-generator-cli generate -i http://localhost:3000/api/docs-json -g typescript-angular -c openapi-generator.config.json -o src/app/dto --global-property models --model-package . && shx rm -rf src/app/dto/@common"
     },
     "private": true,
     "dependencies": {

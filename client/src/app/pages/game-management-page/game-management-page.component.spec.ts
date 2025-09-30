@@ -3,10 +3,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { GamePreviewCardComponent } from '@app/components/features/game-preview-card/game-preview-card.component';
 import { ROUTES } from '@app/constants/routes.constants';
-import { GamePreviewDto } from '@app/dto/gamePreviewDto';
+import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { of } from 'rxjs';
 import { GameManagementPageComponent } from './game-management-page.component';
+import { MapSize } from '@common/enums/map-size.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 
 describe('GameManagementPageComponent', () => {
     let component: GameManagementPageComponent;
@@ -19,8 +21,8 @@ describe('GameManagementPageComponent', () => {
             id: '1',
             name: 'Game 1',
             description: 'Description 1',
-            size: GamePreviewDto.SizeEnum.NUMBER_10,
-            mode: GamePreviewDto.ModeEnum.Classic,
+            size: MapSize.SMALL,
+            mode: GameMode.CLASSIC,
             lastModified: new Date().toISOString(),
             visibility: true,
             gridPreviewUrl: '/assets/game1-preview.png',
@@ -30,8 +32,8 @@ describe('GameManagementPageComponent', () => {
             id: '2',
             name: 'Game 2',
             description: 'Description 2',
-            size: GamePreviewDto.SizeEnum.NUMBER_15,
-            mode: GamePreviewDto.ModeEnum.Classic,
+            size: MapSize.MEDIUM,
+            mode: GameMode.CLASSIC,
             lastModified: new Date().toISOString(),
             visibility: false,
             gridPreviewUrl: '/assets/game2-preview.png',

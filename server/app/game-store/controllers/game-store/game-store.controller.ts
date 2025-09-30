@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
 import { GameInitDto } from '@app/game-store/dto/game-init.dto';
@@ -8,7 +8,6 @@ import { ToggleVisibilityDto } from '@app/game-store/dto/toggle-visibility.dto';
 import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 import { GameStoreGateway } from '@app/game-store/gateways/game-store.gateway';
 import { GameStoreService } from '@app/game-store/services/game-store/game-store.service';
-import { ImageService } from '@app/game-store/services/image/image.service';
 
 @ApiTags('Games')
 @Controller('games')
@@ -16,20 +15,22 @@ export class GameStoreController {
     constructor(
         private readonly gameService: GameStoreService,
         private readonly gameStoreGateway: GameStoreGateway,
-        private readonly imageService: ImageService,
     ) {}
 
     @Get()
+    @ApiOkResponse({ type: [GamePreviewDto] })
     async getGamesPreview(): Promise<GamePreviewDto[]> {
         return this.gameService.getGames();
     }
 
     @Get(':id/init')
+    @ApiOkResponse({ type: GameInitDto })
     async getGameInit(@Param('id') id: string): Promise<GameInitDto> {
         return this.gameService.getGameInit(id);
     }
 
     @Post()
+    @ApiCreatedResponse({ type: GamePreviewDto })
     async createGame(@Body() dto: CreateGameDto): Promise<GamePreviewDto> {
         const gamePreview = await this.gameService.createGame(dto);
         return gamePreview;
