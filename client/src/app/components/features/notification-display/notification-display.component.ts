@@ -19,7 +19,7 @@ export class NotificationDisplayComponent {
         private readonly router: Router,
     ) {}
 
-    handleAction(): void {
+    onAction(): void {
         const currentNotification = this.notification();
         this.notificationService.reset();
 

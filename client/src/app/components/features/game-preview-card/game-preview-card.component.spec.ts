@@ -106,7 +106,7 @@ describe('GamePreviewCardComponent', () => {
 
     it('should build image url from environment socketUrl and game preview path', () => {
         const expected = `${environment.socketUrl}${mockGame.gridPreviewUrl}`;
-        expect(component.getImageUrl()).toBe(expected);
+        expect(component.imageUrl).toBe(expected);
     });
 
     it('should return a map size label when available and fallback to NxN when missing', () => {
@@ -115,12 +115,12 @@ describe('GamePreviewCardComponent', () => {
         if (knownKey) {
             const keyAsNumber = Number(knownKey) as unknown as MapSize;
             component.game.size = keyAsNumber;
-            expect(component.getMapSizeLabel()).toBe(labels[knownKey]);
+            expect(component.mapSizeLabel).toBe(labels[knownKey]);
         }
 
         let candidate = MapSize.SMALL as number;
         while (labels[candidate as unknown as string as keyof typeof labels]) candidate += 1;
         component.game.size = candidate as unknown as MapSize;
-        expect(component.getMapSizeLabel()).toBe(`${candidate}x${candidate}`);
+        expect(component.mapSizeLabel).toBe(`${candidate}x${candidate}`);
     });
 });

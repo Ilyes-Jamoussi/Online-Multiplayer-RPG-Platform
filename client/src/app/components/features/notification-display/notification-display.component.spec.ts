@@ -102,7 +102,7 @@ describe('NotificationDisplayComponent', () => {
         expect(icon.nativeElement.textContent).toBe('info');
     });
 
-    it('should reset notification and navigate when handleAction is called with redirectRoute', () => {
+    it('should reset notification and navigate when onAction is called with redirectRoute', () => {
         const mockNotificationWithRedirect = {
             type: 'error' as const,
             title: 'Error Title',
@@ -113,7 +113,7 @@ describe('NotificationDisplayComponent', () => {
         component.notification = signal(mockNotificationWithRedirect);
         fixture.detectChanges();
 
-        component.handleAction();
+        component.onAction();
 
         expect(notificationService.reset).toHaveBeenCalled();
         expect(router.navigate).toHaveBeenCalledWith([ROUTES.home]);

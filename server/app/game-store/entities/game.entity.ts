@@ -1,4 +1,3 @@
-// server/src/schemas/game.schema.ts
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';

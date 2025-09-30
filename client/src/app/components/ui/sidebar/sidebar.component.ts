@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Output, EventEmitter } from '@angular/core';
-import { UiBaseComponent } from '@app/components/ui/base/ui-base.component';
+import { Component, EventEmitter, Output } from '@angular/core';
+import { UiBaseComponent } from '@app/directives/ui-base/ui-base.component';
 
 @Component({
     selector: 'app-ui-sidebar',
