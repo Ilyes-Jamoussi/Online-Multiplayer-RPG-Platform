@@ -12,7 +12,9 @@ describe('CharacterStoreService', () => {
     let service: CharacterStoreService;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
+        TestBed.configureTestingModule({
+            providers: [CharacterStoreService],
+        });
         service = TestBed.inject(CharacterStoreService);
     });
 

@@ -21,13 +21,21 @@ import { BonusType, DiceType } from '@common/enums/character-creation.enum';
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
     imports: [CommonModule, FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent],
-    providers: [CharacterCreationCheckService],
+    providers: [CharacterCreationCheckService, CharacterStoreService],
 })
 export class CharacterCreationPageComponent {
     readonly diceType = DiceType;
     readonly bonusType = BonusType;
     readonly characterNameMinLength = NAME_MIN_LENGTH;
     readonly characterNameMaxLength = CHARACTER_NAME_MAX_LENGTH;
+    readonly avatars = this.characterStoreService.avatars;
+
+    constructor(
+        readonly assetsService: AssetsService,
+        readonly characterCreationCheckService: CharacterCreationCheckService,
+        private readonly characterStoreService: CharacterStoreService,
+        private readonly notificationService: NotificationService,
+    ) {}
 
     get hasSelectedAvatar(): boolean {
         return this.character.avatar !== null;
@@ -77,22 +85,13 @@ export class CharacterCreationPageComponent {
         return this.characterStoreService;
     }
 
-    avatars = this.characterStoreService.avatars;
-
-    constructor(
-        readonly assetsService: AssetsService,
-        readonly characterCreationCheckService: CharacterCreationCheckService,
-        private readonly characterStoreService: CharacterStoreService,
-        private readonly notificationService: NotificationService,
-    ) {}
+    get selectedAvatarImage(): string {
+        if (this.character.avatar === null) return '';
+        return this.assetsService.getAvatarAnimatedByNumber(this.character.avatar + 1);
+    }
 
     getAvatarImage(avatarIndex: number): string {
         return this.assetsService.getAvatarStaticByNumber(avatarIndex + 1);
-    }
-
-    getSelectedAvatarImage(): string {
-        if (this.character.avatar === null) return '';
-        return this.assetsService.getAvatarAnimatedByNumber(this.character.avatar + 1);
     }
 
     onNameChange(v: string) {
