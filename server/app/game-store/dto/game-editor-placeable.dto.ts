@@ -9,7 +9,7 @@ export class GameEditorPlaceableDto {
     @IsString()
     id!: string;
 
-    @ApiProperty({ enum: PlaceableKind })
+    @ApiProperty({ enum: PlaceableKind, enumName: 'PlaceableKind' })
     @IsEnum(PlaceableKind)
     kind!: PlaceableKind;
 

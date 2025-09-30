@@ -4,7 +4,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 
 export class GameEditorTileDto {
-    @ApiProperty({ enum: TileKind })
+    @ApiProperty({ enum: TileKind, enumName: 'TileKind' })
     @IsEnum(TileKind)
     kind!: TileKind;
 

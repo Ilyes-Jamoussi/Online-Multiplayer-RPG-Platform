@@ -73,7 +73,7 @@ describe('GameEditorTileComponent', () => {
     const tile: GameEditorTileDto = {
         x: 2,
         y: 3,
-        kind: TileKind.BASE as unknown as GameEditorTileDto.KindEnum,
+        kind: TileKind.BASE,
         open: false,
     };
 
@@ -147,7 +147,7 @@ describe('GameEditorTileComponent', () => {
     });
 
     it('image getter should use AssetsService with kind and open', () => {
-        component.tile = { ...tile, kind: TileKind.DOOR as unknown as GameEditorTileDto.KindEnum, open: true };
+        component.tile = { ...tile, kind: TileKind.DOOR, open: true };
         fixture.detectChanges();
         const src = component.image;
         expect(assetsSpy.getTileImage).toHaveBeenCalledWith(TileKind.DOOR, true);

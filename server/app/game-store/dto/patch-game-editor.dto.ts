@@ -17,12 +17,12 @@ export class PatchGameEditorDto {
     @IsString()
     description?: string;
 
-    @ApiPropertyOptional({ enum: MapSize })
+    @ApiPropertyOptional({ enum: MapSize, enumName: 'MapSize' })
     @IsOptional()
     @IsEnum(MapSize)
     size?: MapSize;
 
-    @ApiPropertyOptional({ enum: GameMode })
+    @ApiPropertyOptional({ enum: GameMode, enumName: 'GameMode' })
     @IsOptional()
     @IsEnum(GameMode)
     mode?: GameMode;

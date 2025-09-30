@@ -7,25 +7,15 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 
 
 export interface GameEditorPlaceableDto { 
     id: string;
-    kind: GameEditorPlaceableDto.KindEnum;
+    kind: PlaceableKind;
     orientation: string;
     x: number;
     y: number;
     placed: boolean;
 }
-export namespace GameEditorPlaceableDto {
-    export const KindEnum = {
-        Start: 'START',
-        Flag: 'FLAG',
-        Heal: 'HEAL',
-        Fight: 'FIGHT',
-        Boat: 'BOAT'
-    } as const;
-    export type KindEnum = typeof KindEnum[keyof typeof KindEnum];
-}
-
 

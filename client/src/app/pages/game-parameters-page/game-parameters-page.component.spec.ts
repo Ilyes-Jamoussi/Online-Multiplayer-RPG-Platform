@@ -21,8 +21,8 @@ describe('GameParametersPageComponent', () => {
     const mockGamePreview: GamePreviewDto = {
         id: 'test-game-id',
         name: 'Test Game',
-        size: GamePreviewDto.SizeEnum.NUMBER_15,
-        mode: GamePreviewDto.ModeEnum.Classic,
+        size: MapSize.MEDIUM,
+        mode: GameMode.CLASSIC,
         description: 'Test Description',
         lastModified: '2024-01-01T00:00:00Z',
         visibility: false,

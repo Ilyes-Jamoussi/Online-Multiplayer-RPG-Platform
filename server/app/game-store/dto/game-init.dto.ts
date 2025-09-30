@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
 
 export class GameInitDto {
-    @ApiProperty({ enum: MapSize, example: MapSize.MEDIUM })
+    @ApiProperty({ enum: MapSize, example: MapSize.MEDIUM, enumName: 'MapSize' })
     @IsEnum(MapSize)
     mapSize: MapSize;
 }

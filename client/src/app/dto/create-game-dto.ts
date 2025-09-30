@@ -7,27 +7,15 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 
 
 export interface CreateGameDto { 
-    size: CreateGameDto.SizeEnum;
-    mode: CreateGameDto.ModeEnum;
+    size: MapSize;
+    mode: GameMode;
     name: string;
     description: string;
     visibility?: boolean;
 }
-export namespace CreateGameDto {
-    export const SizeEnum = {
-        NUMBER_10: 10,
-        NUMBER_15: 15,
-        NUMBER_20: 20
-    } as const;
-    export type SizeEnum = typeof SizeEnum[keyof typeof SizeEnum];
-    export const ModeEnum = {
-        Classic: 'classic',
-        CaptureTheFlag: 'capture-the-flag'
-    } as const;
-    export type ModeEnum = typeof ModeEnum[keyof typeof ModeEnum];
-}
-
 

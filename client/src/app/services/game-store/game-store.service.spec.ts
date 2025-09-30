@@ -7,6 +7,7 @@ import { GameSocketService } from '@app/services/game-socket/game-socket.service
 import { MapSize } from '@common/enums/map-size.enum';
 import { of } from 'rxjs';
 import { GameStoreService } from './game-store.service';
+import { GameMode } from '@common/enums/game-mode.enum';
 
 describe('GameStoreService', () => {
     let service: GameStoreService;
@@ -19,7 +20,7 @@ describe('GameStoreService', () => {
             name: 'Game 1',
             description: 'Desc 1',
             size: 10,
-            mode: 'classic',
+            mode: GameMode.CLASSIC,
             lastModified: '2023-01-01',
             visibility: true,
             gridPreviewUrl: '/assets/game1.png',
@@ -30,7 +31,7 @@ describe('GameStoreService', () => {
             name: 'Game 2',
             description: 'Desc 2',
             size: 15,
-            mode: 'classic',
+            mode: GameMode.CLASSIC,
             lastModified: '2023-01-02',
             visibility: false,
             gridPreviewUrl: '/assets/game2.png',
@@ -184,7 +185,7 @@ describe('GameStoreService', () => {
                 name: 'Game 3',
                 description: 'Desc 3',
                 size: MapSize.LARGE,
-                mode: 'classic',
+                mode: GameMode.CLASSIC,
                 lastModified: '2023-01-03',
                 visibility: true,
                 gridPreviewUrl: '/assets/game3.png',
@@ -212,7 +213,7 @@ describe('GameStoreService', () => {
                 name: 'Brand New',
                 description: 'new',
                 size: MapSize.MEDIUM,
-                mode: 'classic',
+                mode: GameMode.CLASSIC,
                 lastModified: '2023-01-04',
                 visibility: true,
                 gridPreviewUrl: '/assets/new.png',

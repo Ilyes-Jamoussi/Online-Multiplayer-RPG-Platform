@@ -44,7 +44,7 @@ describe('GameHttpService', () => {
                     name: 'Game 1',
                     description: 'Desc 1',
                     size: 10,
-                    mode: 'classic',
+                    mode: GameMode.CLASSIC,
                     lastModified: '2023-01-01',
                     visibility: true,
                     gridPreviewUrl: '/assets/game1.png',
@@ -83,7 +83,7 @@ describe('GameHttpService', () => {
                 name: 'New Game',
                 description: 'New Desc',
                 size: 10,
-                mode: 'classic',
+                mode: GameMode.CLASSIC,
             };
 
             service.createGame(createDto).subscribe();

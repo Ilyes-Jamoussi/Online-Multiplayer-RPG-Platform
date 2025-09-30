@@ -6,6 +6,7 @@ import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { of } from 'rxjs';
 import { GameSessionCreationPageComponent } from './game-session-creation-page.component';
+import { GameMode } from '@common/enums/game-mode.enum';
 
 describe('GameSessionCreationPageComponent', () => {
     let component: GameSessionCreationPageComponent;
@@ -19,7 +20,7 @@ describe('GameSessionCreationPageComponent', () => {
             name: 'Game 1',
             description: 'Description 1',
             size: 10,
-            mode: 'classic',
+            mode: GameMode.CLASSIC,
             lastModified: new Date().toISOString(),
             visibility: true,
             gridPreviewUrl: '/assets/game1-preview.png',

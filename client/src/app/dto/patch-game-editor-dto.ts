@@ -8,30 +8,18 @@
  * Do not edit the class manually.
  */
 import { GameEditorTileDto } from './game-editor-tile-dto';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { GameEditorPlaceableDto } from './game-editor-placeable-dto';
+import { MapSize } from '@common/enums/map-size.enum';
 
 
 export interface PatchGameEditorDto { 
     name?: string;
     description?: string;
-    size?: PatchGameEditorDto.SizeEnum;
-    mode?: PatchGameEditorDto.ModeEnum;
+    size?: MapSize;
+    mode?: GameMode;
     gridPreviewUrl?: string;
     tiles?: Array<GameEditorTileDto>;
     objects?: Array<GameEditorPlaceableDto>;
 }
-export namespace PatchGameEditorDto {
-    export const SizeEnum = {
-        NUMBER_10: 10,
-        NUMBER_15: 15,
-        NUMBER_20: 20
-    } as const;
-    export type SizeEnum = typeof SizeEnum[keyof typeof SizeEnum];
-    export const ModeEnum = {
-        Classic: 'classic',
-        CaptureTheFlag: 'capture-the-flag'
-    } as const;
-    export type ModeEnum = typeof ModeEnum[keyof typeof ModeEnum];
-}
-
 

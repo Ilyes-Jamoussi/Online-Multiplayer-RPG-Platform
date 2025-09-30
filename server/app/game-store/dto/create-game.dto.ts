@@ -4,11 +4,11 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class CreateGameDto {
-    @ApiProperty({ enum: MapSize })
+    @ApiProperty({ enum: MapSize, enumName: 'MapSize' })
     @IsEnum(MapSize)
     readonly size: MapSize;
 
-    @ApiProperty({ enum: GameMode })
+    @ApiProperty({ enum: GameMode, enumName: 'GameMode' })
     @IsEnum(GameMode)
     readonly mode: GameMode;
 

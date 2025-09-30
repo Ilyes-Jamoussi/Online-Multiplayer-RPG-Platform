@@ -7,25 +7,14 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { TileKind } from '@common/enums/tile-kind.enum';
 
 
 export interface GameEditorTileDto { 
-    kind: GameEditorTileDto.KindEnum;
+    kind: TileKind;
     x: number;
     y: number;
     open?: boolean;
     teleportChannel?: number;
 }
-export namespace GameEditorTileDto {
-    export const KindEnum = {
-        Water: 'WATER',
-        Wall: 'WALL',
-        Ice: 'ICE',
-        Door: 'DOOR',
-        Base: 'BASE',
-        Teleport: 'TELEPORT'
-    } as const;
-    export type KindEnum = typeof KindEnum[keyof typeof KindEnum];
-}
-
 
