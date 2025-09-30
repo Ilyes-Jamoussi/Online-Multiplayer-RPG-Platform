@@ -4,12 +4,12 @@ import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { EMPTY, of, Subject, throwError } from 'rxjs';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 
-import { GameEditorDto } from '@app/dto/gameEditorDto';
+import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorStoreService } from './game-editor-store.service';
 import { MapSize } from '@common/enums/map-size.enum';
-import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { TileKind } from '@common/enums/tile-kind.enum';
-import { GameEditorPlaceableDto } from '@app/dto/gameEditorPlaceableDto';
+import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 

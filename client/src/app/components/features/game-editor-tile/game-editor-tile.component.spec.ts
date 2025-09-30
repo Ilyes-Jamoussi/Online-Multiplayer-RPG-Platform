@@ -3,7 +3,7 @@ import { GameEditorTileComponent } from './game-editor-tile.component';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { AssetsService } from '@app/services/assets/assets.service';
-import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { ActiveTool, GameEditorIssues, ToolType, Vector2 } from '@app/interfaces/game-editor.interface';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { signal } from '@angular/core';

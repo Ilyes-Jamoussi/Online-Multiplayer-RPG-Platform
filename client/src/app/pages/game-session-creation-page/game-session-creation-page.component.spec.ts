@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
-import { GamePreviewDto } from '@app/dto/gamePreviewDto';
+import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { of } from 'rxjs';
 import { GameSessionCreationPageComponent } from './game-session-creation-page.component';

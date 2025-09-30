@@ -2,7 +2,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/constants/routes.constants';
-import { GamePreviewDto } from '@app/dto/gamePreviewDto';
+import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { MAP_SIZE_LABELS } from '@common/constants/game.constants';
 import { MapSize } from '@common/enums/map-size.enum';

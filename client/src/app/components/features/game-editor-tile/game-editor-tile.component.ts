@@ -1,7 +1,7 @@
 import { NgStyle } from '@angular/common';
 import { Component, ElementRef, Input, NgZone } from '@angular/core';
 import { TileSizeProbeDirective } from '@app/directives/tile-size-probe.directive';
-import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { ToolType } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';

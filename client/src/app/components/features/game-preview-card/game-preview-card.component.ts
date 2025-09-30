@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { GamePreviewDto } from '@app/dto/gamePreviewDto';
+import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { ROUTES } from '@app/constants/routes.constants';
 import { environment } from '@src/environments/environment';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';

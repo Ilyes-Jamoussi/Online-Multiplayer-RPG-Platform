@@ -1,5 +1,5 @@
 import { computed, Injectable } from '@angular/core';
-import { GameEditorTileDto } from '@app/dto/gameEditorTileDto';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { AccesibilityIssue, GameEditorIssue, GameEditorIssues } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import {
