@@ -1,3 +1,4 @@
+import { NAME_ALREADY_EXISTS } from '@app/constants/error-messages.constants';
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
 import { GameDocument } from '@app/game-store/entities/game.entity';
 import { GameEditorService } from '@app/game-store/services/game-editor/game-editor.service';
@@ -80,6 +81,7 @@ describe('GameEditorService', () => {
 
     describe('patchEditByGameId', () => {
         it('returns null when update does not find a document', async () => {
+            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
             mockModel.findByIdAndUpdate = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
 
             const res = await service.patchEditByGameId('nope', { name: 'x' });
@@ -90,6 +92,7 @@ describe('GameEditorService', () => {
         it('saves image when gridPreviewUrl provided and returns mapped preview when update succeeds', async () => {
             const id = 'gameid';
             (mockImageService.saveImage as jest.Mock).mockResolvedValue('game-gameid-preview.png');
+            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
 
             const returnedDoc = {
                 _id: { toString: () => id },
@@ -120,6 +123,7 @@ describe('GameEditorService', () => {
             const id = 'fullid';
             const savedPreview = 'game-fullid-preview.png';
             (mockImageService.saveImage as jest.Mock).mockResolvedValue(savedPreview);
+            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
 
             const body = {
                 name: 'brand new',
@@ -180,6 +184,33 @@ describe('GameEditorService', () => {
             expect(mockMapper.toGamePreviewDto).toHaveBeenCalledWith(returnedDoc as unknown as GameDocument);
             expect(preview).toBeDefined();
             if (preview) expect(preview.id).toBe(id);
+        });
+
+        it('throws ConflictException when another game with same name exists', async () => {
+            const id = 'someid';
+            const body = { name: 'duplicate name' };
+
+            const conflictingGame = { _id: { toString: () => 'otherid' }, name: body.name };
+            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(conflictingGame) }) });
+
+            await expect(service.patchEditByGameId(id, body)).rejects.toThrow(NAME_ALREADY_EXISTS);
+            expect(mockModel.findOne).toHaveBeenCalledWith({ name: body.name, _id: { $ne: id } });
+        });
+
+        it('shouldnt throw if dto name is not provided', async () => {
+            const id = 'someid';
+            const body = { description: 'desc' };
+
+            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
+            mockModel.findByIdAndUpdate = jest.fn().mockReturnValue({
+                lean: () => ({
+                    exec: jest.fn().mockResolvedValue({ _id: { toString: () => id }, name: 'x' }),
+                }),
+            });
+
+            await expect(service.patchEditByGameId(id, body)).resolves.toBeDefined();
+            expect(mockModel.findOne).not.toHaveBeenCalled();
+            expect(mockModel.findByIdAndUpdate).toHaveBeenCalled();
         });
     });
 });

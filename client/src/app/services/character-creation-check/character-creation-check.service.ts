@@ -6,7 +6,7 @@ import { CharacterStoreService } from '@app/services/character-store/character-s
 export class CharacterCreationCheckService {
     constructor(private readonly characterStoreService: CharacterStoreService) {}
 
-    readonly validationProblems = computed(() => {
+    private readonly validationProblems = computed(() => {
         const character = this.characterStoreService.character();
         const name = character.name.trim();
 

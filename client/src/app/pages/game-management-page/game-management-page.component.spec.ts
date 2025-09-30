@@ -83,7 +83,7 @@ describe('GameManagementPageComponent', () => {
 
     it('should navigate to game editor on edit game', () => {
         component.onEditGame('id');
-        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.gameEditor + '/id']);
+        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.gameEditor, 'id']);
     });
 
     it('should delete game', () => {

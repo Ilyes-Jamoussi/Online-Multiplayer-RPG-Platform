@@ -10,6 +10,9 @@
         "coverage": "ng test --code-coverage --source-map=true",
         "lint": "eslint --config eslint.config.mjs \"src/**/*.ts\"",
         "lint:fix": "eslint --config eslint.config.mjs \"src/**/*.ts\" --fix",
+        "typecheck": "tsc -p tsconfig.app.json --noEmit",
+        "knip": "knip",
+        "check": "npm run typecheck && npm run knip",
         "generate-dto": "shx rm -rf src/app/dto && openapi-generator-cli generate -i http://localhost:3000/api/docs-json -g typescript-angular -c openapi-generator.config.json -o src/app/dto --global-property models --model-package . && shx rm -rf src/app/dto/@common"
     },
     "private": true,
@@ -30,7 +33,6 @@
         "rxjs": "7.8.1",
         "socket.io-client": "4.8.1",
         "tslib": "2.4.0",
-        "undici-types": "^7.12.0",
         "zone.js": "0.15.1"
     },
     "devDependencies": {
@@ -45,7 +47,7 @@
         "@eslint/js": "9.32.0",
         "@openapitools/openapi-generator-cli": "^2.23.1",
         "@types/jasmine": "4.3.5",
-        "@types/node": "^24.5.2",
+        "@types/node": "22.10.2",
         "@typescript-eslint/eslint-plugin": "8.38.0",
         "@typescript-eslint/parser": "8.38.0",
         "eslint": "9.32.0",
@@ -55,6 +57,7 @@
         "karma-coverage": "2.2.1",
         "karma-jasmine": "5.1.0",
         "karma-jasmine-html-reporter": "2.1.0",
+        "knip": "^5.64.1",
         "openapi-generator-cli": "^1.0.0",
         "prettier": "3.0.1",
         "shx": "^0.4.0",

@@ -40,7 +40,7 @@ describe('CharacterCreationCheckService', () => {
 
     it('validationProblems returns no issues for valid name and selected avatar', () => {
         characterSig.set({ ...baseCharacter, name: 'Player1', avatar: 1 });
-        const problems = service.validationProblems();
+        const problems = service['validationProblems']();
         expect(problems.nameValidation.hasIssue).toBeFalse();
         expect(problems.avatarSelection.hasIssue).toBeFalse();
         expect(service.canCreate()).toBeTrue();
@@ -50,7 +50,7 @@ describe('CharacterCreationCheckService', () => {
     it('detects name too short', () => {
         const tooShort = 'a'.repeat(Math.max(0, NAME_MIN_LENGTH - 1));
         characterSig.set({ ...baseCharacter, name: tooShort });
-        const problems = service.validationProblems();
+        const problems = service['validationProblems']();
         expect(problems.nameValidation.hasIssue).toBeTrue();
         expect(typeof problems.nameValidation.message).toBe('string');
         expect(service.canCreate()).toBeFalse();
@@ -63,7 +63,7 @@ describe('CharacterCreationCheckService', () => {
     it('detects name too long', () => {
         const tooLong = 'a'.repeat(CHARACTER_NAME_MAX_LENGTH + 1);
         characterSig.set({ ...baseCharacter, name: tooLong });
-        const problems = service.validationProblems();
+        const problems = service['validationProblems']();
         expect(problems.nameValidation.hasIssue).toBeTrue();
         expect(service.canCreate()).toBeFalse();
         const msgs = service.getErrorMessages();
@@ -74,7 +74,7 @@ describe('CharacterCreationCheckService', () => {
 
     it('detects no bonus selected', () => {
         characterSig.set({ ...baseCharacter, bonus: null });
-        const problems = service.validationProblems();
+        const problems = service['validationProblems']();
         expect(problems.bonusSelection.hasIssue).toBeTrue();
         expect(problems.bonusSelection.message).toBe('Un bonus doit être sélectionné.');
         expect(service.canCreate()).toBeFalse();
@@ -84,7 +84,7 @@ describe('CharacterCreationCheckService', () => {
 
     it('detects whitespace-only name (after trim)', () => {
         characterSig.set({ ...baseCharacter, name: '     ' });
-        const problems = service.validationProblems();
+        const problems = service['validationProblems']();
         expect(problems.nameValidation.hasIssue).toBeTrue();
         const msgs = service.getErrorMessages();
         expect(msgs.length).toBe(1);
@@ -93,7 +93,7 @@ describe('CharacterCreationCheckService', () => {
 
     it('detects missing avatar', () => {
         characterSig.set({ ...baseCharacter, avatar: null });
-        const problems = service.validationProblems();
+        const problems = service['validationProblems']();
         expect(problems.avatarSelection.hasIssue).toBeTrue();
         expect(problems.avatarSelection.message).toBe('Un avatar doit être sélectionné.');
         expect(service.canCreate()).toBeFalse();
@@ -104,7 +104,7 @@ describe('CharacterCreationCheckService', () => {
     it('aggregates both errors when name invalid and avatar missing', () => {
         const tooShort = 'a'.repeat(Math.max(0, NAME_MIN_LENGTH - 1));
         characterSig.set({ ...baseCharacter, name: tooShort, avatar: null });
-        const problems = service.validationProblems();
+        const problems = service['validationProblems']();
         expect(problems.nameValidation.hasIssue).toBeTrue();
         expect(problems.avatarSelection.hasIssue).toBeTrue();
         expect(service.canCreate()).toBeFalse();
@@ -121,7 +121,7 @@ describe('CharacterCreationCheckService', () => {
         expect(service.getErrorMessages().length).toBe(2);
 
         characterSig.set({ ...baseCharacter, name: 'Hero', avatar: 2 });
-        const problems = service.validationProblems();
+        const problems = service['validationProblems']();
         expect(problems.nameValidation.hasIssue).toBeFalse();
         expect(problems.avatarSelection.hasIssue).toBeFalse();
         expect(service.canCreate()).toBeTrue();

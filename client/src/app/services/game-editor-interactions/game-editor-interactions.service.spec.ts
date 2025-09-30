@@ -216,7 +216,7 @@ describe('GameEditorInteractionsService', () => {
                     placeableKind: PlaceableKind.BOAT,
                 }),
             );
-            expect(service.objectGrabOffset).toEqual({ x: 7, y: 9 });
+            expect(service['objectGrabOffset']).toEqual({ x: 7, y: 9 });
         });
 
         it('empty id -> payload = kind (fallback), MIME set, but tool/offset only if footprint > 0', () => {
@@ -236,7 +236,7 @@ describe('GameEditorInteractionsService', () => {
                     placeableKind: PlaceableKind.HEAL,
                 }),
             );
-            expect(service.objectGrabOffset).toEqual({ x: 3, y: 4 });
+            expect(service['objectGrabOffset']).toEqual({ x: 3, y: 4 });
         });
 
         it('footprint NaN -> MIME set, but tool/offset remain unchanged (early return)', () => {
@@ -251,7 +251,7 @@ describe('GameEditorInteractionsService', () => {
             expect((evt.dataTransfer as DataTransfer).effectAllowed).toBe('move');
 
             expect(service.activeTool).toBeNull();
-            expect(service.objectGrabOffset).toEqual({ x: 0, y: 0 });
+            expect(service['objectGrabOffset']).toEqual({ x: 0, y: 0 });
         });
 
         it('footprint <= 0 (0) -> MIME set, tool/offset unchanged', () => {
@@ -265,7 +265,7 @@ describe('GameEditorInteractionsService', () => {
             expect(evt._spies.setData).toHaveBeenCalledWith(mime, 'x');
             expect((evt.dataTransfer as DataTransfer).effectAllowed).toBe('move');
             expect(service.activeTool).toBeNull();
-            expect(service.objectGrabOffset).toEqual({ x: 0, y: 0 });
+            expect(service['objectGrabOffset']).toEqual({ x: 0, y: 0 });
         });
 
         it('footprint < 0 (-1) -> MIME set, tool/offset unchanged', () => {
@@ -279,7 +279,7 @@ describe('GameEditorInteractionsService', () => {
             expect(evt._spies.setData).toHaveBeenCalledWith(mime, 'x');
             expect((evt.dataTransfer as DataTransfer).effectAllowed).toBe('move');
             expect(service.activeTool).toBeNull();
-            expect(service.objectGrabOffset).toEqual({ x: 0, y: 0 });
+            expect(service['objectGrabOffset']).toEqual({ x: 0, y: 0 });
         });
 
         it('no dataTransfer -> does nothing (complete no-op)', () => {
@@ -292,7 +292,7 @@ describe('GameEditorInteractionsService', () => {
 
             expect(spyFoot).not.toHaveBeenCalled();
             expect(service.activeTool).toBeNull();
-            expect(service.objectGrabOffset).toEqual({ x: 0, y: 0 });
+            expect(service['objectGrabOffset']).toEqual({ x: 0, y: 0 });
         });
 
         it('checks that the MIME used matches PlaceableMime[object.kind]', () => {
@@ -434,7 +434,7 @@ describe('GameEditorInteractionsService', () => {
             expect(hovered).toBeTruthy();
             expect(hovered.length).toBe(4);
 
-            const origin = service.objectDropVec2;
+            const origin = service['objectDropVec2'];
             const includesOrigin = hovered.some((v) => v.x === origin.x && v.y === origin.y);
             expect(includesOrigin).toBeTrue();
         });
@@ -444,7 +444,7 @@ describe('GameEditorInteractionsService', () => {
                 type: ToolType.PlaceableTool,
                 placeableKind: PlaceableKind.START,
             } as ActiveTool;
-            service.objectDropVec2 = { x: 2, y: 3 };
+            service['objectDropVec2'] = { x: 2, y: 3 };
 
             const mime = PlaceableMime[PlaceableKind.START];
             const evt = makeDragEvent({ types: [mime], dataByType: { [mime]: PlaceableKind.START } });
@@ -459,7 +459,7 @@ describe('GameEditorInteractionsService', () => {
             const obj: GameEditorPlaceableDto = { id: 'obj-1', kind: PlaceableKind.HEAL, x: 1, y: 1, placed: true, orientation: 'N' };
             store.setPlacedObjects([obj]);
 
-            service.objectDropVec2 = { x: 6, y: 7 };
+            service['objectDropVec2'] = { x: 6, y: 7 };
 
             const mime = PlaceableMime[PlaceableKind.HEAL];
             const evt = makeDragEvent({ types: [mime], dataByType: { [mime]: 'obj-1' } });
@@ -486,7 +486,7 @@ describe('GameEditorInteractionsService', () => {
                 type: ToolType.PlaceableTool,
                 placeableKind: PlaceableKind.BOAT,
             } as ActiveTool;
-            service.objectDropVec2 = { x: 4, y: 4 };
+            service['objectDropVec2'] = { x: 4, y: 4 };
             store.setTileAt(4, 4, TileKind.BASE);
             const mime = PlaceableMime[PlaceableKind.BOAT];
             const evt = makeDragEvent({ types: [mime], dataByType: { [mime]: PlaceableKind.BOAT } });
@@ -500,7 +500,7 @@ describe('GameEditorInteractionsService', () => {
                 type: ToolType.PlaceableTool,
                 placeableKind: PlaceableKind.BOAT,
             } as ActiveTool;
-            service.objectDropVec2 = { x: 4, y: 4 };
+            service['objectDropVec2'] = { x: 4, y: 4 };
             store.setTileAt(4, 4, TileKind.WATER);
             const mime = PlaceableMime[PlaceableKind.BOAT];
             const evt = makeDragEvent({ types: [mime], dataByType: { [mime]: PlaceableKind.BOAT } });
@@ -534,7 +534,7 @@ describe('GameEditorInteractionsService', () => {
                 type: ToolType.PlaceableTool,
                 placeableKind: PlaceableKind.HEAL,
             } as ActiveTool;
-            service.objectDropVec2 = { x: 2, y: 3 };
+            service['objectDropVec2'] = { x: 2, y: 3 };
             const mime = PlaceableMime[PlaceableKind.HEAL];
             const evt = makeDragEvent({ types: [mime] });
             service.resolveDropAction(evt);
@@ -547,7 +547,7 @@ describe('GameEditorInteractionsService', () => {
                 type: ToolType.PlaceableTool,
                 placeableKind: PlaceableKind.HEAL,
             } as ActiveTool;
-            service.objectDropVec2 = { x: -1, y: 3 };
+            service['objectDropVec2'] = { x: -1, y: 3 };
             const mime = PlaceableMime[PlaceableKind.HEAL];
             const evt = makeDragEvent({ types: [mime], dataByType: { [mime]: PlaceableKind.HEAL } });
             service.resolveDropAction(evt);
@@ -560,7 +560,7 @@ describe('GameEditorInteractionsService', () => {
                 type: ToolType.PlaceableTool,
                 placeableKind: PlaceableKind.HEAL,
             } as ActiveTool;
-            service.objectDropVec2 = { x: 2, y: 3 };
+            service['objectDropVec2'] = { x: 2, y: 3 };
             store.setTileAt(2, 3, TileKind.WALL);
             const mime = PlaceableMime[PlaceableKind.HEAL];
             const evt = makeDragEvent({ types: [mime], dataByType: { [mime]: PlaceableKind.HEAL } });
@@ -580,7 +580,7 @@ describe('GameEditorInteractionsService', () => {
                 placeableKind: PlaceableKind.HEAL,
             } as ActiveTool;
             store.setPlacedObjects([{ id: 'obj-1', kind: PlaceableKind.HEAL, x: 2, y: 3, placed: true, orientation: 'N' }]);
-            service.objectDropVec2 = { x: 2, y: 3 };
+            service['objectDropVec2'] = { x: 2, y: 3 };
             const mime = PlaceableMime[PlaceableKind.HEAL];
             const evt = makeDragEvent({ types: [mime], dataByType: { [mime]: PlaceableKind.HEAL } });
             service.resolveDropAction(evt);
@@ -591,7 +591,7 @@ describe('GameEditorInteractionsService', () => {
         it('resolveDropAction should call store.movePlacedObject if mime is id and object found at id', () => {
             const obj: GameEditorPlaceableDto = { id: 'obj-1', kind: PlaceableKind.HEAL, x: 1, y: 1, placed: true, orientation: 'N' };
             store.setPlacedObjects([obj]);
-            service.objectDropVec2 = { x: 6, y: 7 };
+            service['objectDropVec2'] = { x: 6, y: 7 };
 
             const mime = PlaceableMime[PlaceableKind.HEAL];
             const evt = makeDragEvent({ types: [mime], dataByType: { [mime]: 'obj-1' } });
@@ -605,7 +605,7 @@ describe('GameEditorInteractionsService', () => {
                 type: ToolType.PlaceableTool,
                 placeableKind: PlaceableKind.START,
             } as ActiveTool;
-            service.objectDropVec2 = { x: 2, y: 3 };
+            service['objectDropVec2'] = { x: 2, y: 3 };
             const mime = PlaceableMime[PlaceableKind.START];
             const evt = makeDragEvent({ types: [mime], dataByType: { [mime]: PlaceableKind.START } });
             store.placeObjectFromInventory.calls.reset();
@@ -616,7 +616,7 @@ describe('GameEditorInteractionsService', () => {
         it("resolveDropAction shouldn't move object if id is not found", () => {
             const obj: GameEditorPlaceableDto = { id: 'obj-1', kind: PlaceableKind.HEAL, x: 1, y: 1, placed: true, orientation: 'N' };
             store.setPlacedObjects([obj]);
-            service.objectDropVec2 = { x: 6, y: 7 };
+            service['objectDropVec2'] = { x: 6, y: 7 };
             const mime = PlaceableMime[PlaceableKind.HEAL];
             const evt = makeDragEvent({ types: [mime], dataByType: { [mime]: 'unknown-id' } });
             store.movePlacedObject.calls.reset();
@@ -627,7 +627,7 @@ describe('GameEditorInteractionsService', () => {
         it("resolveDropAction shouldn't move object if drop position is occupied", () => {
             const obj: GameEditorPlaceableDto = { id: 'obj-1', kind: PlaceableKind.HEAL, x: 1, y: 1, placed: true, orientation: 'N' };
             store.setPlacedObjects([obj, { id: 'obj-2', kind: PlaceableKind.FIGHT, x: 6, y: 7, placed: true, orientation: 'N' }]);
-            service.objectDropVec2 = { x: 6, y: 7 };
+            service['objectDropVec2'] = { x: 6, y: 7 };
             const mime = PlaceableMime[PlaceableKind.HEAL];
             const evt = makeDragEvent({ types: [mime], dataByType: { [mime]: 'obj-1' } });
             store.movePlacedObject.calls.reset();
@@ -641,7 +641,7 @@ describe('GameEditorInteractionsService', () => {
                 type: ToolType.PlaceableTool,
                 placeableKind: PlaceableKind.HEAL,
             } as ActiveTool;
-            service.objectDropVec2 = { x: 6, y: 7 };
+            service['objectDropVec2'] = { x: 6, y: 7 };
             const mime = PlaceableMime[PlaceableKind.HEAL];
             const evt = makeDragEvent({ types: [mime], dataByType: { [mime]: PlaceableKind.HEAL } });
             store.placeObjectFromInventory.calls.reset();

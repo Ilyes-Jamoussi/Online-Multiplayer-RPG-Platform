@@ -1,4 +1,4 @@
-import { GAME_NOT_FOUND } from '@app/constants/error-messages.constants';
+import { GAME_NOT_FOUND, NAME_ALREADY_EXISTS } from '@app/constants/error-messages.constants';
 import { GameEditorPlaceableDto } from '@app/game-store/dto/game-editor-placeable.dto';
 import { GameEditorTileDto } from '@app/game-store/dto/game-editor-tile.dto';
 import { GameEditorDto } from '@app/game-store/dto/game-editor.dto';
@@ -9,7 +9,7 @@ import { Placeable } from '@app/game-store/entities/placeable.entity';
 import { Tile } from '@app/game-store/entities/tile.entity';
 import { ImageService } from '@app/game-store/services/image/image.service';
 import { GameDtoMapper } from '@app/game-store/utils/game-dto-mapper/game-dto-mapper.util';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -31,6 +31,20 @@ export class GameEditorService {
     }
 
     async patchEditByGameId(id: string, dto: PatchGameEditorDto): Promise<GamePreviewDto | null> {
+        if (dto.name) {
+            const conflicting = await this.gameModel
+                .findOne({
+                    name: dto.name,
+                    _id: { $ne: id },
+                })
+                .lean()
+                .exec();
+
+            if (conflicting) {
+                throw new ConflictException(NAME_ALREADY_EXISTS);
+            }
+        }
+
         const update: GameDocument = {
             ...this.buildBasicUpdate(dto),
             ...(await this.buildImageUpdate(dto, id)),
@@ -41,7 +55,6 @@ export class GameEditorService {
         } as GameDocument;
 
         const doc = await this.gameModel.findByIdAndUpdate(id, { $set: update }, { new: true, runValidators: true }).lean().exec();
-
         return doc ? this.gameDtoMapper.toGamePreviewDto(doc) : null;
     }
 

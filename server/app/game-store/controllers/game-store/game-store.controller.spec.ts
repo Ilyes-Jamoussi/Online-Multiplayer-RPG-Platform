@@ -1,9 +1,7 @@
 import { GameStoreController } from '@app/game-store/controllers/game-store/game-store.controller';
 import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
-import { GameInitDto } from '@app/game-store/dto/game-init.dto';
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
 import { ToggleVisibilityDto } from '@app/game-store/dto/toggle-visibility.dto';
-import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 import { GameStoreGateway } from '@app/game-store/gateways/game-store.gateway';
 import { GameStoreService } from '@app/game-store/services/game-store/game-store.service';
 import { ImageService } from '@app/game-store/services/image/image.service';
@@ -28,22 +26,12 @@ describe('GameStoreController', () => {
         draft: false,
     };
 
-    const mockGameInit: GameInitDto = {
-        mapSize: MapSize.MEDIUM,
-    };
-
     const mockCreateGameDto: CreateGameDto = {
         name: 'New Game',
         description: 'New Description',
         size: MapSize.SMALL,
         mode: GameMode.CLASSIC,
         visibility: true,
-    };
-
-    const mockUpdateGameDto: UpdateGameDto = {
-        name: 'Updated Game',
-        description: 'Updated Description',
-        gridPreviewImage: 'base64string',
     };
 
     const mockToggleVisibilityDto: ToggleVisibilityDto = {
@@ -53,9 +41,7 @@ describe('GameStoreController', () => {
     beforeEach(async () => {
         const mockGameService = {
             getGames: jest.fn(),
-            getGameInit: jest.fn(),
             createGame: jest.fn(),
-            updateGame: jest.fn(),
             toggleVisibility: jest.fn(),
             deleteGame: jest.fn(),
         };
@@ -109,18 +95,6 @@ describe('GameStoreController', () => {
         });
     });
 
-    describe('getGameInit', () => {
-        it('should return game initialization data', async () => {
-            const gameId = 'test-id';
-            gameService.getGameInit.mockResolvedValue(mockGameInit);
-
-            const result = await controller.getGameInit(gameId);
-
-            expect(gameService.getGameInit).toHaveBeenCalledWith(gameId);
-            expect(result).toEqual(mockGameInit);
-        });
-    });
-
     describe('createGame', () => {
         it('should create game and emit event', async () => {
             gameService.createGame.mockResolvedValue(mockGamePreview);
@@ -129,18 +103,6 @@ describe('GameStoreController', () => {
 
             expect(gameService.createGame).toHaveBeenCalledWith(mockCreateGameDto);
             expect(result).toEqual(mockGamePreview); // add this assertion
-        });
-    });
-
-    describe('updateGame', () => {
-        it('should update game and emit event', async () => {
-            const gameId = 'test-id';
-            gameService.updateGame.mockResolvedValue(mockGamePreview);
-
-            await controller.updateGame(gameId, mockUpdateGameDto);
-
-            expect(gameService.updateGame).toHaveBeenCalledWith(gameId, mockUpdateGameDto);
-            expect(gameStoreGateway.emitGameUpdated).toHaveBeenCalledWith(mockGamePreview);
         });
     });
 

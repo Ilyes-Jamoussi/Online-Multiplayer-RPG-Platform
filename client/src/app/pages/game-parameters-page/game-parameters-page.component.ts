@@ -23,6 +23,12 @@ export class GameParametersPageComponent {
     selectedMapSize: MapSize = MapSize.MEDIUM;
     selectedGameMode: GameMode = GameMode.CLASSIC;
 
+    constructor(
+        private readonly router: Router,
+        private readonly notificationService: NotificationService,
+        private readonly gameStoreService: GameStoreService,
+    ) {}
+
     readonly mapSizeOptions: MapSizeOption[] = [
         {
             value: MapSize.SMALL,
@@ -53,12 +59,6 @@ export class GameParametersPageComponent {
             description: 'Capturez le drapeau ennemi',
         },
     ];
-
-    constructor(
-        private readonly router: Router,
-        private readonly notificationService: NotificationService,
-        private readonly gameStoreService: GameStoreService,
-    ) {}
 
     onCreate(): void {
         this.gameStoreService

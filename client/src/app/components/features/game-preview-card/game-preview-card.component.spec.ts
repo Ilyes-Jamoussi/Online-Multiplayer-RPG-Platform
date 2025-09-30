@@ -1,7 +1,6 @@
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { ROUTES } from '@app/constants/routes.constants';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { MAP_SIZE_LABELS } from '@common/constants/game.constants';
@@ -69,6 +68,14 @@ describe('GamePreviewCardComponent', () => {
         expect(component.toggleVisibility.emit).toHaveBeenCalledWith('1');
     });
 
+    it('should emit editGame event with game id', () => {
+        spyOn(component.editGame, 'emit');
+
+        component.onEditGame();
+
+        expect(component.editGame.emit).toHaveBeenCalledWith('1');
+    });
+
     it('should format date correctly', () => {
         const dateString = '2023-01-01T10:00:00Z';
         const result = component.formatDate(dateString);
@@ -94,14 +101,6 @@ describe('GamePreviewCardComponent', () => {
     it('should accept isAdmin input', () => {
         component.isAdmin = true;
         expect(component.isAdmin).toBe(true);
-    });
-
-    it('should navigate to game editor on edit', () => {
-        const router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-
-        component.onEditGame();
-
-        expect(router.navigate).toHaveBeenCalledWith([ROUTES.gameEditor, mockGame.id]);
     });
 
     it('should build image url from environment socketUrl and game preview path', () => {

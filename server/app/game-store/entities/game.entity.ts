@@ -11,7 +11,7 @@ export type GameDocument = Game & Document;
 export class Game {
     readonly _id?: Types.ObjectId;
 
-    @Prop({ type: String, required: true })
+    @Prop({ type: String, required: true, unique: true })
     name: string;
 
     @Prop({ type: String, required: true })

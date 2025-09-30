@@ -3,11 +3,9 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { CreateGameDto } from '@app/dto/create-game-dto';
 import { GameEditorDto } from '@app/dto/game-editor-dto';
-import { GameInitDto } from '@app/dto/game-init-dto';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { PatchGameEditorDto } from '@app/dto/patch-game-editor-dto';
 import { ToggleVisibilityDto } from '@app/dto/toggle-visibility-dto';
-import { UpdateGameDto } from '@app/dto/update-game-dto';
 import { API_PATHS } from '@common/constants/api-paths';
 import { environment } from 'src/environments/environment';
 import { GameHttpService } from './game-http.service';
@@ -59,21 +57,6 @@ describe('GameHttpService', () => {
             const req = httpMock.expectOne(gamesEndpoint);
             expect(req.request.method).toBe('GET');
             req.flush(mockGames);
-        });
-    });
-
-    describe('getGameInitializationData', () => {
-        it('should return game initialization data', () => {
-            const gameId = '123';
-            const mockGameInit: GameInitDto = { mapSize: 10 };
-
-            service.getGameInitializationData(gameId).subscribe((gameInit) => {
-                expect(gameInit).toEqual(mockGameInit);
-            });
-
-            const req = httpMock.expectOne(`${gamesEndpoint}/${gameId}/init`);
-            expect(req.request.method).toBe('GET');
-            req.flush(mockGameInit);
         });
     });
 
@@ -142,22 +125,6 @@ describe('GameHttpService', () => {
             expect(req.request.method).toBe('PATCH');
             expect(req.request.body).toEqual(dto);
             req.flush(updated);
-        });
-    });
-
-    describe('updateGame', () => {
-        it('should update game and return void', () => {
-            const id = 'upd-1';
-            const dto: UpdateGameDto = { name: 'New' } as unknown as UpdateGameDto;
-
-            service.updateGame(id, dto).subscribe((r) => {
-                expect(r).toBeNull();
-            });
-
-            const req = httpMock.expectOne(`${gamesEndpoint}/${id}`);
-            expect(req.request.method).toBe('PATCH');
-            expect(req.request.body).toEqual(dto);
-            req.flush(null);
         });
     });
 

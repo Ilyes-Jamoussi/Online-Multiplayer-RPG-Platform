@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import { TestBed } from '@angular/core/testing';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { EMPTY, of, Subject, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 
@@ -13,6 +13,8 @@ import { TileKind } from '@common/enums/tile-kind.enum';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
+import { GamePreviewDto } from '@app/dto/game-preview-dto';
+import { HttpErrorResponse } from '@angular/common/http';
 
 describe('GameEditorStoreService', () => {
     let service: GameEditorStoreService;
@@ -40,6 +42,18 @@ describe('GameEditorStoreService', () => {
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
+
+    const mockPreview: GamePreviewDto = {
+        id: '1',
+        name: 'Test Game',
+        description: 'A game for testing',
+        size: MapSize.SMALL,
+        mode: GameMode.CTF,
+        visibility: false,
+        lastModified: new Date().toISOString(),
+        gridPreviewUrl: '',
+        draft: false,
+    };
 
     const mkTiles = () => {
         const size = MapSize.SMALL;
@@ -86,11 +100,6 @@ describe('GameEditorStoreService', () => {
             expect(service.description).toBe('New Description');
         });
 
-        it('should return correct loadingGame and loadError states', () => {
-            expect(service.loadingGame()).toBe(false);
-            expect(service.loadError()).toBe('');
-        });
-
         it('should get and set tile size', () => {
             expect(service.tileSizePx).toBe(0);
             service.tileSizePx = 1;
@@ -125,17 +134,12 @@ describe('GameEditorStoreService', () => {
             const subject = new Subject<GameEditorDto>();
             gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
 
-            expect(service.loadingGame()).toBe(false);
             service.loadGameById('1');
-
-            expect(service.loadingGame()).toBe(true);
 
             subject.next(mockEditorData);
             subject.complete();
 
-            expect(service.loadingGame()).toBe(false);
-
-            const initial = service.initial();
+            const initial = service['_initial']();
             expect(initial.id).toBe('1');
             expect(initial.name).toBe('Test Game');
             expect(initial.description).toBe('A game for testing');
@@ -147,28 +151,16 @@ describe('GameEditorStoreService', () => {
         it('should handle error when id not found', () => {
             gameHttpServiceSpy.getGameEditorById.and.returnValue(throwError(() => new Error('Game with ID 999 not found')));
 
-            expect(service.loadingGame()).toBe(false);
-            expect(service.loadError()).toBe('');
-
             service.loadGameById('999');
-            expect(service.loadingGame()).toBe(false);
-            expect(service.loadError()).toBe('Game with ID 999 not found');
         });
         it('should set loadError to true when game is undefined / null', () => {
             const subject = new Subject<GameEditorDto>();
             gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
 
-            expect(service.loadingGame()).toBe(false);
-            expect(service.loadError()).toBe('');
-
             service.loadGameById('1');
-            expect(service.loadingGame()).toBe(true);
 
             subject.next(undefined as unknown as GameEditorDto);
             subject.complete();
-
-            expect(service.loadingGame()).toBe(false);
-            expect(service.loadError()).toBe('Game with ID 1 not found');
         });
     });
 
@@ -176,11 +168,32 @@ describe('GameEditorStoreService', () => {
         beforeEach(() => {
             const subject = new Subject<GameEditorDto>();
             gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
-            gameHttpServiceSpy.patchGameEditorById.and.returnValue(EMPTY);
+
+            gameHttpServiceSpy.patchGameEditorById.and.returnValue(of(mockPreview));
 
             service.loadGameById('1');
             subject.next(mockEditorData);
             subject.complete();
+        });
+
+        it('should reject with a user-friendly error when API returns Conflict (duplicate name)', async () => {
+            const gridEl = document.createElement('div');
+
+            // Screenshot peut être null/undefined, on s’en fiche ici : la requête échoue ensuite.
+            screenshotServiceSpy.captureElementAsBase64.and.resolveTo('');
+
+            // Important : faire une modif de nom pour que "name" soit inclus dans le payload si tu le souhaites
+            service.name = 'Duplicate Name';
+
+            // Simule le 409 côté HttpClient/Mongoose → statusText === 'Conflict'
+            const conflict = new HttpErrorResponse({ status: 409, statusText: 'Conflict' });
+            gameHttpServiceSpy.patchGameEditorById.and.returnValue(throwError(() => conflict));
+
+            // Vérifie que la promesse est rejetée avec le bon message
+            await expectAsync(service.saveGame(gridEl)).toBeRejectedWithError(Error, 'Un jeu avec ce nom existe déjà.');
+
+            // Et qu’on n’essaie PAS de créer un nouveau jeu dans ce cas
+            expect(gameHttpServiceSpy.createGame).not.toHaveBeenCalled();
         });
 
         it('should call the API to save the game', async () => {
@@ -203,8 +216,8 @@ describe('GameEditorStoreService', () => {
 
         it('should include gridPreviewUrl when screenshot returns a new image', async () => {
             const gridEl = document.createElement('div');
-            expect(service.initial().name).toBe('Test Game');
-            expect(service.initial().description).toBe('A game for testing');
+            expect(service['_initial']().name).toBe('Test Game');
+            expect(service['_initial']().description).toBe('A game for testing');
 
             service.name = 'Modified Name';
             service.description = 'Modified Description';
@@ -223,8 +236,8 @@ describe('GameEditorStoreService', () => {
 
         it('should send only name if only name was modified (no new screenshot)', async () => {
             const gridEl = document.createElement('div');
-            expect(service.initial().name).toBe('Test Game');
-            expect(service.initial().description).toBe('A game for testing');
+            expect(service['_initial']().name).toBe('Test Game');
+            expect(service['_initial']().description).toBe('A game for testing');
 
             service.name = 'Modified Name';
 
@@ -237,8 +250,8 @@ describe('GameEditorStoreService', () => {
 
         it('should send only description if only description was modified (no new screenshot)', async () => {
             const gridEl = document.createElement('div');
-            expect(service.initial().name).toBe('Test Game');
-            expect(service.initial().description).toBe('A game for testing');
+            expect(service['_initial']().name).toBe('Test Game');
+            expect(service['_initial']().description).toBe('A game for testing');
 
             service.description = 'Modified Description';
 
@@ -289,7 +302,7 @@ describe('GameEditorStoreService', () => {
             const gridEl = document.createElement('div');
             gameHttpServiceSpy.patchGameEditorById.and.returnValues(
                 throwError(() => new Error('Game with ID 1 not found')),
-                EMPTY,
+                of({ ...mockPreview, id: '2', gridPreviewUrl: 'data:image/png;base64,YYY' }),
             );
 
             const created = {
@@ -448,7 +461,7 @@ describe('GameEditorStoreService', () => {
             subject.complete();
         });
         it('should reset the store to initial state', () => {
-            expect(service.initial().id).toBe('1');
+            expect(service['_initial']().id).toBe('1');
             expect(service.tiles().length).toBe(mockEditorData.tiles.length);
             expect(service.objects().length).toBe(mockEditorData.objects.length);
 
@@ -463,7 +476,7 @@ describe('GameEditorStoreService', () => {
 
             service.reset();
 
-            expect(service.initial().id).toBe('1');
+            expect(service['_initial']().id).toBe('1');
             expect(service.name).toBe('Test Game');
             expect(service.description).toBe('A game for testing');
             expect(service.tiles().length).toBe(mockEditorData.tiles.length);

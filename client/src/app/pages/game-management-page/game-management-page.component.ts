@@ -34,7 +34,7 @@ export class GameManagementPageComponent implements OnInit {
     }
 
     onEditGame(id: string): void {
-        this.router.navigate([ROUTES.gameEditor + '/' + id]);
+        this.router.navigate([ROUTES.gameEditor, id]);
     }
 
     onDeleteGame(gameId: string): void {

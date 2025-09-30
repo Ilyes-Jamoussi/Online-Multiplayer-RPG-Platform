@@ -140,14 +140,31 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
         evt.preventDefault();
     }
 
+    @HostListener('mouseover', ['$event'])
+    onMouseOver(evt: MouseEvent): void {
+        const target = evt.target as HTMLElement;
+        if (!target.classList.contains('tile')) {
+            this.gameEditorInteractionsService.dragEnd();
+        }
+    }
+
     async onSave(): Promise<void> {
         if (this.gameEditorCheckService.canSave()) {
-            await this.gameEditorStoreService.saveGame(this.gridWrapper.nativeElement);
-            this.notificationService.displaySuccess({
-                title: 'Jeu sauvegardé',
-                message: 'Votre jeu a été sauvegardé avec succès !',
-                redirectRoute: ROUTES.gameManagement,
-            });
+            try {
+                await this.gameEditorStoreService.saveGame(this.gridWrapper.nativeElement);
+                this.notificationService.displaySuccess({
+                    title: 'Jeu sauvegardé',
+                    message: 'Votre jeu a été sauvegardé avec succès !',
+                    redirectRoute: ROUTES.gameManagement,
+                });
+            } catch (error) {
+                if (error instanceof Error) {
+                    this.notificationService.displayError({
+                        title: 'Erreur lors de la sauvegarde',
+                        message: error.message,
+                    });
+                }
+            }
         } else {
             this.notificationService.displayError({
                 title: 'Problèmes dans la carte',

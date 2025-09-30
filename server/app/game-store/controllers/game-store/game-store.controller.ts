@@ -2,10 +2,8 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
-import { GameInitDto } from '@app/game-store/dto/game-init.dto';
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
 import { ToggleVisibilityDto } from '@app/game-store/dto/toggle-visibility.dto';
-import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 import { GameStoreGateway } from '@app/game-store/gateways/game-store.gateway';
 import { GameStoreService } from '@app/game-store/services/game-store/game-store.service';
 
@@ -23,24 +21,11 @@ export class GameStoreController {
         return this.gameService.getGames();
     }
 
-    @Get(':id/init')
-    @ApiOkResponse({ type: GameInitDto })
-    async getGameInit(@Param('id') id: string): Promise<GameInitDto> {
-        return this.gameService.getGameInit(id);
-    }
-
     @Post()
     @ApiCreatedResponse({ type: GamePreviewDto })
     async createGame(@Body() dto: CreateGameDto): Promise<GamePreviewDto> {
         const gamePreview = await this.gameService.createGame(dto);
         return gamePreview;
-    }
-
-    @Patch(':id')
-    @HttpCode(HttpStatus.NO_CONTENT)
-    async updateGame(@Param('id') id: string, @Body() dto: UpdateGameDto): Promise<void> {
-        const gamePreview = await this.gameService.updateGame(id, dto);
-        this.gameStoreGateway.emitGameUpdated(gamePreview);
     }
 
     @Patch(':id/visibility')

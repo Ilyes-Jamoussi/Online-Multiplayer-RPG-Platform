@@ -1,8 +1,6 @@
 import { GAME_NOT_FOUND } from '@app/constants/error-messages.constants';
 import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
-import { GameInitDto } from '@app/game-store/dto/game-init.dto';
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
-import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 import { Game, GameDocument } from '@app/game-store/entities/game.entity';
 import { ImageService } from '@app/game-store/services/image/image.service';
 import { GameDtoMapper } from '@app/game-store/utils/game-dto-mapper/game-dto-mapper.util';
@@ -27,15 +25,6 @@ export class GameStoreService {
         return games.map((game) => this.gameDtoMapper.toGamePreviewDto(game));
     }
 
-    async getGameInit(id: string): Promise<GameInitDto> {
-        const game = await this.gameModel.findById(id, { map: 1, itemContainers: 1, size: 1 }).lean();
-        if (!game) {
-            throw new NotFoundException(GAME_NOT_FOUND);
-        }
-
-        return { mapSize: game.size };
-    }
-
     async createGame(dto: CreateGameDto): Promise<GamePreviewDto> {
         const existingDraft = await this.gameModel.findOne({ draft: true });
 
@@ -44,32 +33,6 @@ export class GameStoreService {
         }
 
         return this.createDraftGame(dto);
-    }
-
-    async updateGame(id: string, dto: UpdateGameDto): Promise<GamePreviewDto> {
-        const existingGame = await this.gameModel.findById(id);
-        if (!existingGame) {
-            throw new NotFoundException(GAME_NOT_FOUND);
-        }
-
-        if (existingGame.gridPreviewUrl) {
-            await this.imageService.deleteImage(existingGame.gridPreviewUrl);
-        }
-
-        const gridPreviewUrl = await this.imageService.saveImage(dto.gridPreviewImage, `${dto.name}-${Date.now()}-preview.png`, 'grid-previews');
-
-        const updatedGame = await this.gameModel.findByIdAndUpdate(
-            id,
-            {
-                name: dto.name,
-                description: dto.description,
-                gridPreviewUrl,
-                lastModified: new Date(),
-            },
-            { new: true },
-        );
-
-        return this.gameDtoMapper.toGamePreviewDto(updatedGame);
     }
 
     async deleteGame(id: string): Promise<void> {

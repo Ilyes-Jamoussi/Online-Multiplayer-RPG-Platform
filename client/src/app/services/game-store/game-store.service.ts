@@ -1,7 +1,6 @@
 import { computed, Injectable, Signal, signal } from '@angular/core';
 import { CreateGameDto } from '@app/dto/create-game-dto';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
-import { UpdateGameDto } from '@app/dto/update-game-dto';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
 import { Observable, tap } from 'rxjs';
@@ -9,17 +8,12 @@ import { Observable, tap } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class GameStoreService {
     private readonly _gameDisplays = signal<GamePreviewDto[]>([]);
-    private _gameId: string = '';
 
     constructor(
         private readonly gameHttpService: GameHttpService,
         private readonly gameStoreSocketService: GameSocketService,
     ) {
         this.initListeners();
-    }
-
-    get gameDisplays(): Signal<GamePreviewDto[]> {
-        return this._gameDisplays.asReadonly();
     }
 
     get managementGames(): Signal<GamePreviewDto[]> {
@@ -36,10 +30,6 @@ export class GameStoreService {
 
     createGame(payload: CreateGameDto): Observable<GamePreviewDto> {
         return this.gameHttpService.createGame(payload);
-    }
-
-    updateGame(payload: UpdateGameDto): Observable<void> {
-        return this.gameHttpService.updateGame(this._gameId, payload);
     }
 
     deleteGame(id: string): Observable<void> {
