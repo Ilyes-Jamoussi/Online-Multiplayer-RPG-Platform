@@ -45,7 +45,7 @@ export class GameEditorCheckService {
         return !Object.values(this.editorProblems()).some((p) => p.hasIssue);
     }
 
-    private isTerrain(kind: GameEditorTileDto.KindEnum): boolean {
+    private isTerrainTile(kind: GameEditorTileDto.KindEnum): boolean {
         return kind === TileKind.BASE || kind === TileKind.WATER || kind === TileKind.ICE;
     }
 
@@ -59,9 +59,9 @@ export class GameEditorCheckService {
             left === TileKind.WALL &&
             right === TileKind.WALL &&
             top !== undefined &&
-            this.isTerrain(top) &&
+            this.isTerrainTile(top) &&
             bottom !== undefined &&
-            this.isTerrain(bottom)
+            this.isTerrainTile(bottom)
         );
     }
 
@@ -75,9 +75,9 @@ export class GameEditorCheckService {
             top === TileKind.WALL &&
             bottom === TileKind.WALL &&
             left !== undefined &&
-            this.isTerrain(left) &&
+            this.isTerrainTile(left) &&
             right !== undefined &&
-            this.isTerrain(right)
+            this.isTerrainTile(right)
         );
     }
 
@@ -137,7 +137,7 @@ export class GameEditorCheckService {
     private checkTerrainCoverage(tiles: GameEditorTileDto[]): GameEditorIssue {
         const size = this.gameEditorStoreService.size();
         const total = size * size;
-        const terrainCount = tiles.filter((t) => this.isTerrain(t.kind)).length;
+        const terrainCount = tiles.filter((t) => this.isTerrainTile(t.kind)).length;
         const ratio = terrainCount / total;
         const probs: GameEditorIssue = { hasIssue: false };
         if (ratio <= GameEditorCheckService.minTerrainRatio) {
