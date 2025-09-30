@@ -19,10 +19,6 @@ export class NotificationService {
         this._notification.set({ ...success, type: 'success' });
     }
 
-    displayInformation(info: Omit<NotificationMessage, 'type'>): void {
-        this._notification.set({ ...info, type: 'information' });
-    }
-
     reset(): void {
         this._notification.set(null);
     }

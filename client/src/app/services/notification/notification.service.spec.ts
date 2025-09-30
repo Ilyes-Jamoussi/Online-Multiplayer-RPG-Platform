@@ -35,15 +35,6 @@ describe('NotificationService', () => {
         expect(notification).toEqual({ ...successData, type: 'success' });
     });
 
-    it('should display information notification', () => {
-        const infoData = { title: 'Info Title', message: 'Info Message' };
-
-        service.displayInformation(infoData);
-
-        const notification = service.notification();
-        expect(notification).toEqual({ ...infoData, type: 'information' });
-    });
-
     it('should reset notification to null', () => {
         service.displayError({ title: 'Test', message: 'Test' });
         expect(service.notification()).not.toBeNull();
