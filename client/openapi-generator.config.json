@@ -12,5 +12,5 @@
         "TileKind": "TileKind",
         "PlaceableKind": "PlaceableKind"
     },
-    "templateDir": "openapi-templates/typescript-angular"
+    "templateDir": "openapi-templates/ts-angular"
 }
