@@ -1,6 +1,6 @@
 import { NgStyle } from '@angular/common';
 import { Component, ElementRef, Input, NgZone } from '@angular/core';
-import { TileSizeProbeDirective } from '@app/directives/tile-size-probe.directive';
+import { TileSizeProbeDirective } from '@app/directives/tile-size/tile-size-probe.directive';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { ToolType } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
@@ -16,6 +16,10 @@ import { TileKind } from '@common/enums/tile-kind.enum';
     imports: [NgStyle],
 })
 export class GameEditorTileComponent extends TileSizeProbeDirective {
+    @Input({ required: true }) tile: GameEditorTileDto;
+
+    readonly tileKinds = TileKind;
+
     constructor(
         private readonly gameEditorInteractionsService: GameEditorInteractionsService,
         private readonly gameEditorCheckService: GameEditorCheckService,
@@ -26,26 +30,22 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         super(el, zone);
     }
 
-    @Input({ required: true }) tile: GameEditorTileDto;
-
-    readonly tileKinds = TileKind;
-
-    get image() {
+    get tileImage() {
         return this.assetService.getTileImage(TileKind[this.tile.kind], this.tile.open);
     }
 
-    hasProblem(): boolean {
+    get isInvalid(): boolean {
         return (
             this.gameEditorCheckService.editorProblems().terrainAccessibility.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y) ||
             this.gameEditorCheckService.editorProblems().doors.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y)
         );
     }
 
-    isDropHovered(): boolean {
+    get isDropHovered(): boolean {
         return this.gameEditorInteractionsService.hoveredTiles()?.some((t) => t.x === this.tile.x && t.y === this.tile.y) ?? false;
     }
 
-    isBrushHovered(): boolean {
+    get isBrushHovered(): boolean {
         const tool = this.gameEditorInteractionsService.activeTool;
         return tool?.type === ToolType.TileBrushTool;
     }

@@ -1,9 +1,9 @@
 <div
     class="tile"
-    [class.problem]="hasProblem()"
-    [class.dropHover]="isDropHovered()"
-    [class.brushHover]="isBrushHovered()"
-    [ngStyle]="{ '--bg-image': 'url(' + image + ')' }"
+    [class.problem]="isInvalid"
+    [class.dropHover]="isDropHovered"
+    [class.brushHover]="isBrushHovered"
+    [ngStyle]="{ '--bg-image': 'url(' + tileImage + ')' }"
     (mousedown)="onMouseDown($event)"
     (mouseup)="onMouseUp($event)"
     (mouseover)="onMouseOver($event)"

@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { UiBaseComponent } from '@app/components/ui/base/ui-base.component';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { UiFooterComponent } from '@app/components/ui/footer/footer.component';
 import { UiHeaderComponent } from '@app/components/ui/header/header.component';
 import { UiSidebarComponent } from '@app/components/ui/sidebar/sidebar.component';
-import { UiFooterComponent } from '@app/components/ui/footer/footer.component';
+import { UiBaseComponent } from '@app/directives/ui-base/ui-base.component';
 
 @Component({
     selector: 'app-ui-page-layout',

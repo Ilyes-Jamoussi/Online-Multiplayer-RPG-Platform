@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
+import { ToolbarItem, ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { TileKind, TileLabel } from '@common/enums/tile-kind.enum';
-import { ToolbarItem, ToolType } from '@app/interfaces/game-editor.interface';
 
 @Component({
     selector: 'app-editor-toolbar',
@@ -10,15 +10,15 @@ import { ToolbarItem, ToolType } from '@app/interfaces/game-editor.interface';
     styleUrls: ['./game-editor-toolbar.component.scss'],
 })
 export class GameEditorToolbarComponent {
-    constructor(private readonly gameEditorInteractionsService: GameEditorInteractionsService) {}
-
     readonly tileLabel = TileLabel;
+
+    constructor(private readonly gameEditorInteractionsService: GameEditorInteractionsService) {}
 
     get brushes() {
         return this.gameEditorInteractionsService.getToolbarBrushes();
     }
 
-    selectTileBrush(tileKind: TileKind) {
+    selectTileBrush(tileKind: TileKind): void {
         this.gameEditorInteractionsService.activeTool = {
             type: ToolType.TileBrushTool,
             tileKind,

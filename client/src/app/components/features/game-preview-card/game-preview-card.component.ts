@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { GamePreviewDto } from '@app/dto/game-preview-dto';
-import { ROUTES } from '@app/constants/routes.constants';
-import { environment } from '@src/environments/environment';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiIconComponent } from '@app/components/ui/icon/icon.component';
+import { ROUTES } from '@app/constants/routes.constants';
+import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { MAP_SIZE_LABELS } from '@common/constants/game.constants';
+import { environment } from '@src/environments/environment';
 
 @Component({
     selector: 'app-game-preview-card',
@@ -25,6 +25,15 @@ export class GamePreviewCardComponent {
     @Output() toggleVisibility = new EventEmitter<string>();
 
     constructor(private readonly router: Router) {}
+
+    get imageUrl(): string {
+        const baseUrl = environment.socketUrl;
+        return `${baseUrl}${this.game.gridPreviewUrl}`;
+    }
+
+    get mapSizeLabel(): string {
+        return MAP_SIZE_LABELS[this.game.size] || `${this.game.size}x${this.game.size}`;
+    }
 
     onStartGame(): void {
         this.startGame.emit(this.game.id);
@@ -50,14 +59,5 @@ export class GamePreviewCardComponent {
             hour: '2-digit',
             minute: '2-digit',
         });
-    }
-
-    getImageUrl(): string {
-        const baseUrl = environment.socketUrl;
-        return `${baseUrl}${this.game.gridPreviewUrl}`;
-    }
-
-    getMapSizeLabel(): string {
-        return MAP_SIZE_LABELS[this.game.size] || `${this.game.size}x${this.game.size}`;
     }
 }

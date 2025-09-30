@@ -149,20 +149,20 @@ describe('GameEditorTileComponent', () => {
     it('image getter should use AssetsService with kind and open', () => {
         component.tile = { ...tile, kind: TileKind.DOOR, open: true };
         fixture.detectChanges();
-        const src = component.image;
+        const src = component.tileImage;
         expect(assetsSpy.getTileImage).toHaveBeenCalledWith(TileKind.DOOR, true);
         expect(src).toBe('/assets/tiles/base.png');
     });
 
     it('hasProblem should be false when tile not listed in problems', () => {
-        const res = component.hasProblem();
+        const res = component.isInvalid;
         expect(res).toBeFalse();
     });
 
     it('hasProblem should be true when tile is in terrainAccessibility tiles', () => {
         const probs = checkSpy.editorProblems();
         probs.terrainAccessibility.tiles.push({ x: tile.x, y: tile.y });
-        const res = component.hasProblem();
+        const res = component.isInvalid;
         expect(res).toBeTrue();
     });
 
@@ -170,24 +170,24 @@ describe('GameEditorTileComponent', () => {
         const probs = checkSpy.editorProblems();
         probs.terrainAccessibility.tiles = [];
         probs.doors.tiles.push({ x: tile.x, y: tile.y });
-        const res = component.hasProblem();
+        const res = component.isInvalid;
         expect(res).toBeTrue();
     });
 
     it('isDropHovered should reflect hoveredTiles from interactions', () => {
         hoveredTilesState = [];
-        expect(component.isDropHovered()).toBeFalse();
+        expect(component.isDropHovered).toBeFalse();
         hoveredTilesState = [{ x: tile.x, y: tile.y }];
-        expect(component.isDropHovered()).toBeTrue();
+        expect(component.isDropHovered).toBeTrue();
     });
 
     it('isBrushHovered should be true only when active tool is TileBrushTool', () => {
         activeToolState = null;
-        expect(component.isBrushHovered()).toBeFalse();
+        expect(component.isBrushHovered).toBeFalse();
         activeToolState = { type: ToolType.PlaceableTool, placeableKind: 0 as unknown as never };
-        expect(component.isBrushHovered()).toBeFalse();
+        expect(component.isBrushHovered).toBeFalse();
         activeToolState = { type: ToolType.TileBrushTool, tileKind: TileKind.WALL, leftDrag: false, rightDrag: false };
-        expect(component.isBrushHovered()).toBeTrue();
+        expect(component.isBrushHovered).toBeTrue();
     });
 
     it('onRightClick should prevent default', () => {
@@ -316,17 +316,17 @@ describe('GameEditorTileComponent', () => {
             get: (): (() => readonly Vector2[] | undefined) => () => undefined,
             configurable: true,
         });
-        expect(component.isDropHovered()).toBeFalse();
+        expect(component.isDropHovered).toBeFalse();
         Object.defineProperty(interactionsSpy, 'hoveredTiles', original as PropertyDescriptor);
     });
 
     it('isDropHovered returns false when list does not include tile', () => {
         hoveredTilesState = [{ x: tile.x + 1, y: tile.y + 1 }];
-        expect(component.isDropHovered()).toBeFalse();
+        expect(component.isDropHovered).toBeFalse();
     });
 
     it('isDropHovered returns true when list includes tile', () => {
         hoveredTilesState = [{ x: tile.x, y: tile.y }];
-        expect(component.isDropHovered()).toBeTrue();
+        expect(component.isDropHovered).toBeTrue();
     });
 });
