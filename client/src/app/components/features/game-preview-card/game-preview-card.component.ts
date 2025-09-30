@@ -1,9 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Router } from '@angular/router';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiIconComponent } from '@app/components/ui/icon/icon.component';
-import { ROUTES } from '@app/constants/routes.constants';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { MAP_SIZE_LABELS } from '@common/constants/game.constants';
 import { environment } from '@src/environments/environment';
@@ -24,8 +22,6 @@ export class GamePreviewCardComponent {
     @Output() deleteGame = new EventEmitter<string>();
     @Output() toggleVisibility = new EventEmitter<string>();
 
-    constructor(private readonly router: Router) {}
-
     get imageUrl(): string {
         const baseUrl = environment.socketUrl;
         return `${baseUrl}${this.game.gridPreviewUrl}`;
@@ -40,7 +36,7 @@ export class GamePreviewCardComponent {
     }
 
     onEditGame(): void {
-        this.router.navigate([ROUTES.gameEditor, this.game.id]);
+        this.editGame.emit(this.game.id);
     }
 
     onDeleteGame(): void {
