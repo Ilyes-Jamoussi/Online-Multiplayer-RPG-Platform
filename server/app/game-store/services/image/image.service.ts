@@ -24,6 +24,12 @@ export class ImageService {
 
     async deleteImage(filepath: string): Promise<void> {
         const fullPath = join(this.assetsPath, filepath.replace(ASSETS_URL_PREFIX, ''));
-        await fs.unlink(fullPath);
+        try {
+            await fs.unlink(fullPath);
+        } catch (error) {
+            if (error.code !== 'ENOENT') {
+                throw error;
+            }
+        }
     }
 }

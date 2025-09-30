@@ -70,5 +70,23 @@ describe('ImageService', () => {
 
             expect(mockFs.unlink).toHaveBeenCalledWith(join(process.cwd(), 'assets', 'games/test-image.png'));
         });
+
+        it('should not throw error when file does not exist (ENOENT)', async () => {
+            const filepath = '/assets/games/non-existent.png';
+            const enoentError = new Error('File not found') as NodeJS.ErrnoException;
+            enoentError.code = 'ENOENT';
+            mockFs.unlink.mockRejectedValue(enoentError);
+
+            await expect(service.deleteImage(filepath)).resolves.not.toThrow();
+        });
+
+        it('should throw error for non-ENOENT errors', async () => {
+            const filepath = '/assets/games/test-image.png';
+            const permissionError = new Error('Permission denied') as NodeJS.ErrnoException;
+            permissionError.code = 'EPERM';
+            mockFs.unlink.mockRejectedValue(permissionError);
+
+            await expect(service.deleteImage(filepath)).rejects.toThrow('Permission denied');
+        });
     });
 });
