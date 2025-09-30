@@ -67,8 +67,7 @@ describe('GameEditorPageComponent', () => {
         mockGameEditorCheckService = jasmine.createSpyObj('GameEditorCheckService', ['canSave']);
         mockNotificationService = jasmine.createSpyObj('NotificationService', ['displaySuccess', 'displayError']);
 
-        // Create mock with writable activeTool property
-        mockGameEditorInteractionsService = jasmine.createSpyObj('GameEditorInteractionsService', ['removeObject']);
+        mockGameEditorInteractionsService = jasmine.createSpyObj('GameEditorInteractionsService', ['removeObject', 'dragEnd']);
         Object.defineProperty(mockGameEditorInteractionsService, 'activeTool', {
             value: null,
             writable: true,
@@ -290,6 +289,49 @@ describe('GameEditorPageComponent', () => {
         });
     });
 
+    it('should show conflict error message when saveGame rejects with duplicate-name Error', async () => {
+        // canSave = true → on passe dans le try/catch
+        mockGameEditorCheckService.canSave.and.returnValue(true);
+
+        // gridWrapper nécessaire à l’appel
+        component.gridWrapper = {
+            nativeElement: document.createElement('div'),
+        } as ElementRef<HTMLElement>;
+
+        // saveGame rejette avec l’erreur attendue
+        const conflictErr = new Error('Un jeu avec ce nom existe déjà.');
+        mockGameEditorStoreService.saveGame.and.returnValue(Promise.reject(conflictErr));
+
+        await component.onSave();
+
+        expect(mockGameEditorStoreService.saveGame).toHaveBeenCalledWith(component.gridWrapper.nativeElement);
+        expect(mockNotificationService.displaySuccess).not.toHaveBeenCalled();
+        expect(mockNotificationService.displayError).toHaveBeenCalledWith({
+            title: 'Erreur lors de la sauvegarde',
+            message: 'Un jeu avec ce nom existe déjà.',
+        });
+    });
+
+    it('should show generic error message when saveGame rejects with another Error', async () => {
+        mockGameEditorCheckService.canSave.and.returnValue(true);
+
+        component.gridWrapper = {
+            nativeElement: document.createElement('div'),
+        } as ElementRef<HTMLElement>;
+
+        const genericErr = new Error('Boom');
+        mockGameEditorStoreService.saveGame.and.returnValue(Promise.reject(genericErr));
+
+        await component.onSave();
+
+        expect(mockGameEditorStoreService.saveGame).toHaveBeenCalled();
+        expect(mockNotificationService.displaySuccess).not.toHaveBeenCalled();
+        expect(mockNotificationService.displayError).toHaveBeenCalledWith({
+            title: 'Erreur lors de la sauvegarde',
+            message: 'Boom',
+        });
+    });
+
     it('should show error when canSave is false', async () => {
         mockGameEditorCheckService.canSave.and.returnValue(false);
 
@@ -300,5 +342,24 @@ describe('GameEditorPageComponent', () => {
             title: 'Problèmes dans la carte',
             message: 'Veuillez corriger les problèmes dans la carte avant de sauvegarder.',
         });
+    });
+
+    it('should call dragEnd on mouseover when target is NOT a tile', () => {
+        const nonTile = document.createElement('div');
+        const evt = { target: nonTile } as unknown as MouseEvent;
+
+        component.onMouseOver(evt);
+
+        expect(mockGameEditorInteractionsService.dragEnd).toHaveBeenCalled();
+    });
+
+    it('should NOT call dragEnd on mouseover when target HAS class "tile"', () => {
+        const tile = document.createElement('div');
+        tile.classList.add('tile');
+        const evt = { target: tile } as unknown as MouseEvent;
+
+        component.onMouseOver(evt);
+
+        expect(mockGameEditorInteractionsService.dragEnd).not.toHaveBeenCalled();
     });
 });

@@ -10,7 +10,7 @@ import { TileKind } from '@common/enums/tile-kind.enum';
 import { PatchGameEditorDto } from '@app/dto/patch-game-editor-dto';
 import { ExtendedGameEditorPlaceableDto, Inventory, PLACEABLE_ORDER } from '@app/interfaces/game-editor.interface';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { of } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CreateGameDto } from '@app/dto/create-game-dto';
 import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
@@ -174,6 +174,7 @@ export class GameEditorStoreService {
 
     async saveGame(gridElement: HTMLElement): Promise<void> {
         const gridPreviewImage = await this.screenshotService.captureElementAsBase64(gridElement);
+
         const current = {
             name: this._name(),
             description: this._description(),
@@ -182,11 +183,14 @@ export class GameEditorStoreService {
             gridPreviewUrl: gridPreviewImage ?? this._gridPreviewUrl(),
         };
         const game: PatchGameEditorDto = this.pickChangedProperties(current, this._initial());
-        this.gameHttpService
-            .patchGameEditorById(this._id(), game)
-            .pipe(
+
+        await firstValueFrom(
+            this.gameHttpService.patchGameEditorById(this._id(), game).pipe(
                 take(1),
-                catchError(() => {
+                catchError((err) => {
+                    if (err.statusText === 'Conflict') {
+                        return throwError(() => new Error('Un jeu avec ce nom existe déjà.'));
+                    }
                     const createDto: CreateGameDto = {
                         name: this._name(),
                         description: this._description(),
@@ -205,8 +209,8 @@ export class GameEditorStoreService {
                         }),
                     );
                 }),
-            )
-            .subscribe();
+            ),
+        );
     }
 
     getTileAt(x: number, y: number): GameEditorTileDto | undefined {
