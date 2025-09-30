@@ -13,11 +13,13 @@ import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.
 import { of } from 'rxjs';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CreateGameDto } from '@app/dto/create-game-dto';
+import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 
 @Injectable()
 export class GameEditorStoreService {
     constructor(
         private readonly gameHttpService: GameHttpService,
+        private readonly screenshotService: ScreenshotService,
         private readonly assetsService: AssetsService,
     ) {}
 
@@ -193,7 +195,8 @@ export class GameEditorStoreService {
             .subscribe();
     }
 
-    saveGame(gridPreviewImage?: string): void {
+    async saveGame(gridElement: HTMLElement): Promise<void> {
+        const gridPreviewImage = await this.screenshotService.captureElementAsBase64(gridElement);
         const current = {
             name: this._name(),
             description: this._description(),

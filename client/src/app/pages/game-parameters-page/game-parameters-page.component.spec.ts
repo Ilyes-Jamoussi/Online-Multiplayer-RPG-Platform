@@ -27,7 +27,7 @@ describe('GameParametersPageComponent', () => {
         lastModified: '2024-01-01T00:00:00Z',
         visibility: false,
         gridPreviewUrl: 'http://example.com/preview.png',
-        draft: true
+        draft: true,
     };
 
     beforeEach(async () => {
@@ -42,8 +42,8 @@ describe('GameParametersPageComponent', () => {
                 provideHttpClientTesting(),
                 { provide: Router, useValue: mockRouter },
                 { provide: GameStoreService, useValue: mockGameStoreService },
-                { provide: NotificationService, useValue: mockNotificationService }
-            ]
+                { provide: NotificationService, useValue: mockNotificationService },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GameParametersPageComponent);

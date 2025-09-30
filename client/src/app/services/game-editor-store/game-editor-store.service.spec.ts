@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { EMPTY, of, Subject, throwError } from 'rxjs';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
+import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 
 import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorStoreService } from './game-editor-store.service';
@@ -17,16 +18,19 @@ describe('GameEditorStoreService', () => {
     let service: GameEditorStoreService;
     let gameHttpServiceSpy: jasmine.SpyObj<GameHttpService>;
     let gameStoreServiceSpy: jasmine.SpyObj<GameStoreService>;
+    let screenshotServiceSpy: jasmine.SpyObj<ScreenshotService>;
 
     beforeEach(() => {
         gameHttpServiceSpy = jasmine.createSpyObj('GameHttpService', ['getGameEditorById', 'patchGameEditorById', 'createGame']);
         gameStoreServiceSpy = jasmine.createSpyObj('GameStoreService', ['selectGame', 'deselectGame']);
+        screenshotServiceSpy = jasmine.createSpyObj('ScreenshotService', ['captureElementAsBase64']);
 
         TestBed.configureTestingModule({
             providers: [
                 GameEditorStoreService,
                 { provide: GameHttpService, useValue: gameHttpServiceSpy },
                 { provide: GameStoreService, useValue: gameStoreServiceSpy },
+                { provide: ScreenshotService, useValue: screenshotServiceSpy },
             ],
         });
 
@@ -172,7 +176,6 @@ describe('GameEditorStoreService', () => {
         beforeEach(() => {
             const subject = new Subject<GameEditorDto>();
             gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
-
             gameHttpServiceSpy.patchGameEditorById.and.returnValue(EMPTY);
 
             service.loadGameById('1');
@@ -180,30 +183,36 @@ describe('GameEditorStoreService', () => {
             subject.complete();
         });
 
-        it('should call the API to save the game', () => {
-            expect(service.initial().name).toBe('Test Game');
-            expect(service.initial().description).toBe('A game for testing');
+        it('should call the API to save the game', async () => {
+            // pour ce test, on ne veut PAS de gridPreviewUrl, donc screenshot → null
+            screenshotServiceSpy.captureElementAsBase64.and.resolveTo('base64imagestring');
 
+            const gridEl = document.createElement('div');
             service.name = 'Modified Name';
             service.description = 'Modified Description';
 
-            service.saveGame();
+            await service.saveGame(gridEl);
 
+            expect(screenshotServiceSpy.captureElementAsBase64).toHaveBeenCalledWith(gridEl);
             expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
                 name: 'Modified Name',
                 description: 'Modified Description',
+                gridPreviewUrl: 'base64imagestring',
             });
         });
 
-        it('should include gridPreviewUrl when provided', () => {
+        it('should include gridPreviewUrl when screenshot returns a new image', async () => {
+            const gridEl = document.createElement('div');
             expect(service.initial().name).toBe('Test Game');
             expect(service.initial().description).toBe('A game for testing');
 
             service.name = 'Modified Name';
             service.description = 'Modified Description';
 
-            const newPreviewUrl = '/assets/new-preview.png';
-            service.saveGame(newPreviewUrl);
+            const newPreviewUrl = 'data:image/png;base64,XXX';
+            screenshotServiceSpy.captureElementAsBase64.and.resolveTo(newPreviewUrl);
+
+            await service.saveGame(gridEl);
 
             expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
                 name: 'Modified Name',
@@ -212,35 +221,36 @@ describe('GameEditorStoreService', () => {
             });
         });
 
-        it('should send only name if only name was modified', () => {
+        it('should send only name if only name was modified (no new screenshot)', async () => {
+            const gridEl = document.createElement('div');
             expect(service.initial().name).toBe('Test Game');
             expect(service.initial().description).toBe('A game for testing');
 
             service.name = 'Modified Name';
 
-            service.saveGame();
+            await service.saveGame(gridEl);
 
             expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
                 name: 'Modified Name',
             });
         });
 
-        it('should send only description if only description was modified', () => {
+        it('should send only description if only description was modified (no new screenshot)', async () => {
+            const gridEl = document.createElement('div');
             expect(service.initial().name).toBe('Test Game');
             expect(service.initial().description).toBe('A game for testing');
 
             service.description = 'Modified Description';
 
-            service.saveGame();
+            await service.saveGame(gridEl);
 
             expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
                 description: 'Modified Description',
             });
         });
 
-        it('should send only tiles if only tiles were modified', () => {
-            expect(service.initial().name).toBe('Test Game');
-            expect(service.initial().description).toBe('A game for testing');
+        it('should send only tiles if only tiles were modified (no new screenshot)', async () => {
+            const gridEl = document.createElement('div');
             expect(service.tiles()).toEqual(mockEditorData.tiles);
             expect(service.objects()).toEqual(mockEditorData.objects);
 
@@ -250,16 +260,15 @@ describe('GameEditorStoreService', () => {
             expect(service.tiles()).not.toEqual(mockEditorData.tiles);
             expect(service.objects()).toEqual(mockEditorData.objects);
 
-            service.saveGame();
+            await service.saveGame(gridEl);
 
             expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
                 tiles: service.tiles(),
             });
         });
 
-        it('should send only objects if only objects were modified', () => {
-            expect(service.initial().name).toBe('Test Game');
-            expect(service.initial().description).toBe('A game for testing');
+        it('should send only objects if only objects were modified (no new screenshot)', async () => {
+            const gridEl = document.createElement('div');
             expect(service.tiles()).toEqual(mockEditorData.tiles);
             expect(service.objects()).toEqual(mockEditorData.objects);
 
@@ -269,14 +278,15 @@ describe('GameEditorStoreService', () => {
             expect(service.tiles()).toEqual(mockEditorData.tiles);
             expect(service.objects()).not.toEqual(mockEditorData.objects);
 
-            service.saveGame();
+            await service.saveGame(gridEl);
 
             expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
                 objects: service.objects(),
             });
         });
 
-        it('should create a new game if patchGameEditorById throws a not found error', () => {
+        it('should create a new game if patchGameEditorById throws a not found error', async () => {
+            const gridEl = document.createElement('div');
             gameHttpServiceSpy.patchGameEditorById.and.returnValues(
                 throwError(() => new Error('Game with ID 1 not found')),
                 EMPTY,
@@ -295,7 +305,10 @@ describe('GameEditorStoreService', () => {
             };
             gameHttpServiceSpy.createGame.and.returnValue(of(created));
 
-            service.saveGame();
+            const newPreviewUrl = 'data:image/png;base64,YYY';
+            screenshotServiceSpy.captureElementAsBase64.and.resolveTo(newPreviewUrl);
+
+            await service.saveGame(gridEl);
 
             expect(gameHttpServiceSpy.createGame).toHaveBeenCalledWith({
                 name: 'Test Game',
@@ -309,6 +322,7 @@ describe('GameEditorStoreService', () => {
                 jasmine.objectContaining({
                     tiles: service.tiles(),
                     objects: service.objects(),
+                    gridPreviewUrl: newPreviewUrl,
                 }),
             );
         });
