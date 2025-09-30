@@ -1,300 +1,305 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { ROUTES } from '@app/constants/routes.constants';
-import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH, WHITESPACE_PATTERN } from '@app/constants/validation.constants';
-import { AssetsService } from '@app/services/assets/assets.service';
-import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
-import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
-import { NotificationService } from '@app/services/notification/notification.service';
-import { BonusType, DiceType } from '@common/enums/character-creation.enum';
-import { Character } from '@common/interfaces/character.interface';
+import { TestBed } from '@angular/core/testing';
 import { CharacterCreationPageComponent } from './character-creation-page.component';
 
-describe('CharacterCreationPageComponent (high coverage)', () => {
-    let fixture: ComponentFixture<CharacterCreationPageComponent>;
-    let component: CharacterCreationPageComponent;
+import { AssetsService } from '@app/services/assets/assets.service';
+import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
+import { CharacterStoreService } from '@app/services/character-store/character-store.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 
-    const baseCharacter = {
+import { BonusType, DiceType } from '@common/enums/character-creation.enum';
+import { Character } from '@common/interfaces/character.interface';
+import { Signal } from '@angular/core';
+import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@app/constants/validation.constants';
+
+const AVATAR_COUNT = 12;
+const STAT_BASE = 10;
+const STAT_BONUS = 2;
+
+function createCharacterStoreSpy(avatarCount = AVATAR_COUNT) {
+    let state: Character = {
         name: '',
         avatar: null,
         bonus: null,
-        diceAssignment: { attack: 'D4', defense: 'D6' } as const,
-        attributes: { life: 1, speed: 1 },
+        diceAssignment: { attack: DiceType.D4, defense: DiceType.D6 },
+        attributes: { life: 10, speed: 10 },
     };
 
-    const mockCharacterStoreService = {
-        character: jasmine.createSpy('character').and.returnValue(baseCharacter),
-        avatars: [0, 1, 2],
-        resetAvatar: jasmine.createSpy('resetAvatar'),
-        setBonus: jasmine.createSpy('setBonus'),
-        setName: jasmine.createSpy('setName'),
-        selectAvatar: jasmine.createSpy('selectAvatar'),
-        setDice: jasmine.createSpy('setDice'),
-        generateRandom: jasmine.createSpy('generateRandom'),
-    };
+    const characterSignalSpy = jasmine.createSpy('character').and.callFake(() => state) as unknown as Signal<Character>;
 
-    const mockAssetsService = {
-        getAvatarStaticByNumber: jasmine.createSpy('getAvatarStaticByNumber').and.callFake((n) => `static-${n}`),
-        getAvatarAnimatedByNumber: jasmine.createSpy('getAvatarAnimatedByNumber').and.callFake((n) => `anim-${n}`),
-        getDiceImage: jasmine.createSpy('getDiceImage').and.callFake((type: string, value: string) => `dice-${type}-${value}`),
-    };
+    const storeSpy = jasmine.createSpyObj<CharacterStoreService>('CharacterStoreService', ['setDice', 'generateRandom']);
 
-    const mockCharacterCreationCheckService = {
-        canCreate: jasmine.createSpy('canCreate').and.returnValue(false),
-    };
-
-    const mockNotificationService = {
-        displayError: jasmine.createSpy('displayError'),
-        displaySuccess: jasmine.createSpy('displaySuccess'),
-    };
-
-    const mockRouter = {
-        navigate: jasmine.createSpy('navigate'),
-    };
-
-    beforeEach(async () => {
-        await TestBed.configureTestingModule({
-            imports: [CharacterCreationPageComponent],
-            providers: [
-                { provide: CharacterStoreService, useValue: mockCharacterStoreService },
-                { provide: AssetsService, useValue: mockAssetsService },
-                { provide: CharacterCreationCheckService, useValue: mockCharacterCreationCheckService },
-                { provide: NotificationService, useValue: mockNotificationService },
-                { provide: Router, useValue: mockRouter },
-            ],
-        }).compileComponents();
-
-        fixture = TestBed.createComponent(CharacterCreationPageComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+    Object.defineProperty(storeSpy, 'character', {
+        get: () => characterSignalSpy,
     });
 
-    it('should instantiate and expose constants from project', () => {
+    Object.defineProperty(storeSpy, 'avatars', {
+        get: () => Array.from({ length: avatarCount }, (_, i) => i),
+    });
+
+    Object.defineProperty(storeSpy, 'name', {
+        set: (v: string) => {
+            state = { ...state, name: v };
+        },
+    });
+
+    Object.defineProperty(storeSpy, 'bonus', {
+        set: (b: BonusType | null) => {
+            const base = 10;
+            const plus = 2;
+            const life = b === BonusType.Life ? base + plus : base;
+            const speed = b === BonusType.Speed ? base + plus : base;
+            state = { ...state, bonus: b, attributes: { life, speed } };
+        },
+    });
+
+    Object.defineProperty(storeSpy, 'avatar', {
+        set: (idx: number | null) => {
+            state = { ...state, avatar: idx };
+        },
+    });
+
+    storeSpy.setDice.and.callFake((attr: 'attack' | 'defense', value: DiceType) => {
+        if (attr === 'attack') {
+            state = {
+                ...state,
+                diceAssignment: {
+                    attack: value,
+                    defense: value === DiceType.D6 ? DiceType.D4 : DiceType.D6,
+                },
+            };
+        } else {
+            state = {
+                ...state,
+                diceAssignment: {
+                    attack: value === DiceType.D6 ? DiceType.D4 : DiceType.D6,
+                    defense: value,
+                },
+            };
+        }
+    });
+
+    storeSpy.generateRandom.and.callFake(() => {
+        /** no-op */
+    });
+
+    return { storeSpy, characterSignalSpy, getState: () => state };
+}
+
+describe('CharacterCreationPageComponent', () => {
+    let component: CharacterCreationPageComponent;
+
+    let assetsServiceSpy: jasmine.SpyObj<AssetsService>;
+    let creationCheckServiceSpy: jasmine.SpyObj<CharacterCreationCheckService>;
+    let notificationServiceSpy: jasmine.SpyObj<NotificationService>;
+
+    beforeEach(() => {
+        assetsServiceSpy = jasmine.createSpyObj<AssetsService>('AssetsService', [
+            'getAvatarStaticImage',
+            'getAvatarAnimatedImage',
+            'getAvatarStaticByNumber',
+            'getAvatarAnimatedByNumber',
+            'getDiceImage',
+            'getTileImage',
+            'getPlaceableImage',
+        ]);
+
+        creationCheckServiceSpy = jasmine.createSpyObj<CharacterCreationCheckService>('CharacterCreationCheckService', [
+            'canCreate',
+            'getErrorMessages',
+        ]);
+
+        notificationServiceSpy = jasmine.createSpyObj<NotificationService>('NotificationService', ['displayError', 'displaySuccess']);
+
+        const { storeSpy } = createCharacterStoreSpy(AVATAR_COUNT);
+
+        TestBed.configureTestingModule({
+            imports: [CharacterCreationPageComponent],
+            providers: [
+                { provide: AssetsService, useValue: assetsServiceSpy },
+                { provide: CharacterCreationCheckService, useValue: creationCheckServiceSpy },
+                { provide: NotificationService, useValue: notificationServiceSpy },
+                { provide: CharacterStoreService, useValue: storeSpy },
+            ],
+        });
+
+        TestBed.overrideComponent(CharacterCreationPageComponent, {
+            set: {
+                providers: [{ provide: CharacterCreationCheckService, useValue: creationCheckServiceSpy }],
+            },
+        });
+
+        const fixture = TestBed.createComponent(CharacterCreationPageComponent);
+        component = fixture.componentInstance;
+        assetsServiceSpy.getAvatarStaticByNumber.and.callFake((n: number) => `/static/avatarS${n}.png`);
+        assetsServiceSpy.getAvatarAnimatedByNumber.and.callFake((n: number) => `/anim/avatar${n}.gif`);
+        assetsServiceSpy.getDiceImage.and.returnValue('/dice/d4.svg');
+    });
+
+    it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should have correct default values', () => {
+        expect(component.diceType).toBe(DiceType);
+        expect(component.bonusType).toBe(BonusType);
+        expect(component.hasSelectedAvatar).toBeFalse();
+        expect(component.selectedAvatarAltText).toBe('');
+        expect(component.avatars.length).toBe(AVATAR_COUNT);
+    });
+
+    it('should update name in store when changed', () => {
+        const newName = 'New Hero Name';
+        component.onNameChange(newName);
+        expect(component.character.name).toBe(newName);
+    });
+
+    it('should select avatar and update selectedAvatarAltText', () => {
+        const avatarIndex = 3;
+        component.selectAvatar(avatarIndex);
+        expect(component.character.avatar).toBe(avatarIndex);
+        expect(component.selectedAvatarAltText).toBe(`Avatar sélectionné ${avatarIndex + 1}`);
+        expect(component.hasSelectedAvatar).toBeTrue();
+    });
+
+    it('should change bonus and update attributes accordingly', () => {
+        component.onBonusChange(BonusType.Life);
+        expect(component.character.bonus).toBe(BonusType.Life);
+        expect(component.character.attributes.life).toBe(STAT_BASE + STAT_BONUS);
+        expect(component.character.attributes.speed).toBe(STAT_BASE);
+
+        component.onBonusChange(BonusType.Speed);
+        expect(component.character.bonus).toBe(BonusType.Speed);
+        expect(component.character.attributes.life).toBe(STAT_BASE);
+        expect(component.character.attributes.speed).toBe(STAT_BASE + STAT_BONUS);
+    });
+
+    it('should change attack and defense dice and update assignment accordingly', () => {
+        component.onAttackDiceChange(DiceType.D6);
+        expect(component.character.diceAssignment.attack).toBe(DiceType.D6);
+        expect(component.character.diceAssignment.defense).toBe(DiceType.D4);
+
+        component.onDefenseDiceChange(DiceType.D6);
+        expect(component.character.diceAssignment.attack).toBe(DiceType.D4);
+        expect(component.character.diceAssignment.defense).toBe(DiceType.D6);
+    });
+
+    it('should generate random character', () => {
+        component.generateRandomCharacter();
+        expect(component.store.generateRandom).toHaveBeenCalled();
+    });
+
+    it('should submit character if valid', () => {
+        creationCheckServiceSpy.canCreate.and.returnValue(true);
+        component.onSubmit();
+        expect(creationCheckServiceSpy.canCreate).toHaveBeenCalled();
+        expect(notificationServiceSpy.displayError).not.toHaveBeenCalled();
+    });
+
+    it('should get correct avatar image paths', () => {
+        const avatarIndex = 5;
+        const staticPath = component.getAvatarImage(avatarIndex);
+        const animatedPath = component.getSelectedAvatarImage();
+
+        expect(staticPath).toBe(`/static/avatarS${avatarIndex + 1}.png`);
+        expect(animatedPath).toBe('');
+
+        component.selectAvatar(avatarIndex);
+        const animatedPathAfterSelect = component.getSelectedAvatarImage();
+        expect(animatedPathAfterSelect).toBe(`/anim/avatar${avatarIndex + 1}.gif`);
+    });
+
+    it('should return correct aria-pressed for avatars', () => {
+        const avatarIndex = 2;
+        expect(component.getisAvatarSelected(avatarIndex)).toBeFalse();
+        component.selectAvatar(avatarIndex);
+        expect(component.getisAvatarSelected(avatarIndex)).toBeTrue();
+    });
+
+    it('should have correct character name length constants', () => {
         expect(component.characterNameMinLength).toBe(NAME_MIN_LENGTH);
         expect(component.characterNameMaxLength).toBe(CHARACTER_NAME_MAX_LENGTH);
     });
 
-    it('ngOnInit should reset avatar and set a default bonus', () => {
-        expect(mockCharacterStoreService.resetAvatar).toHaveBeenCalled();
-        expect(mockCharacterStoreService.setBonus).toHaveBeenCalledWith('life');
+    it('should compute hasSelectedAvatar and showAvatarPlaceholder correctly', () => {
+        expect(component.hasSelectedAvatar).toBeFalse();
+        expect(component.showAvatarPlaceholder).toBeTrue();
+
+        component.selectAvatar(1);
+        expect(component.hasSelectedAvatar).toBeTrue();
+        expect(component.showAvatarPlaceholder).toBeFalse();
     });
 
-    it('getAvatarImage and getSelectedAvatarImage use AssetsService and character state', () => {
-        expect(component.getSelectedAvatarImage()).toBe('');
-        expect(component.getAvatarImage(1)).toBe('static-2');
-
-        (mockCharacterStoreService.character as jasmine.Spy).and.returnValue({ ...baseCharacter, avatar: 1 });
-        expect(component.getSelectedAvatarImage()).toBe('anim-2');
-    });
-
-    it('store getter returns the injected CharacterStoreService instance', () => {
-        expect(component.store).toBe(mockCharacterStoreService as unknown as CharacterStoreService);
-    });
-
-    it("getNameErrorMessage returns the 'only spaces' message when trimmed value contains only whitespace chars", () => {
-        Object.defineProperty(component, 'character', {
-            get: () =>
-                ({
-                    name: { trim: () => ' '.repeat(NAME_MIN_LENGTH) },
-                }) as unknown as Character,
-        });
-
-        const msg = component.getNameErrorMessage();
-        expect(msg).toContain('espaces');
-    });
-
-    it('getNameErrorMessage returns empty string for empty name after trim', () => {
-        Object.defineProperty(component, 'character', {
-            get: () => ({ name: { trim: () => '' } }) as unknown as Character,
-        });
-        expect(component.getNameErrorMessage()).toBe('');
-    });
-
-    it('getNameErrorMessage returns empty string for a valid name', () => {
-        Object.defineProperty(component, 'character', {
-            get: () => ({ name: { trim: () => 'ValidName' } }) as unknown as Character,
-        });
-        expect(component.getNameErrorMessage()).toBe('');
-    });
-
-    it('onNameChange delegates to store.setName and getNameErrorMessage uses project constants', () => {
-        component.onNameChange('ab');
-        expect(mockCharacterStoreService.setName).toHaveBeenCalledWith('ab');
-
-        const tooShort = 'a'.repeat(NAME_MIN_LENGTH - 1);
-        (mockCharacterStoreService.character as jasmine.Spy).and.returnValue({ ...baseCharacter, name: tooShort });
-        expect(component.getNameErrorMessage()).toContain(`${NAME_MIN_LENGTH}`);
-
-        const tooLong = 'a'.repeat(CHARACTER_NAME_MAX_LENGTH + 1);
-        (mockCharacterStoreService.character as jasmine.Spy).and.returnValue({ ...baseCharacter, name: tooLong });
-        expect(component.getNameErrorMessage()).toContain(`${CHARACTER_NAME_MAX_LENGTH}`);
-
-        const onlySpaces = ' '.repeat(NAME_MIN_LENGTH + 1);
-        (mockCharacterStoreService.character as jasmine.Spy).and.returnValue({ ...baseCharacter, name: onlySpaces });
-        expect(onlySpaces.replace(WHITESPACE_PATTERN, '').length).toBe(0);
-        expect(component.getNameErrorMessage()).toBe('');
-    });
-
-    it('selectAvatar, onBonusChange, onAttackDiceChange, onDefenseDiceChange delegate to store', () => {
-        component.selectAvatar(2);
-        expect(mockCharacterStoreService.selectAvatar).toHaveBeenCalledWith(2);
+    it('should reflect bonus selection flags (isLifeBonusSelected / isSpeedBonusSelected)', () => {
+        component.onBonusChange(BonusType.Life);
+        expect(component.isLifeBonusSelected).toBeTrue();
+        expect(component.isSpeedBonusSelected).toBeFalse();
 
         component.onBonusChange(BonusType.Speed);
-        expect(mockCharacterStoreService.setBonus).toHaveBeenCalledWith(BonusType.Speed);
+        expect(component.isLifeBonusSelected).toBeFalse();
+        expect(component.isSpeedBonusSelected).toBeTrue();
+    });
+
+    it('should reflect dice selection flags for attack (D4/D6)', () => {
+        expect(component.isAttackD4Selected).toBeTrue();
+        expect(component.isAttackD6Selected).toBeFalse();
 
         component.onAttackDiceChange(DiceType.D6);
-        expect(mockCharacterStoreService.setDice).toHaveBeenCalledWith('attack', DiceType.D6);
+        expect(component.isAttackD4Selected).toBeFalse();
+        expect(component.isAttackD6Selected).toBeTrue();
+    });
+
+    it('should reflect dice selection flags for defense (D4/D6)', () => {
+        expect(component.isDefenseD4Selected).toBeFalse();
+        expect(component.isDefenseD6Selected).toBeTrue();
+
+        component.onDefenseDiceChange(DiceType.D6);
+        expect(component.isDefenseD4Selected).toBeFalse();
+        expect(component.isDefenseD6Selected).toBeTrue();
 
         component.onDefenseDiceChange(DiceType.D4);
-        expect(mockCharacterStoreService.setDice).toHaveBeenCalledWith('defense', DiceType.D4);
+        expect(component.isDefenseD4Selected).toBeTrue();
+        expect(component.isDefenseD6Selected).toBeFalse();
     });
 
-    describe('getter methods', () => {
-        it('hasSelectedAvatar should return true when avatar is selected', () => {
-            Object.defineProperty(component, 'character', {
-                get: () => ({ avatar: 1 }) as Character,
-                configurable: true,
-            });
-            expect(component.hasSelectedAvatar).toBe(true);
-        });
+    it('should call assetsService.getAvatarStaticByNumber with index+1 and return its value', () => {
+        const idx = 4;
+        const expected = `/static/avatarS${idx + 1}.png`;
+        assetsServiceSpy.getAvatarStaticByNumber.and.returnValue(expected);
 
-        it('hasSelectedAvatar should return false when no avatar is selected', () => {
-            Object.defineProperty(component, 'character', {
-                get: () => ({ avatar: null }) as Character,
-                configurable: true,
-            });
-            expect(component.hasSelectedAvatar).toBe(false);
-        });
+        const path = component.getAvatarImage(idx);
 
-        it('showAvatarPlaceholder should return false when avatar is selected', () => {
-            Object.defineProperty(component, 'character', {
-                get: () => ({ avatar: 1 }) as Character,
-                configurable: true,
-            });
-            expect(component.showAvatarPlaceholder).toBe(false);
-        });
-
-        it('showAvatarPlaceholder should return true when no avatar is selected', () => {
-            Object.defineProperty(component, 'character', {
-                get: () => ({ avatar: null }) as Character,
-                configurable: true,
-            });
-            expect(component.showAvatarPlaceholder).toBe(true);
-        });
-
-        it('isLifeBonusSelected should return true when life bonus is selected', () => {
-            Object.defineProperty(component, 'character', {
-                get: () => ({ bonus: BonusType.Life }) as Character,
-                configurable: true,
-            });
-            expect(component.isLifeBonusSelected).toBe(true);
-        });
-
-        it('isSpeedBonusSelected should return true when speed bonus is selected', () => {
-            Object.defineProperty(component, 'character', {
-                get: () => ({ bonus: BonusType.Speed }) as Character,
-                configurable: true,
-            });
-            expect(component.isSpeedBonusSelected).toBe(true);
-        });
-
-        it('isAttackD4Selected should return true when attack dice is D4', () => {
-            Object.defineProperty(component, 'character', {
-                get: () => ({ diceAssignment: { attack: DiceType.D4 } }) as Character,
-                configurable: true,
-            });
-            expect(component.isAttackD4Selected).toBe(true);
-        });
-
-        it('isAttackD6Selected should return true when attack dice is D6', () => {
-            Object.defineProperty(component, 'character', {
-                get: () => ({ diceAssignment: { attack: DiceType.D6 } }) as Character,
-                configurable: true,
-            });
-            expect(component.isAttackD6Selected).toBe(true);
-        });
-
-        it('isDefenseD4Selected should return true when defense dice is D4', () => {
-            Object.defineProperty(component, 'character', {
-                get: () => ({ diceAssignment: { defense: DiceType.D4 } }) as Character,
-                configurable: true,
-            });
-            expect(component.isDefenseD4Selected).toBe(true);
-        });
-
-        it('isDefenseD6Selected should return true when defense dice is D6', () => {
-            Object.defineProperty(component, 'character', {
-                get: () => ({ diceAssignment: { defense: DiceType.D6 } }) as Character,
-                configurable: true,
-            });
-            expect(component.isDefenseD6Selected).toBe(true);
-        });
-
-        it('isAvatarSelected should return true when given avatar matches selected avatar', () => {
-            Object.defineProperty(component, 'character', {
-                get: () => ({ avatar: 2 }) as Character,
-                configurable: true,
-            });
-            expect(component.isAvatarSelected(2)).toBe(true);
-            expect(component.isAvatarSelected(1)).toBe(false);
-        });
-
-        it('getSelectedAvatarAltText should return correct text when avatar is selected', () => {
-            Object.defineProperty(component, 'character', {
-                get: () => ({ avatar: 2 }) as Character,
-                configurable: true,
-            });
-            expect(component.getSelectedAvatarAltText()).toBe('Avatar sélectionné 3');
-        });
-
-        it('getSelectedAvatarAltText should return empty string when no avatar is selected', () => {
-            Object.defineProperty(component, 'character', {
-                get: () => ({ avatar: null }) as Character,
-                configurable: true,
-            });
-            expect(component.getSelectedAvatarAltText()).toBe('');
-        });
+        expect(assetsServiceSpy.getAvatarStaticByNumber).toHaveBeenCalledWith(idx + 1);
+        expect(path).toBe(expected);
     });
 
-    it('generateRandomCharacter delegates to store.generateRandom', () => {
-        component.generateRandomCharacter();
-        expect(mockCharacterStoreService.generateRandom).toHaveBeenCalled();
-    });
-
-    it('onSubmit when cannot create -> displayError called and no success', () => {
-        mockCharacterCreationCheckService.canCreate.and.returnValue(false);
-        mockNotificationService.displayError.calls.reset();
-        mockNotificationService.displaySuccess.calls.reset();
-
-        (component as unknown as { characterCreationCheckService: CharacterCreationCheckService }).characterCreationCheckService =
-            mockCharacterCreationCheckService as unknown as CharacterCreationCheckService;
-        (component as unknown as { notificationService: NotificationService }).notificationService =
-            mockNotificationService as unknown as NotificationService;
+    it('should not submit character if invalid and display error payload from component', () => {
+        creationCheckServiceSpy.canCreate.and.returnValue(false);
 
         component.onSubmit();
 
-        expect(mockNotificationService.displayError).toHaveBeenCalled();
-        expect(mockNotificationService.displaySuccess).not.toHaveBeenCalled();
-
-        const errArg = (mockNotificationService.displayError as jasmine.Spy).calls.mostRecent().args[0];
-        expect(errArg.title).toContain('Erreur');
+        expect(creationCheckServiceSpy.canCreate).toHaveBeenCalled();
+        expect(notificationServiceSpy.displayError).toHaveBeenCalledWith({
+            title: 'Erreur de validation',
+            message: 'Nom, avatar et bonus requis.',
+        });
+        expect(notificationServiceSpy.displaySuccess).not.toHaveBeenCalled();
     });
 
-    it('onSubmit when can create -> displaySuccess called with redirect route', () => {
-        mockCharacterCreationCheckService.canCreate.and.returnValue(true);
-        (mockCharacterStoreService.character as jasmine.Spy).and.returnValue({ ...baseCharacter, name: 'ValidName' });
-
-        (component as unknown as { characterCreationCheckService: CharacterCreationCheckService }).characterCreationCheckService =
-            mockCharacterCreationCheckService as unknown as CharacterCreationCheckService;
-        (component as unknown as { notificationService: NotificationService }).notificationService =
-            mockNotificationService as unknown as NotificationService;
+    it('should submit character if valid and call displaySuccess with redirect', () => {
+        creationCheckServiceSpy.canCreate.and.returnValue(true);
 
         component.onSubmit();
 
-        expect(mockNotificationService.displaySuccess).toHaveBeenCalled();
-        const successArg = (mockNotificationService.displaySuccess as jasmine.Spy).calls.mostRecent().args[0];
-        expect(successArg.redirectRoute).toBe(ROUTES.waitingRoom);
-        expect(successArg.title).toContain('Personnage');
+        expect(creationCheckServiceSpy.canCreate).toHaveBeenCalled();
+        expect(notificationServiceSpy.displayError).not.toHaveBeenCalled();
+        expect(notificationServiceSpy.displaySuccess).toHaveBeenCalled();
+        const arg = notificationServiceSpy.displaySuccess.calls.mostRecent().args[0];
+        expect(arg).toEqual(
+            jasmine.objectContaining({
+                title: 'Personnage créé',
+                message: jasmine.stringMatching(/est prêt pour l’aventure\./),
+                redirectRoute: 'waiting-room',
+            }),
+        );
     });
 });
