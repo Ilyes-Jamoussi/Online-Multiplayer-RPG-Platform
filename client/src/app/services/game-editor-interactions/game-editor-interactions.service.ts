@@ -114,7 +114,8 @@ export class GameEditorInteractionsService {
             object &&
             ((object.kind === PlaceableKind.BOAT && tool.tileKind !== TileKind.WATER) ||
                 tool.tileKind === TileKind.WALL ||
-                tool.tileKind === TileKind.DOOR)
+                tool.tileKind === TileKind.DOOR ||
+                tool.tileKind === TileKind.TELEPORT)
         ) {
             this.store.removeObject(object.id);
         }
@@ -190,7 +191,7 @@ export class GameEditorInteractionsService {
 
                 const tk = tile.kind as TileKind;
 
-                if (tk === TileKind.WALL || tk === TileKind.DOOR) return false;
+                if (tk === TileKind.WALL || tk === TileKind.DOOR || tk === TileKind.TELEPORT) return false;
 
                 if (kind === PlaceableKind.BOAT) {
                     if (tk !== TileKind.WATER) return false;
