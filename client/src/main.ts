@@ -12,7 +12,7 @@ import { GameParametersPageComponent } from '@app/pages/game-parameters-page/gam
 import { GameSessionCreationPageComponent } from '@app/pages/game-session-creation-page/game-session-creation-page.component';
 import { HomePageComponent } from '@app/pages/home-page/home-page.component';
 import { WaitingRoomPageComponent } from '@app/pages/waiting-room-page/waiting-room-page.component';
-import { removeLeadingSlash } from '@src/utils/route/route.utils';
+import { removeLeadingSlash } from '@src/utils/route/route.util';
 import { environment } from './environments/environment';
 
 // import { CreateGameComponent } from './app/pages/create-game/create-game.component'; --- IGNORE ---
