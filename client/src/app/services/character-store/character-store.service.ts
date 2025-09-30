@@ -3,8 +3,6 @@ import { CHARACTER_AVATARS_COUNT, CHARACTER_BASE, CHARACTER_PLUS } from '@app/co
 import { BonusType, DiceType } from '@common/enums/character-creation.enum';
 import { Character } from '@common/interfaces/character.interface';
 
-const MAX_NAME_LENGTH = 8;
-
 @Injectable({ providedIn: 'root' })
 export class CharacterStoreService {
     private readonly _name = signal('');
@@ -32,17 +30,16 @@ export class CharacterStoreService {
         return Array.from({ length: CHARACTER_AVATARS_COUNT }, (_, i) => i);
     }
 
-    setName(name: string) {
+    set name(name: string) {
         this._name.set(name);
     }
-    selectAvatar(index: number) {
-        if (index >= 0 && index < CHARACTER_AVATARS_COUNT) this._avatar.set(index);
-    }
-    resetAvatar() {
-        this._avatar.set(null);
-    }
-    setBonus(bonus: BonusType | null) {
+
+    set bonus(bonus: BonusType | null) {
         this._bonus.set(bonus);
+    }
+
+    set avatar(avatar: number | null) {
+        if (avatar !== null && avatar >= 0 && avatar < CHARACTER_AVATARS_COUNT) this._avatar.set(avatar);
     }
 
     setDice(attr: 'attack' | 'defense', value: DiceType) {
@@ -57,29 +54,5 @@ export class CharacterStoreService {
         const RANDOM_THRESHOLD = 0.5;
         this._bonus.set(Math.random() < RANDOM_THRESHOLD ? BonusType.Life : BonusType.Speed);
         this.setDice(Math.random() < RANDOM_THRESHOLD ? 'attack' : 'defense', DiceType.D6);
-    }
-
-    get isValid(): boolean {
-        return this.isNameValid && this._avatar() !== null && this._bonus() !== null;
-    }
-
-    get isNameValid(): boolean {
-        const name = this._name().trim();
-        return name.length > 0 && name.length <= MAX_NAME_LENGTH && /^[a-zA-Z0-9]+$/.test(name);
-    }
-
-    get nameError(): string | null {
-        const name = this._name().trim();
-        if (name.length === 0) return 'Le nom est requis';
-        if (name.length > MAX_NAME_LENGTH) return 'Maximum 8 caractères';
-        if (!/^[a-zA-Z0-9]+$/.test(name)) return 'Lettres et chiffres seulement';
-        return null;
-    }
-
-    resetForm() {
-        this._name.set('');
-        this._avatar.set(0);
-        this._bonus.set(null);
-        this._dice.set({ attack: DiceType.D4, defense: DiceType.D6 });
     }
 }

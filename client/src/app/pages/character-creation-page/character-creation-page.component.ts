@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { ErrorsBadgeComponent } from '@app/components/features/errors-badge/errors-badge.component';
@@ -8,10 +8,10 @@ import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiInputComponent } from '@app/components/ui/input/input.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { ROUTES } from '@app/constants/routes.constants';
-import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH, WHITESPACE_PATTERN } from '@app/constants/validation.constants';
+import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@app/constants/validation.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
-import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
+import { CharacterStoreService } from '@app/services/character-store/character-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { BonusType, DiceType } from '@common/enums/character-creation.enum';
 
@@ -23,9 +23,11 @@ import { BonusType, DiceType } from '@common/enums/character-creation.enum';
     imports: [CommonModule, FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent],
     providers: [CharacterCreationCheckService],
 })
-export class CharacterCreationPageComponent implements OnInit {
+export class CharacterCreationPageComponent {
     readonly diceType = DiceType;
     readonly bonusType = BonusType;
+    readonly characterNameMinLength = NAME_MIN_LENGTH;
+    readonly characterNameMaxLength = CHARACTER_NAME_MAX_LENGTH;
 
     get hasSelectedAvatar(): boolean {
         return this.character.avatar !== null;
@@ -59,15 +61,13 @@ export class CharacterCreationPageComponent implements OnInit {
         return this.character.diceAssignment.defense === DiceType.D6;
     }
 
-    isAvatarSelected(avatar: number): boolean {
+    getisAvatarSelected(avatar: number): boolean {
         return this.character.avatar === avatar;
     }
 
-    getSelectedAvatarAltText(): string {
+    get selectedAvatarAltText(): string {
         return this.character.avatar !== null ? `Avatar sélectionné ${this.character.avatar + 1}` : '';
     }
-    readonly characterNameMinLength = NAME_MIN_LENGTH;
-    readonly characterNameMaxLength = CHARACTER_NAME_MAX_LENGTH;
 
     get character() {
         return this.characterStoreService.character();
@@ -95,33 +95,16 @@ export class CharacterCreationPageComponent implements OnInit {
         return this.assetsService.getAvatarAnimatedByNumber(this.character.avatar + 1);
     }
 
-    ngOnInit() {
-        this.characterStoreService.resetAvatar();
-        this.characterStoreService.setBonus(BonusType.Life);
-    }
-
     onNameChange(v: string) {
-        this.characterStoreService.setName(v);
-    }
-
-    getNameErrorMessage(): string {
-        const name = this.character.name.trim();
-        if (name.length === 0) return '';
-        if (name.length < NAME_MIN_LENGTH || name.length > CHARACTER_NAME_MAX_LENGTH) {
-            return `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${CHARACTER_NAME_MAX_LENGTH} caractères.`;
-        }
-        if (name.replace(WHITESPACE_PATTERN, '').length === 0) {
-            return "Le nom ne peut pas être composé uniquement d'espaces.";
-        }
-        return '';
+        this.characterStoreService.name = v;
     }
 
     selectAvatar(index: number) {
-        this.characterStoreService.selectAvatar(index);
+        this.characterStoreService.avatar = index;
     }
 
     onBonusChange(bonus: BonusType) {
-        this.characterStoreService.setBonus(bonus);
+        this.characterStoreService.bonus = bonus;
     }
 
     onAttackDiceChange(value: DiceType) {

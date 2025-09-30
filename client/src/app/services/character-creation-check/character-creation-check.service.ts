@@ -1,6 +1,6 @@
 import { computed, Injectable } from '@angular/core';
 import { NAME_MIN_LENGTH, CHARACTER_NAME_MAX_LENGTH, WHITESPACE_PATTERN } from '@app/constants/validation.constants';
-import { CharacterStoreService } from '@app/services/game/character-store/character-store.service';
+import { CharacterStoreService } from '@app/services/character-store/character-store.service';
 
 @Injectable()
 export class CharacterCreationCheckService {
@@ -13,6 +13,7 @@ export class CharacterCreationCheckService {
         return {
             nameValidation: this.checkNameValidation(name),
             avatarSelection: this.checkAvatarSelection(character.avatar),
+            bonusSelection: this.checkBonusSelection(character.bonus),
         };
     });
 
@@ -30,6 +31,10 @@ export class CharacterCreationCheckService {
 
         if (problems.avatarSelection.hasIssue && problems.avatarSelection.message) {
             messages.push(problems.avatarSelection.message);
+        }
+
+        if (problems.bonusSelection.hasIssue && problems.bonusSelection.message) {
+            messages.push(problems.bonusSelection.message);
         }
 
         return messages;
@@ -53,6 +58,17 @@ export class CharacterCreationCheckService {
             return {
                 hasIssue: true,
                 message: 'Un avatar doit être sélectionné.',
+            };
+        }
+
+        return { hasIssue: false };
+    }
+
+    private checkBonusSelection(bonus: string | null): { hasIssue: boolean; message?: string } {
+        if (bonus === null) {
+            return {
+                hasIssue: true,
+                message: 'Un bonus doit être sélectionné.',
             };
         }
 
