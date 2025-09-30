@@ -5,7 +5,7 @@ import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { catchError, finalize, switchMap, take, tap } from 'rxjs/operators';
+import { catchError, switchMap, take, tap } from 'rxjs/operators';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { PatchGameEditorDto } from '@app/dto/patch-game-editor-dto';
 import { ExtendedGameEditorPlaceableDto, Inventory, PLACEABLE_ORDER } from '@app/interfaces/game-editor.interface';
@@ -45,9 +45,6 @@ export class GameEditorStoreService {
     private readonly _mode = signal<GameMode>(GameMode.CLASSIC);
 
     private readonly _tileSizePx = signal<number>(0);
-
-    private readonly _loadingGame = signal<boolean>(false);
-    private readonly _loadError = signal<string>('');
 
     get placedObjects(): ExtendedGameEditorPlaceableDto[] {
         const objs = this._objects();
@@ -105,18 +102,6 @@ export class GameEditorStoreService {
         return inv;
     });
 
-    get loadingGame() {
-        return this._loadingGame.asReadonly();
-    }
-
-    get loadError() {
-        return this._loadError.asReadonly();
-    }
-
-    get initial() {
-        return this._initial.asReadonly();
-    }
-
     get name() {
         return this._name();
     }
@@ -162,16 +147,12 @@ export class GameEditorStoreService {
     }
 
     loadGameById(id: string): void {
-        this._loadingGame.set(true);
-        this._loadError.set('');
-
         this.gameHttpService
             .getGameEditorById(id)
             .pipe(
                 take(1),
                 tap((game) => {
                     if (!game) {
-                        this._loadError.set(`Game with ID ${id} not found`);
                         return;
                     }
                     this._id.set(game.id);
@@ -184,12 +165,8 @@ export class GameEditorStoreService {
                     this._gridPreviewUrl.set(game.gridPreviewUrl);
                     this._mode.set(game.mode as GameMode);
                 }),
-                catchError((error) => {
-                    this._loadError.set(error?.message);
+                catchError(() => {
                     return of(null);
-                }),
-                finalize(() => {
-                    this._loadingGame.set(false);
                 }),
             )
             .subscribe();

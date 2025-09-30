@@ -20,6 +20,22 @@ export class GameEditorInteractionsService {
     private readonly _objectDropVec2 = signal<Vector2>({ x: 0, y: 0 });
     private readonly _draggedObject = signal<PlaceableKind | string>('');
 
+    private get objectGrabOffset(): Vector2 {
+        return this._objectGrabOffset();
+    }
+
+    private set objectGrabOffset(offset: Vector2) {
+        this._objectGrabOffset.set(offset);
+    }
+
+    private get objectDropVec2(): Vector2 {
+        return this._objectDropVec2();
+    }
+
+    private set objectDropVec2(vec: Vector2) {
+        this._objectDropVec2.set(vec);
+    }
+
     get activeTool(): ActiveTool | null {
         return this._activeTool();
     }
@@ -27,22 +43,6 @@ export class GameEditorInteractionsService {
     set activeTool(tool: ActiveTool) {
         this._previousActiveTool.set(this._activeTool());
         this._activeTool.set(tool);
-    }
-
-    get objectGrabOffset(): Vector2 {
-        return this._objectGrabOffset();
-    }
-
-    set objectGrabOffset(offset: Vector2) {
-        this._objectGrabOffset.set(offset);
-    }
-
-    get objectDropVec2(): Vector2 {
-        return this._objectDropVec2();
-    }
-
-    set objectDropVec2(vec: Vector2) {
-        this._objectDropVec2.set(vec);
     }
 
     get hoveredTiles() {
