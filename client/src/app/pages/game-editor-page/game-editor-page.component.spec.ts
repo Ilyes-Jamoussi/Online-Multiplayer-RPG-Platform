@@ -8,7 +8,6 @@ import { GameEditorPageComponent } from './game-editor-page.component';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { NotificationService } from '@app/services/notification/notification.service';
-import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { ToolType } from '@app/interfaces/game-editor.interface';
 import { MapSize } from '@common/enums/map-size.enum';
@@ -25,58 +24,54 @@ describe('GameEditorPageComponent', () => {
     let mockGameEditorStoreService: jasmine.SpyObj<GameEditorStoreService>;
     let mockGameEditorCheckService: jasmine.SpyObj<GameEditorCheckService>;
     let mockNotificationService: jasmine.SpyObj<NotificationService>;
-    let mockScreenshotService: jasmine.SpyObj<ScreenshotService>;
     let mockGameEditorInteractionsService: jasmine.SpyObj<GameEditorInteractionsService> & { activeTool: unknown };
     let paramMapSubject: Subject<ParamMap>;
 
     beforeEach(async () => {
         paramMapSubject = new Subject<ParamMap>();
-        
+
         mockActivatedRoute = jasmine.createSpyObj('ActivatedRoute', [], {
-            paramMap: paramMapSubject.asObservable()
+            paramMap: paramMapSubject.asObservable(),
         });
 
         // Create mock with writable properties
-        mockGameEditorStoreService = jasmine.createSpyObj('GameEditorStoreService', [
-            'loadGameById', 'reset', 'saveGame'
-        ]);
-        
+        mockGameEditorStoreService = jasmine.createSpyObj('GameEditorStoreService', ['loadGameById', 'reset', 'saveGame']);
+
         // Set up properties with getters/setters
         Object.defineProperty(mockGameEditorStoreService, 'tiles', {
-            value: jasmine.createSpy().and.returnValue([{ x: 0, y: 0, kind: TileKind.BASE }])
+            value: jasmine.createSpy().and.returnValue([{ x: 0, y: 0, kind: TileKind.BASE }]),
         });
         Object.defineProperty(mockGameEditorStoreService, 'size', {
-            value: jasmine.createSpy().and.returnValue(MapSize.SMALL)
+            value: jasmine.createSpy().and.returnValue(MapSize.SMALL),
         });
         Object.defineProperty(mockGameEditorStoreService, 'placedObjects', {
             value: [],
-            writable: true
+            writable: true,
         });
         Object.defineProperty(mockGameEditorStoreService, 'tileSizePx', {
             value: MOCK_TILE_SIZE,
-            writable: true
+            writable: true,
         });
         Object.defineProperty(mockGameEditorStoreService, 'name', {
             value: 'Test Game',
-            writable: true
+            writable: true,
         });
         Object.defineProperty(mockGameEditorStoreService, 'description', {
             value: 'Test Description',
-            writable: true
+            writable: true,
         });
         Object.defineProperty(mockGameEditorStoreService, 'inventory', {
-            value: jasmine.createSpy().and.returnValue([])
+            value: jasmine.createSpy().and.returnValue([]),
         });
 
         mockGameEditorCheckService = jasmine.createSpyObj('GameEditorCheckService', ['canSave']);
         mockNotificationService = jasmine.createSpyObj('NotificationService', ['displaySuccess', 'displayError']);
-        mockScreenshotService = jasmine.createSpyObj('ScreenshotService', ['captureElementAsBase64']);
-        
+
         // Create mock with writable activeTool property
         mockGameEditorInteractionsService = jasmine.createSpyObj('GameEditorInteractionsService', ['removeObject']);
         Object.defineProperty(mockGameEditorInteractionsService, 'activeTool', {
             value: null,
-            writable: true
+            writable: true,
         });
 
         await TestBed.configureTestingModule({
@@ -88,18 +83,19 @@ describe('GameEditorPageComponent', () => {
                 { provide: GameEditorStoreService, useValue: mockGameEditorStoreService },
                 { provide: GameEditorCheckService, useValue: mockGameEditorCheckService },
                 { provide: NotificationService, useValue: mockNotificationService },
-                { provide: ScreenshotService, useValue: mockScreenshotService },
-                { provide: GameEditorInteractionsService, useValue: mockGameEditorInteractionsService }
-            ]
-        }).overrideComponent(GameEditorPageComponent, {
-            set: {
-                providers: [
-                    { provide: GameEditorStoreService, useValue: mockGameEditorStoreService },
-                    { provide: GameEditorInteractionsService, useValue: mockGameEditorInteractionsService },
-                    { provide: GameEditorCheckService, useValue: mockGameEditorCheckService }
-                ]
-            }
-        }).compileComponents();
+                { provide: GameEditorInteractionsService, useValue: mockGameEditorInteractionsService },
+            ],
+        })
+            .overrideComponent(GameEditorPageComponent, {
+                set: {
+                    providers: [
+                        { provide: GameEditorStoreService, useValue: mockGameEditorStoreService },
+                        { provide: GameEditorInteractionsService, useValue: mockGameEditorInteractionsService },
+                        { provide: GameEditorCheckService, useValue: mockGameEditorCheckService },
+                    ],
+                },
+            })
+            .compileComponents();
 
         fixture = TestBed.createComponent(GameEditorPageComponent);
         component = fixture.componentInstance;
@@ -116,13 +112,13 @@ describe('GameEditorPageComponent', () => {
 
     it('should get gameId$ from route params', () => {
         let gameId: string | undefined;
-        component.gameId$.subscribe(id => gameId = id);
-        
-        const mockParamMap = { 
-            get: (key: string) => key === 'id' ? 'test-game-id' : null,
+        component.gameId$.subscribe((id) => (gameId = id));
+
+        const mockParamMap = {
+            get: (key: string) => (key === 'id' ? 'test-game-id' : null),
             has: (key: string) => key === 'id',
-            getAll: (key: string) => key === 'id' ? ['test-game-id'] : [],
-            keys: ['id']
+            getAll: (key: string) => (key === 'id' ? ['test-game-id'] : []),
+            keys: ['id'],
         } as ParamMap;
         paramMapSubject.next(mockParamMap);
         expect(gameId).toBe('test-game-id');
@@ -130,24 +126,24 @@ describe('GameEditorPageComponent', () => {
 
     it('should filter out null gameId from route params', () => {
         const gameIds: string[] = [];
-        component.gameId$.subscribe(id => gameIds.push(id));
-        
-        const emptyParamMap = { 
+        component.gameId$.subscribe((id) => gameIds.push(id));
+
+        const emptyParamMap = {
             get: () => null,
             has: () => false,
             getAll: () => [],
-            keys: []
+            keys: [],
         } as ParamMap;
-        const validParamMap = { 
-            get: (key: string) => key === 'id' ? 'valid-id' : null,
+        const validParamMap = {
+            get: (key: string) => (key === 'id' ? 'valid-id' : null),
             has: (key: string) => key === 'id',
-            getAll: (key: string) => key === 'id' ? ['valid-id'] : [],
-            keys: ['id']
+            getAll: (key: string) => (key === 'id' ? ['valid-id'] : []),
+            keys: ['id'],
         } as ParamMap;
-        
+
         paramMapSubject.next(emptyParamMap);
         paramMapSubject.next(validParamMap);
-        
+
         expect(gameIds).toEqual(['valid-id']);
     });
 
@@ -156,7 +152,7 @@ describe('GameEditorPageComponent', () => {
             type: ToolType.TileBrushTool,
             tileKind: TileKind.BASE,
             leftDrag: true,
-            rightDrag: false
+            rightDrag: false,
         };
         expect(component.disableOverlayPointerEvents).toBe(true);
 
@@ -164,14 +160,14 @@ describe('GameEditorPageComponent', () => {
             type: ToolType.TileBrushTool,
             tileKind: TileKind.BASE,
             leftDrag: false,
-            rightDrag: true
+            rightDrag: true,
         };
         expect(component.disableOverlayPointerEvents).toBe(true);
     });
 
     it('should get disableOverlayPointerEvents correctly when tool is not TileBrushTool', () => {
         mockGameEditorInteractionsService.activeTool = {
-            type: ToolType.PlaceableEraserTool
+            type: ToolType.PlaceableEraserTool,
         };
         expect(component.disableOverlayPointerEvents).toBe(false);
     });
@@ -203,14 +199,14 @@ describe('GameEditorPageComponent', () => {
 
     it('should get and set name from store service', () => {
         expect(component.name).toBe('Test Game');
-        
+
         component.name = 'New Name';
         expect(mockGameEditorStoreService.name).toBe('New Name');
     });
 
     it('should get and set description from store service', () => {
         expect(component.description).toBe('Test Description');
-        
+
         component.description = 'New Description';
         expect(mockGameEditorStoreService.description).toBe('New Description');
     });
@@ -223,24 +219,24 @@ describe('GameEditorPageComponent', () => {
 
     it('should load game on init when gameId is available', () => {
         component.ngOnInit();
-        
-        const mockParamMap = { 
-            get: (key: string) => key === 'id' ? 'test-id' : null,
+
+        const mockParamMap = {
+            get: (key: string) => (key === 'id' ? 'test-id' : null),
             has: (key: string) => key === 'id',
-            getAll: (key: string) => key === 'id' ? ['test-id'] : [],
-            keys: ['id']
+            getAll: (key: string) => (key === 'id' ? ['test-id'] : []),
+            keys: ['id'],
         } as ParamMap;
         paramMapSubject.next(mockParamMap);
-        
+
         expect(mockGameEditorStoreService.loadGameById).toHaveBeenCalledWith('test-id');
     });
 
     it('should complete destroy$ on ngOnDestroy', () => {
         spyOn(component['destroy$'], 'next');
         spyOn(component['destroy$'], 'complete');
-        
+
         component.ngOnDestroy();
-        
+
         expect(component['destroy$'].next).toHaveBeenCalled();
         expect(component['destroy$'].complete).toHaveBeenCalled();
     });
@@ -258,12 +254,12 @@ describe('GameEditorPageComponent', () => {
     it('should handle drop outside grid', () => {
         const mockEvent = new DragEvent('drop');
         spyOn(mockEvent, 'preventDefault');
-        
+
         component.onDropOutsideOfGrid(mockEvent);
-        
+
         expect(mockEvent.preventDefault).toHaveBeenCalled();
         expect(mockGameEditorInteractionsService.activeTool).toEqual({
-            type: ToolType.PlaceableEraserTool
+            type: ToolType.PlaceableEraserTool,
         });
         expect(mockGameEditorInteractionsService.removeObject).toHaveBeenCalled();
     });
@@ -271,42 +267,38 @@ describe('GameEditorPageComponent', () => {
     it('should handle drag over', () => {
         const mockEvent = new DragEvent('dragover');
         spyOn(mockEvent, 'preventDefault');
-        
+
         component.onDragOver(mockEvent);
-        
+
         expect(mockEvent.preventDefault).toHaveBeenCalled();
     });
 
     it('should save game successfully when canSave is true', async () => {
         mockGameEditorCheckService.canSave.and.returnValue(true);
-        mockScreenshotService.captureElementAsBase64.and.returnValue(Promise.resolve('base64-image'));
-        
-        // Mock gridWrapper
+
         component.gridWrapper = {
-            nativeElement: document.createElement('div')
+            nativeElement: document.createElement('div'),
         } as ElementRef<HTMLElement>;
-        
+
         await component.onSave();
-        
-        expect(mockScreenshotService.captureElementAsBase64).toHaveBeenCalledWith(component.gridWrapper.nativeElement);
-        expect(mockGameEditorStoreService.saveGame).toHaveBeenCalledWith('base64-image');
+
+        expect(mockGameEditorStoreService.saveGame).toHaveBeenCalledWith(component.gridWrapper.nativeElement);
         expect(mockNotificationService.displaySuccess).toHaveBeenCalledWith({
             title: 'Jeu sauvegardé',
             message: 'Votre jeu a été sauvegardé avec succès !',
-            redirectRoute: ROUTES.gameManagement
+            redirectRoute: ROUTES.gameManagement,
         });
     });
 
     it('should show error when canSave is false', async () => {
         mockGameEditorCheckService.canSave.and.returnValue(false);
-        
+
         await component.onSave();
-        
-        expect(mockScreenshotService.captureElementAsBase64).not.toHaveBeenCalled();
+
         expect(mockGameEditorStoreService.saveGame).not.toHaveBeenCalled();
         expect(mockNotificationService.displayError).toHaveBeenCalledWith({
             title: 'Problèmes dans la carte',
-            message: 'Veuillez corriger les problèmes dans la carte avant de sauvegarder.'
+            message: 'Veuillez corriger les problèmes dans la carte avant de sauvegarder.',
         });
     });
 });

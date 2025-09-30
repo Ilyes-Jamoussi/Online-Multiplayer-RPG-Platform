@@ -38,7 +38,7 @@ describe('ScreenshotService', () => {
         try {
             // This will test the actual implementation
             const result = await service.captureElementAsBase64(testElement);
-            
+
             // Verify the result is a base64 data URL
             expect(result).toMatch(/^data:image\/jpeg;base64,/);
             expect(typeof result).toBe('string');

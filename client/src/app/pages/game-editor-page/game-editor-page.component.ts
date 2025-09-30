@@ -8,7 +8,6 @@ import { GameEditorCheckService } from '@app/services/game-editor-check/game-edi
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
-import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 import { UiInputComponent } from '@app/components/ui/input/input.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { distinctUntilChanged, filter, map, Subject, takeUntil, tap } from 'rxjs';
@@ -50,14 +49,12 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
 
     private readonly destroy$ = new Subject<void>();
 
-    // eslint-disable-next-line max-params
     constructor(
         private readonly activatedRoute: ActivatedRoute,
         private readonly gameEditorStoreService: GameEditorStoreService,
         private readonly gameEditorCheckService: GameEditorCheckService,
-        private readonly notificationService: NotificationService,
-        private readonly screenshotService: ScreenshotService,
         private readonly gameEditorInteractionsService: GameEditorInteractionsService,
+        private readonly notificationService: NotificationService,
     ) {}
 
     readonly gameId$ = this.activatedRoute.paramMap.pipe(
@@ -145,8 +142,7 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
 
     async onSave(): Promise<void> {
         if (this.gameEditorCheckService.canSave()) {
-            const gridPreviewImage = await this.screenshotService.captureElementAsBase64(this.gridWrapper.nativeElement);
-            this.gameEditorStoreService.saveGame(gridPreviewImage);
+            await this.gameEditorStoreService.saveGame(this.gridWrapper.nativeElement);
             this.notificationService.displaySuccess({
                 title: 'Jeu sauvegardé',
                 message: 'Votre jeu a été sauvegardé avec succès !',
