@@ -1,6 +1,6 @@
-export const ASSETS_BASE_PATH = './assets';
+const ASSETS_BASE_PATH = './assets';
 
-export const AVATARS_BASE_PATH = `${ASSETS_BASE_PATH}/images/avatars`;
+const AVATARS_BASE_PATH = `${ASSETS_BASE_PATH}/images/avatars`;
 export const AVATAR_STATIC_PATH = `${AVATARS_BASE_PATH}/static`;
 export const AVATAR_ANIMATED_PATH = `${AVATARS_BASE_PATH}/animated`;
 

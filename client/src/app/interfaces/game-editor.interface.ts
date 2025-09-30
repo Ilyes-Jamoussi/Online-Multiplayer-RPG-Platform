@@ -39,7 +39,7 @@ export type Inventory = {
     [key in PlaceableKind]: InventoryItem;
 };
 
-export interface InventoryItem {
+interface InventoryItem {
     kind: PlaceableKind;
     total: number;
     remaining: number;
@@ -62,12 +62,12 @@ export interface TileBrushTool {
     rightDrag: boolean;
 }
 
-export interface PlaceableTool {
+interface PlaceableTool {
     type: ToolType.PlaceableTool;
     placeableKind: PlaceableKind;
 }
 
-export interface PlaceableEraserTool {
+interface PlaceableEraserTool {
     type: ToolType.PlaceableEraserTool;
 }
 
