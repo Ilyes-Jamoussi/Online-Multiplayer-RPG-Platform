@@ -94,4 +94,42 @@ describe('placeable.factory', () => {
         const result = makeDefaultPlaceables(MapSize.SMALL, 'INVALID_MODE' as unknown as GameMode);
         expect(result.length).toBeGreaterThan(0);
     });
+
+    it('treats undefined count as 0 (loop does not run when count is undefined)', () => {
+        const size = MapSize.SMALL;
+        const mode = GameMode.CLASSIC;
+
+        const kind = PlaceableKind.HEAL as PlaceableKind;
+
+        const original = (PLACEABLE_COUNTS[size] ?? {})[kind];
+        PLACEABLE_COUNTS[size][kind] = undefined;
+
+        try {
+            const out = makeDefaultPlaceables(size, mode);
+
+            expect(out.some((p) => p.kind === kind)).toBeFalsy();
+
+            const otherKinds = Object.keys(PLACEABLE_COUNTS[size]).filter((k) => k !== kind);
+            for (const k of otherKinds) {
+                expect(out.some((p) => p.kind === (k as PlaceableKind))).toBeTruthy();
+            }
+        } finally {
+            PLACEABLE_COUNTS[size][kind] = original;
+        }
+    });
+
+    it('treats undefined extra flag count as 0 in CTF', () => {
+        const size = MapSize.MEDIUM;
+        const original = (FLAG_COUNTS[GameMode.CTF]?.[size] ?? {})[PlaceableKind.FLAG];
+        (FLAG_COUNTS[GameMode.CTF][size])[PlaceableKind.FLAG] = undefined;
+
+        try {
+            const out = makeDefaultPlaceables(size, GameMode.CTF);
+            const base = PLACEABLE_COUNTS[size]?.[PlaceableKind.FLAG] ?? 0;
+            const flags = out.filter((p) => p.kind === PlaceableKind.FLAG).length;
+            expect(flags).toBe(base);
+        } finally {
+            (FLAG_COUNTS[GameMode.CTF][size])[PlaceableKind.FLAG] = original;
+        }
+    });
 });
