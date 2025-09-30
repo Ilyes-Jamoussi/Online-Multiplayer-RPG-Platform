@@ -3,7 +3,7 @@ import { CHARACTER_AVATARS_COUNT, CHARACTER_BASE, CHARACTER_PLUS } from '@app/co
 import { BonusType, DiceType } from '@common/enums/character-creation.enum';
 import { Character } from '@common/interfaces/character.interface';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class CharacterStoreService {
     private readonly _name = signal('');
     private readonly _avatar = signal<number | null>(null);
