@@ -1,13 +1,17 @@
+import { GAME_NOT_FOUND } from '@app/constants/error-messages.constants';
+import { GameEditorPlaceableDto } from '@app/game-store/dto/game-editor-placeable.dto';
+import { GameEditorTileDto } from '@app/game-store/dto/game-editor-tile.dto';
 import { GameEditorDto } from '@app/game-store/dto/game-editor.dto';
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
 import { PatchGameEditorDto } from '@app/game-store/dto/patch-game-editor.dto';
 import { Game, GameDocument } from '@app/game-store/entities/game.entity';
+import { Placeable } from '@app/game-store/entities/placeable.entity';
+import { Tile } from '@app/game-store/entities/tile.entity';
 import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
+import { ImageService } from '@app/game-store/services/image/image.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ImageService } from '@app/game-store/services/image/image.service';
-import { DEFAULT_DRAFT_GAME_DESCRIPTION, DEFAULT_DRAFT_GAME_NAME } from '@common/constants/game.constants';
 
 @Injectable()
 export class GameEditorService {
@@ -17,65 +21,64 @@ export class GameEditorService {
         private readonly gameDtoMapper: GameDtoMapper,
     ) {}
 
-    async getEditByGameId(gameId: string): Promise<GameEditorDto> {
-        const game = await this.gameModel.findById(gameId).lean();
+    async getEditByGameId(id: string): Promise<GameEditorDto> {
+        const game = await this.gameModel.findById(id).lean();
         if (!game) {
-            throw new NotFoundException(`Game with id ${gameId} not found`);
+            throw new NotFoundException(GAME_NOT_FOUND);
         }
 
-        return {
-            id: game._id.toString(),
-            lastModified: game.lastModified,
-            name: game.name === DEFAULT_DRAFT_GAME_NAME ? '' : game.name,
-            description: game.description === DEFAULT_DRAFT_GAME_DESCRIPTION ? '' : game.description,
-            size: game.size,
-            mode: game.mode,
-            tiles: game.tiles,
-            gridPreviewUrl: game.gridPreviewUrl,
-            objects: game.objects.map((obj) => ({ ...obj, id: obj._id.toString() })),
-        };
+        return this.gameDtoMapper.toGameEditorDto(game);
     }
 
-    async patchEditByGameId(id: string, body: PatchGameEditorDto): Promise<GamePreviewDto | null> {
-        const update: GameDocument = {} as GameDocument;
-
-        if (body.name) update.name = body.name;
-        if (body.description) update.description = body.description;
-        if (body.size) update.size = body.size;
-        if (body.mode) update.mode = body.mode;
-
-        if (body.gridPreviewUrl) {
-            const filename = `game-${id}-preview.png`;
-            update.gridPreviewUrl = await this.imageService.saveImage(body.gridPreviewUrl, filename, 'game-previews');
-        }
-
-        if (body.tiles) {
-            update.tiles = body.tiles.map((t) => ({
-                kind: t.kind,
-                x: t.x,
-                y: t.y,
-                open: t.open,
-                teleportChannel: t.teleportChannel,
-            }));
-        }
-
-        if (body.objects) {
-            update.objects = body.objects.map((o) => ({
-                id: o.id,
-                kind: o.kind,
-                x: o.x,
-                y: o.y,
-                placed: o.placed,
-                orientation: o.orientation,
-            }));
-        }
-
-        update.lastModified = new Date();
-        update.draft = false;
+    async patchEditByGameId(id: string, dto: PatchGameEditorDto): Promise<GamePreviewDto | null> {
+        const update: GameDocument = {
+            ...this.buildBasicUpdate(dto),
+            ...(await this.buildImageUpdate(dto, id)),
+            ...(dto.tiles && { tiles: this.mapTiles(dto.tiles) }),
+            ...(dto.objects && { objects: this.mapObjects(dto.objects) }),
+            lastModified: new Date(),
+            draft: false,
+        } as GameDocument;
 
         const doc = await this.gameModel.findByIdAndUpdate(id, { $set: update }, { new: true, runValidators: true }).lean().exec();
 
-        if (!doc) return null;
-        return this.gameDtoMapper.toGamePreviewDto(doc);
+        return doc ? this.gameDtoMapper.toGamePreviewDto(doc) : null;
+    }
+
+    private buildBasicUpdate(dto: PatchGameEditorDto): Partial<GameDocument> {
+        return {
+            ...(dto.name && { name: dto.name }),
+            ...(dto.description && { description: dto.description }),
+            ...(dto.size && { size: dto.size }),
+            ...(dto.mode && { mode: dto.mode }),
+        };
+    }
+
+    private async buildImageUpdate(dto: PatchGameEditorDto, id: string): Promise<Partial<GameDocument>> {
+        if (!dto.gridPreviewUrl) return {};
+        const filename = `game-${id}-preview.png`;
+        const gridPreviewUrl = await this.imageService.saveImage(dto.gridPreviewUrl, filename, 'game-previews');
+        return { gridPreviewUrl };
+    }
+
+    private mapTiles(tiles: GameEditorTileDto[]): Tile[] {
+        return tiles.map((t) => ({
+            kind: t.kind,
+            x: t.x,
+            y: t.y,
+            open: t.open,
+            teleportChannel: t.teleportChannel,
+        }));
+    }
+
+    private mapObjects(objects: GameEditorPlaceableDto[]): Placeable[] {
+        return objects.map((o) => ({
+            id: o.id,
+            kind: o.kind,
+            x: o.x,
+            y: o.y,
+            placed: o.placed,
+            orientation: o.orientation,
+        }));
     }
 }

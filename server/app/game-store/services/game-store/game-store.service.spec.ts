@@ -4,7 +4,7 @@ import { Game, GameDocument } from '@app/game-store/entities/game.entity';
 import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
 import { GameStoreService } from '@app/game-store/services/game-store/game-store.service';
 import { ImageService } from '@app/game-store/services/image/image.service';
-import { getProjection } from '@app/utils/mongo.utils';
+import { getProjection } from '@app/utils/mongo/mongo.util';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { NotFoundException } from '@nestjs/common';

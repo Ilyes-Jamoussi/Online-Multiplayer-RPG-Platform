@@ -1,9 +1,7 @@
+import { ModeSizeMatrix } from '@app/types/game-placeables.types';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-
-type SizeCounts = Partial<Record<PlaceableKind, number>>;
-type ModeSizeMatrix = Record<MapSize, SizeCounts>;
 
 export const PLACEABLE_COUNTS: ModeSizeMatrix = {
     [MapSize.SMALL]: { [PlaceableKind.START]: 2, [PlaceableKind.HEAL]: 1, [PlaceableKind.FIGHT]: 1, [PlaceableKind.BOAT]: 1 },

@@ -1,0 +1,3 @@
+export const MIN_TELEPORT_CHANNEL = 1;
+export const MAX_TELEPORT_CHANNEL = 5;
+export const PLACEABLE_UNPLACED_COORDINATE = -1;

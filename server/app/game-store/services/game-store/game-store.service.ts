@@ -1,3 +1,4 @@
+import { GAME_NOT_FOUND } from '@app/constants/error-messages.constants';
 import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
 import { GameInitDto } from '@app/game-store/dto/game-init.dto';
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
@@ -7,7 +8,7 @@ import { makeDefaultPlaceables } from '@app/game-store/factory/placeable/placeab
 import { makeDefaultTiles } from '@app/game-store/factory/tile/tile.factory';
 import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
 import { ImageService } from '@app/game-store/services/image/image.service';
-import { getProjection } from '@app/utils/mongo.utils';
+import { getProjection } from '@app/utils/mongo/mongo.util';
 import { DEFAULT_DRAFT_GAME_DESCRIPTION, DEFAULT_DRAFT_GAME_NAME } from '@common/constants/game.constants';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -21,89 +22,34 @@ export class GameStoreService {
         private readonly gameDtoMapper: GameDtoMapper,
     ) {}
 
-    async createGame(dto: CreateGameDto): Promise<GamePreviewDto> {
-        const existingDraft = await this.gameModel.findOne({ draft: true });
-
-        if (existingDraft) {
-            return this.updateExistingDraft(existingDraft._id.toString(), dto);
-        }
-
-        return this.createNewDraft(dto);
-    }
-
-    private async createNewDraft(dto: CreateGameDto): Promise<GamePreviewDto> {
-        const defaultObjects = makeDefaultPlaceables(dto.size, dto.mode);
-        const defaultTiles = makeDefaultTiles(dto.size);
-
-        const gameDocument: GameDocument = {
-            ...dto,
-            name: dto?.name || DEFAULT_DRAFT_GAME_NAME,
-            description: dto?.description || DEFAULT_DRAFT_GAME_DESCRIPTION,
-            tiles: defaultTiles,
-            objects: defaultObjects,
-            visibility: false,
-            lastModified: new Date(),
-            createdAt: new Date(),
-            gridPreviewUrl: '',
-            draft: true,
-        } as GameDocument;
-
-        const createdGame = await this.gameModel.create(gameDocument);
-        return this.gameDtoMapper.toGamePreviewDto(createdGame);
-    }
-
-    private async updateExistingDraft(draftId: string, dto: CreateGameDto): Promise<GamePreviewDto> {
-        const defaultObjects = makeDefaultPlaceables(dto.size, dto.mode);
-        const defaultTiles = makeDefaultTiles(dto.size);
-
-        const updatedDraft = await this.gameModel.findByIdAndUpdate(
-            draftId,
-            {
-                ...dto,
-                tiles: defaultTiles,
-                objects: defaultObjects,
-                lastModified: new Date(),
-                gridPreviewUrl: '',
-            },
-            { new: true },
-        );
-
-        return this.gameDtoMapper.toGamePreviewDto(updatedDraft);
-    }
-
     async getGames(): Promise<GamePreviewDto[]> {
         const games = await this.gameModel.find({ draft: false }, getProjection('displayGameDto')).sort({ createdAt: -1 }).lean();
         return games.map((game) => this.gameDtoMapper.toGamePreviewDto(game));
     }
 
-    async getGameInit(gameId: string): Promise<GameInitDto> {
-        const game = await this.gameModel.findById(gameId, { map: 1, itemContainers: 1, size: 1 }).lean();
+    async getGameInit(id: string): Promise<GameInitDto> {
+        const game = await this.gameModel.findById(id, { map: 1, itemContainers: 1, size: 1 }).lean();
         if (!game) {
-            throw new NotFoundException(`Game with id ${gameId} not found`);
+            throw new NotFoundException(GAME_NOT_FOUND);
         }
 
-        return {
-            mapSize: game.size,
-        };
+        return { mapSize: game.size };
     }
 
-    async deleteGame(id: string): Promise<void> {
-        const game = await this.gameModel.findById(id);
-        if (!game) {
-            throw new NotFoundException('Game not found');
+    async createGame(dto: CreateGameDto): Promise<GamePreviewDto> {
+        const existingDraft = await this.gameModel.findOne({ draft: true });
+
+        if (existingDraft) {
+            return this.updateDraftGame(existingDraft._id.toString(), dto);
         }
 
-        if (game.gridPreviewUrl) {
-            await this.imageService.deleteImage(game.gridPreviewUrl);
-        }
-
-        await this.gameModel.deleteOne({ _id: id });
+        return this.createDraftGame(dto);
     }
 
     async updateGame(id: string, dto: UpdateGameDto): Promise<GamePreviewDto> {
         const existingGame = await this.gameModel.findById(id);
         if (!existingGame) {
-            throw new NotFoundException('Game not found');
+            throw new NotFoundException(GAME_NOT_FOUND);
         }
 
         if (existingGame.gridPreviewUrl) {
@@ -126,13 +72,66 @@ export class GameStoreService {
         return this.gameDtoMapper.toGamePreviewDto(updatedGame);
     }
 
+    async deleteGame(id: string): Promise<void> {
+        const game = await this.gameModel.findById(id);
+        if (!game) {
+            throw new NotFoundException(GAME_NOT_FOUND);
+        }
+
+        if (game.gridPreviewUrl) {
+            await this.imageService.deleteImage(game.gridPreviewUrl);
+        }
+
+        await this.gameModel.deleteOne({ _id: id });
+    }
+
     async toggleVisibility(id: string, newVisibility: boolean): Promise<void> {
         const updated = await this.gameModel
             .findByIdAndUpdate(id, { $set: { visibility: newVisibility, lastModified: new Date() } }, { new: false })
             .lean();
 
         if (!updated) {
-            throw new NotFoundException('Game not found');
+            throw new NotFoundException(GAME_NOT_FOUND);
         }
+    }
+
+    private async createDraftGame(dto: CreateGameDto): Promise<GamePreviewDto> {
+        const defaultObjects = makeDefaultPlaceables(dto.size, dto.mode);
+        const defaultTiles = makeDefaultTiles(dto.size);
+
+        const newDraft: GameDocument = {
+            ...dto,
+            name: dto?.name || DEFAULT_DRAFT_GAME_NAME,
+            description: dto?.description || DEFAULT_DRAFT_GAME_DESCRIPTION,
+            tiles: defaultTiles,
+            objects: defaultObjects,
+            visibility: false,
+            lastModified: new Date(),
+            createdAt: new Date(),
+            gridPreviewUrl: '',
+            draft: true,
+        } as GameDocument;
+
+        const createdGame = await this.gameModel.create(newDraft);
+        return this.gameDtoMapper.toGamePreviewDto(createdGame);
+    }
+
+    private async updateDraftGame(id: string, dto: CreateGameDto): Promise<GamePreviewDto> {
+        const defaultObjects = makeDefaultPlaceables(dto.size, dto.mode);
+        const defaultTiles = makeDefaultTiles(dto.size);
+
+        const updatedDraft = await this.gameModel.findByIdAndUpdate(
+            id,
+            {
+                ...dto,
+                tiles: defaultTiles,
+                objects: defaultObjects,
+                lastModified: new Date(),
+                gridPreviewUrl: '',
+            },
+            { new: true },
+        );
+
+        return this.gameDtoMapper.toGamePreviewDto(updatedDraft);
     }
 }

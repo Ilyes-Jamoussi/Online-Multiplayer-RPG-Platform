@@ -1,11 +1,10 @@
-// patch-game-editor.dto.ts
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { GameMode } from '@common/enums/game-mode.enum';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameEditorTileDto } from './game-editor-tile.dto';
 import { GameEditorPlaceableDto } from './game-editor-placeable.dto';
+import { GameEditorTileDto } from './game-editor-tile.dto';
 
 export class PatchGameEditorDto {
     @ApiPropertyOptional()

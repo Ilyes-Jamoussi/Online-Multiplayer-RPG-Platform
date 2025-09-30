@@ -1,4 +1,4 @@
-import { FLAG_COUNTS, PLACEABLE_COUNTS } from '@app/game-store/config/game.config';
+import { FLAG_COUNTS, PLACEABLE_COUNTS } from '@app/constants/game-placeables.constants';
 import { Placeable } from '@app/game-store/entities/placeable.entity';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';

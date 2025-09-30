@@ -5,43 +5,43 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsDateString, IsEnum, IsMongoId, IsNotEmpty, IsString } from 'class-validator';
 
 export class GamePreviewDto {
-    @ApiProperty({ example: '507f1f77bcf86cd799439011' })
+    @ApiProperty()
     @IsString()
     @IsMongoId()
     readonly id: string;
 
-    @ApiProperty({ example: 'Epic Adventure Game' })
+    @ApiProperty()
     @IsString()
     @IsNotEmpty()
     readonly name: string;
 
-    @ApiProperty({ enum: MapSize, example: MapSize.MEDIUM })
+    @ApiProperty({ enum: MapSize })
     @IsEnum(MapSize)
     readonly size: MapSize;
 
-    @ApiProperty({ enum: GameMode, example: GameMode.CLASSIC })
+    @ApiProperty({ enum: GameMode })
     @IsEnum(GameMode)
     readonly mode: GameMode;
 
-    @ApiProperty({ example: 'An exciting adventure awaits!' })
+    @ApiProperty()
     @IsString()
     @IsNotEmpty()
     readonly description: string;
 
-    @ApiProperty({ example: '2024-01-15T10:30:00Z' })
+    @ApiProperty()
     @IsDateString()
     readonly lastModified: Date;
 
-    @ApiProperty({ example: true })
+    @ApiProperty()
     @IsBoolean()
     readonly visibility: boolean;
 
-    @ApiProperty({ example: '/assets/grid-previews/game-123-preview.png' })
+    @ApiProperty()
     @IsString()
     @IsNotEmpty()
     readonly gridPreviewUrl: string;
 
-    @ApiProperty({ example: false })
+    @ApiProperty()
     @IsBoolean()
     readonly draft: boolean;
 }

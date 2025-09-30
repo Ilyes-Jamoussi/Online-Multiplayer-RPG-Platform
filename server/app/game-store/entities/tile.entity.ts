@@ -1,7 +1,6 @@
-// server/src/schemas/tile.schema.ts
+import { TileKind } from '@common/enums/tile-kind.enum';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { TileKind } from '@common/enums/tile-kind.enum';
 
 export type TileDocument = Tile & Document;
 
