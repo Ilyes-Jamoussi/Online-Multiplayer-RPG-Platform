@@ -140,6 +140,16 @@ export class GameEditorPageComponent implements OnInit, OnDestroy {
         evt.preventDefault();
     }
 
+    @HostListener('mouseover', ['$event'])
+    onMouseOver(evt: MouseEvent): void {
+        const target = evt.target as HTMLElement;
+        if (
+            !target.classList.contains('tile')
+        ) {
+            this.gameEditorInteractionsService.dragEnd();
+        }
+    }
+
     async onSave(): Promise<void> {
         if (this.gameEditorCheckService.canSave()) {
             await this.gameEditorStoreService.saveGame(this.gridWrapper.nativeElement);
