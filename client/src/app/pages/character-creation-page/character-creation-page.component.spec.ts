@@ -198,13 +198,13 @@ describe('CharacterCreationPageComponent', () => {
     it('should get correct avatar image paths', () => {
         const avatarIndex = 5;
         const staticPath = component.getAvatarImage(avatarIndex);
-        const animatedPath = component.getSelectedAvatarImage();
+        const animatedPath = component.selectedAvatarImage;
 
         expect(staticPath).toBe(`/static/avatarS${avatarIndex + 1}.png`);
         expect(animatedPath).toBe('');
 
         component.selectAvatar(avatarIndex);
-        const animatedPathAfterSelect = component.getSelectedAvatarImage();
+        const animatedPathAfterSelect = component.selectedAvatarImage;
         expect(animatedPathAfterSelect).toBe(`/anim/avatar${avatarIndex + 1}.gif`);
     });
 
