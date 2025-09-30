@@ -1,14 +1,10 @@
-// ==================== POINT D'ENTRÉE PRINCIPAL ====================
-// Import du design system complet
-
 @use 'styles/variables' as *;
 
-// ==================== STYLES GLOBAUX ====================
 body {
     margin: 0;
     padding: 0;
     font-family: $font-primary;
-    background-image: url('/assets/images/background.png');
+    background-image: url('./assets/images/background.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;

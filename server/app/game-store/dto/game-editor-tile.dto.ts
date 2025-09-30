@@ -1,14 +1,22 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsInt, IsOptional, IsBoolean, Min, Max } from 'class-validator';
+import { MAX_TELEPORT_CHANNEL, MIN_TELEPORT_CHANNEL } from '@app/constants/game-config.constants';
 import { TileKind } from '@common/enums/tile-kind.enum';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 
 export class GameEditorTileDto {
     @ApiProperty({ enum: TileKind })
     @IsEnum(TileKind)
     kind!: TileKind;
 
-    @ApiProperty() @IsInt() @Min(0) x!: number;
-    @ApiProperty() @IsInt() @Min(0) y!: number;
+    @ApiProperty()
+    @IsInt()
+    @Min(0)
+    x!: number;
+
+    @ApiProperty()
+    @IsInt()
+    @Min(0)
+    y!: number;
 
     @ApiPropertyOptional()
     @IsOptional()
@@ -17,8 +25,7 @@ export class GameEditorTileDto {
 
     @ApiPropertyOptional()
     @IsOptional()
-    @Min(1)
-    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-    @Max(5)
+    @Min(MIN_TELEPORT_CHANNEL)
+    @Max(MAX_TELEPORT_CHANNEL)
     teleportChannel?: number;
 }

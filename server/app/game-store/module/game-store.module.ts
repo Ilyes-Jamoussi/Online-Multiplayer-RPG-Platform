@@ -2,10 +2,10 @@ import { GameEditorController } from '@app/game-store//controllers/game-editor/g
 import { GameStoreController } from '@app/game-store/controllers/game-store/game-store.controller';
 import { Game, gameSchema } from '@app/game-store/entities/game.entity';
 import { GameStoreGateway } from '@app/game-store/gateways/game-store.gateway';
-import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
 import { GameEditorService } from '@app/game-store/services/game-editor/game-editor.service';
 import { GameStoreService } from '@app/game-store/services/game-store/game-store.service';
 import { ImageService } from '@app/game-store/services/image/image.service';
+import { GameDtoMapper } from '@app/game-store/utils/game-dto-mapper/game-dto-mapper.util';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 

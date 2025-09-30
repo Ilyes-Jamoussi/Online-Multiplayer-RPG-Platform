@@ -1,29 +1,28 @@
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
-
 export class CreateGameDto {
-    @ApiProperty({ enum: MapSize, example: MapSize.LARGE })
+    @ApiProperty({ enum: MapSize })
     @IsEnum(MapSize)
     readonly size: MapSize;
 
-    @ApiProperty({ enum: GameMode, example: GameMode.CLASSIC })
+    @ApiProperty({ enum: GameMode })
     @IsEnum(GameMode)
     readonly mode: GameMode;
 
-    @ApiProperty({ example: 'New game' })
+    @ApiProperty()
     @IsString()
     @IsOptional()
     readonly name: string;
 
-    @ApiProperty({ example: 'Description…' })
+    @ApiProperty()
     @IsString()
     @IsOptional()
     readonly description: string;
 
-    @ApiPropertyOptional({ example: false, description: 'Public (true) ou privé (false)' })
+    @ApiPropertyOptional()
     @IsOptional()
     @IsBoolean()
     readonly visibility?: boolean;

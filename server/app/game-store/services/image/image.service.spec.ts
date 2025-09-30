@@ -71,14 +71,4 @@ describe('ImageService', () => {
             expect(mockFs.unlink).toHaveBeenCalledWith(join(process.cwd(), 'assets', 'games/test-image.png'));
         });
     });
-
-    describe('getImageUrl', () => {
-        it('should return the same filepath', () => {
-            const filepath = '/assets/games/test-image.png';
-
-            const result = service.getImageUrl(filepath);
-
-            expect(result).toBe(filepath);
-        });
-    });
 });

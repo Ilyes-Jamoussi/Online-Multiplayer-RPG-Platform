@@ -7,13 +7,19 @@ import { Types } from 'mongoose';
 export class Placeable {
     readonly _id?: Types.ObjectId;
 
-    @Prop({ required: true, enum: PlaceableKind }) kind: PlaceableKind;
+    @Prop({ required: true, enum: PlaceableKind })
+    kind: PlaceableKind;
 
-    @Prop({ required: true, min: -1 }) x: number;
-    @Prop({ required: true, min: -1 }) y: number;
+    @Prop({ required: true, min: -1 })
+    x: number;
 
-    @Prop({ required: true }) placed: boolean;
+    @Prop({ required: true, min: -1 })
+    y: number;
 
-    @Prop({ enum: Orientation }) orientation?: Orientation;
+    @Prop({ required: true })
+    placed: boolean;
+
+    @Prop({ enum: Orientation })
+    orientation?: Orientation;
 }
 export const placeableSchema = SchemaFactory.createForClass(Placeable);

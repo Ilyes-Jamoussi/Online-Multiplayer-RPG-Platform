@@ -1,6 +1,8 @@
 import { GamePreviewDto } from '@app/game-store/dto/game-preview.dto';
 import { GameDocument } from '@app/game-store/entities/game.entity';
-import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
+import { GameEditorService } from '@app/game-store/services/game-editor/game-editor.service';
+import { ImageService } from '@app/game-store/services/image/image.service';
+import { GameDtoMapper } from '@app/game-store/utils/game-dto-mapper/game-dto-mapper.util';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
@@ -8,8 +10,6 @@ import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { NotFoundException } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { GameEditorService } from '@app/game-store/services/game-editor/game-editor.service';
-import { ImageService } from '@app/game-store/services/image/image.service';
 
 describe('GameEditorService', () => {
     let service: GameEditorService;
@@ -34,6 +34,12 @@ describe('GameEditorService', () => {
         mockMapper.toGamePreviewDto = jest
             .fn()
             .mockImplementation((g: { _id: { toString: () => string }; name: string }) => ({ id: g._id.toString(), name: g.name }) as GamePreviewDto);
+        mockMapper.toGameEditorDto = jest.fn().mockImplementation((g: GameDocument) => ({
+            id: g._id.toString(),
+            name: g.name,
+            tiles: g.tiles,
+            objects: g.objects.map((obj) => ({ ...obj, id: obj._id.toString() })),
+        }));
 
         service = new GameEditorService(mockModel as unknown as Model<GameDocument>, mockImageService as ImageService, mockMapper as GameDtoMapper);
     });

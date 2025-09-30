@@ -1,10 +1,10 @@
 import { CreateGameDto } from '@app/game-store/dto/create-game.dto';
 import { UpdateGameDto } from '@app/game-store/dto/update-game.dto';
 import { Game, GameDocument } from '@app/game-store/entities/game.entity';
-import { GameDtoMapper } from '@app/game-store/mappers/game-dto.mappers';
 import { GameStoreService } from '@app/game-store/services/game-store/game-store.service';
 import { ImageService } from '@app/game-store/services/image/image.service';
-import { getProjection } from '@app/utils/mongo.utils';
+import { GameDtoMapper } from '@app/game-store/utils/game-dto-mapper/game-dto-mapper.util';
+import { getProjection } from '@app/utils/mongo/mongo.util';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { NotFoundException } from '@nestjs/common';
@@ -154,6 +154,18 @@ describe('GameStoreService', () => {
             expect(gameModel.findByIdAndUpdate).toHaveBeenCalled();
             expect(result).toEqual(expect.objectContaining({ id: mockObjectId.toString(), name: updatedDraft.name }));
         });
+
+        it('should use default values when name and description are undefined', async () => {
+            const dtoWithoutNameDesc = { size: MapSize.SMALL, mode: GameMode.CLASSIC } as CreateGameDto;
+            const mockGameDocument = createMockGameDocument();
+
+            (gameModel.findOne as jest.Mock).mockResolvedValue(null);
+            (gameModel.create as jest.Mock).mockResolvedValue(mockGameDocument);
+
+            await service.createGame(dtoWithoutNameDesc);
+
+            expect(gameModel.create).toHaveBeenCalled();
+        });
     });
 
     describe('getGameInit', () => {
@@ -178,7 +190,7 @@ describe('GameStoreService', () => {
             } as unknown as Query<GameDocument | null, GameDocument>;
             gameModel.findById.mockReturnValue(mockQuery);
 
-            await expect(service.getGameInit('nonexistent-id')).rejects.toThrow(new NotFoundException('Game with id nonexistent-id not found'));
+            await expect(service.getGameInit('nonexistent-id')).rejects.toThrow(new NotFoundException('Game not found'));
         });
     });
 

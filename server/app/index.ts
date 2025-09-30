@@ -1,4 +1,5 @@
 import { AppModule } from '@app/app.module';
+import { ASSETS_FOLDER_NAME, ASSETS_URL_PREFIX } from '@app/constants/image.constants';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -11,9 +12,9 @@ const bootstrap = async () => {
     app.useGlobalPipes(new ValidationPipe());
     app.enableCors();
 
-    const assetsPath = join(process.cwd(), 'assets');
+    const assetsPath = join(process.cwd(), ASSETS_FOLDER_NAME);
     app.useStaticAssets(assetsPath, {
-        prefix: '/assets/',
+        prefix: ASSETS_URL_PREFIX,
     });
 
     const config = new DocumentBuilder()

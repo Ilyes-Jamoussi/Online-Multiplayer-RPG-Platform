@@ -2,17 +2,17 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class UpdateGameDto {
-    @ApiProperty({ example: 'New game' })
+    @ApiProperty()
     @IsString()
     @IsNotEmpty()
     readonly name: string;
 
-    @ApiProperty({ example: 'Description…' })
+    @ApiProperty()
     @IsString()
     @IsNotEmpty()
     readonly description: string;
 
-    @ApiProperty({ example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...' })
+    @ApiProperty()
     @IsString()
     @IsNotEmpty()
     readonly gridPreviewImage: string;
