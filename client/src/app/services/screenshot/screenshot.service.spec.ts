@@ -27,7 +27,6 @@ describe('ScreenshotService', () => {
     });
 
     it('should capture element as base64 - integration test', async () => {
-        // Create a simple test element
         const testElement = document.createElement('div');
         testElement.style.width = '100px';
         testElement.style.height = '100px';
@@ -36,18 +35,14 @@ describe('ScreenshotService', () => {
         document.body.appendChild(testElement);
 
         try {
-            // This will test the actual implementation
             const result = await service.captureElementAsBase64(testElement);
 
-            // Verify the result is a base64 data URL
             expect(result).toMatch(/^data:image\/jpeg;base64,/);
             expect(typeof result).toBe('string');
             expect(result.length).toBeGreaterThan(0);
         } catch (error) {
-            // html2canvas might not work in headless Chrome, but we still test the method call
             expect(error).toBeDefined();
         } finally {
-            // Clean up
             document.body.removeChild(testElement);
         }
     });

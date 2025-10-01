@@ -15,7 +15,6 @@ import { WaitingRoomPageComponent } from '@app/pages/waiting-room-page/waiting-r
 import { removeLeadingSlash } from '@src/utils/route/route.util';
 import { environment } from './environments/environment';
 
-// import { CreateGameComponent } from './app/pages/create-game/create-game.component'; --- IGNORE ---
 
 if (environment.production) {
     enableProdMode();
@@ -28,7 +27,6 @@ const routes: Routes = [
         path: removeLeadingSlash(ROUTES.home),
         component: HomePageComponent,
     },
-    // { path: removeLeadingSlash(ROUTES.gameEditor), component: GameEditorPageComponent },
     {
         path: removeLeadingSlash(ROUTES.gameEditor) + '/:id',
         component: GameEditorPageComponent,

@@ -63,7 +63,7 @@ class StoreStub implements Partial<GameEditorStoreService> {
     });
 
     placeObjectFromInventory = jasmine.createSpy('placeObjectFromInventory').and.callFake((kind: PlaceableKind, x: number, y: number) => {
-        const k = PlaceableKind[kind] as unknown as PlaceableKind; // just to keep type happy if enum string/num
+        const k = PlaceableKind[kind] as unknown as PlaceableKind;
         const id = `${kind}-${x}-${y}`;
         this.setPlacedObjects([...this.placedObjectsSig(), { id, kind: k, x, y, placed: true, orientation: 'N' }]);
     });
@@ -221,7 +221,7 @@ describe('GameEditorInteractionsService', () => {
 
         it('empty id -> payload = kind (fallback), MIME set, but tool/offset only if footprint > 0', () => {
             const obj: GameEditorPlaceableDto = { id: '', kind: PlaceableKind.HEAL, x: 0, y: 0, placed: true, orientation: 'N' };
-            spyOn(service, 'getFootprintOf').and.returnValue(1); // valide
+            spyOn(service, 'getFootprintOf').and.returnValue(1);
 
             const evt = makeDragEventWithSpies({ offsetX: 3, offsetY: 4 });
             service.setupObjectDrag(obj, evt);
@@ -247,7 +247,7 @@ describe('GameEditorInteractionsService', () => {
             service.setupObjectDrag(obj, evt);
 
             const mime = PlaceableMime[PlaceableKind.START];
-            expect(evt._spies.setData).toHaveBeenCalledWith(mime, 'x'); // setData est avant le check footprint
+            expect(evt._spies.setData).toHaveBeenCalledWith(mime, 'x');
             expect((evt.dataTransfer as DataTransfer).effectAllowed).toBe('move');
 
             expect(service.activeTool).toBeNull();
