@@ -1,0 +1,73 @@
+<app-ui-page-layout [hasHeader]="true" [hasSidebar]="true" headerTitle="Éditeur de Jeu" [showBackButton]="true">
+    <div class="editor-container">
+        <div class="editor-content">
+            <div class="editor-sidebar" slot="sidebar">
+                <span>Choix de tuiles</span>
+                <app-editor-toolbar></app-editor-toolbar>
+                <span>Inventaire d'objets</span>
+                <app-editor-inventory></app-editor-inventory>
+            </div>
+            <div class="grid-container">
+                @if(tiles.length > 0) {
+                <div #gridWrapper class="grid-wrapper">
+                    <div
+                        class="grid"
+                        [ngStyle]="{
+                            'grid-template-columns': 'repeat(' + size + ', minmax(0,1fr))',
+                            'grid-template-rows': 'repeat(' + size + ', minmax(0,1fr))'
+                        }"
+                    >
+                        @for(tile of tiles; track $index; let i = $index) {
+                        <app-editor-tile [tile]="tile" appTileSizeProbe [probeActive]="i === 0" (sizeChange)="onResize($event)"></app-editor-tile>
+                        }
+                    </div>
+                    <div
+                        class="objects-overlay"
+                        [class.disable-pointer-events]="disableOverlayPointerEvents"
+                        [ngStyle]="{
+                            'grid-template-columns': 'repeat(' + size + ', minmax(0,1fr))',
+                            'grid-template-rows': 'repeat(' + size + ', minmax(0,1fr))'
+                        }"
+                    >
+                        @for (obj of placedObjects; track obj.id) {
+                        <app-editor-placed-object [object]="obj" [tileSize]="tileSizePx" />
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+            <div class="editor-sidebar right" slot="sidebar">
+                <div class="game-infos">
+                    <span class="label">Nom du jeu</span>
+                    <app-ui-input
+                        [fullWidth]="true"
+                        type="text"
+                        placeholder="Saisissez le nom de votre jeu"
+                        [value]="name"
+                        (valueChange)="name = $event"
+                        [maxLength]="gameNameMaxLength"
+                    ></app-ui-input>
+                    <small class="helper">{{ name.length || 0 }} / {{ gameNameMaxLength }}</small>
+
+                    <span class="label">Description</span>
+                    <app-ui-input
+                        type="textarea"
+                        [fullWidth]="true"
+                        placeholder="Décrivez votre jeu en quelques mots"
+                        [value]="description"
+                        (valueChange)="description = $event"
+                        [maxLength]="descriptionMaxLength"
+                    ></app-ui-input>
+                    <small class="helper">{{ description.length || 0 }} / {{ descriptionMaxLength }}</small>
+                </div>
+
+                <div class="sidebar-actions">
+                    <app-ui-button [fullWidth]="true" (buttonClick)="onReset()">Réinitialiser la grille</app-ui-button>
+                    <app-ui-button [fullWidth]="true" (buttonClick)="onSave()" [disabled]="!canSave">Sauvegarder</app-ui-button>
+                </div>
+
+                <app-errors-badge validationType="game-editor"></app-errors-badge>
+            </div>
+        </div>
+    </div>
+</app-ui-page-layout>

@@ -1,0 +1,41 @@
+.uiPageLayout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+
+    app-ui-header {
+        flex-shrink: 0;
+    }
+
+    .page-body {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+
+        app-ui-sidebar {
+            flex-shrink: 0;
+        }
+
+        .page-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+    }
+
+    app-ui-footer {
+        flex-shrink: 0;
+        border-top: 1px solid #e0e0e0;
+        background-color: #f8f9fa;
+    }
+
+    &.hasSidebar {
+        .page-body {
+            .page-content {
+                padding-left: 1rem;
+            }
+        }
+    }
+}

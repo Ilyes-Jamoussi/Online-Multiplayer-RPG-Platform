@@ -1,0 +1,21 @@
+<div class="ui-input">
+    @if(type === 'textarea') {
+    <textarea
+        [class.full-width]="fullWidth"
+        [placeholder]="placeholder"
+        [value]="value"
+        (input)="onInput($event)"
+        (keydown)="onKeyDown($event)"
+        [attr.maxlength]="maxLength"
+    ></textarea>
+    } @else {
+    <input
+        [class.full-width]="fullWidth"
+        [placeholder]="placeholder"
+        [value]="value"
+        (input)="onInput($event)"
+        (keydown)="onKeyDown($event)"
+        [attr.maxlength]="maxLength"
+    />
+    }
+</div>

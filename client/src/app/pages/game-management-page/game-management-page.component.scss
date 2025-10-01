@@ -1,0 +1,53 @@
+.games-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.games-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.no-games-message {
+    text-align: center;
+    padding: 4rem 2rem;
+
+    h2 {
+        margin: 0 0 1rem 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    p {
+        margin: 0;
+        font-size: 1rem;
+        color: #6b7280;
+    }
+}
+
+:host ::ng-deep .footer-content {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+}
+
+@media (max-width: 768px) {
+    .games-section {
+        padding: 1rem;
+    }
+
+    .games-grid {
+        gap: 1.5rem;
+    }
+
+    .no-games-message {
+        padding: 3rem 1.5rem;
+
+        h2 {
+            font-size: 1.25rem;
+        }
+    }
+}

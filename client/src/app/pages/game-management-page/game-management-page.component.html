@@ -1,0 +1,28 @@
+<app-ui-page-layout [hasHeader]="true" headerTitle="Administration des Jeux" [showBackButton]="true" [hasFooter]="true" (backClick)="onBack()">
+    <div class="games-section">
+        @if (gameDisplays() && gameDisplays().length > 0) {
+        <div class="games-grid">
+            @for (game of gameDisplays(); track game.id) {
+            <app-game-preview-card
+                [game]="game"
+                [isAdmin]="true"
+                (editGame)="onEditGame(game.id)"
+                (deleteGame)="onDeleteGame($event)"
+                (toggleVisibility)="onToggleVisibility($event)"
+            ></app-game-preview-card>
+            }
+        </div>
+        } @else {
+        <div class="no-games-message">
+            <h2>Aucun jeu disponible</h2>
+            <p>Créez votre premier jeu pour commencer.</p>
+        </div>
+        }
+    </div>
+
+    <div slot="footer">
+        <div class="footer-content">
+            <app-ui-button variant="primary" size="lg" (buttonClick)="onCreateNewGame()"> Créer un nouveau jeu </app-ui-button>
+        </div>
+    </div>
+</app-ui-page-layout>

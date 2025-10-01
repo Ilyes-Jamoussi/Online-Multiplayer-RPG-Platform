@@ -1,0 +1,11 @@
+<div class="list">
+    @for (b of brushes; track b.image) {
+    <button
+        class="tool-btn {{ b.class }}"
+        [class.selected]="isBrushSelected(b)"
+        (click)="selectTileBrush(b.tileKind)"
+        [style.background-image]="'url(' + b.image + ')'"
+        [attr.data-tooltip]="tileLabel[b.tileKind]"
+    ></button>
+    }
+</div>

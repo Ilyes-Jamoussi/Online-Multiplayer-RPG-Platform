@@ -1,0 +1,208 @@
+%ui-component-base {
+    @include ui-component-base;
+}
+
+.isFull {
+    width: 100% !important;
+}
+
+.isHidden {
+    display: none !important;
+}
+
+.isLoading {
+    cursor: wait;
+    position: relative;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 1rem;
+        height: 1rem;
+        margin: -0.5rem 0 0 -0.5rem;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: ui-spin 1s linear infinite;
+    }
+}
+
+@keyframes ui-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes ui-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes ui-shake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-4px);
+    }
+    75% {
+        transform: translateX(4px);
+    }
+}
+
+.ui-text-center {
+    text-align: center !important;
+}
+.ui-text-left {
+    text-align: left !important;
+}
+.ui-text-right {
+    text-align: right !important;
+}
+
+.ui-flex {
+    display: flex !important;
+}
+.ui-flex-col {
+    flex-direction: column !important;
+}
+.ui-flex-row {
+    flex-direction: row !important;
+}
+.ui-flex-wrap {
+    flex-wrap: wrap !important;
+}
+.ui-flex-nowrap {
+    flex-wrap: nowrap !important;
+}
+
+.ui-items-center {
+    align-items: center !important;
+}
+.ui-items-start {
+    align-items: flex-start !important;
+}
+.ui-items-end {
+    align-items: flex-end !important;
+}
+
+.ui-justify-center {
+    justify-content: center !important;
+}
+.ui-justify-start {
+    justify-content: flex-start !important;
+}
+.ui-justify-end {
+    justify-content: flex-end !important;
+}
+.ui-justify-between {
+    justify-content: space-between !important;
+}
+
+@media (max-width: 768px) {
+    .ui-mobile-full {
+        width: 100% !important;
+    }
+
+    .ui-mobile-hidden {
+        display: none !important;
+    }
+}
+
+@media (min-width: 769px) {
+    .ui-desktop-hidden {
+        display: none !important;
+    }
+}
+
+@each $name, $color in $ui-colors {
+    .ui-color-#{$name} {
+        color: $color !important;
+    }
+
+    .ui-bg-#{$name} {
+        background-color: $color !important;
+        color: ui-contrast($name) !important;
+    }
+
+    .ui-border-#{$name} {
+        border-color: $color !important;
+    }
+}
+
+@each $name, $value in $ui-gaps {
+    .ui-m-#{$name} {
+        margin: $value !important;
+    }
+    .ui-mt-#{$name} {
+        margin-top: $value !important;
+    }
+    .ui-mb-#{$name} {
+        margin-bottom: $value !important;
+    }
+    .ui-ml-#{$name} {
+        margin-left: $value !important;
+    }
+    .ui-mr-#{$name} {
+        margin-right: $value !important;
+    }
+    .ui-mx-#{$name} {
+        margin-left: $value !important;
+        margin-right: $value !important;
+    }
+    .ui-my-#{$name} {
+        margin-top: $value !important;
+        margin-bottom: $value !important;
+    }
+
+    .ui-p-#{$name} {
+        padding: $value !important;
+    }
+    .ui-pt-#{$name} {
+        padding-top: $value !important;
+    }
+    .ui-pb-#{$name} {
+        padding-bottom: $value !important;
+    }
+    .ui-pl-#{$name} {
+        padding-left: $value !important;
+    }
+    .ui-pr-#{$name} {
+        padding-right: $value !important;
+    }
+    .ui-px-#{$name} {
+        padding-left: $value !important;
+        padding-right: $value !important;
+    }
+    .ui-py-#{$name} {
+        padding-top: $value !important;
+        padding-bottom: $value !important;
+    }
+
+    .ui-gap-#{$name} {
+        gap: $value !important;
+    }
+}
+
+@each $name, $value in $ui-shapes {
+    .ui-rounded-#{$name} {
+        border-radius: $value !important;
+    }
+}
+
+@each $name, $value in $ui-elevations {
+    .ui-shadow-#{$name} {
+        box-shadow: $value !important;
+    }
+}

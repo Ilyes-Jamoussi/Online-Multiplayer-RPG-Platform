@@ -36,10 +36,45 @@ cache:
         policy: pull
 
 stages:
+    - backup
     - install
     - lint
     - test
     - deploy
+
+backup:rotate-two-checkpoints:
+  stage: backup
+  variables:
+    GIT_DEPTH: "0"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
+  allow_failure: true
+  before_script:
+    - 'which git || (apt-get update -qq && apt-get install -y git)'
+    - git config user.email "ci-backup-bot@example.com"
+    - git config user.name "CI Backup Bot"
+    - git remote set-url origin "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+    - |
+      if [ -z "${CI_COMMIT_BEFORE_SHA}" ] || [ "${CI_COMMIT_BEFORE_SHA}" = "0000000000000000000000000000000000000000" ]; then
+        echo "No CI_COMMIT_BEFORE_SHA (new branch or initial push) -> skipping rotation"; exit 0;
+      fi
+    - git fetch --no-tags --depth=1 origin "${CI_COMMIT_BEFORE_SHA}" || true
+  script:
+    - set -euo pipefail
+    - |
+      exists_remote_branch () {
+        git ls-remote --heads origin "$1" | grep -q .
+      }
+
+      if exists_remote_branch "backup-1"; then
+        B1_SHA="$(git ls-remote origin refs/heads/backup-1 | awk '{print $1}')"
+        echo "Rotating: backup-1 ($B1_SHA) -> backup-2"
+        git push origin "+${B1_SHA}:refs/heads/backup-2"
+      else
+        echo "backup-1 does not exist yet -> skipping rotation to backup-2"
+      fi
+      echo "Setting backup-1 to CI_COMMIT_BEFORE_SHA=${CI_COMMIT_BEFORE_SHA}"
+      git push origin "+${CI_COMMIT_BEFORE_SHA}:refs/heads/backup-1"
 
 install:client:
     stage: install

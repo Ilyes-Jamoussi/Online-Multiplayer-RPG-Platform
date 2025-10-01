@@ -45,4 +45,11 @@ export default [
             // Angular template rules can be added here
         },
     },
+    {
+        files: ['src/app/dto/**/*.ts'],
+        rules: {
+            '@typescript-eslint/naming-convention': 'off',
+            '@typescript-eslint/array-type': 'off',
+        },
+    },
 ];

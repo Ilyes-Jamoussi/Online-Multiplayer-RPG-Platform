@@ -1,2 +1,10 @@
 *.ico
 .gitkeep
+*.png
+*.jpg
+*.svg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.webp

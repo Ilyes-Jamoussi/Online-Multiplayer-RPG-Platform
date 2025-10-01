@@ -1,0 +1,27 @@
+<div [ngClass]="classes">
+    @if (hasHeader && headerTitle) { @if (backClick.observed) {
+    <app-ui-header [title]="headerTitle" [subtitle]="headerSubtitle" [showBackButton]="showBackButton" (backClick)="onBackClick()"> </app-ui-header>
+    } @else {
+    <app-ui-header [title]="headerTitle" [subtitle]="headerSubtitle" [showBackButton]="showBackButton"> </app-ui-header>
+    } } @else if (showBackButton) {
+    <button type="button" class="back-only-button" (click)="onBackClick()">⬅ Retour</button>
+    }
+
+    <div class="page-body">
+        @if (hasSidebar) {
+        <app-ui-sidebar (menuItemClick)="onMenuItemClick($event)">
+            <ng-content select="[slot=sidebar]"></ng-content>
+        </app-ui-sidebar>
+        }
+
+        <main class="page-content">
+            <ng-content></ng-content>
+        </main>
+    </div>
+
+    @if (hasFooter) {
+    <app-ui-footer>
+        <ng-content select="[slot=footer]"></ng-content>
+    </app-ui-footer>
+    }
+</div>

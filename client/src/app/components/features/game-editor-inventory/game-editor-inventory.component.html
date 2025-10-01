@@ -1,0 +1,33 @@
+<div class="inventory" [style.--tile-size.px]="tileSizePx">
+    @for (item of invKeys; track item) {
+    <div
+        class="slot"
+        [class.disabled]="inventory[item].remaining === 0"
+        [class.drag-over]="dragOver === item"
+        [attr.title]="placeableLabel[inventory[item].kind]"
+        (dragover)="onSlotDragOver($event, item)"
+        (dragenter)="onSlotDragEnter($event, item)"
+        (dragleave)="onSlotDragLeave()"
+        (drop)="onSlotDrop($event, inventory[item].kind)"
+    >
+        <div
+            class="icon-cell"
+            [class.drag-over]="dragOver === inventory[item].kind"
+            [draggable]="inventory[item].remaining > 0"
+            [ngStyle]="{ 'background-image': 'url(' + inventory[item].image + ')' }"
+            (dragend)="onDragEnd()"
+            (dragstart)="onDragStart($event, inventory[item].kind, inventory[item].remaining === 0)"
+            [attr.data-mime]="dndMime[inventory[item].kind]"
+            [attr.data-kind]="inventory[item].kind"
+            [style.--footprint]="placeableFootprint[inventory[item].kind]"
+            [attr.data-tooltip]="placeableLabel[inventory[item].kind]"
+        >
+            <span class="badge" [class.drag-over]="dragOver === inventory[item].kind">
+                {{ inventory[item].remaining }}
+            </span>
+        </div>
+    </div>
+    } @empty {
+    <div class="empty">Aucun objet disponible</div>
+    }
+</div>

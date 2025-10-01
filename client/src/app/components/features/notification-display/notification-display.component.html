@@ -1,0 +1,27 @@
+@if (notification(); as notif) {
+<div class="notification-container">
+    <div class="notification-card" [ngClass]="notif.type">
+        <div class="notification-icon">
+            <div class="icon-circle">
+                @if (notif.type === 'error') {
+                <i class="material-icons">error_outline</i>
+                } @if (notif.type === 'success') {
+                <i class="material-icons">check_circle</i>
+                } @if (notif.type === 'information') {
+                <i class="material-icons">info</i>
+                }
+            </div>
+        </div>
+        <div class="notification-content">
+            <h2 class="notification-title">{{ notif.title }}</h2>
+            <p class="notification-message">{{ notif.message }}</p>
+        </div>
+        <div class="notification-actions">
+            <button class="notification-button" (click)="onAction()">
+                <i class="material-icons">check</i>
+                <span class="button-text">OK</span>
+            </button>
+        </div>
+    </div>
+</div>
+}
