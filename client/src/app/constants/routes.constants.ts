@@ -1,10 +1,10 @@
 export const ROUTES = {
-    home: 'home',
-    gameParameters: 'game-parameters',
-    gameEditor: 'game-editor',
-    gameSessionCreation: 'game-session-creation',
-    gameManagement: 'game-management',
-    characterCreation: 'character-creation',
-    createGamePage: 'game-session-creation',
-    waitingRoom: 'waiting-room',
+    homePage: 'home',
+    parametersPage: 'parameters',
+    editorPage: 'editor',
+    sessionCreationPage: 'session-creation',
+    managementPage: 'management',
+    characterCreationPage: 'character-creation',
+    waitingRoomPage: 'waiting-room',
+    joinSessionPage: 'join-session',
 };

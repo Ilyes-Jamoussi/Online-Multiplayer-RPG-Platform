@@ -1,0 +1,14 @@
+<div class="player-card" [ngClass]="cardClasses">
+    <div class="avatar-wrapper">
+        <img class="avatar-image" [src]="getAvatarImage()" [alt]="player.name" />
+    </div>
+
+    <div class="player-details">
+        <div class="name-row">
+            <h4 class="player-name">{{ player.name }}</h4>
+            <span *ngIf="isAdmin" class="badge admin">👑</span>
+        </div>
+
+        <button *ngIf="showKickButton" class="kick-button" (click)="kickPlayer()" aria-label="Retirer ce joueur">🗑️ Retirer</button>
+    </div>
+</div>

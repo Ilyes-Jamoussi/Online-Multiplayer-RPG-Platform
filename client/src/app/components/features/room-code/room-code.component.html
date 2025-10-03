@@ -1,0 +1,14 @@
+<div class="room-code-container">
+    <h3>
+        <i class="material-icons">key</i>
+        Code de la salle
+    </h3>
+    <div class="room-code-display">
+        <span class="code">{{ roomCode }}</span>
+        <button class="copy-button" (click)="copyToClipboard()">
+            <i class="material-icons">content_copy</i>
+            Copier
+        </button>
+        <div class="copied-tooltip" [class.visible]="showCopiedTooltip">Code copié !</div>
+    </div>
+</div>

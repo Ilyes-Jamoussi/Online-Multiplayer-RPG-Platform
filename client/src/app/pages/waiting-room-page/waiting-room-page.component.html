@@ -1,13 +1,20 @@
-<app-ui-page-layout [hasHeader]="true" headerTitle="Salle d'attente" [showBackButton]="false">
-    <div class="waiting-room-content">
-        <div class="waiting-card">
-            <h2>Partie en préparation</h2>
-            <p>Votre personnage a été créé avec succès !</p>
-            <p>La fonctionnalité multijoueurs sera disponible au Sprint 2.</p>
+<div class="waiting-room-container">
+    <div class="page-header">
+        <h1>
+            <i class="material-icons">groups</i>
+            Salle d'attente
+        </h1>
+        <app-room-code></app-room-code>
+    </div>
 
-            <div class="actions">
-                <app-ui-button (buttonClick)="onBack()"> ← Retour à l'accueil </app-ui-button>
-            </div>
+    <div class="room-sections">
+        <div class="players-section">
+            <app-players-list></app-players-list>
+        </div>
+        <div class="chat-section">
+            <app-chat></app-chat>
         </div>
     </div>
-</app-ui-page-layout>
+
+    <app-waiting-room-actions></app-waiting-room-actions>
+</div>

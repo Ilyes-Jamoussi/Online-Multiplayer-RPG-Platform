@@ -1,35 +1,257 @@
-.waiting-room-content {
+.waiting-room-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 60vh;
-    padding: 2rem;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    height: 100vh;
+    background-color: #f8f9fa;
+    box-sizing: border-box;
+    overflow-x: hidden;
+
+    .page-header {
+        background-color: white;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+        width: 100%;
+        box-sizing: border-box;
+
+        h1 {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 0;
+            color: #1976d2;
+            font-size: 2rem;
+            font-weight: 500;
+            white-space: nowrap;
+
+            i {
+                font-size: 2.5rem;
+                color: #2196f3;
+            }
+        }
+
+        app-room-code {
+            flex-shrink: 0;
+        }
+    }
+
+    .room-sections {
+        display: flex;
+        gap: 1.5rem;
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        box-sizing: border-box;
+
+        .players-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow: hidden;
+
+            app-players-list {
+                flex: 1;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+        }
+
+        .chat-section {
+            flex: 2;
+            min-width: 400px;
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+    }
+
+    .action-section {
+        background-color: white;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e9ecef;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        width: 100%;
+        box-sizing: border-box;
+
+        .lock-button {
+            height: 48px;
+            width: 48px;
+            padding: 0;
+            border: none;
+            border-radius: 8px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+
+            &:hover {
+                background-color: #e0e0e0;
+            }
+
+            i {
+                color: #666;
+                font-size: 28px;
+            }
+        }
+
+        button:not(.lock-button) {
+            height: 48px;
+            padding: 0 2rem;
+            min-width: 200px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4caf50;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+
+            &:hover:not(:disabled) {
+                background-color: #43a047;
+            }
+
+            &:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    .lock-message {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        margin-top: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        color: #666;
+        font-size: 0.9rem;
+
+        i {
+            color: #666;
+            font-size: 20px;
+        }
+    }
+
+    /* Ajustement pour les écrans plus petits */
+    @media (max-width: 768px) {
+        padding: 1rem;
+        height: auto;
+        min-height: 100vh;
+
+        .page-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+        }
+
+        .room-sections {
+            flex-direction: column;
+
+            .players-section,
+            .chat-section {
+                width: 100%;
+                min-width: unset;
+                flex: none;
+            }
+        }
+    }
 }
 
-.waiting-card {
-    background: white;
+.waiting-room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem;
+    background-color: white;
     border-radius: 12px;
-    padding: 3rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    max-width: 500px;
-    width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
 
-    h2 {
-        font-size: 2rem;
-        margin-bottom: 1.5rem;
-        color: #333;
-        font-weight: 600;
+.waiting-room-content {
+    display: flex;
+    gap: 1.5rem;
+    flex: 1;
+    min-height: 0;
+    height: calc(100vh - 200px);
+}
+
+.waiting-room-footer {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.start-game-button {
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #2196f3;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+
+    &:hover:not(:disabled) {
+        background-color: #1976d2;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(33, 150, 243, 0.4);
     }
 
-    p {
-        font-size: 1.2rem;
-        color: #333;
-        margin-bottom: 1rem;
-        line-height: 1.5;
+    &:active:not(:disabled) {
+        transform: translateY(0);
     }
 
-    .actions {
-        margin-top: 2rem;
+    &:disabled {
+        background-color: #bdbdbd;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .waiting-room-content {
+        flex-direction: column;
+        height: auto;
     }
 }

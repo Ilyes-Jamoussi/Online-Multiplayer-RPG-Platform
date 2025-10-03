@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { AVATAR_ANIMATED_PATH, AVATAR_STATIC_PATH, DICE_PATH, OBJECT_PATH, TILE_PATH } from '@app/constants/assets-paths.constants';
 import { Avatar } from '@common/enums/avatar.enum';
-import { DiceType } from '@common/enums/character-creation.enum';
-import { AssetsService } from './assets.service';
+import { Dice } from '@common/enums/dice.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
+import { AssetsService } from './assets.service';
 
 describe('AssetsService', () => {
     let service: AssetsService;
@@ -63,8 +63,8 @@ describe('AssetsService', () => {
     });
 
     describe('dice images', () => {
-        it('should return dice image path using DiceType enum', () => {
-            const dice = DiceType.D4;
+        it('should return dice image path using Dice enum', () => {
+            const dice = Dice.D4;
             const result = service.getDiceImage(dice);
             expect(result).toContain(DICE_PATH);
             expect(result).toContain(dice.toLowerCase());

@@ -1,0 +1,34 @@
+.avatar-card {
+    position: relative;
+    aspect-ratio: 1;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    &:hover {
+        border-color: #4a90e2;
+    }
+
+    &.mine {
+        border-color: #4a90e2;
+        background: #f0f8ff;
+    }
+
+    &.taken {
+        opacity: 0.5;
+        cursor: not-allowed;
+        border-color: #ccc;
+    }
+}
+
+.avatar-image {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+    image-rendering: pixelated;
+}

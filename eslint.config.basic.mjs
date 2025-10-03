@@ -80,6 +80,7 @@ export default (tsParser, tsPlugin) => [
             ],
             '@typescript-eslint/array-type': ['error', { default: 'array' }],
             '@typescript-eslint/explicit-member-accessibility': ['error', { accessibility: 'no-public' }],
+            '@typescript-eslint/prefer-readonly': 'warn',
             '@typescript-eslint/no-explicit-any': ['error', { fixToUnknown: true }],
             '@typescript-eslint/no-inferrable-types': [
                 'error',

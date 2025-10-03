@@ -20,13 +20,17 @@ export class HomePageComponent {
         members: ['Wael El Karoui', 'Ilyes Jamoussi', 'Noah Blanchard', 'Adam Rafai', 'Eduard Andrei Podaru'],
     };
 
-    constructor(private router: Router) {}
+    constructor(private readonly router: Router) {}
 
     navigateToCreateGame(): void {
-        this.router.navigate([ROUTES.gameSessionCreation]);
+        this.router.navigate([ROUTES.sessionCreationPage]);
     }
 
     navigateToAdminPage(): void {
-        this.router.navigate([ROUTES.gameManagement]);
+        this.router.navigate([ROUTES.managementPage]);
+    }
+
+    navigateToJoinGame(): void {
+        this.router.navigate([ROUTES.joinSessionPage]);
     }
 }

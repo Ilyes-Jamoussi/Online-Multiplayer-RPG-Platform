@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
+import { AvatarGridComponent } from '@app/components/features/avatar-grid/avatar-grid.component';
 import { ErrorsBadgeComponent } from '@app/components/features/errors-badge/errors-badge.component';
 import { StatsBarComponent } from '@app/components/features/stats-bar/stats-bar.component';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
@@ -9,41 +9,42 @@ import { UiInputComponent } from '@app/components/ui/input/input.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { ROUTES } from '@app/constants/routes.constants';
 import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@app/constants/validation.constants';
+import { CreateSessionDto } from '@app/dto/create-session-dto';
+import { JoinSessionDto } from '@app/dto/join-session-dto';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { CharacterStoreService } from '@app/services/character-store/character-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
-import { BonusType, DiceType } from '@common/enums/character-creation.enum';
+import { PlayerService } from '@app/services/player/player.service';
+import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
+import { SessionService } from '@app/services/session/session.service';
+import { BonusType } from '@common/enums/character-creation.enum';
+import { Dice } from '@common/enums/dice.enum';
+
 
 @Component({
     standalone: true,
     selector: 'app-character-creation-page',
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
-    imports: [CommonModule, FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent],
+    imports: [CommonModule, FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent, AvatarGridComponent],
     providers: [CharacterCreationCheckService, CharacterStoreService],
 })
 export class CharacterCreationPageComponent {
-    readonly diceType = DiceType;
+    readonly dice = Dice;
     readonly bonusType = BonusType;
     readonly characterNameMinLength = NAME_MIN_LENGTH;
     readonly characterNameMaxLength = CHARACTER_NAME_MAX_LENGTH;
-    readonly avatars = this.characterStoreService.avatars;
 
     constructor(
         private readonly assetsService: AssetsService,
         private readonly characterCreationCheckService: CharacterCreationCheckService,
         private readonly characterStoreService: CharacterStoreService,
+        private readonly playerService: PlayerService,
+        private readonly sessionService: SessionService,
+        private readonly sessionSocketService: SessionSocketService,
         private readonly notificationService: NotificationService,
     ) {}
-
-    get hasSelectedAvatar(): boolean {
-        return this.character.avatar !== null;
-    }
-
-    get showAvatarPlaceholder(): boolean {
-        return !this.hasSelectedAvatar;
-    }
 
     get isLifeBonusSelected(): boolean {
         return this.character.bonus === BonusType.Life;
@@ -54,70 +55,46 @@ export class CharacterCreationPageComponent {
     }
 
     get isAttackD4Selected(): boolean {
-        return this.character.diceAssignment.attack === DiceType.D4;
+        return this.character.diceAssignment.attack === Dice.D4;
     }
 
     get isAttackD6Selected(): boolean {
-        return this.character.diceAssignment.attack === DiceType.D6;
+        return this.character.diceAssignment.attack === Dice.D6;
     }
 
     get isDefenseD4Selected(): boolean {
-        return this.character.diceAssignment.defense === DiceType.D4;
+        return this.character.diceAssignment.defense === Dice.D4;
     }
 
     get isDefenseD6Selected(): boolean {
-        return this.character.diceAssignment.defense === DiceType.D6;
-    }
-
-    get selectedAvatarAltText(): string {
-        return this.character.avatar !== null ? `Avatar sélectionné ${this.character.avatar + 1}` : '';
+        return this.character.diceAssignment.defense === Dice.D6;
     }
 
     get character() {
         return this.characterStoreService.character();
     }
 
-    get store() {
-        return this.characterStoreService;
-    }
-
-    get selectedAvatarImage(): string {
-        if (this.character.avatar === null) return '';
-        return this.assetsService.getAvatarAnimatedByNumber(this.character.avatar + 1);
-    }
-
     get canCreateCharacter(): boolean {
         return this.characterCreationCheckService.canCreate();
     }
 
-    getIsAvatarSelected(avatar: number): boolean {
-        return this.character.avatar === avatar;
-    }
-
-    getAvatarImage(avatarIndex: number): string {
-        return this.assetsService.getAvatarStaticByNumber(avatarIndex + 1);
-    }
-
-    getDiceImage(diceType: DiceType): string {
-        return this.assetsService.getDiceImage(diceType);
+    getDiceImage(dice: Dice): string {
+        return this.assetsService.getDiceImage(dice);
     }
 
     onNameChange(v: string) {
         this.characterStoreService.name = v;
     }
 
-    selectAvatar(index: number) {
-        this.characterStoreService.avatar = index;
-    }
-
     onBonusChange(bonus: BonusType) {
         this.characterStoreService.bonus = bonus;
     }
 
-    onAttackDiceChange(value: DiceType) {
+    onAttackDiceChange(value: Dice) {
         this.characterStoreService.setDice('attack', value);
     }
-    onDefenseDiceChange(value: DiceType) {
+
+    onDefenseDiceChange(value: Dice) {
         this.characterStoreService.setDice('defense', value);
     }
 
@@ -125,19 +102,53 @@ export class CharacterCreationPageComponent {
         this.characterStoreService.generateRandom();
     }
 
-    onSubmit() {
-        if (!this.characterCreationCheckService.canCreate()) {
-            this.notificationService.displayError({
-                title: 'Erreur de validation',
-                message: 'Nom, avatar et bonus requis.',
-            });
-            return;
+    onSubmit(): void {
+        if (this.playerService.isAdmin()) {
+            this.handleAdminCreation();
+        } else {
+            this.handlePlayerJoin();
         }
+    }
 
-        this.notificationService.displaySuccess({
-            title: 'Personnage créé',
-            message: `${this.character.name} est prêt pour l’aventure.`,
-            redirectRoute: ROUTES.waitingRoom,
+    private handleAdminCreation(): void {
+        const dto: CreateSessionDto = {
+            player: this.playerService.player(),
+            mapSize: 1,
+            map: [],
+            itemContainers: [],
+        };
+
+        this.sessionSocketService.createSession(dto);
+        this.sessionSocketService.onSessionCreated((data) => {
+            this.sessionService.updateSession({ id: data.sessionId });
+            this.playerService.updatePlayer({ id: data.playerId });
+            this.notificationService.displaySuccess({
+                title: 'Personnage créé',
+                message: `${this.character.name} est prêt pour l'aventure.`,
+                redirectRoute: ROUTES.waitingRoomPage,
+            });
+        });
+    }
+
+    private handlePlayerJoin(): void {
+
+        const dto: JoinSessionDto = {
+            player: this.playerService.player(),
+            sessionId: this.sessionService.id(),
+        };
+
+        this.sessionSocketService.joinSession(dto);
+        this.sessionSocketService.onSessionJoined(() => {
+            this.notificationService.displaySuccess({
+                title: 'Personnage créé',
+                message: `${this.character.name} est prêt pour l'aventure.`,
+                redirectRoute: ROUTES.waitingRoomPage,
+            });
+        });
+
+        this.sessionSocketService.onSessionJoinError((msg) => {
+            this.notificationService.displayError({ title: 'Erreur', message: msg });
         });
     }
 }
+

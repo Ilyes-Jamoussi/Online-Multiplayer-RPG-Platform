@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { CHARACTER_AVATARS_COUNT, CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
+import { BonusType } from '@common/enums/character-creation.enum';
+import { Dice } from '@common/enums/dice.enum';
 import { CharacterStoreService } from './character-store.service';
-import { BonusType, DiceType } from '@common/enums/character-creation.enum';
 
 const EXPECTED_LIFE_BASE = CHARACTER_BASE;
 const EXPECTED_SPEED_BASE = CHARACTER_BASE;
@@ -27,8 +28,8 @@ describe('CharacterStoreService', () => {
         expect(character.name).toBe('');
         expect(character.avatar).toBeNull();
         expect(character.bonus).toBeNull();
-        expect(character.diceAssignment.attack).toBe(DiceType.D4);
-        expect(character.diceAssignment.defense).toBe(DiceType.D6);
+        expect(character.diceAssignment.attack).toBe(Dice.D4);
+        expect(character.diceAssignment.defense).toBe(Dice.D6);
         expect(character.attributes.life).toBe(EXPECTED_LIFE_BASE);
         expect(character.attributes.speed).toBe(EXPECTED_SPEED_BASE);
     });
@@ -52,10 +53,10 @@ describe('CharacterStoreService', () => {
     });
 
     it('should set dice assignment', () => {
-        service.setDice('attack', DiceType.D6);
+        service.setDice('attack', Dice.D6);
         const character = service.character();
-        expect(character.diceAssignment.attack).toBe(DiceType.D6);
-        expect(character.diceAssignment.defense).toBe(DiceType.D4);
+        expect(character.diceAssignment.attack).toBe(Dice.D6);
+        expect(character.diceAssignment.defense).toBe(Dice.D4);
     });
 
     it('should generate random character', () => {
@@ -85,22 +86,22 @@ describe('CharacterStoreService', () => {
     });
 
     it('should set dice assignment when setting defense (other branch)', () => {
-        service.setDice('defense', DiceType.D6);
+        service.setDice('defense', Dice.D6);
         const character = service.character();
-        expect(character.diceAssignment.defense).toBe(DiceType.D6);
-        expect(character.diceAssignment.attack).toBe(DiceType.D4);
+        expect(character.diceAssignment.defense).toBe(Dice.D6);
+        expect(character.diceAssignment.attack).toBe(Dice.D4);
     });
 
     it('should set dice assignment correctly for attack variants', () => {
-        service.setDice('attack', DiceType.D4);
+        service.setDice('attack', Dice.D4);
         let character = service.character();
-        expect(character.diceAssignment.attack).toBe(DiceType.D4);
-        expect(character.diceAssignment.defense).toBe(DiceType.D6);
+        expect(character.diceAssignment.attack).toBe(Dice.D4);
+        expect(character.diceAssignment.defense).toBe(Dice.D6);
 
-        service.setDice('attack', DiceType.D6);
+        service.setDice('attack', Dice.D6);
         character = service.character();
-        expect(character.diceAssignment.attack).toBe(DiceType.D6);
-        expect(character.diceAssignment.defense).toBe(DiceType.D4);
+        expect(character.diceAssignment.attack).toBe(Dice.D6);
+        expect(character.diceAssignment.defense).toBe(Dice.D4);
     });
 
     it('should allow selecting first and last avatar indices', () => {
@@ -129,8 +130,8 @@ describe('CharacterStoreService', () => {
 
         expect(character.bonus).toBe(BonusType.Life);
 
-        expect(character.diceAssignment.defense).toBe(DiceType.D6);
-        expect(character.diceAssignment.attack).toBe(DiceType.D4);
+        expect(character.diceAssignment.defense).toBe(Dice.D6);
+        expect(character.diceAssignment.attack).toBe(Dice.D4);
     });
 
     it('should update attributes when bonus is speed', () => {
@@ -141,10 +142,10 @@ describe('CharacterStoreService', () => {
     });
 
     it('should set dice assignment when setting defense to D4', () => {
-        service.setDice('defense', DiceType.D4);
+        service.setDice('defense', Dice.D4);
         const c = service.character();
-        expect(c.diceAssignment.defense).toBe(DiceType.D4);
-        expect(c.diceAssignment.attack).toBe(DiceType.D6);
+        expect(c.diceAssignment.defense).toBe(Dice.D4);
+        expect(c.diceAssignment.attack).toBe(Dice.D6);
     });
 
     it('generateRandom should set bonus to speed when random >= threshold', () => {

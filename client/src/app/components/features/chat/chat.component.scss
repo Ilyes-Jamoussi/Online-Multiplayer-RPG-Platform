@@ -1,0 +1,36 @@
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 0 1rem;
+        color: #1976d2;
+        font-size: 1.2rem;
+        font-weight: 500;
+
+        i {
+            color: #2196f3;
+        }
+    }
+
+    .messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+
+        .message {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+    }
+}

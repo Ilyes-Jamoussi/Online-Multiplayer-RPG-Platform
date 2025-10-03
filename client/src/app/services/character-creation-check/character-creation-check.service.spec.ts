@@ -1,9 +1,11 @@
-import { TestBed } from '@angular/core/testing';
 import { Signal, WritableSignal, signal } from '@angular/core';
-import { NAME_MIN_LENGTH, CHARACTER_NAME_MAX_LENGTH } from '@app/constants/validation.constants';
+import { TestBed } from '@angular/core/testing';
+import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@app/constants/validation.constants';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { CharacterStoreService } from '@app/services/character-store/character-store.service';
-import { DiceType, BonusType } from '@common/enums/character-creation.enum';
+import { BonusType } from '@common/enums/character-creation.enum';
+import { Dice } from '@common/enums/dice.enum';
+
 import { Character } from '@common/interfaces/character.interface';
 
 describe('CharacterCreationCheckService', () => {
@@ -14,7 +16,7 @@ describe('CharacterCreationCheckService', () => {
         name: 'ValidName',
         avatar: 0,
         bonus: BonusType.Life,
-        diceAssignment: { attack: DiceType.D4, defense: DiceType.D6 },
+        diceAssignment: { attack: Dice.D4, defense: Dice.D6 },
         attributes: { life: 1, speed: 1 },
     };
 

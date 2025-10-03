@@ -1,0 +1,13 @@
+<div class="players-list">
+    <div class="header">
+        <h2>Joueurs</h2>
+        <span class="player-count">{{ players().length }}</span>
+    </div>
+    <div class="players-grid">
+        <app-player-card *ngFor="let player of players()" [player]="player" />
+    </div>
+    <div class="lock-message" *ngIf="isRoomLocked()">
+        <i class="material-icons">lock</i>
+        La salle est verrouillée, plus aucun joueur ne peut la rejoindre
+    </div>
+</div>

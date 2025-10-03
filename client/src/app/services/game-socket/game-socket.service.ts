@@ -5,7 +5,7 @@ import { GameStoreEvents } from '@common/constants/game-store-events';
 
 @Injectable({ providedIn: 'root' })
 export class GameSocketService {
-    constructor(private socket: SocketService) {}
+    constructor(private readonly socket: SocketService) {}
 
     onGameCreated(callback: (game: GamePreviewDto) => void): void {
         this.socket.onSuccessEvent(GameStoreEvents.GameCreated, callback);

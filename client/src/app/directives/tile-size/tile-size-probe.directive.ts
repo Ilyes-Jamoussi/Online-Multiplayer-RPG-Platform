@@ -8,8 +8,8 @@ export class TileSizeProbeDirective implements OnChanges, OnDestroy {
     private resizeObserver?: ResizeObserver;
 
     constructor(
-        private el: ElementRef<HTMLElement>,
-        private zone: NgZone,
+        private readonly el: ElementRef<HTMLElement>,
+        private readonly zone: NgZone,
     ) {}
 
     ngOnChanges(): void {

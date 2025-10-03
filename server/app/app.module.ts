@@ -1,4 +1,6 @@
-import { GameStoreModule } from '@app/game-store/module/game-store.module';
+import { GameStoreModule } from '@app/modules/game-store/module/game-store.module';
+import { SessionModule } from '@app/modules/session/module/session.module';
+
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -14,6 +16,7 @@ import { MongooseModule } from '@nestjs/mongoose';
             }),
         }),
         GameStoreModule,
+        SessionModule
     ],
     providers: [Logger],
 })

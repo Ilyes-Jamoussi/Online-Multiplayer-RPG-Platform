@@ -25,7 +25,6 @@
 }
 
 .card-body {
-    --gap: 0.5rem;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -33,79 +32,6 @@
     padding: 0.75rem;
     min-height: 0;
     overflow-y: auto;
-}
-
-.selected {
-    width: 200px;
-    height: 200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #4a90e2;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #fff;
-}
-
-.selected-img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    image-rendering: pixelated;
-}
-
-.selected-empty {
-    font-size: 2rem;
-    color: #4a90e2;
-}
-
-.grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--gap);
-    width: 100%;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 10px 4px 4px;
-}
-
-.cell {
-    position: relative;
-    flex: 0 0 calc((100% - (var(--gap) * 4)) / 5);
-    aspect-ratio: 1 / 1;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    background: #fff;
-    cursor: pointer;
-}
-
-.cell:hover {
-    outline: 2px solid #4a90e2;
-}
-
-.cell.active {
-    outline: 2px solid #4a90e2;
-}
-
-.cell-img {
-    width: 75%;
-    height: 75%;
-    object-fit: contain;
-    margin: auto;
-    image-rendering: pixelated;
-}
-
-.cell-num {
-    position: absolute;
-    right: 4px;
-    bottom: 4px;
-    font-size: 0.6rem;
-    background: #4a90e2;
-    color: #fff;
-    border-radius: 6px;
-    padding: 1px 4px;
 }
 
 .field {
@@ -219,22 +145,7 @@
 }
 
 @media (max-width: 900px) {
-    .grid {
-        gap: 0.45rem;
-    }
-    .cell {
-        flex: 0 0 calc((100% - (0.45rem * 3)) / 4);
-    }
     .dice-rows {
         grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 600px) {
-    .grid {
-        gap: 0.4rem;
-    }
-    .cell {
-        flex: 0 0 calc((100% - (0.4rem * 2)) / 3);
     }
 }
