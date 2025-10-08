@@ -78,7 +78,7 @@ describe('GameStoreService', () => {
             const mockGameDocument = createMockGameDocument();
 
             const mockQuery = {
-                sort: jest.fn().mockReturnThis(), // <-- add this
+                sort: jest.fn().mockReturnThis(),
                 lean: jest.fn().mockResolvedValue([mockGameDocument]),
             } as unknown as Query<GameDocument[], GameDocument>;
 

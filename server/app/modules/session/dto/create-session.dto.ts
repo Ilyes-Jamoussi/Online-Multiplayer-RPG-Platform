@@ -1,26 +1,21 @@
-import { MapSize } from '@common/enums/map-size.enum';
-import { ItemContainer } from '@common/interfaces/item-container.interface';
-import { Tile } from '@common/interfaces/tile.interface';
-import { Player } from '@common/models/player.model';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsObject, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNumber, IsString, ValidateNested } from 'class-validator';
+import { PlayerDto } from './player.dto';
 
 export class CreateSessionDto {
     @ApiProperty()
-    @IsEnum(MapSize)
-    readonly mapSize: MapSize;
+    @IsString()
+    readonly gameId: string;
 
     @ApiProperty()
-    @IsObject()
-    readonly player: Player;
+    @IsNumber()
+    readonly maxPlayers: number;
 
-    @ApiProperty()
-    @IsArray()
-    readonly map: Tile[][];
-
-    @ApiProperty()
-    @IsArray()
-    readonly itemContainers: ItemContainer[];
+    @ApiProperty({ type: PlayerDto })
+    @ValidateNested()
+    @Type(() => PlayerDto)
+    readonly player: PlayerDto;
 }
 
 export class SessionCreatedDto {

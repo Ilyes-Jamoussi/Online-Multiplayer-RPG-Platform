@@ -1,7 +1,7 @@
+import { SessionService } from '@app/modules/session//services/session.service';
+import { SessionDtoController } from '@app/modules/session/controllers/session-dto.controller';
+import { SessionGateway } from '@app/modules/session/gateways/session.gateway';
 import { Module } from '@nestjs/common';
-import { SessionGateway } from '../gateways/session.gateway';
-import { SessionService } from '../services/session.service';
-import { SessionDtoController } from '../controllers/session-dto.controller';
 
 @Module({
     controllers: [SessionDtoController],

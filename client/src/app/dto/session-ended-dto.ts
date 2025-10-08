@@ -9,9 +9,7 @@
  */
 
 
-export interface SessionPlayerDto { 
-    id: string;
-    name: string;
-    isAdmin: boolean;
+export interface SessionEndedDto { 
+    message: string;
 }
 

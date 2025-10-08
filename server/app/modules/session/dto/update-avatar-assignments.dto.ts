@@ -1,6 +1,7 @@
 import { Avatar } from '@common/enums/avatar.enum';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsString } from 'class-validator';
+import { IsEnum, IsString } from 'class-validator';
+import { AvatarAssignmentDto } from './avatar-assignment.dto';
 
 export class UpdateAvatarAssignmentsDto {
     @ApiProperty()
@@ -10,14 +11,6 @@ export class UpdateAvatarAssignmentsDto {
     @ApiProperty()
     @IsEnum(Avatar)
     readonly avatar: Avatar;
-}
-
-export class AvatarAssignmentDto {
-    @ApiProperty()
-    avatar: string;
-
-    @ApiProperty({ nullable: true })
-    chosenBy: string | null;
 }
 
 export class AvatarAssignmentsUpdatedDto {

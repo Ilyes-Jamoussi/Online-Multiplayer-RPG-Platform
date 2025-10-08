@@ -64,7 +64,7 @@ describe('GameEditorService', () => {
                 mode: GameMode.CLASSIC,
                 tiles: [{ x: 0, y: 0, kind: TileKind.BASE }],
                 gridPreviewUrl: 'preview.png',
-                objects: [{ _id: { toString: () => 'obj1' }, x: 0, y: 0, kind: PlaceableKind.START, placed: false }],
+                objects: [{ _id: { toString: (): string => 'obj1' }, x: 0, y: 0, kind: PlaceableKind.START, placed: false }],
             } as const;
 
             mockModel.findById = jest.fn().mockReturnValue({ lean: () => Promise.resolve(gameDoc) });
@@ -140,7 +140,7 @@ describe('GameEditorService', () => {
             let capturedSet: unknown = null;
             mockModel.findByIdAndUpdate = jest.fn().mockImplementation((passedId: string, setArg: unknown) => {
                 capturedSet = setArg;
-                return { lean: () => ({ exec: jest.fn().mockResolvedValue(returnedDoc) }) };
+                return { lean: (): { exec: jest.Mock } => ({ exec: jest.fn().mockResolvedValue(returnedDoc) }) };
             });
 
             const preview = await service.patchEditByGameId(id, body);
@@ -150,7 +150,7 @@ describe('GameEditorService', () => {
             expect(mockModel.findByIdAndUpdate).toHaveBeenCalled();
             expect(capturedSet).not.toBeNull();
 
-            const setObj = (capturedSet as unknown as { $set?: PatchSet }).$set ?? (capturedSet as PatchSet);
+            const setObj = (capturedSet as { $set?: PatchSet }).$set ?? (capturedSet as PatchSet);
             expect(setObj.name).toBe(body.name);
             expect(setObj.description).toBe(body.description);
             expect(setObj.size).toBe(body.size);
@@ -190,8 +190,10 @@ describe('GameEditorService', () => {
             const id = 'someid';
             const body = { name: 'duplicate name' };
 
-            const conflictingGame = { _id: { toString: () => 'otherid' }, name: body.name };
-            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(conflictingGame) }) });
+            const conflictingGame = { _id: { toString: (): string => 'otherid' }, name: body.name };
+            mockModel.findOne = jest.fn().mockReturnValue({ 
+                lean: (): { exec: jest.Mock } => ({ exec: jest.fn().mockResolvedValue(conflictingGame) }) 
+            });
 
             await expect(service.patchEditByGameId(id, body)).rejects.toThrow(NAME_ALREADY_EXISTS);
             expect(mockModel.findOne).toHaveBeenCalledWith({ name: body.name, _id: { $ne: id } });

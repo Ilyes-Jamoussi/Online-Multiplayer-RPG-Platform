@@ -14,7 +14,7 @@ export class CharacterCreationCheckService {
     private readonly validationProblems = computed(() => {
         const character = this.characterStoreService.character();
         const name = character.name.trim();
-        const selectedAvatar = this.playerService.avatar(); // Écouter l'avatar du PlayerService
+        const selectedAvatar = this.playerService.avatar();
 
         return {
             nameValidation: this.checkNameValidation(name),

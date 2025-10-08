@@ -11,7 +11,7 @@ import { Server } from 'socket.io';
 @Injectable()
 export class GameStoreGateway {
     @WebSocketServer()
-    private server: Server;
+    private readonly server: Server;
 
     emitGameCreated(dto: GamePreviewDto): void {
         this.server.emit(GameStoreEvents.GameCreated, successResponse(dto));

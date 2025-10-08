@@ -7,11 +7,12 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { Avatar } from '@common/enums/avatar.enum';
 
 
 export interface SessionLeftDto { 
     sessionId: string;
     playerName: string;
-    playerAvatar: string;
+    playerAvatar: Avatar | null;
 }
 

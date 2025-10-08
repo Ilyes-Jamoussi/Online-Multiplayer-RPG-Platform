@@ -11,9 +11,9 @@ export class LeaveSessionDto {
     @IsString()
     readonly playerName: string;
 
-    @ApiProperty()
+    @ApiProperty({ enum: Avatar, enumName: 'Avatar', nullable: true })
     @IsEnum(Avatar)
-    readonly playerAvatar: Avatar;
+    readonly playerAvatar: Avatar | null;
 }
 
 export class SessionLeftDto {
@@ -25,7 +25,7 @@ export class SessionLeftDto {
     @IsString()
     readonly playerName: string;
 
-    @ApiProperty()
+    @ApiProperty({ enum: Avatar, enumName: 'Avatar', nullable: true })
     @IsEnum(Avatar)
-    readonly playerAvatar: Avatar;
+    readonly playerAvatar: Avatar | null;
 }

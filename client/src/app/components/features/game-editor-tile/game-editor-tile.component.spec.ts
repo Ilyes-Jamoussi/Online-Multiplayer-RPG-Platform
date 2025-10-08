@@ -57,7 +57,7 @@ function makeMouseEvent(init?: MouseEvtInit): MouseEvent {
     const evt = {
         preventDefault: init?.preventDefault ?? NOOP,
         stopPropagation: init?.stopPropagation ?? NOOP,
-        button: (init?.button ?? 0) as number,
+        button: init?.button ?? 0,
     } as unknown as MouseEvent;
     return evt;
 }

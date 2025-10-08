@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
-import { Player } from '@common/models/player.model';
+import { Player } from '@common/models/player.interface';
 
 @Component({
     selector: 'app-waiting-room-actions',
@@ -46,6 +46,6 @@ export class WaitingRoomActionsComponent {
     }
 
     startGame(): void {
-        // this.sessionService.startGame();
+        this.sessionService.startGameSession();
     }
 }

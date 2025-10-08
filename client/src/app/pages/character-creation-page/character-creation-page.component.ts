@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AvatarGridComponent } from '@app/components/features/avatar-grid/avatar-grid.component';
 import { ErrorsBadgeComponent } from '@app/components/features/errors-badge/errors-badge.component';
 import { StatsBarComponent } from '@app/components/features/stats-bar/stats-bar.component';
@@ -9,8 +10,6 @@ import { UiInputComponent } from '@app/components/ui/input/input.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { ROUTES } from '@app/constants/routes.constants';
 import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@app/constants/validation.constants';
-import { CreateSessionDto } from '@app/dto/create-session-dto';
-import { JoinSessionDto } from '@app/dto/join-session-dto';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { CharacterStoreService } from '@app/services/character-store/character-store.service';
@@ -21,13 +20,15 @@ import { SessionService } from '@app/services/session/session.service';
 import { BonusType } from '@common/enums/character-creation.enum';
 import { Dice } from '@common/enums/dice.enum';
 
-
 @Component({
     standalone: true,
     selector: 'app-character-creation-page',
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
-    imports: [CommonModule, FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent, AvatarGridComponent],
+    imports: [
+        CommonModule, FormsModule, UiButtonComponent, UiInputComponent, 
+        UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent, AvatarGridComponent
+    ],
     providers: [CharacterCreationCheckService, CharacterStoreService],
 })
 export class CharacterCreationPageComponent {
@@ -44,6 +45,7 @@ export class CharacterCreationPageComponent {
         private readonly sessionService: SessionService,
         private readonly sessionSocketService: SessionSocketService,
         private readonly notificationService: NotificationService,
+        private readonly router: Router
     ) {}
 
     get isLifeBonusSelected(): boolean {
@@ -78,32 +80,38 @@ export class CharacterCreationPageComponent {
         return this.characterCreationCheckService.canCreate();
     }
 
+    get isPlayerAdmin(): boolean {
+        return this.playerService.isAdmin();
+    }
+
     getDiceImage(dice: Dice): string {
         return this.assetsService.getDiceImage(dice);
     }
 
-    onNameChange(v: string) {
+    onNameChange(v: string): void {
         this.characterStoreService.name = v;
     }
 
-    onBonusChange(bonus: BonusType) {
+    onBonusChange(bonus: BonusType): void {
         this.characterStoreService.bonus = bonus;
     }
 
-    onAttackDiceChange(value: Dice) {
+    onAttackDiceChange(value: Dice): void {
         this.characterStoreService.setDice('attack', value);
     }
 
-    onDefenseDiceChange(value: Dice) {
+    onDefenseDiceChange(value: Dice): void {
         this.characterStoreService.setDice('defense', value);
     }
 
-    generateRandomCharacter() {
+    generateRandomCharacter(): void {
         this.characterStoreService.generateRandom();
     }
 
     onSubmit(): void {
-        if (this.playerService.isAdmin()) {
+        this.playerService.updatePlayer({ name: this.character.name });
+
+        if (this.isPlayerAdmin) {
             this.handleAdminCreation();
         } else {
             this.handlePlayerJoin();
@@ -111,39 +119,24 @@ export class CharacterCreationPageComponent {
     }
 
     private handleAdminCreation(): void {
-        const dto: CreateSessionDto = {
-            player: this.playerService.player(),
-            mapSize: 1,
-            map: [],
-            itemContainers: [],
-        };
+        this.sessionService.createSession(this.playerService.player());
 
-        this.sessionSocketService.createSession(dto);
         this.sessionSocketService.onSessionCreated((data) => {
             this.sessionService.updateSession({ id: data.sessionId });
             this.playerService.updatePlayer({ id: data.playerId });
-            this.notificationService.displaySuccess({
-                title: 'Personnage créé',
-                message: `${this.character.name} est prêt pour l'aventure.`,
-                redirectRoute: ROUTES.waitingRoomPage,
-            });
+            this.router.navigate([ROUTES.waitingRoomPage]);
+        });
+
+        this.sessionSocketService.onSessionCreatedError((error) => {
+            this.notificationService.displayError({ title: 'Erreur de création', message: error });
         });
     }
 
     private handlePlayerJoin(): void {
+        this.sessionService.joinSession(this.playerService.player());
 
-        const dto: JoinSessionDto = {
-            player: this.playerService.player(),
-            sessionId: this.sessionService.id(),
-        };
-
-        this.sessionSocketService.joinSession(dto);
         this.sessionSocketService.onSessionJoined(() => {
-            this.notificationService.displaySuccess({
-                title: 'Personnage créé',
-                message: `${this.character.name} est prêt pour l'aventure.`,
-                redirectRoute: ROUTES.waitingRoomPage,
-            });
+            this.router.navigate([ROUTES.waitingRoomPage]);
         });
 
         this.sessionSocketService.onSessionJoinError((msg) => {

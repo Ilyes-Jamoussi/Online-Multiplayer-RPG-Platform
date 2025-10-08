@@ -7,10 +7,11 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { Avatar } from '@common/enums/avatar.enum';
 
 
 export interface AvatarAssignmentDto { 
-    avatar: string;
+    avatar: Avatar;
     chosenBy: string | null;
 }
 

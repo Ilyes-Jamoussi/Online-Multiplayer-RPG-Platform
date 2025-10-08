@@ -7,4 +7,5 @@ export const ROUTES = {
     characterCreationPage: 'character-creation',
     waitingRoomPage: 'waiting-room',
     joinSessionPage: 'join-session',
+    gameSessionPage: 'game-session',
 };

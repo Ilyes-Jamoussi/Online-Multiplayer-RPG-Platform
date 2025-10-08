@@ -51,7 +51,8 @@ describe('RoomCodeComponent', () => {
             component.copyToClipboard();
             expect(component.showCopiedTooltip).toBeTrue();
 
-            tick(2000);
+            const TOOLTIP_DELAY = 2000;
+            tick(TOOLTIP_DELAY);
             expect(component.showCopiedTooltip).toBeFalse();
         }));
     });

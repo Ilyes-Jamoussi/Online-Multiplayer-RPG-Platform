@@ -4,13 +4,15 @@
         "GameMode": "@common/enums/game-mode.enum",
         "MapSize": "@common/enums/map-size.enum",
         "TileKind": "@common/enums/tile-kind.enum",
-        "PlaceableKind": "@common/enums/placeable-kind.enum"
+        "PlaceableKind": "@common/enums/placeable-kind.enum",
+        "Avatar": "@common/enums/avatar.enum"
     },
     "typeMappings": {
         "GameMode": "GameMode",
         "MapSize": "MapSize",
         "TileKind": "TileKind",
-        "PlaceableKind": "PlaceableKind"
+        "PlaceableKind": "PlaceableKind",
+        "Avatar": "Avatar"
     },
     "templateDir": "openapi-templates/ts-angular"
 }

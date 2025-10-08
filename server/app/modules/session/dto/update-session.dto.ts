@@ -1,17 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-
-export class SessionPlayerDto {
-    @ApiProperty()
-    id: string;
-
-    @ApiProperty()
-    name: string;
-
-    @ApiProperty()
-    isAdmin: boolean;
-}
+import { PlayerDto } from './player.dto';
 
 export class SessionPlayersUpdatedDto {
-    @ApiProperty({ type: [SessionPlayerDto] })
-    players: SessionPlayerDto[];
+    @ApiProperty({ type: [PlayerDto] })
+    players: PlayerDto[];
 }

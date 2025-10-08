@@ -1,15 +1,15 @@
-import { computed, Injectable, Signal, signal } from '@angular/core';
-import { BASE_STAT, DEFAULT_PLAYER } from '@app/constants/player.constants';
+import { computed, Injectable, Signal, signal, WritableSignal } from '@angular/core';
+import { DEFAULT_PLAYER } from '@app/constants/player.constants';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { SessionService } from '@app/services/session/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
-import { Player } from '@common/models/player.model';
+import { Player } from '@common/models/player.interface';
 
 @Injectable({
     providedIn: 'root',
 })
 export class PlayerService {
-    private readonly _player = signal<Player>({ ...DEFAULT_PLAYER });
+    private readonly _player: WritableSignal<Player> = signal<Player>({ ...DEFAULT_PLAYER });
 
     constructor(
         private readonly sessionService: SessionService,
@@ -30,14 +30,6 @@ export class PlayerService {
 
     get avatar(): Signal<Avatar | null> {
         return computed(() => this.player().avatar);
-    }
-
-    get canCreateCharacter(): Signal<boolean> {
-        return computed(() => {
-            const player = this.player();
-            const hasBonus = player.maxHp > BASE_STAT || player.speed > BASE_STAT;
-            return !!player.name && player.avatar !== null && hasBonus;
-        });
     }
 
     get sessionId(): string {

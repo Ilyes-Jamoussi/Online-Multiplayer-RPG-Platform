@@ -102,7 +102,7 @@ describe('GameStoreController', () => {
             const result = await controller.createGame(mockCreateGameDto);
 
             expect(gameService.createGame).toHaveBeenCalledWith(mockCreateGameDto);
-            expect(result).toEqual(mockGamePreview); // add this assertion
+            expect(result).toEqual(mockGamePreview);
         });
     });
 

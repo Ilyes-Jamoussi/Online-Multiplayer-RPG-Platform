@@ -54,7 +54,7 @@ describe('placeable.factory', () => {
         const expectedFlagClassic = baseClassic[PlaceableKind.FLAG] ?? 0;
         const expectedFlagCtf = (baseClassic[PlaceableKind.FLAG] ?? 0) + (flagExtra[PlaceableKind.FLAG] ?? 0);
 
-        const countFlags = (arr: Placeable[]) => arr.filter((p) => p.kind === PlaceableKind.FLAG).length;
+        const countFlags = (arr: Placeable[]): number => arr.filter((p) => p.kind === PlaceableKind.FLAG).length;
 
         expect(countFlags(outClassic)).toBe(expectedFlagClassic);
         expect(countFlags(outCtf)).toBe(expectedFlagCtf);

@@ -17,7 +17,7 @@ export class GamePreviewCardComponent {
     @Input() game!: GamePreviewDto;
     @Input() isAdmin = false;
 
-    @Output() startGame = new EventEmitter<string>();
+    @Output() startGame = new EventEmitter<GamePreviewDto>();
     @Output() editGame = new EventEmitter<string>();
     @Output() deleteGame = new EventEmitter<string>();
     @Output() toggleVisibility = new EventEmitter<string>();
@@ -32,7 +32,7 @@ export class GamePreviewCardComponent {
     }
 
     onStartGame(): void {
-        this.startGame.emit(this.game.id);
+        this.startGame.emit(this.game);
     }
 
     onEditGame(): void {

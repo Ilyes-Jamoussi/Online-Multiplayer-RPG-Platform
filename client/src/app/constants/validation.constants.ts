@@ -7,4 +7,4 @@ export const SESSION_ACCESS_CODE_LENGTH = 4;
 export const WHITESPACE_PATTERN = /\s/g;
 
 export const TEXT_ALLOWED_CHARS_PATTERN = /^[a-zA-ZÀ-ÿ\-'\s]$/;
-export const NUMBER_ALLOWED_CHARS_PATTERN = /^[0-9]$/;
+export const NUMBER_ALLOWED_CHARS_PATTERN = /^[0-9\s]$/;

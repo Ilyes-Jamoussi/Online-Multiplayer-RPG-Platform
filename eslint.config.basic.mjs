@@ -52,6 +52,7 @@ export default (tsParser, tsPlugin) => [
             'radix': 'error',
             'use-isnan': 'error',
             'guard-for-in': 'error',
+            'no-inline-comments': 'warn',
         },
     },
     {
@@ -119,7 +120,9 @@ export default (tsParser, tsPlugin) => [
                     "format": ["PascalCase"],
                     "selector": "enumMember"
                 }
-            ]
+            ],
+            // "@typescript-eslint/explicit-function-return-type": "warn",
+            "@typescript-eslint/no-unnecessary-type-assertion": "warn"
         },
     },
     {

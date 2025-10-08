@@ -13,9 +13,7 @@ export class UiInputComponent {
     @Input() maxLength?: number;
     @Input() fullWidth: boolean = false;
     @Input() set value(val: string) {
-        if (val !== undefined) {
-            this._value = val;
-        }
+        this._value = val;
     }
 
     @Output() valueChange = new EventEmitter<string>();
@@ -23,7 +21,7 @@ export class UiInputComponent {
     private _value: string = '';
 
     @HostBinding('class.full-width')
-    get isFullWidth() {
+    get isFullWidth(): boolean {
         return this.fullWidth;
     }
 
@@ -67,7 +65,7 @@ export class UiInputComponent {
     }
 
     private isSpaceInvalid(value: string, hasSelection: boolean, selectionStart: number): boolean {
-        return this.type === 'number' || (!hasSelection && (value.length === 0 || value.endsWith(' '))) || (hasSelection && selectionStart === 0);
+        return (!hasSelection && (value.length === 0 || value.endsWith(' '))) || (hasSelection && selectionStart === 0);
     }
 
     private filterInvalidChars(value: string): string {

@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
-import { SessionPlayersUpdatedDto } from '@app/dto/session-players-updated-dto';
-import { CreateSessionDto } from '@app/dto/create-session-dto';
-import { SessionCreatedDto } from '@app/dto/session-created-dto';
+import { AvatarAssignmentsUpdatedDto } from '@app/dto/avatar-assignments-updated-dto';
 import { AvatarSelectionJoinedDto } from '@app/dto/avatar-selection-joined-dto';
+import { CreateSessionDto } from '@app/dto/create-session-dto';
 import { JoinAvatarSelectionDto } from '@app/dto/join-avatar-selection-dto';
 import { JoinSessionDto } from '@app/dto/join-session-dto';
-import { StartGameSessionDto } from '@app/dto/start-game-session-dto';
-import { AvatarAssignmentsUpdatedDto } from '@app/dto/avatar-assignments-updated-dto';
+import { KickPlayerDto } from '@app/dto/kick-player-dto';
+import { SessionCreatedDto } from '@app/dto/session-created-dto';
+import { SessionJoinedDto } from '@app/dto/session-joined-dto';
+import { SessionPlayersUpdatedDto } from '@app/dto/session-players-updated-dto';
 import { UpdateAvatarAssignmentsDto } from '@app/dto/update-avatar-assignments-dto';
 import { SocketService } from '@app/services/socket/socket.service';
 import { SessionEvents } from '@common/constants/session-events';
@@ -19,19 +20,23 @@ export class SessionSocketService {
         this.socket.emit(SessionEvents.CreateSession, data);
     }
 
-    lockSession(data: {}): void {
-        this.socket.emit(SessionEvents.LockSession, data);
+    lockSession(): void {
+        this.socket.emit(SessionEvents.LockSession, {});
     }
 
-    unlockSession(data: {}): void {
-        this.socket.emit(SessionEvents.UnlockSession, data);
+    unlockSession(): void {
+        this.socket.emit(SessionEvents.UnlockSession, {});
+    }
+
+    startGameSession(): void {
+        this.socket.emit(SessionEvents.StartGameSession, {});
     }
 
     onSessionCreated(callback: (data: SessionCreatedDto) => void): void {
         this.socket.onSuccessEvent(SessionEvents.SessionCreated, callback);
     }
 
-    onSessionCreatedError(callback: (msg: string) => void): void {
+    onSessionCreatedError(callback: (message: string) => void): void {
         this.socket.onErrorEvent(SessionEvents.SessionCreated, callback);
     }
 
@@ -51,7 +56,7 @@ export class SessionSocketService {
         this.socket.emit(SessionEvents.JoinSession, data);
     }
 
-    onSessionJoined(callback: (data: {}) => void): void {
+    onSessionJoined(callback: (data: SessionJoinedDto) => void): void {
         this.socket.onSuccessEvent(SessionEvents.SessionJoined, callback);
     }
 
@@ -63,19 +68,31 @@ export class SessionSocketService {
         this.socket.emit(SessionEvents.UpdateAvatarAssignments, data);
     }
 
-    startGameSession(data: StartGameSessionDto): void {
-        this.socket.emit(SessionEvents.StartGameSession, data);
-    }
-
-    onGameSessionStarted(callback: (data: StartGameSessionDto) => void): void {
-        this.socket.onSuccessEvent(SessionEvents.GameSessionStarted, callback);
-    }
-
     onAvatarAssignmentsUpdated(callback: (data: AvatarAssignmentsUpdatedDto) => void): void {
         this.socket.onSuccessEvent(SessionEvents.AvatarAssignmentsUpdated, callback);
     }
 
     onSessionPlayersUpdated(callback: (data: SessionPlayersUpdatedDto) => void): void {
         this.socket.onSuccessEvent(SessionEvents.SessionPlayersUpdated, callback);
+    }
+
+    kickPlayer(data: KickPlayerDto): void {
+        this.socket.emit(SessionEvents.KickPlayer, data);
+    }
+
+    onPlayerKicked(callback: (data: { message: string }) => void): void {
+        this.socket.onSuccessEvent(SessionEvents.PlayerKicked, callback);
+    }
+
+    onGameSessionStarted(callback: () => void): void {
+        this.socket.onSuccessEvent(SessionEvents.GameSessionStarted, callback);
+    }
+
+    leaveSession(): void {
+        this.socket.emit(SessionEvents.LeaveSession, {});
+    }
+
+    onSessionEnded(callback: (data: { message: string }) => void): void {
+        this.socket.onSuccessEvent(SessionEvents.SessionEnded, callback);
     }
 }

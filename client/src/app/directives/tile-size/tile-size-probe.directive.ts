@@ -33,7 +33,7 @@ export class TileSizeProbeDirective implements OnChanges, OnDestroy {
     ngOnDestroy(): void {
         this.teardown();
     }
-    private teardown() {
+    private teardown(): void {
         this.resizeObserver?.disconnect();
         this.resizeObserver = undefined;
     }

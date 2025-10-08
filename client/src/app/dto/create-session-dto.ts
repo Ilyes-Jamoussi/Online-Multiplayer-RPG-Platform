@@ -7,12 +7,12 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { PlayerDto } from './player-dto';
 
 
 export interface CreateSessionDto { 
-    mapSize: number;
-    player: object;
-    map: Array<string>;
-    itemContainers: Array<string>;
+    gameId: string;
+    maxPlayers: number;
+    player: PlayerDto;
 }
 

@@ -3,7 +3,7 @@
         @if (visibleGameDisplays() && visibleGameDisplays().length > 0) {
         <div class="games-grid">
             @for (game of visibleGameDisplays(); track game.id) {
-            <app-game-preview-card [game]="game" [isAdmin]="false" (startGame)="onStartGame()"> </app-game-preview-card>
+            <app-game-preview-card [game]="game" [isAdmin]="false" (startGame)="onStartGame($event)"> </app-game-preview-card>
             }
         </div>
         } @else {

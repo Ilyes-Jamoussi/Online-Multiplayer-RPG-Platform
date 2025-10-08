@@ -9,7 +9,7 @@ class ResizeObserverStub implements ResizeObserver {
     static last(): ResizeObserverStub | undefined {
         return this.instances[this.instances.length - 1];
     }
-    private cb: ROCallback;
+    private readonly cb: ROCallback;
     observedNode: Element | null = null;
     disconnected = false;
     constructor(cb: ROCallback) {

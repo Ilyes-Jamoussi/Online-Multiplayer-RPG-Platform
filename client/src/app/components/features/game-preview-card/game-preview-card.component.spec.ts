@@ -118,7 +118,7 @@ describe('GamePreviewCardComponent', () => {
         }
 
         let candidate = MapSize.SMALL as number;
-        while (labels[candidate as unknown as string as keyof typeof labels]) candidate += 1;
+        while (labels[candidate as keyof typeof labels]) candidate += 1;
         component.game.size = candidate as unknown as MapSize;
         expect(component.mapSizeLabel).toBe(`${candidate}x${candidate}`);
     });

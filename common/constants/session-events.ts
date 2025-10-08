@@ -20,8 +20,10 @@ export enum SessionEvents {
     LockSession = 'lockSession',
     UnlockSession = 'unlockSession',
 
-    // Game
-
     StartGameSession = 'startGameSession',
     GameSessionStarted = 'gameSessionStarted',
+
+    KickPlayer = 'kickPlayer',
+    PlayerKicked = 'playerKicked',
+    SessionEnded = 'sessionEnded',
 }

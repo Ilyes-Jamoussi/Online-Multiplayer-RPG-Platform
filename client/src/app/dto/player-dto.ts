@@ -7,9 +7,13 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { Avatar } from '@common/enums/avatar.enum';
 
 
-export interface StartGameSessionDto { 
-    gameSession: object;
+export interface PlayerDto { 
+    id: string;
+    name: string;
+    avatar: Avatar | null;
+    isAdmin: boolean;
 }
 

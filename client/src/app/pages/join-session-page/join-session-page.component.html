@@ -2,19 +2,21 @@
     <div class="join-session-content">
         <div class="join-card">
             <div class="field">
-                <h3>Code d'accès</h3>
+                <h3>Code d'accès de session</h3>
                 <app-ui-input
                     type="number"
                     placeholder="Entrez le code à 4 chiffres"
+                    [value]="sessionAccessCode"
                     [maxLength]="sessionAccessCodeLength"
-                    (valueChange)="onCodeChange($event)"
+                    (valueChange)="onSessionAccessCodeChange($event)"
                 ></app-ui-input>
             </div>
 
-            <app-ui-button 
-                type="button" 
+            <app-ui-button
+                type="button"
                 [fullWidth]="true"
-                [disabled]="accessCode.length !== sessionAccessCodeLength"
+                [disabled]="sessionAccessCode.length !== sessionAccessCodeLength"
+                (buttonClick)="onSubmit()"
             >
                 Rejoindre la partie
             </app-ui-button>

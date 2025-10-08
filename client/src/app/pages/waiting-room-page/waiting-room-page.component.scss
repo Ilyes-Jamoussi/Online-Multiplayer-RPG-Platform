@@ -1,257 +1,134 @@
-.waiting-room-container {
+.room-header {
     display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    height: 100vh;
-    background-color: #f8f9fa;
-    box-sizing: border-box;
-    overflow-x: hidden;
-
-    .page-header {
-        background-color: white;
-        padding: 1rem;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e9ecef;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 2rem;
-        width: 100%;
-        box-sizing: border-box;
-
-        h1 {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin: 0;
-            color: #1976d2;
-            font-size: 2rem;
-            font-weight: 500;
-            white-space: nowrap;
-
-            i {
-                font-size: 2.5rem;
-                color: #2196f3;
-            }
-        }
-
-        app-room-code {
-            flex-shrink: 0;
-        }
-    }
-
-    .room-sections {
-        display: flex;
-        gap: 1.5rem;
-        flex: 1;
-        min-height: 0;
-        width: 100%;
-        box-sizing: border-box;
-
-        .players-section {
-            flex: 1;
-            min-width: 300px;
-            background: white;
-            border-radius: 12px;
-            padding: 1rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e9ecef;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-            overflow: hidden;
-
-            app-players-list {
-                flex: 1;
-                min-height: 0;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-        }
-
-        .chat-section {
-            flex: 2;
-            min-width: 400px;
-            background: white;
-            border-radius: 12px;
-            padding: 1rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e9ecef;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-        }
-    }
-
-    .action-section {
-        background-color: white;
-        border-radius: 12px;
-        padding: 1rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e9ecef;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 1rem;
-        width: 100%;
-        box-sizing: border-box;
-
-        .lock-button {
-            height: 48px;
-            width: 48px;
-            padding: 0;
-            border: none;
-            border-radius: 8px;
-            background-color: #f0f0f0;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s;
-
-            &:hover {
-                background-color: #e0e0e0;
-            }
-
-            i {
-                color: #666;
-                font-size: 28px;
-            }
-        }
-
-        button:not(.lock-button) {
-            height: 48px;
-            padding: 0 2rem;
-            min-width: 200px;
-            border: none;
-            border-radius: 8px;
-            background-color: #4caf50;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-
-            &:hover:not(:disabled) {
-                background-color: #43a047;
-            }
-
-            &:disabled {
-                background-color: #ccc;
-                cursor: not-allowed;
-            }
-        }
-    }
-
-    .lock-message {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem;
-        margin-top: 1rem;
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        color: #666;
-        font-size: 0.9rem;
-
-        i {
-            color: #666;
-            font-size: 20px;
-        }
-    }
-
-    /* Ajustement pour les écrans plus petits */
-    @media (max-width: 768px) {
-        padding: 1rem;
-        height: auto;
-        min-height: 100vh;
-
-        .page-header {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 1rem;
-        }
-
-        .room-sections {
-            flex-direction: column;
-
-            .players-section,
-            .chat-section {
-                width: 100%;
-                min-width: unset;
-                flex: none;
-            }
-        }
-    }
+    justify-content: center;
+    padding: 1rem;
+    margin-bottom: 1rem;
 }
 
-.waiting-room-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.25rem;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-}
-
-.waiting-room-content {
+.room-sections {
     display: flex;
     gap: 1.5rem;
     flex: 1;
     min-height: 0;
-    height: calc(100vh - 200px);
-}
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 1rem;
 
-.waiting-room-footer {
-    display: flex;
-    justify-content: center;
-    padding: 1rem;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
+    .players-section {
+        flex: 1;
+        min-width: 300px;
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e9ecef;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        overflow: hidden;
 
-.start-game-button {
-    padding: 1rem 2.5rem;
-    border: none;
-    border-radius: 8px;
-    background-color: #2196f3;
-    color: white;
-    font-size: 1.2rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: 100%;
 
-    &:hover:not(:disabled) {
-        background-color: #1976d2;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(33, 150, 243, 0.4);
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.5rem 0;
+
+                h2 {
+                    margin: 0;
+                    font-size: 1.25rem;
+                    color: #333;
+                }
+
+                .player-count {
+                    background-color: #e9ecef;
+                    padding: 0.25rem 0.75rem;
+                    border-radius: 1rem;
+                    font-size: 0.9rem;
+                    color: #666;
+                    font-weight: 500;
+                }
+            }
+
+            .players-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1rem;
+                overflow-y: auto;
+                padding-right: 0.5rem;
+
+                &::-webkit-scrollbar {
+                    width: 6px;
+                }
+
+                &::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 3px;
+                }
+
+                &::-webkit-scrollbar-thumb {
+                    background: #ccc;
+                    border-radius: 3px;
+
+                    &:hover {
+                        background: #999;
+                    }
+                }
+            }
+
+            .lock-message {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.75rem;
+                margin-top: 1rem;
+                background-color: #f8f9fa;
+                border-radius: 8px;
+                color: #666;
+                font-size: 0.9rem;
+
+                i {
+                    color: #666;
+                    font-size: 20px;
+                }
+            }
+        }
     }
 
-    &:active:not(:disabled) {
-        transform: translateY(0);
-    }
-
-    &:disabled {
-        background-color: #bdbdbd;
-        cursor: not-allowed;
-        box-shadow: none;
+    .chat-section {
+        flex: 2;
+        min-width: 400px;
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e9ecef;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
     }
 }
 
 @media (max-width: 768px) {
-    .waiting-room-content {
+    .room-header {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .room-sections {
         flex-direction: column;
-        height: auto;
+        padding: 0 0.5rem;
+
+        .players-section,
+        .chat-section {
+            width: 100%;
+            min-width: unset;
+            flex: none;
+        }
     }
 }

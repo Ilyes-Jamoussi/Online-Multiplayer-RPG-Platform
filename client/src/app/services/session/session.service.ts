@@ -1,12 +1,16 @@
 import { computed, Injectable, Signal, signal } from '@angular/core';
-import { DEFAULT_SESSION, MAX_SESSION_PLAYERS, MIN_SESSION_PLAYERS } from '@app/constants/session.constants';
+import { Router } from '@angular/router';
+import { ROUTES } from '@app/constants/routes.constants';
+import { DEFAULT_SESSION, MIN_SESSION_PLAYERS } from '@app/constants/session.constants';
+import { CreateSessionDto } from '@app/dto/create-session-dto';
+import { JoinSessionDto } from '@app/dto/join-session-dto';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
-import { MapSize } from '@common/enums/map-size.enum';
-import { ItemContainer } from '@common/interfaces/item-container.interface';
-import { Tile } from '@common/interfaces/tile.interface';
-import { Player } from '@common/models/player.model';
-import { AvatarAssignment, Session } from '@common/models/session.model';
+import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
+import { Player } from '@common/models/player.interface';
+import { AvatarAssignment, Session } from '@common/models/session.interface';
+
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -14,6 +18,8 @@ export class SessionService {
 
     constructor(
         private readonly sessionSocketService: SessionSocketService,
+        private readonly notificationService: NotificationService,
+        private readonly router: Router,
     ) {
         this.initListeners();
     }
@@ -34,20 +40,16 @@ export class SessionService {
         return computed(() => this.session().avatarAssignments);
     }
 
+    get gameId(): Signal<string> {
+        return computed(() => this.session().gameId);
+    }
+
+    get maxPlayers(): Signal<number> {
+        return computed(() => this.session().maxPlayers);
+    }
+
     get isRoomLocked(): Signal<boolean> {
         return computed(() => this.session().isRoomLocked);
-    }
-
-    get map(): Signal<Tile[][]> {
-        return computed(() => this.session().gameInitializationData.map);
-    }
-
-    get itemContainers(): Signal<ItemContainer[]> {
-        return computed(() => this.session().gameInitializationData.itemContainers);
-    }
-
-    get mapSize(): Signal<MapSize> {
-        return computed(() => this.session().gameInitializationData.mapSize);
     }
 
     updateSession(partial: Partial<Session>): void {
@@ -60,12 +62,12 @@ export class SessionService {
 
     lock(): void {
         this.updateSession({ isRoomLocked: true });
-        this.sessionSocketService.lockSession({});
+        this.sessionSocketService.lockSession();
     }
 
     unlock(): void {
         this.updateSession({ isRoomLocked: false });
-        this.sessionSocketService.unlockSession({});
+        this.sessionSocketService.unlockSession();
     }
 
     canBeLocked(): boolean {
@@ -73,7 +75,7 @@ export class SessionService {
     }
 
     canBeUnlocked(): boolean {
-        return this.isRoomLocked() && this.players().length < MAX_SESSION_PLAYERS;
+        return this.isRoomLocked() && this.players().length < this.maxPlayers();
     }
 
     canStartGame(): boolean {
@@ -93,48 +95,76 @@ export class SessionService {
         this.updateSession({ avatarAssignments: updated });
     }
 
-    // loadGameInitializationData(gameId: string): Observable<void> {
-    //     return this.gameHttpService.getGameInitializationData(gameId).pipe(
-    //         tap((data) => {
-    //             this.updateSession({
-    //                 gameInitializationData: {
-    //                     mapSize: data.mapSize,
-    //                     map: data.map,
-    //                     itemContainers: data.itemContainers,
-    //                 },
-    //             });
-    //         }),
-    //         map(() => undefined),
-    //     );
-    // }
+    kickPlayer(playerId: string): void {
+        this.sessionSocketService.kickPlayer({ playerId });
+    }
 
-    // startGame(): void {
-    //     this.gameSessionService.initializeGame(this.session());
-    //     const gameSession = this.gameSessionService.gameSession();
-    //     this.sessionSocketService.startGameSession({ gameSession });
-    // }
+    leaveSession(): void {
+        this.sessionSocketService.leaveSession();
+        this.resetSession();
+        this.router.navigate([ROUTES.homePage]);
+    }
 
-    // private handleGameStart(data: StartGameSessionDto): void {
-    //     this.gameSessionService.setGameSession(data.gameSession);
-    //     this.router.navigate([ROUTES.gameSession]);
-    // }
+    initializeSessionWithGame(gameId: string, mapSize: MapSize): void {
+        const maxPlayers = MAP_SIZE_TO_MAX_PLAYERS[mapSize];
+        this.updateSession({ gameId, maxPlayers });
+    }
+
+    createSession(player: Player): void {
+        const session = this.session();
+        const dto: CreateSessionDto = {
+            gameId: session.gameId,
+            maxPlayers: session.maxPlayers,
+            player
+        };
+        this.sessionSocketService.createSession(dto);
+    }
+
+    joinSession(player: Player): void {
+        const session = this.session();
+        const dto: JoinSessionDto = {
+            sessionId: session.id,
+            player
+        };
+        this.sessionSocketService.joinSession(dto);
+    }
+
+    startGameSession(): void {
+        this.sessionSocketService.startGameSession();
+    }
 
     private initListeners(): void {
-        this.sessionSocketService.onSessionPlayersUpdated((data) => {
-            const currentSession = this._session();
-            const updatedPlayers = currentSession.players.map((player: any) => {
-                const sessionPlayer = data.players.find(sp => sp.id === player.id);
-                return sessionPlayer ? { ...player, name: sessionPlayer.name, isAdmin: sessionPlayer.isAdmin } : player;
-            });
-            this.updateSession({ players: updatedPlayers });
-        });
+        this.sessionSocketService.onSessionPlayersUpdated((data) => this.updateSession({ players: data.players }));
 
-        this.sessionSocketService.onAvatarAssignmentsUpdated((data) => {
-            this.updateSession({ avatarAssignments: data.avatarAssignments as any });
-        });
+        this.sessionSocketService.onSessionJoined((data) => this.updateSession({ 
+            gameId: data.gameId, 
+            maxPlayers: data.maxPlayers 
+        }));
+
+        this.sessionSocketService.onAvatarAssignmentsUpdated((data) => this.updateSession({ avatarAssignments: data.avatarAssignments }));
 
         this.sessionSocketService.onAvatarSelectionJoined((data) => this.updateSession({ id: data.playerId }));
 
-        // this.sessionSocketService.onGameSessionStarted((data) => this.handleGameStart(data));
+        this.sessionSocketService.onGameSessionStarted(() => {
+            this.router.navigate([ROUTES.gameSessionPage]);
+        });
+
+        this.sessionSocketService.onPlayerKicked((data) => {
+            this.resetSession();
+            this.notificationService.displayError({
+                title: 'Exclusion de la session',
+                message: data.message,
+                redirectRoute: ROUTES.homePage,
+            });
+        });
+
+        this.sessionSocketService.onSessionEnded((data) => {
+            this.resetSession();
+            this.notificationService.displayError({
+                title: 'Session terminée',
+                message: data.message,
+                redirectRoute: ROUTES.homePage,
+            });
+        });
     }
 }

@@ -1,8 +1,8 @@
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
 import { Avatar } from '@common/enums/avatar.enum';
-import { Player } from '@common/models/player.model';
-import { AvatarAssignment, Session } from '@common/models/session.model';
+import { Player } from '@common/models/player.interface';
+import { AvatarAssignment, Session } from '@common/models/session.interface';
 import { Injectable, Logger } from '@nestjs/common';
 import { ACCESS_CODE_LENGTH, ACCESS_CODE_PADDING, ACCESS_CODE_RANGE } from './session.service.constants';
 @Injectable()
@@ -24,18 +24,25 @@ export class SessionService {
     }
 
     joinSession(playerId: string, data: JoinSessionDto): void {
-        const player = {
+        const session = this.getSession(data.sessionId);
+        const uniqueName = this.generateUniqueName(data.player.name, session.players);
+
+        const player: Player = {
             ...data.player,
+            name: uniqueName,
             id: playerId,
-            startingPoint: { x: 0, y: 0 },
         };
-        this.getSession(data.sessionId).players.push(player);
+        session.players.push(player);
     }
 
     leaveSession(sessionId: string, playerId: string): void {
-        this.logger.log(`✅ Joueur ${playerId} retiré de la session ${sessionId}`);
         const session = this.getSession(sessionId);
         session.players = session.players.filter((player) => player.id !== playerId);
+    }
+
+    isSessionFull(sessionId: string): boolean {
+        const session = this.getSession(sessionId);
+        return session.players.length >= session.maxPlayers;
     }
 
     getPlayersCount(sessionId: string): number {
@@ -53,7 +60,6 @@ export class SessionService {
     }
 
     getPlayersSession(sessionId: string): Player[] {
-        this.logger.log(`[getPlayersSession] sessionId: ${sessionId}`);
         return this.getSession(sessionId).players;
     }
     getPlayersData(sessionId: string): { name: string; avatar: string }[] {
@@ -63,19 +69,9 @@ export class SessionService {
         }));
     }
 
-    debugSessions(): void {
-        this.logger.log('Current sessions content:');
-        for (const [sessionId, session] of this.sessions.entries()) {
-            this.logger.log(`Session ID: ${sessionId}`);
-            session.players.forEach((player) => {
-                this.logger.log(`   Player socket: ${player.id}, name: ${player.name}, avatar: ${player.avatar}, isAdmin: ${player.isAdmin}`);
-            });
-        }
-    }
-
-    chooseAvatar(sessionId: string, playerId: string, avatarId: string): void {
+    chooseAvatar(sessionId: string, playerId: string, avatar: Avatar): void {
         this.releaseAvatar(sessionId, playerId);
-        this.selectAvatar(sessionId, playerId, avatarId);
+        this.selectAvatar(sessionId, playerId, avatar);
     }
 
     getChosenAvatars(sessionId: string): AvatarAssignment[] {
@@ -97,7 +93,22 @@ export class SessionService {
         return this.getSession(sessionId).isRoomLocked;
     }
 
-    private getSession(sessionId: string): Session | undefined {
+    isAdmin(playerId: string): boolean {
+        for (const session of this.sessions.values()) {
+            const player = session.players.find(p => p.id === playerId);
+            if (player) {
+                return player.isAdmin || false;
+            }
+        }
+        return false;
+    }
+
+    kickPlayer(sessionId: string, playerId: string): void {
+        const session = this.getSession(sessionId);
+        session.players = session.players.filter((player) => player.id !== playerId);
+    }
+
+    getSession(sessionId: string): Session | undefined {
         return this.sessions.get(sessionId);
     }
 
@@ -119,6 +130,23 @@ export class SessionService {
         return this.sessions.has(sessionId);
     }
 
+    private buildChosenAvatars(adminId: string, adminAvatar: Avatar): AvatarAssignment[] {
+        return Object.values(Avatar).map((avatar) => {
+            const isChosen = avatar === adminAvatar;
+            return {
+                avatar,
+                chosenBy: isChosen ? adminId : null,
+            };
+        });
+    }
+
+    private selectAvatar(sessionId: string, playerId: string, avatar: Avatar): void {
+        const session = this.sessions.get(sessionId);
+
+        const selectedAvatar = session.avatarAssignments.find((a) => a.avatar === avatar);
+        selectedAvatar.chosenBy = playerId;
+    }
+
     private releaseAvatar(sessionId: string, playerId: string): void {
         const session = this.sessions.get(sessionId);
         if (!session) return;
@@ -131,39 +159,36 @@ export class SessionService {
         }
     }
 
-    private selectAvatar(sessionId: string, playerId: string, avatarName: string): void {
-        const session = this.sessions.get(sessionId);
+    private generateUniqueName(baseName: string, existingPlayers: Player[]): string {
+        const existingNames = existingPlayers.map(player => player.name);
 
-        const avatar = session.avatarAssignments.find((a) => a.avatar === avatarName);
-        avatar.chosenBy = playerId;
-    }
+        if (!existingNames.includes(baseName)) {
+            return baseName;
+        }
 
-    private buildChosenAvatars(adminId: string, adminAvatar: Avatar): AvatarAssignment[] {
-        return Object.values(Avatar).map((avatarName) => {
-            const isChosen = avatarName === adminAvatar;
-            return {
-                avatar: avatarName,
-                chosenBy: isChosen ? adminId : null,
-            };
-        });
+        let counter = 2;
+        let uniqueName = `${baseName}-${counter}`;
+
+        while (existingNames.includes(uniqueName)) {
+            counter++;
+            uniqueName = `${baseName}-${counter}`;
+        }
+
+        return uniqueName;
     }
 
     private buildSession(sessionId: string, adminId: string, data: CreateSessionDto): Session {
-        const adminPlayer = {
+        const adminPlayer: Player = {
             ...data.player,
             id: adminId,
-            startingPoint: { x: 0, y: 0 },
         };
         return {
             players: [adminPlayer],
             avatarAssignments: this.buildChosenAvatars(adminId, data.player.avatar),
             id: sessionId,
+            gameId: data.gameId,
+            maxPlayers: data.maxPlayers,
             isRoomLocked: false,
-            gameInitializationData: {
-                map: data.map,
-                itemContainers: data.itemContainers,
-                mapSize: data.mapSize,
-            },
         };
     }
 }

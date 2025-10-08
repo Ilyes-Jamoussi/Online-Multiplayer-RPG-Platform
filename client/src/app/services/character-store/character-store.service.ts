@@ -45,12 +45,12 @@ export class CharacterStoreService {
         this._avatar.set(avatar);
     }
 
-    setDice(attr: 'attack' | 'defense', value: Dice) {
+    setDice(attr: 'attack' | 'defense', value: Dice): void {
         if (attr === 'attack') this._dice.set({ attack: value, defense: value === Dice.D6 ? Dice.D4 : Dice.D6 });
         else this._dice.set({ attack: value === Dice.D6 ? Dice.D4 : Dice.D6, defense: value });
     }
 
-    generateRandom() {
+    generateRandom(): void {
         const names = ['Aragorn', 'Legolas', 'Gimli', 'Gandalf', 'Frodo', 'Samwise', 'Boromir', 'Faramir', 'Eowyn', 'Arwen', 'Galadriel', 'Elrond'];
         const avatars = Object.values(Avatar);
         this._name.set(names[Math.floor(Math.random() * names.length)]);

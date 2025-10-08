@@ -2,7 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { Player } from '@common/models/player.model';
+import { SessionService } from '@app/services/session/session.service';
+import { Player } from '@common/models/player.interface';
 
 @Component({
     selector: 'app-player-card',
@@ -17,6 +18,7 @@ export class PlayerCardComponent {
     constructor(
         private readonly playerService: PlayerService,
         private readonly assetsService: AssetsService,
+        private readonly sessionService: SessionService,
     ) {}
 
     get isMe(): boolean {
@@ -38,11 +40,11 @@ export class PlayerCardComponent {
         return this.playerService.isAdmin() && !this.isAdmin;
     }
 
-    kickPlayer() {
-        // this.sessionService.kickPlayer(this.player.id);
+    kickPlayer(): void {
+        this.sessionService.kickPlayer(this.player.id);
     }
 
-    getAvatarImage(): string {
+    get avatarImage(): string {
         return this.assetsService.getAvatarStaticImage(this.player.avatar);
     }
 }
