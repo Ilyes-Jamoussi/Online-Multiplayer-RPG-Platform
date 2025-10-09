@@ -13,7 +13,7 @@ import { Player } from '@common/models/player.interface';
     styleUrl: './player-card.component.scss',
 })
 export class PlayerCardComponent {
-    @Input() player!: Player;
+    @Input({required: true}) player: Player;
 
     constructor(
         private readonly playerService: PlayerService,
