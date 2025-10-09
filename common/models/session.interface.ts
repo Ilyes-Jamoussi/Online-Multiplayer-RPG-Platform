@@ -1,5 +1,5 @@
-import { Avatar } from '@common/enums/avatar.enum';
-import { Player } from '@common/models/player.interface';
+import { Avatar } from '../enums/avatar.enum';
+import { Player } from './player.interface';
 
 export interface AvatarAssignment {
     avatar: Avatar;

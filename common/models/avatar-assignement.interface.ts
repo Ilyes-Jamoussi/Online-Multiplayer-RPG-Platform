@@ -1,4 +1,4 @@
-import { Avatar } from '@common/enums/avatar.enum';
+import { Avatar } from '../enums/avatar.enum';
 
 export interface AvatarAssignment {
     avatar: Avatar;
