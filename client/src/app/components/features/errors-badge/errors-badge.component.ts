@@ -22,7 +22,6 @@ export class ErrorsBadgeComponent {
             return this.characterCreationCheckService.getErrorMessages();
         }
 
-        // Default case: 'game-editor'
         const problems = this.gameEditorCheckService.editorProblems();
         const messages: string[] = [];
         for (const issue of Object.values(GameEditorIssuesEnum)) {
@@ -32,8 +31,6 @@ export class ErrorsBadgeComponent {
             }
         }
         return messages;
-
-        return [];
     }
 
     get errorCount(): number {
