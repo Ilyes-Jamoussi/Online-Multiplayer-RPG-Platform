@@ -4,7 +4,7 @@ import { Avatar } from '@common/enums/avatar.enum';
 import { Player } from '@common/models/player.interface';
 import { AvatarAssignment, Session } from '@common/models/session.interface';
 import { Injectable, Logger } from '@nestjs/common';
-import { ACCESS_CODE_LENGTH, ACCESS_CODE_PADDING, ACCESS_CODE_RANGE } from './session.service.constants';
+import { ACCESS_CODE_LENGTH, ACCESS_CODE_PADDING, ACCESS_CODE_RANGE } from '@app/constants/session.constants';
 @Injectable()
 export class SessionService {
     private readonly sessions = new Map<string, Session>();

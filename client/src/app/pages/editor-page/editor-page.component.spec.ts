@@ -72,7 +72,7 @@ describe('EditorPageComponent', () => {
         });
 
         await TestBed.configureTestingModule({
-            imports: [GameEditorPageComponent],
+            imports: [EditorPageComponent],
             providers: [
                 provideHttpClient(),
                 provideHttpClientTesting(),
@@ -83,7 +83,7 @@ describe('EditorPageComponent', () => {
                 { provide: GameEditorInteractionsService, useValue: mockGameEditorInteractionsService },
             ],
         })
-            .overrideComponent(GameEditorPageComponent, {
+            .overrideComponent(EditorPageComponent, {
                 set: {
                     providers: [
                         { provide: GameEditorStoreService, useValue: mockGameEditorStoreService },
@@ -94,7 +94,7 @@ describe('EditorPageComponent', () => {
             })
             .compileComponents();
 
-        fixture = TestBed.createComponent(GameEditorPageComponent);
+        fixture = TestBed.createComponent(EditorPageComponent);
         component = fixture.componentInstance;
     });
 
@@ -283,7 +283,7 @@ describe('EditorPageComponent', () => {
         expect(mockNotificationService.displaySuccess).toHaveBeenCalledWith({
             title: 'Jeu sauvegardé',
             message: 'Votre jeu a été sauvegardé avec succès !',
-            redirectRoute: ROUTES.gameManagement,
+            redirectRoute: ROUTES.managementPage,
         });
     });
 

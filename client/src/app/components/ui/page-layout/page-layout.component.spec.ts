@@ -40,9 +40,9 @@ describe('UiPageLayoutComponent', () => {
     it('should emit menuItemClick with ROUTES value when onMenuItemClick is called', () => {
         spyOn(component.menuItemClick, 'emit');
 
-        component.onMenuItemClick(ROUTES.home);
+        component.onMenuItemClick(ROUTES.homePage);
 
-        expect(component.menuItemClick.emit).toHaveBeenCalledWith(ROUTES.home);
+        expect(component.menuItemClick.emit).toHaveBeenCalledWith(ROUTES.homePage);
     });
 
     it('classes getter should include uiPageLayout and reflect hasSidebar input', () => {

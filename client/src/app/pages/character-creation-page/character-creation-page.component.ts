@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AvatarGridComponent } from '@app/components/features/avatar-grid/avatar-grid.component';
@@ -42,11 +42,16 @@ export class CharacterCreationPageComponent {
         private readonly characterCreationCheckService: CharacterCreationCheckService,
         private readonly characterStoreService: CharacterStoreService,
         private readonly playerService: PlayerService,
-        private readonly sessionService: SessionService,
-        private readonly sessionSocketService: SessionSocketService,
-        private readonly notificationService: NotificationService,
-        private readonly router: Router
-    ) {}
+        private readonly sessionSocketService: SessionSocketService
+    ) {
+        this.sessionService = inject(SessionService);
+        this.notificationService = inject(NotificationService);
+        this.router = inject(Router);
+    }
+
+    private readonly sessionService = inject(SessionService);
+    private readonly notificationService = inject(NotificationService);
+    private readonly router = inject(Router);
 
     get isLifeBonusSelected(): boolean {
         return this.character.bonus === BonusType.Life;

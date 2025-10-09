@@ -1,3 +1,4 @@
+import { AVATAR_SELECTION_ROOM_PREFIX } from '@app/constants/session.constants';
 import { CreateSessionDto, SessionCreatedDto } from '@app/modules/session/dto/create-session.dto';
 import { AvatarSelectionJoinedDto, JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection';
 import { JoinSessionDto, SessionJoinedDto } from '@app/modules/session/dto/join-session.dto';
@@ -5,7 +6,6 @@ import { KickPlayerDto } from '@app/modules/session/dto/kick-player.dto';
 import { AvatarAssignmentsUpdatedDto, UpdateAvatarAssignmentsDto } from '@app/modules/session/dto/update-avatar-assignments.dto';
 import { SessionPlayersUpdatedDto } from '@app/modules/session/dto/update-session.dto';
 import { SessionService } from '@app/modules/session/services/session.service';
-import { AVATAR_SELECTION_ROOM_PREFIX } from '@app/modules/session/services/session.service.constants';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { SessionEvents } from '@common/constants/session-events';
 import { Player } from '@common/models/player.interface';
@@ -58,9 +58,9 @@ export class SessionGateway implements OnGatewayDisconnect {
         }
         const players = this.handleJoinSession(socket, data);
         const session = this.sessionService.getSession(data.sessionId);
-        socket.emit(SessionEvents.SessionJoined, successResponse<SessionJoinedDto>({ 
-            gameId: session.gameId, 
-            maxPlayers: session.maxPlayers 
+        socket.emit(SessionEvents.SessionJoined, successResponse<SessionJoinedDto>({
+            gameId: session.gameId,
+            maxPlayers: session.maxPlayers
         }));
         this.server.to(data.sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
     }

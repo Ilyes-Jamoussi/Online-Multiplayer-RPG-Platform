@@ -116,7 +116,7 @@ describe('NotificationDisplayComponent', () => {
         component.onAction();
 
         expect(notificationService.reset).toHaveBeenCalled();
-        expect(router.navigate).toHaveBeenCalledWith([ROUTES.home]);
+        expect(router.navigate).toHaveBeenCalledWith([ROUTES.homePage]);
     });
 
     it('should not display anything when notification is null', () => {

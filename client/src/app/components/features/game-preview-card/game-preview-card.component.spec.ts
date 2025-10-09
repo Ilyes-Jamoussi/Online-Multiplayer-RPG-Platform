@@ -49,7 +49,7 @@ describe('GamePreviewCardComponent', () => {
 
         component.onStartGame();
 
-        expect(component.startGame.emit).toHaveBeenCalledWith('1');
+        expect(component.startGame.emit).toHaveBeenCalledWith(component.game);
     });
 
     it('should emit deleteGame event with game id', () => {
@@ -118,7 +118,7 @@ describe('GamePreviewCardComponent', () => {
         }
 
         let candidate = MapSize.SMALL as number;
-        while (labels[candidate as keyof typeof labels]) candidate += 1;
+        while (labels[candidate.toString()]) candidate += 1;
         component.game.size = candidate as unknown as MapSize;
         expect(component.mapSizeLabel).toBe(`${candidate}x${candidate}`);
     });

@@ -3,10 +3,10 @@ import { CreateGameDto } from '@app/dto/create-game-dto';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { of } from 'rxjs';
 import { GameStoreService } from './game-store.service';
-import { GameMode } from '@common/enums/game-mode.enum';
 
 describe('GameStoreService', () => {
     let service: GameStoreService;

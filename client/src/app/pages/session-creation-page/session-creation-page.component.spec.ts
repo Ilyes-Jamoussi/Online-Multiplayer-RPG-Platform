@@ -70,7 +70,8 @@ describe('SessionCreationPageComponent', () => {
     });
 
     it('should navigate to character creation', () => {
-        component.onStartGame();
+        const mockGame = { id: 'test-game', name: 'Test Game' } as GamePreviewDto;
+        component.onStartGame(mockGame);
 
         expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.characterCreationPage]);
     });

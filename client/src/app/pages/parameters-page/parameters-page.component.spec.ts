@@ -109,7 +109,7 @@ describe('ParametersPageComponent', () => {
             description: '',
             visibility: false,
         });
-        expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.gameEditor, 'test-game-id']);
+        expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.editorPage, 'test-game-id']);
     });
 
     it('should handle create game error with error message', () => {

@@ -78,12 +78,12 @@ describe('ManagementPageComponent', () => {
 
     it('should navigate to game size selection on create new game', () => {
         component.onCreateNewGame();
-        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.gameParameters]);
+        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.parametersPage]);
     });
 
     it('should navigate to game editor on edit game', () => {
         component.onEditGame('id');
-        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.gameEditor, 'id']);
+        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.editorPage, 'id']);
     });
 
     it('should delete game', () => {
@@ -100,6 +100,6 @@ describe('ManagementPageComponent', () => {
 
     it('should navigate to home on go back', () => {
         component.onBack();
-        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.home]);
+        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.homePage]);
     });
 });
