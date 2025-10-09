@@ -16,40 +16,20 @@ import { AvatarAssignment, Session } from '@common/models/session.interface';
 export class SessionService {
     private readonly _session = signal<Session>({ ...DEFAULT_SESSION });
 
+    readonly session = this._session.asReadonly();
+    readonly id: Signal<string> = computed(() => this.session().id);
+    readonly players: Signal<Player[]> = computed(() => this.session().players);
+    readonly avatarAssignments: Signal<AvatarAssignment[]> = computed(() => this.session().avatarAssignments);
+    readonly gameId: Signal<string> = computed(() => this.session().gameId);
+    readonly maxPlayers: Signal<number> = computed(() => this.session().maxPlayers);
+    readonly isRoomLocked: Signal<boolean> = computed(() => this.session().isRoomLocked);
+
     constructor(
         private readonly sessionSocketService: SessionSocketService,
         private readonly notificationService: NotificationService,
         private readonly router: Router,
     ) {
         this.initListeners();
-    }
-
-    get session(): Signal<Session> {
-        return this._session.asReadonly();
-    }
-
-    get id(): Signal<string> {
-        return computed(() => this.session().id);
-    }
-
-    get players(): Signal<Player[]> {
-        return computed(() => this.session().players);
-    }
-
-    get avatarAssignments(): Signal<AvatarAssignment[]> {
-        return computed(() => this.session().avatarAssignments);
-    }
-
-    get gameId(): Signal<string> {
-        return computed(() => this.session().gameId);
-    }
-
-    get maxPlayers(): Signal<number> {
-        return computed(() => this.session().maxPlayers);
-    }
-
-    get isRoomLocked(): Signal<boolean> {
-        return computed(() => this.session().isRoomLocked);
     }
 
     updateSession(partial: Partial<Session>): void {

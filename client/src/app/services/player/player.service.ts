@@ -11,26 +11,15 @@ import { Player } from '@common/models/player.interface';
 export class PlayerService {
     private readonly _player: WritableSignal<Player> = signal<Player>({ ...DEFAULT_PLAYER });
 
+    readonly player: Signal<Player> = this._player.asReadonly();
+    readonly id: Signal<string> = computed(() => this.player().id);
+    readonly isAdmin: Signal<boolean> = computed(() => this.player().isAdmin);
+    readonly avatar: Signal<Avatar | null> = computed(() => this.player().avatar);
+
     constructor(
         private readonly sessionService: SessionService,
         private readonly sessionSocketService: SessionSocketService,
     ) {}
-
-    get player(): Signal<Player> {
-        return this._player.asReadonly();
-    }
-
-    get id(): Signal<string> {
-        return computed(() => this.player().id);
-    }
-
-    get isAdmin(): Signal<boolean> {
-        return computed(() => this.player().isAdmin);
-    }
-
-    get avatar(): Signal<Avatar | null> {
-        return computed(() => this.player().avatar);
-    }
 
     get sessionId(): string {
         return this.sessionService.session().id;
