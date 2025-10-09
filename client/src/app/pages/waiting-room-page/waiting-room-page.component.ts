@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, Signal } from '@angular/core';
-import { ChatComponent } from '@app/components/features/chat/chat.component';
 import { PlayerCardComponent } from '@app/components/features/player-card/player-card.component';
 import { RoomCodeComponent } from '@app/components/features/room-code/room-code.component';
 import { WaitingRoomActionsComponent } from '@app/components/features/waiting-room-actions/waiting-room-actions.component';
@@ -15,7 +14,6 @@ import { Player } from '@common/models/player.interface';
     imports: [
         CommonModule,
         UiPageLayoutComponent,
-        ChatComponent,
         PlayerCardComponent,
         RoomCodeComponent,
         WaitingRoomActionsComponent

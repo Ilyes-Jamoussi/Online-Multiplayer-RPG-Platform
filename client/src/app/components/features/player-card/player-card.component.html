@@ -7,8 +7,9 @@
         <div class="name-row">
             <h4 class="player-name">{{ player.name }}</h4>
             <span *ngIf="isAdmin" class="badge admin">👑</span>
+            <button *ngIf="showKickButton" class="kick-button" (click)="kickPlayer()" aria-label="Retirer ce joueur">
+                Expulser
+            </button>
         </div>
-
-        <button *ngIf="showKickButton" class="kick-button" (click)="kickPlayer()" aria-label="Retirer ce joueur">🗑️ Retirer</button>
     </div>
 </div>

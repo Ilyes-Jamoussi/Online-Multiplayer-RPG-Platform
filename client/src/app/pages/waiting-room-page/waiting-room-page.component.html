@@ -1,16 +1,14 @@
 <app-ui-page-layout [hasHeader]="true" [hasFooter]="true" [showBackButton]="true" headerTitle="Salle d'attente" (backClick)="onBack()">
-    <div class="room-header">
-        <app-room-code></app-room-code>
-    </div>
-
-    <div class="room-sections">
-        <div class="players-section">
-            <div class="players-list">
+    <div class="waiting-room-content">
+        <div class="left-panel">
+            <app-room-code></app-room-code>
+            
+            <div class="players-section">
                 <div class="header">
-                    <h2>Joueurs</h2>
+                    <h2><i class="material-icons">group</i> Joueurs</h2>
                     <span class="player-count">{{ players().length }} / {{ maxPlayers() }}</span>
                 </div>
-                <div class="players-grid">
+                <div class="players-list">
                     @for (player of players(); track player.id) {
                         <app-player-card [player]="player" />
                     }
@@ -23,8 +21,20 @@
                 }
             </div>
         </div>
-        <div class="chat-section">
-            <app-chat></app-chat>
+
+        <div class="right-panel">
+            <div class="chat-section">
+                <div class="header">
+                    <h2><i class="material-icons">chat</i> Chat</h2>
+                </div>
+                <div class="messages">
+                    <!-- Messages will go here -->
+                </div>
+                <div class="chat-input">
+                    <input type="text" placeholder="Tapez votre message...">
+                    <button>Envoyer</button>
+                </div>
+            </div>
         </div>
     </div>
 
