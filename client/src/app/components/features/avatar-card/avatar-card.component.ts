@@ -13,7 +13,7 @@ type AvatarSelectionState = 'available' | 'mine' | 'taken';
     styleUrls: ['./avatar-card.component.scss'],
 })
 export class AvatarCardComponent {
-    @Input() assignment!: AvatarAssignment;
+    @Input({required: true}) assignment: AvatarAssignment;
 
     constructor(
         private readonly playerService: PlayerService,

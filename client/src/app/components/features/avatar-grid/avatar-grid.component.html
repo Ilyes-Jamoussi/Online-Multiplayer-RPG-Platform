@@ -7,5 +7,7 @@
 </div>
 
 <div class="avatar-grid">
-    <app-avatar-card *ngFor="let assignment of assignments" [assignment]="assignment" />
+    @for (assignment of assignments; track $index) {
+        <app-avatar-card [assignment]="assignment" />
+    }
 </div>
