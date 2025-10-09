@@ -2,7 +2,6 @@
 
 <ng-template #adminActions>
     <div class="session-control-container">
-        <!-- 🔐 Bouton cadenas toggle -->
         <button
             class="lock-toggle-button"
             (click)="toggleLock()"
@@ -14,7 +13,6 @@
             </i>
         </button>
 
-        <!-- ▶️ Bouton démarrer la partie -->
         <button class="start-button" [disabled]="!canStartGame" (click)="startGame()">
             <i class="material-icons">play_arrow</i>
             Démarrer la partie
