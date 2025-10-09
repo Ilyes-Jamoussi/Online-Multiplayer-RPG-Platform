@@ -8,6 +8,7 @@ import { NUMBER_ALLOWED_CHARS_PATTERN, TEXT_ALLOWED_CHARS_PATTERN } from '@app/c
     standalone: true,
 })
 export class UiInputComponent {
+    @Input() disabled: boolean = false;
     @Input() placeholder: string = '';
     @Input() type: 'text' | 'number' | 'textarea' = 'text';
     @Input() maxLength?: number;
