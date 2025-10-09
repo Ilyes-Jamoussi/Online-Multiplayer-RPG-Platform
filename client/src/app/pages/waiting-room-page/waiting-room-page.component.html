@@ -31,8 +31,9 @@
                     <!-- Messages will go here -->
                 </div>
                 <div class="chat-input">
-                    <input type="text" placeholder="Tapez votre message...">
-                    <button>Envoyer</button>
+                    <!-- disable the input until its not fully implemented-->
+                    <app-ui-input type="text" placeholder="Tapez votre message..."></app-ui-input>
+                    <app-ui-button [disabled]="true">Envoyer</app-ui-button>
                 </div>
             </div>
         </div>
