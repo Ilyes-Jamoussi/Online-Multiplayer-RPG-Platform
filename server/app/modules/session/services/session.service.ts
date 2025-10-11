@@ -147,7 +147,7 @@ export class SessionService {
         selectedAvatar.chosenBy = playerId;
     }
 
-    private releaseAvatar(sessionId: string, playerId: string): void {
+    releaseAvatar(sessionId: string, playerId: string): void {
         const session = this.sessions.get(sessionId);
         if (!session) return;
 

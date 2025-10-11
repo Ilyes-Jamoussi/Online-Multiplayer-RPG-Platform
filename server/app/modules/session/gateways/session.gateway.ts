@@ -75,8 +75,22 @@ export class SessionGateway implements OnGatewayDisconnect {
         socket.join(this.getAvatarSelectionRoomId(data.sessionId));
 
         const avatarAssignments = this.sessionService.getChosenAvatars(data.sessionId);
-        socket.emit(SessionEvents.AvatarSelectionJoined, successResponse<AvatarSelectionJoinedDto>({ playerId: socket.id }));
+        socket.emit(SessionEvents.AvatarSelectionJoined, successResponse<AvatarSelectionJoinedDto>({ 
+            playerId: socket.id, 
+            sessionId: data.sessionId 
+        }));
         socket.emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
+    }
+
+    @SubscribeMessage(SessionEvents.LeaveAvatarSelection)
+    leaveAvatarSelection(socket: Socket, data: JoinAvatarSelectionDto): void {
+        const roomId = this.getAvatarSelectionRoomId(data.sessionId);
+        socket.leave(roomId);
+        
+        this.sessionService.releaseAvatar(data.sessionId, socket.id);
+        const avatarAssignments = this.sessionService.getChosenAvatars(data.sessionId);
+        
+        this.server.to(roomId).emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
     }
 
     @SubscribeMessage(SessionEvents.UpdateAvatarAssignments)
@@ -110,14 +124,14 @@ export class SessionGateway implements OnGatewayDisconnect {
             const kickedSocket = this.server.sockets.sockets.get(data.playerId);
             if (kickedSocket) {
                 kickedSocket.leave(sessionId);
-                kickedSocket.emit(SessionEvents.PlayerKicked, successResponse({ message: 'Vous avez été exclu de la session' }));
+                kickedSocket.emit(SessionEvents.SessionEnded, successResponse({ message: 'Vous avez été exclu de la session' }));
             }
 
             const players = this.sessionService.getPlayersSession(sessionId);
             this.server.to(sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
 
         } catch (error) {
-            socket.emit(SessionEvents.PlayerKicked, errorResponse(error.message));
+            socket.emit(SessionEvents.SessionEnded, errorResponse(error.message));
         }
     }
 

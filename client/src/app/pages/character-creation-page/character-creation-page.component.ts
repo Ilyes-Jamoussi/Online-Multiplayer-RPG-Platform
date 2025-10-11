@@ -1,22 +1,17 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { AvatarGridComponent } from '@app/components/features/avatar-grid/avatar-grid.component';
 import { ErrorsBadgeComponent } from '@app/components/features/errors-badge/errors-badge.component';
 import { StatsBarComponent } from '@app/components/features/stats-bar/stats-bar.component';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiInputComponent } from '@app/components/ui/input/input.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
-import { ROUTES } from '@app/constants/routes.constants';
 import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@app/constants/validation.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { CharacterStoreService } from '@app/services/character-store/character-store.service';
-import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
-import { SessionService } from '@app/services/session/session.service';
 import { BonusType } from '@common/enums/character-creation.enum';
 import { Dice } from '@common/enums/dice.enum';
 
@@ -26,7 +21,7 @@ import { Dice } from '@common/enums/dice.enum';
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
     imports: [
-        CommonModule, FormsModule, UiButtonComponent, UiInputComponent, 
+        CommonModule, FormsModule, UiButtonComponent, UiInputComponent,
         UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent, AvatarGridComponent
     ],
     providers: [CharacterCreationCheckService, CharacterStoreService],
@@ -42,16 +37,9 @@ export class CharacterCreationPageComponent {
         private readonly characterCreationCheckService: CharacterCreationCheckService,
         private readonly characterStoreService: CharacterStoreService,
         private readonly playerService: PlayerService,
-        private readonly sessionSocketService: SessionSocketService
-    ) {
-        this.sessionService = inject(SessionService);
-        this.notificationService = inject(NotificationService);
-        this.router = inject(Router);
-    }
+        private readonly location: Location,
+    ) {}
 
-    private readonly sessionService = inject(SessionService);
-    private readonly notificationService = inject(NotificationService);
-    private readonly router = inject(Router);
 
     get isLifeBonusSelected(): boolean {
         return this.character.bonus === BonusType.Life;
@@ -116,37 +104,15 @@ export class CharacterCreationPageComponent {
     onSubmit(): void {
         this.playerService.updatePlayer({ name: this.character.name });
 
-        if (this.isPlayerAdmin) {
-            this.handleAdminCreation();
-        } else {
-            this.handlePlayerJoin();
-        }
+        if (this.isPlayerAdmin)
+            this.playerService.createSession();
+        else
+            this.playerService.joinSession();
     }
 
-    private handleAdminCreation(): void {
-        this.sessionService.createSession(this.playerService.player());
-
-        this.sessionSocketService.onSessionCreated((data) => {
-            this.sessionService.updateSession({ id: data.sessionId });
-            this.playerService.updatePlayer({ id: data.playerId });
-            this.router.navigate([ROUTES.waitingRoomPage]);
-        });
-
-        this.sessionSocketService.onSessionCreatedError((error) => {
-            this.notificationService.displayError({ title: 'Erreur de création', message: error });
-        });
-    }
-
-    private handlePlayerJoin(): void {
-        this.sessionService.joinSession(this.playerService.player());
-
-        this.sessionSocketService.onSessionJoined(() => {
-            this.router.navigate([ROUTES.waitingRoomPage]);
-        });
-
-        this.sessionSocketService.onSessionJoinError((msg) => {
-            this.notificationService.displayError({ title: 'Erreur', message: msg });
-        });
+    onBack(): void {
+        this.playerService.leaveAvatarSelection();
+        this.location.back();
     }
 }
 

@@ -10,4 +10,8 @@ export class AvatarSelectionJoinedDto {
     @ApiProperty()
     @IsString()
     readonly playerId: string;
+
+    @ApiProperty()
+    @IsString()
+    readonly sessionId: string;
 }

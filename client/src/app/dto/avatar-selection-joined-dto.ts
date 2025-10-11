@@ -11,5 +11,6 @@
 
 export interface AvatarSelectionJoinedDto { 
     playerId: string;
+    sessionId: string;
 }
 

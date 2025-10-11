@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { PlayerService } from '@app/services/player/player.service';
-import { SessionService } from '@app/services/session/session.service';
 
 @Component({
   selector: 'app-game-session-page',
@@ -11,12 +10,10 @@ import { SessionService } from '@app/services/session/session.service';
 })
 export class GameSessionPageComponent {
   constructor(
-    private readonly sessionService: SessionService,
-    private readonly playerService: PlayerService
+    private readonly playerService: PlayerService,
   ) {}
 
   onBack(): void {
-    this.sessionService.leaveSession();
-    this.playerService.resetPlayer();
+    this.playerService.leaveSession();
   }
 }

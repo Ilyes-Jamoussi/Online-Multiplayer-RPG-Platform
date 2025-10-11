@@ -6,7 +6,6 @@ import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layou
 import { ROUTES } from '@app/constants/routes.constants';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
-import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 
 @Component({
@@ -20,7 +19,6 @@ export class SessionCreationPageComponent implements OnInit {
     constructor(
         private readonly router: Router,
         private readonly gameStoreService: GameStoreService,
-        private readonly playerService: PlayerService,
         private readonly sessionService: SessionService,
     ) {}
 
@@ -34,8 +32,6 @@ export class SessionCreationPageComponent implements OnInit {
 
     onStartGame(game: GamePreviewDto): void {
         this.sessionService.initializeSessionWithGame(game.id, game.size);
-        this.playerService.resetPlayer();
-        this.router.navigate([ROUTES.characterCreationPage]);
     }
 
     onBack(): void {

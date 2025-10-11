@@ -10,6 +10,7 @@ export enum SessionEvents {
 
     JoinAvatarSelection = 'joinAvatarSelection',
     AvatarSelectionJoined = 'avatarSelectionJoined',
+    LeaveAvatarSelection = 'leaveAvatarSelection',
 
     UpdateAvatarAssignments = 'updateAvatarAssignments',
     AvatarAssignmentsUpdated = 'avatarAssignmentsUpdated',
@@ -24,6 +25,5 @@ export enum SessionEvents {
     GameSessionStarted = 'gameSessionStarted',
 
     KickPlayer = 'kickPlayer',
-    PlayerKicked = 'playerKicked',
     SessionEnded = 'sessionEnded',
 }

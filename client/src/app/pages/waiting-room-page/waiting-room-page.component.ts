@@ -27,8 +27,8 @@ import { Player } from '@common/models/player.interface';
 })
 export class WaitingRoomPageComponent {
     constructor(
+        private readonly playerService: PlayerService,
         private readonly sessionService: SessionService,
-        private readonly playerService: PlayerService
     ) {}
 
     get players(): Signal<Player[]> {
@@ -48,7 +48,6 @@ export class WaitingRoomPageComponent {
     // }
 
     onBack(): void {
-        this.sessionService.leaveSession();
-        this.playerService.resetPlayer();
+        this.playerService.leaveSession();
     }
 }
