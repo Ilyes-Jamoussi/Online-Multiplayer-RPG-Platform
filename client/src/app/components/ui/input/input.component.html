@@ -10,6 +10,7 @@
     ></textarea>
     } @else {
     <input
+        [disabled]="disabled"
         [class.full-width]="fullWidth"
         [placeholder]="placeholder"
         [value]="value"

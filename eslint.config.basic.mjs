@@ -52,6 +52,7 @@ export default (tsParser, tsPlugin) => [
             'radix': 'error',
             'use-isnan': 'error',
             'guard-for-in': 'error',
+            'no-inline-comments': 'warn',
         },
     },
     {
@@ -80,6 +81,7 @@ export default (tsParser, tsPlugin) => [
             ],
             '@typescript-eslint/array-type': ['error', { default: 'array' }],
             '@typescript-eslint/explicit-member-accessibility': ['error', { accessibility: 'no-public' }],
+            '@typescript-eslint/prefer-readonly': 'warn',
             '@typescript-eslint/no-explicit-any': ['error', { fixToUnknown: true }],
             '@typescript-eslint/no-inferrable-types': [
                 'error',
@@ -118,7 +120,9 @@ export default (tsParser, tsPlugin) => [
                     "format": ["PascalCase"],
                     "selector": "enumMember"
                 }
-            ]
+            ],
+            // "@typescript-eslint/explicit-function-return-type": "warn",
+            "@typescript-eslint/no-unnecessary-type-assertion": "warn"
         },
     },
     {

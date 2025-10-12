@@ -16,8 +16,8 @@ class StoreStub implements Partial<GameEditorStoreService> {
     private _tileSizePx = 32;
     private _size = MapSize.MEDIUM;
 
-    private tilesSig = signal<GameEditorTileDto[]>([]);
-    private placedObjectsSig = signal<GameEditorPlaceableDto[]>([]);
+    private readonly tilesSig = signal<GameEditorTileDto[]>([]);
+    private readonly placedObjectsSig = signal<GameEditorPlaceableDto[]>([]);
 
     get tileSizePx() {
         return this._tileSizePx;

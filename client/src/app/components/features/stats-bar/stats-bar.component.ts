@@ -13,7 +13,7 @@ export class StatsBarComponent {
     @Input() maxValue: number = 10;
     @Input() color: string = '#4a90e2';
     @Input() showDice: boolean = false;
-    @Input() diceType: string = '';
+    @Input() dice: string = '';
 
     get segments(): boolean[] {
         return Array.from({ length: this.maxValue }, (_, i) => i < this.value);

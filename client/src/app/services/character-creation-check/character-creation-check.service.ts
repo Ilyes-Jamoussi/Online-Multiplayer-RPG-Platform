@@ -1,18 +1,24 @@
 import { computed, Injectable } from '@angular/core';
 import { NAME_MIN_LENGTH, CHARACTER_NAME_MAX_LENGTH, WHITESPACE_PATTERN } from '@app/constants/validation.constants';
 import { CharacterStoreService } from '@app/services/character-store/character-store.service';
+import { PlayerService } from '@app/services/player/player.service';
+import { Avatar } from '@common/enums/avatar.enum';
 
 @Injectable()
 export class CharacterCreationCheckService {
-    constructor(private readonly characterStoreService: CharacterStoreService) {}
+    constructor(
+        private readonly characterStoreService: CharacterStoreService,
+        private readonly playerService: PlayerService
+    ) {}
 
     private readonly validationProblems = computed(() => {
         const character = this.characterStoreService.character();
         const name = character.name.trim();
+        const selectedAvatar = this.playerService.avatar();
 
         return {
             nameValidation: this.checkNameValidation(name),
-            avatarSelection: this.checkAvatarSelection(character.avatar),
+            avatarSelection: this.checkAvatarSelection(selectedAvatar),
             bonusSelection: this.checkBonusSelection(character.bonus),
         };
     });
@@ -53,7 +59,7 @@ export class CharacterCreationCheckService {
         return { hasIssue: false };
     }
 
-    private checkAvatarSelection(avatar: number | null): { hasIssue: boolean; message?: string } {
+    private checkAvatarSelection(avatar: Avatar | null): { hasIssue: boolean; message?: string } {
         if (avatar === null) {
             return {
                 hasIssue: true,

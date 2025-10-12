@@ -82,7 +82,7 @@ export class GameEditorStoreService {
 
         for (const o of objs) {
             const kind = PlaceableKind[o.kind];
-            if (!inv[kind]) {
+            if (!(kind in inv)) {
                 inv[kind] = { kind, total: 0, remaining: 0, disabled: false, image: this.assetsService.getPlaceableImage(kind) };
             }
             inv[kind].total += 1;
@@ -92,7 +92,7 @@ export class GameEditorStoreService {
         }
 
         for (const k of PLACEABLE_ORDER) {
-            if (!inv[k]) {
+            if (!(k in inv)) {
                 inv[k] = { total: 0, remaining: 0, kind: k, disabled: true, image: this.assetsService.getPlaceableImage(k) };
             } else {
                 inv[k].disabled = inv[k].remaining === 0;
@@ -163,7 +163,7 @@ export class GameEditorStoreService {
                     this._objects.set(game.objects);
                     this._size.set(game.size);
                     this._gridPreviewUrl.set(game.gridPreviewUrl);
-                    this._mode.set(game.mode as GameMode);
+                    this._mode.set(game.mode);
                 }),
                 catchError(() => {
                     return of(null);
@@ -250,7 +250,7 @@ export class GameEditorStoreService {
         this._size.set(initial.size);
         this._name.set(initial.name);
         this._description.set(initial.description);
-        this._mode.set(initial.mode as GameMode);
+        this._mode.set(initial.mode);
         this._gridPreviewUrl.set(initial.gridPreviewUrl);
     }
 

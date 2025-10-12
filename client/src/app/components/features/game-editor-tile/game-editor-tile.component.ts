@@ -30,7 +30,7 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         super(el, zone);
     }
 
-    get tileImage() {
+    get tileImage(): string {
         return this.assetService.getTileImage(TileKind[this.tile.kind], this.tile.open);
     }
 
@@ -50,11 +50,11 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         return tool?.type === ToolType.TileBrushTool;
     }
 
-    onRightClick(event: MouseEvent) {
+    onRightClick(event: MouseEvent): void {
         event.preventDefault();
     }
 
-    onMouseDown(event: MouseEvent) {
+    onMouseDown(event: MouseEvent): void {
         event.preventDefault();
         if (event.button === 0) {
             this.gameEditorInteractionsService.dragStart(this.tile.x, this.tile.y, 'left');
@@ -69,7 +69,7 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         }
     }
 
-    onMouseUp(event: MouseEvent) {
+    onMouseUp(event: MouseEvent): void {
         event.preventDefault();
         this.gameEditorInteractionsService.dragEnd();
         if (event.button === 2) {
@@ -77,12 +77,12 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         }
     }
 
-    onMouseOver(event: MouseEvent) {
+    onMouseOver(event: MouseEvent): void {
         event.preventDefault();
         this.gameEditorInteractionsService.tilePaint(this.tile.x, this.tile.y);
     }
 
-    onTileDragOver(evt: DragEvent) {
+    onTileDragOver(evt: DragEvent): void {
         if (!this.gameEditorInteractionsService.hasMime(evt)) return;
         if (!evt.dataTransfer) return;
         evt.preventDefault();
@@ -90,11 +90,11 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         this.gameEditorInteractionsService.resolveHoveredTiles(evt, this.tile.x, this.tile.y);
     }
 
-    onTileDragEnter(evt: DragEvent) {
+    onTileDragEnter(evt: DragEvent): void {
         if (!this.gameEditorInteractionsService.hasMime(evt)) return;
     }
 
-    onTileDrop(evt: DragEvent) {
+    onTileDrop(evt: DragEvent): void {
         if (!this.gameEditorInteractionsService.hasMime(evt)) return;
         if (!evt.dataTransfer) return;
         evt.preventDefault();
