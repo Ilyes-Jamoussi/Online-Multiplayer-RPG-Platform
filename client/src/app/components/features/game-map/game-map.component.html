@@ -16,7 +16,6 @@
                     'grid-template-rows': 'repeat(' + size + ', 1fr)'
                 }"
             >
-                <!-- Affichage des tuiles avec vraies images -->
                 @for (tile of tiles; track tile.x + '-' + tile.y) {
                     <div 
                         class="map-tile"
@@ -31,7 +30,6 @@
                 }
             </div>
             
-            <!-- Overlay pour les objets avec vraies dimensions -->
             <div
                 class="objects-overlay"
                 [ngStyle]="{

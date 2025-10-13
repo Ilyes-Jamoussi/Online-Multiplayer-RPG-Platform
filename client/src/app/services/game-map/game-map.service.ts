@@ -67,7 +67,6 @@ export class GameMapService {
                         return;
                     }
 
-                    // Recréer la carte à partir des données sauvegardées
                     this.buildGameMap(gameData);
                     this._loading.set(false);
                 }),
@@ -81,23 +80,18 @@ export class GameMapService {
     }
 
     private buildGameMap(gameData: GameEditorDto): void {
-        // Stocker les informations de base
         this._name.set(gameData.name);
         this._description.set(gameData.description);
         this._size.set(gameData.size);
         this._mode.set(gameData.mode);
 
-        // Recréer les tuiles avec leurs positions
         const tiles: GameEditorTileDto[] = gameData.tiles.map(tile => ({
             ...tile,
-            // Ajouter des propriétés par défaut si nécessaires
             open: tile.open ?? false
         }));
 
-        // Recréer les objets placés
         const objects: GameEditorPlaceableDto[] = gameData.objects.map(obj => ({
             ...obj,
-            // Ajouter des propriétés par défaut si nécessaires
             placed: obj.placed ?? true
         }));
 

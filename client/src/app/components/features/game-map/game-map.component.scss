@@ -31,7 +31,6 @@
 
 .map-grid {
     display: grid;
-    /* Pas de gap pour coller les tuiles comme dans l'éditeur */
     aspect-ratio: 1;
 }
 
@@ -72,7 +71,6 @@
     align-items: center;
     justify-content: center;
     z-index: 10;
-    /* Pas de margin pour que les objets 2x2 s'affichent correctement */
 }
 
 .object-image {
