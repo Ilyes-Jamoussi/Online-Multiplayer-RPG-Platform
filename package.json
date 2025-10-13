@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "eslint-plugin-no-comments": "^1.1.10"
+  }
+}

@@ -1,19 +1,53 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { ROUTES } from '@app/constants/routes.constants';
+import { CommonModule } from '@angular/common';
+import { Component, Signal } from '@angular/core';
+import { PlayerCardComponent } from '@app/components/features/player-card/player-card.component';
+import { RoomCodeComponent } from '@app/components/features/room-code/room-code.component';
+import { WaitingRoomActionsComponent } from '@app/components/features/waiting-room-actions/waiting-room-actions.component';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
+import { UiInputComponent } from '@app/components/ui/input/input.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
+import { PlayerService } from '@app/services/player/player.service';
+import { SessionService } from '@app/services/session/session.service';
+import { Player } from '@common/models/player.interface';
 
 @Component({
     selector: 'app-waiting-room-page',
+    standalone: true,
+    imports: [
+        CommonModule,
+        UiButtonComponent,
+        UiInputComponent,
+        UiPageLayoutComponent,
+        PlayerCardComponent,
+        RoomCodeComponent,
+        WaitingRoomActionsComponent
+    ],
     templateUrl: './waiting-room-page.component.html',
     styleUrls: ['./waiting-room-page.component.scss'],
-    imports: [UiPageLayoutComponent, UiButtonComponent],
 })
 export class WaitingRoomPageComponent {
-    constructor(private readonly router: Router) {}
+    constructor(
+        private readonly playerService: PlayerService,
+        private readonly sessionService: SessionService,
+    ) {}
+
+    get players(): Signal<Player[]> {
+        return this.sessionService.players;
+    }
+
+    get isRoomLocked(): Signal<boolean> {
+        return this.sessionService.isRoomLocked;
+    }
+
+    get maxPlayers(): Signal<number> {
+        return this.sessionService.maxPlayers;
+    }
+
+    // onStartGame(): void {
+    //     this.sessionService.startGameSession();
+    // }
 
     onBack(): void {
-        this.router.navigate([ROUTES.home]);
+        this.playerService.leaveSession();
     }
 }

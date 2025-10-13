@@ -85,7 +85,7 @@ export class GameEditorCheckService {
         const problem: GameEditorIssue = { hasIssue: false };
         const inventory = this.gameEditorStoreService.inventory();
         const startItem = inventory.START;
-        if (startItem && startItem.remaining > 0) {
+        if (startItem.remaining > 0) {
             problem.message = 'Tous les points de départ doivent être placés sur la carte.';
             problem.hasIssue = true;
         }
@@ -97,7 +97,7 @@ export class GameEditorCheckService {
         if (this.gameEditorStoreService.mode() === GameMode.CTF) {
             const inventory = this.gameEditorStoreService.inventory();
             const flagItem = inventory.FLAG;
-            if (flagItem && flagItem.remaining > 0) {
+            if (flagItem.remaining > 0) {
                 problem.message = 'Tous les drapeaux doivent être placés sur la carte.';
                 problem.hasIssue = true;
             }
@@ -165,7 +165,7 @@ export class GameEditorCheckService {
     private buildTileKindGrid(tiles: GameEditorTileDto[], size: number): TileKind[][] {
         const grid: TileKind[][] = Array.from({ length: size }, () => Array<TileKind>(size).fill(TileKind.WALL));
         for (const t of tiles) {
-            grid[t.y][t.x] = t.kind as TileKind;
+            grid[t.y][t.x] = t.kind;
         }
         return grid;
     }

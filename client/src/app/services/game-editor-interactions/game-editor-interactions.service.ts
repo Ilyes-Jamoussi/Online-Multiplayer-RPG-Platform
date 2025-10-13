@@ -148,7 +148,7 @@ export class GameEditorInteractionsService {
 
     resolveDropAction(evt: DragEvent): void {
         this._hoveredTiles.set([]);
-        if (evt && evt.dataTransfer) {
+        if (evt.dataTransfer) {
             const mime = Object.values(PlaceableMime).find((m) => evt.dataTransfer?.types.includes(m));
             if (!mime) return;
             const data = evt.dataTransfer.getData(mime);
@@ -190,7 +190,7 @@ export class GameEditorInteractionsService {
                 const tile = this.store.getTileAt(tx, ty);
                 if (!tile) return false;
 
-                const tk = tile.kind as TileKind;
+                const tk = tile.kind;
 
                 if (tk === TileKind.WALL || tk === TileKind.DOOR || tk === TileKind.TELEPORT) return false;
 

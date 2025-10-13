@@ -43,13 +43,13 @@ describe('HomePageComponent', () => {
     it('navigateToCreateGame should call router.navigate with ROUTES.gameSessionCreation', () => {
         component.navigateToCreateGame();
         expect(routerStub.navigate).toHaveBeenCalledTimes(1);
-        expect(routerStub.navigate).toHaveBeenCalledWith([ROUTES.gameSessionCreation]);
+        expect(routerStub.navigate).toHaveBeenCalledWith([ROUTES.sessionCreationPage]);
     });
 
     it('navigateToAdminPage should call router.navigate with ROUTES.gameManagement', () => {
         component.navigateToAdminPage();
         expect(routerStub.navigate).toHaveBeenCalledTimes(1);
-        expect(routerStub.navigate).toHaveBeenCalledWith([ROUTES.gameManagement]);
+        expect(routerStub.navigate).toHaveBeenCalledWith([ROUTES.managementPage]);
     });
 
     it('template should render team number and team members in footer', () => {

@@ -1,13 +1,42 @@
-<app-ui-page-layout [hasHeader]="true" headerTitle="Salle d'attente" [showBackButton]="false">
+<app-ui-page-layout [hasHeader]="true" [hasFooter]="true" [showBackButton]="true" headerTitle="Salle d'attente" (backClick)="onBack()">
     <div class="waiting-room-content">
-        <div class="waiting-card">
-            <h2>Partie en préparation</h2>
-            <p>Votre personnage a été créé avec succès !</p>
-            <p>La fonctionnalité multijoueurs sera disponible au Sprint 2.</p>
+        <div class="left-panel">
+            <app-room-code></app-room-code>
 
-            <div class="actions">
-                <app-ui-button (buttonClick)="onBack()"> ← Retour à l'accueil </app-ui-button>
+            <div class="players-section">
+                <div class="header">
+                    <h2><i class="material-icons">group</i> Joueurs</h2>
+                    <span class="player-count">{{ players().length }} / {{ maxPlayers() }}</span>
+                </div>
+                <div class="players-list">
+                    @for (player of players(); track player.id) {
+                    <app-player-card [player]="player" />
+                    }
+                </div>
+                @if (isRoomLocked()) {
+                <div class="lock-message">
+                    <i class="material-icons">lock</i>
+                    La salle est verrouillée, plus aucun joueur ne peut la rejoindre
+                </div>
+                }
             </div>
         </div>
+
+        <div class="right-panel">
+            <div class="chat-section">
+                <div class="header">
+                    <h2><i class="material-icons">chat</i> Chat</h2>
+                </div>
+                <div class="messages"></div>
+                <div class="chat-input">
+                    <app-ui-input [disabled]="true" type="text" placeholder="Tapez votre message..."></app-ui-input>
+                    <app-ui-button [disabled]="true">Envoyer</app-ui-button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div slot="footer">
+        <app-waiting-room-actions></app-waiting-room-actions>
     </div>
 </app-ui-page-layout>

@@ -29,18 +29,18 @@ export class GameEditorInventoryComponent {
         return this.gameEditorStoreService.inventory();
     }
 
-    get tileSizePx() {
+    get tileSizePx(): number {
         return this.gameEditorStoreService.tileSizePx;
     }
 
     @HostBinding('style.--tile-px')
-    get tileVar() {
+    get tileVar(): number {
         return this.gameEditorStoreService.tileSizePx;
     }
 
     onDragStart(evt: DragEvent, kind: PlaceableKind, disabled: boolean): void {
         if (disabled || !evt.dataTransfer) {
-            evt?.preventDefault();
+            evt.preventDefault();
             return;
         }
 
@@ -57,28 +57,28 @@ export class GameEditorInventoryComponent {
         );
     }
 
-    onDragEnd() {
+    onDragEnd(): void {
         this.gameEditorInteractionsService.revertToPreviousTool();
     }
 
-    onSlotDragOver(evt: DragEvent, kind: PlaceableKind) {
+    onSlotDragOver(evt: DragEvent, kind: PlaceableKind): void {
         evt.preventDefault();
         evt.stopPropagation();
         if (!evt.dataTransfer) return;
         if (!this.slotAccepts(evt, kind)) return;
         evt.dataTransfer.dropEffect = 'move';
     }
-    onSlotDragEnter(evt: DragEvent, kind: PlaceableKind) {
+    onSlotDragEnter(evt: DragEvent, kind: PlaceableKind): void {
         evt.preventDefault();
         evt.stopPropagation();
         if (!this.slotAccepts(evt, kind)) return;
         this.dragOver = kind;
     }
-    onSlotDragLeave() {
+    onSlotDragLeave(): void {
         this.dragOver = '';
     }
 
-    onSlotDrop(evt: DragEvent, kind: PlaceableKind) {
+    onSlotDrop(evt: DragEvent, kind: PlaceableKind): void {
         evt.preventDefault();
         evt.stopPropagation();
         if (!evt.dataTransfer) return;

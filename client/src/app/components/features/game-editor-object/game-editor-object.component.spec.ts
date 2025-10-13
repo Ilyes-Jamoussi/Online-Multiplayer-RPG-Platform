@@ -41,7 +41,7 @@ function makeDragEvent(init?: DragEvtInit): DragEvent {
         dataTransfer: init?.dataTransfer ?? null,
         offsetX: init?.offsetX ?? 0,
         offsetY: init?.offsetY ?? 0,
-        button: (init?.button ?? 0) as number,
+        button: init?.button ?? 0,
     } as unknown as DragEvent;
     return evt;
 }
@@ -56,7 +56,7 @@ function makeMouseEvent(init?: MouseEvtInit): MouseEvent {
     const evt = {
         preventDefault: init?.preventDefault ?? NOOP,
         stopPropagation: init?.stopPropagation ?? NOOP,
-        button: (init?.button ?? 0) as number,
+        button: init?.button ?? 0,
     } as unknown as MouseEvent;
     return evt;
 }
@@ -139,13 +139,13 @@ describe('GameEditorObjectComponent', () => {
     it('should set grid-column based on footprint and x', () => {
         fixture.detectChanges();
         const host = fixture.nativeElement as HTMLElement;
-        expect((host.style as CSSStyleDeclaration).gridColumn).toBe('4 / span 2');
+        expect(host.style.gridColumn).toBe('4 / span 2');
     });
 
     it('should set grid-row based on footprint and y', () => {
         fixture.detectChanges();
         const host = fixture.nativeElement as HTMLElement;
-        expect((host.style as CSSStyleDeclaration).gridRow).toBe('5 / span 2');
+        expect(host.style.gridRow).toBe('5 / span 2');
     });
 
     it('should reflect CSS variable --tile-px from tileSize input', () => {

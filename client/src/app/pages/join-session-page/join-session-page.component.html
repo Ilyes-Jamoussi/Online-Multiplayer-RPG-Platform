@@ -1,0 +1,25 @@
+<app-ui-page-layout [hasHeader]="true" [hasFooter]="false" headerTitle="Rejoindre une partie" [showBackButton]="true">
+    <div class="join-session-content">
+        <div class="join-card">
+            <div class="field">
+                <h3>Code d'accès de session</h3>
+                <app-ui-input
+                    type="number"
+                    placeholder="Entrez le code à 4 chiffres"
+                    [value]="sessionAccessCode"
+                    [maxLength]="sessionAccessCodeLength"
+                    (valueChange)="onSessionAccessCodeChange($event)"
+                ></app-ui-input>
+            </div>
+
+            <app-ui-button
+                type="button"
+                [fullWidth]="true"
+                [disabled]="sessionAccessCode.length !== sessionAccessCodeLength"
+                (buttonClick)="onSubmit()"
+            >
+                Rejoindre la partie
+            </app-ui-button>
+        </div>
+    </div>
+</app-ui-page-layout>

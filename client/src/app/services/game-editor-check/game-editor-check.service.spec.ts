@@ -16,11 +16,11 @@ export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
     private _description = 'Test Description';
     private _tileSizePx = 32;
 
-    private tilesSig = signal<GameEditorTileDto[]>([]);
-    private objectsSig = signal<GameEditorPlaceableDto[]>([]);
-    private sizeSig = signal<MapSize>(MapSize.MEDIUM);
-    private modeSig = signal<GameMode>(GameMode.CLASSIC);
-    private inventorySig = signal<Inventory>({} as Inventory);
+    private readonly tilesSig = signal<GameEditorTileDto[]>([]);
+    private readonly objectsSig = signal<GameEditorPlaceableDto[]>([]);
+    private readonly sizeSig = signal<MapSize>(MapSize.MEDIUM);
+    private readonly modeSig = signal<GameMode>(GameMode.CLASSIC);
+    private readonly inventorySig = signal<Inventory>({} as Inventory);
 
     get name() {
         return this._name;
@@ -178,7 +178,7 @@ describe('GameEditorCheckService', () => {
         });
 
         it('should detect missing terrain coverage', () => {
-            const variability = 3; // 3 = mod base pour variabilité
+            const variability = 3;
             const tiles: GameEditorTileDto[] = [];
             for (let y = 0; y < SIZE; y++) {
                 for (let x = 0; x < SIZE; x++) {

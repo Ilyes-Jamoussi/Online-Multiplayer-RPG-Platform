@@ -1,14 +1,17 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { CHARACTER_AVATARS_COUNT, CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
-import { BonusType, DiceType } from '@common/enums/character-creation.enum';
+import { CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
+import { Avatar } from '@common/enums/avatar.enum';
+import { BonusType } from '@common/enums/character-creation.enum';
+import { Dice } from '@common/enums/dice.enum';
+
 import { Character } from '@common/interfaces/character.interface';
 
 @Injectable()
 export class CharacterStoreService {
     private readonly _name = signal('');
-    private readonly _avatar = signal<number | null>(null);
+    private readonly _avatar = signal<Avatar | null>(null);
     private readonly _bonus = signal<BonusType | null>(null);
-    private readonly _dice = signal<{ attack: DiceType; defense: DiceType }>({ attack: DiceType.D4, defense: DiceType.D6 });
+    private readonly _dice = signal<{ attack: Dice; defense: Dice }>({ attack: Dice.D4, defense: Dice.D6 });
 
     private readonly _attributes = computed(() => {
         const bonus = this._bonus();
@@ -26,8 +29,8 @@ export class CharacterStoreService {
         attributes: this._attributes(),
     }));
 
-    get avatars(): number[] {
-        return Array.from({ length: CHARACTER_AVATARS_COUNT }, (_, i) => i);
+    get avatars(): Avatar[] {
+        return Object.values(Avatar);
     }
 
     set name(name: string) {
@@ -38,21 +41,22 @@ export class CharacterStoreService {
         this._bonus.set(bonus);
     }
 
-    set avatar(avatar: number | null) {
-        if (avatar !== null && avatar >= 0 && avatar < CHARACTER_AVATARS_COUNT) this._avatar.set(avatar);
+    set avatar(avatar: Avatar | null) {
+        this._avatar.set(avatar);
     }
 
-    setDice(attr: 'attack' | 'defense', value: DiceType) {
-        if (attr === 'attack') this._dice.set({ attack: value, defense: value === DiceType.D6 ? DiceType.D4 : DiceType.D6 });
-        else this._dice.set({ attack: value === DiceType.D6 ? DiceType.D4 : DiceType.D6, defense: value });
+    setDice(attr: 'attack' | 'defense', value: Dice): void {
+        if (attr === 'attack') this._dice.set({ attack: value, defense: value === Dice.D6 ? Dice.D4 : Dice.D6 });
+        else this._dice.set({ attack: value === Dice.D6 ? Dice.D4 : Dice.D6, defense: value });
     }
 
-    generateRandom() {
+    generateRandom(): void {
         const names = ['Aragorn', 'Legolas', 'Gimli', 'Gandalf', 'Frodo', 'Samwise', 'Boromir', 'Faramir', 'Eowyn', 'Arwen', 'Galadriel', 'Elrond'];
+        const avatars = Object.values(Avatar);
         this._name.set(names[Math.floor(Math.random() * names.length)]);
-        this._avatar.set(Math.floor(Math.random() * CHARACTER_AVATARS_COUNT));
+        this._avatar.set(avatars[Math.floor(Math.random() * avatars.length)]);
         const RANDOM_THRESHOLD = 0.5;
         this._bonus.set(Math.random() < RANDOM_THRESHOLD ? BonusType.Life : BonusType.Speed);
-        this.setDice(Math.random() < RANDOM_THRESHOLD ? 'attack' : 'defense', DiceType.D6);
+        this.setDice(Math.random() < RANDOM_THRESHOLD ? 'attack' : 'defense', Dice.D6);
     }
 }

@@ -1,0 +1,38 @@
+.avatar-animated {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #4a90e2;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+
+    img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        image-rendering: pixelated;
+    }
+
+    .selected-empty {
+        font-size: 2rem;
+        color: #4a90e2;
+    }
+}
+
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+    padding: 10px 4px 4px;
+}
+
+@media (max-width: 600px) {
+    .avatar-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
