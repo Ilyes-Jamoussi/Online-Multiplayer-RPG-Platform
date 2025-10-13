@@ -21,7 +21,7 @@ export class GameStoreService {
     ) {}
 
     async getGames(): Promise<GamePreviewDto[]> {
-        const games = await this.gameModel.find({ draft: false }, getProjection('displayGameDto')).sort({ createdAt: -1 }).lean();
+        const games = await this.gameModel.find({ draft: false }, getProjection('displayGameDto')).sort({ createdAt: 1 }).lean();
         return games.map((game) => this.gameDtoMapper.toGamePreviewDto(game));
     }
 
