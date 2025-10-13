@@ -14,32 +14,21 @@ export interface CreateInGameSessionInput {
     startPoints: StartPoint[];
     turnOrderIndex: number[];
     activePlayerId: string;
+    players: InGamePlayer[];
 }
 
 @Injectable()
 export class InGameSessionService {
     private readonly sessions = new Map<string, InGameSession>();
 
-    /** CRUD de base */
     create(input: CreateInGameSessionInput): InGameSession {
-        const players: InGamePlayer[] = input.baseSession.players.map((p) => ({
-            id: p.id,
-            name: p.name,
-            avatar: p.avatar,
-            isAdmin: p.isAdmin,
-            currentPosition: { x: 0, y: 0 },
-            isActive: p.id === input.activePlayerId,
-            joinedInGameSession: false,
-            startPointId: '',
-        }));
-
         const session: InGameSession = {
             id: this.buildGameSessionId(input.baseSession.id, input.baseSession.gameId),
             sessionId: input.baseSession.id,
             gameId: input.baseSession.gameId,
             mapSize: input.mapSize,
             mode: input.mode,
-            players,
+            players: input.players,
             startPoints: input.startPoints,
             turnOrderIndex: input.turnOrderIndex,
             currentTurnIndex: 0,
@@ -59,7 +48,6 @@ export class InGameSessionService {
         this.sessions.set(session.sessionId, session);
     }
 
-    /** Gestion joueurs */
     join(sessionId: string, playerId: string): InGameSession {
         const s = this.mustGet(sessionId);
         const updated = {
@@ -99,7 +87,6 @@ export class InGameSessionService {
         return updated;
     }
 
-    /** Utilitaires de tour (sans timer, pur état) */
     getCurrentPlayer(sessionId: string) {
         const s = this.mustGet(sessionId);
         const idx = s.turnOrderIndex[s.currentTurnIndex];
@@ -125,7 +112,6 @@ export class InGameSessionService {
         return updated;
     }
 
-    /** Assignation du startPoint à un joueur (mutation pure de session) */
     setPlayerStartPoint(sessionId: string, playerId: string, startPointId: string): InGameSession {
         const s = this.mustGet(sessionId);
 
@@ -140,7 +126,6 @@ export class InGameSessionService {
         return updated;
     }
 
-    /** Helpers */
     private mustGet(sessionId: string): InGameSession {
         const s = this.sessions.get(sessionId);
         if (!s) throw new Error('In game session not found');
