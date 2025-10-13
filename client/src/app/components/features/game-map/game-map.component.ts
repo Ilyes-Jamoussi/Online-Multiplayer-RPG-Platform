@@ -33,16 +33,23 @@ export class GameMapComponent implements OnInit {
         return this.gameMapService.size();
     }
 
-    get loading() {
-        return this.gameMapService.loading();
-    }
-
-    get error() {
-        return this.gameMapService.error();
-    }
-
     get placedObjectsCount(): number {
         return this.objects.filter((obj: any) => obj.placed).length;
+    }
+
+    get gridStyle() {
+        return {
+            gridTemplateColumns: `repeat(${this.size}, 1fr)`,
+            gridTemplateRows: `repeat(${this.size}, 1fr)`
+        };
+    }
+
+    getObjectStyle(obj: any) {
+        const footprint = this.getObjectFootprint(obj.kind);
+        return {
+            gridColumn: `${obj.x + 1} / span ${footprint}`,
+            gridRow: `${obj.y + 1} / span ${footprint}`
+        };
     }
 
     ngOnInit(): void {

@@ -7,16 +7,12 @@
     padding: 1rem;
 }
 
-.loading, .error, .empty {
+.empty {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 200px;
     font-size: 1.2rem;
-}
-
-.error {
-    color: #ff4444;
 }
 
 .map-container {
@@ -42,11 +38,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    
-    &:hover {
-        opacity: 0.8;
-    }
 }
 
 .tile-image {

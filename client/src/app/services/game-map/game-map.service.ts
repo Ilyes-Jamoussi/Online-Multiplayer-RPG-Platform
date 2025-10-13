@@ -3,22 +3,33 @@ import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { catchError, of, take, tap } from 'rxjs';
 
 @Injectable()
 export class GameMapService {
-    private readonly _tiles = signal<GameEditorTileDto[]>([]);
-    private readonly _objects = signal<GameEditorPlaceableDto[]>([]);
-    private readonly _size = signal<MapSize>(MapSize.MEDIUM);
-    private readonly _name = signal<string>('');
-    private readonly _description = signal<string>('');
-    private readonly _mode = signal<GameMode>(GameMode.CLASSIC);
-    private readonly _loading = signal<boolean>(false);
-    private readonly _error = signal<boolean>(false);
+    private readonly initialState = {
+        tiles: [],
+        objects: [],
+        size: MapSize.MEDIUM,
+        name: '',
+        description: '',
+        mode: GameMode.CLASSIC
+    };
 
-    constructor(private readonly gameHttpService: GameHttpService) {}
+    private readonly _tiles = signal<GameEditorTileDto[]>(this.initialState.tiles);
+    private readonly _objects = signal<GameEditorPlaceableDto[]>(this.initialState.objects);
+    private readonly _size = signal<MapSize>(this.initialState.size);
+    private readonly _name = signal<string>(this.initialState.name);
+    private readonly _description = signal<string>(this.initialState.description);
+    private readonly _mode = signal<GameMode>(this.initialState.mode);
+
+    constructor(
+        private readonly gameHttpService: GameHttpService,
+        private readonly notificationService: NotificationService
+    ) {}
 
     get tiles() {
         return this._tiles.asReadonly();
@@ -44,35 +55,20 @@ export class GameMapService {
         return this._mode.asReadonly();
     }
 
-    get loading() {
-        return this._loading.asReadonly();
-    }
-
-    get error() {
-        return this._error.asReadonly();
-    }
-
     loadGameMap(gameId: string): void {
-        this._loading.set(true);
-        this._error.set(false);
-
         this.gameHttpService
             .getGameEditorById(gameId)
             .pipe(
                 take(1),
                 tap((gameData) => {
                     if (!gameData) {
-                        this._error.set(true);
-                        this._loading.set(false);
+                        this.notificationService.displayError({ title: 'Erreur', message: 'Impossible de charger la carte' });
                         return;
                     }
-
                     this.buildGameMap(gameData);
-                    this._loading.set(false);
                 }),
                 catchError(() => {
-                    this._error.set(true);
-                    this._loading.set(false);
+                    this.notificationService.displayError({ title: 'Erreur', message: 'Erreur lors du chargement de la carte' });
                     return of(null);
                 }),
             )
@@ -100,13 +96,9 @@ export class GameMapService {
     }
 
     reset(): void {
-        this._tiles.set([]);
-        this._objects.set([]);
-        this._size.set(MapSize.MEDIUM);
-        this._name.set('');
-        this._description.set('');
-        this._mode.set(GameMode.CLASSIC);
-        this._loading.set(false);
-        this._error.set(false);
+        Object.entries(this.initialState).forEach(([key, value]) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (this as any)[`_${key}`].set(value);
+        });
     }
 }

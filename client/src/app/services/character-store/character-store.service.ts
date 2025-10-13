@@ -1,62 +1,65 @@
-import { computed, Injectable, signal } from '@angular/core';
-import { CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
+import { Injectable, signal } from '@angular/core';
+import { CHARACTER_BASE } from '@app/constants/character.constants';
 import { Avatar } from '@common/enums/avatar.enum';
-import { BonusType } from '@common/enums/character-creation.enum';
 import { Dice } from '@common/enums/dice.enum';
-
 import { Character } from '@common/interfaces/character.interface';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class CharacterStoreService {
-    private readonly _name = signal('');
-    private readonly _avatar = signal<Avatar | null>(null);
-    private readonly _bonus = signal<BonusType | null>(null);
-    private readonly _dice = signal<{ attack: Dice; defense: Dice }>({ attack: Dice.D4, defense: Dice.D6 });
+    private readonly _character = signal<Character | null>(null);
 
-    private readonly _attributes = computed(() => {
-        const bonus = this._bonus();
-        return {
-            life: bonus === BonusType.Life ? CHARACTER_BASE + CHARACTER_PLUS : CHARACTER_BASE,
-            speed: bonus === BonusType.Speed ? CHARACTER_BASE + CHARACTER_PLUS : CHARACTER_BASE,
-        };
-    });
-
-    readonly character = computed<Character>(() => ({
-        name: this._name(),
-        avatar: this._avatar(),
-        bonus: this._bonus(),
-        diceAssignment: this._dice(),
-        attributes: this._attributes(),
-    }));
-
-    get avatars(): Avatar[] {
-        return Object.values(Avatar);
+    get character() {
+        return this._character.asReadonly();
     }
 
-    set name(name: string) {
-        this._name.set(name);
+    setCharacter(character: Character): void {
+        this._character.set(character);
     }
 
-    set bonus(bonus: BonusType | null) {
-        this._bonus.set(bonus);
+    clearCharacter(): void {
+        this._character.set(null);
     }
 
-    set avatar(avatar: Avatar | null) {
-        this._avatar.set(avatar);
+    // Getters pour les stats calculées
+    get lifePoints(): number {
+        const char = this._character();
+        if (!char) return CHARACTER_BASE;
+        return char.attributes.life;
     }
 
-    setDice(attr: 'attack' | 'defense', value: Dice): void {
-        if (attr === 'attack') this._dice.set({ attack: value, defense: value === Dice.D6 ? Dice.D4 : Dice.D6 });
-        else this._dice.set({ attack: value === Dice.D6 ? Dice.D4 : Dice.D6, defense: value });
+    get speedPoints(): number {
+        const char = this._character();
+        if (!char) return CHARACTER_BASE;
+        return char.attributes.speed;
     }
 
-    generateRandom(): void {
-        const names = ['Aragorn', 'Legolas', 'Gimli', 'Gandalf', 'Frodo', 'Samwise', 'Boromir', 'Faramir', 'Eowyn', 'Arwen', 'Galadriel', 'Elrond'];
-        const avatars = Object.values(Avatar);
-        this._name.set(names[Math.floor(Math.random() * names.length)]);
-        this._avatar.set(avatars[Math.floor(Math.random() * avatars.length)]);
-        const RANDOM_THRESHOLD = 0.5;
-        this._bonus.set(Math.random() < RANDOM_THRESHOLD ? BonusType.Life : BonusType.Speed);
-        this.setDice(Math.random() < RANDOM_THRESHOLD ? 'attack' : 'defense', Dice.D6);
+    get attackPoints(): number {
+        return CHARACTER_BASE;
+    }
+
+    get defensePoints(): number {
+        return CHARACTER_BASE;
+    }
+
+    get attackDice(): Dice {
+        const char = this._character();
+        return char?.diceAssignment.attack || Dice.D4;
+    }
+
+    get defenseDice(): Dice {
+        const char = this._character();
+        return char?.diceAssignment.defense || Dice.D6;
+    }
+
+    get name(): string {
+        const char = this._character();
+        return char?.name || 'Joueur';
+    }
+
+    get avatar(): Avatar | null {
+        const char = this._character();
+        return char?.avatar || null;
     }
 }

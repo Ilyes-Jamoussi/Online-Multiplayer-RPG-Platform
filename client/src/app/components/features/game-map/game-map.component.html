@@ -1,30 +1,19 @@
 <div class="game-map-wrapper">
-    @if (loading) {
-        <div class="loading">
-            <p>Chargement de la carte...</p>
-        </div>
-    } @else if (error) {
-        <div class="error">
-            <p>Erreur lors du chargement de la carte</p>
-        </div>
-    } @else if (tiles.length > 0) {
+    @if (tiles.length > 0) {
         <div class="map-container">
             <div
                 class="map-grid"
-                [ngStyle]="{
-                    'grid-template-columns': 'repeat(' + size + ', 1fr)',
-                    'grid-template-rows': 'repeat(' + size + ', 1fr)'
-                }"
+                [ngStyle]="gridStyle"
             >
                 @for (tile of tiles; track tile.x + '-' + tile.y) {
                     <div 
                         class="map-tile"
-                        [title]="tile.kind + ' (' + tile.x + ',' + tile.y + ')'"
                     >
                         <img 
                             [src]="getTileImage(tile.kind, tile.open)" 
                             [alt]="tile.kind"
                             class="tile-image"
+                            draggable="false"
                         />
                     </div>
                 }
@@ -32,25 +21,19 @@
             
             <div
                 class="objects-overlay"
-                [ngStyle]="{
-                    'grid-template-columns': 'repeat(' + size + ', 1fr)',
-                    'grid-template-rows': 'repeat(' + size + ', 1fr)'
-                }"
+                [ngStyle]="gridStyle"
             >
                 @for (obj of objects; track obj.id) {
                     @if (obj.placed) {
                         <div 
                             class="map-object"
-                            [ngStyle]="{
-                                'grid-column': (obj.x + 1) + ' / span ' + getObjectFootprint(obj.kind),
-                                'grid-row': (obj.y + 1) + ' / span ' + getObjectFootprint(obj.kind)
-                            }"
-                            [title]="obj.kind + ' (' + obj.x + ',' + obj.y + ')'"
+                            [ngStyle]="getObjectStyle(obj)"
                         >
                             <img 
                                 [src]="getPlaceableImage(obj.kind)" 
                                 [alt]="obj.kind"
                                 class="object-image"
+                                draggable="false"
                             />
                         </div>
                     }

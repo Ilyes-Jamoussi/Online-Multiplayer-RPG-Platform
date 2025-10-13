@@ -9,4 +9,12 @@
             </div>
         }
     </div>
+    
+    @if (gameId()) {
+        <app-player-info></app-player-info>
+        <app-game-info 
+            [mapSize]="mapSize" 
+            [activePlayer]="activePlayer">
+        </app-game-info>
+    }
 </app-ui-page-layout>

@@ -1,0 +1,18 @@
+<div class="game-info-panel">
+    <h3>Informations de partie</h3>
+    
+    <div class="info-item">
+        <span class="label">Taille de la carte :</span>
+        <span class="value">{{ mapSizeLabel }}</span>
+    </div>
+    
+    <div class="info-item">
+        <span class="label">Joueurs :</span>
+        <span class="value">{{ playerCount }}</span>
+    </div>
+    
+    <div class="info-item">
+        <span class="label">Joueur actif :</span>
+        <span class="value active-player">{{ activePlayer || 'Aucun' }}</span>
+    </div>
+</div>

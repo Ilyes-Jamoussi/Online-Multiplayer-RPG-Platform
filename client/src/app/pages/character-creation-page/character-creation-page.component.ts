@@ -12,6 +12,7 @@ import { ROUTES } from '@app/constants/routes.constants';
 import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@app/constants/validation.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
+import { CharacterEditorService } from '@app/services/character-editor/character-editor.service';
 import { CharacterStoreService } from '@app/services/character-store/character-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -19,6 +20,7 @@ import { SessionSocketService } from '@app/services/session-socket/session-socke
 import { SessionService } from '@app/services/session/session.service';
 import { BonusType } from '@common/enums/character-creation.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { Player } from '@common/models/player.interface';
 
 @Component({
     standalone: true,
@@ -29,7 +31,7 @@ import { Dice } from '@common/enums/dice.enum';
         CommonModule, FormsModule, UiButtonComponent, UiInputComponent, 
         UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent, AvatarGridComponent
     ],
-    providers: [CharacterCreationCheckService, CharacterStoreService],
+    providers: [CharacterCreationCheckService, CharacterEditorService],
 })
 export class CharacterCreationPageComponent {
     readonly dice = Dice;
@@ -40,15 +42,17 @@ export class CharacterCreationPageComponent {
     constructor(
         private readonly assetsService: AssetsService,
         private readonly characterCreationCheckService: CharacterCreationCheckService,
-        private readonly characterStoreService: CharacterStoreService,
+        private readonly characterEditorService: CharacterEditorService,
         private readonly playerService: PlayerService,
         private readonly sessionSocketService: SessionSocketService
     ) {
+        this.characterStoreService = inject(CharacterStoreService);
         this.sessionService = inject(SessionService);
         this.notificationService = inject(NotificationService);
         this.router = inject(Router);
     }
 
+    private readonly characterStoreService = inject(CharacterStoreService);
     private readonly sessionService = inject(SessionService);
     private readonly notificationService = inject(NotificationService);
     private readonly router = inject(Router);
@@ -78,7 +82,7 @@ export class CharacterCreationPageComponent {
     }
 
     get character() {
-        return this.characterStoreService.character();
+        return this.characterEditorService.character();
     }
 
     get canCreateCharacter(): boolean {
@@ -94,27 +98,34 @@ export class CharacterCreationPageComponent {
     }
 
     onNameChange(v: string): void {
-        this.characterStoreService.name = v;
+        this.characterEditorService.name = v;
     }
 
     onBonusChange(bonus: BonusType): void {
-        this.characterStoreService.bonus = bonus;
+        this.characterEditorService.bonus = bonus;
     }
 
     onAttackDiceChange(value: Dice): void {
-        this.characterStoreService.setDice('attack', value);
+        this.characterEditorService.setDice('attack', value);
     }
 
     onDefenseDiceChange(value: Dice): void {
-        this.characterStoreService.setDice('defense', value);
+        this.characterEditorService.setDice('defense', value);
     }
 
     generateRandomCharacter(): void {
-        this.characterStoreService.generateRandom();
+        this.characterEditorService.generateRandom();
     }
 
     onSubmit(): void {
-        this.playerService.updatePlayer({ name: this.character.name });
+        this.characterStoreService.setCharacter(this.character);
+        
+        const playerUpdate: Partial<Player> = { name: this.character.name };
+        if (this.character.avatar) {
+            playerUpdate.avatar = this.character.avatar;
+        }
+        
+        this.playerService.updatePlayer(playerUpdate);
 
         if (this.isPlayerAdmin) {
             this.handleAdminCreation();
