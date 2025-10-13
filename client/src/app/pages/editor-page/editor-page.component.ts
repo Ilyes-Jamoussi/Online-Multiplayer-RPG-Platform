@@ -10,14 +10,12 @@ import { GameEditorToolbarComponent } from '@app/components/features/game-editor
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiInputComponent } from '@app/components/ui/input/input.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
-import { ROUTES } from '@app/constants/routes.constants';
 import { DESCRIPTION_MAX_LENGTH, GAME_NAME_MAX_LENGTH } from '@app/constants/validation.constants';
 import { TileSizeProbeDirective } from '@app/directives/tile-size/tile-size-probe.directive';
 import { ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { NotificationService } from '@app/services/notification/notification.service';
 import { distinctUntilChanged, filter, map, Subject, takeUntil, tap } from 'rxjs';
 
 @Component({
@@ -54,7 +52,6 @@ export class EditorPageComponent implements OnInit, OnDestroy {
         private readonly gameEditorStoreService: GameEditorStoreService,
         private readonly gameEditorCheckService: GameEditorCheckService,
         private readonly gameEditorInteractionsService: GameEditorInteractionsService,
-        private readonly notificationService: NotificationService,
     ) {}
 
     readonly gameId$ = this.activatedRoute.paramMap.pipe(
@@ -150,26 +147,7 @@ export class EditorPageComponent implements OnInit, OnDestroy {
 
     async onSave(): Promise<void> {
         if (this.gameEditorCheckService.canSave()) {
-            try {
-                await this.gameEditorStoreService.saveGame(this.gridWrapper.nativeElement);
-                this.notificationService.displaySuccess({
-                    title: 'Jeu sauvegardé',
-                    message: 'Votre jeu a été sauvegardé avec succès !',
-                    redirectRoute: ROUTES.managementPage,
-                });
-            } catch (error) {
-                if (error instanceof Error) {
-                    this.notificationService.displayError({
-                        title: 'Erreur lors de la sauvegarde',
-                        message: error.message,
-                    });
-                }
-            }
-        } else {
-            this.notificationService.displayError({
-                title: 'Problèmes dans la carte',
-                message: 'Veuillez corriger les problèmes dans la carte avant de sauvegarder.',
-            });
+            await this.gameEditorStoreService.saveGame(this.gridWrapper.nativeElement);
         }
     }
 }
