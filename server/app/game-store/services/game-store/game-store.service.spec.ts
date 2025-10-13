@@ -87,7 +87,7 @@ describe('GameStoreService', () => {
             const result = await service.getGames();
 
             expect(gameModel.find).toHaveBeenCalledWith({ draft: false }, getProjection('displayGameDto'));
-            expect(mockQuery.sort).toHaveBeenCalledWith({ createdAt: -1 });
+            expect(mockQuery.sort).toHaveBeenCalledWith({ createdAt: 1 });
             expect(mockQuery.lean).toHaveBeenCalled();
 
             expect(result).toHaveLength(1);
