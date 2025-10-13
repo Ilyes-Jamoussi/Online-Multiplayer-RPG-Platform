@@ -114,6 +114,10 @@ export class SessionService {
     }
 
     private initListeners(): void {
+        this.sessionSocketService.onSessionCreated((data) => this.updateSession({ 
+            id: data.sessionId 
+        }));
+
         this.sessionSocketService.onSessionPlayersUpdated((data) => this.updateSession({ players: data.players }));
 
         this.sessionSocketService.onSessionJoined((data) => this.updateSession({ 

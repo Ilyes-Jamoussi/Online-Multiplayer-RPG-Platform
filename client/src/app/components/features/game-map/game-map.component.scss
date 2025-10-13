@@ -1,0 +1,94 @@
+.game-map-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+}
+
+.loading, .error, .empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    font-size: 1.2rem;
+}
+
+.error {
+    color: #ff4444;
+}
+
+.map-container {
+    position: relative;
+    display: inline-block;
+    border: 2px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 80vh;
+    max-height: 80vh;
+}
+
+.map-grid {
+    display: grid;
+    /* Pas de gap pour coller les tuiles comme dans l'éditeur */
+    aspect-ratio: 1;
+}
+
+.map-tile {
+    width: 100%;
+    height: 100%;
+    min-width: 20px;
+    min-height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    
+    &:hover {
+        opacity: 0.8;
+    }
+}
+
+.tile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.objects-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    pointer-events: none;
+}
+
+.map-object {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    /* Pas de margin pour que les objets 2x2 s'affichent correctement */
+}
+
+.object-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+.map-info {
+    margin-top: 1rem;
+    text-align: center;
+    
+    p {
+        margin: 0.25rem 0;
+        font-size: 0.9rem;
+        color: #666;
+    }
+}

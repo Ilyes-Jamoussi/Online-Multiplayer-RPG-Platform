@@ -1,3 +1,12 @@
-<app-ui-page-layout [hasHeader]="true" [hasFooter]="true" [showBackButton]="true" headerTitle="Session de Jeu" (backClick)="onBack()">
-    <h1>Session de Jeu</h1>
+<app-ui-page-layout [hasHeader]="true" [hasFooter]="false" [showBackButton]="true" headerTitle="Session de Jeu" (backClick)="onBack()">
+    <div class="game-session-content">
+        @if (gameId()) {
+            <app-game-map [gameId]="gameId()"></app-game-map>
+        } @else {
+            <div class="error">
+                <p>Aucune carte de jeu disponible</p>
+                <p>Retourne à la salle d'attente et redémarre le jeu</p>
+            </div>
+        }
+    </div>
 </app-ui-page-layout>
