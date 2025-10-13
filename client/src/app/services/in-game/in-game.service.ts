@@ -7,10 +7,10 @@ import { InGameSession } from '@common/models/session.interface';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { SessionService } from '@app/services/session/session.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { NotificationService } from '@app/services/notification/notification.service';
 
 const MILLISECONDS_PER_SECOND = 1000;
 const DEFAULT_TURN_DURATION = 30;
+const DEFAULT_TURN_TRANSITION_DURATION = 3;
 
 @Injectable({
     providedIn: 'root',
@@ -59,6 +59,8 @@ export class TimerService {
 })
 export class InGameService {
     private readonly _inGameSession = signal<InGameSession>(DEFAULT_IN_GAME_SESSION);
+    private readonly _isTransitioning = signal<boolean>(false);
+    private readonly _isGameStarted = signal<boolean>(false);
 
     readonly inGameSession = this._inGameSession.asReadonly();
     readonly id: Signal<string> = computed(() => this.inGameSession().id);
@@ -71,13 +73,13 @@ export class InGameService {
     readonly turnOrderIndex: Signal<number[]> = computed(() => this.inGameSession().turnOrderIndex);
     readonly currentTurnIndex: Signal<number> = computed(() => this.inGameSession().currentTurnIndex);
     readonly activePlayerId: Signal<string> = computed(() => this.inGameSession().activePlayerId);
+    readonly currentTurn: Signal<number> = computed(() => this.inGameSession().currentTurn);
 
     constructor(
         private readonly inGameSocketService: InGameSocketService,
         private readonly sessionService: SessionService,
         private readonly timerService: TimerService,
         private readonly playerService: PlayerService,
-        private readonly notificationService: NotificationService,
     ) {
         this.initListeners();
     }
@@ -90,8 +92,12 @@ export class InGameService {
         this.inGameSocketService.playerJoinInGameSession(this.sessionService.id());
     }
 
-    startTurn(): void {
-        this.inGameSocketService.playerStartTurn(this.sessionService.id());
+    startGame(): void {
+        this.inGameSocketService.playerStartGame(this.sessionService.id());
+    }
+
+    endTurn(): void {
+        this.inGameSocketService.playerEndTurn(this.sessionService.id());
     }
 
     startTurnTimer(): void {
@@ -103,6 +109,11 @@ export class InGameService {
         this.timerService.stopTimer();
     }
 
+    startTurnTransitionTimer(): void {
+        const duration = DEFAULT_TURN_TRANSITION_DURATION;
+        this.timerService.startTimer(duration);
+    }
+
     get timeRemaining(): Signal<number> {
         return this.timerService.timeRemaining;
     }
@@ -111,26 +122,34 @@ export class InGameService {
         return this.timerService.isActive;
     }
 
+    get isTransitioning(): Signal<boolean> {
+        return this._isTransitioning.asReadonly();
+    }
+
     get isMyTurn(): boolean {
         return this.activePlayerId() === this.playerService.id();
+    }
+
+    get isGameStarted(): Signal<boolean> {
+        return this._isGameStarted.asReadonly();
     }
 
     turnEnd(data: InGameSession): void {
         this.updateInGameSession(data);
         this.stopTurnTimer();
+        this.startTurnTransitionTimer();
+        this._isTransitioning.set(true);
+    }
 
-        if (this.isMyTurn) {
-            this.notificationService.displayInformation({
-                title: "C'est à toi de jouer !",
-                message: "Ton tour va commencer, c'est à toi de jouer !",
-            });
-        } else {
-            const player = this.players().find((p) => p.id === data.activePlayerId);
-            this.notificationService.displayInformation({
-                title: "Tour terminé, c'est à " + player?.name + ' de jouer !',
-                message: '',
-            });
-        }
+    turnTransitionEnded(): void {
+        this._isTransitioning.set(false);
+    }
+
+    cleanupAll(): void {
+        this.timerService.resetTimer();
+        this._isGameStarted.set(false);
+        this._isTransitioning.set(false);
+        this.inGameSocketService.leaveInGameSession(this.sessionService.id());
     }
 
     private initListeners(): void {
@@ -138,12 +157,26 @@ export class InGameService {
             this.updateInGameSession(data);
         });
 
+        this.inGameSocketService.onGameStarted(() => {
+            this.startTurnTimer();
+            this._isGameStarted.set(true);
+        });
+
         this.inGameSocketService.onTurnStarted(() => {
             this.startTurnTimer();
+            this._isGameStarted.set(true);
         });
 
         this.inGameSocketService.onTurnEnded((data) => {
             this.turnEnd(data);
+        });
+
+        this.inGameSocketService.onTurnTransitionEnded(() => {
+            this.turnTransitionEnded();
+        });
+
+        this.inGameSocketService.onInGameSessionLeft((data) => {
+            this.updateInGameSession(data);
         });
     }
 }

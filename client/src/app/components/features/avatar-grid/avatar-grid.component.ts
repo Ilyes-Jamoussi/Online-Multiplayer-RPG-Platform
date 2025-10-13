@@ -8,7 +8,6 @@ import { SessionService } from '@app/services/session/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { AvatarAssignment } from '@common/models/session.interface';
 
-
 @Component({
     selector: 'app-avatar-grid',
     imports: [CommonModule, AvatarCardComponent],
@@ -19,7 +18,7 @@ export class AvatarGridComponent {
     constructor(
         private readonly sessionService: SessionService,
         private readonly playerService: PlayerService,
-        private readonly assetsService: AssetsService
+        private readonly assetsService: AssetsService,
     ) {}
 
     get assignments(): AvatarAssignment[] {

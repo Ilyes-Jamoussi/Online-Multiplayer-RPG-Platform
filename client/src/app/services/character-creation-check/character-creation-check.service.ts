@@ -8,7 +8,7 @@ import { Avatar } from '@common/enums/avatar.enum';
 export class CharacterCreationCheckService {
     constructor(
         private readonly characterStoreService: CharacterStoreService,
-        private readonly playerService: PlayerService
+        private readonly playerService: PlayerService,
     ) {}
 
     private readonly validationProblems = computed(() => {

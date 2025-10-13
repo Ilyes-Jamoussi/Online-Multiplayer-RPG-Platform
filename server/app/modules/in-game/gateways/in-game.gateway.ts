@@ -15,9 +15,7 @@ import { InGameSession } from '@common/models/session.interface';
         },
     }),
 )
-@WebSocketGateway({
-    cors: true,
-})
+@WebSocketGateway({ cors: true })
 @Injectable()
 export class InGameGateway {
     @WebSocketServer() private readonly server: Server;
@@ -28,24 +26,72 @@ export class InGameGateway {
     @SubscribeMessage(InGameEvents.PlayerJoinInGameSession)
     playerJoinInGameSession(socket: Socket, sessionId: string): void {
         try {
-            const ingameSession = this.inGameService.joinInGameSession(socket.id, sessionId);
-            socket.emit(InGameEvents.PlayerJoinedInGameSession, successResponse<InGameSession>(ingameSession));
+            const inGameSession = this.inGameService.joinInGameSession(sessionId, socket.id);
+            this.server.to(inGameSession.id).emit(InGameEvents.PlayerJoinedInGameSession, successResponse(inGameSession));
         } catch (error) {
             socket.emit(InGameEvents.PlayerJoinedInGameSession, errorResponse(error.message));
         }
     }
 
-    @SubscribeMessage(InGameEvents.TurnStart)
-    playerStartTurn(socket: Socket, sessionId: string): void {
-        const inGameSession = this.inGameService.getInGameSession(sessionId);
+    @SubscribeMessage(InGameEvents.GameStart)
+    async startGame(socket: Socket, sessionId: string): Promise<void> {
         try {
-            this.inGameService.startTurn(sessionId, socket.id, (updatedSession) => {
-                this.server.to(sessionId).emit(InGameEvents.TurnEnded, successResponse(updatedSession));
+            const inGameSession = this.inGameService.getInGameSession(sessionId);
+            if (!inGameSession) throw new Error('Session not found');
+
+            this.inGameService.startGame(sessionId, {
+                endTurnCallback: (updated) => {
+                    this.server.to(inGameSession.id).emit(InGameEvents.TurnEnded, successResponse(updated));
+                },
+                transitionCallback: () => {
+                    this.server.to(inGameSession.id).emit(InGameEvents.TurnTransitionEnded, successResponse({}));
+                    this.server.to(inGameSession.id).emit(InGameEvents.TurnStarted, successResponse({}));
+                },
+                gameOverCallback: (session) => {
+                    this.server.to(session.id).emit(InGameEvents.GameOver, successResponse(session));
+                },
             });
-            const ingameSessionId = inGameSession.id;
-            this.server.to(ingameSessionId).emit(InGameEvents.TurnStarted, successResponse({}));
+
+            this.server.to(inGameSession.id).emit(InGameEvents.TurnStarted, successResponse({}));
         } catch (error) {
             socket.emit(InGameEvents.TurnStarted, errorResponse(error.message));
+        }
+    }
+
+    @SubscribeMessage(InGameEvents.TurnEnd)
+    playerEndTurn(socket: Socket, sessionId: string): void {
+        try {
+            const inGameSession = this.inGameService.getInGameSession(sessionId);
+            if (!inGameSession) throw new Error('Session not found');
+
+            this.inGameService.playerEndTurn(sessionId, socket.id, {
+                endTurnCallback: (updated) => {
+                    this.server.to(inGameSession.id).emit(InGameEvents.TurnEnded, successResponse(updated));
+                },
+                transitionCallback: () => {
+                    this.server.to(inGameSession.id).emit(InGameEvents.TurnTransitionEnded, successResponse({}));
+                    this.server.to(inGameSession.id).emit(InGameEvents.TurnStarted, successResponse({}));
+                },
+                gameOverCallback: (session) => {
+                    this.server.to(session.id).emit(InGameEvents.GameOver, successResponse(session));
+                },
+            });
+        } catch (error) {
+            socket.emit(InGameEvents.TurnEnded, errorResponse(error.message));
+        }
+    }
+
+    @SubscribeMessage(InGameEvents.LeaveInGameSession)
+    leaveInGameSession(socket: Socket, sessionId: string): void {
+        try {
+            const inGameSession = this.inGameService.getInGameSession(sessionId);
+            if (!inGameSession) throw new Error('In game session not found');
+
+            const updated = this.inGameService.leaveInGameSession(sessionId, socket.id);
+            this.server.to(inGameSession.id).emit(InGameEvents.InGameSessionLeft, successResponse<InGameSession>(updated));
+            socket.leave(inGameSession.id);
+        } catch (error) {
+            socket.emit(InGameEvents.InGameSessionLeft, errorResponse(error.message));
         }
     }
 }

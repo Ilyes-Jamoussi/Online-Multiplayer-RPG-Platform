@@ -11,7 +11,6 @@ import { Player } from '@common/models/player.interface';
 import { AvatarAssignment, Session } from '@common/models/session.interface';
 import { NotificationService } from '@app/services/notification/notification.service';
 
-
 @Injectable({ providedIn: 'root' })
 export class SessionService {
     private readonly _session = signal<Session>({ ...DEFAULT_SESSION });
@@ -63,11 +62,8 @@ export class SessionService {
     }
 
     updateAvatarAssignment(playerId: string, avatar: Avatar, isAdmin: boolean): void {
-        if (isAdmin)
-            this.assignAvatar(playerId, avatar);
-        else
-            this.sessionSocketService.updateAvatarsAssignment({ sessionId: this.id(), avatar });
-
+        if (isAdmin) this.assignAvatar(playerId, avatar);
+        else this.sessionSocketService.updateAvatarsAssignment({ sessionId: this.id(), avatar });
     }
 
     kickPlayer(playerId: string): void {
@@ -91,7 +87,7 @@ export class SessionService {
         const dto: CreateSessionDto = {
             gameId: session.gameId,
             maxPlayers: session.maxPlayers,
-            player
+            player,
         };
         this.sessionSocketService.createSession(dto);
     }
@@ -99,7 +95,7 @@ export class SessionService {
     joinSession(player: Player): void {
         const dto: JoinSessionDto = {
             sessionId: this.id(),
-            player
+            player,
         };
         this.sessionSocketService.joinSession(dto);
     }
@@ -134,7 +130,9 @@ export class SessionService {
 
         this.sessionSocketService.onSessionPlayersUpdated((data) => this.updateSession({ players: data.players }));
 
-        this.sessionSocketService.onGameSessionStarted(() => { this.router.navigate([ROUTES.gameSessionPage]); });
+        this.sessionSocketService.onGameSessionStarted(() => {
+            this.router.navigate([ROUTES.gameSessionPage]);
+        });
 
         this.sessionSocketService.onSessionJoined((data) => {
             this.updateSession({ gameId: data.gameId, maxPlayers: data.maxPlayers });
@@ -152,7 +150,5 @@ export class SessionService {
         this.sessionSocketService.onAvatarSelectionJoinError((msg) => {
             this.notificationService.displayError({ title: 'Erreur de connexion', message: msg });
         });
-
-
     }
 }

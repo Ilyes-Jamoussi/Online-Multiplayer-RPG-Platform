@@ -15,13 +15,15 @@ import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-@UsePipes(new ValidationPipe({
-    transform: true,
-    exceptionFactory: (errors): Error => {
-        new Logger('ValidationPipe').error('Validation failed:', errors);
-        throw new Error('Validation failed');
-    }
-}))
+@UsePipes(
+    new ValidationPipe({
+        transform: true,
+        exceptionFactory: (errors): Error => {
+            new Logger('ValidationPipe').error('Validation failed:', errors);
+            throw new Error('Validation failed');
+        },
+    }),
+)
 @WebSocketGateway({
     cors: true,
 })
@@ -45,7 +47,6 @@ export class SessionGateway implements OnGatewayDisconnect {
             const players = this.sessionService.getPlayersSession(sessionId);
             socket.emit(SessionEvents.SessionCreated, successResponse<SessionCreatedDto>({ sessionId, playerId: adminId }));
             socket.emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
-
         } catch (error) {
             socket.emit(SessionEvents.SessionCreated, errorResponse(error.message));
         }
@@ -60,10 +61,13 @@ export class SessionGateway implements OnGatewayDisconnect {
         }
         const players = this.handleJoinSession(socket, data);
         const session = this.sessionService.getSession(data.sessionId);
-        socket.emit(SessionEvents.SessionJoined, successResponse<SessionJoinedDto>({
-            gameId: session.gameId,
-            maxPlayers: session.maxPlayers
-        }));
+        socket.emit(
+            SessionEvents.SessionJoined,
+            successResponse<SessionJoinedDto>({
+                gameId: session.gameId,
+                maxPlayers: session.maxPlayers,
+            }),
+        );
         this.server.to(data.sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
     }
 
@@ -77,10 +81,13 @@ export class SessionGateway implements OnGatewayDisconnect {
         socket.join(this.getAvatarSelectionRoomId(data.sessionId));
 
         const avatarAssignments = this.sessionService.getChosenAvatars(data.sessionId);
-        socket.emit(SessionEvents.AvatarSelectionJoined, successResponse<AvatarSelectionJoinedDto>({ 
-            playerId: socket.id, 
-            sessionId: data.sessionId 
-        }));
+        socket.emit(
+            SessionEvents.AvatarSelectionJoined,
+            successResponse<AvatarSelectionJoinedDto>({
+                playerId: socket.id,
+                sessionId: data.sessionId,
+            }),
+        );
         socket.emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
     }
 
@@ -88,10 +95,10 @@ export class SessionGateway implements OnGatewayDisconnect {
     leaveAvatarSelection(socket: Socket, data: JoinAvatarSelectionDto): void {
         const roomId = this.getAvatarSelectionRoomId(data.sessionId);
         socket.leave(roomId);
-        
+
         this.sessionService.releaseAvatar(data.sessionId, socket.id);
         const avatarAssignments = this.sessionService.getChosenAvatars(data.sessionId);
-        
+
         this.server.to(roomId).emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
     }
 
@@ -131,7 +138,6 @@ export class SessionGateway implements OnGatewayDisconnect {
 
             const players = this.sessionService.getPlayersSession(sessionId);
             this.server.to(sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
-
         } catch (error) {
             socket.emit(SessionEvents.SessionEnded, errorResponse(error.message));
         }
@@ -140,13 +146,13 @@ export class SessionGateway implements OnGatewayDisconnect {
     @SubscribeMessage(SessionEvents.StartGameSession)
     async startGameSession(socket: Socket): Promise<void> {
         const sessionId = this.sessionService.getPlayerSessionId(socket.id);
-        const inGameSessionId = await this.inGameService.initInGameSession(this.sessionService.getSession(sessionId));
+        const inGameSession = await this.inGameService.initInGameSession(this.sessionService.getSession(sessionId));
         const players = this.sessionService.getPlayersSession(sessionId);
 
         for (const player of players) {
             const playerSocket = this.server.sockets.sockets.get(player.id);
             if (playerSocket) {
-                playerSocket.join(inGameSessionId);
+                playerSocket.join(inGameSession.id);
             }
         }
 
@@ -163,7 +169,7 @@ export class SessionGateway implements OnGatewayDisconnect {
             const isAdmin = this.sessionService.isAdmin(socket.id);
 
             if (isAdmin) {
-                socket.broadcast.to(sessionId).emit(SessionEvents.SessionEnded, successResponse({ message: 'L\'organisateur a quitté' }));
+                socket.broadcast.to(sessionId).emit(SessionEvents.SessionEnded, successResponse({ message: "L'organisateur a quitté" }));
 
                 for (const player of session.players) {
                     const playerSocket = this.server.sockets.sockets.get(player.id);
@@ -181,7 +187,6 @@ export class SessionGateway implements OnGatewayDisconnect {
 
             const players = this.sessionService.getPlayersSession(sessionId);
             this.server.to(sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
-
         } catch (error) {
             this.logger.error('Error leaving session:', error.message);
         }

@@ -62,13 +62,12 @@ export class PlayerService {
         if (!this.isAdmin()) {
             this.sessionService.leaveAvatarSelection();
         }
-        
+
         this.resetPlayer();
         this.sessionService.resetSession();
     }
 
     private initListeners(): void {
-
         this.sessionSocketService.onSessionCreated((data) => {
             this.updatePlayer({ id: data.playerId });
             this.sessionService.updateSession({ id: data.sessionId });
@@ -90,9 +89,5 @@ export class PlayerService {
             this.sessionService.updateSession({ id: data.sessionId });
             this.router.navigate([ROUTES.characterCreationPage]);
         });
-
     }
-
-
 }
-

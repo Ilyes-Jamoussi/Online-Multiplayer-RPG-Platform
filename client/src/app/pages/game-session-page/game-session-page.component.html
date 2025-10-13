@@ -9,11 +9,23 @@
     <p>Start Points: {{ inGameSession.startPoints.length }}</p>
     <p>Turn Order Index: {{ inGameSession.turnOrderIndex.length }}</p>
     <p>Current Turn Index: {{ inGameSession.currentTurnIndex }}</p>
-    <p>Players: {{ getPlayerNames() }}</p>
-    <p>Start Points: {{ getStartPointsString() }}</p>
-    <p>Turn Order Index: {{ inGameSession.turnOrderIndex.join(', ') }}</p>
-    <p>Current Turn Index: {{ inGameSession.currentTurnIndex }}</p>
+    <p>Current Turn: {{ getCurrentTurn() }}</p>
     <p>Active Player: {{ getActivePlayerName() }}</p>
     <p>Turn timer: {{ getTimeRemaining() }}</p>
-    <button [disabled]="!getIsMyTurn()" (click)="onStartTurn()">Start Turn</button>
+    <p>Is Transitioning: {{ getIsTransitioning() }}</p>
+    <p>Is My Turn: {{ getIsMyTurn() }}</p>
+    <button [disabled]="getDisableStartButton()" (click)="onStartTurn()">Start Turn</button>
+    <button [disabled]="!getIsMyTurn()" (click)="onEndTurn()">End my turn</button>
 </app-ui-page-layout>
+
+@if (getIsTransitioning()) {
+<div class="transition-overlay" (click)="$event.stopPropagation()">
+    <div class="transition-modal">
+        <h2>{{ getTransitionMessage() }}</h2>
+
+        <div class="loading-spinner">
+            <p>{{ getTimeRemaining() }}</p>
+        </div>
+    </div>
+</div>
+}

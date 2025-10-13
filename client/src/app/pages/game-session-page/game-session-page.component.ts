@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -6,11 +7,11 @@ import { InGameSession } from '@common/models/session.interface';
 
 @Component({
     selector: 'app-game-session-page',
-    imports: [UiPageLayoutComponent],
+    imports: [UiPageLayoutComponent, CommonModule],
     templateUrl: './game-session-page.component.html',
     styleUrl: './game-session-page.component.scss',
 })
-export class GameSessionPageComponent implements OnInit {
+export class GameSessionPageComponent implements OnInit, OnDestroy {
     constructor(
         private readonly playerService: PlayerService,
         private readonly inGameService: InGameService,
@@ -18,6 +19,10 @@ export class GameSessionPageComponent implements OnInit {
 
     ngOnInit(): void {
         this.inGameService.loadInGameSession();
+    }
+
+    ngOnDestroy(): void {
+        this.inGameService.cleanupAll();
     }
 
     get inGameSession(): InGameSession {
@@ -49,7 +54,35 @@ export class GameSessionPageComponent implements OnInit {
         return this.inGameService.isMyTurn;
     }
 
+    getIsGameStarted(): boolean {
+        return this.inGameService.isGameStarted();
+    }
+
+    getDisableStartButton(): boolean {
+        return this.getIsGameStarted() || !this.getIsMyTurn();
+    }
+
+    getCurrentTurn(): number {
+        return this.inGameService.currentTurn();
+    }
+
+    getIsTransitioning(): boolean {
+        return this.inGameService.isTransitioning();
+    }
+
+    getTransitionMessage(): string {
+        if (this.getIsMyTurn()) {
+            return "C'est à toi de jouer !";
+        }
+        const activePlayerName = this.getActivePlayerName();
+        return `C'est au tour de ${activePlayerName}`;
+    }
+
     onStartTurn(): void {
-        this.inGameService.startTurn();
+        this.inGameService.startGame();
+    }
+
+    onEndTurn(): void {
+        this.inGameService.endTurn();
     }
 }

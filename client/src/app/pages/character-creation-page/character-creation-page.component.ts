@@ -21,8 +21,14 @@ import { Dice } from '@common/enums/dice.enum';
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
     imports: [
-        CommonModule, FormsModule, UiButtonComponent, UiInputComponent,
-        UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent, AvatarGridComponent
+        CommonModule,
+        FormsModule,
+        UiButtonComponent,
+        UiInputComponent,
+        UiPageLayoutComponent,
+        StatsBarComponent,
+        ErrorsBadgeComponent,
+        AvatarGridComponent,
     ],
     providers: [CharacterCreationCheckService, CharacterStoreService],
 })
@@ -39,7 +45,6 @@ export class CharacterCreationPageComponent {
         private readonly playerService: PlayerService,
         private readonly location: Location,
     ) {}
-
 
     get isLifeBonusSelected(): boolean {
         return this.character.bonus === BonusType.Life;
@@ -104,10 +109,8 @@ export class CharacterCreationPageComponent {
     onSubmit(): void {
         this.playerService.updatePlayer({ name: this.character.name });
 
-        if (this.isPlayerAdmin)
-            this.playerService.createSession();
-        else
-            this.playerService.joinSession();
+        if (this.isPlayerAdmin) this.playerService.createSession();
+        else this.playerService.joinSession();
     }
 
     onBack(): void {
@@ -115,4 +118,3 @@ export class CharacterCreationPageComponent {
         this.location.back();
     }
 }
-

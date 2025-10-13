@@ -95,7 +95,7 @@ export class SessionService {
 
     isAdmin(playerId: string): boolean {
         for (const session of this.sessions.values()) {
-            const player = session.players.find(p => p.id === playerId);
+            const player = session.players.find((p) => p.id === playerId);
             if (player) {
                 return player.isAdmin || false;
             }
@@ -160,7 +160,7 @@ export class SessionService {
     }
 
     private generateUniqueName(baseName: string, existingPlayers: Player[]): string {
-        const existingNames = existingPlayers.map(player => player.name);
+        const existingNames = existingPlayers.map((player) => player.name);
 
         if (!existingNames.includes(baseName)) {
             return baseName;

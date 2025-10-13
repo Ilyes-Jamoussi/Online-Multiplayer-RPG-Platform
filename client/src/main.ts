@@ -17,7 +17,6 @@ import { WaitingRoomPageComponent } from '@app/pages/waiting-room-page/waiting-r
 import { removeLeadingSlash } from '@src/utils/route/route.util';
 import { environment } from './environments/environment';
 
-
 if (environment.production) {
     enableProdMode();
 }
