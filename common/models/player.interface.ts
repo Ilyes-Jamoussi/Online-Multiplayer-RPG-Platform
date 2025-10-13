@@ -6,3 +6,10 @@ export interface Player {
     avatar: Avatar | null;
     isAdmin: boolean;
 }
+
+export interface InGamePlayer extends Player {
+    currentPosition: { x: number; y: number };
+    isActive: boolean; 
+    startPointId: string;
+    joinedInGameSession: boolean;
+}

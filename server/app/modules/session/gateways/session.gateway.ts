@@ -1,4 +1,5 @@
 import { AVATAR_SELECTION_ROOM_PREFIX } from '@app/constants/session.constants';
+import { InGameService } from '@app/modules/in-game/services/in-game.service';
 import { CreateSessionDto, SessionCreatedDto } from '@app/modules/session/dto/create-session.dto';
 import { AvatarSelectionJoinedDto, JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection';
 import { JoinSessionDto, SessionJoinedDto } from '@app/modules/session/dto/join-session.dto';
@@ -31,6 +32,7 @@ export class SessionGateway implements OnGatewayDisconnect {
 
     constructor(
         private readonly sessionService: SessionService,
+        private readonly inGameService: InGameService,
     ) {}
 
     @SubscribeMessage(SessionEvents.CreateSession)
@@ -136,8 +138,18 @@ export class SessionGateway implements OnGatewayDisconnect {
     }
 
     @SubscribeMessage(SessionEvents.StartGameSession)
-    startGameSession(socket: Socket): void {
+    async startGameSession(socket: Socket): Promise<void> {
         const sessionId = this.sessionService.getPlayerSessionId(socket.id);
+        const inGameSessionId = await this.inGameService.initInGameSession(this.sessionService.getSession(sessionId));
+        const players = this.sessionService.getPlayersSession(sessionId);
+
+        for (const player of players) {
+            const playerSocket = this.server.sockets.sockets.get(player.id);
+            if (playerSocket) {
+                playerSocket.join(inGameSessionId);
+            }
+        }
+
         this.server.to(sessionId).emit(SessionEvents.GameSessionStarted, successResponse({}));
     }
 

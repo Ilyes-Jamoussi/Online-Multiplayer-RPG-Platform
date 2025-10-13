@@ -1,5 +1,7 @@
+import { MapSize } from '@common/enums/map-size.enum';
 import { Avatar } from '../enums/avatar.enum';
-import { Player } from './player.interface';
+import { InGamePlayer, Player } from './player.interface';
+import { GameMode } from '@common/enums/game-mode.enum';
 
 export interface AvatarAssignment {
     avatar: Avatar;
@@ -13,4 +15,23 @@ export interface Session {
     players: Player[];
     avatarAssignments: AvatarAssignment[];
     isRoomLocked: boolean;
+}
+
+export interface InGameSession {
+    id: string;
+    gameId: string;
+    sessionId: string;
+    mapSize: MapSize;
+    mode: GameMode;
+    players: InGamePlayer[];
+    startPoints: {
+        x: number;
+        y: number;
+        id: string;
+        playerId: string;
+    }[];
+    turnOrderIndex: number[];
+    currentTurnIndex: number;
+    activePlayerId: string;
+    currentTurn: number;
 }
