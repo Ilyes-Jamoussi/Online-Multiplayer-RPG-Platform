@@ -32,6 +32,7 @@ describe('GameEditorService', () => {
         Object.keys(mockModel).forEach((k) => delete mockModel[k]);
 
         mockImageService.saveImage = jest.fn().mockResolvedValue('some-url.png');
+        mockImageService.deleteImage = jest.fn().mockResolvedValue(undefined);
         mockMapper.toGamePreviewDto = jest
             .fn()
             .mockImplementation((g: { _id: { toString: () => string }; name: string }) => ({ id: g._id.toString(), name: g.name }) as GamePreviewDto);
@@ -93,6 +94,7 @@ describe('GameEditorService', () => {
             const id = 'gameid';
             (mockImageService.saveImage as jest.Mock).mockResolvedValue('game-gameid-preview.png');
             mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
+            mockModel.findById = jest.fn().mockReturnValue({ lean: () => Promise.resolve({ gridPreviewUrl: 'old-image.png' }) });
 
             const returnedDoc = {
                 _id: { toString: () => id },
@@ -124,6 +126,7 @@ describe('GameEditorService', () => {
             const savedPreview = 'game-fullid-preview.png';
             (mockImageService.saveImage as jest.Mock).mockResolvedValue(savedPreview);
             mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
+            mockModel.findById = jest.fn().mockReturnValue({ lean: () => Promise.resolve({ gridPreviewUrl: 'old-image.png' }) });
 
             const body = {
                 name: 'brand new',
@@ -145,7 +148,11 @@ describe('GameEditorService', () => {
 
             const preview = await service.patchEditByGameId(id, body);
 
-            expect(mockImageService.saveImage).toHaveBeenCalledWith(body.gridPreviewUrl, `game-${id}-preview.png`, 'game-previews');
+            expect(mockImageService.saveImage).toHaveBeenCalledWith(
+                body.gridPreviewUrl, 
+                expect.stringMatching(new RegExp(`^game-${id}-\\d+-preview\\.png$`)), 
+                'game-previews'
+            );
 
             expect(mockModel.findByIdAndUpdate).toHaveBeenCalled();
             expect(capturedSet).not.toBeNull();

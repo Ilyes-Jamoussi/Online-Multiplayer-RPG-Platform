@@ -56,6 +56,7 @@ export class GameEditorInteractionsService {
                 image: this.assetService.getTileImage(tk),
                 tileKind: tk,
                 class: tk.toLowerCase(),
+                disabled: tk === TileKind.TELEPORT,
             }));
     }
 

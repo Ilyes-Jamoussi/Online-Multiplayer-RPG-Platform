@@ -25,13 +25,13 @@
 
             <div class="game-actions">
                 @if (isAdmin) {
-                <app-ui-button variant="secondary" size="sm" (buttonClick)="onEditGame()">
+                <app-ui-button variant="primary" size="sm" (buttonClick)="onEditGame()">
                     <app-ui-icon iconName="Edit"></app-ui-icon>
                     Modifier
                 </app-ui-button>
-                <app-ui-button variant="ghost" size="sm" (buttonClick)="onToggleVisibility()">
+                <app-ui-button [variant]="game.visibility ? 'success' : 'warning'" size="sm" (buttonClick)="onToggleVisibility()">
                     <app-ui-icon [iconName]="game.visibility ? 'Eye' : 'EyeSlash'"></app-ui-icon>
-                    {{ game.visibility ? 'Masquer' : 'Publier' }}
+                    {{ game.visibility ? 'Publié' : 'Masqué' }}
                 </app-ui-button>
                 <app-ui-button variant="error" size="sm" (buttonClick)="onDeleteGame()">
                     <app-ui-icon iconName="Trash"></app-ui-icon>
