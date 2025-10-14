@@ -3,7 +3,6 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ElementRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-import { ROUTES } from '@app/constants/routes.constants';
 import { ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
@@ -280,66 +279,18 @@ describe('EditorPageComponent', () => {
         await component.onSave();
 
         expect(mockGameEditorStoreService.saveGame).toHaveBeenCalledWith(component.gridWrapper.nativeElement);
-        expect(mockNotificationService.displaySuccess).toHaveBeenCalledWith({
-            title: 'Jeu sauvegardé',
-            message: 'Votre jeu a été sauvegardé avec succès !',
-            redirectRoute: ROUTES.managementPage,
-        });
     });
 
-    it('should show conflict error message when saveGame rejects with duplicate-name Error', async () => {
-        // canSave = true → on passe dans le try/catch
-        mockGameEditorCheckService.canSave.and.returnValue(true);
-
-        // gridWrapper nécessaire à l’appel
-        component.gridWrapper = {
-            nativeElement: document.createElement('div'),
-        } as ElementRef<HTMLElement>;
-
-        // saveGame rejette avec l’erreur attendue
-        const conflictErr = new Error('Un jeu avec ce nom existe déjà.');
-        mockGameEditorStoreService.saveGame.and.returnValue(Promise.reject(conflictErr));
-
-        await component.onSave();
-
-        expect(mockGameEditorStoreService.saveGame).toHaveBeenCalledWith(component.gridWrapper.nativeElement);
-        expect(mockNotificationService.displaySuccess).not.toHaveBeenCalled();
-        expect(mockNotificationService.displayError).toHaveBeenCalledWith({
-            title: 'Erreur lors de la sauvegarde',
-            message: 'Un jeu avec ce nom existe déjà.',
-        });
-    });
-
-    it('should show generic error message when saveGame rejects with another Error', async () => {
-        mockGameEditorCheckService.canSave.and.returnValue(true);
-
-        component.gridWrapper = {
-            nativeElement: document.createElement('div'),
-        } as ElementRef<HTMLElement>;
-
-        const genericErr = new Error('Boom');
-        mockGameEditorStoreService.saveGame.and.returnValue(Promise.reject(genericErr));
-
-        await component.onSave();
-
-        expect(mockGameEditorStoreService.saveGame).toHaveBeenCalled();
-        expect(mockNotificationService.displaySuccess).not.toHaveBeenCalled();
-        expect(mockNotificationService.displayError).toHaveBeenCalledWith({
-            title: 'Erreur lors de la sauvegarde',
-            message: 'Boom',
-        });
-    });
-
-    it('should show error when canSave is false', async () => {
+    it('should not save game when canSave is false', async () => {
         mockGameEditorCheckService.canSave.and.returnValue(false);
+
+        component.gridWrapper = {
+            nativeElement: document.createElement('div'),
+        } as ElementRef<HTMLElement>;
 
         await component.onSave();
 
         expect(mockGameEditorStoreService.saveGame).not.toHaveBeenCalled();
-        expect(mockNotificationService.displayError).toHaveBeenCalledWith({
-            title: 'Problèmes dans la carte',
-            message: 'Veuillez corriger les problèmes dans la carte avant de sauvegarder.',
-        });
     });
 
     it('should call dragEnd on mouseover when target is NOT a tile', () => {

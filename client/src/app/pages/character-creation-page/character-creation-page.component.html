@@ -60,7 +60,16 @@
 
                     <div class="dice-rows">
                         <div class="dice-card">
-                            <span>Attaque</span>
+                            <span>
+                                Attaque: 
+                                @if (isAttackD4Selected) {
+                                D4
+                                } @else if (isAttackD6Selected) {
+                                D6
+                                } @else {
+                                (Aucun)
+                                }
+                            </span>
                             <div class="dice-row">
                                 <button type="button" class="dice-btn" [class.sel]="isAttackD4Selected" (click)="onAttackDiceChange(dice.D4)">
                                     <img [src]="getDiceImage(dice.D4)" [alt]="dice.D4" />
@@ -72,7 +81,16 @@
                         </div>
 
                         <div class="dice-card">
-                            <span>Défense</span>
+                            <span>
+                                Défense: 
+                                @if (isDefenseD4Selected) {
+                                D4
+                                } @else if (isDefenseD6Selected) {
+                                D6
+                                } @else {
+                                (Aucun)
+                                }                                
+                            </span>
                             <div class="dice-row">
                                 <button type="button" class="dice-btn" [class.sel]="isDefenseD4Selected" (click)="onDefenseDiceChange(dice.D4)">
                                     <img [src]="getDiceImage(dice.D4)" [alt]="dice.D4" />
