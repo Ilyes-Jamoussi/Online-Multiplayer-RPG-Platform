@@ -17,7 +17,10 @@ export enum InGameEvents {
     TurnEnd = 'turnEnd',
     TurnEnded = 'turnEnded',
     TurnTransitionEnded = 'turnTransitionEnded',
+    TurnTimeout = 'turnTimeout',
+    TurnForcedEnd = 'turnForcedEnd',
+    TurnManualEnd = 'turnManualEnd',
 
     LeaveInGameSession = 'leaveInGameSession',
-    InGameSessionLeft = 'inGameSessionLeft',
+    LeftInGameSession = 'leftInGameSession',
 }

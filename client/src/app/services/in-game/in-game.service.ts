@@ -1,16 +1,10 @@
-import { Injectable, Signal, computed, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
-import { GameMode } from '@common/enums/game-mode.enum';
-import { MapSize } from '@common/enums/map-size.enum';
-import { InGamePlayer } from '@common/models/player.interface';
+import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION, MILLISECONDS_PER_SECOND } from '@common/constants/in-game';
 import { InGameSession } from '@common/models/session.interface';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { SessionService } from '@app/services/session/session.service';
 import { PlayerService } from '@app/services/player/player.service';
-
-const MILLISECONDS_PER_SECOND = 1000;
-const DEFAULT_TURN_DURATION = 30;
-const DEFAULT_TURN_TRANSITION_DURATION = 3;
 
 @Injectable({
     providedIn: 'root',
@@ -25,7 +19,7 @@ export class TimerService {
 
     startTimer(duration: number): void {
         this.stopTimer();
-        this._timeRemaining.set(duration);
+        this._timeRemaining.set(duration / MILLISECONDS_PER_SECOND);
         this._isActive.set(true);
 
         this.timer = window.setInterval(() => {
@@ -62,19 +56,6 @@ export class InGameService {
     private readonly _isTransitioning = signal<boolean>(false);
     private readonly _isGameStarted = signal<boolean>(false);
 
-    readonly inGameSession = this._inGameSession.asReadonly();
-    readonly id: Signal<string> = computed(() => this.inGameSession().id);
-    readonly gameId: Signal<string> = computed(() => this.inGameSession().gameId);
-    readonly sessionId: Signal<string> = computed(() => this.inGameSession().sessionId);
-    readonly mapSize: Signal<MapSize> = computed(() => this.inGameSession().mapSize);
-    readonly mode: Signal<GameMode> = computed(() => this.inGameSession().mode);
-    readonly players: Signal<InGamePlayer[]> = computed(() => this.inGameSession().players);
-    readonly startPoints: Signal<{ x: number; y: number; id: string; playerId: string }[]> = computed(() => this.inGameSession().startPoints);
-    readonly turnOrderIndex: Signal<number[]> = computed(() => this.inGameSession().turnOrderIndex);
-    readonly currentTurnIndex: Signal<number> = computed(() => this.inGameSession().currentTurnIndex);
-    readonly activePlayerId: Signal<string> = computed(() => this.inGameSession().activePlayerId);
-    readonly currentTurn: Signal<number> = computed(() => this.inGameSession().currentTurn);
-
     constructor(
         private readonly inGameSocketService: InGameSocketService,
         private readonly sessionService: SessionService,
@@ -83,6 +64,18 @@ export class InGameService {
     ) {
         this.initListeners();
     }
+
+    readonly isMyTurn = computed(() => this._inGameSession().currentTurn.activePlayerId === this.playerService.id());
+    readonly currentTurn = computed(() => this._inGameSession().currentTurn);
+    readonly turnNumber = computed(() => this._inGameSession().currentTurn.turnNumber);
+    readonly turnOrderPlayerId = computed(() => this._inGameSession().turnOrderPlayerId);
+    readonly startPoints = computed(() => this._inGameSession().startPoints);
+    readonly mapSize = computed(() => this._inGameSession().mapSize);
+    readonly mode = computed(() => this._inGameSession().mode);
+    readonly isGameStarted = computed(() => this._inGameSession().isGameStarted);
+    readonly isTransitioning = computed(() => this._isTransitioning());
+    readonly timeRemaining = computed(() => this.timerService.timeRemaining());
+    readonly inGamePlayers = computed(() => this._inGameSession().inGamePlayers);
 
     updateInGameSession(data: InGameSession): void {
         this._inGameSession.update((inGameSession) => ({ ...inGameSession, ...data }));
@@ -96,13 +89,8 @@ export class InGameService {
         this.inGameSocketService.playerStartGame(this.sessionService.id());
     }
 
-    endTurn(): void {
-        this.inGameSocketService.playerEndTurn(this.sessionService.id());
-    }
-
     startTurnTimer(): void {
-        const duration = DEFAULT_TURN_DURATION;
-        this.timerService.startTimer(duration);
+        this.timerService.startTimer(DEFAULT_TURN_DURATION);
     }
 
     stopTurnTimer(): void {
@@ -110,28 +98,7 @@ export class InGameService {
     }
 
     startTurnTransitionTimer(): void {
-        const duration = DEFAULT_TURN_TRANSITION_DURATION;
-        this.timerService.startTimer(duration);
-    }
-
-    get timeRemaining(): Signal<number> {
-        return this.timerService.timeRemaining;
-    }
-
-    get isTimerActive(): Signal<boolean> {
-        return this.timerService.isActive;
-    }
-
-    get isTransitioning(): Signal<boolean> {
-        return this._isTransitioning.asReadonly();
-    }
-
-    get isMyTurn(): boolean {
-        return this.activePlayerId() === this.playerService.id();
-    }
-
-    get isGameStarted(): Signal<boolean> {
-        return this._isGameStarted.asReadonly();
+        this.timerService.startTimer(DEFAULT_TURN_TRANSITION_DURATION);
     }
 
     turnEnd(data: InGameSession): void {
@@ -150,6 +117,7 @@ export class InGameService {
         this._isGameStarted.set(false);
         this._isTransitioning.set(false);
         this.inGameSocketService.leaveInGameSession(this.sessionService.id());
+        this.playerService.leaveSession();
     }
 
     private initListeners(): void {
@@ -157,12 +125,14 @@ export class InGameService {
             this.updateInGameSession(data);
         });
 
-        this.inGameSocketService.onGameStarted(() => {
+        this.inGameSocketService.onGameStarted((data) => {
+            this.updateInGameSession(data);
             this.startTurnTimer();
             this._isGameStarted.set(true);
         });
 
-        this.inGameSocketService.onTurnStarted(() => {
+        this.inGameSocketService.onTurnStarted((data) => {
+            this.updateInGameSession(data);
             this.startTurnTimer();
             this._isGameStarted.set(true);
         });
@@ -175,8 +145,9 @@ export class InGameService {
             this.turnTransitionEnded();
         });
 
-        this.inGameSocketService.onInGameSessionLeft((data) => {
+        this.inGameSocketService.onLeftInGameSession((data) => {
             this.updateInGameSession(data);
+            this.cleanupAll();
         });
     }
 }

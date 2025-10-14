@@ -2,12 +2,12 @@ import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Player } from '@common/models/player.interface';
-import { AvatarAssignment, Session } from '@common/models/session.interface';
+import { AvatarAssignment, WaitingRoomSession } from '@common/models/session.interface';
 import { Injectable, Logger } from '@nestjs/common';
 import { ACCESS_CODE_LENGTH, ACCESS_CODE_PADDING, ACCESS_CODE_RANGE } from '@app/constants/session.constants';
 @Injectable()
 export class SessionService {
-    private readonly sessions = new Map<string, Session>();
+    private readonly sessions = new Map<string, WaitingRoomSession>();
     private readonly logger = new Logger(SessionService.name);
 
     createSession(adminId: string, data: CreateSessionDto): string {
@@ -31,6 +31,10 @@ export class SessionService {
             ...data.player,
             name: uniqueName,
             id: playerId,
+            speed: 0,
+            health: 0,
+            attack: 0,
+            defense: 0,
         };
         session.players.push(player);
     }
@@ -108,7 +112,7 @@ export class SessionService {
         session.players = session.players.filter((player) => player.id !== playerId);
     }
 
-    getSession(sessionId: string): Session | undefined {
+    getSession(sessionId: string): WaitingRoomSession | undefined {
         return this.sessions.get(sessionId);
     }
 
@@ -177,10 +181,14 @@ export class SessionService {
         return uniqueName;
     }
 
-    private buildSession(sessionId: string, adminId: string, data: CreateSessionDto): Session {
+    private buildSession(sessionId: string, adminId: string, data: CreateSessionDto): WaitingRoomSession {
         const adminPlayer: Player = {
             ...data.player,
             id: adminId,
+            speed: 0,
+            health: 0,
+            attack: 0,
+            defense: 0,
         };
         return {
             players: [adminPlayer],

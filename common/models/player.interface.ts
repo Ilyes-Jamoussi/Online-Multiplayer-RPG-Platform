@@ -5,11 +5,15 @@ export interface Player {
     name: string;
     avatar: Avatar | null;
     isAdmin: boolean;
+    speed: number;
+    health: number;
+    attack: number;
+    defense: number;
 }
 
 export interface InGamePlayer extends Player {
-    currentPosition: { x: number; y: number };
-    isActive: boolean; 
+    x: number;
+    y: number;
+    joined: boolean;
     startPointId: string;
-    joinedInGameSession: boolean;
 }

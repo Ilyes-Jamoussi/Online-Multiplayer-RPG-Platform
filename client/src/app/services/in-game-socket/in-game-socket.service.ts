@@ -19,11 +19,11 @@ export class InGameSocketService {
         this.socket.emit(InGameEvents.GameStart, sessionId);
     }
 
-    onGameStarted(callback: () => void): void {
+    onGameStarted(callback: (data: InGameSession) => void): void {
         this.socket.onSuccessEvent(InGameEvents.GameStarted, callback);
     }
 
-    onTurnStarted(callback: () => void): void {
+    onTurnStarted(callback: (data: InGameSession) => void): void {
         this.socket.onSuccessEvent(InGameEvents.TurnStarted, callback);
     }
 
@@ -43,7 +43,15 @@ export class InGameSocketService {
         this.socket.emit(InGameEvents.LeaveInGameSession, sessionId);
     }
 
-    onInGameSessionLeft(callback: (data: InGameSession) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.InGameSessionLeft, callback);
+    onLeftInGameSession(callback: (data: InGameSession) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.LeftInGameSession, callback);
+    }
+
+    onTurnTimeout(callback: (data: InGameSession) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.TurnTimeout, callback);
+    }
+
+    onTurnForcedEnd(callback: (data: InGameSession) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.TurnForcedEnd, callback);
     }
 }

@@ -9,6 +9,8 @@ import { SessionPlayersUpdatedDto } from '@app/modules/session/dto/update-sessio
 import { SessionService } from '@app/modules/session/services/session.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { SessionEvents } from '@common/constants/session-events';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { Player } from '@common/models/player.interface';
 import { SocketResponse } from '@common/types/socket-response.type';
 import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
@@ -146,13 +148,17 @@ export class SessionGateway implements OnGatewayDisconnect {
     @SubscribeMessage(SessionEvents.StartGameSession)
     async startGameSession(socket: Socket): Promise<void> {
         const sessionId = this.sessionService.getPlayerSessionId(socket.id);
-        const inGameSession = await this.inGameService.initInGameSession(this.sessionService.getSession(sessionId));
+        const inGameSession = await this.inGameService.createInGameSession(
+            this.sessionService.getSession(sessionId),
+            GameMode.CLASSIC,
+            MapSize.SMALL,
+        );
         const players = this.sessionService.getPlayersSession(sessionId);
 
         for (const player of players) {
             const playerSocket = this.server.sockets.sockets.get(player.id);
             if (playerSocket) {
-                playerSocket.join(inGameSession.id);
+                playerSocket.join(inGameSession.inGameId);
             }
         }
 

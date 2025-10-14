@@ -5,6 +5,7 @@ import { InGameService } from '@app/modules/in-game/services/in-game.service';
 import { InGameEvents } from '@common/constants/in-game-events';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { InGameSession } from '@common/models/session.interface';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @UsePipes(
     new ValidationPipe({
@@ -23,11 +24,14 @@ export class InGameGateway {
 
     constructor(private readonly inGameService: InGameService) {}
 
+    // --- SOCKET HANDLERS -----------------------------------------------------
+
     @SubscribeMessage(InGameEvents.PlayerJoinInGameSession)
     playerJoinInGameSession(socket: Socket, sessionId: string): void {
         try {
-            const inGameSession = this.inGameService.joinInGameSession(sessionId, socket.id);
-            this.server.to(inGameSession.id).emit(InGameEvents.PlayerJoinedInGameSession, successResponse(inGameSession));
+            const session = this.inGameService.joinInGameSession(sessionId, socket.id);
+            this.server.to(session.inGameId).emit(InGameEvents.PlayerJoinedInGameSession, successResponse(session));
+            this.logger.log(`Player ${socket.id} joined session ${session.id}`);
         } catch (error) {
             socket.emit(InGameEvents.PlayerJoinedInGameSession, errorResponse(error.message));
         }
@@ -36,62 +40,64 @@ export class InGameGateway {
     @SubscribeMessage(InGameEvents.GameStart)
     async startGame(socket: Socket, sessionId: string): Promise<void> {
         try {
-            const inGameSession = this.inGameService.getInGameSession(sessionId);
-            if (!inGameSession) throw new Error('Session not found');
-
-            this.inGameService.startGame(sessionId, {
-                endTurnCallback: (updated) => {
-                    this.server.to(inGameSession.id).emit(InGameEvents.TurnEnded, successResponse(updated));
-                },
-                transitionCallback: () => {
-                    this.server.to(inGameSession.id).emit(InGameEvents.TurnTransitionEnded, successResponse({}));
-                    this.server.to(inGameSession.id).emit(InGameEvents.TurnStarted, successResponse({}));
-                },
-                gameOverCallback: (session) => {
-                    this.server.to(session.id).emit(InGameEvents.GameOver, successResponse(session));
-                },
-            });
-
-            this.server.to(inGameSession.id).emit(InGameEvents.TurnStarted, successResponse({}));
+            const started = this.inGameService.startSession(sessionId);
+            this.server.to(started.inGameId).emit(InGameEvents.GameStarted, successResponse(started));
+            this.logger.log(`Game started for session ${started.inGameId}`);
         } catch (error) {
-            socket.emit(InGameEvents.TurnStarted, errorResponse(error.message));
+            socket.emit(InGameEvents.GameStarted, errorResponse(error.message));
         }
     }
 
-    @SubscribeMessage(InGameEvents.TurnEnd)
-    playerEndTurn(socket: Socket, sessionId: string): void {
-        try {
-            const inGameSession = this.inGameService.getInGameSession(sessionId);
-            if (!inGameSession) throw new Error('Session not found');
-
-            this.inGameService.playerEndTurn(sessionId, socket.id, {
-                endTurnCallback: (updated) => {
-                    this.server.to(inGameSession.id).emit(InGameEvents.TurnEnded, successResponse(updated));
-                },
-                transitionCallback: () => {
-                    this.server.to(inGameSession.id).emit(InGameEvents.TurnTransitionEnded, successResponse({}));
-                    this.server.to(inGameSession.id).emit(InGameEvents.TurnStarted, successResponse({}));
-                },
-                gameOverCallback: (session) => {
-                    this.server.to(session.id).emit(InGameEvents.GameOver, successResponse(session));
-                },
-            });
-        } catch (error) {
-            socket.emit(InGameEvents.TurnEnded, errorResponse(error.message));
-        }
-    }
+    // @SubscribeMessage(InGameEvents.TurnEnd)
+    // playerEndTurn(socket: Socket, sessionId: string): void {
+    //     try {
+    //         const session = this.inGameService.getSession(sessionId);
+    //         if (!session) throw new Error('Session not found');
+    //         this.inGameService.playerEndTurn(sessionId, socket.id);
+    //     } catch (error) {
+    //         socket.emit(InGameEvents.TurnEnded, errorResponse(error.message));
+    //     }
+    // }
 
     @SubscribeMessage(InGameEvents.LeaveInGameSession)
     leaveInGameSession(socket: Socket, sessionId: string): void {
         try {
-            const inGameSession = this.inGameService.getInGameSession(sessionId);
-            if (!inGameSession) throw new Error('In game session not found');
-
-            const updated = this.inGameService.leaveInGameSession(sessionId, socket.id);
-            this.server.to(inGameSession.id).emit(InGameEvents.InGameSessionLeft, successResponse<InGameSession>(updated));
-            socket.leave(inGameSession.id);
+            const session = this.inGameService.leaveInGameSession(sessionId, socket.id);
+            socket.leave(session.inGameId);
+            this.server.to(session.inGameId).emit(InGameEvents.LeftInGameSession, successResponse<InGameSession>(session));
+            this.logger.log(`Socket ${socket.id} left session ${session.id}`);
         } catch (error) {
-            socket.emit(InGameEvents.InGameSessionLeft, errorResponse(error.message));
+            socket.emit(InGameEvents.LeftInGameSession, errorResponse(error.message));
         }
+    }
+
+    @OnEvent('turn.started')
+    handleTurnStarted(payload: { session: InGameSession }) {
+        this.server.to(payload.session.inGameId).emit(InGameEvents.TurnStarted, successResponse(payload.session));
+        this.logger.log(`Turn ${payload.session.currentTurn.turnNumber} started for session ${payload.session.id}`);
+    }
+
+    @OnEvent('turn.ended')
+    handleTurnEnded(payload: { session: InGameSession }) {
+        this.server.to(payload.session.inGameId).emit(InGameEvents.TurnEnded, successResponse(payload.session));
+        this.logger.log(`Turn ${payload.session.currentTurn.turnNumber - 1} ended for session ${payload.session.id}`);
+    }
+
+    @OnEvent('turn.transition')
+    handleTurnTransition(payload: { session: InGameSession }) {
+        this.server.to(payload.session.inGameId).emit(InGameEvents.TurnTransitionEnded, successResponse(payload.session));
+        this.logger.log(`Transition → Turn ${payload.session.currentTurn.turnNumber} in session ${payload.session.id}`);
+    }
+
+    @OnEvent('turn.timeout')
+    handleTurnTimeout(payload: { session: InGameSession }) {
+        this.server.to(payload.session.inGameId).emit(InGameEvents.TurnTimeout, successResponse(payload.session));
+        this.logger.warn(`Timeout for session ${payload.session.id}`);
+    }
+
+    @OnEvent('turn.forcedEnd')
+    handleForcedEnd(payload: { session: InGameSession }) {
+        this.server.to(payload.session.inGameId).emit(InGameEvents.TurnForcedEnd, successResponse(payload.session));
+        this.logger.warn(`Forced end of turn for session ${payload.session.id}`);
     }
 }

@@ -1,30 +1,25 @@
 <app-ui-page-layout [hasHeader]="true" [hasFooter]="true" [showBackButton]="true" headerTitle="Session de Jeu" (backClick)="onBack()">
-    <h1>Session de Jeu</h1>
-    <p>Session ID: {{ inGameSession.id }}</p>
-    <p>Game ID: {{ inGameSession.gameId }}</p>
-    <p>Session ID: {{ inGameSession.sessionId }}</p>
-    <p>Map Size: {{ inGameSession.mapSize }}</p>
-    <p>Mode: {{ inGameSession.mode }}</p>
-    <p>Players: {{ inGameSession.players.length }}</p>
-    <p>Start Points: {{ inGameSession.startPoints.length }}</p>
-    <p>Turn Order Index: {{ inGameSession.turnOrderIndex.length }}</p>
-    <p>Current Turn Index: {{ inGameSession.currentTurnIndex }}</p>
-    <p>Current Turn: {{ getCurrentTurn() }}</p>
-    <p>Active Player: {{ getActivePlayerName() }}</p>
-    <p>Turn timer: {{ getTimeRemaining() }}</p>
-    <p>Is Transitioning: {{ getIsTransitioning() }}</p>
-    <p>Is My Turn: {{ getIsMyTurn() }}</p>
-    <button [disabled]="getDisableStartButton()" (click)="onStartTurn()">Start Turn</button>
-    <button [disabled]="!getIsMyTurn()" (click)="onEndTurn()">End my turn</button>
+    <button [disabled]="disableStartButton" (click)="onStartGame()">Start Turn</button>
+    <p>Map Size: {{ inGameService.mapSize() }}</p>
+    <p>Mode: {{ inGameService.mode() }}</p>
+    <p>Turn Number: {{ inGameService.turnNumber() }}</p>
+    <p>Turn Order Player Id: {{ inGameService.turnOrderPlayerId() }}</p>
+    <p>Start Points: {{ inGameService.startPoints() }}</p>
+    <p>Is Game Started: {{ inGameService.isGameStarted() }}</p>
+    <p>Is Transitioning: {{ inGameService.isTransitioning() }}</p>
+    <p>Is My Turn: {{ inGameService.isMyTurn() }}</p>
+    <p>Current Turn: {{ inGameService.currentTurn().activePlayerId }}</p>
+    <p>Time Remaining: {{ inGameService.timeRemaining() }}</p>
+    <!-- <button [disabled]="disableEndButton" (click)="onEndTurn()">End my turn</button> -->
 </app-ui-page-layout>
 
-@if (getIsTransitioning()) {
+@if (inGameService.isTransitioning()) {
 <div class="transition-overlay" (click)="$event.stopPropagation()">
     <div class="transition-modal">
-        <h2>{{ getTransitionMessage() }}</h2>
+        <h2>{{ transitionMessage }}</h2>
 
         <div class="loading-spinner">
-            <p>{{ getTimeRemaining() }}</p>
+            <p>{{ inGameService.timeRemaining() }}</p>
         </div>
     </div>
 </div>
