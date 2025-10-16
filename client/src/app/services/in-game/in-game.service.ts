@@ -5,6 +5,7 @@ import { InGameSession } from '@common/models/session.interface';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { SessionService } from '@app/services/session/session.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { InGamePlayer } from '@common/models/player.interface';
 
 @Injectable({
     providedIn: 'root',
@@ -76,6 +77,14 @@ export class InGameService {
     readonly isTransitioning = computed(() => this._isTransitioning());
     readonly timeRemaining = computed(() => this.timerService.timeRemaining());
     readonly inGamePlayers = computed(() => this._inGameSession().inGamePlayers);
+
+    get activePlayer(): InGamePlayer | undefined {
+        return this.inGamePlayers()[this.currentTurn().activePlayerId];
+    }
+
+    get turnTransitionMessage(): string {
+        return this.isMyTurn() ? "C'est ton tour !" : `C'est le tour de ${this.activePlayer?.name} !`;
+    }
 
     updateInGameSession(data: InGameSession): void {
         this._inGameSession.update((inGameSession) => ({ ...inGameSession, ...data }));

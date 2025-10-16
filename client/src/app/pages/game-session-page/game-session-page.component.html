@@ -1,5 +1,8 @@
 <app-ui-page-layout [hasHeader]="true" [hasFooter]="true" [showBackButton]="true" headerTitle="Session de Jeu" (backClick)="onBack()">
     <button [disabled]="disableStartButton" (click)="onStartGame()">Start Turn</button>
+    <!-- ALL OF THIS CODE IS FOR DEBUGGING PURPOSES, and WILL BE REMOVES / REPLACED -->
+    <!-- IT IS NOT TO BE CONSIDERED AS PART OF THE UI / FINAL PROJECT -->
+    <!-- THE CODING PRACTICES OF THE PROJECT AREN'T FOLLOWED HERE -->
     <p>Map Size: {{ inGameService.mapSize() }}</p>
     <p>Mode: {{ inGameService.mode() }}</p>
     <p>Turn Number: {{ inGameService.turnNumber() }}</p>

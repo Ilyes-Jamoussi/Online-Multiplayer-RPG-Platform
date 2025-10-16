@@ -18,10 +18,7 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
     ) {}
 
     get transitionMessage(): string {
-        return `Tour ${this.inGameService.turnNumber()} - ${
-            this.inGameService.inGamePlayers()[this.inGameService.currentTurn().activePlayerId]?.name ||
-            this.inGameService.currentTurn().activePlayerId
-        }`;
+        return this.inGameService.turnTransitionMessage;
     }
 
     get disableStartButton(): boolean {

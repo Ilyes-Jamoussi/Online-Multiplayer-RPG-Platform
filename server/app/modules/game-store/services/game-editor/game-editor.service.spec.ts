@@ -149,9 +149,9 @@ describe('GameEditorService', () => {
             const preview = await service.patchEditByGameId(id, body);
 
             expect(mockImageService.saveImage).toHaveBeenCalledWith(
-                body.gridPreviewUrl, 
-                expect.stringMatching(new RegExp(`^game-${id}-\\d+-preview\\.png$`)), 
-                'game-previews'
+                body.gridPreviewUrl,
+                expect.stringMatching(new RegExp(`^game-${id}-\\d+-preview\\.png$`)),
+                'game-previews',
             );
 
             expect(mockModel.findByIdAndUpdate).toHaveBeenCalled();
