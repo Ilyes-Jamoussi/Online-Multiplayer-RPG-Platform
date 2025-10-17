@@ -20,7 +20,7 @@ import { Player } from '@common/models/player.interface';
         UiPageLayoutComponent,
         PlayerCardComponent,
         RoomCodeComponent,
-        WaitingRoomActionsComponent
+        WaitingRoomActionsComponent,
     ],
     templateUrl: './waiting-room-page.component.html',
     styleUrls: ['./waiting-room-page.component.scss'],

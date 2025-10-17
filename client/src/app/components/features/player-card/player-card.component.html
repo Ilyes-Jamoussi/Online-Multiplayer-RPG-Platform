@@ -8,11 +8,8 @@
             <h4 class="player-name">{{ player.name }}</h4>
             @if (isAdmin) {
             <span class="badge admin">👑</span>
-            }
-            @if (showKickButton) {
-            <button *ngIf="showKickButton" class="kick-button" (click)="kickPlayer()" aria-label="Retirer ce joueur">
-                Expulser
-            </button>
+            } @if (showKickButton) {
+            <button *ngIf="showKickButton" class="kick-button" (click)="kickPlayer()" aria-label="Retirer ce joueur">Expulser</button>
             }
         </div>
     </div>

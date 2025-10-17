@@ -1,19 +1,43 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
-import { PlayerService } from '@app/services/player/player.service';
+import { ROUTES } from '@app/constants/routes.constants';
+import { InGameService } from '@app/services/in-game/in-game.service';
+import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-game-session-page',
-  imports: [UiPageLayoutComponent],
-  templateUrl: './game-session-page.component.html',
-  styleUrl: './game-session-page.component.scss'
+    selector: 'app-game-session-page',
+    imports: [UiPageLayoutComponent, CommonModule],
+    templateUrl: './game-session-page.component.html',
+    styleUrl: './game-session-page.component.scss',
 })
-export class GameSessionPageComponent {
-  constructor(
-    private readonly playerService: PlayerService,
-  ) {}
+export class GameSessionPageComponent implements OnInit, OnDestroy {
+    constructor(
+        readonly inGameService: InGameService,
+        private readonly router: Router,
+    ) {}
 
-  onBack(): void {
-    this.playerService.leaveSession();
-  }
+    get transitionMessage(): string {
+        return this.inGameService.turnTransitionMessage;
+    }
+
+    get disableStartButton(): boolean {
+        return !this.inGameService.isMyTurn() || this.inGameService.isGameStarted();
+    }
+
+    ngOnInit(): void {
+        this.inGameService.loadInGameSession();
+    }
+
+    ngOnDestroy(): void {
+        this.inGameService.cleanupAll();
+    }
+
+    onStartGame(): void {
+        this.inGameService.startGame();
+    }
+
+    onBack(): void {
+        this.router.navigate([ROUTES.homePage]);
+    }
 }

@@ -12,10 +12,7 @@ import { PlayerService } from '@app/services/player/player.service';
     styleUrl: './join-session-page.component.scss',
 })
 export class JoinSessionPageComponent {
-
-    constructor(
-        private readonly playerService: PlayerService,
-    ) {}
+    constructor(private readonly playerService: PlayerService) {}
     readonly sessionAccessCodeLength = SESSION_ACCESS_CODE_LENGTH;
     sessionAccessCode = '';
 

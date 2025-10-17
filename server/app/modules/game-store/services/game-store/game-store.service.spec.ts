@@ -93,12 +93,12 @@ describe('GameStoreService', () => {
             expect(result).toHaveLength(1);
             expect(result[0]).toEqual({
                 id: mockObjectId.toString(),
-                name: mockGameDocument.name,
-                description: mockGameDocument.description,
-                size: mockGameDocument.size,
-                mode: mockGameDocument.mode,
-                lastModified: mockGameDocument.lastModified,
-                visibility: mockGameDocument.visibility,
+                name: 'Test Game',
+                description: 'Test Description',
+                size: MapSize.MEDIUM,
+                mode: GameMode.CLASSIC,
+                lastModified: mockDate,
+                visibility: true,
             });
         });
 
@@ -118,9 +118,13 @@ describe('GameStoreService', () => {
     describe('createGame', () => {
         it('should create a new draft when no existing draft', async () => {
             const mockGameDocument = createMockGameDocument();
+            const mockGameDocumentWithToObject = {
+                ...mockGameDocument,
+                toObject: jest.fn().mockReturnValue(mockGameDocument),
+            };
 
             (gameModel.findOne as jest.Mock).mockResolvedValue(null);
-            (gameModel.create as jest.Mock).mockResolvedValue(mockGameDocument);
+            (gameModel.create as jest.Mock).mockResolvedValue(mockGameDocumentWithToObject);
 
             const result = await service.createGame(mockCreateGameDto);
 
@@ -138,22 +142,31 @@ describe('GameStoreService', () => {
             const existingDraft = createMockGameDocument({ draft: true });
             const updatedDraft = { ...existingDraft, name: 'Draft Updated' } as Partial<GameDocument>;
 
+            const mockQuery = {
+                lean: jest.fn().mockResolvedValue(updatedDraft),
+            };
+
             (gameModel.findOne as jest.Mock).mockResolvedValue(existingDraft);
-            (gameModel.findByIdAndUpdate as jest.Mock).mockResolvedValue(updatedDraft);
+            (gameModel.findByIdAndUpdate as jest.Mock).mockReturnValue(mockQuery);
 
             const result = await service.createGame(mockCreateGameDto);
 
             expect(gameModel.findOne).toHaveBeenCalledWith({ draft: true });
             expect(gameModel.findByIdAndUpdate).toHaveBeenCalled();
+            expect(mockQuery.lean).toHaveBeenCalled();
             expect(result).toEqual(expect.objectContaining({ id: mockObjectId.toString(), name: updatedDraft.name }));
         });
 
         it('should use default values when name and description are undefined', async () => {
             const dtoWithoutNameDesc = { size: MapSize.SMALL, mode: GameMode.CLASSIC } as CreateGameDto;
             const mockGameDocument = createMockGameDocument();
+            const mockGameDocumentWithToObject = {
+                ...mockGameDocument,
+                toObject: jest.fn().mockReturnValue(mockGameDocument),
+            };
 
             (gameModel.findOne as jest.Mock).mockResolvedValue(null);
-            (gameModel.create as jest.Mock).mockResolvedValue(mockGameDocument);
+            (gameModel.create as jest.Mock).mockResolvedValue(mockGameDocumentWithToObject);
 
             await service.createGame(dtoWithoutNameDesc);
 

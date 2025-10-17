@@ -70,11 +70,10 @@ export class GameEditorService {
 
     private async buildImageUpdate(dto: PatchGameEditorDto, id: string): Promise<Partial<GameDocument>> {
         if (!dto.gridPreviewUrl) return {};
-        
+
         const existingGame = await this.gameModel.findById(id).lean();
-        if (existingGame?.gridPreviewUrl)
-            await this.imageService.deleteImage(existingGame.gridPreviewUrl);
-        
+        if (existingGame?.gridPreviewUrl) await this.imageService.deleteImage(existingGame.gridPreviewUrl);
+
         const filename = `game-${id}-${Date.now()}-preview.png`;
         const gridPreviewUrl = await this.imageService.saveImage(dto.gridPreviewUrl, filename, 'game-previews');
         return { gridPreviewUrl };

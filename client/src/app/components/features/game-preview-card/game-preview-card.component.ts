@@ -14,7 +14,7 @@ import { environment } from '@src/environments/environment';
     imports: [CommonModule, UiIconComponent, UiButtonComponent],
 })
 export class GamePreviewCardComponent {
-    @Input({required: true}) game: GamePreviewDto;
+    @Input({ required: true }) game: GamePreviewDto;
     @Input() isAdmin = false;
 
     @Output() startGame = new EventEmitter<GamePreviewDto>();

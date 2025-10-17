@@ -1,3 +1,29 @@
 <app-ui-page-layout [hasHeader]="true" [hasFooter]="true" [showBackButton]="true" headerTitle="Session de Jeu" (backClick)="onBack()">
-    <h1>Session de Jeu</h1>
+    <button [disabled]="disableStartButton" (click)="onStartGame()">Start Turn</button>
+    <!-- ALL OF THIS CODE IS FOR DEBUGGING PURPOSES, and WILL BE REMOVES / REPLACED -->
+    <!-- IT IS NOT TO BE CONSIDERED AS PART OF THE UI / FINAL PROJECT -->
+    <!-- THE CODING PRACTICES OF THE PROJECT AREN'T FOLLOWED HERE -->
+    <p>Map Size: {{ inGameService.mapSize() }}</p>
+    <p>Mode: {{ inGameService.mode() }}</p>
+    <p>Turn Number: {{ inGameService.turnNumber() }}</p>
+    <p>Turn Order Player Id: {{ inGameService.turnOrderPlayerId() }}</p>
+    <p>Start Points: {{ inGameService.startPoints() }}</p>
+    <p>Is Game Started: {{ inGameService.isGameStarted() }}</p>
+    <p>Is Transitioning: {{ inGameService.isTransitioning() }}</p>
+    <p>Is My Turn: {{ inGameService.isMyTurn() }}</p>
+    <p>Current Turn: {{ inGameService.currentTurn().activePlayerId }}</p>
+    <p>Time Remaining: {{ inGameService.timeRemaining() }}</p>
+    <!-- <button [disabled]="disableEndButton" (click)="onEndTurn()">End my turn</button> -->
 </app-ui-page-layout>
+
+@if (inGameService.isTransitioning()) {
+<div class="transition-overlay" (click)="$event.stopPropagation()">
+    <div class="transition-modal">
+        <h2>{{ transitionMessage }}</h2>
+
+        <div class="loading-spinner">
+            <p>{{ inGameService.timeRemaining() }}</p>
+        </div>
+    </div>
+</div>
+}

@@ -149,9 +149,9 @@ describe('GameEditorService', () => {
             const preview = await service.patchEditByGameId(id, body);
 
             expect(mockImageService.saveImage).toHaveBeenCalledWith(
-                body.gridPreviewUrl, 
-                expect.stringMatching(new RegExp(`^game-${id}-\\d+-preview\\.png$`)), 
-                'game-previews'
+                body.gridPreviewUrl,
+                expect.stringMatching(new RegExp(`^game-${id}-\\d+-preview\\.png$`)),
+                'game-previews',
             );
 
             expect(mockModel.findByIdAndUpdate).toHaveBeenCalled();
@@ -198,8 +198,8 @@ describe('GameEditorService', () => {
             const body = { name: 'duplicate name' };
 
             const conflictingGame = { _id: { toString: (): string => 'otherid' }, name: body.name };
-            mockModel.findOne = jest.fn().mockReturnValue({ 
-                lean: (): { exec: jest.Mock } => ({ exec: jest.fn().mockResolvedValue(conflictingGame) }) 
+            mockModel.findOne = jest.fn().mockReturnValue({
+                lean: (): { exec: jest.Mock } => ({ exec: jest.fn().mockResolvedValue(conflictingGame) }),
             });
 
             await expect(service.patchEditByGameId(id, body)).rejects.toThrow(NAME_ALREADY_EXISTS);

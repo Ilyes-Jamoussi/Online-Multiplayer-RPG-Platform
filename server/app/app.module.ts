@@ -16,7 +16,7 @@ import { MongooseModule } from '@nestjs/mongoose';
             }),
         }),
         GameStoreModule,
-        SessionModule
+        SessionModule,
     ],
     providers: [Logger],
 })
