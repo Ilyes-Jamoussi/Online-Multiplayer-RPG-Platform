@@ -1,53 +1,12 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
-import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION, MILLISECONDS_PER_SECOND } from '@common/constants/in-game';
+import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { InGameSession } from '@common/models/session.interface';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { SessionService } from '@app/services/session/session.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { InGamePlayer } from '@common/models/player.interface';
-
-@Injectable({
-    providedIn: 'root',
-})
-export class TimerService {
-    private readonly _timeRemaining = signal<number>(0);
-    private readonly _isActive = signal<boolean>(false);
-    private timer: number | null = null;
-
-    readonly timeRemaining = this._timeRemaining.asReadonly();
-    readonly isActive = this._isActive.asReadonly();
-
-    startTimer(duration: number): void {
-        this.stopTimer();
-        this._timeRemaining.set(duration / MILLISECONDS_PER_SECOND);
-        this._isActive.set(true);
-
-        this.timer = window.setInterval(() => {
-            const currentTime = this._timeRemaining();
-            if (currentTime <= 1) {
-                this.stopTimer();
-                this._timeRemaining.set(0);
-                this._isActive.set(false);
-            } else {
-                this._timeRemaining.set(currentTime - 1);
-            }
-        }, MILLISECONDS_PER_SECOND);
-    }
-
-    stopTimer(): void {
-        if (this.timer) {
-            window.clearInterval(this.timer);
-            this.timer = null;
-        }
-        this._isActive.set(false);
-    }
-
-    resetTimer(): void {
-        this.stopTimer();
-        this._timeRemaining.set(0);
-    }
-}
+import { TimerService } from '@app/services/timer/timer.service';
 
 @Injectable({
     providedIn: 'root',
