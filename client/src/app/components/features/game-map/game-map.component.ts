@@ -1,5 +1,6 @@
 import { CommonModule, NgStyle } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
+import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
@@ -34,7 +35,7 @@ export class GameMapComponent implements OnInit {
     }
 
     get placedObjectsCount(): number {
-        return this.objects.filter((obj: any) => obj.placed).length;
+        return this.objects.filter((obj: GameEditorPlaceableDto) => obj.placed).length;
     }
 
     get gridStyle() {
@@ -44,7 +45,7 @@ export class GameMapComponent implements OnInit {
         };
     }
 
-    getObjectStyle(obj: any) {
+    getObjectStyle(obj: GameEditorPlaceableDto) {
         const footprint = this.getObjectFootprint(obj.kind);
         return {
             gridColumn: `${obj.x + 1} / span ${footprint}`,
