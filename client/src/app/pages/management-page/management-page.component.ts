@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { GamePreviewCardComponent } from '@app/components/features/game-preview-card/game-preview-card.component';
@@ -13,7 +12,7 @@ import { GameStoreService } from '@app/services/game-store/game-store.service';
     templateUrl: './management-page.component.html',
     styleUrls: ['./management-page.component.scss'],
     standalone: true,
-    imports: [CommonModule, GamePreviewCardComponent, UiPageLayoutComponent, UiButtonComponent],
+    imports: [GamePreviewCardComponent, UiPageLayoutComponent, UiButtonComponent],
 })
 export class ManagementPageComponent implements OnInit {
     get gameDisplays(): Signal<GamePreviewDto[]> {

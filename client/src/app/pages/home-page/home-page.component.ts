@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -10,7 +9,7 @@ import { UiButtonComponent } from '@app/components/ui/button/button.component';
     selector: 'app-home-page',
     templateUrl: './home-page.component.html',
     styleUrls: ['./home-page.component.scss'],
-    imports: [CommonModule, FormsModule, UiButtonComponent, UiPageLayoutComponent],
+    imports: [FormsModule, UiButtonComponent, UiPageLayoutComponent],
     standalone: true,
 })
 export class HomePageComponent {

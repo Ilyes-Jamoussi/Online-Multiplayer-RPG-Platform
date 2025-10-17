@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, Signal } from '@angular/core';
 import { PlayerCardComponent } from '@app/components/features/player-card/player-card.component';
 import { RoomCodeComponent } from '@app/components/features/room-code/room-code.component';
@@ -14,7 +13,6 @@ import { Player } from '@common/models/player.interface';
     selector: 'app-waiting-room-page',
     standalone: true,
     imports: [
-        CommonModule,
         UiButtonComponent,
         UiInputComponent,
         UiPageLayoutComponent,

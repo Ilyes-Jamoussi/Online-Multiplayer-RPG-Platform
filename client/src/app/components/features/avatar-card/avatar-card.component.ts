@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -8,7 +8,7 @@ type AvatarSelectionState = 'available' | 'mine' | 'taken';
 
 @Component({
     selector: 'app-avatar-card',
-    imports: [CommonModule],
+    imports: [NgClass],
     templateUrl: './avatar-card.component.html',
     styleUrls: ['./avatar-card.component.scss'],
 })

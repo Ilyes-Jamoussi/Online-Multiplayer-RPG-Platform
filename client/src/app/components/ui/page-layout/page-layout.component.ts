@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { UiFooterComponent } from '@app/components/ui/footer/footer.component';
 import { UiHeaderComponent } from '@app/components/ui/header/header.component';
@@ -8,7 +8,7 @@ import { UiBaseComponent } from '@app/directives/ui-base/ui-base.component';
 @Component({
     selector: 'app-ui-page-layout',
     standalone: true,
-    imports: [CommonModule, UiHeaderComponent, UiSidebarComponent, UiFooterComponent],
+    imports: [NgClass, UiHeaderComponent, UiSidebarComponent, UiFooterComponent],
     templateUrl: './page-layout.component.html',
     styleUrl: './page-layout.component.scss',
 })

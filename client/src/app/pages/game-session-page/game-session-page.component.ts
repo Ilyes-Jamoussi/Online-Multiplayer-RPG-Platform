@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { ROUTES } from '@app/constants/routes.constants';
@@ -7,7 +6,7 @@ import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-game-session-page',
-    imports: [UiPageLayoutComponent, CommonModule],
+    imports: [UiPageLayoutComponent],
     templateUrl: './game-session-page.component.html',
     styleUrl: './game-session-page.component.scss',
 })

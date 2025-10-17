@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -15,7 +14,7 @@ import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
 @Component({
     selector: 'app-parameters-page',
     standalone: true,
-    imports: [CommonModule, FormsModule, UiButtonComponent, UiIconComponent, UiPageLayoutComponent],
+    imports: [FormsModule, UiButtonComponent, UiIconComponent, UiPageLayoutComponent],
     templateUrl: './parameters-page.component.html',
     styleUrls: ['./parameters-page.component.scss'],
 })

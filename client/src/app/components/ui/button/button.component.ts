@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error' | 'ghost';
@@ -7,7 +6,6 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
 @Component({
     selector: 'app-ui-button',
     standalone: true,
-    imports: [CommonModule],
     templateUrl: './button.component.html',
     styleUrls: ['./button.component.scss'],
 })

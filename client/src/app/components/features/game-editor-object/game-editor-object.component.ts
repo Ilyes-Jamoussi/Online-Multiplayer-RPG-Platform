@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { NgStyle } from '@angular/common';
 import { ChangeDetectionStrategy, Component, HostBinding, Input } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { ToolType } from '@app/interfaces/game-editor.interface';
@@ -9,7 +9,7 @@ import { PlaceableKind, PlaceableLabel } from '@common/enums/placeable-kind.enum
 @Component({
     selector: 'app-editor-placed-object',
     standalone: true,
-    imports: [CommonModule],
+    imports: [NgStyle],
     templateUrl: './game-editor-object.component.html',
     styleUrls: ['./game-editor-object.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
