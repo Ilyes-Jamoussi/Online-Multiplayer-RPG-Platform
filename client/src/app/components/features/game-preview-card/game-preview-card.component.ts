@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiIconComponent } from '@app/components/ui/icon/icon.component';
@@ -11,7 +10,7 @@ import { environment } from '@src/environments/environment';
     templateUrl: './game-preview-card.component.html',
     styleUrls: ['./game-preview-card.component.scss'],
     standalone: true,
-    imports: [CommonModule, UiIconComponent, UiButtonComponent],
+    imports: [UiIconComponent, UiButtonComponent],
 })
 export class GamePreviewCardComponent {
     @Input({ required: true }) game: GamePreviewDto;

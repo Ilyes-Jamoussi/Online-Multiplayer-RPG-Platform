@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { AvatarCardComponent } from '@app/components/features/avatar-card/avatar-card.component';
 import { AssetsService } from '@app/services/assets/assets.service';
@@ -10,7 +9,7 @@ import { AvatarAssignment } from '@common/models/session.interface';
 
 @Component({
     selector: 'app-avatar-grid',
-    imports: [CommonModule, AvatarCardComponent],
+    imports: [AvatarCardComponent],
     templateUrl: './avatar-grid.component.html',
     styleUrls: ['./avatar-grid.component.scss'],
 })

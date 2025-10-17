@@ -1,4 +1,4 @@
-import { CommonModule, Location } from '@angular/common';
+import { Location } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AvatarGridComponent } from '@app/components/features/avatar-grid/avatar-grid.component';
@@ -21,7 +21,6 @@ import { Dice } from '@common/enums/dice.enum';
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
     imports: [
-        CommonModule,
         FormsModule,
         UiButtonComponent,
         UiInputComponent,

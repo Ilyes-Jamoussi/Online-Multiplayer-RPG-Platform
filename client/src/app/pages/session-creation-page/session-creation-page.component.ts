@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { GamePreviewCardComponent } from '@app/components/features/game-preview-card/game-preview-card.component';
@@ -13,7 +12,7 @@ import { SessionService } from '@app/services/session/session.service';
     templateUrl: './session-creation-page.component.html',
     styleUrls: ['./session-creation-page.component.scss'],
     standalone: true,
-    imports: [CommonModule, GamePreviewCardComponent, UiPageLayoutComponent],
+    imports: [GamePreviewCardComponent, UiPageLayoutComponent],
 })
 export class SessionCreationPageComponent implements OnInit {
     constructor(
