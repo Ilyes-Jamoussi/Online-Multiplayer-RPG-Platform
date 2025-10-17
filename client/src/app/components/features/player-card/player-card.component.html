@@ -10,9 +10,7 @@
             <span class="badge admin">👑</span>
             }
             @if (showKickButton) {
-            <button *ngIf="showKickButton" class="kick-button" (click)="kickPlayer()" aria-label="Retirer ce joueur">
-                Expulser
-            </button>
+            <button class="kick-button" (click)="kickPlayer()" aria-label="Retirer ce joueur">Expulser</button>
             }
         </div>
     </div>

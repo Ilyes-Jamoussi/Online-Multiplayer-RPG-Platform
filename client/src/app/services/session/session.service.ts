@@ -4,17 +4,16 @@ import { ROUTES } from '@app/constants/routes.constants';
 import { DEFAULT_SESSION, MIN_SESSION_PLAYERS } from '@app/constants/session.constants';
 import { CreateSessionDto } from '@app/dto/create-session-dto';
 import { JoinSessionDto } from '@app/dto/join-session-dto';
-import { NotificationService } from '@app/services/notification/notification.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
 import { Player } from '@common/models/player.interface';
-import { AvatarAssignment, Session } from '@common/models/session.interface';
-
+import { AvatarAssignment, WaitingRoomSession } from '@common/models/session.interface';
+import { NotificationService } from '@app/services/notification/notification.service';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
-    private readonly _session = signal<Session>({ ...DEFAULT_SESSION });
+    private readonly _session = signal<WaitingRoomSession>({ ...DEFAULT_SESSION });
 
     readonly session = this._session.asReadonly();
     readonly id: Signal<string> = computed(() => this.session().id);
@@ -32,7 +31,7 @@ export class SessionService {
         this.initListeners();
     }
 
-    updateSession(partial: Partial<Session>): void {
+    updateSession(partial: Partial<WaitingRoomSession>): void {
         this._session.update((session) => ({ ...session, ...partial }));
     }
 
@@ -62,7 +61,58 @@ export class SessionService {
         return this.isRoomLocked() && this.players().length >= MIN_SESSION_PLAYERS;
     }
 
-    assignAvatar(playerId: string, avatar: Avatar): void {
+    updateAvatarAssignment(playerId: string, avatar: Avatar, isAdmin: boolean): void {
+        if (isAdmin) this.assignAvatar(playerId, avatar);
+        else this.sessionSocketService.updateAvatarsAssignment({ sessionId: this.id(), avatar });
+    }
+
+    kickPlayer(playerId: string): void {
+        this.sessionSocketService.kickPlayer({ playerId });
+    }
+
+    leaveSession(): void {
+        this.resetSession();
+        this.router.navigate([ROUTES.homePage]);
+        this.sessionSocketService.leaveSession();
+    }
+
+    initializeSessionWithGame(gameId: string, mapSize: MapSize): void {
+        const maxPlayers = MAP_SIZE_TO_MAX_PLAYERS[mapSize];
+        this.updateSession({ gameId, maxPlayers });
+        this.router.navigate([ROUTES.characterCreationPage]);
+    }
+
+    createSession(player: Player): void {
+        const session = this.session();
+        const dto: CreateSessionDto = {
+            gameId: session.gameId,
+            maxPlayers: session.maxPlayers,
+            player,
+        };
+        this.sessionSocketService.createSession(dto);
+    }
+
+    joinSession(player: Player): void {
+        const dto: JoinSessionDto = {
+            sessionId: this.id(),
+            player,
+        };
+        this.sessionSocketService.joinSession(dto);
+    }
+
+    startGameSession(): void {
+        this.sessionSocketService.startGameSession();
+    }
+
+    joinAvatarSelection(sessionId: string): void {
+        this.sessionSocketService.joinAvatarSelection({ sessionId });
+    }
+
+    leaveAvatarSelection(): void {
+        this.sessionSocketService.leaveAvatarSelection({ sessionId: this.id() });
+    }
+
+    private assignAvatar(playerId: string, avatar: Avatar): void {
         const updated = this._session().avatarAssignments.map((assignment) => {
             const isOldChoice = assignment.chosenBy === playerId;
             const isNewChoice = assignment.avatar === avatar;
@@ -75,80 +125,32 @@ export class SessionService {
         this.updateSession({ avatarAssignments: updated });
     }
 
-    kickPlayer(playerId: string): void {
-        this.sessionSocketService.kickPlayer({ playerId });
-    }
-
-    leaveSession(): void {
-        this.sessionSocketService.leaveSession();
-        this.resetSession();
-        this.router.navigate([ROUTES.homePage]);
-    }
-
-    initializeSessionWithGame(gameId: string, mapSize: MapSize): void {
-        const maxPlayers = MAP_SIZE_TO_MAX_PLAYERS[mapSize];
-        this.updateSession({ gameId, maxPlayers });
-    }
-
-    createSession(player: Player): void {
-        const session = this.session();
-        const dto: CreateSessionDto = {
-            gameId: session.gameId,
-            maxPlayers: session.maxPlayers,
-            player
-        };
-        this.sessionSocketService.createSession(dto);
-    }
-
-    joinSession(player: Player): void {
-        const session = this.session();
-        const dto: JoinSessionDto = {
-            sessionId: session.id,
-            player
-        };
-        this.sessionSocketService.joinSession(dto);
-    }
-
-    startGameSession(): void {
-        this.sessionSocketService.startGameSession();
-    }
-
     private initListeners(): void {
-        this.sessionSocketService.onSessionCreated((data) => this.updateSession({ 
-            id: data.sessionId 
-        }));
-
-        this.sessionSocketService.onSessionPlayersUpdated((data) => this.updateSession({ players: data.players }));
-
-        this.sessionSocketService.onSessionJoined((data) => this.updateSession({ 
-            gameId: data.gameId, 
-            maxPlayers: data.maxPlayers 
-        }));
-
         this.sessionSocketService.onAvatarAssignmentsUpdated((data) => this.updateSession({ avatarAssignments: data.avatarAssignments }));
 
-        this.sessionSocketService.onAvatarSelectionJoined((data) => this.updateSession({ id: data.playerId }));
+        this.sessionSocketService.onSessionPlayersUpdated((data) =>
+            this.updateSession({ players: data.players.map((player) => ({ ...player, speed: 0, health: 0, attack: 0, defense: 0 })) }),
+        );
 
         this.sessionSocketService.onGameSessionStarted(() => {
             this.router.navigate([ROUTES.gameSessionPage]);
         });
 
-        this.sessionSocketService.onPlayerKicked((data) => {
-            this.resetSession();
-            this.notificationService.displayError({
-                title: 'Exclusion de la session',
-                message: data.message,
-                redirectRoute: ROUTES.homePage,
-            });
+        this.sessionSocketService.onSessionJoined((data) => {
+            this.updateSession({ gameId: data.gameId, maxPlayers: data.maxPlayers });
+            this.router.navigate([ROUTES.waitingRoomPage]);
         });
 
-        this.sessionSocketService.onSessionEnded((data) => {
-            this.resetSession();
-            this.notificationService.displayError({
-                title: 'Session terminée',
-                message: data.message,
-                redirectRoute: ROUTES.homePage,
-            });
+        this.sessionSocketService.onSessionCreatedError((error) => {
+            this.notificationService.displayError({ title: 'Erreur de création', message: error });
+        });
+
+        this.sessionSocketService.onSessionJoinError((msg) => {
+            this.notificationService.displayError({ title: 'Erreur', message: msg });
+        });
+
+        this.sessionSocketService.onAvatarSelectionJoinError((msg) => {
+            this.notificationService.displayError({ title: 'Erreur de connexion', message: msg });
         });
     }
 }

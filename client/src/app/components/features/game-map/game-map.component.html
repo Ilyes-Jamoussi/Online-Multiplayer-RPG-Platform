@@ -39,6 +39,27 @@
                     }
                 }
             </div>
+
+            <!-- Overlay des joueurs -->
+            <div
+                class="players-overlay"
+                [ngStyle]="gridStyle"
+            >
+                @for (player of players; track player.id) {
+                    <div 
+                        class="map-player"
+                        [ngStyle]="getPlayerStyle(player)"
+                        [title]="player.name"
+                    >
+                        <img 
+                            [src]="getPlayerAvatarImage(player.id)" 
+                            [alt]="player.name"
+                            class="player-avatar"
+                            draggable="false"
+                        />
+                    </div>
+                }
+            </div>
         </div>
     } @else {
         <div class="empty">

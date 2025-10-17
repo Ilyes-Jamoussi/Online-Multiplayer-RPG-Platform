@@ -21,7 +21,7 @@ export class GameStoreService {
     ) {}
 
     async getGames(): Promise<GamePreviewDto[]> {
-        const games = await this.gameModel.find({ draft: false }, getProjection('displayGameDto')).sort({ createdAt: -1 }).lean();
+        const games = await this.gameModel.find({ draft: false }, getProjection('displayGameDto')).sort({ createdAt: 1 }).lean();
         return games.map((game) => this.gameDtoMapper.toGamePreviewDto(game));
     }
 
@@ -62,7 +62,7 @@ export class GameStoreService {
         const defaultObjects = makeDefaultPlaceables(dto.size, dto.mode);
         const defaultTiles = makeDefaultTiles(dto.size);
 
-        const newDraft: GameDocument = {
+        const newDraft = {
             ...dto,
             name: dto?.name || DEFAULT_DRAFT_GAME_NAME,
             description: dto?.description || DEFAULT_DRAFT_GAME_DESCRIPTION,
@@ -73,27 +73,29 @@ export class GameStoreService {
             createdAt: new Date(),
             gridPreviewUrl: '',
             draft: true,
-        } as GameDocument;
+        };
 
         const createdGame = await this.gameModel.create(newDraft);
-        return this.gameDtoMapper.toGamePreviewDto(createdGame);
+        return this.gameDtoMapper.toGamePreviewDto(createdGame.toObject());
     }
 
     private async updateDraftGame(id: string, dto: CreateGameDto): Promise<GamePreviewDto> {
         const defaultObjects = makeDefaultPlaceables(dto.size, dto.mode);
         const defaultTiles = makeDefaultTiles(dto.size);
 
-        const updatedDraft = await this.gameModel.findByIdAndUpdate(
-            id,
-            {
-                ...dto,
-                tiles: defaultTiles,
-                objects: defaultObjects,
-                lastModified: new Date(),
-                gridPreviewUrl: '',
-            },
-            { new: true },
-        );
+        const updatedDraft = await this.gameModel
+            .findByIdAndUpdate(
+                id,
+                {
+                    ...dto,
+                    tiles: defaultTiles,
+                    objects: defaultObjects,
+                    lastModified: new Date(),
+                    gridPreviewUrl: '',
+                },
+                { new: true },
+            )
+            .lean();
 
         return this.gameDtoMapper.toGamePreviewDto(updatedDraft);
     }

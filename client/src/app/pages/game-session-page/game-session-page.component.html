@@ -17,4 +17,30 @@
             [activePlayer]="activePlayer">
         </app-game-info>
     }
+
+    <!-- Game controls -->
+    <div class="game-controls">
+        <button [disabled]="disableStartButton" (click)="onStartGame()">Démarrer le tour</button>
+        
+        <!-- Debug info (à supprimer en production) -->
+        <div class="debug-info">
+            <p>Taille de carte: {{ inGameService.mapSize() }}</p>
+            <p>Mode: {{ inGameService.mode() }}</p>
+            <p>Numéro de tour: {{ inGameService.turnNumber() }}</p>
+            <p>Jeu démarré: {{ inGameService.isGameStarted() }}</p>
+            <p>Mon tour: {{ inGameService.isMyTurn() }}</p>
+            <p>Temps restant: {{ inGameService.timeRemaining() }}</p>
+        </div>
+    </div>
 </app-ui-page-layout>
+
+@if (inGameService.isTransitioning()) {
+<div class="transition-overlay" (click)="$event.stopPropagation()">
+    <div class="transition-modal">
+        <h2>{{ transitionMessage }}</h2>
+        <div class="loading-spinner">
+            <p>{{ inGameService.timeRemaining() }}</p>
+        </div>
+    </div>
+</div>
+}

@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, Signal } from '@angular/core';
 import { PlayerCardComponent } from '@app/components/features/player-card/player-card.component';
 import { RoomCodeComponent } from '@app/components/features/room-code/room-code.component';
@@ -14,21 +13,20 @@ import { Player } from '@common/models/player.interface';
     selector: 'app-waiting-room-page',
     standalone: true,
     imports: [
-        CommonModule,
         UiButtonComponent,
         UiInputComponent,
         UiPageLayoutComponent,
         PlayerCardComponent,
         RoomCodeComponent,
-        WaitingRoomActionsComponent
+        WaitingRoomActionsComponent,
     ],
     templateUrl: './waiting-room-page.component.html',
     styleUrls: ['./waiting-room-page.component.scss'],
 })
 export class WaitingRoomPageComponent {
     constructor(
+        private readonly playerService: PlayerService,
         private readonly sessionService: SessionService,
-        private readonly playerService: PlayerService
     ) {}
 
     get players(): Signal<Player[]> {
@@ -48,7 +46,6 @@ export class WaitingRoomPageComponent {
     // }
 
     onBack(): void {
-        this.sessionService.leaveSession();
-        this.playerService.resetPlayer();
+        this.playerService.leaveSession();
     }
 }

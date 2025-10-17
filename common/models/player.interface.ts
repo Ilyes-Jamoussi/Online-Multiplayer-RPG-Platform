@@ -5,4 +5,15 @@ export interface Player {
     name: string;
     avatar: Avatar | null;
     isAdmin: boolean;
+    speed: number;
+    health: number;
+    attack: number;
+    defense: number;
+}
+
+export interface InGamePlayer extends Player {
+    x: number;
+    y: number;
+    joined: boolean;
+    startPointId: string;
 }

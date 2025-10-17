@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -8,12 +8,12 @@ import { Player } from '@common/models/player.interface';
 @Component({
     selector: 'app-player-card',
     standalone: true,
-    imports: [CommonModule],
+    imports: [NgClass],
     templateUrl: './player-card.component.html',
     styleUrl: './player-card.component.scss',
 })
 export class PlayerCardComponent {
-    @Input({required: true}) player: Player;
+    @Input({ required: true }) player: Player;
 
     constructor(
         private readonly playerService: PlayerService,

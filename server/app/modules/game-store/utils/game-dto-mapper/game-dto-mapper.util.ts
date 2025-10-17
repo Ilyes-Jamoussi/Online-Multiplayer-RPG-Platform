@@ -3,10 +3,11 @@ import { GamePreviewDto } from '@app/modules/game-store/dto/game-preview.dto';
 import { GameDocument } from '@app/modules/game-store/entities/game.entity';
 import { DEFAULT_DRAFT_GAME_DESCRIPTION, DEFAULT_DRAFT_GAME_NAME } from '@common/constants/game.constants';
 import { Injectable } from '@nestjs/common';
+import { FlattenMaps } from 'mongoose';
 
 @Injectable()
 export class GameDtoMapper {
-    toGameEditorDto(game: GameDocument): GameEditorDto {
+    toGameEditorDto(game: FlattenMaps<GameDocument>): GameEditorDto {
         return {
             id: game._id.toString(),
             lastModified: game.lastModified,
@@ -23,7 +24,7 @@ export class GameDtoMapper {
         };
     }
 
-    toGamePreviewDto(game: GameDocument): GamePreviewDto {
+    toGamePreviewDto(game: FlattenMaps<GameDocument>): GamePreviewDto {
         return {
             id: game._id.toString(),
             name: game.name,

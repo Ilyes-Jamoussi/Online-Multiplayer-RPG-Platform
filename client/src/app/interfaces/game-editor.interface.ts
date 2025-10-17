@@ -87,4 +87,5 @@ export type ToolbarItem = {
     image: string;
     tileKind: TileKind;
     class: string;
+    disabled?: boolean;
 };

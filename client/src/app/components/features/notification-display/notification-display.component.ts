@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
@@ -7,7 +7,7 @@ import { NotificationService } from '@app/services/notification/notification.ser
 @Component({
     selector: 'app-notification-display',
     standalone: true,
-    imports: [CommonModule, MatIconModule],
+    imports: [NgClass, MatIconModule],
     templateUrl: './notification-display.component.html',
     styleUrls: ['./notification-display.component.scss'],
 })

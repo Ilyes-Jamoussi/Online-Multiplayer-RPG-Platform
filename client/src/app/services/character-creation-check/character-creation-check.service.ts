@@ -8,18 +8,18 @@ import { Avatar } from '@common/enums/avatar.enum';
 export class CharacterCreationCheckService {
     constructor(
         private readonly characterEditorService: CharacterEditorService,
-        private readonly playerService: PlayerService
+        private readonly playerService: PlayerService,
     ) {}
 
     private readonly validationProblems = computed(() => {
         const character = this.characterEditorService.character();
-        const name = character.name.trim();
+        const name = character?.name?.trim() || '';
         const selectedAvatar = this.playerService.avatar();
 
         return {
             nameValidation: this.checkNameValidation(name),
             avatarSelection: this.checkAvatarSelection(selectedAvatar),
-            bonusSelection: this.checkBonusSelection(character.bonus),
+            bonusSelection: this.checkBonusSelection(character?.bonus || null),
         };
     });
 

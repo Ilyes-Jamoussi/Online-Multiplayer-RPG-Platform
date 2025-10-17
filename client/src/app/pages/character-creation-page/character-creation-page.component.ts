@@ -1,26 +1,19 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Location } from '@angular/common';
+import { Component, OnInit, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { AvatarGridComponent } from '@app/components/features/avatar-grid/avatar-grid.component';
 import { ErrorsBadgeComponent } from '@app/components/features/errors-badge/errors-badge.component';
 import { StatsBarComponent } from '@app/components/features/stats-bar/stats-bar.component';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiInputComponent } from '@app/components/ui/input/input.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
-import { ROUTES } from '@app/constants/routes.constants';
 import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@app/constants/validation.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { CharacterEditorService } from '@app/services/character-editor/character-editor.service';
-import { CharacterStoreService } from '@app/services/character-store/character-store.service';
-import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
-import { SessionService } from '@app/services/session/session.service';
 import { BonusType } from '@common/enums/character-creation.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { Player } from '@common/models/player.interface';
 
 @Component({
     standalone: true,
@@ -28,12 +21,17 @@ import { Player } from '@common/models/player.interface';
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
     imports: [
-        CommonModule, FormsModule, UiButtonComponent, UiInputComponent, 
-        UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent, AvatarGridComponent
+        FormsModule,
+        UiButtonComponent,
+        UiInputComponent,
+        UiPageLayoutComponent,
+        StatsBarComponent,
+        ErrorsBadgeComponent,
+        AvatarGridComponent,
     ],
     providers: [CharacterCreationCheckService, CharacterEditorService],
 })
-export class CharacterCreationPageComponent {
+export class CharacterCreationPageComponent implements OnInit {
     readonly dice = Dice;
     readonly bonusType = BonusType;
     readonly characterNameMinLength = NAME_MIN_LENGTH;
@@ -44,41 +42,46 @@ export class CharacterCreationPageComponent {
         private readonly characterCreationCheckService: CharacterCreationCheckService,
         private readonly characterEditorService: CharacterEditorService,
         private readonly playerService: PlayerService,
-        private readonly sessionSocketService: SessionSocketService
+        private readonly location: Location,
     ) {
-        this.characterStoreService = inject(CharacterStoreService);
-        this.sessionService = inject(SessionService);
-        this.notificationService = inject(NotificationService);
-        this.router = inject(Router);
+        // Synchroniser l'avatar PlayerService -> CharacterEditorService
+        effect(() => {
+            const playerAvatar = this.playerService.avatar();
+            if (playerAvatar) {
+                this.characterEditorService.avatar = playerAvatar;
+            }
+        });
     }
 
-    private readonly characterStoreService = inject(CharacterStoreService);
-    private readonly sessionService = inject(SessionService);
-    private readonly notificationService = inject(NotificationService);
-    private readonly router = inject(Router);
+    ngOnInit(): void {
+        const currentAvatar = this.playerService.avatar();
+        if (currentAvatar) {
+            this.characterEditorService.avatar = currentAvatar;
+        }
+    }
 
     get isLifeBonusSelected(): boolean {
-        return this.character.bonus === BonusType.Life;
+        return this.character?.bonus === BonusType.Life || false;
     }
 
     get isSpeedBonusSelected(): boolean {
-        return this.character.bonus === BonusType.Speed;
+        return this.character?.bonus === BonusType.Speed || false;
     }
 
     get isAttackD4Selected(): boolean {
-        return this.character.diceAssignment.attack === Dice.D4;
+        return this.character?.diceAssignment.attack === Dice.D4 || false;
     }
 
     get isAttackD6Selected(): boolean {
-        return this.character.diceAssignment.attack === Dice.D6;
+        return this.character?.diceAssignment.attack === Dice.D6 || false;
     }
 
     get isDefenseD4Selected(): boolean {
-        return this.character.diceAssignment.defense === Dice.D4;
+        return this.character?.diceAssignment.defense === Dice.D4 || false;
     }
 
     get isDefenseD6Selected(): boolean {
-        return this.character.diceAssignment.defense === Dice.D6;
+        return this.character?.diceAssignment.defense === Dice.D6 || false;
     }
 
     get character() {
@@ -115,49 +118,25 @@ export class CharacterCreationPageComponent {
 
     generateRandomCharacter(): void {
         this.characterEditorService.generateRandom();
+        const avatar = this.characterEditorService.character()?.avatar;
+        if (avatar) {
+            this.playerService.selectAvatar(avatar);
+        }
     }
 
     onSubmit(): void {
-        this.characterStoreService.setCharacter(this.character);
+        const character = this.character;
+        if (!character) return;
         
-        const playerUpdate: Partial<Player> = { name: this.character.name };
-        if (this.character.avatar) {
-            playerUpdate.avatar = this.character.avatar;
-        }
-        
-        this.playerService.updatePlayer(playerUpdate);
+        // Stocker le personnage dans PlayerService
+        this.playerService.setCharacter(character);
 
-        if (this.isPlayerAdmin) {
-            this.handleAdminCreation();
-        } else {
-            this.handlePlayerJoin();
-        }
+        if (this.isPlayerAdmin) this.playerService.createSession();
+        else this.playerService.joinSession();
     }
 
-    private handleAdminCreation(): void {
-        this.sessionService.createSession(this.playerService.player());
-
-        this.sessionSocketService.onSessionCreated((data) => {
-            this.sessionService.updateSession({ id: data.sessionId });
-            this.playerService.updatePlayer({ id: data.playerId });
-            this.router.navigate([ROUTES.waitingRoomPage]);
-        });
-
-        this.sessionSocketService.onSessionCreatedError((error) => {
-            this.notificationService.displayError({ title: 'Erreur de création', message: error });
-        });
-    }
-
-    private handlePlayerJoin(): void {
-        this.sessionService.joinSession(this.playerService.player());
-
-        this.sessionSocketService.onSessionJoined(() => {
-            this.router.navigate([ROUTES.waitingRoomPage]);
-        });
-
-        this.sessionSocketService.onSessionJoinError((msg) => {
-            this.notificationService.displayError({ title: 'Erreur', message: msg });
-        });
+    onBack(): void {
+        this.playerService.leaveAvatarSelection();
+        this.location.back();
     }
 }
-

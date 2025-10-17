@@ -1,11 +1,11 @@
-import { CommonModule } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { UiBaseComponent } from '@app/directives/ui-base/ui-base.component';
 
 @Component({
     selector: 'app-ui-sidebar',
     standalone: true,
-    imports: [CommonModule],
+    imports: [NgClass],
     templateUrl: './sidebar.component.html',
     styleUrl: './sidebar.component.scss',
 })
