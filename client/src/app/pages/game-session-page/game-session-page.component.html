@@ -1,4 +1,6 @@
 <app-ui-page-layout [hasHeader]="true" [hasFooter]="false" [showBackButton]="true" headerTitle="Session de Jeu" (backClick)="onBack()">
+    <app-game-timer></app-game-timer>
+    
     <div class="game-session-content">
         @if (gameId()) {
             <app-game-map [gameId]="gameId()"></app-game-map>
@@ -11,6 +13,7 @@
     </div>
     
     @if (gameId()) {
+        <app-players-list></app-players-list>
         <app-player-info></app-player-info>
         <app-game-info 
             [mapSize]="mapSize" 
@@ -20,7 +23,8 @@
 
     <!-- Game controls -->
     <div class="game-controls">
-        <button [disabled]="disableStartButton" (click)="onStartGame()">Démarrer le tour</button>
+        <button [disabled]="!inGameService.isMyTurn() || !inGameService.isGameStarted()" (click)="onEndTurn()">Terminer le tour</button>
+        <button class="abandon-button" (click)="onAbandonGame()">Abandonner la partie</button>
         
         <!-- Debug info (à supprimer en production) -->
         <div class="debug-info">

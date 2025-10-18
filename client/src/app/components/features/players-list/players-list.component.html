@@ -1,0 +1,35 @@
+<div class="players-list">
+    <h3>Joueurs</h3>
+    <div class="players-container">
+        @for (player of orderedPlayers(); track player.id) {
+            <div class="player-item" 
+                 [class.active]="isActivePlayer(player)"
+                 [class.current-user]="isCurrentUser(player)"
+                 [class.abandoned]="hasAbandoned(player)">
+                
+                <div class="player-info">
+                    <span class="player-name" [class.strikethrough]="hasAbandoned(player)">
+                        {{ player.name }}
+                    </span>
+                    
+                    <div class="player-badges">
+                        @if (isAdmin(player)) {
+                            <span class="badge admin">👑</span>
+                        }
+                        @if (isActivePlayer(player)) {
+                            <span class="badge active">Tour actuel</span>
+                        }
+                        @if (hasAbandoned(player)) {
+                            <span class="badge abandoned">Abandonné</span>
+                        }
+                    </div>
+                </div>
+                
+                <div class="combat-wins">
+                    <span class="wins-count">{{ getCombatWins() }}</span>
+                    <span class="wins-label">victoires</span>
+                </div>
+            </div>
+        }
+    </div>
+</div>

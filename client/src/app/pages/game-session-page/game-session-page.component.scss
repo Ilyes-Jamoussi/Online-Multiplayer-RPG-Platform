@@ -3,6 +3,14 @@
     flex-direction: column;
     height: 100%;
     padding: 1rem;
+    position: relative;
+}
+
+app-players-list {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 200;
 }
 
 .loading, .error {
@@ -72,6 +80,14 @@
         
         &:hover:not(:disabled) {
             background: #2980b9;
+        }
+
+        &.abandon-button {
+            background: #e74c3c;
+            
+            &:hover:not(:disabled) {
+                background: #c0392b;
+            }
         }
     }
 }
