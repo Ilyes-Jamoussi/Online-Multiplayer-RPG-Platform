@@ -90,4 +90,29 @@ export class InGameService {
 
         return session;
     }
+
+    endPlayerTurn(sessionId: string, playerId: string): InGameSession {
+        const session = this.sessionRepository.findById(sessionId);
+        if (session.currentTurn.activePlayerId !== playerId) {
+            throw new BadRequestException('Not your turn');
+        }
+        this.turnEngine.endTurnManual(session);
+        return session;
+    }
+
+    abandonGame(sessionId: string, playerId: string): { session: InGameSession; playerName: string } {
+        const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        
+        const playerName = player.name;
+        player.joined = false;
+
+        const joinedPlayers = Object.values(session.inGamePlayers).filter((p) => p.joined);
+        if (joinedPlayers.length < 2) {
+            this.turnEngine.forceStopTimer(sessionId);
+        }
+
+        return { session, playerName };
+    }
 }

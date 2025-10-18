@@ -48,17 +48,6 @@ export class InGameGateway {
         }
     }
 
-    // @SubscribeMessage(InGameEvents.TurnEnd)
-    // playerEndTurn(socket: Socket, sessionId: string): void {
-    //     try {
-    //         const session = this.inGameService.getSession(sessionId);
-    //         if (!session) throw new Error('Session not found');
-    //         this.inGameService.playerEndTurn(sessionId, socket.id);
-    //     } catch (error) {
-    //         socket.emit(InGameEvents.TurnEnded, errorResponse(error.message));
-    //     }
-    // }
-
     @SubscribeMessage(InGameEvents.LeaveInGameSession)
     leaveInGameSession(socket: Socket, sessionId: string): void {
         try {
@@ -66,6 +55,29 @@ export class InGameGateway {
             socket.leave(session.inGameId);
             this.server.to(session.inGameId).emit(InGameEvents.LeftInGameSession, successResponse<InGameSession>(session));
             this.logger.log(`Socket ${socket.id} left session ${session.id}`);
+        } catch (error) {
+            socket.emit(InGameEvents.LeftInGameSession, errorResponse(error.message));
+        }
+    }
+
+    @SubscribeMessage(InGameEvents.PlayerEndTurn)
+    playerEndTurn(socket: Socket, sessionId: string): void {
+        try {
+            const session = this.inGameService.endPlayerTurn(sessionId, socket.id);
+            this.server.to(session.inGameId).emit(InGameEvents.TurnEnded, successResponse(session));
+            this.logger.log(`Player ${socket.id} ended turn in session ${session.id}`);
+        } catch (error) {
+            socket.emit(InGameEvents.TurnEnded, errorResponse(error.message));
+        }
+    }
+
+    @SubscribeMessage(InGameEvents.PlayerAbandonGame)
+    playerAbandonGame(socket: Socket, sessionId: string): void {
+        try {
+            const result = this.inGameService.abandonGame(sessionId, socket.id);
+            socket.leave(result.session.inGameId);
+            this.server.to(result.session.inGameId).emit(InGameEvents.PlayerAbandoned, successResponse(result));
+            this.logger.log(`Player ${result.playerName} abandoned game in session ${sessionId}`);
         } catch (error) {
             socket.emit(InGameEvents.LeftInGameSession, errorResponse(error.message));
         }
