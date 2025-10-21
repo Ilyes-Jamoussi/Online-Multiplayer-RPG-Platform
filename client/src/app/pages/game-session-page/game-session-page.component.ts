@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, Signal } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { GameInfoComponent } from '@app/components/features/game-info/game-info.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
@@ -11,21 +11,22 @@ import { ROUTES } from '@app/constants/routes.constants';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { SessionService } from '@app/services/session/session.service';
+import { MapSize } from '@common/enums/map-size.enum';
 
 @Component({
     selector: 'app-game-session-page',
     imports: [
-        CommonModule, 
-        UiPageLayoutComponent, 
-        GameMapComponent, 
-        GameInfoComponent, 
-        PlayerInfoComponent, 
-        PlayersListComponent, 
-        GameTimerComponent
+        CommonModule,
+        UiPageLayoutComponent,
+        GameMapComponent,
+        GameInfoComponent,
+        PlayerInfoComponent,
+        PlayersListComponent,
+        GameTimerComponent,
     ],
     templateUrl: './game-session-page.component.html',
     styleUrl: './game-session-page.component.scss',
-    providers: [GameMapService]
+    providers: [GameMapService],
 })
 export class GameSessionPageComponent implements OnInit, OnDestroy {
     constructor(
@@ -35,8 +36,8 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         private readonly router: Router,
     ) {}
 
-    get gameId(): Signal<string> {
-        return this.sessionService.gameId;
+    get gameId(): string {
+        return this.sessionService.gameId();
     }
 
     get mapSize() {
@@ -53,6 +54,34 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
 
     get disableStartButton(): boolean {
         return !this.inGameService.isMyTurn() || this.inGameService.isGameStarted();
+    }
+
+    get isMyTurn(): boolean {
+        return this.inGameService.isMyTurn();
+    }
+
+    get isGameStarted(): boolean {
+        return this.inGameService.isGameStarted();
+    }
+
+    get mapSizeValue(): MapSize {
+        return this.inGameService.mapSize();
+    }
+
+    get mode(): string {
+        return this.inGameService.mode();
+    }
+
+    get turnNumber(): number {
+        return this.inGameService.turnNumber();
+    }
+
+    get timeRemaining(): number {
+        return this.inGameService.timeRemaining();
+    }
+
+    get isTransitioning(): boolean {
+        return this.inGameService.isTransitioning();
     }
 
     ngOnInit(): void {
