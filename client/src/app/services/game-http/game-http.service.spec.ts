@@ -95,7 +95,7 @@ describe('GameHttpService', () => {
                 expect(editor).toEqual(mockEditor);
             });
 
-            const req = httpMock.expectOne(`${gamesEndpoint}/${id}/editor/`);
+            const req = httpMock.expectOne(`${gamesEndpoint}/${id}/editor`);
             expect(req.request.method).toBe('GET');
             req.flush(mockEditor);
         });

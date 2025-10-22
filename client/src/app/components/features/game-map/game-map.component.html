@@ -1,0 +1,68 @@
+<div class="game-map-wrapper">
+    @if (tiles.length > 0) {
+        <div class="map-container">
+            <div
+                class="map-grid"
+                [ngStyle]="gridStyle"
+            >
+                @for (tile of tiles; track tile.x + '-' + tile.y) {
+                    <div 
+                        class="map-tile"
+                    >
+                        <img 
+                            [src]="getTileImage(tile.kind, tile.open)" 
+                            [alt]="tile.kind"
+                            class="tile-image"
+                            draggable="false"
+                        />
+                    </div>
+                }
+            </div>
+            
+            <div
+                class="objects-overlay"
+                [ngStyle]="gridStyle"
+            >
+                @for (obj of objects; track obj.id) {
+                    @if (obj.placed) {
+                        <div 
+                            class="map-object"
+                            [ngStyle]="getObjectStyle(obj)"
+                        >
+                            <img 
+                                [src]="getPlaceableImage(obj.kind)" 
+                                [alt]="obj.kind"
+                                class="object-image"
+                                draggable="false"
+                            />
+                        </div>
+                    }
+                }
+            </div>
+
+            <div
+                class="players-overlay"
+                [ngStyle]="gridStyle"
+            >
+                @for (player of players; track player.id) {
+                    <div 
+                        class="map-player"
+                        [ngStyle]="getPlayerStyle(player)"
+                        [title]="player.name"
+                    >
+                        <img 
+                            [src]="getPlayerAvatarImage(player.id)" 
+                            [alt]="player.name"
+                            class="player-avatar"
+                            draggable="false"
+                        />
+                    </div>
+                }
+            </div>
+        </div>
+    } @else {
+        <div class="empty">
+            <p>Aucune donnée de carte disponible</p>
+        </div>
+    }
+</div>

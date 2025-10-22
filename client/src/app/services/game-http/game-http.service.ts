@@ -21,7 +21,7 @@ export class GameHttpService {
     }
 
     getGameEditorById(id: string): Observable<GameEditorDto> {
-        return this.http.get<GameEditorDto>(`${this.gamesEndpoint}/${id}/editor/`);
+        return this.http.get<GameEditorDto>(`${this.gamesEndpoint}/${id}/editor`);
     }
 
     patchGameEditorById(id: string, dto: PatchGameEditorDto): Observable<GamePreviewDto> {

@@ -1,5 +1,7 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, signal, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
+import { ROUTES } from '@app/constants/routes.constants';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { InGameSession } from '@common/models/session.interface';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
@@ -7,6 +9,7 @@ import { SessionService } from '@app/services/session/session.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { InGamePlayer } from '@common/models/player.interface';
 import { TimerService } from '@app/services/timer/timer.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 
 @Injectable({
     providedIn: 'root',
@@ -15,12 +18,14 @@ export class InGameService {
     private readonly _inGameSession = signal<InGameSession>(DEFAULT_IN_GAME_SESSION);
     private readonly _isTransitioning = signal<boolean>(false);
     private readonly _isGameStarted = signal<boolean>(false);
+    private readonly router = inject(Router);
 
     constructor(
         private readonly inGameSocketService: InGameSocketService,
         private readonly sessionService: SessionService,
         private readonly timerService: TimerService,
         private readonly playerService: PlayerService,
+        private readonly notificationService: NotificationService,
     ) {
         this.initListeners();
     }
@@ -55,6 +60,16 @@ export class InGameService {
 
     startGame(): void {
         this.inGameSocketService.playerStartGame(this.sessionService.id());
+    }
+
+    endTurn(): void {
+        this.inGameSocketService.playerEndTurn(this.sessionService.id());
+    }
+
+    abandonGame(): void {
+        this.inGameSocketService.playerAbandonGame(this.sessionService.id());
+        this.cleanupAll();
+        this.router.navigate([ROUTES.homePage]);
     }
 
     startTurnTimer(): void {
@@ -116,6 +131,14 @@ export class InGameService {
         this.inGameSocketService.onLeftInGameSession((data) => {
             this.updateInGameSession(data);
             this.cleanupAll();
+        });
+
+        this.inGameSocketService.onPlayerAbandoned((data) => {
+            this.updateInGameSession(data.session);
+            this.notificationService.displayInformation({
+                title: 'Joueur parti',
+                message: `${data.playerName} a abandonné la partie`
+            });
         });
     }
 }

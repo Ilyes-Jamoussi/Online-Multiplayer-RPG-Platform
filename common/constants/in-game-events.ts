@@ -23,4 +23,8 @@ export enum InGameEvents {
 
     LeaveInGameSession = 'leaveInGameSession',
     LeftInGameSession = 'leftInGameSession',
+    
+    PlayerEndTurn = 'playerEndTurn',
+    PlayerAbandonGame = 'playerAbandonGame',
+    PlayerAbandoned = 'playerAbandoned',
 }

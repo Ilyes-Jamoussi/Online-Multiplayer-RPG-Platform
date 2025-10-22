@@ -1,0 +1,45 @@
+<div class="player-info-panel">
+    <div class="player-header">
+        <img [src]="avatarImage" [alt]="characterName" class="avatar">
+        <h3>{{ characterName }}</h3>
+    </div>
+    
+    <div class="stats-section">
+        <div class="stat-item hp">
+            <span class="label">Vie :</span>
+            <span class="value">{{ currentHP }}/{{ maxHP }}</span>
+        </div>
+        
+        <div class="stat-item">
+            <span class="label">Rapidité :</span>
+            <span class="value">{{ currentSpeed }}/{{ maxSpeed }}</span>
+        </div>
+        
+        <div class="stat-item">
+            <span class="label">Attaque :</span>
+            <span class="value">{{ attackValue }} ({{ attackDice }})</span>
+        </div>
+        
+        <div class="stat-item">
+            <span class="label">Défense :</span>
+            <span class="value">{{ defenseValue }} ({{ defenseDice }})</span>
+        </div>
+    </div>
+    
+    <div class="turn-section">
+        <div class="stat-item">
+            <span class="label">Mouvement :</span>
+            <span class="value">{{ movementPoints }}</span>
+        </div>
+        
+        <div class="stat-item">
+            <span class="label">Mouvement bonus :</span>
+            <span class="value">{{ bonusMovementPoints }}</span>
+        </div>
+        
+        <div class="stat-item">
+            <span class="label">Actions :</span>
+            <span class="value">{{ actionsRemaining }}</span>
+        </div>
+    </div>
+</div>

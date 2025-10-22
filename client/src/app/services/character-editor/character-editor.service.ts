@@ -7,7 +7,7 @@ import { Dice } from '@common/enums/dice.enum';
 import { Character } from '@common/interfaces/character.interface';
 
 @Injectable()
-export class CharacterStoreService {
+export class CharacterEditorService {
     private readonly _name = signal('');
     private readonly _avatar = signal<Avatar | null>(null);
     private readonly _bonus = signal<BonusType | null>(null);
