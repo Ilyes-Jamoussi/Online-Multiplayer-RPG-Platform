@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SocketService } from '@app/services/socket/socket.service';
 import { InGameEvents } from '@common/constants/in-game-events';
+import { Orientation } from '@common/enums/orientation.enum';
 import { InGameSession } from '@common/models/session.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -35,24 +36,16 @@ export class InGameSocketService {
         this.socket.onSuccessEvent(InGameEvents.TurnTransitionEnded, callback);
     }
 
-    leaveInGameSession(sessionId: string): void {
-        this.socket.emit(InGameEvents.LeaveInGameSession, sessionId);
+    playerLeaveInGameSession(sessionId: string): void {
+        this.socket.emit(InGameEvents.PlayerLeaveInGameSession, sessionId);
+    }
+
+    onPlayerLeftInGameSession(callback: (data: { session: InGameSession; playerName: string }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerLeftInGameSession, callback);
     }
 
     playerEndTurn(sessionId: string): void {
         this.socket.emit(InGameEvents.PlayerEndTurn, sessionId);
-    }
-
-    playerAbandonGame(sessionId: string): void {
-        this.socket.emit(InGameEvents.PlayerAbandonGame, sessionId);
-    }
-
-    onLeftInGameSession(callback: (data: InGameSession) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.LeftInGameSession, callback);
-    }
-
-    onPlayerAbandoned(callback: (data: { session: InGameSession; playerName: string }) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.PlayerAbandoned, callback);
     }
 
     onTurnTimeout(callback: (data: InGameSession) => void): void {
@@ -61,5 +54,17 @@ export class InGameSocketService {
 
     onTurnForcedEnd(callback: (data: InGameSession) => void): void {
         this.socket.onSuccessEvent(InGameEvents.TurnForcedEnd, callback);
+    }
+
+    onPlayerMoved(callback: (data: { playerId: string; x: number; y: number; movementPoints: number }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerMoved, callback);
+    }
+
+    playerMove(sessionId: string, orientation: Orientation): void {
+        this.socket.emit(InGameEvents.PlayerMove, { sessionId, orientation });
+    }
+
+    onLeftInGameSessionAck(callback: () => void): void {
+        this.socket.onSuccessEvent(InGameEvents.LeftInGameSessionAck, callback);
     }
 }

@@ -70,11 +70,24 @@ export class PlayerService {
         return char?.name || this.player().name || 'Joueur';
     }
 
-    setCharacter(character: Character): void {
+    get remainingMovementPoints(): number {
+        return this.player().movementPoints;
+    }
+
+    set characterData(character: Character) {
         this._character.set(character);
-        this.updatePlayer({ 
+        this.updatePlayer({
             name: character.name,
-            avatar: character.avatar
+            avatar: character.avatar,
+            speed: character.attributes.speed,
+            health: character.attributes.life,
+            attack: Dice[character.diceAssignment.attack],
+            defense: Dice[character.diceAssignment.defense],
+            x: 0,
+            y: 0,
+            isInGame: false,
+            startPointId: '',
+            movementPoints: 0,
         });
     }
 

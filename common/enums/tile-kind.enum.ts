@@ -15,3 +15,12 @@ export enum TileLabel {
     BASE = 'Base',
     TELEPORT = 'Téléporteur',
 }
+
+export enum TileCost {
+    WALL = -1,
+    DOOR = -1,
+    ICE = 0,
+    BASE = 1,
+    DOOR_OPEN = 1,
+    WATER = 2,
+}

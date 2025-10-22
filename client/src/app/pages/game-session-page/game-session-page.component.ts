@@ -1,15 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { GameInfoComponent } from '@app/components/features/game-info/game-info.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
 import { GameTimerComponent } from '@app/components/features/game-timer/game-timer.component';
 import { PlayerInfoComponent } from '@app/components/features/player-info/player-info.component';
 import { PlayersListComponent } from '@app/components/features/players-list/players-list.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
-import { ROUTES } from '@app/constants/routes.constants';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
+import { InGameKeyboardEventsService } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
 import { SessionService } from '@app/services/session/session.service';
 import { MapSize } from '@common/enums/map-size.enum';
 
@@ -33,7 +32,7 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         private readonly sessionService: SessionService,
         private readonly gameMapService: GameMapService,
         readonly inGameService: InGameService,
-        private readonly router: Router,
+        private readonly keyboardEventsService: InGameKeyboardEventsService,
     ) {}
 
     get gameId(): string {
@@ -86,9 +85,11 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.inGameService.loadInGameSession();
+        this.keyboardEventsService.startListening();
     }
 
     ngOnDestroy(): void {
+        this.keyboardEventsService.stopListening();
         this.inGameService.cleanupAll();
     }
 
@@ -100,12 +101,7 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         this.inGameService.endTurn();
     }
 
-    onAbandonGame(): void {
-        this.inGameService.abandonGame();
-    }
-
-    onBack(): void {
-        this.inGameService.cleanupAll();
-        this.router.navigate([ROUTES.homePage]);
+    onLeaveGame(): void {
+        this.inGameService.leaveGame();
     }
 }

@@ -1,4 +1,4 @@
-<app-ui-page-layout [hasHeader]="true" [hasFooter]="false" [showBackButton]="true" headerTitle="Session de Jeu" (backClick)="onBack()">
+<app-ui-page-layout [hasHeader]="true" [hasFooter]="false" [showBackButton]="true" headerTitle="Session de Jeu" (backClick)="onLeaveGame()">
     <app-game-timer></app-game-timer>
 
     <div class="game-session-content">
@@ -20,7 +20,7 @@
 
     <div class="game-controls">
         <button [disabled]="!isMyTurn || !isGameStarted" (click)="onEndTurn()">Terminer le tour</button>
-        <button class="abandon-button" (click)="onAbandonGame()">Abandonner la partie</button>
+        <button class="abandon-button" (click)="onLeaveGame()">Abandonner la partie</button>
         @if(!isGameStarted && isMyTurn) {
         <button (click)="onStartGame()">Démarrer le jeu</button>
         }

@@ -29,7 +29,7 @@ describe('InGameSessionRepository', () => {
                 x: 0,
                 y: 0,
                 startPointId: '',
-                joined: false,
+                isInGame: false,
                 avatar: Avatar.Avatar1,
                 isAdmin: true,
                 speed: BASE_SPEED,
@@ -43,7 +43,7 @@ describe('InGameSessionRepository', () => {
                 x: 0,
                 y: 0,
                 startPointId: '',
-                joined: false,
+                isInGame: false,
                 avatar: Avatar.Avatar2,
                 isAdmin: false,
                 speed: BASE_SPEED,
@@ -179,14 +179,14 @@ describe('InGameSessionRepository', () => {
 
             session.inGamePlayers.player1.x = POSITION_FIVE;
             session.inGamePlayers.player1.y = POSITION_FIVE;
-            session.inGamePlayers.player1.joined = true;
+            session.inGamePlayers.player1.isInGame = true;
 
             repository.update(session);
 
             const updatedSession = repository.findById(session.id);
             expect(updatedSession.inGamePlayers.player1.x).toBe(POSITION_FIVE);
             expect(updatedSession.inGamePlayers.player1.y).toBe(POSITION_FIVE);
-            expect(updatedSession.inGamePlayers.player1.joined).toBe(true);
+            expect(updatedSession.inGamePlayers.player1.isInGame).toBe(true);
         });
 
         it('should update turn order', () => {
@@ -319,12 +319,12 @@ describe('InGameSessionRepository', () => {
             expect(retrievedSession.inGamePlayers.player1.x).toBe(POSITION_FIVE);
             expect(retrievedSession.currentTurn.turnNumber).toBe(TURN_NUMBER_TWO);
 
-            session.inGamePlayers.player2.joined = true;
+            session.inGamePlayers.player2.isInGame = true;
             repository.update(session);
 
             retrievedSession = repository.findById(session.id);
             expect(retrievedSession.inGamePlayers.player1.x).toBe(POSITION_FIVE);
-            expect(retrievedSession.inGamePlayers.player2.joined).toBe(true);
+            expect(retrievedSession.inGamePlayers.player2.isInGame).toBe(true);
         });
     });
 });

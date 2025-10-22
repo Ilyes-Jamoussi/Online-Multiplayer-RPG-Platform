@@ -128,9 +128,7 @@ export class SessionService {
     private initListeners(): void {
         this.sessionSocketService.onAvatarAssignmentsUpdated((data) => this.updateSession({ avatarAssignments: data.avatarAssignments }));
 
-        this.sessionSocketService.onSessionPlayersUpdated((data) =>
-            this.updateSession({ players: data.players.map((player) => ({ ...player, speed: 0, health: 0, attack: 0, defense: 0 })) }),
-        );
+        this.sessionSocketService.onSessionPlayersUpdated((data) => this.updateSession({ players: data.players as Player[] }));
 
         this.sessionSocketService.onGameSessionStarted(() => {
             this.router.navigate([ROUTES.gameSessionPage]);

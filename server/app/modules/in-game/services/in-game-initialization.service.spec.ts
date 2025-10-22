@@ -8,14 +8,13 @@ import { GameMode } from '@common/enums/game-mode.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { Types } from 'mongoose';
+import { Dice } from '@common/enums/dice.enum';
 
 describe('InGameInitializationService', () => {
     let service: InGameInitializationService;
 
     const BASE_SPEED = 5;
     const BASE_HEALTH = 100;
-    const BASE_ATTACK = 10;
-    const BASE_DEFENSE = 5;
     const LARGE_ARRAY_SIZE = 1000;
     const SHUFFLE_ITERATIONS = 10;
     const PLAYER_COUNT = 3;
@@ -40,13 +39,14 @@ describe('InGameInitializationService', () => {
                 x: 0,
                 y: 0,
                 startPointId: '',
-                joined: false,
+                isInGame: false,
                 avatar: Avatar.Avatar1,
                 isAdmin: false,
                 speed: BASE_SPEED,
                 health: BASE_HEALTH,
-                attack: BASE_ATTACK,
-                defense: BASE_DEFENSE,
+                attack: Dice.D6,
+                defense: Dice.D6,
+                movementPoints: 0,
             },
             player2: {
                 id: 'player2',
@@ -54,13 +54,14 @@ describe('InGameInitializationService', () => {
                 x: 0,
                 y: 0,
                 startPointId: '',
-                joined: false,
+                isInGame: false,
                 avatar: Avatar.Avatar2,
                 isAdmin: false,
                 speed: BASE_SPEED,
                 health: BASE_HEALTH,
-                attack: BASE_ATTACK,
-                defense: BASE_DEFENSE,
+                attack: Dice.D6,
+                defense: Dice.D6,
+                movementPoints: 0,
             },
             player3: {
                 id: 'player3',
@@ -68,13 +69,14 @@ describe('InGameInitializationService', () => {
                 x: 0,
                 y: 0,
                 startPointId: '',
-                joined: false,
+                isInGame: false,
                 avatar: Avatar.Avatar3,
                 isAdmin: false,
                 speed: BASE_SPEED,
                 health: BASE_HEALTH,
-                attack: BASE_ATTACK,
-                defense: BASE_DEFENSE,
+                attack: Dice.D6,
+                defense: Dice.D6,
+                movementPoints: 0,
             },
         },
         currentTurn: { turnNumber: 1, activePlayerId: 'player1' },
@@ -300,13 +302,14 @@ describe('InGameInitializationService', () => {
                         x: 0,
                         y: 0,
                         startPointId: '',
-                        joined: false,
+                        isInGame: false,
                         avatar: Avatar.Avatar1,
                         isAdmin: true,
                         speed: BASE_SPEED,
                         health: BASE_HEALTH,
-                        attack: BASE_ATTACK,
-                        defense: BASE_DEFENSE,
+                        attack: Dice.D6,
+                        defense: Dice.D6,
+                        movementPoints: 0,
                     },
                 },
                 turnOrderPlayerId: ['player1'],
