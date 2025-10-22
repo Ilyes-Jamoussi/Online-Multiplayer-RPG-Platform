@@ -62,4 +62,12 @@ export class InGameSocketService {
     onTurnForcedEnd(callback: (data: InGameSession) => void): void {
         this.socket.onSuccessEvent(InGameEvents.TurnForcedEnd, callback);
     }
+
+    toggleAdminMode(sessionId: string): void {
+        this.socket.emit(InGameEvents.ToggleAdminMode, sessionId);
+    }
+
+    onAdminModeToggled(callback: () => void): void {
+        this.socket.onSuccessEvent(InGameEvents.AdminModeToggled, callback);
+    }
 }

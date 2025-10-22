@@ -48,3 +48,9 @@
     </div>
 </div>
 }
+
+@if (adminModeService.isAdminModeActivated()) {
+  <div class="admin-badge" aria-live="polite" title="Mode admin activé">
+    Mode Admin activé
+  </div>
+}

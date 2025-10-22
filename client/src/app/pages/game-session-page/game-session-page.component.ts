@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, Signal } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { GameInfoComponent } from '@app/components/features/game-info/game-info.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
@@ -8,6 +8,7 @@ import { PlayerInfoComponent } from '@app/components/features/player-info/player
 import { PlayersListComponent } from '@app/components/features/players-list/players-list.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { ROUTES } from '@app/constants/routes.constants';
+import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { SessionService } from '@app/services/session/session.service';
@@ -15,12 +16,12 @@ import { SessionService } from '@app/services/session/session.service';
 @Component({
     selector: 'app-game-session-page',
     imports: [
-        CommonModule, 
-        UiPageLayoutComponent, 
-        GameMapComponent, 
-        GameInfoComponent, 
-        PlayerInfoComponent, 
-        PlayersListComponent, 
+        CommonModule,
+        UiPageLayoutComponent,
+        GameMapComponent,
+        GameInfoComponent,
+        PlayerInfoComponent,
+        PlayersListComponent,
         GameTimerComponent
     ],
     templateUrl: './game-session-page.component.html',
@@ -33,7 +34,19 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         private readonly gameMapService: GameMapService,
         readonly inGameService: InGameService,
         private readonly router: Router,
+        readonly adminModeService: AdminModeService
     ) {}
+
+    @HostListener('window:keydown', ['$event'])
+    onKeyDown(e: KeyboardEvent) {
+        if (e.repeat) return;
+        const tag = (document.activeElement?.tagName || '').toLowerCase();
+        const typingInField = tag === 'input' || tag === 'textarea' || tag === 'select' || (document.activeElement as any)?.isContentEditable;
+
+        if (!typingInField && (e.key === 'd' || e.key === 'D')) {
+            this.adminModeService.toggleAdminMode();
+        }
+    }
 
     get gameId(): Signal<string> {
         return this.sessionService.gameId;
@@ -73,6 +86,7 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
 
     onAbandonGame(): void {
         this.inGameService.abandonGame();
+        this.adminModeService.disableAdminModeOnAbandon();
     }
 
     onBack(): void {

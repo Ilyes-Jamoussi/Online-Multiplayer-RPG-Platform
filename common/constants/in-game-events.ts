@@ -27,4 +27,7 @@ export enum InGameEvents {
     PlayerEndTurn = 'playerEndTurn',
     PlayerAbandonGame = 'playerAbandonGame',
     PlayerAbandoned = 'playerAbandoned',
+
+    ToggleAdminMode = 'toggleAdminMode',
+    AdminModeToggled = 'adminModeToggled',
 }
