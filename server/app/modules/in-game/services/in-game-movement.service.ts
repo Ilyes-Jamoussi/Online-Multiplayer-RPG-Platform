@@ -25,7 +25,10 @@ export class InGameMovementService {
         }
 
         const moveCost = TileCost[tile.kind];
-        if (moveCost > player.movementPoints) {
+        if (moveCost === -1) {
+            throw new BadRequestException('Cannot move onto this tile');
+        }
+        else if (moveCost > player.movementPoints) {
             throw new BadRequestException('Not enough movement points for this tile');
         }
 
