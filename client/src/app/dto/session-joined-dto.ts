@@ -12,5 +12,6 @@
 export interface SessionJoinedDto { 
     gameId: string;
     maxPlayers: number;
+    modifiedPlayerName?: string;
 }
 

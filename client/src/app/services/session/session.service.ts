@@ -5,12 +5,12 @@ import { DEFAULT_SESSION, MIN_SESSION_PLAYERS } from '@app/constants/session.con
 import { CreateSessionDto } from '@app/dto/create-session-dto';
 import { JoinSessionDto } from '@app/dto/join-session-dto';
 import { SessionPreviewDto } from '@app/dto/session-preview-dto';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
 import { Player } from '@common/models/player.interface';
 import { AvatarAssignment, WaitingRoomSession } from '@common/models/session.interface';
-import { NotificationService } from '@app/services/notification/notification.service';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -118,6 +118,11 @@ export class SessionService {
 
     loadAvailableSessions(): void {
         this.sessionSocketService.loadAvailableSessions();
+    }
+
+    handleSessionJoined(data: { gameId: string; maxPlayers: number }): void {
+        this.updateSession({ gameId: data.gameId, maxPlayers: data.maxPlayers });
+        this.router.navigate([ROUTES.waitingRoomPage]);
     }
 
     private assignAvatar(playerId: string, avatar: Avatar): void {

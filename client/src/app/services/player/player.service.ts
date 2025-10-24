@@ -66,8 +66,7 @@ export class PlayerService {
     }
 
     get characterName(): string {
-        const char = this._character();
-        return char?.name || this.player().name || 'Joueur';
+        return this.player().name;
     }
 
     setCharacter(character: Character): void {
@@ -139,6 +138,11 @@ export class PlayerService {
             this.updatePlayer({ id: data.playerId });
             this.sessionService.updateSession({ id: data.sessionId });
             this.router.navigate([ROUTES.characterCreationPage]);
+        });
+
+        this.sessionSocketService.onSessionJoined((data) => {
+            if (data.modifiedPlayerName) this.updatePlayer({ name: data.modifiedPlayerName });
+            this.sessionService.handleSessionJoined({ gameId: data.gameId, maxPlayers: data.maxPlayers });
         });
     }
 }

@@ -27,7 +27,7 @@ export class SessionService {
         this.eventEmitter.emit('session.availabilityChanged');
     }
 
-    joinSession(playerId: string, data: JoinSessionDto): void {
+    joinSession(playerId: string, data: JoinSessionDto): string {
         const session = this.getSession(data.sessionId);
         const uniqueName = this.generateUniqueName(data.player.name, session.players);
 
@@ -46,6 +46,8 @@ export class SessionService {
             this.lock(data.sessionId);
             this.eventEmitter.emit('session.autoLocked', data.sessionId);
         }
+
+        return uniqueName;
     }
 
     leaveSession(sessionId: string, playerId: string): void {

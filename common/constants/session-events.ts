@@ -18,6 +18,8 @@ export enum SessionEvents {
     SessionPlayersUpdated = 'sessionPlayersUpdated',
     UpdatedAvatarAssignments = 'updateAvatarAssignments',
 
+    PlayerNameUpdated = 'playerNameUpdated',
+
     LockSession = 'lockSession',
     SessionAutoLocked = 'sessionAutoLocked',
     UnlockSession = 'unlockSession',
