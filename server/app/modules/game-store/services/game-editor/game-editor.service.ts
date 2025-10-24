@@ -1,4 +1,4 @@
-import { GAME_NOT_FOUND, NAME_ALREADY_EXISTS } from '@app/constants/error-messages.constants';
+import { NAME_ALREADY_EXISTS } from '@app/constants/error-messages.constants';
 import { GameEditorPlaceableDto } from '@app/modules/game-store/dto/game-editor-placeable.dto';
 import { GameEditorTileDto } from '@app/modules/game-store/dto/game-editor-tile.dto';
 import { GameEditorDto } from '@app/modules/game-store/dto/game-editor.dto';
@@ -9,7 +9,7 @@ import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { ImageService } from '@app/modules/game-store/services/image/image.service';
 import { GameDtoMapper } from '@app/modules/game-store/utils/game-dto-mapper/game-dto-mapper.util';
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -23,10 +23,6 @@ export class GameEditorService {
 
     async getEditByGameId(id: string): Promise<GameEditorDto> {
         const game = await this.gameModel.findById(id).lean();
-        if (!game) {
-            throw new NotFoundException(GAME_NOT_FOUND);
-        }
-
         return this.gameDtoMapper.toGameEditorDto(game);
     }
 
@@ -48,8 +44,8 @@ export class GameEditorService {
         const update: GameDocument = {
             ...this.buildBasicUpdate(dto),
             ...(await this.buildImageUpdate(dto, id)),
-            ...(dto.tiles && { tiles: this.mapTiles(dto.tiles) }),
-            ...(dto.objects && { objects: this.mapObjects(dto.objects) }),
+            ...{ tiles: this.mapTiles(dto.tiles) },
+            ...{ objects: this.mapObjects(dto.objects) },
             lastModified: new Date(),
             draft: false,
             visibility: false,
@@ -61,10 +57,10 @@ export class GameEditorService {
 
     private buildBasicUpdate(dto: PatchGameEditorDto): Partial<GameDocument> {
         return {
-            ...(dto.name && { name: dto.name }),
-            ...(dto.description && { description: dto.description }),
-            ...(dto.size && { size: dto.size }),
-            ...(dto.mode && { mode: dto.mode }),
+            ...{ name: dto.name },
+            ...{ description: dto.description },
+            ...{ size: dto.size },
+            ...{ mode: dto.mode },
         };
     }
 
@@ -72,7 +68,7 @@ export class GameEditorService {
         if (!dto.gridPreviewUrl) return {};
 
         const existingGame = await this.gameModel.findById(id).lean();
-        if (existingGame?.gridPreviewUrl) await this.imageService.deleteImage(existingGame.gridPreviewUrl);
+        if (existingGame.gridPreviewUrl) await this.imageService.deleteImage(existingGame.gridPreviewUrl);
 
         const filename = `game-${id}-${Date.now()}-preview.png`;
         const gridPreviewUrl = await this.imageService.saveImage(dto.gridPreviewUrl, filename, 'game-previews');

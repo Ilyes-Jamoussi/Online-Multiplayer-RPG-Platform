@@ -155,9 +155,7 @@ export class GameEditorStoreService {
             .pipe(
                 take(1),
                 tap((game) => {
-                    if (!game) {
-                        return;
-                    }
+                    this.setGame(game);
                     this._id.set(game.id);
                     this._initial.set(game);
                     this._name.set(game.name);
@@ -184,7 +182,7 @@ export class GameEditorStoreService {
                 description: this._description(),
                 tiles: this._tiles(),
                 objects: this._objects(),
-                gridPreviewUrl: gridPreviewImage ?? this._gridPreviewUrl(),
+                gridPreviewUrl: gridPreviewImage || this._gridPreviewUrl(),
             };
             const game: PatchGameEditorDto = this.pickChangedProperties(current, this._initial());
 
@@ -243,7 +241,6 @@ export class GameEditorStoreService {
             this.updateTiles((draft) => {
                 const idx = this.getIndexByCoord(x, y);
                 const currentTile = draft[idx];
-                if (!currentTile) return;
 
                 if (currentTile.kind !== TileKind.DOOR && currentTile.kind === kind) return;
 

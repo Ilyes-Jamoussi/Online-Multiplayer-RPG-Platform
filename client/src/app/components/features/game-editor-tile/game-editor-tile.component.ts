@@ -42,7 +42,7 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
     }
 
     get isDropHovered(): boolean {
-        return this.gameEditorInteractionsService.hoveredTiles()?.some((t) => t.x === this.tile.x && t.y === this.tile.y) ?? false;
+        return this.gameEditorInteractionsService.hoveredTiles().some((t) => t.x === this.tile.x && t.y === this.tile.y);
     }
 
     get isBrushHovered(): boolean {

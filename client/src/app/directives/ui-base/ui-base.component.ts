@@ -48,7 +48,7 @@ export abstract class UiBaseComponent {
             warning: 'warn',
             info: 'info',
         };
-        return this.variant ? variantMap[this.variant] ?? 'primary' : 'primary';
+        return variantMap[this.variant] || 'primary';
     }
 
     get computedStyle(): UiStyle {
@@ -69,15 +69,15 @@ export abstract class UiBaseComponent {
         return {
             [`c-${this.computedColor}`]: true,
             [`st-${this.computedStyle}`]: true,
-            [`s-${this.size || 'md'}`]: true,
+            [`s-${this.size}`]: true,
             [`sh-${this.computedShape}`]: true,
-            [`al-${this.alignContent || 'center'}`]: true,
-            [`gap-${this.gap || 'md'}`]: true,
+            [`al-${this.alignContent}`]: true,
+            [`gap-${this.gap}`]: true,
             [`w-${this.computedWidth}`]: true,
-            [`elev-${this.elevation || 'none'}`]: true,
-            [`fw-${this.fontWeight}`]: !!this.fontWeight,
-            [`text-${this.textTransform}`]: !!this.textTransform,
-            [`fs-${this.fontSize}`]: !!this.fontSize,
+            [`elev-${this.elevation}`]: true,
+            [`fw-${this.fontWeight}`]: Boolean(this.fontWeight),
+            [`text-${this.textTransform}`]: Boolean(this.textTransform),
+            [`fs-${this.fontSize}`]: Boolean(this.fontSize),
             [`v-${this.variant}`]: !!this.variant,
             isFull: !!this.fullWidth,
             isDisabled: this.disabled,

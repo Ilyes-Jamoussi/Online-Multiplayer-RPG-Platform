@@ -77,7 +77,7 @@ export class GameMapComponent implements OnInit {
 
     getPlayerAvatarImage(playerId: string): string {
         const player = this.inGameService.inGamePlayers()[playerId];
-        if (!player?.avatar) return '';
+        if (!player.avatar) return '';
         return this.assetsService.getAvatarStaticImage(player.avatar);
     }
 
@@ -97,7 +97,7 @@ export class GameMapComponent implements OnInit {
     }
 
     getObjectFootprint(placeableKind: string): number {
-        return PlaceableFootprint[placeableKind as PlaceableKind] || 1;
+        return PlaceableFootprint[placeableKind as PlaceableKind];
     }
 
     getStartPointStyle(startPoint: StartPoint) {

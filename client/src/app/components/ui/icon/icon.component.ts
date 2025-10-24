@@ -27,7 +27,7 @@ export class UiIconComponent extends UiBaseComponent {
     }
 
     get iconValue(): string {
-        return FaIcons[this.iconName] || FaIcons.FaceMeh;
+        return FaIcons[this.iconName];
     }
 
     get iconSize(): SizeProp {
