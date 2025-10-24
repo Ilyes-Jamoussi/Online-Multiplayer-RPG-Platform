@@ -206,22 +206,19 @@ export class SessionGateway implements OnGatewayDisconnect {
 
     @SubscribeMessage(SessionEvents.LoadAvailableSessions)
     loadAvailableSessions(socket: Socket): void {
-        this.emitAvailableSessionsUpdate();
+        const sessions = this.sessionService.getAvailableSessions();
+        socket.emit(SessionEvents.AvailableSessionsUpdated, successResponse<AvailableSessionsUpdatedDto>({ sessions }));
     }
 
     @OnEvent('session.availabilityChanged')
     handleAvailabilityChange(): void {
-        this.emitAvailableSessionsUpdate();
+        const sessions = this.sessionService.getAvailableSessions();
+        this.server.emit(SessionEvents.AvailableSessionsUpdated, successResponse<AvailableSessionsUpdatedDto>({ sessions }));
     }
 
     @OnEvent('session.autoLocked')
     handleAutoLocked(sessionId: string): void {
         this.server.to(sessionId).emit(SessionEvents.SessionAutoLocked, successResponse({}));
-    }
-
-    private emitAvailableSessionsUpdate(): void {
-        const sessions = this.sessionService.getAvailableSessions();
-        this.server.emit(SessionEvents.AvailableSessionsUpdated, successResponse<AvailableSessionsUpdatedDto>({ sessions }));
     }
 
     private getRoom(accessCode: string): Set<string> | undefined {

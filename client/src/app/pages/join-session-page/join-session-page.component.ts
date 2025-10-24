@@ -2,6 +2,7 @@ import { Component, OnInit, Signal } from '@angular/core';
 import { SessionCardComponent } from '@app/components/features/session-card/session-card.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { SessionPreviewDto } from '@app/dto/session-preview-dto';
+import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 
 @Component({
@@ -15,9 +16,10 @@ export class JoinSessionPageComponent implements OnInit {
         return this.sessionService.availableSessions;
     }
 
-    constructor(private readonly sessionService: SessionService) {}
+    constructor(private readonly sessionService: SessionService, private readonly playerService: PlayerService) {}
 
     ngOnInit(): void {
+        this.playerService.updatePlayer({ isAdmin: false });
         this.sessionService.loadAvailableSessions();
     }
 

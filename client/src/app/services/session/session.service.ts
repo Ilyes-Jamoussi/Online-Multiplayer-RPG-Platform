@@ -96,8 +96,9 @@ export class SessionService {
     }
 
     joinSession(player: Player): void {
+        const sessionId = this.id();
         const dto: JoinSessionDto = {
-            sessionId: this.id(),
+            sessionId,
             player,
         };
         this.sessionSocketService.joinSession(dto);

@@ -136,7 +136,7 @@ export class PlayerService {
         });
 
         this.sessionSocketService.onAvatarSelectionJoined((data) => {
-            this.updatePlayer({ id: data.playerId, isAdmin: false });
+            this.updatePlayer({ id: data.playerId });
             this.sessionService.updateSession({ id: data.sessionId });
             this.router.navigate([ROUTES.characterCreationPage]);
         });
