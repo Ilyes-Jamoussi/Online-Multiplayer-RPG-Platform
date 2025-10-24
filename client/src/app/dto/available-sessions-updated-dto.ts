@@ -7,11 +7,10 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { SessionPreviewDto } from './session-preview-dto';
 
 
-export interface SessionJoinedDto { 
-    gameId: string;
-    maxPlayers: number;
-    modifiedPlayerName?: string;
+export interface AvailableSessionsUpdatedDto { 
+    sessions: Array<SessionPreviewDto>;
 }
 

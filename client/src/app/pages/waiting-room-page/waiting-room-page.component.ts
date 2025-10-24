@@ -1,6 +1,5 @@
 import { Component, Signal } from '@angular/core';
 import { PlayerCardComponent } from '@app/components/features/player-card/player-card.component';
-import { RoomCodeComponent } from '@app/components/features/room-code/room-code.component';
 import { WaitingRoomActionsComponent } from '@app/components/features/waiting-room-actions/waiting-room-actions.component';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiInputComponent } from '@app/components/ui/input/input.component';
@@ -17,7 +16,6 @@ import { Player } from '@common/models/player.interface';
         UiInputComponent,
         UiPageLayoutComponent,
         PlayerCardComponent,
-        RoomCodeComponent,
         WaitingRoomActionsComponent,
     ],
     templateUrl: './waiting-room-page.component.html',

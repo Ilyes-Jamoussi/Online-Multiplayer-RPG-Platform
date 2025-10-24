@@ -5,7 +5,7 @@ import { Module } from '@nestjs/common';
 // import { SessionDtoController } from '../controllers/session-dto.controller';
 
 @Module({
-    // controllers: [SessionDtoController], pour la genetration des dto ; en commentaire pour le lint
+    // controllers: [SessionDtoController], // pour la generation des dto ; en commentaire pour le lint
     imports: [InGameModule],
     providers: [SessionService, SessionGateway],
 })

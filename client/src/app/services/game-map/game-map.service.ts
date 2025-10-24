@@ -61,10 +61,6 @@ export class GameMapService {
             .pipe(
                 take(1),
                 tap((gameData) => {
-                    if (!gameData) {
-                        this.notificationService.displayError({ title: 'Erreur', message: 'Impossible de charger la carte' });
-                        return;
-                    }
                     this.buildGameMap(gameData);
                 }),
                 catchError(() => {
@@ -88,7 +84,7 @@ export class GameMapService {
 
         const objects: GameEditorPlaceableDto[] = gameData.objects.map(obj => ({
             ...obj,
-            placed: obj.placed ?? true
+            placed: obj.placed || true
         }));
 
         this._tiles.set(tiles);
