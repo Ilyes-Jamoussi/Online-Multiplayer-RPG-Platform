@@ -1,4 +1,4 @@
-import { Component, Signal } from '@angular/core';
+import { Component, OnInit, Signal } from '@angular/core';
 import { SessionCardComponent } from '@app/components/features/session-card/session-card.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { SessionPreviewDto } from '@app/dto/session-preview-dto';
@@ -10,12 +10,16 @@ import { SessionService } from '@app/services/session/session.service';
     templateUrl: './join-session-page.component.html',
     styleUrl: './join-session-page.component.scss',
 })
-export class JoinSessionPageComponent {
+export class JoinSessionPageComponent implements OnInit {
     get availableSessions(): Signal<SessionPreviewDto[]> {
         return this.sessionService.availableSessions;
     }
 
     constructor(private readonly sessionService: SessionService) {}
+
+    ngOnInit(): void {
+        this.sessionService.loadAvailableSessions();
+    }
 
     onJoinSession(sessionId: string): void {
         this.sessionService.joinAvatarSelection(sessionId);

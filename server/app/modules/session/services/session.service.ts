@@ -41,6 +41,11 @@ export class SessionService {
             defense: 0,
         };
         session.players.push(player);
+
+        if (session.players.length >= session.maxPlayers) {
+            this.lock(data.sessionId);
+            this.eventEmitter.emit('session.autoLocked', data.sessionId);
+        }
     }
 
     leaveSession(sessionId: string, playerId: string): void {

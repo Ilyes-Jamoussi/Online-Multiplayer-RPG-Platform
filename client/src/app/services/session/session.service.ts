@@ -115,6 +115,10 @@ export class SessionService {
         this.sessionSocketService.leaveAvatarSelection({ sessionId: this.id() });
     }
 
+    loadAvailableSessions(): void {
+        this.sessionSocketService.loadAvailableSessions();
+    }
+
     private assignAvatar(playerId: string, avatar: Avatar): void {
         const updated = this._session().avatarAssignments.map((assignment) => {
             const isOldChoice = assignment.chosenBy === playerId;
@@ -163,6 +167,10 @@ export class SessionService {
 
         this.sessionSocketService.onAvailableSessionsUpdated((data) => {
             this._availableSessions.set(data.sessions);
+        });
+
+        this.sessionSocketService.onSessionAutoLocked(() => {
+            this.updateSession({ isRoomLocked: true });
         });
     }
 }

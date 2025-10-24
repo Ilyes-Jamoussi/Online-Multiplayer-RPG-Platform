@@ -204,9 +204,19 @@ export class SessionGateway implements OnGatewayDisconnect {
         this.leaveSession(socket);
     }
 
+    @SubscribeMessage(SessionEvents.LoadAvailableSessions)
+    loadAvailableSessions(socket: Socket): void {
+        this.emitAvailableSessionsUpdate();
+    }
+
     @OnEvent('session.availabilityChanged')
     handleAvailabilityChange(): void {
         this.emitAvailableSessionsUpdate();
+    }
+
+    @OnEvent('session.autoLocked')
+    handleAutoLocked(sessionId: string): void {
+        this.server.to(sessionId).emit(SessionEvents.SessionAutoLocked, successResponse({}));
     }
 
     private emitAvailableSessionsUpdate(): void {

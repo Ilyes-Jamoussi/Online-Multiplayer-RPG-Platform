@@ -100,4 +100,12 @@ export class SessionSocketService {
     onAvailableSessionsUpdated(callback: (data: AvailableSessionsUpdatedDto) => void): void {
         this.socket.onSuccessEvent(SessionEvents.AvailableSessionsUpdated, callback);
     }
+
+    onSessionAutoLocked(callback: () => void): void {
+        this.socket.onSuccessEvent(SessionEvents.SessionAutoLocked, callback);
+    }
+
+    loadAvailableSessions(): void {
+        this.socket.emit(SessionEvents.LoadAvailableSessions, {});
+    }
 }
