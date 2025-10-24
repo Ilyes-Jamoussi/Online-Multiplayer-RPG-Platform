@@ -1,4 +1,4 @@
-import { NAME_ALREADY_EXISTS } from '@app/constants/error-messages.constants';
+import { GAME_NOT_FOUND, NAME_ALREADY_EXISTS } from '@app/constants/error-messages.constants';
 import { GameEditorPlaceableDto } from '@app/modules/game-store/dto/game-editor-placeable.dto';
 import { GameEditorTileDto } from '@app/modules/game-store/dto/game-editor-tile.dto';
 import { GameEditorDto } from '@app/modules/game-store/dto/game-editor.dto';
@@ -9,7 +9,7 @@ import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { ImageService } from '@app/modules/game-store/services/image/image.service';
 import { GameDtoMapper } from '@app/modules/game-store/utils/game-dto-mapper/game-dto-mapper.util';
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -23,6 +23,9 @@ export class GameEditorService {
 
     async getEditByGameId(id: string): Promise<GameEditorDto> {
         const game = await this.gameModel.findById(id).lean();
+        if (!game) {
+            throw new NotFoundException(GAME_NOT_FOUND);
+        }
         return this.gameDtoMapper.toGameEditorDto(game);
     }
 
@@ -76,6 +79,7 @@ export class GameEditorService {
     }
 
     private mapTiles(tiles: GameEditorTileDto[]): Tile[] {
+        if (!tiles) return [];
         return tiles.map((t) => ({
             kind: t.kind,
             x: t.x,
@@ -86,6 +90,7 @@ export class GameEditorService {
     }
 
     private mapObjects(objects: GameEditorPlaceableDto[]): Placeable[] {
+        if (!objects) return [];
         return objects.map((o) => ({
             id: o.id,
             kind: o.kind,

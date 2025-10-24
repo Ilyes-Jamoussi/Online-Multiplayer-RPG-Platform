@@ -48,7 +48,7 @@ export abstract class UiBaseComponent {
             warning: 'warn',
             info: 'info',
         };
-        return variantMap[this.variant] || 'primary';
+        return variantMap[this.variant || 'primary'] || 'primary';
     }
 
     get computedStyle(): UiStyle {
@@ -69,12 +69,12 @@ export abstract class UiBaseComponent {
         return {
             [`c-${this.computedColor}`]: true,
             [`st-${this.computedStyle}`]: true,
-            [`s-${this.size}`]: true,
+            [`s-${this.size || 'md'}`]: true,
             [`sh-${this.computedShape}`]: true,
-            [`al-${this.alignContent}`]: true,
-            [`gap-${this.gap}`]: true,
+            [`al-${this.alignContent || 'center'}`]: true,
+            [`gap-${this.gap || 'md'}`]: true,
             [`w-${this.computedWidth}`]: true,
-            [`elev-${this.elevation}`]: true,
+            [`elev-${this.elevation || 'none'}`]: true,
             [`fw-${this.fontWeight}`]: Boolean(this.fontWeight),
             [`text-${this.textTransform}`]: Boolean(this.textTransform),
             [`fs-${this.fontSize}`]: Boolean(this.fontSize),

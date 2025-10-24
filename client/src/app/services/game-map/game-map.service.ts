@@ -61,7 +61,6 @@ export class GameMapService {
             .pipe(
                 take(1),
                 tap((gameData) => {
-                    this.setGameData(gameData);
                     this.buildGameMap(gameData);
                 }),
                 catchError(() => {
