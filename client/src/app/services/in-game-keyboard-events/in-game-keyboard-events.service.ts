@@ -31,9 +31,9 @@ export class InGameKeyboardEventsService implements OnDestroy {
         if (this.isListening) return;
 
         this.isListening = true;
-        this.keyDownHandler = this.handleKeyDown.bind(this);
+        this.keyDownHandler = this.handleKeyUp.bind(this);
 
-        document.addEventListener('keydown', this.keyDownHandler);
+        document.addEventListener('keyup', this.keyDownHandler);
     }
 
     stopListening(): void {
@@ -42,11 +42,11 @@ export class InGameKeyboardEventsService implements OnDestroy {
         this.isListening = false;
 
         if (this.keyDownHandler) {
-            document.removeEventListener('keydown', this.keyDownHandler);
+            document.removeEventListener('keyup', this.keyDownHandler);
         }
     }
 
-    private handleKeyDown(event: KeyboardEvent): void {
+    private handleKeyUp(event: KeyboardEvent): void {
         if (!this.inGameService.isMyTurn() || !this.inGameService.isGameStarted()) {
             return;
         }
