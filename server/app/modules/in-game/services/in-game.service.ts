@@ -34,17 +34,17 @@ export class InGameService {
             startPoints: [],
             mapSize,
             mode,
-            turnOrderPlayerId: [],
+            turnOrder: [],
         };
 
         const game = await this.gameCache.fetchAndCacheGame(id, gameId);
 
-        const playerOrder = this.initialization.shuffleArray(players.map((p) => p.id));
-        session.turnOrderPlayerId = playerOrder;
+        const playerIdsOrder = this.initialization.makeTurnOrder(players);
+        session.turnOrder = playerIdsOrder;
 
         session.inGamePlayers = Object.fromEntries(players.map((p) => [p.id, { ...p, x: 0, y: 0, startPointId: '', joined: false }]));
 
-        const firstPlayerId = playerOrder[0];
+        const firstPlayerId = playerIdsOrder[0];
         session.currentTurn.activePlayerId = firstPlayerId;
         if (session.inGamePlayers[firstPlayerId]) {
             session.inGamePlayers[firstPlayerId].movementPoints = session.inGamePlayers[firstPlayerId].speed;
@@ -103,14 +103,10 @@ export class InGameService {
     }
 
     leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string } {
+        const player = this.sessionRepository.playerLeave(sessionId, playerId);
         const session = this.sessionRepository.findById(sessionId);
-        const player = session.inGamePlayers[playerId];
-        if (!player) throw new NotFoundException('Player not found');
-        if (!player.isInGame) throw new BadRequestException('Player not joined');
-        player.isInGame = false;
-
-        const joinedPlayers = Object.values(session.inGamePlayers).filter((p) => p.isInGame);
-        if (joinedPlayers.length < 2) {
+        const joinedPlayers = this.sessionRepository.currentPlayerCount(sessionId);
+        if (joinedPlayers < 2) {
             this.turnEngine.forceStopTimer(sessionId);
         }
 

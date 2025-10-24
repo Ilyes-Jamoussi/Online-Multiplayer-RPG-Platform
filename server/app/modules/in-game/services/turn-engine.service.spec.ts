@@ -80,7 +80,7 @@ describe('TurnEngineService', () => {
         startPoints: [],
         mapSize: MapSize.MEDIUM,
         mode: GameMode.CLASSIC,
-        turnOrderPlayerId: ['player1', 'player2', 'player3'],
+        turnOrder: ['player1', 'player2', 'player3'],
         ...overrides,
     });
 
@@ -127,13 +127,13 @@ describe('TurnEngineService', () => {
         });
 
         it('should throw error when turnOrderPlayerId is empty', () => {
-            const session = createMockSession({ turnOrderPlayerId: [] });
+            const session = createMockSession({ turnOrder: [] });
 
             expect(() => service.startFirstTurn(session)).toThrow('TURN_ORDER_NOT_DEFINED');
         });
 
         it('should throw error when turnOrderPlayerId is undefined', () => {
-            const session = createMockSession({ turnOrderPlayerId: undefined as unknown as string[] });
+            const session = createMockSession({ turnOrder: undefined as unknown as string[] });
 
             expect(() => service.startFirstTurn(session)).toThrow('TURN_ORDER_NOT_DEFINED');
         });

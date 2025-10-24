@@ -56,7 +56,7 @@ describe('InGameSessionRepository', () => {
         startPoints: [],
         mapSize: MapSize.MEDIUM,
         mode: GameMode.CLASSIC,
-        turnOrderPlayerId: ['player1', 'player2'],
+        turnOrder: ['player1', 'player2'],
         ...overrides,
     });
 
@@ -193,13 +193,13 @@ describe('InGameSessionRepository', () => {
             const session = createMockSession();
             repository.save(session);
 
-            session.turnOrderPlayerId = ['player2', 'player1'];
+            session.turnOrder = ['player2', 'player1'];
             session.currentTurn.activePlayerId = 'player2';
 
             repository.update(session);
 
             const updatedSession = repository.findById(session.id);
-            expect(updatedSession.turnOrderPlayerId).toEqual(['player2', 'player1']);
+            expect(updatedSession.turnOrder).toEqual(['player2', 'player1']);
             expect(updatedSession.currentTurn.activePlayerId).toBe('player2');
         });
 

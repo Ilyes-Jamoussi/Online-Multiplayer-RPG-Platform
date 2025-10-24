@@ -23,7 +23,7 @@
                 class="objects-overlay"
                 [ngStyle]="gridStyle"
             >
-                @for (obj of objects; track obj.id) {
+                @for (obj of visibleObjects; track obj.id) {
                     @if (obj.placed) {
                         <div 
                             class="map-object"

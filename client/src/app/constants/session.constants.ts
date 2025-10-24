@@ -21,7 +21,7 @@ export const DEFAULT_IN_GAME_SESSION: InGameSession = {
     inGamePlayers: {},
     currentTurn: { turnNumber: 0, activePlayerId: '' },
     startPoints: [],
-    turnOrderPlayerId: [],
+    turnOrder: [],
     mapSize: MapSize.SMALL,
     mode: GameMode.CLASSIC,
 };

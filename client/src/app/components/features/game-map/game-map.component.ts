@@ -3,7 +3,6 @@ import { Component, Input, OnInit } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
-import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { InGamePlayer } from '@common/models/player.interface';
@@ -15,7 +14,7 @@ import { StartPoint } from '@common/models/start-point.interface';
     imports: [CommonModule, NgStyle],
     templateUrl: './game-map.component.html',
     styleUrls: ['./game-map.component.scss'],
-    providers: [GameMapService]
+    providers: [GameMapService],
 })
 export class GameMapComponent implements OnInit {
     @Input() gameId!: string;
@@ -23,7 +22,6 @@ export class GameMapComponent implements OnInit {
     constructor(
         private readonly gameMapService: GameMapService,
         private readonly assetsService: AssetsService,
-        private readonly inGameService: InGameService
     ) {}
 
     ngOnInit(): void {
@@ -32,20 +30,16 @@ export class GameMapComponent implements OnInit {
         }
     }
 
+    get players() {
+        return this.gameMapService.currentlyInGamePlayers;
+    }
+
     get tiles() {
         return this.gameMapService.tiles();
     }
 
     get objects() {
         return this.gameMapService.objects();
-    }
-
-    get players() {
-        return Object.values(this.inGameService.inGamePlayers());
-    }
-
-    get startPoints() {
-        return this.inGameService.startPoints();
     }
 
     get size() {
@@ -59,8 +53,12 @@ export class GameMapComponent implements OnInit {
     get gridStyle() {
         return {
             gridTemplateColumns: `repeat(${this.size}, 1fr)`,
-            gridTemplateRows: `repeat(${this.size}, 1fr)`
+            gridTemplateRows: `repeat(${this.size}, 1fr)`,
         };
+    }
+
+    get visibleObjects() {
+        return this.gameMapService.visibleObjects();
     }
 
     getTileImage(tileKind: string, opened: boolean = false): string {
@@ -76,23 +74,21 @@ export class GameMapComponent implements OnInit {
     }
 
     getPlayerAvatarImage(playerId: string): string {
-        const player = this.inGameService.inGamePlayers()[playerId];
-        if (!player?.avatar) return '';
-        return this.assetsService.getAvatarStaticImage(player.avatar);
+        return this.gameMapService.getAvatarByPlayerId(playerId);
     }
 
     getObjectStyle(obj: GameEditorPlaceableDto) {
         const footprint = this.getObjectFootprint(obj.kind);
         return {
             gridColumn: `${obj.x + 1} / span ${footprint}`,
-            gridRow: `${obj.y + 1} / span ${footprint}`
+            gridRow: `${obj.y + 1} / span ${footprint}`,
         };
     }
 
     getPlayerStyle(player: InGamePlayer) {
         return {
             gridColumn: `${player.x + 1}`,
-            gridRow: `${player.y + 1}`
+            gridRow: `${player.y + 1}`,
         };
     }
 
@@ -103,7 +99,7 @@ export class GameMapComponent implements OnInit {
     getStartPointStyle(startPoint: StartPoint) {
         return {
             gridColumn: `${startPoint.x + 1}`,
-            gridRow: `${startPoint.y + 1}`
+            gridRow: `${startPoint.y + 1}`,
         };
     }
 }

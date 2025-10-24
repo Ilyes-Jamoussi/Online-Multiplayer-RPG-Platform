@@ -96,7 +96,7 @@ describe('InGameService', () => {
         startPoints: [],
         mapSize: MapSize.MEDIUM,
         mode: GameMode.CLASSIC,
-        turnOrderPlayerId: ['player1', 'player2'],
+        turnOrder: ['player1', 'player2'],
         ...overrides,
     });
 
@@ -171,7 +171,7 @@ describe('InGameService', () => {
             const result = await service.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.MEDIUM);
 
             expect(mockInitialization.shuffleArray).toHaveBeenCalledWith(['player1', 'player2']);
-            expect(result.turnOrderPlayerId).toEqual(['player2', 'player1']);
+            expect(result.turnOrder).toEqual(['player2', 'player1']);
         });
 
         it('should assign start points', async () => {

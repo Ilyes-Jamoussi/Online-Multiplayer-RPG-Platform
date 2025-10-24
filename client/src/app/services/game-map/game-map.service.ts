@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, Signal, computed, signal } from '@angular/core';
 import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
@@ -7,6 +7,9 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { catchError, of, take, tap } from 'rxjs';
+import { InGameService } from '@app/services/in-game/in-game.service';
+import { AssetsService } from '@app/services/assets/assets.service';
+import { InGamePlayer } from '@common/models/player.interface';
 
 @Injectable()
 export class GameMapService {
@@ -16,7 +19,7 @@ export class GameMapService {
         size: MapSize.MEDIUM,
         name: '',
         description: '',
-        mode: GameMode.CLASSIC
+        mode: GameMode.CLASSIC,
     };
 
     private readonly _tiles = signal<GameEditorTileDto[]>(this.initialState.tiles);
@@ -26,10 +29,21 @@ export class GameMapService {
     private readonly _description = signal<string>(this.initialState.description);
     private readonly _mode = signal<GameMode>(this.initialState.mode);
 
+    readonly visibleObjects: Signal<GameEditorPlaceableDto[]> = computed(() => {
+        const visibleObjects = this.objects().filter((obj) => obj.placed);
+        return visibleObjects.filter((obj) => this.inGameService.startPoints().some((startPoint) => startPoint.id === obj.id));
+    });
+
     constructor(
         private readonly gameHttpService: GameHttpService,
-        private readonly notificationService: NotificationService
+        private readonly notificationService: NotificationService,
+        private readonly inGameService: InGameService,
+        private readonly assetsService: AssetsService,
     ) {}
+
+    get players() {
+        return this.inGameService.inGamePlayers();
+    }
 
     get tiles() {
         return this._tiles.asReadonly();
@@ -55,6 +69,10 @@ export class GameMapService {
         return this._mode.asReadonly();
     }
 
+    get currentlyInGamePlayers(): InGamePlayer[] {
+        return this.inGameService.currentlyInGamePlayers;
+    }
+
     loadGameMap(gameId: string): void {
         this.gameHttpService
             .getGameEditorById(gameId)
@@ -75,20 +93,26 @@ export class GameMapService {
             .subscribe();
     }
 
+    getAvatarByPlayerId(playerId: string): string {
+        const player = this.inGameService.getPlayerByPlayerId(playerId);
+        if (!player?.avatar) return '';
+        return this.assetsService.getAvatarStaticImage(player.avatar);
+    }
+
     private buildGameMap(gameData: GameEditorDto): void {
         this._name.set(gameData.name);
         this._description.set(gameData.description);
         this._size.set(gameData.size);
         this._mode.set(gameData.mode);
 
-        const tiles: GameEditorTileDto[] = gameData.tiles.map(tile => ({
+        const tiles: GameEditorTileDto[] = gameData.tiles.map((tile) => ({
             ...tile,
-            open: tile.open ?? false
+            open: tile.open ?? false,
         }));
 
-        const objects: GameEditorPlaceableDto[] = gameData.objects.map(obj => ({
+        const objects: GameEditorPlaceableDto[] = gameData.objects.map((obj) => ({
             ...obj,
-            placed: obj.placed ?? true
+            placed: obj.placed ?? true,
         }));
 
         this._tiles.set(tiles);

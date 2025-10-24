@@ -12,9 +12,9 @@ export class TurnEngineService {
     constructor(private readonly eventEmitter: EventEmitter2, private readonly sessionRepository: InGameSessionRepository) {}
 
     startFirstTurn(session: InGameSession, timeoutMs = DEFAULT_TURN_DURATION): TurnState {
-        if (!session.turnOrderPlayerId?.length) throw new Error('TURN_ORDER_NOT_DEFINED');
+        if (!session.turnOrder?.length) throw new Error('TURN_ORDER_NOT_DEFINED');
 
-        const firstPlayer = session.turnOrderPlayerId[0];
+        const firstPlayer = session.turnOrder[0];
         session.inGamePlayers[firstPlayer].movementPoints = session.inGamePlayers[firstPlayer].speed;
         const newTurn: TurnState = {
             turnNumber: 1,
@@ -67,7 +67,7 @@ export class TurnEngineService {
     }
 
     private getNextPlayer(session: InGameSession, currentId: string): string {
-        const order = session.turnOrderPlayerId;
+        const order = session.turnOrder;
         const idx = order.indexOf(currentId);
         if (idx === -1) return order[0];
         return order[(idx + 1) % order.length];

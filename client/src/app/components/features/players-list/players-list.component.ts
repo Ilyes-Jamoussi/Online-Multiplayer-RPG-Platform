@@ -18,7 +18,7 @@ export class PlayersListComponent {
     ) {}
 
     readonly orderedPlayers: Signal<InGamePlayer[]> = computed(() => {
-        const turnOrder = this.inGameService.turnOrderPlayerId();
+        const turnOrder = this.inGameService.turnOrder();
         const players = this.inGameService.inGamePlayers();
         
         return turnOrder.map(playerId => players[playerId]).filter(Boolean);

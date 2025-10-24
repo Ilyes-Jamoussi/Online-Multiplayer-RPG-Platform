@@ -30,5 +30,5 @@ export interface InGameSession extends BaseSession {
     startPoints: StartPoint[];
     mapSize: MapSize;
     mode: GameMode;
-    turnOrderPlayerId: string[];
+    turnOrder: string[];
 }

@@ -83,7 +83,7 @@ describe('InGameInitializationService', () => {
         startPoints: [],
         mapSize: MapSize.MEDIUM,
         mode: GameMode.CLASSIC,
-        turnOrderPlayerId: ['player1', 'player2', 'player3'],
+        turnOrder: ['player1', 'player2', 'player3'],
         ...overrides,
     });
 
@@ -312,7 +312,7 @@ describe('InGameInitializationService', () => {
                         movementPoints: 0,
                     },
                 },
-                turnOrderPlayerId: ['player1'],
+                turnOrder: ['player1'],
             });
             const game = createMockGame(1);
 

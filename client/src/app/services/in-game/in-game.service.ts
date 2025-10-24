@@ -32,7 +32,7 @@ export class InGameService {
     readonly isMyTurn = computed(() => this._inGameSession().currentTurn.activePlayerId === this.playerService.id());
     readonly currentTurn = computed(() => this._inGameSession().currentTurn);
     readonly turnNumber = computed(() => this._inGameSession().currentTurn.turnNumber);
-    readonly turnOrderPlayerId = computed(() => this._inGameSession().turnOrderPlayerId);
+    readonly turnOrder = computed(() => this._inGameSession().turnOrder);
     readonly startPoints = computed(() => this._inGameSession().startPoints);
     readonly mapSize = computed(() => this._inGameSession().mapSize);
     readonly mode = computed(() => this._inGameSession().mode);
@@ -41,8 +41,16 @@ export class InGameService {
     readonly timeRemaining = computed(() => this.timerService.timeRemaining());
     readonly inGamePlayers = computed(() => this._inGameSession().inGamePlayers);
 
+    getPlayerByPlayerId(playerId: string): InGamePlayer {
+        return this.inGamePlayers()[playerId];
+    }
+
     get activePlayer(): InGamePlayer | undefined {
-        return this.inGamePlayers()[this.currentTurn().activePlayerId];
+        return this.getPlayerByPlayerId(this.currentTurn().activePlayerId);
+    }
+
+    get currentlyInGamePlayers(): InGamePlayer[] {
+        return Object.values(this.inGamePlayers()).filter((p) => p.isInGame);
     }
 
     get turnTransitionMessage(): string {
