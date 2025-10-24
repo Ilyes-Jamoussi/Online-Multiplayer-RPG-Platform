@@ -6,18 +6,14 @@
                 [ngStyle]="gridStyle"
             >
                 @for (tile of tiles; track tile.x + '-' + tile.y) {
-                    <div 
-                        class="map-tile"
-                    >
-                        <img 
-                            [src]="getTileImage(tile.kind, tile.open)" 
-                            [alt]="tile.kind"
-                            class="tile-image"
-                            draggable="false"
-                        />
-                    </div>
+                    <app-game-map-tile
+                        [tile]="tile"
+                        [imageSrc]="getTileImage(tile.kind, tile.open)"
+                    />
                 }
             </div>
+
+            <app-game-map-tile-modal />
             
             <div
                 class="objects-overlay"

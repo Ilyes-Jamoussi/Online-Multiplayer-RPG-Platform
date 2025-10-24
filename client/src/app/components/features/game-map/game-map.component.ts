@@ -7,11 +7,13 @@ import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { InGamePlayer } from '@common/models/player.interface';
 import { StartPoint } from '@common/models/start-point.interface';
+import { GameMapTileComponent } from '@app/components/features/game-map-tile/game-map-tile.component';
+import { GameMapTileModalComponent } from '@app/components/features/game-map-tile-modal/game-map-tile-modal.component';
 
 @Component({
     selector: 'app-game-map',
     standalone: true,
-    imports: [CommonModule, NgStyle],
+    imports: [CommonModule, NgStyle, GameMapTileComponent, GameMapTileModalComponent],
     templateUrl: './game-map.component.html',
     styleUrls: ['./game-map.component.scss'],
     providers: [GameMapService],

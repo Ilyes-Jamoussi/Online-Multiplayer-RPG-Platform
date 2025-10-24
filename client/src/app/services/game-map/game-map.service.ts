@@ -28,6 +28,7 @@ export class GameMapService {
     private readonly _name = signal<string>(this.initialState.name);
     private readonly _description = signal<string>(this.initialState.description);
     private readonly _mode = signal<GameMode>(this.initialState.mode);
+    private readonly _activeTileCoords = signal<{ x: number; y: number } | null>(null);
 
     readonly visibleObjects: Signal<GameEditorPlaceableDto[]> = computed(() => {
         const visibleObjects = this.objects().filter((obj) => obj.placed);
@@ -67,6 +68,41 @@ export class GameMapService {
 
     get mode() {
         return this._mode.asReadonly();
+    }
+
+    get activeTileCoords() {
+        return this._activeTileCoords.asReadonly();
+    }
+
+    getActiveTile(): GameEditorTileDto | null {
+        const coords = this._activeTileCoords();
+        if (!coords) return null;
+        return this.tiles().find((t) => t.x === coords.x && t.y === coords.y) ?? null;
+    }
+
+    openTileModal(tile: GameEditorTileDto): void {
+        this._activeTileCoords.set({ x: tile.x, y: tile.y });
+    }
+
+    closeTileModal(): void {
+        this._activeTileCoords.set(null);
+    }
+
+    isTileModalOpen(tile: GameEditorTileDto): boolean {
+        const coords = this._activeTileCoords();
+        return !!coords && coords.x === tile.x && coords.y === tile.y;
+    }
+
+    getPlayerOnTile(): InGamePlayer | undefined {
+        const coords = this._activeTileCoords();
+        if (!coords) return undefined;
+        return this.currentlyInGamePlayers.find((player) => player.x === coords.x && player.y === coords.y);
+    }
+
+    getObjectOnTile(): GameEditorPlaceableDto | undefined {
+        const coords = this._activeTileCoords();
+        if (!coords) return undefined;
+        return this.objects().find((obj) => obj.x === coords.x && obj.y === coords.y);
     }
 
     get currentlyInGamePlayers(): InGamePlayer[] {
@@ -124,5 +160,6 @@ export class GameMapService {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (this as any)[`_${key}`].set(value);
         });
+        this._activeTileCoords.set(null);
     }
 }
