@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { AvailableSessionsUpdatedDto } from '@app/dto/available-sessions-updated-dto';
 import { AvatarAssignmentsUpdatedDto } from '@app/dto/avatar-assignments-updated-dto';
 import { AvatarSelectionJoinedDto } from '@app/dto/avatar-selection-joined-dto';
 import { CreateSessionDto } from '@app/dto/create-session-dto';
@@ -68,7 +69,7 @@ export class SessionSocketService {
         this.socket.onSuccessEvent(SessionEvents.AvatarSelectionJoined, callback);
     }
 
-    onAvatarSelectionJoinError(callback: (msg: string) => void): void {
+    onAvatarSelectionJoinError(callback: (message: string) => void): void {
         this.socket.onErrorEvent(SessionEvents.AvatarSelectionJoined, callback);
     }
 
@@ -76,12 +77,12 @@ export class SessionSocketService {
         this.socket.onSuccessEvent(SessionEvents.SessionJoined, callback);
     }
 
-    onSessionJoinError(callback: (msg: string) => void): void {
+    onSessionJoinError(callback: (message: string) => void): void {
         this.socket.onErrorEvent(SessionEvents.SessionJoined, callback);
     }
 
-    onSessionEnded(callback: (data: { message: string }) => void): void {
-        this.socket.onSuccessEvent(SessionEvents.SessionEnded, callback);
+    onSessionEnded(callback: (message: string) => void): void {
+        this.socket.onSuccessEvent(SessionEvents.SessionEnded, (data: { message: string }) => callback(data.message));
     }
 
     onAvatarAssignmentsUpdated(callback: (data: AvatarAssignmentsUpdatedDto) => void): void {
@@ -94,5 +95,9 @@ export class SessionSocketService {
 
     onGameSessionStarted(callback: () => void): void {
         this.socket.onSuccessEvent(SessionEvents.GameSessionStarted, callback);
+    }
+
+    onAvailableSessionsUpdated(callback: (data: AvailableSessionsUpdatedDto) => void): void {
+        this.socket.onSuccessEvent(SessionEvents.AvailableSessionsUpdated, callback);
     }
 }

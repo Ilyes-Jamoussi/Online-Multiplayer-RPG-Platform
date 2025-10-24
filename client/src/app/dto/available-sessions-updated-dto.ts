@@ -7,10 +7,10 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { PlayerDto } from './player-dto';
+import { SessionPreviewDto } from './session-preview-dto';
 
 
-export interface SessionPlayersUpdatedDto { 
-    players: Array<PlayerDto>;
+export interface AvailableSessionsUpdatedDto { 
+    sessions: Array<SessionPreviewDto>;
 }
 

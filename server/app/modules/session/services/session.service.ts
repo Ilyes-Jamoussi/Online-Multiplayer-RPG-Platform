@@ -1,26 +1,30 @@
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
+import { SessionPreviewDto } from '@app/modules/session/dto/available-sessions-updated.dto';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Player } from '@common/models/player.interface';
 import { AvatarAssignment, WaitingRoomSession } from '@common/models/session.interface';
 import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ACCESS_CODE_LENGTH, ACCESS_CODE_PADDING, ACCESS_CODE_RANGE } from '@app/constants/session.constants';
 @Injectable()
 export class SessionService {
     private readonly sessions = new Map<string, WaitingRoomSession>();
     private readonly logger = new Logger(SessionService.name);
 
+    constructor(private readonly eventEmitter: EventEmitter2) {}
+
     createSession(adminId: string, data: CreateSessionDto): string {
         const sessionId = this.getUniqueAccessCode();
         const session = this.buildSession(sessionId, adminId, data);
-
         this.sessions.set(sessionId, session);
-
+        this.eventEmitter.emit('session.availabilityChanged');
         return sessionId;
     }
 
     endSession(sessionId: string): void {
         this.sessions.delete(sessionId);
+        this.eventEmitter.emit('session.availabilityChanged');
     }
 
     joinSession(playerId: string, data: JoinSessionDto): void {
@@ -86,11 +90,13 @@ export class SessionService {
     lock(sessionId: string): void {
         const session = this.getSession(sessionId);
         session.isRoomLocked = true;
+        this.eventEmitter.emit('session.availabilityChanged');
     }
 
     unlock(sessionId: string): void {
         const session = this.getSession(sessionId);
         session.isRoomLocked = false;
+        this.eventEmitter.emit('session.availabilityChanged');
     }
 
     isRoomLocked(sessionId: string): boolean {
@@ -114,6 +120,15 @@ export class SessionService {
 
     getSession(sessionId: string): WaitingRoomSession | undefined {
         return this.sessions.get(sessionId);
+    }
+
+    getAvailableSessions(): SessionPreviewDto[] {
+        const availableSessions = Array.from(this.sessions.values()).filter((session) => !session.isRoomLocked);
+        return availableSessions.map((session) => ({
+            id: session.id,
+            currentPlayers: session.players.length,
+            maxPlayers: session.maxPlayers,
+        }));
     }
 
     private getUniqueAccessCode(): string {

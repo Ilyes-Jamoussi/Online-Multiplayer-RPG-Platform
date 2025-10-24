@@ -125,12 +125,12 @@ export class PlayerService {
             this.router.navigate([ROUTES.waitingRoomPage]);
         });
 
-        this.sessionSocketService.onSessionEnded((data) => {
+        this.sessionSocketService.onSessionEnded((message) => {
             this.resetPlayer();
             this.sessionService.resetSession();
             this.notificationService.displayError({
                 title: 'Session terminée',
-                message: data.message,
+                message,
                 redirectRoute: ROUTES.homePage,
             });
         });

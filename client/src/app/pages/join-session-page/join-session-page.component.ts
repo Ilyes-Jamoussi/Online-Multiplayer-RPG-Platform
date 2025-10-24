@@ -1,25 +1,23 @@
-import { Component } from '@angular/core';
-import { UiButtonComponent } from '@app/components/ui/button/button.component';
-import { UiInputComponent } from '@app/components/ui/input/input.component';
+import { Component, Signal } from '@angular/core';
+import { SessionCardComponent } from '@app/components/features/session-card/session-card.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
-import { SESSION_ACCESS_CODE_LENGTH } from '@app/constants/validation.constants';
-import { PlayerService } from '@app/services/player/player.service';
+import { SessionPreviewDto } from '@app/dto/session-preview-dto';
+import { SessionService } from '@app/services/session/session.service';
+
 @Component({
     selector: 'app-join-session-page',
-    imports: [UiPageLayoutComponent, UiButtonComponent, UiInputComponent],
+    imports: [UiPageLayoutComponent, SessionCardComponent],
     templateUrl: './join-session-page.component.html',
     styleUrl: './join-session-page.component.scss',
 })
 export class JoinSessionPageComponent {
-    constructor(private readonly playerService: PlayerService) {}
-    readonly sessionAccessCodeLength = SESSION_ACCESS_CODE_LENGTH;
-    sessionAccessCode = '';
-
-    onSessionAccessCodeChange(value: string): void {
-        this.sessionAccessCode = value;
+    get availableSessions(): Signal<SessionPreviewDto[]> {
+        return this.sessionService.availableSessions;
     }
 
-    onSubmit(): void {
-        this.playerService.joinAvatarSelection(this.sessionAccessCode);
+    constructor(private readonly sessionService: SessionService) {}
+
+    onJoinSession(sessionId: string): void {
+        this.sessionService.joinAvatarSelection(sessionId);
     }
 }

@@ -1,5 +1,6 @@
 import { AVATAR_SELECTION_ROOM_PREFIX } from '@app/constants/session.constants';
 import { InGameService } from '@app/modules/in-game/services/in-game.service';
+import { AvailableSessionsUpdatedDto } from '@app/modules/session/dto/available-sessions-updated.dto';
 import { CreateSessionDto, SessionCreatedDto } from '@app/modules/session/dto/create-session.dto';
 import { AvatarSelectionJoinedDto, JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection';
 import { JoinSessionDto, SessionJoinedDto } from '@app/modules/session/dto/join-session.dto';
@@ -14,6 +15,7 @@ import { MapSize } from '@common/enums/map-size.enum';
 import { Player } from '@common/models/player.interface';
 import { SocketResponse } from '@common/types/socket-response.type';
 import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
@@ -200,6 +202,16 @@ export class SessionGateway implements OnGatewayDisconnect {
 
     handleDisconnect(socket: Socket): void {
         this.leaveSession(socket);
+    }
+
+    @OnEvent('session.availabilityChanged')
+    handleAvailabilityChange(): void {
+        this.emitAvailableSessionsUpdate();
+    }
+
+    private emitAvailableSessionsUpdate(): void {
+        const sessions = this.sessionService.getAvailableSessions();
+        this.server.emit(SessionEvents.AvailableSessionsUpdated, successResponse<AvailableSessionsUpdatedDto>({ sessions }));
     }
 
     private getRoom(accessCode: string): Set<string> | undefined {

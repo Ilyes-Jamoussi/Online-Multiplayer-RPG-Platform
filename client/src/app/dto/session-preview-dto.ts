@@ -7,10 +7,11 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { PlayerDto } from './player-dto';
 
 
-export interface SessionPlayersUpdatedDto { 
-    players: Array<PlayerDto>;
+export interface SessionPreviewDto { 
+    id: string;
+    currentPlayers: number;
+    maxPlayers: number;
 }
 

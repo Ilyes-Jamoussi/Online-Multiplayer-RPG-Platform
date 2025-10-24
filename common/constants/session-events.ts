@@ -26,4 +26,6 @@ export enum SessionEvents {
 
     KickPlayer = 'kickPlayer',
     SessionEnded = 'sessionEnded',
+
+    AvailableSessionsUpdated = 'availableSessionsUpdated',
 }
