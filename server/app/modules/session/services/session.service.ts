@@ -31,10 +31,15 @@ export class SessionService {
             ...data.player,
             name: uniqueName,
             id: playerId,
-            speed: 0,
-            health: 0,
-            attack: 0,
-            defense: 0,
+            speed: data.player.speed,
+            health: data.player.health,
+            attack: data.player.attack,
+            defense: data.player.defense,
+            x: 0,
+            y: 0,
+            isInGame: false,
+            startPointId: '',
+            movementPoints: 0,
         };
         session.players.push(player);
     }
@@ -185,10 +190,15 @@ export class SessionService {
         const adminPlayer: Player = {
             ...data.player,
             id: adminId,
-            speed: 0,
-            health: 0,
-            attack: 0,
-            defense: 0,
+            speed: data.player.speed,
+            health: data.player.health,
+            attack: data.player.attack,
+            defense: data.player.defense,
+            x: 0,
+            y: 0,
+            isInGame: false,
+            startPointId: '',
+            movementPoints: 0,
         };
         return {
             players: [adminPlayer],

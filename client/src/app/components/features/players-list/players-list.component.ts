@@ -37,7 +37,7 @@ export class PlayersListComponent {
     }
 
     hasAbandoned(player: InGamePlayer): boolean {
-        return !player.joined;
+        return !player.isInGame;
     }
 
     getCombatWins(): number {

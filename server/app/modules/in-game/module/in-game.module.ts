@@ -8,9 +8,18 @@ import { GameCacheService } from '@app/modules/in-game/services/game-cache.servi
 import { InGameInitializationService } from '@app/modules/in-game/services/in-game-initialization.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session.repository';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement.service';
 
 @Module({
-    providers: [InGameService, InGameGateway, TurnEngineService, GameCacheService, InGameInitializationService, InGameSessionRepository],
+    providers: [
+        InGameService,
+        InGameGateway,
+        TurnEngineService,
+        GameCacheService,
+        InGameInitializationService,
+        InGameSessionRepository,
+        InGameMovementService,
+    ],
     exports: [InGameService],
     imports: [MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }]), EventEmitterModule.forRoot()],
 })

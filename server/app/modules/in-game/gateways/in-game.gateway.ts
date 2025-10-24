@@ -6,7 +6,7 @@ import { InGameEvents } from '@common/constants/in-game-events';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { InGameSession } from '@common/models/session.interface';
 import { OnEvent } from '@nestjs/event-emitter';
-
+import { Orientation } from '@common/enums/orientation.enum';
 @UsePipes(
     new ValidationPipe({
         transform: true,
@@ -16,15 +16,13 @@ import { OnEvent } from '@nestjs/event-emitter';
         },
     }),
 )
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({})
 @Injectable()
 export class InGameGateway {
     @WebSocketServer() private readonly server: Server;
     private readonly logger = new Logger(InGameGateway.name);
 
     constructor(private readonly inGameService: InGameService) {}
-
-    // --- SOCKET HANDLERS -----------------------------------------------------
 
     @SubscribeMessage(InGameEvents.PlayerJoinInGameSession)
     playerJoinInGameSession(socket: Socket, sessionId: string): void {
@@ -48,18 +46,6 @@ export class InGameGateway {
         }
     }
 
-    @SubscribeMessage(InGameEvents.LeaveInGameSession)
-    leaveInGameSession(socket: Socket, sessionId: string): void {
-        try {
-            const session = this.inGameService.leaveInGameSession(sessionId, socket.id);
-            socket.leave(session.inGameId);
-            this.server.to(session.inGameId).emit(InGameEvents.LeftInGameSession, successResponse<InGameSession>(session));
-            this.logger.log(`Socket ${socket.id} left session ${session.id}`);
-        } catch (error) {
-            socket.emit(InGameEvents.LeftInGameSession, errorResponse(error.message));
-        }
-    }
-
     @SubscribeMessage(InGameEvents.PlayerEndTurn)
     playerEndTurn(socket: Socket, sessionId: string): void {
         try {
@@ -71,15 +57,25 @@ export class InGameGateway {
         }
     }
 
-    @SubscribeMessage(InGameEvents.PlayerAbandonGame)
-    playerAbandonGame(socket: Socket, sessionId: string): void {
+    @SubscribeMessage(InGameEvents.PlayerLeaveInGameSession)
+    playerLeaveSession(socket: Socket, sessionId: string): void {
         try {
-            const result = this.inGameService.abandonGame(sessionId, socket.id);
+            const result = this.inGameService.leaveInGameSession(sessionId, socket.id);
             socket.leave(result.session.inGameId);
-            this.server.to(result.session.inGameId).emit(InGameEvents.PlayerAbandoned, successResponse(result));
-            this.logger.log(`Player ${result.playerName} abandoned game in session ${sessionId}`);
+            this.server.to(result.session.inGameId).emit(InGameEvents.PlayerLeftInGameSession, successResponse(result));
+            this.server.to(socket.id).emit(InGameEvents.LeftInGameSessionAck, successResponse({}));
+            this.logger.log(`Player ${result.playerName} left session ${sessionId}`);
         } catch (error) {
-            socket.emit(InGameEvents.LeftInGameSession, errorResponse(error.message));
+            socket.emit(InGameEvents.PlayerLeftInGameSession, errorResponse(error.message));
+        }
+    }
+
+    @SubscribeMessage(InGameEvents.PlayerMove)
+    playerMove(socket: Socket, payload: { sessionId: string; orientation: Orientation }): void {
+        try {
+            this.inGameService.movePlayer(payload.sessionId, socket.id, payload.orientation);
+        } catch (error) {
+            socket.emit(InGameEvents.PlayerMoved, errorResponse(error.message));
         }
     }
 
@@ -111,5 +107,16 @@ export class InGameGateway {
     handleForcedEnd(payload: { session: InGameSession }) {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnForcedEnd, successResponse(payload.session));
         this.logger.warn(`Forced end of turn for session ${payload.session.id}`);
+    }
+
+    @OnEvent('player.moved')
+    handlePlayerMoved(payload: { session: InGameSession; playerId: string; x: number; y: number; movementPoints: number }) {
+        this.server
+            .to(payload.session.inGameId)
+            .emit(
+                InGameEvents.PlayerMoved,
+                successResponse({ playerId: payload.playerId, x: payload.x, y: payload.y, movementPoints: payload.movementPoints }),
+            );
+        this.logger.log(`Player ${payload.playerId} moved to ${payload.x}, ${payload.y} in session ${payload.session.id}`);
     }
 }

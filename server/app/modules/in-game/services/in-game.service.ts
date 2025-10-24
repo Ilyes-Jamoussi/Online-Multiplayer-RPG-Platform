@@ -7,6 +7,8 @@ import { TurnEngineService } from './turn-engine.service';
 import { GameCacheService } from './game-cache.service';
 import { InGameInitializationService } from './in-game-initialization.service';
 import { InGameSessionRepository } from './in-game-session.repository';
+import { InGameMovementService } from './in-game-movement.service';
+import { Orientation } from '@common/enums/orientation.enum';
 
 @Injectable()
 export class InGameService {
@@ -15,30 +17,39 @@ export class InGameService {
         private readonly gameCache: GameCacheService,
         private readonly initialization: InGameInitializationService,
         private readonly sessionRepository: InGameSessionRepository,
+        private readonly movementService: InGameMovementService,
     ) {}
 
     async createInGameSession(waiting: WaitingRoomSession, mode: GameMode, mapSize: MapSize): Promise<InGameSession> {
+        const { id, gameId, maxPlayers, players } = waiting;
+
         const session: InGameSession = {
-            id: waiting.id,
-            inGameId: `${waiting.id}-${waiting.gameId}`,
-            gameId: waiting.gameId,
-            maxPlayers: waiting.maxPlayers,
+            id,
+            inGameId: `${id}-${gameId}`,
+            gameId,
+            maxPlayers,
             isGameStarted: false,
             inGamePlayers: {},
-            currentTurn: { turnNumber: 1, activePlayerId: `` },
+            currentTurn: { turnNumber: 1, activePlayerId: '' },
             startPoints: [],
             mapSize,
             mode,
             turnOrderPlayerId: [],
         };
 
-        const game = await this.gameCache.fetchAndCacheGame(session.id, waiting.gameId);
+        const game = await this.gameCache.fetchAndCacheGame(id, gameId);
 
-        const order = waiting.players.map((p) => p.id);
+        const playerOrder = this.initialization.shuffleArray(players.map((p) => p.id));
+        session.turnOrderPlayerId = playerOrder;
 
-        session.turnOrderPlayerId = this.initialization.shuffleArray(order);
-        session.inGamePlayers = Object.fromEntries(waiting.players.map((p) => [p.id, { ...p, x: 0, y: 0, startPointId: '', joined: false }]));
-        session.currentTurn.activePlayerId = session.turnOrderPlayerId[0];
+        session.inGamePlayers = Object.fromEntries(players.map((p) => [p.id, { ...p, x: 0, y: 0, startPointId: '', joined: false }]));
+
+        const firstPlayerId = playerOrder[0];
+        session.currentTurn.activePlayerId = firstPlayerId;
+        if (session.inGamePlayers[firstPlayerId]) {
+            session.inGamePlayers[firstPlayerId].movementPoints = session.inGamePlayers[firstPlayerId].speed;
+        }
+
         this.initialization.assignStartPoints(session, game);
         this.sessionRepository.save(session);
         return session;
@@ -71,23 +82,8 @@ export class InGameService {
         const session = this.sessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
-        if (player.joined) throw new BadRequestException('Player already joined');
-        player.joined = true;
-        return session;
-    }
-
-    leaveInGameSession(sessionId: string, playerId: string): InGameSession {
-        const session = this.sessionRepository.findById(sessionId);
-        const player = session.inGamePlayers[playerId];
-        if (!player) throw new NotFoundException('Player not found');
-        if (!player.joined) throw new BadRequestException('Player not joined');
-        player.joined = false;
-
-        const joinedPlayers = Object.values(session.inGamePlayers).filter((p) => p.joined);
-        if (joinedPlayers.length < 2) {
-            this.turnEngine.forceStopTimer(sessionId);
-        }
-
+        if (player.isInGame) throw new BadRequestException('Player already joined');
+        player.isInGame = true;
         return session;
     }
 
@@ -100,19 +96,24 @@ export class InGameService {
         return session;
     }
 
-    abandonGame(sessionId: string, playerId: string): { session: InGameSession; playerName: string } {
+    movePlayer(sessionId: string, playerId: string, orientation: Orientation): void {
+        const session = this.sessionRepository.findById(sessionId);
+        if (playerId !== session.currentTurn.activePlayerId) throw new BadRequestException('Not your turn');
+        this.movementService.movePlayer(session, playerId, orientation);
+    }
+
+    leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string } {
         const session = this.sessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
-        
-        const playerName = player.name;
-        player.joined = false;
+        if (!player.isInGame) throw new BadRequestException('Player not joined');
+        player.isInGame = false;
 
-        const joinedPlayers = Object.values(session.inGamePlayers).filter((p) => p.joined);
+        const joinedPlayers = Object.values(session.inGamePlayers).filter((p) => p.isInGame);
         if (joinedPlayers.length < 2) {
             this.turnEngine.forceStopTimer(sessionId);
         }
 
-        return { session, playerName };
+        return { session, playerName: player.name };
     }
 }
