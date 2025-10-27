@@ -179,25 +179,19 @@ describe('GameEditorStoreService', () => {
         it('should reject with a user-friendly error when API returns Conflict (duplicate name)', async () => {
             const gridEl = document.createElement('div');
 
-            // Screenshot peut être null/undefined, on s’en fiche ici : la requête échoue ensuite.
             screenshotServiceSpy.captureElementAsBase64.and.resolveTo('');
 
-            // Important : faire une modif de nom pour que "name" soit inclus dans le payload si tu le souhaites
             service.name = 'Duplicate Name';
 
-            // Simule le 409 côté HttpClient/Mongoose → statusText === 'Conflict'
             const conflict = new HttpErrorResponse({ status: 409, statusText: 'Conflict' });
             gameHttpServiceSpy.patchGameEditorById.and.returnValue(throwError(() => conflict));
 
-            // Vérifie que la promesse est rejetée avec le bon message
             await expectAsync(service.saveGame(gridEl)).toBeRejectedWithError(Error, 'Un jeu avec ce nom existe déjà.');
 
-            // Et qu’on n’essaie PAS de créer un nouveau jeu dans ce cas
             expect(gameHttpServiceSpy.createGame).not.toHaveBeenCalled();
         });
 
         it('should call the API to save the game', async () => {
-            // pour ce test, on ne veut PAS de gridPreviewUrl, donc screenshot → null
             screenshotServiceSpy.captureElementAsBase64.and.resolveTo('base64imagestring');
 
             const gridEl = document.createElement('div');

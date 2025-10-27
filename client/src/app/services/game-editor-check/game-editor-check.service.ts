@@ -174,6 +174,7 @@ export class GameEditorCheckService {
         return kind === TileKind.BASE || kind === TileKind.ICE || kind === TileKind.WATER || kind === TileKind.DOOR || kind === TileKind.TELEPORT;
     }
 
+    // Todo: shorten this method
     private connectedWalkableComponents(grid: TileKind[][], size: number): { set: Set<string>; size: number }[] {
         const seen = new Set<string>();
         const comps: { set: Set<string>; size: number }[] = [];
