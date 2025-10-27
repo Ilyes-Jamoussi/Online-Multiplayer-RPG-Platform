@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { UiButtonComponent, ButtonVariant, ButtonSize } from './button.component';
+import { UiButtonComponent} from './button.component';
 
 describe('UiButtonComponent', () => {
     let component: UiButtonComponent;
@@ -94,7 +94,7 @@ describe('UiButtonComponent', () => {
     });
 
     it('classes getter should reflect variant changes', () => {
-        const variants: ButtonVariant[] = ['primary', 'secondary', 'accent', 'success', 'warning', 'error', 'ghost'];
+        const variants: string[] = ['primary', 'secondary', 'accent', 'success', 'warning', 'error', 'ghost'];
         for (const v of variants) {
             component.variant = v;
             const cls = component.classes.split(' ').filter(Boolean);
@@ -103,7 +103,7 @@ describe('UiButtonComponent', () => {
     });
 
     it('classes getter should reflect size changes', () => {
-        const sizes: ButtonSize[] = ['sm', 'md', 'lg'];
+        const sizes: string[] = ['sm', 'md', 'lg'];
         for (const s of sizes) {
             component.size = s;
             const cls = component.classes.split(' ').filter(Boolean);
