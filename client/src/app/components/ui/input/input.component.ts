@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { NUMBER_ALLOWED_CHARS_PATTERN, TEXT_ALLOWED_CHARS_PATTERN } from '@app/constants/validation.constants';
-import { InputVariants } from '@common/enums/input-variants';
+import { InputVariants } from '@common/enums/input-variants.enum';
 
 @Component({
     selector: 'app-ui-input',
@@ -11,7 +11,7 @@ import { InputVariants } from '@common/enums/input-variants';
 export class UiInputComponent {
     @Input() disabled: boolean = false;
     @Input() placeholder: string = '';
-    @Input() type: InputVariants = InputVariants.TEXT;
+    @Input() type: InputVariants | string = InputVariants.TEXT;
     @Input() maxLength?: number;
     @Input() minLength?: number;
     @Input() fullWidth: boolean = false;

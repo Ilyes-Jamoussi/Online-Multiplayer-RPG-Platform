@@ -25,20 +25,20 @@
 
             <div class="game-actions">
                 @if (isAdmin) {
-                <app-ui-button variant:Primary size:Small (buttonClick)="onEditGame()">
+                <app-ui-button variant="primary" size="sm" (buttonClick)="onEditGame()">
                     <app-ui-icon iconName="Edit"></app-ui-icon>
                     Modifier
                 </app-ui-button>
-                <app-ui-button [variant]:game.visibility ? Success : Warning size:Small (buttonClick)="onToggleVisibility()">
+                <app-ui-button [variant]="game.visibility ? 'success' : 'warning'" size="sm" (buttonClick)="onToggleVisibility()">
                     <app-ui-icon [iconName]="game.visibility ? 'Eye' : 'EyeSlash'"></app-ui-icon>
                     {{ game.visibility ? 'Publié' : 'Masqué' }}
                 </app-ui-button>
-                <app-ui-button variant:Error size:Small (buttonClick)="onDeleteGame()">
+                <app-ui-button variant="error" size="sm" (buttonClick)="onDeleteGame()">
                     <app-ui-icon iconName="Trash"></app-ui-icon>
                     Supprimer
                 </app-ui-button>
                 } @else {
-                <app-ui-button variant:Primary size:Medium (buttonClick)="onStartGame()">
+                <app-ui-button variant="primary" size="md" (buttonClick)="onStartGame()">
                     <app-ui-icon iconName="Play"></app-ui-icon>
                     Jouer
                 </app-ui-button>
