@@ -1,7 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-
-export type ButtonVariant = 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error' | 'ghost';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+import { ButtonVariant, ButtonSize } from '@common/enums/button-variant';
 
 @Component({
     selector: 'app-ui-button',
@@ -10,8 +8,8 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
     styleUrls: ['./button.component.scss'],
 })
 export class UiButtonComponent {
-    @Input() variant: ButtonVariant = 'primary';
-    @Input() size: ButtonSize = 'md';
+    @Input() variant: ButtonVariant.Primary;
+    @Input() size: ButtonSize.Medium;
     @Input() disabled: boolean = false;
     @Input() loading: boolean = false;
     @Input() fullWidth: boolean = false;
