@@ -41,7 +41,7 @@
                     <span class="label">Nom du jeu</span>
                     <app-ui-input
                         [fullWidth]="true"
-                        type="text"
+                        type:TEXT
                         placeholder="Saisissez le nom de votre jeu"
                         [value]="name"
                         (valueChange)="name = $event"
@@ -51,7 +51,7 @@
 
                     <span class="label">Description</span>
                     <app-ui-input
-                        type="textarea"
+                        type:TEXTAREA
                         [fullWidth]="true"
                         placeholder="Décrivez votre jeu en quelques mots"
                         [value]="description"
