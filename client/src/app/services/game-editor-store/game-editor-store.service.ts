@@ -125,17 +125,17 @@ export class GameEditorStoreService {
         return this._tiles.asReadonly();
     }
 
-    get objects() {
-        return this._objects.asReadonly();
-    }
+    // get objects() {
+    //     return this._objects.asReadonly();
+    // }
 
     get size() {
         return this._size.asReadonly();
     }
 
-    get gridPreviewUrl() {
-        return this._gridPreviewUrl.asReadonly();
-    }
+    // get gridPreviewUrl() {
+    //     return this._gridPreviewUrl.asReadonly();
+    // }
 
     get mode() {
         return this._mode.asReadonly();

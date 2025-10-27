@@ -12,6 +12,7 @@ export class UiInputComponent {
     @Input() placeholder: string = '';
     @Input() type: 'text' | 'number' | 'textarea' = 'text';
     @Input() maxLength?: number;
+    @Input() minLength?: number;
     @Input() fullWidth: boolean = false;
     @Input() set value(val: string) {
         this._value = val;

@@ -28,11 +28,6 @@ describe('HomePageComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should have the default gameName defined in the component', () => {
-        expect(typeof component.gameName).toBe('string');
-        expect(component.gameName.length).toBeGreaterThan(0);
-    });
-
     it('should expose team info with expected shape', () => {
         expect(component.teamInfo).toBeDefined();
         expect(component.teamInfo.teamNumber).toBeDefined();

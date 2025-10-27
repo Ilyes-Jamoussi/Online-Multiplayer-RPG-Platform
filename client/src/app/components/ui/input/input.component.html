@@ -7,6 +7,7 @@
         (input)="onInput($event)"
         (keydown)="onKeyDown($event)"
         [attr.maxlength]="maxLength"
+        [attr.minlength]="minLength"
     ></textarea>
     } @else {
     <input
@@ -17,6 +18,7 @@
         (input)="onInput($event)"
         (keydown)="onKeyDown($event)"
         [attr.maxlength]="maxLength"
+        [attr.minlength]="minLength"
     />
     }
 </div>

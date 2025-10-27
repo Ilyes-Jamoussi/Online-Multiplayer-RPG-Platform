@@ -13,7 +13,6 @@ import { UiButtonComponent } from '@app/components/ui/button/button.component';
     standalone: true,
 })
 export class HomePageComponent {
-    gameName: string = 'RPG Maker x2';
     teamInfo = {
         teamNumber: '204',
         members: ['Wael El Karoui', 'Ilyes Jamoussi', 'Noah Blanchard', 'Adam Rafai', 'Eduard Andrei Podaru'],
