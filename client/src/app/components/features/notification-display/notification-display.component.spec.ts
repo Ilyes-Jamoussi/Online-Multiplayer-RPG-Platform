@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatIconModule } from '@angular/material/icon';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { NotificationDisplayComponent } from './notification-display.component';
 
@@ -116,7 +116,7 @@ describe('NotificationDisplayComponent', () => {
         component.onAction();
 
         expect(notificationService.reset).toHaveBeenCalled();
-        expect(router.navigate).toHaveBeenCalledWith([ROUTES.homePage]);
+        expect(router.navigate).toHaveBeenCalledWith([ROUTES.HomePage]);
     });
 
     it('should not display anything when notification is null', () => {

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 
@@ -21,14 +21,14 @@ export class HomePageComponent {
     constructor(private readonly router: Router) {}
 
     navigateToCreateGame(): void {
-        this.router.navigate([ROUTES.sessionCreationPage]);
+        this.router.navigate([ROUTES.SessionCreationPage]);
     }
 
     navigateToAdminPage(): void {
-        this.router.navigate([ROUTES.managementPage]);
+        this.router.navigate([ROUTES.ManagementPage]);
     }
 
     navigateToJoinGame(): void {
-        this.router.navigate([ROUTES.joinSessionPage]);
+        this.router.navigate([ROUTES.JoinSessionPage]);
     }
 }

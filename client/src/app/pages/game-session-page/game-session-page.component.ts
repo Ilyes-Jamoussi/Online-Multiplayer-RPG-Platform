@@ -7,7 +7,7 @@ import { GameTimerComponent } from '@app/components/features/game-timer/game-tim
 import { PlayerInfoComponent } from '@app/components/features/player-info/player-info.component';
 import { PlayersListComponent } from '@app/components/features/players-list/players-list.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { SessionService } from '@app/services/session/session.service';
@@ -106,6 +106,6 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
 
     onBack(): void {
         this.inGameService.cleanupAll();
-        this.router.navigate([ROUTES.homePage]);
+        this.router.navigate([ROUTES.HomePage]);
     }
 }

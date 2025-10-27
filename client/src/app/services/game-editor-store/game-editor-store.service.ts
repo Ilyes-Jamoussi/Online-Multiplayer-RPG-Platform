@@ -15,7 +15,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { CreateGameDto } from '@app/dto/create-game-dto';
 import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 import { NotificationService } from '@app/services/notification/notification.service';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable()
@@ -297,7 +297,7 @@ export class GameEditorStoreService {
         this.notificationService.displaySuccess({
             title: 'Jeu sauvegardé',
             message: 'Votre jeu a été sauvegardé avec succès !',
-            redirectRoute: ROUTES.managementPage,
+            redirectRoute: ROUTES.ManagementPage,
         });
     }
 

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { HomePageComponent } from './home-page.component';
 
 describe('HomePageComponent', () => {
@@ -38,13 +38,13 @@ describe('HomePageComponent', () => {
     it('navigateToCreateGame should call router.navigate with ROUTES.gameSessionCreation', () => {
         component.navigateToCreateGame();
         expect(routerStub.navigate).toHaveBeenCalledTimes(1);
-        expect(routerStub.navigate).toHaveBeenCalledWith([ROUTES.sessionCreationPage]);
+        expect(routerStub.navigate).toHaveBeenCalledWith([ROUTES.SessionCreationPage]);
     });
 
     it('navigateToAdminPage should call router.navigate with ROUTES.gameManagement', () => {
         component.navigateToAdminPage();
         expect(routerStub.navigate).toHaveBeenCalledTimes(1);
-        expect(routerStub.navigate).toHaveBeenCalledWith([ROUTES.managementPage]);
+        expect(routerStub.navigate).toHaveBeenCalledWith([ROUTES.ManagementPage]);
     });
 
     it('template should render team number and team members in footer', () => {
