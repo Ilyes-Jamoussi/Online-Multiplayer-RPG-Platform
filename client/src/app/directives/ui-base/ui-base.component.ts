@@ -86,12 +86,4 @@ export abstract class UiBaseComponent {
             disableHoverEffects: this.disableHoverEffects,
         };
     }
-
-    get styleVars(): Record<string, string> {
-        const vars: Record<string, string> = {};
-        if (this.computedWidth === 'custom' && this.widthValue) {
-            vars['--ui-w'] = this.widthValue;
-        }
-        return vars;
-    }
 }

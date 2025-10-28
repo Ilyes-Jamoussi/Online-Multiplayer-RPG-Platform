@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiIconComponent } from '@app/components/ui/icon/icon.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { GameModeOption, MapSizeOption } from '@app/interfaces/game-parameters.interface';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
@@ -70,7 +70,7 @@ export class ParametersPageComponent {
             })
             .subscribe({
                 next: (gamePreview) => {
-                    this.router.navigate([ROUTES.editorPage, gamePreview.id]);
+                    this.router.navigate([ROUTES.EditorPage, gamePreview.id]);
                 },
                 error: (err) => {
                     this.notificationService.displayError({

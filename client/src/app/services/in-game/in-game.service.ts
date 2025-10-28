@@ -1,7 +1,7 @@
 import { Injectable, computed, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { InGameSession } from '@common/models/session.interface';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
@@ -69,7 +69,7 @@ export class InGameService {
     abandonGame(): void {
         this.inGameSocketService.playerAbandonGame(this.sessionService.id());
         this.cleanupAll();
-        this.router.navigate([ROUTES.homePage]);
+        this.router.navigate([ROUTES.HomePage]);
     }
 
     startTurnTimer(): void {

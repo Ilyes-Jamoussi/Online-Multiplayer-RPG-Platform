@@ -1,5 +1,6 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { NUMBER_ALLOWED_CHARS_PATTERN, TEXT_ALLOWED_CHARS_PATTERN } from '@app/constants/validation.constants';
+import { InputVariants } from '@common/enums/input-variants.enum';
 
 @Component({
     selector: 'app-ui-input',
@@ -10,8 +11,9 @@ import { NUMBER_ALLOWED_CHARS_PATTERN, TEXT_ALLOWED_CHARS_PATTERN } from '@app/c
 export class UiInputComponent {
     @Input() disabled: boolean = false;
     @Input() placeholder: string = '';
-    @Input() type: 'text' | 'number' | 'textarea' = 'text';
+    @Input() type: InputVariants | string = InputVariants.TEXT;
     @Input() maxLength?: number;
+    @Input() minLength?: number;
     @Input() fullWidth: boolean = false;
     @Input() set value(val: string) {
         this._value = val;
@@ -61,7 +63,7 @@ export class UiInputComponent {
     }
 
     private isValidChar(char: string): boolean {
-        const pattern = this.type === 'number' ? NUMBER_ALLOWED_CHARS_PATTERN : TEXT_ALLOWED_CHARS_PATTERN;
+        const pattern = this.type === InputVariants.NUMBER ? NUMBER_ALLOWED_CHARS_PATTERN : TEXT_ALLOWED_CHARS_PATTERN;
         return pattern.test(char);
     }
 
@@ -70,7 +72,7 @@ export class UiInputComponent {
     }
 
     private filterInvalidChars(value: string): string {
-        const pattern = this.type === 'number' ? NUMBER_ALLOWED_CHARS_PATTERN : TEXT_ALLOWED_CHARS_PATTERN;
+        const pattern = this.type === InputVariants.NUMBER ? NUMBER_ALLOWED_CHARS_PATTERN : TEXT_ALLOWED_CHARS_PATTERN;
         return [...value].filter((c) => pattern.test(c) || c === ' ').join('');
     }
 }

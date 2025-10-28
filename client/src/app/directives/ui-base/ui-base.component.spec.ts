@@ -48,18 +48,6 @@ describe('UiBaseComponent', () => {
         expect(c['popOut']).toBeFalse();
     });
 
-    it('should return empty styleVars when width is not custom', () => {
-        const vars = comp.styleVars;
-        expect(vars).toEqual({});
-    });
-
-    it('should return styleVars with custom width when width is custom and widthValue is set', () => {
-        comp.width = 'custom';
-        comp.widthValue = '200px';
-        const vars = comp.styleVars;
-        expect(vars).toEqual({ ['--ui-w']: '200px' });
-    });
-
     it('should return color when color input is set', () => {
         comp.color = 'danger';
         expect(comp.computedColor).toBe('danger');

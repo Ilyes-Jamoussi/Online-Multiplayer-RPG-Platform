@@ -1,6 +1,6 @@
 import { computed, Injectable, Signal, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { DEFAULT_SESSION, MIN_SESSION_PLAYERS } from '@app/constants/session.constants';
 import { CreateSessionDto } from '@app/dto/create-session-dto';
 import { JoinSessionDto } from '@app/dto/join-session-dto';
@@ -75,14 +75,14 @@ export class SessionService {
 
     leaveSession(): void {
         this.resetSession();
-        this.router.navigate([ROUTES.homePage]);
+        this.router.navigate([ROUTES.HomePage]);
         this.sessionSocketService.leaveSession();
     }
 
     initializeSessionWithGame(gameId: string, mapSize: MapSize): void {
         const maxPlayers = MAP_SIZE_TO_MAX_PLAYERS[mapSize];
         this.updateSession({ gameId, maxPlayers });
-        this.router.navigate([ROUTES.characterCreationPage]);
+        this.router.navigate([ROUTES.CharacterCreationPage]);
     }
 
     createSession(player: Player): void {
@@ -122,7 +122,7 @@ export class SessionService {
 
     handleSessionJoined(data: { gameId: string; maxPlayers: number }): void {
         this.updateSession({ gameId: data.gameId, maxPlayers: data.maxPlayers });
-        this.router.navigate([ROUTES.waitingRoomPage]);
+        this.router.navigate([ROUTES.WaitingRoomPage]);
     }
 
     private assignAvatar(playerId: string, avatar: Avatar): void {
@@ -146,12 +146,12 @@ export class SessionService {
         );
 
         this.sessionSocketService.onGameSessionStarted(() => {
-            this.router.navigate([ROUTES.gameSessionPage]);
+            this.router.navigate([ROUTES.GameSessionPage]);
         });
 
         this.sessionSocketService.onSessionJoined((data) => {
             this.updateSession({ gameId: data.gameId, maxPlayers: data.maxPlayers });
-            this.router.navigate([ROUTES.waitingRoomPage]);
+            this.router.navigate([ROUTES.WaitingRoomPage]);
         });
 
         this.sessionSocketService.onSessionCreatedError((error) => {
@@ -168,7 +168,7 @@ export class SessionService {
 
         this.sessionSocketService.onAvatarSelectionJoined((data) => {
             this.updateSession({ id: data.sessionId });
-            this.router.navigate([ROUTES.characterCreationPage]);
+            this.router.navigate([ROUTES.CharacterCreationPage]);
         });
 
         this.sessionSocketService.onAvailableSessionsUpdated((data) => {
