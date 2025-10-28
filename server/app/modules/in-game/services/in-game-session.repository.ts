@@ -56,4 +56,13 @@ export class InGameSessionRepository {
         const session = this.findById(sessionId);
         session.turnOrder = session.turnOrder.filter((id) => id !== playerId);
     }
+
+    findSessionByPlayerId(playerId: string): InGameSession | null {
+        for (const session of this.sessions.values()) {
+            if (session.inGamePlayers[playerId]?.isInGame) {
+                return session;
+            }
+        }
+        return null;
+    }
 }

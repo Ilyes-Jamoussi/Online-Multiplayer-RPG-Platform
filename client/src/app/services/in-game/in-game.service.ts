@@ -76,7 +76,16 @@ export class InGameService {
     }
 
     loadInGameSession(): void {
-        this.inGameSocketService.playerJoinInGameSession(this.sessionService.id());
+        if (this.sessionService.id()) {
+            this.inGameSocketService.playerJoinInGameSession(this.sessionService.id());
+        } else {
+            this.cleanupAll();
+            this.notificationService.displayError({
+                title: 'Session non trouvée',
+                message: `Vous n'êtes connecté à aucune session`,
+                redirectRoute: ROUTES.homePage,
+            });
+        }
     }
 
     startGame(): void {

@@ -119,4 +119,8 @@ export class InGameService {
     getIngamePlayers(sessionId: string): InGamePlayer[] {
         return this.sessionRepository.getIngamePlayers(sessionId);
     }
+
+    findSessionByPlayerId(playerId: string): InGameSession | null {
+        return this.sessionRepository.findSessionByPlayerId(playerId);
+    }
 }
