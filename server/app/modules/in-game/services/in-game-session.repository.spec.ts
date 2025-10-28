@@ -4,14 +4,15 @@ import { NotFoundException } from '@nestjs/common';
 import { MapSize } from '@common/enums/map-size.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { Avatar } from '@common/enums/avatar.enum';
+import { Dice } from '@common/enums/dice.enum';
 
 describe('InGameSessionRepository', () => {
     let repository: InGameSessionRepository;
 
     const BASE_SPEED = 5;
     const BASE_HEALTH = 100;
-    const BASE_ATTACK = 10;
-    const BASE_DEFENSE = 5;
+    const BASE_ATTACK = Dice.D4;
+    const BASE_DEFENSE = Dice.D4;
     const POSITION_FIVE = 5;
     const POSITION_TEN = 10;
     const TURN_NUMBER_TWO = 2;
@@ -36,6 +37,7 @@ describe('InGameSessionRepository', () => {
                 health: BASE_HEALTH,
                 attack: BASE_ATTACK,
                 defense: BASE_DEFENSE,
+                movementPoints: BASE_SPEED,
             },
             player2: {
                 id: 'player2',
@@ -50,6 +52,7 @@ describe('InGameSessionRepository', () => {
                 health: BASE_HEALTH,
                 attack: BASE_ATTACK,
                 defense: BASE_DEFENSE,
+                movementPoints: BASE_SPEED,
             },
         },
         currentTurn: { turnNumber: 1, activePlayerId: 'player1' },
