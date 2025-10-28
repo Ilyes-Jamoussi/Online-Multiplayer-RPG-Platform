@@ -1,5 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { InGameSession } from '@common/models/session.interface';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
@@ -9,7 +10,6 @@ import { InGamePlayer } from '@common/models/player.interface';
 import { TimerService } from '@app/services/timer/timer.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { Orientation } from '@common/enums/orientation.enum';
-import { ROUTES } from '@app/constants/routes.constants';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 
 @Injectable({
@@ -69,7 +69,7 @@ export class InGameService {
             this.notificationService.displayError({
                 title: 'Session non trouvée',
                 message: `Vous n'êtes connecté à aucune session`,
-                redirectRoute: ROUTES.homePage,
+                redirectRoute: ROUTES.HomePage,
             });
         }
     }
@@ -184,7 +184,7 @@ export class InGameService {
             this.notificationService.displayInformation({
                 title: 'Départ réussi',
                 message: `Tu as quitté la partie avec succès`,
-                redirectRoute: ROUTES.homePage,
+                redirectRoute: ROUTES.HomePage,
             });
         });
 
@@ -193,7 +193,7 @@ export class InGameService {
             this.notificationService.displayError({
                 title: 'Partie terminée par défaut',
                 message: `Il n'y a plus assez de joueurs pour continuer la partie, la partie est terminée`,
-                redirectRoute: ROUTES.homePage,
+                redirectRoute: ROUTES.HomePage,
             });
         });
 

@@ -18,8 +18,6 @@ import { TileKind } from '@common/enums/tile-kind.enum';
 export class GameEditorTileComponent extends TileSizeProbeDirective {
     @Input({ required: true }) tile: GameEditorTileDto;
 
-    readonly tileKinds = TileKind;
-
     constructor(
         private readonly gameEditorInteractionsService: GameEditorInteractionsService,
         private readonly gameEditorCheckService: GameEditorCheckService,

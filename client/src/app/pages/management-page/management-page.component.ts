@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { GamePreviewCardComponent } from '@app/components/features/game-preview-card/game-preview-card.component';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 
@@ -29,11 +29,11 @@ export class ManagementPageComponent implements OnInit {
     }
 
     onCreateNewGame(): void {
-        this.router.navigate([ROUTES.parametersPage]);
+        this.router.navigate([ROUTES.ParametersPage]);
     }
 
     onEditGame(id: string): void {
-        this.router.navigate([ROUTES.editorPage, id]);
+        this.router.navigate([ROUTES.EditorPage, id]);
     }
 
     onDeleteGame(gameId: string): void {
@@ -45,6 +45,6 @@ export class ManagementPageComponent implements OnInit {
     }
 
     onBack(): void {
-        this.router.navigate([ROUTES.homePage]);
+        this.router.navigate([ROUTES.HomePage]);
     }
 }

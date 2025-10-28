@@ -2,7 +2,7 @@ import { computed, Injectable, Signal, signal, WritableSignal } from '@angular/c
 import { Router } from '@angular/router';
 import { CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
 import { DEFAULT_PLAYER } from '@app/constants/player.constants';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { SessionService } from '@app/services/session/session.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
@@ -134,7 +134,7 @@ export class PlayerService {
         this.sessionSocketService.onSessionCreated((data) => {
             this.updatePlayer({ id: data.playerId });
             this.sessionService.updateSession({ id: data.sessionId });
-            this.router.navigate([ROUTES.waitingRoomPage]);
+            this.router.navigate([ROUTES.WaitingRoomPage]);
         });
 
         this.sessionSocketService.onSessionEnded((message) => {
@@ -143,14 +143,14 @@ export class PlayerService {
             this.notificationService.displayError({
                 title: 'Session terminée',
                 message,
-                redirectRoute: ROUTES.homePage,
+                redirectRoute: ROUTES.HomePage,
             });
         });
 
         this.sessionSocketService.onAvatarSelectionJoined((data) => {
             this.updatePlayer({ id: data.playerId });
             this.sessionService.updateSession({ id: data.sessionId });
-            this.router.navigate([ROUTES.characterCreationPage]);
+            this.router.navigate([ROUTES.CharacterCreationPage]);
         });
 
         this.sessionSocketService.onSessionJoined((data) => {

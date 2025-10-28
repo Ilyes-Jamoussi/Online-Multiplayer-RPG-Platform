@@ -3,7 +3,7 @@ import { enableProdMode, enableProfiling } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { Routes, provideRouter, withHashLocation } from '@angular/router';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { AppComponent } from '@app/pages/app/app.component';
 import { CharacterCreationPageComponent } from '@app/pages/character-creation-page/character-creation-page.component';
 import { EditorPageComponent } from '@app/pages/editor-page/editor-page.component';
@@ -22,42 +22,42 @@ if (environment.production) {
 }
 
 const routes: Routes = [
-    { path: '', redirectTo: removeLeadingSlash(ROUTES.homePage), pathMatch: 'full' },
+    { path: '', redirectTo: removeLeadingSlash(ROUTES.HomePage), pathMatch: 'full' },
 
     {
-        path: removeLeadingSlash(ROUTES.homePage),
+        path: removeLeadingSlash(ROUTES.HomePage),
         component: HomePageComponent,
     },
     {
-        path: removeLeadingSlash(ROUTES.editorPage) + '/:id',
+        path: removeLeadingSlash(ROUTES.EditorPage) + '/:id',
         component: EditorPageComponent,
     },
-    { path: removeLeadingSlash(ROUTES.managementPage), component: ManagementPageComponent },
+    { path: removeLeadingSlash(ROUTES.ManagementPage), component: ManagementPageComponent },
     {
-        path: removeLeadingSlash(ROUTES.sessionCreationPage),
+        path: removeLeadingSlash(ROUTES.SessionCreationPage),
         component: SessionCreationPageComponent,
     },
     {
-        path: removeLeadingSlash(ROUTES.characterCreationPage),
+        path: removeLeadingSlash(ROUTES.CharacterCreationPage),
         component: CharacterCreationPageComponent,
     },
     {
-        path: removeLeadingSlash(ROUTES.waitingRoomPage),
+        path: removeLeadingSlash(ROUTES.WaitingRoomPage),
         component: WaitingRoomPageComponent,
     },
     {
-        path: removeLeadingSlash(ROUTES.gameSessionPage),
+        path: removeLeadingSlash(ROUTES.GameSessionPage),
         component: GameSessionPageComponent,
     },
     {
-        path: removeLeadingSlash(ROUTES.parametersPage),
+        path: removeLeadingSlash(ROUTES.ParametersPage),
         component: ParametersPageComponent,
     },
     {
-        path: removeLeadingSlash(ROUTES.joinSessionPage),
+        path: removeLeadingSlash(ROUTES.JoinSessionPage),
         component: JoinSessionPageComponent,
     },
-    { path: '**', redirectTo: removeLeadingSlash(ROUTES.homePage) },
+    { path: '**', redirectTo: removeLeadingSlash(ROUTES.HomePage) },
 ];
 
 enableProfiling();
