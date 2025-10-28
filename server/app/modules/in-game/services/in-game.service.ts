@@ -9,6 +9,7 @@ import { InGameInitializationService } from './in-game-initialization.service';
 import { InGameSessionRepository } from './in-game-session.repository';
 import { InGameMovementService } from './in-game-movement.service';
 import { Orientation } from '@common/enums/orientation.enum';
+import { InGamePlayer } from '@common/models/player.interface';
 
 @Injectable()
 export class InGameService {
@@ -102,14 +103,20 @@ export class InGameService {
         this.movementService.movePlayer(session, playerId, orientation);
     }
 
-    leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string } {
+    leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string; sessionEnded: boolean } {
         const player = this.sessionRepository.playerLeave(sessionId, playerId);
         const session = this.sessionRepository.findById(sessionId);
-        const joinedPlayers = this.sessionRepository.currentPlayerCount(sessionId);
-        if (joinedPlayers < 2) {
+        const inGamePlayers = this.sessionRepository.inGamePlayersCount(sessionId);
+        let sessionEnded = false;
+        if (inGamePlayers < 2) {
             this.turnEngine.forceStopTimer(sessionId);
+            sessionEnded = true;
         }
 
-        return { session, playerName: player.name };
+        return { session, playerName: player.name, sessionEnded };
+    }
+
+    getIngamePlayers(sessionId: string): InGamePlayer[] {
+        return this.sessionRepository.getIngamePlayers(sessionId);
     }
 }

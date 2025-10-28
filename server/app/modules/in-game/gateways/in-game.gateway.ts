@@ -36,7 +36,7 @@ export class InGameGateway {
     }
 
     @SubscribeMessage(InGameEvents.GameStart)
-    async startGame(socket: Socket, sessionId: string): Promise<void> {
+    startGame(socket: Socket, sessionId: string): void {
         try {
             const started = this.inGameService.startSession(sessionId);
             this.server.to(started.inGameId).emit(InGameEvents.GameStarted, successResponse(started));
@@ -62,9 +62,14 @@ export class InGameGateway {
         try {
             const result = this.inGameService.leaveInGameSession(sessionId, socket.id);
             socket.leave(result.session.inGameId);
-            this.server.to(result.session.inGameId).emit(InGameEvents.PlayerLeftInGameSession, successResponse(result));
-            this.server.to(socket.id).emit(InGameEvents.LeftInGameSessionAck, successResponse({}));
-            this.logger.log(`Player ${result.playerName} left session ${sessionId}`);
+            if (result.sessionEnded) {
+                this.server.to(socket.id).emit(InGameEvents.LeftInGameSessionAck, successResponse({}));
+                this.server.to(result.session.inGameId).emit(InGameEvents.GameForceStopped, successResponse({}));
+                this.logger.warn(`Game force stopped for session ${sessionId}`);
+            } else {
+                this.server.to(result.session.inGameId).emit(InGameEvents.PlayerLeftInGameSession, successResponse(result));
+                this.logger.log(`Player ${result.playerName} left session ${sessionId}`);
+            }
         } catch (error) {
             socket.emit(InGameEvents.PlayerLeftInGameSession, errorResponse(error.message));
         }

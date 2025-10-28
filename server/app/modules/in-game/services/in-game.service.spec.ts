@@ -147,7 +147,7 @@ describe('InGameService', () => {
         mockSessionRepository.update = jest.fn();
         mockSessionRepository.delete = jest.fn();
         mockSessionRepository.playerLeave = jest.fn();
-        mockSessionRepository.currentPlayerCount = jest.fn();
+        mockSessionRepository.inGamePlayersCount = jest.fn();
 
         service = new InGameService(
             mockTurnEngine as TurnEngineService,
@@ -390,7 +390,7 @@ describe('InGameService', () => {
                 session.inGamePlayers.player1.isInGame = false;
                 return { name: 'Alice' };
             });
-            (mockSessionRepository.currentPlayerCount as jest.Mock).mockReturnValue(1);
+            (mockSessionRepository.inGamePlayersCount as jest.Mock).mockReturnValue(1);
 
             const result = service.leaveInGameSession('session-123', 'player1');
 
@@ -429,7 +429,7 @@ describe('InGameService', () => {
 
             (mockSessionRepository.findById as jest.Mock).mockReturnValue(session);
             (mockSessionRepository.playerLeave as jest.Mock).mockReturnValue({ name: 'Alice' });
-            (mockSessionRepository.currentPlayerCount as jest.Mock).mockReturnValue(0);
+            (mockSessionRepository.inGamePlayersCount as jest.Mock).mockReturnValue(0);
 
             service.leaveInGameSession('session-123', 'player1');
 
@@ -458,7 +458,7 @@ describe('InGameService', () => {
 
             (mockSessionRepository.findById as jest.Mock).mockReturnValue(session);
             (mockSessionRepository.playerLeave as jest.Mock).mockReturnValue({ name: 'Alice' });
-            (mockSessionRepository.currentPlayerCount as jest.Mock).mockReturnValue(2);
+            (mockSessionRepository.inGamePlayersCount as jest.Mock).mockReturnValue(2);
 
             service.leaveInGameSession('session-123', 'player1');
 
@@ -475,7 +475,7 @@ describe('InGameService', () => {
                 session.inGamePlayers.player2.isInGame = false;
                 return { name: 'Bob' };
             });
-            (mockSessionRepository.currentPlayerCount as jest.Mock).mockReturnValue(1);
+            (mockSessionRepository.inGamePlayersCount as jest.Mock).mockReturnValue(1);
 
             service.leaveInGameSession('session-123', 'player2');
 
@@ -494,7 +494,7 @@ describe('InGameService', () => {
                 session.inGamePlayers.player1.isInGame = false;
                 return { name: 'Alice' };
             });
-            (mockSessionRepository.currentPlayerCount as jest.Mock).mockReturnValue(1);
+            (mockSessionRepository.inGamePlayersCount as jest.Mock).mockReturnValue(1);
 
             const result = service.leaveInGameSession('session-123', 'player1');
 

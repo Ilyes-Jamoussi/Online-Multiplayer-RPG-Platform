@@ -169,6 +169,14 @@ export class SessionGateway implements OnGatewayDisconnect {
         }
 
         this.server.to(sessionId).emit(SessionEvents.GameSessionStarted, successResponse({}));
+
+        for (const player of players) {
+            // leave session id for every socket
+            const playerSocket = this.server.sockets.sockets.get(player.id);
+            if (playerSocket) {
+                playerSocket.leave(sessionId);
+            }
+        }
     }
 
     @SubscribeMessage(SessionEvents.LeaveSession)

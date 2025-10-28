@@ -6,9 +6,13 @@ import { InGamePlayer } from '@common/models/player.interface';
 export class InGameSessionRepository {
     private readonly sessions = new Map<string, InGameSession>();
 
-    currentPlayerCount(sessionId: string): number {
+    inGamePlayersCount(sessionId: string): number {
+        return this.getIngamePlayers(sessionId).length;
+    }
+
+    getIngamePlayers(sessionId: string): InGamePlayer[] {
         const session = this.findById(sessionId);
-        return Object.values(session.inGamePlayers).filter((p) => p.isInGame).length;
+        return Object.values(session.inGamePlayers).filter((p) => p.isInGame);
     }
 
     save(session: InGameSession): void {
