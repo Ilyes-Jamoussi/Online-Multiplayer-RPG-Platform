@@ -1,6 +1,7 @@
 import { Avatar } from '@common/enums/avatar.enum';
+import { Dice } from '@common/enums/dice.enum';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber, IsString } from 'class-validator';
 
 export class PlayerDto {
     @ApiProperty()
@@ -18,4 +19,20 @@ export class PlayerDto {
     @ApiProperty()
     @IsBoolean()
     readonly isAdmin: boolean;
+
+    @ApiProperty({ enum: Dice, enumName: 'Dice' })
+    @IsEnum(Dice)
+    readonly attack: Dice;
+
+    @ApiProperty({ enum: Dice, enumName: 'Dice' })
+    @IsEnum(Dice)
+    readonly defense: Dice;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly speed: number;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly health: number;
 }

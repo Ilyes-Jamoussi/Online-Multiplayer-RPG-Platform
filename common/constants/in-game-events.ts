@@ -1,16 +1,8 @@
 export enum InGameEvents {
-    PlayerJoinInGameSession = 'playerJoinInGameSession',
-    PlayerJoinedInGameSession = 'playerJoinedInGameSession',
-    PlayerLeaveInGameSession = 'playerLeaveInGameSession',
-    PlayerLeftInGameSession = 'playerLeftInGameSession',
-    PlayerMove = 'playerMove',
-    PlayerMoved = 'playerMoved',
-    PlayerCombatAction = 'playerCombatAction',
-    PlayerCombatResult = 'playerCombatResult',
-
     GameStart = 'gameStart',
     GameStarted = 'gameStarted',
     GameOver = 'gameOver',
+    GameForceStopped = 'gameForceStopped',
 
     TurnStart = 'turnStart',
     TurnStarted = 'turnStarted',
@@ -21,10 +13,16 @@ export enum InGameEvents {
     TurnForcedEnd = 'turnForcedEnd',
     TurnManualEnd = 'turnManualEnd',
 
-    LeaveInGameSession = 'leaveInGameSession',
-    LeftInGameSession = 'leftInGameSession',
-    
     PlayerEndTurn = 'playerEndTurn',
-    PlayerAbandonGame = 'playerAbandonGame',
-    PlayerAbandoned = 'playerAbandoned',
+    PlayerJoinInGameSession = 'playerJoinInGameSession',
+    PlayerJoinedInGameSession = 'playerJoinedInGameSession',
+    PlayerLeaveInGameSession = 'playerLeaveInGameSession',
+    PlayerLeftInGameSession = 'playerLeftInGameSession',
+    PlayerMove = 'playerMove',
+    PlayerMoved = 'playerMoved',
+    PlayerCombatAction = 'playerCombatAction',
+    PlayerCombatResult = 'playerCombatResult',
+    PlayerReachableTiles = 'playerReachableTiles',
+
+    LeftInGameSessionAck = 'leftInGameSessionAck',
 }

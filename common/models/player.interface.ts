@@ -1,3 +1,4 @@
+import { Dice } from '@common/enums/dice.enum';
 import { Avatar } from '../enums/avatar.enum';
 
 export interface Player {
@@ -7,13 +8,13 @@ export interface Player {
     isAdmin: boolean;
     speed: number;
     health: number;
-    attack: number;
-    defense: number;
-}
-
-export interface InGamePlayer extends Player {
+    attack: Dice;
+    defense: Dice;
     x: number;
     y: number;
-    joined: boolean;
+    isInGame: boolean;
     startPointId: string;
+    movementPoints: number;
 }
+
+export interface InGamePlayer extends Player {}

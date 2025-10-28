@@ -20,15 +20,7 @@ import { Dice } from '@common/enums/dice.enum';
     selector: 'app-character-creation-page',
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
-    imports: [
-        FormsModule,
-        UiButtonComponent,
-        UiInputComponent,
-        UiPageLayoutComponent,
-        StatsBarComponent,
-        ErrorsBadgeComponent,
-        AvatarGridComponent,
-    ],
+    imports: [FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent, AvatarGridComponent],
     providers: [CharacterCreationCheckService, CharacterEditorService],
 })
 export class CharacterCreationPageComponent implements OnInit {
@@ -126,9 +118,9 @@ export class CharacterCreationPageComponent implements OnInit {
 
     onSubmit(): void {
         const character = this.character;
-        
-        // Stocker le personnage dans PlayerService
-        this.playerService.setCharacter(character);
+        if (!character) return;
+
+        this.playerService.characterData = character;
 
         if (this.isPlayerAdmin) this.playerService.createSession();
         else this.playerService.joinSession();

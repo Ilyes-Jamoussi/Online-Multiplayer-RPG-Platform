@@ -6,7 +6,8 @@ import { InGameEvents } from '@common/constants/in-game-events';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { InGameSession } from '@common/models/session.interface';
 import { OnEvent } from '@nestjs/event-emitter';
-
+import { Orientation } from '@common/enums/orientation.enum';
+import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 @UsePipes(
     new ValidationPipe({
         transform: true,
@@ -16,15 +17,13 @@ import { OnEvent } from '@nestjs/event-emitter';
         },
     }),
 )
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({})
 @Injectable()
 export class InGameGateway {
     @WebSocketServer() private readonly server: Server;
     private readonly logger = new Logger(InGameGateway.name);
 
     constructor(private readonly inGameService: InGameService) {}
-
-    // --- SOCKET HANDLERS -----------------------------------------------------
 
     @SubscribeMessage(InGameEvents.PlayerJoinInGameSession)
     playerJoinInGameSession(socket: Socket, sessionId: string): void {
@@ -33,30 +32,19 @@ export class InGameGateway {
             this.server.to(session.inGameId).emit(InGameEvents.PlayerJoinedInGameSession, successResponse(session));
             this.logger.log(`Player ${socket.id} joined session ${session.id}`);
         } catch (error) {
+            this.logger.error(`Error joining session ${sessionId} for player ${socket.id}: ${error.message}`);
             socket.emit(InGameEvents.PlayerJoinedInGameSession, errorResponse(error.message));
         }
     }
 
     @SubscribeMessage(InGameEvents.GameStart)
-    async startGame(socket: Socket, sessionId: string): Promise<void> {
+    startGame(socket: Socket, sessionId: string): void {
         try {
             const started = this.inGameService.startSession(sessionId);
             this.server.to(started.inGameId).emit(InGameEvents.GameStarted, successResponse(started));
             this.logger.log(`Game started for session ${started.inGameId}`);
         } catch (error) {
             socket.emit(InGameEvents.GameStarted, errorResponse(error.message));
-        }
-    }
-
-    @SubscribeMessage(InGameEvents.LeaveInGameSession)
-    leaveInGameSession(socket: Socket, sessionId: string): void {
-        try {
-            const session = this.inGameService.leaveInGameSession(sessionId, socket.id);
-            socket.leave(session.inGameId);
-            this.server.to(session.inGameId).emit(InGameEvents.LeftInGameSession, successResponse<InGameSession>(session));
-            this.logger.log(`Socket ${socket.id} left session ${session.id}`);
-        } catch (error) {
-            socket.emit(InGameEvents.LeftInGameSession, errorResponse(error.message));
         }
     }
 
@@ -71,21 +59,26 @@ export class InGameGateway {
         }
     }
 
-    @SubscribeMessage(InGameEvents.PlayerAbandonGame)
-    playerAbandonGame(socket: Socket, sessionId: string): void {
+    @SubscribeMessage(InGameEvents.PlayerLeaveInGameSession)
+    playerLeaveInGameSession(socket: Socket, sessionId: string): void {
+        this.playerLeaveSession(sessionId, socket.id);
+        this.server.to(socket.id).emit(InGameEvents.LeftInGameSessionAck, successResponse({}));
+        socket.leave(sessionId);
+    }
+
+    @SubscribeMessage(InGameEvents.PlayerMove)
+    playerMove(socket: Socket, payload: { sessionId: string; orientation: Orientation }): void {
         try {
-            const result = this.inGameService.abandonGame(sessionId, socket.id);
-            socket.leave(result.session.inGameId);
-            this.server.to(result.session.inGameId).emit(InGameEvents.PlayerAbandoned, successResponse(result));
-            this.logger.log(`Player ${result.playerName} abandoned game in session ${sessionId}`);
+            this.inGameService.movePlayer(payload.sessionId, socket.id, payload.orientation);
         } catch (error) {
-            socket.emit(InGameEvents.LeftInGameSession, errorResponse(error.message));
+            socket.emit(InGameEvents.PlayerMoved, errorResponse(error.message));
         }
     }
 
     @OnEvent('turn.started')
     handleTurnStarted(payload: { session: InGameSession }) {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnStarted, successResponse(payload.session));
+        this.inGameService.getReachableTiles(payload.session.id, payload.session.currentTurn.activePlayerId);
         this.logger.log(`Turn ${payload.session.currentTurn.turnNumber} started for session ${payload.session.id}`);
     }
 
@@ -111,5 +104,43 @@ export class InGameGateway {
     handleForcedEnd(payload: { session: InGameSession }) {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnForcedEnd, successResponse(payload.session));
         this.logger.warn(`Forced end of turn for session ${payload.session.id}`);
+    }
+
+    @OnEvent('player.moved')
+    handlePlayerMoved(payload: { session: InGameSession; playerId: string; x: number; y: number; movementPoints: number }) {
+        this.server
+            .to(payload.session.inGameId)
+            .emit(
+                InGameEvents.PlayerMoved,
+                successResponse({ playerId: payload.playerId, x: payload.x, y: payload.y, movementPoints: payload.movementPoints }),
+            );
+        this.logger.log(`Player ${payload.playerId} moved to ${payload.x}, ${payload.y} in session ${payload.session.id}`);
+    }
+
+    @OnEvent('player.reachableTiles')
+    handlePlayerReachableTiles(payload: { playerId: string; reachable: ReachableTile[] }) {
+        this.server.to(payload.playerId).emit(InGameEvents.PlayerReachableTiles, successResponse(payload.reachable));
+    }
+
+    handleDisconnect(socket: Socket) {
+        const session = this.inGameService.findSessionByPlayerId(socket.id);
+        if (session) {
+            this.playerLeaveSession(session.id, socket.id);
+        }
+    }
+
+    private playerLeaveSession(sessionId: string, playerId: string): void {
+        try {
+            const result = this.inGameService.leaveInGameSession(sessionId, playerId);
+            if (result.sessionEnded) {
+                this.server.to(result.session.inGameId).emit(InGameEvents.GameForceStopped, successResponse({}));
+                this.server.socketsLeave(sessionId);
+            } else {
+                this.server.to(result.session.inGameId).emit(InGameEvents.PlayerLeftInGameSession, successResponse(result));
+                this.logger.log(`Player ${result.playerName} left session ${sessionId}`);
+            }
+        } catch (error) {
+            this.server.to(playerId).emit(InGameEvents.PlayerLeftInGameSession, errorResponse(error.message));
+        }
     }
 }

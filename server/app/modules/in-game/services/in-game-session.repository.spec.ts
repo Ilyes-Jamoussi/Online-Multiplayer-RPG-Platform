@@ -4,14 +4,15 @@ import { NotFoundException } from '@nestjs/common';
 import { MapSize } from '@common/enums/map-size.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { Avatar } from '@common/enums/avatar.enum';
+import { Dice } from '@common/enums/dice.enum';
 
 describe('InGameSessionRepository', () => {
     let repository: InGameSessionRepository;
 
     const BASE_SPEED = 5;
     const BASE_HEALTH = 100;
-    const BASE_ATTACK = 10;
-    const BASE_DEFENSE = 5;
+    const BASE_ATTACK = Dice.D4;
+    const BASE_DEFENSE = Dice.D4;
     const POSITION_FIVE = 5;
     const POSITION_TEN = 10;
     const TURN_NUMBER_TWO = 2;
@@ -29,13 +30,14 @@ describe('InGameSessionRepository', () => {
                 x: 0,
                 y: 0,
                 startPointId: '',
-                joined: false,
+                isInGame: false,
                 avatar: Avatar.Avatar1,
                 isAdmin: true,
                 speed: BASE_SPEED,
                 health: BASE_HEALTH,
                 attack: BASE_ATTACK,
                 defense: BASE_DEFENSE,
+                movementPoints: BASE_SPEED,
             },
             player2: {
                 id: 'player2',
@@ -43,20 +45,21 @@ describe('InGameSessionRepository', () => {
                 x: 0,
                 y: 0,
                 startPointId: '',
-                joined: false,
+                isInGame: false,
                 avatar: Avatar.Avatar2,
                 isAdmin: false,
                 speed: BASE_SPEED,
                 health: BASE_HEALTH,
                 attack: BASE_ATTACK,
                 defense: BASE_DEFENSE,
+                movementPoints: BASE_SPEED,
             },
         },
         currentTurn: { turnNumber: 1, activePlayerId: 'player1' },
         startPoints: [],
         mapSize: MapSize.MEDIUM,
         mode: GameMode.CLASSIC,
-        turnOrderPlayerId: ['player1', 'player2'],
+        turnOrder: ['player1', 'player2'],
         ...overrides,
     });
 
@@ -179,27 +182,27 @@ describe('InGameSessionRepository', () => {
 
             session.inGamePlayers.player1.x = POSITION_FIVE;
             session.inGamePlayers.player1.y = POSITION_FIVE;
-            session.inGamePlayers.player1.joined = true;
+            session.inGamePlayers.player1.isInGame = true;
 
             repository.update(session);
 
             const updatedSession = repository.findById(session.id);
             expect(updatedSession.inGamePlayers.player1.x).toBe(POSITION_FIVE);
             expect(updatedSession.inGamePlayers.player1.y).toBe(POSITION_FIVE);
-            expect(updatedSession.inGamePlayers.player1.joined).toBe(true);
+            expect(updatedSession.inGamePlayers.player1.isInGame).toBe(true);
         });
 
         it('should update turn order', () => {
             const session = createMockSession();
             repository.save(session);
 
-            session.turnOrderPlayerId = ['player2', 'player1'];
+            session.turnOrder = ['player2', 'player1'];
             session.currentTurn.activePlayerId = 'player2';
 
             repository.update(session);
 
             const updatedSession = repository.findById(session.id);
-            expect(updatedSession.turnOrderPlayerId).toEqual(['player2', 'player1']);
+            expect(updatedSession.turnOrder).toEqual(['player2', 'player1']);
             expect(updatedSession.currentTurn.activePlayerId).toBe('player2');
         });
 
@@ -319,12 +322,12 @@ describe('InGameSessionRepository', () => {
             expect(retrievedSession.inGamePlayers.player1.x).toBe(POSITION_FIVE);
             expect(retrievedSession.currentTurn.turnNumber).toBe(TURN_NUMBER_TWO);
 
-            session.inGamePlayers.player2.joined = true;
+            session.inGamePlayers.player2.isInGame = true;
             repository.update(session);
 
             retrievedSession = repository.findById(session.id);
             expect(retrievedSession.inGamePlayers.player1.x).toBe(POSITION_FIVE);
-            expect(retrievedSession.inGamePlayers.player2.joined).toBe(true);
+            expect(retrievedSession.inGamePlayers.player2.isInGame).toBe(true);
         });
     });
 });

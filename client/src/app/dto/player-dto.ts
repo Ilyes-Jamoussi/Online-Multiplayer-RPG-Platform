@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { Dice } from '@common/enums/dice.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 
 
@@ -15,5 +16,9 @@ export interface PlayerDto {
     name: string;
     avatar: Avatar | null;
     isAdmin: boolean;
+    attack: Dice;
+    defense: Dice;
+    speed: number;
+    health: number;
 }
 

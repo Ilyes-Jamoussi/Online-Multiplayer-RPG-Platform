@@ -1,11 +1,14 @@
+/* eslint-disable max-lines */
 import { Test, TestingModule } from '@nestjs/testing';
 import { TurnEngineService } from './turn-engine.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InGameSession } from '@common/models/session.interface';
+import { InGameSessionRepository } from './in-game-session.repository';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { MapSize } from '@common/enums/map-size.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { Avatar } from '@common/enums/avatar.enum';
+import { Dice } from '@common/enums/dice.enum';
 
 describe('TurnEngineService', () => {
     let service: TurnEngineService;
@@ -23,8 +26,6 @@ describe('TurnEngineService', () => {
     const EVENT_CALL_ORDER_FOURTH = 4;
     const BASE_SPEED = 5;
     const BASE_HEALTH = 100;
-    const BASE_ATTACK = 10;
-    const BASE_DEFENSE = 5;
 
     const createMockSession = (overrides: Partial<InGameSession> = {}): InGameSession => ({
         id: 'session-123',
@@ -39,13 +40,14 @@ describe('TurnEngineService', () => {
                 x: 0,
                 y: 0,
                 startPointId: 'start1',
-                joined: true,
+                isInGame: true,
                 avatar: Avatar.Avatar1,
                 isAdmin: false,
                 speed: BASE_SPEED,
                 health: BASE_HEALTH,
-                attack: BASE_ATTACK,
-                defense: BASE_DEFENSE,
+                attack: Dice.D6,
+                defense: Dice.D4,
+                movementPoints: 0,
             },
             player2: {
                 id: 'player2',
@@ -53,13 +55,14 @@ describe('TurnEngineService', () => {
                 x: 1,
                 y: 1,
                 startPointId: 'start2',
-                joined: true,
+                isInGame: true,
                 avatar: Avatar.Avatar2,
                 isAdmin: false,
                 speed: BASE_SPEED,
                 health: BASE_HEALTH,
-                attack: BASE_ATTACK,
-                defense: BASE_DEFENSE,
+                attack: Dice.D6,
+                defense: Dice.D4,
+                movementPoints: 0,
             },
             player3: {
                 id: 'player3',
@@ -67,20 +70,21 @@ describe('TurnEngineService', () => {
                 x: 2,
                 y: 2,
                 startPointId: 'start3',
-                joined: true,
+                isInGame: true,
                 avatar: Avatar.Avatar3,
                 isAdmin: false,
                 speed: BASE_SPEED,
                 health: BASE_HEALTH,
-                attack: BASE_ATTACK,
-                defense: BASE_DEFENSE,
+                attack: Dice.D6,
+                defense: Dice.D4,
+                movementPoints: 0,
             },
         },
         currentTurn: { turnNumber: 1, activePlayerId: 'player1' },
         startPoints: [],
         mapSize: MapSize.MEDIUM,
         mode: GameMode.CLASSIC,
-        turnOrderPlayerId: ['player1', 'player2', 'player3'],
+        turnOrder: ['player1', 'player2', 'player3'],
         ...overrides,
     });
 
@@ -89,12 +93,23 @@ describe('TurnEngineService', () => {
             emit: jest.fn(),
         };
 
+        const mockSessionRepository = {
+            findById: jest.fn(),
+            save: jest.fn(),
+            update: jest.fn(),
+            delete: jest.fn(),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 TurnEngineService,
                 {
                     provide: EventEmitter2,
                     useValue: mockEventEmitter,
+                },
+                {
+                    provide: InGameSessionRepository,
+                    useValue: mockSessionRepository,
                 },
             ],
         }).compile();
@@ -127,13 +142,13 @@ describe('TurnEngineService', () => {
         });
 
         it('should throw error when turnOrderPlayerId is empty', () => {
-            const session = createMockSession({ turnOrderPlayerId: [] });
+            const session = createMockSession({ turnOrder: [] });
 
             expect(() => service.startFirstTurn(session)).toThrow('TURN_ORDER_NOT_DEFINED');
         });
 
         it('should throw error when turnOrderPlayerId is undefined', () => {
-            const session = createMockSession({ turnOrderPlayerId: undefined as unknown as string[] });
+            const session = createMockSession({ turnOrder: undefined as unknown as string[] });
 
             expect(() => service.startFirstTurn(session)).toThrow('TURN_ORDER_NOT_DEFINED');
         });
@@ -235,6 +250,22 @@ describe('TurnEngineService', () => {
             const session = createMockSession({
                 currentTurn: { turnNumber: 1, activePlayerId: 'unknown-player' },
             });
+            
+            session.inGamePlayers['unknown-player'] = {
+                id: 'unknown-player',
+                name: 'Unknown',
+                x: 0,
+                y: 0,
+                startPointId: '',
+                isInGame: true,
+                avatar: Avatar.Avatar1,
+                isAdmin: false,
+                speed: BASE_SPEED,
+                health: BASE_HEALTH,
+                attack: Dice.D6,
+                defense: Dice.D4,
+                movementPoints: 0,
+            };
 
             const result = service.nextTurn(session);
 

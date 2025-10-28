@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, Signal, computed, signal } from '@angular/core';
 import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
@@ -6,7 +6,12 @@ import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
 import { catchError, of, take, tap } from 'rxjs';
+import { InGameService } from '@app/services/in-game/in-game.service';
+import { AssetsService } from '@app/services/assets/assets.service';
+import { InGamePlayer } from '@common/models/player.interface';
+import { Vector2 } from '@app/interfaces/game-editor.interface';
 
 @Injectable()
 export class GameMapService {
@@ -16,7 +21,7 @@ export class GameMapService {
         size: MapSize.MEDIUM,
         name: '',
         description: '',
-        mode: GameMode.CLASSIC
+        mode: GameMode.CLASSIC,
     };
 
     private readonly _tiles = signal<GameEditorTileDto[]>(this.initialState.tiles);
@@ -25,11 +30,26 @@ export class GameMapService {
     private readonly _name = signal<string>(this.initialState.name);
     private readonly _description = signal<string>(this.initialState.description);
     private readonly _mode = signal<GameMode>(this.initialState.mode);
+    private readonly _activeTileCoords = signal<{ x: number; y: number } | null>(null);
+
+    readonly visibleObjects: Signal<GameEditorPlaceableDto[]> = computed(() => {
+        const visibleObjects = this.objects().filter((obj) => obj.placed);
+        return visibleObjects.filter((obj) => {
+            const isInStartPoints = this.inGameService.startPoints().some((startPoint) => startPoint.id === obj.id);
+            return obj.kind !== PlaceableKind.START || isInStartPoints;
+        });
+    });
 
     constructor(
         private readonly gameHttpService: GameHttpService,
-        private readonly notificationService: NotificationService
+        private readonly notificationService: NotificationService,
+        private readonly inGameService: InGameService,
+        private readonly assetsService: AssetsService,
     ) {}
+
+    get players() {
+        return this.inGameService.inGamePlayers();
+    }
 
     get tiles() {
         return this._tiles.asReadonly();
@@ -55,6 +75,66 @@ export class GameMapService {
         return this._mode.asReadonly();
     }
 
+    get activeTileCoords() {
+        return this._activeTileCoords.asReadonly();
+    }
+
+    get reachableTiles() {
+        return this.inGameService.reachableTiles();
+    }
+
+    get isMyTurn() {
+        return this.inGameService.isMyTurn();
+    }
+
+    getActiveTile(coords?: Vector2): GameEditorTileDto | null {
+        const targetCoords = coords ?? this._activeTileCoords();
+        if (!targetCoords) return null;
+        return this.tiles().find((t) => t.x === targetCoords.x && t.y === targetCoords.y) ?? null;
+    }
+
+    openTileModal(tile: GameEditorTileDto): void {
+        this._activeTileCoords.set({ x: tile.x, y: tile.y });
+    }
+
+    closeTileModal(): void {
+        this._activeTileCoords.set(null);
+    }
+
+    isTileModalOpen(tile: GameEditorTileDto): boolean {
+        const coords = this._activeTileCoords();
+        return !!coords && coords.x === tile.x && coords.y === tile.y;
+    }
+
+    getPlayerOnTile(coords?: Vector2): InGamePlayer | undefined {
+        const targetCoords = coords ?? this._activeTileCoords();
+        if (!targetCoords) return undefined;
+        return this.currentlyInGamePlayers.find((player) => player.x === targetCoords.x && player.y === targetCoords.y);
+    }
+
+    getObjectOnTile(coords?: Vector2): GameEditorPlaceableDto | undefined {
+        const targetCoords = coords ?? this._activeTileCoords();
+        if (!targetCoords) return undefined;
+        
+        return this.visibleObjects().find((obj) => {
+            if (obj.x === targetCoords.x && obj.y === targetCoords.y) return true;
+            
+            if (PlaceableFootprint[obj.kind] === 2) {
+                return (
+                    (obj.x === targetCoords.x - 1 && obj.y === targetCoords.y) ||
+                    (obj.x === targetCoords.x && obj.y === targetCoords.y - 1) ||
+                    (obj.x === targetCoords.x - 1 && obj.y === targetCoords.y - 1)
+                );
+            }
+            
+            return false;
+        });
+    }
+
+    get currentlyInGamePlayers(): InGamePlayer[] {
+        return this.inGameService.currentlyInGamePlayers;
+    }
+
     loadGameMap(gameId: string): void {
         this.gameHttpService
             .getGameEditorById(gameId)
@@ -71,20 +151,26 @@ export class GameMapService {
             .subscribe();
     }
 
+    getAvatarByPlayerId(playerId: string): string {
+        const player = this.inGameService.getPlayerByPlayerId(playerId);
+        if (!player?.avatar) return '';
+        return this.assetsService.getAvatarStaticImage(player.avatar);
+    }
+
     private buildGameMap(gameData: GameEditorDto): void {
         this._name.set(gameData.name);
         this._description.set(gameData.description);
         this._size.set(gameData.size);
         this._mode.set(gameData.mode);
 
-        const tiles: GameEditorTileDto[] = gameData.tiles.map(tile => ({
+        const tiles: GameEditorTileDto[] = gameData.tiles.map((tile) => ({
             ...tile,
-            open: tile.open ?? false
+            open: tile.open ?? false,
         }));
 
-        const objects: GameEditorPlaceableDto[] = gameData.objects.map(obj => ({
+        const objects: GameEditorPlaceableDto[] = gameData.objects.map((obj) => ({
             ...obj,
-            placed: obj.placed || true
+            placed: obj.placed,
         }));
 
         this._tiles.set(tiles);
@@ -92,9 +178,12 @@ export class GameMapService {
     }
 
     reset(): void {
-        Object.entries(this.initialState).forEach(([key, value]) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (this as any)[`_${key}`].set(value);
-        });
+        this._tiles.set(this.initialState.tiles);
+        this._objects.set(this.initialState.objects);
+        this._size.set(this.initialState.size);
+        this._name.set(this.initialState.name);
+        this._description.set(this.initialState.description);
+        this._mode.set(this.initialState.mode);
+        this._activeTileCoords.set(null);
     }
 }

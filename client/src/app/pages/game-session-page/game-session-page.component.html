@@ -1,4 +1,4 @@
-<app-ui-page-layout [hasHeader]="true" [hasFooter]="false" [showBackButton]="true" headerTitle="Session de Jeu" (backClick)="onBack()">
+<app-ui-page-layout [hasHeader]="true" [hasFooter]="false" [showBackButton]="true" headerTitle="Session de Jeu" (backClick)="onLeaveGame()">
     <app-game-timer></app-game-timer>
 
     <div class="game-session-content">
@@ -20,7 +20,7 @@
 
     <div class="game-controls">
         <button [disabled]="!isMyTurn || !isGameStarted" (click)="onEndTurn()">Terminer le tour</button>
-        <button class="abandon-button" (click)="onAbandonGame()">Abandonner la partie</button>
+        <button class="abandon-button" (click)="onLeaveGame()">Abandonner la partie</button>
         @if(!isGameStarted && isMyTurn) {
         <button (click)="onStartGame()">Démarrer le jeu</button>
         }
@@ -33,6 +33,12 @@
             <p>Jeu démarré: {{ isGameStarted }}</p>
             <p>Mon tour: {{ isMyTurn }}</p>
             <p>Temps restant: {{ timeRemaining }}</p>
+            <p>Session ID: {{ inGameService.inGameSession().id }}</p>
+            <p>Active Player ID: {{ inGameService.inGameSession().currentTurn.activePlayerId }}</p>
+            <p>Joueurs en jeu: {{ getInGamePlayersCount() }}</p>
+            <p>Points de mouvement: {{ getCurrentPlayerMovementPoints() }}</p>
+            <p>Tuiles atteignables: {{ getReachableTilesCount() }}</p>
+            <p>Debug: {{ getDebugInfo() }}</p>
         </div>
     </div>
 </app-ui-page-layout>
