@@ -21,16 +21,6 @@ export class InGameService {
     private readonly _isGameStarted = signal<boolean>(false);
     private readonly _reachableTiles = signal<ReachableTile[]>([]);
 
-    constructor(
-        private readonly inGameSocketService: InGameSocketService,
-        private readonly sessionService: SessionService,
-        private readonly timerService: TimerService,
-        private readonly playerService: PlayerService,
-        private readonly notificationService: NotificationService,
-    ) {
-        this.initListeners();
-    }
-
     readonly isMyTurn = computed(() => this._inGameSession().currentTurn.activePlayerId === this.playerService.id());
     readonly currentTurn = computed(() => this._inGameSession().currentTurn);
     readonly turnNumber = computed(() => this._inGameSession().currentTurn.turnNumber);
@@ -45,8 +35,14 @@ export class InGameService {
     readonly inGameSession = this._inGameSession.asReadonly();
     readonly reachableTiles = this._reachableTiles.asReadonly();
 
-    getPlayerByPlayerId(playerId: string): InGamePlayer {
-        return this.inGamePlayers()[playerId];
+    constructor(
+        private readonly inGameSocketService: InGameSocketService,
+        private readonly sessionService: SessionService,
+        private readonly timerService: TimerService,
+        private readonly playerService: PlayerService,
+        private readonly notificationService: NotificationService,
+    ) {
+        this.initListeners();
     }
 
     get activePlayer(): InGamePlayer | undefined {
@@ -59,6 +55,40 @@ export class InGameService {
 
     get turnTransitionMessage(): string {
         return this.isMyTurn() ? "C'est ton tour !" : `C'est le tour de ${this.activePlayer?.name} !`;
+    }
+
+    getPlayerByPlayerId(playerId: string): InGamePlayer {
+        return this.inGamePlayers()[playerId];
+    }
+
+    loadInGameSession(): void {
+        if (this.sessionService.id()) {
+            this.inGameSocketService.playerJoinInGameSession(this.sessionService.id());
+        } else {
+            this.reset();
+            this.notificationService.displayError({
+                title: 'Session non trouvée',
+                message: `Vous n'êtes connecté à aucune session`,
+                redirectRoute: ROUTES.homePage,
+            });
+        }
+    }
+
+    leaveGame(): void {
+        this.inGameSocketService.playerLeaveInGameSession(this.sessionService.id());
+    }
+
+    startGame(): void {
+        this.inGameSocketService.playerStartGame(this.sessionService.id());
+    }
+
+    movePlayer(orientation: Orientation): void {
+        if (!this.isMyTurn() || !this.isGameStarted()) return;
+        this.inGameSocketService.playerMove(this.sessionService.id(), orientation);
+    }
+
+    endTurn(): void {
+        this.inGameSocketService.playerEndTurn(this.sessionService.id());
     }
 
     updateInGameSession(data: InGameSession): void {
@@ -77,27 +107,6 @@ export class InGameService {
                 movementPoints,
             });
         }
-    }
-
-    loadInGameSession(): void {
-        if (this.sessionService.id()) {
-            this.inGameSocketService.playerJoinInGameSession(this.sessionService.id());
-        } else {
-            this.cleanupAll();
-            this.notificationService.displayError({
-                title: 'Session non trouvée',
-                message: `Vous n'êtes connecté à aucune session`,
-                redirectRoute: ROUTES.homePage,
-            });
-        }
-    }
-
-    startGame(): void {
-        this.inGameSocketService.playerStartGame(this.sessionService.id());
-    }
-
-    endTurn(): void {
-        this.inGameSocketService.playerEndTurn(this.sessionService.id());
     }
 
     startTurnTimer(): void {
@@ -123,21 +132,14 @@ export class InGameService {
         this._isTransitioning.set(false);
     }
 
-    cleanupAll(): void {
+    reset(): void {
         this.timerService.resetTimer();
         this._isGameStarted.set(false);
         this._isTransitioning.set(false);
+        this._reachableTiles.set([]);
+        this._inGameSession.set(DEFAULT_IN_GAME_SESSION);
         this.sessionService.resetSession();
         this.playerService.resetPlayer();
-    }
-
-    movePlayer(orientation: Orientation): void {
-        if (!this.isMyTurn() || !this.isGameStarted()) return;
-        this.inGameSocketService.playerMove(this.sessionService.id(), orientation);
-    }
-
-    leaveGame(): void {
-        this.inGameSocketService.playerLeaveInGameSession(this.sessionService.id());
     }
 
     private initListeners(): void {
@@ -178,7 +180,7 @@ export class InGameService {
         });
 
         this.inGameSocketService.onLeftInGameSessionAck(() => {
-            this.cleanupAll();
+            this.reset();
             this.notificationService.displayInformation({
                 title: 'Départ réussi',
                 message: `Tu as quitté la partie avec succès`,
@@ -187,7 +189,7 @@ export class InGameService {
         });
 
         this.inGameSocketService.onGameForceStopped(() => {
-            this.cleanupAll();
+            this.reset();
             this.notificationService.displayError({
                 title: 'Partie terminée par défaut',
                 message: `Il n'y a plus assez de joueurs pour continuer la partie, la partie est terminée`,

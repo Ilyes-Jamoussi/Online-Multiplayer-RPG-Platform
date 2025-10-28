@@ -117,7 +117,7 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.keyboardEventsService.stopListening();
-        this.inGameService.cleanupAll();
+        this.inGameService.reset();
     }
 
     onStartGame(): void {

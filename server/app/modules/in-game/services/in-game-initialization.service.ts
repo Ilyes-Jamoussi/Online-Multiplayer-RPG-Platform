@@ -8,13 +8,11 @@ import { InGamePlayer } from '@common/models/player.interface';
 export class InGameInitializationService {
     makeTurnOrder(players: InGamePlayer[]): string[] {
         const sortedPlayers = [...players].sort((a, b) => b.speed - a.speed);
-        const uniqueSpeeds = Array.from(new Set(sortedPlayers.map(p => p.speed)));
+        const uniqueSpeeds = Array.from(new Set(sortedPlayers.map((p) => p.speed)));
         const orderedPlayerIds: string[] = [];
 
         for (const speed of uniqueSpeeds) {
-            const playerIdsAtSpeed = sortedPlayers
-                .filter(p => p.speed === speed)
-                .map(p => p.id);
+            const playerIdsAtSpeed = sortedPlayers.filter((p) => p.speed === speed).map((p) => p.id);
             orderedPlayerIds.push(...this.shuffleArray(playerIdsAtSpeed));
         }
 
@@ -23,11 +21,12 @@ export class InGameInitializationService {
 
     assignStartPoints(session: InGameSession, game: Game): void {
         const shuffledStartPoints = this.shuffleArray(game.objects.filter((o) => o.kind === PlaceableKind.START));
-        
+
         if (shuffledStartPoints.length < session.turnOrder.length) {
-            throw new Error(`Pas assez de points de départ sur la carte : ${shuffledStartPoints.length} points pour ${session.turnOrder.length} joueurs`);
+            throw new Error(`Pas assez de points de départ sur la carte :
+                ${shuffledStartPoints.length} points pour ${session.turnOrder.length} joueurs`);
         }
-        
+
         session.startPoints = session.turnOrder.map((playerId, index) => {
             const startPoint = shuffledStartPoints[index];
             const player = session.inGamePlayers[playerId];

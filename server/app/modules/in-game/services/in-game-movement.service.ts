@@ -46,7 +46,7 @@ export class InGameMovementService {
             throw new BadRequestException('Tile is occupied');
         }
 
-        this.gameCache.moveTileOccupant(session.id, player.x, player.y, player);
+        this.gameCache.moveTileOccupant(session.id, nextX, nextY, player);
 
         player.x = nextX;
         player.y = nextY;
@@ -62,6 +62,8 @@ export class InGameMovementService {
 
         if (player.movementPoints) {
             this.calculateReachableTiles(session, playerId);
+        } else {
+            this.eventEmitter.emit('player.reachableTiles', { playerId, reachable: [] });
         }
     }
 

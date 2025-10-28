@@ -38,6 +38,12 @@ export class GameCacheService {
         return game;
     }
 
+    getGameMapForSession(sessionId: string): GameMap {
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        return gameMap;
+    }
+
     clearGameCache(sessionId: string): void {
         this.sessionsGames.delete(sessionId);
     }
