@@ -5,10 +5,13 @@ import { Model } from 'mongoose';
 import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { Orientation } from '@common/enums/orientation.enum';
+import { InGamePlayer } from '@common/models/player.interface';
+import { MapSize } from '@common/enums/map-size.enum';
 
 interface GameMap {
-    tiles: Tile[];
+    tiles: (Tile & { playerId: string | null })[];
     objects: Placeable[];
+    size: MapSize;
 }
 @Injectable()
 export class GameCacheService {
@@ -21,7 +24,11 @@ export class GameCacheService {
         const game = await this.gameModel.findById(gameId).lean();
         if (!game) throw new NotFoundException('Game not found');
         this.sessionsGames.set(sessionId, game);
-        this.sessionsGameMaps.set(sessionId, { tiles: game.tiles, objects: game.objects });
+        this.sessionsGameMaps.set(sessionId, {
+            tiles: game.tiles.map((tile) => ({ ...tile, playerId: null })),
+            objects: game.objects,
+            size: game.size,
+        });
         return game;
     }
 
@@ -58,5 +65,40 @@ export class GameCacheService {
             case Orientation.W:
                 return { x: currentX - 1, y: currentY };
         }
+    }
+
+    getPlaceablesAtPosition(sessionId: string, x: number, y: number): Placeable[] {
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        return gameMap.objects.filter((obj) => obj.placed && obj.x === x && obj.y === y);
+    }
+
+    getMapSize(sessionId: string): number {
+        return this.getGameForSession(sessionId).size;
+    }
+
+    setTileOccupant(sessionId: string, x: number, y: number, player: InGamePlayer): void {
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        gameMap.tiles[y * gameMap.size + x].playerId = player.id;
+    }
+
+    moveTileOccupant(sessionId: string, x: number, y: number, player: InGamePlayer): void {
+        this.clearTileOccupant(sessionId, player.x, player.y);
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        gameMap.tiles[y * gameMap.size + x].playerId = player.id;
+    }
+
+    clearTileOccupant(sessionId: string, x: number, y: number): void {
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        gameMap.tiles[y * gameMap.size + x].playerId = null;
+    }
+
+    getTileOccupant(sessionId: string, x: number, y: number): string | null {
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        return gameMap.tiles[y * gameMap.size + x].playerId;
     }
 }

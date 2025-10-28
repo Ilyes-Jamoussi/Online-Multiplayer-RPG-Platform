@@ -10,6 +10,7 @@ import { TimerService } from '@app/services/timer/timer.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { Orientation } from '@common/enums/orientation.enum';
 import { ROUTES } from '@app/constants/routes.constants';
+import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 
 @Injectable({
     providedIn: 'root',
@@ -18,6 +19,7 @@ export class InGameService {
     private readonly _inGameSession = signal<InGameSession>(DEFAULT_IN_GAME_SESSION);
     private readonly _isTransitioning = signal<boolean>(false);
     private readonly _isGameStarted = signal<boolean>(false);
+    private readonly _reachableTiles = signal<ReachableTile[]>([]);
 
     constructor(
         private readonly inGameSocketService: InGameSocketService,
@@ -41,6 +43,7 @@ export class InGameService {
     readonly timeRemaining = computed(() => this.timerService.timeRemaining());
     readonly inGamePlayers = computed(() => this._inGameSession().inGamePlayers);
     readonly inGameSession = this._inGameSession.asReadonly();
+    readonly reachableTiles = this._reachableTiles.asReadonly();
 
     getPlayerByPlayerId(playerId: string): InGamePlayer {
         return this.inGamePlayers()[playerId];
@@ -190,6 +193,10 @@ export class InGameService {
                 message: `Il n'y a plus assez de joueurs pour continuer la partie, la partie est terminée`,
                 redirectRoute: ROUTES.homePage,
             });
+        });
+
+        this.inGameSocketService.onPlayerReachableTiles((data) => {
+            this._reachableTiles.set(data);
         });
     }
 }

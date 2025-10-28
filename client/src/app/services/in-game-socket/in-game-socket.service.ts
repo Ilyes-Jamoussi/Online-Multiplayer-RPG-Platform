@@ -3,6 +3,7 @@ import { SocketService } from '@app/services/socket/socket.service';
 import { InGameEvents } from '@common/constants/in-game-events';
 import { Orientation } from '@common/enums/orientation.enum';
 import { InGameSession } from '@common/models/session.interface';
+import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 
 @Injectable({ providedIn: 'root' })
 export class InGameSocketService {
@@ -70,5 +71,9 @@ export class InGameSocketService {
 
     onGameForceStopped(callback: () => void): void {
         this.socket.onSuccessEvent(InGameEvents.GameForceStopped, callback);
+    }
+
+    onPlayerReachableTiles(callback: (data: ReachableTile[]) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerReachableTiles, callback);
     }
 }

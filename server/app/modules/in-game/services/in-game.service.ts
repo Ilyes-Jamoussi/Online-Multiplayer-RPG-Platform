@@ -123,4 +123,9 @@ export class InGameService {
     findSessionByPlayerId(playerId: string): InGameSession | null {
         return this.sessionRepository.findSessionByPlayerId(playerId);
     }
+
+    getReachableTiles(sessionId: string, playerId: string): void {
+        const session = this.sessionRepository.findById(sessionId);
+        this.movementService.calculateReachableTiles(session, playerId);
+    }
 }
