@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNumber, IsString, ValidateNested } from 'class-validator';
+import { IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { PlayerDto } from './player.dto';
 
 export class JoinSessionDto {
@@ -22,4 +22,9 @@ export class SessionJoinedDto {
     @ApiProperty()
     @IsNumber()
     maxPlayers: number;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsString()
+    modifiedPlayerName?: string;
 }

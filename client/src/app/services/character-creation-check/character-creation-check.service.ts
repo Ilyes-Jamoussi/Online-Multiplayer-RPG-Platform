@@ -13,13 +13,13 @@ export class CharacterCreationCheckService {
 
     private readonly validationProblems = computed(() => {
         const character = this.characterEditorService.character();
-        const name = character?.name?.trim() || '';
+        const name = character.name.trim() || '';
         const selectedAvatar = this.playerService.avatar();
 
         return {
             nameValidation: this.checkNameValidation(name),
             avatarSelection: this.checkAvatarSelection(selectedAvatar),
-            bonusSelection: this.checkBonusSelection(character?.bonus || null),
+            bonusSelection: this.checkBonusSelection(character.bonus || null),
         };
     });
 

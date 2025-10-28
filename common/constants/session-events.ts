@@ -18,7 +18,10 @@ export enum SessionEvents {
     SessionPlayersUpdated = 'sessionPlayersUpdated',
     UpdatedAvatarAssignments = 'updateAvatarAssignments',
 
+    PlayerNameUpdated = 'playerNameUpdated',
+
     LockSession = 'lockSession',
+    SessionAutoLocked = 'sessionAutoLocked',
     UnlockSession = 'unlockSession',
 
     StartGameSession = 'startGameSession',
@@ -26,4 +29,7 @@ export enum SessionEvents {
 
     KickPlayer = 'kickPlayer',
     SessionEnded = 'sessionEnded',
+
+    AvailableSessionsUpdated = 'availableSessionsUpdated',
+    LoadAvailableSessions = 'loadAvailableSessions',
 }

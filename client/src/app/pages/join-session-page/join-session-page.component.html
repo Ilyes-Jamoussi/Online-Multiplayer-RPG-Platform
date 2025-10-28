@@ -1,25 +1,19 @@
-<app-ui-page-layout [hasHeader]="true" [hasFooter]="false" headerTitle="Rejoindre une partie" [showBackButton]="true">
-    <div class="join-session-content">
-        <div class="join-card">
-            <div class="field">
-                <h3>Code d'accès de session</h3>
-                <app-ui-input
-                    type="number"
-                    placeholder="Entrez le code à 4 chiffres"
-                    [value]="sessionAccessCode"
-                    [maxLength]="sessionAccessCodeLength"
-                    (valueChange)="onSessionAccessCodeChange($event)"
-                ></app-ui-input>
-            </div>
-
-            <app-ui-button
-                type="button"
-                [fullWidth]="true"
-                [disabled]="sessionAccessCode.length !== sessionAccessCodeLength"
-                (buttonClick)="onSubmit()"
-            >
-                Rejoindre la partie
-            </app-ui-button>
+<app-ui-page-layout [hasHeader]="true" headerTitle="Rejoindre une partie" [showBackButton]="true">
+    <div class="sessions-section">
+        @if (availableSessions() && availableSessions().length > 0) {
+        <div class="sessions-grid">
+            @for (session of availableSessions(); track session.id) {
+            <app-session-card 
+                [session]="session" 
+                (joinSession)="onJoinSession($event)">
+            </app-session-card>
+            }
         </div>
+        } @else {
+        <div class="no-sessions-message">
+            <h2>Aucune partie disponible</h2>
+            <p>Il n'y a actuellement aucune partie que vous pouvez rejoindre.</p>
+        </div>
+        }
     </div>
 </app-ui-page-layout>

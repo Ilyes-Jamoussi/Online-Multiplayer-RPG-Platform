@@ -1,5 +1,6 @@
 import { AVATAR_SELECTION_ROOM_PREFIX } from '@app/constants/session.constants';
 import { InGameService } from '@app/modules/in-game/services/in-game.service';
+import { AvailableSessionsUpdatedDto } from '@app/modules/session/dto/available-sessions-updated.dto';
 import { CreateSessionDto, SessionCreatedDto } from '@app/modules/session/dto/create-session.dto';
 import { AvatarSelectionJoinedDto, JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection';
 import { JoinSessionDto, SessionJoinedDto } from '@app/modules/session/dto/join-session.dto';
@@ -11,9 +12,9 @@ import { errorResponse, successResponse } from '@app/utils/socket-response/socke
 import { SessionEvents } from '@common/constants/session-events';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { Player } from '@common/models/player.interface';
 import { SocketResponse } from '@common/types/socket-response.type';
 import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
@@ -61,15 +62,20 @@ export class SessionGateway implements OnGatewayDisconnect {
             socket.emit(SessionEvents.SessionJoined, validationError);
             return;
         }
-        const players = this.handleJoinSession(socket, data);
+        const modifiedPlayerName = this.handleJoinSession(socket, data);
         const session = this.sessionService.getSession(data.sessionId);
-        socket.emit(
-            SessionEvents.SessionJoined,
-            successResponse<SessionJoinedDto>({
-                gameId: session.gameId,
-                maxPlayers: session.maxPlayers,
-            }),
-        );
+        const players = this.sessionService.getPlayersSession(data.sessionId);
+        
+        const dto: SessionJoinedDto = {
+            gameId: session.gameId,
+            maxPlayers: session.maxPlayers,
+        };
+
+        if (modifiedPlayerName !== data.player.name) {
+            dto.modifiedPlayerName = modifiedPlayerName;
+        }
+        
+        socket.emit(SessionEvents.SessionJoined, successResponse(dto));
         this.server.to(data.sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
     }
 
@@ -202,6 +208,23 @@ export class SessionGateway implements OnGatewayDisconnect {
         this.leaveSession(socket);
     }
 
+    @SubscribeMessage(SessionEvents.LoadAvailableSessions)
+    loadAvailableSessions(socket: Socket): void {
+        const sessions = this.sessionService.getAvailableSessions();
+        socket.emit(SessionEvents.AvailableSessionsUpdated, successResponse<AvailableSessionsUpdatedDto>({ sessions }));
+    }
+
+    @OnEvent('session.availabilityChanged')
+    handleAvailabilityChange(): void {
+        const sessions = this.sessionService.getAvailableSessions();
+        this.server.emit(SessionEvents.AvailableSessionsUpdated, successResponse<AvailableSessionsUpdatedDto>({ sessions }));
+    }
+
+    @OnEvent('session.autoLocked')
+    handleAutoLocked(sessionId: string): void {
+        this.server.to(sessionId).emit(SessionEvents.SessionAutoLocked, successResponse({}));
+    }
+
     private getRoom(accessCode: string): Set<string> | undefined {
         return this.server.sockets.adapter.rooms.get(accessCode);
     }
@@ -224,12 +247,11 @@ export class SessionGateway implements OnGatewayDisconnect {
         return null;
     }
 
-    private handleJoinSession(socket: Socket, data: JoinSessionDto): Player[] {
+    private handleJoinSession(socket: Socket, data: JoinSessionDto): string {
         socket.leave(this.getAvatarSelectionRoomId(data.sessionId));
         socket.join(data.sessionId);
 
-        this.sessionService.joinSession(socket.id, data);
-        return this.sessionService.getPlayersSession(data.sessionId);
+        return this.sessionService.joinSession(socket.id, data);
     }
 
     private getAvatarSelectionRoomId(sessionId: string): string {

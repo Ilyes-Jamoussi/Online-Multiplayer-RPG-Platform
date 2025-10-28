@@ -1,5 +1,6 @@
 // import { Body, Controller, Post } from '@nestjs/common';
 // import { ApiOperation, ApiTags } from '@nestjs/swagger';
+// import { AvailableSessionsUpdatedDto } from '../dto/available-sessions-updated.dto';
 // import { CreateSessionDto, SessionCreatedDto } from '../dto/create-session.dto';
 // import { AvatarSelectionJoinedDto, JoinAvatarSelectionDto } from '../dto/join-avatar-selection';
 // import { JoinSessionDto, SessionJoinedDto } from '../dto/join-session.dto';
@@ -68,4 +69,8 @@
 //     @Post('session-ended')
 //     @ApiOperation({ summary: 'DTO for SessionEnded' })
 //     sessionEnded(@Body() dto: SessionEndedDto): void {}
+
+//     @Post('available-sessions-updated')
+//     @ApiOperation({ summary: 'DTO for AvailableSessionsUpdated' })
+//     availableSessionsUpdated(@Body() dto: AvailableSessionsUpdatedDto): void {}
 // }

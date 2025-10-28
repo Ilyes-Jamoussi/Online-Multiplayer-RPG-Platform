@@ -9,9 +9,9 @@
  */
 
 
-export interface SessionJoinedDto { 
-    gameId: string;
+export interface SessionPreviewDto { 
+    id: string;
+    currentPlayers: number;
     maxPlayers: number;
-    modifiedPlayerName?: string;
 }
 

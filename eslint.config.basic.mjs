@@ -69,6 +69,9 @@ export default (tsParser, tsPlugin) => [
             '@typescript-eslint/no-unused-vars': 'error',
             '@typescript-eslint/dot-notation': 'error',
             '@typescript-eslint/no-unused-expressions': 'error',
+            // Added lint rules for code quality - COMMENTED OUT
+            // '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'warn',
+            // '@typescript-eslint/no-unnecessary-condition': 'warn',
             '@typescript-eslint/no-magic-numbers': [
                 'error',
                 {
