@@ -40,6 +40,7 @@ export class InGameService {
     readonly isTransitioning = computed(() => this._isTransitioning());
     readonly timeRemaining = computed(() => this.timerService.timeRemaining());
     readonly inGamePlayers = computed(() => this._inGameSession().inGamePlayers);
+    readonly inGameSession = this._inGameSession.asReadonly();
 
     getPlayerByPlayerId(playerId: string): InGamePlayer {
         return this.inGamePlayers()[playerId];

@@ -90,6 +90,9 @@ export class SessionService {
 
     lock(sessionId: string): void {
         const session = this.getSession(sessionId);
+        if (!session) {
+            throw new Error(`Session ${sessionId} introuvable`);
+        }
         session.isRoomLocked = true;
     }
 

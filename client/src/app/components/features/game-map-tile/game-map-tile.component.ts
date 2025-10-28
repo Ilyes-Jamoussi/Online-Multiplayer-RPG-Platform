@@ -17,6 +17,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 export class GameMapTileComponent {
     @Input({ required: true }) tile: GameEditorTileDto;
     @Input({ required: true }) imageSrc: string;
+    @Input() cssClass: string = '';
 
     constructor(
         private readonly gameMapService: GameMapService,

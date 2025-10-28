@@ -150,5 +150,9 @@ export class SessionService {
         this.sessionSocketService.onAvatarSelectionJoinError((msg) => {
             this.notificationService.displayError({ title: 'Erreur de connexion', message: msg });
         });
+
+        this.sessionSocketService.onStartGameSessionError((msg) => {
+            this.notificationService.displayError({ title: 'Impossible de démarrer le jeu', message: msg });
+        });
     }
 }
