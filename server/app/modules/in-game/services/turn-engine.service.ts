@@ -3,13 +3,12 @@ import { InGameSession } from '@common/models/session.interface';
 import { TurnState } from '@common/models/turn-state.interface';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { InGameSessionRepository } from './in-game-session.repository';
 
 @Injectable()
 export class TurnEngineService {
     private readonly timers = new Map<string, NodeJS.Timeout>();
 
-    constructor(private readonly eventEmitter: EventEmitter2, private readonly sessionRepository: InGameSessionRepository) {}
+    constructor(private readonly eventEmitter: EventEmitter2) {}
 
     startFirstTurn(session: InGameSession, timeoutMs = DEFAULT_TURN_DURATION): TurnState {
         if (!session.turnOrder?.length) throw new Error('TURN_ORDER_NOT_DEFINED');

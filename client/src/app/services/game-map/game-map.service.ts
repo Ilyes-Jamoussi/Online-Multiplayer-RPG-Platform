@@ -79,6 +79,14 @@ export class GameMapService {
         return this._activeTileCoords.asReadonly();
     }
 
+    get reachableTiles() {
+        return this.inGameService.reachableTiles();
+    }
+
+    get isMyTurn() {
+        return this.inGameService.isMyTurn();
+    }
+
     getActiveTile(coords?: Vector2): GameEditorTileDto | null {
         const targetCoords = coords ?? this._activeTileCoords();
         if (!targetCoords) return null;

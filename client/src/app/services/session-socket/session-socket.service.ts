@@ -97,6 +97,10 @@ export class SessionSocketService {
         this.socket.onSuccessEvent(SessionEvents.GameSessionStarted, callback);
     }
 
+    onStartGameSessionError(callback: (message: string) => void): void {
+        this.socket.onErrorEvent(SessionEvents.StartGameSession, callback);
+    }
+
     onAvailableSessionsUpdated(callback: (data: AvailableSessionsUpdatedDto) => void): void {
         this.socket.onSuccessEvent(SessionEvents.AvailableSessionsUpdated, callback);
     }

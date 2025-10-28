@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { GameInfoComponent } from '@app/components/features/game-info/game-info.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
 import { GameTimerComponent } from '@app/components/features/game-timer/game-timer.component';
@@ -28,6 +28,8 @@ import { MapSize } from '@common/enums/map-size.enum';
     providers: [GameMapService],
 })
 export class GameSessionPageComponent implements OnInit, OnDestroy {
+    @ViewChild(GameMapComponent) gameMapComponent?: GameMapComponent;
+
     constructor(
         private readonly sessionService: SessionService,
         private readonly gameMapService: GameMapService,
@@ -83,6 +85,31 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         return this.inGameService.isTransitioning();
     }
 
+    getInGamePlayersCount(): number {
+        return Object.keys(this.inGameService.inGameSession().inGamePlayers).length;
+    }
+
+    getCurrentPlayerMovementPoints(): number {
+        const session = this.inGameService.inGameSession();
+        const activePlayerId = session.currentTurn.activePlayerId;
+        const player = session.inGamePlayers[activePlayerId];
+        return player?.movementPoints || 0;
+    }
+
+    getReachableTilesCount(): number {
+        return this.gameMapComponent?.reachableTiles?.length || 0;
+    }
+
+    getDebugInfo(): string {
+        const session = this.inGameService.inGameSession();
+        const activePlayerId = session.currentTurn.activePlayerId;
+        const player = session.inGamePlayers[activePlayerId];
+        
+        if (!player) return 'Joueur non trouvé';
+        
+        return `Pos:(${player.x},${player.y}) MP:${player.movementPoints}`;
+    }
+
     ngOnInit(): void {
         this.inGameService.loadInGameSession();
         this.keyboardEventsService.startListening();
@@ -90,7 +117,7 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.keyboardEventsService.stopListening();
-        this.inGameService.cleanupAll();
+        this.inGameService.reset();
     }
 
     onStartGame(): void {

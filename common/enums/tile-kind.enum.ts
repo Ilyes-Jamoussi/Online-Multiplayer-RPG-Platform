@@ -23,4 +23,5 @@ export enum TileCost {
     BASE = 1,
     DOOR_OPEN = 1,
     WATER = 2,
+    TELEPORT = 0,
 }

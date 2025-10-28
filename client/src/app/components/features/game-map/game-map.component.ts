@@ -63,6 +63,11 @@ export class GameMapComponent implements OnInit {
         return this.gameMapService.visibleObjects();
     }
 
+    get reachableTiles() {
+        if (!this.gameMapService.isMyTurn) return [];
+        return this.gameMapService.reachableTiles;
+    }
+
     getTileImage(tileKind: string, opened: boolean = false): string {
         return this.assetsService.getTileImage(tileKind as TileKind, opened);
     }
@@ -103,5 +108,13 @@ export class GameMapComponent implements OnInit {
             gridColumn: `${startPoint.x + 1}`,
             gridRow: `${startPoint.y + 1}`,
         };
+    }
+
+    isReachable(x: number, y: number): boolean {
+        return this.reachableTiles.some((tile) => tile.x === x && tile.y === y);
+    }
+
+    getTileClass(x: number, y: number): string {
+        return this.isReachable(x, y) ? 'reachable-tile' : '';
     }
 }

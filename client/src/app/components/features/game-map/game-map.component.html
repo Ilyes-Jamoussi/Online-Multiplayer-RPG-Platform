@@ -9,6 +9,7 @@
                     <app-game-map-tile
                         [tile]="tile"
                         [imageSrc]="getTileImage(tile.kind, tile.open)"
+                        [cssClass]="getTileClass(tile.x, tile.y)"
                     />
                 }
             </div>

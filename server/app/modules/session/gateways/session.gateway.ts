@@ -152,11 +152,29 @@ export class SessionGateway implements OnGatewayDisconnect {
     @SubscribeMessage(SessionEvents.StartGameSession)
     async startGameSession(socket: Socket): Promise<void> {
         const sessionId = this.sessionService.getPlayerSessionId(socket.id);
-        const inGameSession = await this.inGameService.createInGameSession(
-            this.sessionService.getSession(sessionId),
-            GameMode.CLASSIC,
-            MapSize.SMALL,
-        );
+        if (!sessionId) {
+            socket.emit(SessionEvents.StartGameSession, errorResponse('Joueur non connecté à une session'));
+            return;
+        }
+        
+        const waitingSession = this.sessionService.getSession(sessionId);
+        if (!waitingSession) {
+            socket.emit(SessionEvents.StartGameSession, errorResponse('Session introuvable'));
+            return;
+        }
+        
+        let inGameSession;
+        try {
+            inGameSession = await this.inGameService.createInGameSession(
+                waitingSession,
+                GameMode.CLASSIC,
+                MapSize.SMALL,
+            );
+        } catch (error) {
+            socket.emit(SessionEvents.StartGameSession, errorResponse(error.message));
+            return;
+        }
+        
         const players = this.sessionService.getPlayersSession(sessionId);
 
         for (const player of players) {

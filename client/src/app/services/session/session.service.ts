@@ -176,5 +176,9 @@ export class SessionService {
         this.sessionSocketService.onSessionAutoLocked(() => {
             this.updateSession({ isRoomLocked: true });
         });
+
+        this.sessionSocketService.onStartGameSessionError((msg) => {
+            this.notificationService.displayError({ title: 'Impossible de démarrer le jeu', message: msg });
+        });
     }
 }
