@@ -6,6 +6,7 @@ import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { catchError, of, take, tap } from 'rxjs';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { AssetsService } from '@app/services/assets/assets.service';
@@ -32,7 +33,10 @@ export class GameMapService {
 
     readonly visibleObjects: Signal<GameEditorPlaceableDto[]> = computed(() => {
         const visibleObjects = this.objects().filter((obj) => obj.placed);
-        return visibleObjects.filter((obj) => this.inGameService.startPoints().some((startPoint) => startPoint.id === obj.id));
+        return visibleObjects.filter((obj) => {
+            const isInStartPoints = this.inGameService.startPoints().some((startPoint) => startPoint.id === obj.id);
+            return obj.kind !== PlaceableKind.START || isInStartPoints;
+        });
     });
 
     constructor(
