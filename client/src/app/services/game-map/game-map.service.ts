@@ -6,10 +6,12 @@ import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
 import { catchError, of, take, tap } from 'rxjs';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { InGamePlayer } from '@common/models/player.interface';
+import { Vector2 } from '@app/interfaces/game-editor.interface';
 
 @Injectable()
 export class GameMapService {
@@ -32,7 +34,10 @@ export class GameMapService {
 
     readonly visibleObjects: Signal<GameEditorPlaceableDto[]> = computed(() => {
         const visibleObjects = this.objects().filter((obj) => obj.placed);
-        return visibleObjects.filter((obj) => this.inGameService.startPoints().some((startPoint) => startPoint.id === obj.id));
+        return visibleObjects.filter((obj) => {
+            const isInStartPoints = this.inGameService.startPoints().some((startPoint) => startPoint.id === obj.id);
+            return obj.kind !== PlaceableKind.START || isInStartPoints;
+        });
     });
 
     constructor(
@@ -74,10 +79,10 @@ export class GameMapService {
         return this._activeTileCoords.asReadonly();
     }
 
-    getActiveTile(): GameEditorTileDto | null {
-        const coords = this._activeTileCoords();
-        if (!coords) return null;
-        return this.tiles().find((t) => t.x === coords.x && t.y === coords.y) ?? null;
+    getActiveTile(coords?: Vector2): GameEditorTileDto | null {
+        const targetCoords = coords ?? this._activeTileCoords();
+        if (!targetCoords) return null;
+        return this.tiles().find((t) => t.x === targetCoords.x && t.y === targetCoords.y) ?? null;
     }
 
     openTileModal(tile: GameEditorTileDto): void {
@@ -93,16 +98,29 @@ export class GameMapService {
         return !!coords && coords.x === tile.x && coords.y === tile.y;
     }
 
-    getPlayerOnTile(): InGamePlayer | undefined {
-        const coords = this._activeTileCoords();
-        if (!coords) return undefined;
-        return this.currentlyInGamePlayers.find((player) => player.x === coords.x && player.y === coords.y);
+    getPlayerOnTile(coords?: Vector2): InGamePlayer | undefined {
+        const targetCoords = coords ?? this._activeTileCoords();
+        if (!targetCoords) return undefined;
+        return this.currentlyInGamePlayers.find((player) => player.x === targetCoords.x && player.y === targetCoords.y);
     }
 
-    getObjectOnTile(): GameEditorPlaceableDto | undefined {
-        const coords = this._activeTileCoords();
-        if (!coords) return undefined;
-        return this.objects().find((obj) => obj.x === coords.x && obj.y === coords.y);
+    getObjectOnTile(coords?: Vector2): GameEditorPlaceableDto | undefined {
+        const targetCoords = coords ?? this._activeTileCoords();
+        if (!targetCoords) return undefined;
+        
+        return this.visibleObjects().find((obj) => {
+            if (obj.x === targetCoords.x && obj.y === targetCoords.y) return true;
+            
+            if (PlaceableFootprint[obj.kind] === 2) {
+                return (
+                    (obj.x === targetCoords.x - 1 && obj.y === targetCoords.y) ||
+                    (obj.x === targetCoords.x && obj.y === targetCoords.y - 1) ||
+                    (obj.x === targetCoords.x - 1 && obj.y === targetCoords.y - 1)
+                );
+            }
+            
+            return false;
+        });
     }
 
     get currentlyInGamePlayers(): InGamePlayer[] {
@@ -115,10 +133,6 @@ export class GameMapService {
             .pipe(
                 take(1),
                 tap((gameData) => {
-                    if (!gameData) {
-                        this.notificationService.displayError({ title: 'Erreur', message: 'Impossible de charger la carte' });
-                        return;
-                    }
                     this.buildGameMap(gameData);
                 }),
                 catchError(() => {
@@ -148,7 +162,7 @@ export class GameMapService {
 
         const objects: GameEditorPlaceableDto[] = gameData.objects.map((obj) => ({
             ...obj,
-            placed: obj.placed ?? true,
+            placed: obj.placed,
         }));
 
         this._tiles.set(tiles);
@@ -156,10 +170,12 @@ export class GameMapService {
     }
 
     reset(): void {
-        Object.entries(this.initialState).forEach(([key, value]) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (this as any)[`_${key}`].set(value);
-        });
+        this._tiles.set(this.initialState.tiles);
+        this._objects.set(this.initialState.objects);
+        this._size.set(this.initialState.size);
+        this._name.set(this.initialState.name);
+        this._description.set(this.initialState.description);
+        this._mode.set(this.initialState.mode);
         this._activeTileCoords.set(null);
     }
 }

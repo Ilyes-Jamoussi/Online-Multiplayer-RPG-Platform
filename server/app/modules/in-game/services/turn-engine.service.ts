@@ -94,5 +94,6 @@ export class TurnEngineService {
         const timer = this.timers.get(sessionId);
         if (timer) clearTimeout(timer);
         this.timers.delete(sessionId);
+        this.eventEmitter.emit('turn.forceStopTimer', { sessionId });
     }
 }

@@ -77,7 +77,16 @@ export class InGameService {
     }
 
     loadInGameSession(): void {
-        this.inGameSocketService.playerJoinInGameSession(this.sessionService.id());
+        if (this.sessionService.id()) {
+            this.inGameSocketService.playerJoinInGameSession(this.sessionService.id());
+        } else {
+            this.cleanupAll();
+            this.notificationService.displayError({
+                title: 'Session non trouvée',
+                message: `Vous n'êtes connecté à aucune session`,
+                redirectRoute: ROUTES.homePage,
+            });
+        }
     }
 
     startGame(): void {
@@ -115,8 +124,8 @@ export class InGameService {
         this.timerService.resetTimer();
         this._isGameStarted.set(false);
         this._isTransitioning.set(false);
-        this.inGameSocketService.playerLeaveInGameSession(this.sessionService.id());
-        this.playerService.leaveSession();
+        this.sessionService.resetSession();
+        this.playerService.resetPlayer();
     }
 
     movePlayer(orientation: Orientation): void {
@@ -170,6 +179,15 @@ export class InGameService {
             this.notificationService.displayInformation({
                 title: 'Départ réussi',
                 message: `Tu as quitté la partie avec succès`,
+                redirectRoute: ROUTES.homePage,
+            });
+        });
+
+        this.inGameSocketService.onGameForceStopped(() => {
+            this.cleanupAll();
+            this.notificationService.displayError({
+                title: 'Partie terminée par défaut',
+                message: `Il n'y a plus assez de joueurs pour continuer la partie, la partie est terminée`,
                 redirectRoute: ROUTES.homePage,
             });
         });

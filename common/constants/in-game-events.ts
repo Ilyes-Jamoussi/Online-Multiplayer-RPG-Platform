@@ -2,6 +2,7 @@ export enum InGameEvents {
     GameStart = 'gameStart',
     GameStarted = 'gameStarted',
     GameOver = 'gameOver',
+    GameForceStopped = 'gameForceStopped',
 
     TurnStart = 'turnStart',
     TurnStarted = 'turnStarted',

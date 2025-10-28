@@ -53,27 +53,27 @@ export class CharacterCreationPageComponent implements OnInit {
     }
 
     get isLifeBonusSelected(): boolean {
-        return this.character?.bonus === BonusType.Life || false;
+        return this.character.bonus === BonusType.Life || false;
     }
 
     get isSpeedBonusSelected(): boolean {
-        return this.character?.bonus === BonusType.Speed || false;
+        return this.character.bonus === BonusType.Speed || false;
     }
 
     get isAttackD4Selected(): boolean {
-        return this.character?.diceAssignment.attack === Dice.D4 || false;
+        return this.character.diceAssignment.attack === Dice.D4 || false;
     }
 
     get isAttackD6Selected(): boolean {
-        return this.character?.diceAssignment.attack === Dice.D6 || false;
+        return this.character.diceAssignment.attack === Dice.D6 || false;
     }
 
     get isDefenseD4Selected(): boolean {
-        return this.character?.diceAssignment.defense === Dice.D4 || false;
+        return this.character.diceAssignment.defense === Dice.D4 || false;
     }
 
     get isDefenseD6Selected(): boolean {
-        return this.character?.diceAssignment.defense === Dice.D6 || false;
+        return this.character.diceAssignment.defense === Dice.D6 || false;
     }
 
     get character() {
@@ -110,7 +110,7 @@ export class CharacterCreationPageComponent implements OnInit {
 
     generateRandomCharacter(): void {
         this.characterEditorService.generateRandom();
-        const avatar = this.characterEditorService.character()?.avatar;
+        const avatar = this.characterEditorService.character().avatar;
         if (avatar) {
             this.playerService.selectAvatar(avatar);
         }

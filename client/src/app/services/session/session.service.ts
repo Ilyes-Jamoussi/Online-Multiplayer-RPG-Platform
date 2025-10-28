@@ -4,18 +4,21 @@ import { ROUTES } from '@app/constants/routes.constants';
 import { DEFAULT_SESSION, MIN_SESSION_PLAYERS } from '@app/constants/session.constants';
 import { CreateSessionDto } from '@app/dto/create-session-dto';
 import { JoinSessionDto } from '@app/dto/join-session-dto';
+import { SessionPreviewDto } from '@app/dto/session-preview-dto';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
 import { Player } from '@common/models/player.interface';
 import { AvatarAssignment, WaitingRoomSession } from '@common/models/session.interface';
-import { NotificationService } from '@app/services/notification/notification.service';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
     private readonly _session = signal<WaitingRoomSession>({ ...DEFAULT_SESSION });
+    private readonly _availableSessions = signal<SessionPreviewDto[]>([]);
 
     readonly session = this._session.asReadonly();
+    readonly availableSessions = this._availableSessions.asReadonly();
     readonly id: Signal<string> = computed(() => this.session().id);
     readonly players: Signal<Player[]> = computed(() => this.session().players);
     readonly avatarAssignments: Signal<AvatarAssignment[]> = computed(() => this.session().avatarAssignments);
@@ -93,8 +96,9 @@ export class SessionService {
     }
 
     joinSession(player: Player): void {
+        const sessionId = this.id();
         const dto: JoinSessionDto = {
-            sessionId: this.id(),
+            sessionId,
             player,
         };
         this.sessionSocketService.joinSession(dto);
@@ -110,6 +114,15 @@ export class SessionService {
 
     leaveAvatarSelection(): void {
         this.sessionSocketService.leaveAvatarSelection({ sessionId: this.id() });
+    }
+
+    loadAvailableSessions(): void {
+        this.sessionSocketService.loadAvailableSessions();
+    }
+
+    handleSessionJoined(data: { gameId: string; maxPlayers: number }): void {
+        this.updateSession({ gameId: data.gameId, maxPlayers: data.maxPlayers });
+        this.router.navigate([ROUTES.waitingRoomPage]);
     }
 
     private assignAvatar(playerId: string, avatar: Avatar): void {
@@ -143,12 +156,25 @@ export class SessionService {
             this.notificationService.displayError({ title: 'Erreur de création', message: error });
         });
 
-        this.sessionSocketService.onSessionJoinError((msg) => {
-            this.notificationService.displayError({ title: 'Erreur', message: msg });
+        this.sessionSocketService.onSessionJoinError((message) => {
+            this.notificationService.displayError({ title: 'Erreur', message });
         });
 
-        this.sessionSocketService.onAvatarSelectionJoinError((msg) => {
-            this.notificationService.displayError({ title: 'Erreur de connexion', message: msg });
+        this.sessionSocketService.onAvatarSelectionJoinError((message) => {
+            this.notificationService.displayError({ title: 'Erreur de connexion', message });
+        });
+
+        this.sessionSocketService.onAvatarSelectionJoined((data) => {
+            this.updateSession({ id: data.sessionId });
+            this.router.navigate([ROUTES.characterCreationPage]);
+        });
+
+        this.sessionSocketService.onAvailableSessionsUpdated((data) => {
+            this._availableSessions.set(data.sessions);
+        });
+
+        this.sessionSocketService.onSessionAutoLocked(() => {
+            this.updateSession({ isRoomLocked: true });
         });
 
         this.sessionSocketService.onStartGameSessionError((msg) => {

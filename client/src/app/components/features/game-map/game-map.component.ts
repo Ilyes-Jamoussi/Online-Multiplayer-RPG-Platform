@@ -118,7 +118,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
     }
 
     getObjectFootprint(placeableKind: string): number {
-        return PlaceableFootprint[placeableKind as PlaceableKind] || 1;
+        return PlaceableFootprint[placeableKind as PlaceableKind];
     }
 
     getStartPointStyle(startPoint: StartPoint) {

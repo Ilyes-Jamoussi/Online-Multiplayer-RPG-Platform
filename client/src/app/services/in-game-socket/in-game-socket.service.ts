@@ -67,4 +67,8 @@ export class InGameSocketService {
     onLeftInGameSessionAck(callback: () => void): void {
         this.socket.onSuccessEvent(InGameEvents.LeftInGameSessionAck, callback);
     }
+
+    onGameForceStopped(callback: () => void): void {
+        this.socket.onSuccessEvent(InGameEvents.GameForceStopped, callback);
+    }
 }

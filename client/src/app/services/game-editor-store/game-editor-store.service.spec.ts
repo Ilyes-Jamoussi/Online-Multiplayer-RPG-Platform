@@ -673,68 +673,68 @@ describe('GameEditorStoreService', () => {
         it('should return the correct inventory counts for FLAG', () => {
             const inventory = service.inventory();
             expect(inventory.FLAG).toBeDefined();
-            expect(inventory.FLAG?.kind).toBe(PlaceableKind.FLAG);
-            expect(inventory.FLAG?.total).toBe(1);
-            expect(inventory.FLAG?.remaining).toBe(1);
-            expect(inventory.FLAG?.disabled).toBeFalse();
+            expect(inventory.FLAG.kind).toBe(PlaceableKind.FLAG);
+            expect(inventory.FLAG.total).toBe(1);
+            expect(inventory.FLAG.remaining).toBe(1);
+            expect(inventory.FLAG.disabled).toBeFalse();
         });
 
         it('should return the correct inventory counts for START', () => {
             const inventory = service.inventory();
             expect(inventory.START).toBeDefined();
-            expect(inventory.START?.kind).toBe(PlaceableKind.START);
-            expect(inventory.START?.total).toBe(1);
-            expect(inventory.START?.remaining).toBe(0);
-            expect(inventory.START?.disabled).toBeTrue();
+            expect(inventory.START.kind).toBe(PlaceableKind.START);
+            expect(inventory.START.total).toBe(1);
+            expect(inventory.START.remaining).toBe(0);
+            expect(inventory.START.disabled).toBeTrue();
         });
 
         it('should return the correct inventory counts for BOAT', () => {
             const inventory = service.inventory();
             expect(inventory.BOAT).toBeDefined();
-            expect(inventory.BOAT?.kind).toBe(PlaceableKind.BOAT);
-            expect(inventory.BOAT?.total).toBe(1);
-            expect(inventory.BOAT?.remaining).toBe(0);
-            expect(inventory.BOAT?.disabled).toBeTrue();
+            expect(inventory.BOAT.kind).toBe(PlaceableKind.BOAT);
+            expect(inventory.BOAT.total).toBe(1);
+            expect(inventory.BOAT.remaining).toBe(0);
+            expect(inventory.BOAT.disabled).toBeTrue();
         });
 
         it('should return the correct inventory counts for FIGHT', () => {
             const inventory = service.inventory();
             expect(inventory.FIGHT).toBeDefined();
-            expect(inventory.FIGHT?.kind).toBe(PlaceableKind.FIGHT);
-            expect(inventory.FIGHT?.total).toBe(0);
-            expect(inventory.FIGHT?.remaining).toBe(0);
-            expect(inventory.FIGHT?.disabled).toBeTrue();
+            expect(inventory.FIGHT.kind).toBe(PlaceableKind.FIGHT);
+            expect(inventory.FIGHT.total).toBe(0);
+            expect(inventory.FIGHT.remaining).toBe(0);
+            expect(inventory.FIGHT.disabled).toBeTrue();
         });
 
         it('should return the correct inventory counts for HEAL', () => {
             const inventory = service.inventory();
             expect(inventory.HEAL).toBeDefined();
-            expect(inventory.HEAL?.kind).toBe(PlaceableKind.HEAL);
-            expect(inventory.HEAL?.total).toBe(0);
-            expect(inventory.HEAL?.remaining).toBe(0);
-            expect(inventory.HEAL?.disabled).toBeTrue();
+            expect(inventory.HEAL.kind).toBe(PlaceableKind.HEAL);
+            expect(inventory.HEAL.total).toBe(0);
+            expect(inventory.HEAL.remaining).toBe(0);
+            expect(inventory.HEAL.disabled).toBeTrue();
         });
 
         it('should update inventory counts after placing an object', () => {
             const inventory = service.inventory();
-            expect(inventory.FLAG?.remaining).toBe(1);
-            expect(inventory.FLAG?.disabled).toBeFalse();
+            expect(inventory.FLAG.remaining).toBe(1);
+            expect(inventory.FLAG.disabled).toBeFalse();
             service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
             const afterInventory = service.inventory();
-            expect(afterInventory.FLAG?.remaining).toBe(0);
-            expect(afterInventory.FLAG?.disabled).toBeTrue();
+            expect(afterInventory.FLAG.remaining).toBe(0);
+            expect(afterInventory.FLAG.disabled).toBeTrue();
         });
 
         it('should update inventory counts after removing an object', () => {
             service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
             let inventory = service.inventory();
-            expect(inventory.FLAG?.remaining).toBe(0);
-            expect(inventory.FLAG?.disabled).toBeTrue();
+            expect(inventory.FLAG.remaining).toBe(0);
+            expect(inventory.FLAG.disabled).toBeTrue();
 
             service.removeObject('flag1');
             inventory = service.inventory();
-            expect(inventory.FLAG?.remaining).toBe(1);
-            expect(inventory.FLAG?.disabled).toBeFalse();
+            expect(inventory.FLAG.remaining).toBe(1);
+            expect(inventory.FLAG.disabled).toBeFalse();
         });
     });
 });

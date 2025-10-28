@@ -6,9 +6,13 @@ import { InGamePlayer } from '@common/models/player.interface';
 export class InGameSessionRepository {
     private readonly sessions = new Map<string, InGameSession>();
 
-    currentPlayerCount(sessionId: string): number {
+    inGamePlayersCount(sessionId: string): number {
+        return this.getIngamePlayers(sessionId).length;
+    }
+
+    getIngamePlayers(sessionId: string): InGamePlayer[] {
         const session = this.findById(sessionId);
-        return Object.values(session.inGamePlayers).filter((p) => p.isInGame).length;
+        return Object.values(session.inGamePlayers).filter((p) => p.isInGame);
     }
 
     save(session: InGameSession): void {
@@ -51,5 +55,14 @@ export class InGameSessionRepository {
     removePlayerFromTurnOrder(sessionId: string, playerId: string): void {
         const session = this.findById(sessionId);
         session.turnOrder = session.turnOrder.filter((id) => id !== playerId);
+    }
+
+    findSessionByPlayerId(playerId: string): InGameSession | null {
+        for (const session of this.sessions.values()) {
+            if (session.inGamePlayers[playerId]?.isInGame) {
+                return session;
+            }
+        }
+        return null;
     }
 }

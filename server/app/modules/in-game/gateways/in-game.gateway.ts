@@ -31,12 +31,13 @@ export class InGameGateway {
             this.server.to(session.inGameId).emit(InGameEvents.PlayerJoinedInGameSession, successResponse(session));
             this.logger.log(`Player ${socket.id} joined session ${session.id}`);
         } catch (error) {
+            this.logger.error(`Error joining session ${sessionId} for player ${socket.id}: ${error.message}`);
             socket.emit(InGameEvents.PlayerJoinedInGameSession, errorResponse(error.message));
         }
     }
 
     @SubscribeMessage(InGameEvents.GameStart)
-    async startGame(socket: Socket, sessionId: string): Promise<void> {
+    startGame(socket: Socket, sessionId: string): void {
         try {
             const started = this.inGameService.startSession(sessionId);
             this.server.to(started.inGameId).emit(InGameEvents.GameStarted, successResponse(started));
@@ -58,16 +59,10 @@ export class InGameGateway {
     }
 
     @SubscribeMessage(InGameEvents.PlayerLeaveInGameSession)
-    playerLeaveSession(socket: Socket, sessionId: string): void {
-        try {
-            const result = this.inGameService.leaveInGameSession(sessionId, socket.id);
-            socket.leave(result.session.inGameId);
-            this.server.to(result.session.inGameId).emit(InGameEvents.PlayerLeftInGameSession, successResponse(result));
-            this.server.to(socket.id).emit(InGameEvents.LeftInGameSessionAck, successResponse({}));
-            this.logger.log(`Player ${result.playerName} left session ${sessionId}`);
-        } catch (error) {
-            socket.emit(InGameEvents.PlayerLeftInGameSession, errorResponse(error.message));
-        }
+    playerLeaveInGameSession(socket: Socket, sessionId: string): void {
+        this.playerLeaveSession(sessionId, socket.id);
+        this.server.to(socket.id).emit(InGameEvents.LeftInGameSessionAck, successResponse({}));
+        socket.leave(sessionId);
     }
 
     @SubscribeMessage(InGameEvents.PlayerMove)
@@ -118,5 +113,27 @@ export class InGameGateway {
                 successResponse({ playerId: payload.playerId, x: payload.x, y: payload.y, movementPoints: payload.movementPoints }),
             );
         this.logger.log(`Player ${payload.playerId} moved to ${payload.x}, ${payload.y} in session ${payload.session.id}`);
+    }
+
+    handleDisconnect(socket: Socket) {
+        const session = this.inGameService.findSessionByPlayerId(socket.id);
+        if (session) {
+            this.playerLeaveSession(session.id, socket.id);
+        }
+    }
+
+    private playerLeaveSession(sessionId: string, playerId: string): void {
+        try {
+            const result = this.inGameService.leaveInGameSession(sessionId, playerId);
+            if (result.sessionEnded) {
+                this.server.to(result.session.inGameId).emit(InGameEvents.GameForceStopped, successResponse({}));
+                this.server.socketsLeave(sessionId);
+            } else {
+                this.server.to(result.session.inGameId).emit(InGameEvents.PlayerLeftInGameSession, successResponse(result));
+                this.logger.log(`Player ${result.playerName} left session ${sessionId}`);
+            }
+        } catch (error) {
+            this.server.to(playerId).emit(InGameEvents.PlayerLeftInGameSession, errorResponse(error.message));
+        }
     }
 }
