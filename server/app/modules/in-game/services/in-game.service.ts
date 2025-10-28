@@ -116,7 +116,7 @@ export class InGameService {
         return { session, playerName: player.name, sessionEnded };
     }
 
-    getIngamePlayers(sessionId: string): InGamePlayer[] {
+    getInGamePlayers(sessionId: string): InGamePlayer[] {
         return this.sessionRepository.getIngamePlayers(sessionId);
     }
 

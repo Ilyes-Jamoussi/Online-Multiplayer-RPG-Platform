@@ -65,7 +65,6 @@ export class SessionGateway implements OnGatewayDisconnect {
         const modifiedPlayerName = this.handleJoinSession(socket, data);
         const session = this.sessionService.getSession(data.sessionId);
         const players = this.sessionService.getPlayersSession(data.sessionId);
-        
         const dto: SessionJoinedDto = {
             gameId: session.gameId,
             maxPlayers: session.maxPlayers,
@@ -74,7 +73,6 @@ export class SessionGateway implements OnGatewayDisconnect {
         if (modifiedPlayerName !== data.player.name) {
             dto.modifiedPlayerName = modifiedPlayerName;
         }
-        
         socket.emit(SessionEvents.SessionJoined, successResponse(dto));
         this.server.to(data.sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
     }
@@ -171,12 +169,12 @@ export class SessionGateway implements OnGatewayDisconnect {
         this.server.to(sessionId).emit(SessionEvents.GameSessionStarted, successResponse({}));
 
         for (const player of players) {
-            // leave session id for every socket
             const playerSocket = this.server.sockets.sockets.get(player.id);
             if (playerSocket) {
                 playerSocket.leave(sessionId);
             }
         }
+        this.sessionService.endSession(sessionId);
     }
 
     @SubscribeMessage(SessionEvents.LeaveSession)

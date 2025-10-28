@@ -39,10 +39,6 @@ export class WaitingRoomPageComponent {
         return this.sessionService.maxPlayers;
     }
 
-    // onStartGame(): void {
-    //     this.sessionService.startGameSession();
-    // }
-
     onBack(): void {
         this.playerService.leaveSession();
     }

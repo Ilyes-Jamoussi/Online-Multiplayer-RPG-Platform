@@ -61,6 +61,8 @@ export class InGameGateway {
     @SubscribeMessage(InGameEvents.PlayerLeaveInGameSession)
     playerLeaveInGameSession(socket: Socket, sessionId: string): void {
         this.playerLeaveSession(sessionId, socket.id);
+        this.server.to(socket.id).emit(InGameEvents.LeftInGameSessionAck, successResponse({}));
+        socket.leave(sessionId);
     }
 
     @SubscribeMessage(InGameEvents.PlayerMove)
@@ -124,9 +126,8 @@ export class InGameGateway {
         try {
             const result = this.inGameService.leaveInGameSession(sessionId, playerId);
             if (result.sessionEnded) {
-                this.server.to(playerId).emit(InGameEvents.LeftInGameSessionAck, successResponse({}));
                 this.server.to(result.session.inGameId).emit(InGameEvents.GameForceStopped, successResponse({}));
-                this.logger.warn(`Game force stopped for session ${sessionId}`);
+                this.server.socketsLeave(sessionId);
             } else {
                 this.server.to(result.session.inGameId).emit(InGameEvents.PlayerLeftInGameSession, successResponse(result));
                 this.logger.log(`Player ${result.playerName} left session ${sessionId}`);

@@ -123,6 +123,8 @@ export class InGameService {
         this.timerService.resetTimer();
         this._isGameStarted.set(false);
         this._isTransitioning.set(false);
+        this.sessionService.resetSession();
+        this.playerService.resetPlayer();
     }
 
     movePlayer(orientation: Orientation): void {
