@@ -9,7 +9,6 @@ import { AvatarAssignmentsUpdatedDto, UpdateAvatarAssignmentsDto } from '@app/mo
 import { SessionPlayersUpdatedDto } from '@app/modules/session/dto/update-session.dto';
 import { SessionService } from '@app/modules/session/services/session.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
-import { InGameEvents } from '@common/constants/in-game-events';
 import { SessionEvents } from '@common/constants/session-events';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
@@ -229,14 +228,6 @@ export class SessionGateway implements OnGatewayDisconnect {
         }
     }
 
-    @SubscribeMessage(InGameEvents.ToggleAdminMode)
-    handleToggleAdminMode(socket: Socket, sessionId: string): void {
-        try {
-            this.server.to(sessionId).emit(InGameEvents.AdminModeToggled, successResponse({}));
-        } catch (error) {
-            this.logger.error('Error toggling admin mode:', error.message);
-        }
-    }
 
     handleDisconnect(socket: Socket): void {
         this.leaveSession(socket);

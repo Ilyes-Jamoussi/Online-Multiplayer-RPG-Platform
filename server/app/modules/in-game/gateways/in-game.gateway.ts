@@ -122,6 +122,18 @@ export class InGameGateway {
         this.server.to(payload.playerId).emit(InGameEvents.PlayerReachableTiles, successResponse(payload.reachable));
     }
 
+    @SubscribeMessage(InGameEvents.ToggleAdminMode)
+    handleToggleAdminMode(socket: Socket, sessionId: string): void {
+        try {
+            const session = this.inGameService.getSession(sessionId);
+            if (session) {
+                this.server.to(session.inGameId).emit(InGameEvents.AdminModeToggled, successResponse({}));
+            }
+        } catch (error) {
+            this.logger.error('Error toggling admin mode:', error.message);
+        }
+    }
+
     handleDisconnect(socket: Socket) {
         const session = this.inGameService.findSessionByPlayerId(socket.id);
         if (session) {
