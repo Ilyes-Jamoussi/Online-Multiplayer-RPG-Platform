@@ -18,6 +18,7 @@ export class TurnEngineService {
         const newTurn: TurnState = {
             turnNumber: 1,
             activePlayerId: firstPlayer,
+            hasUsedAction: false,
         };
 
         session.currentTurn = newTurn;
@@ -36,6 +37,7 @@ export class TurnEngineService {
         const newTurn: TurnState = {
             turnNumber: prev.turnNumber + 1,
             activePlayerId: nextPlayer,
+            hasUsedAction: false,
         };
 
         session.currentTurn = newTurn;

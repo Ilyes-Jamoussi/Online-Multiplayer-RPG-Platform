@@ -11,6 +11,7 @@ import { TimerService } from '@app/services/timer/timer.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { Orientation } from '@common/enums/orientation.enum';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+import { AvailableAction } from '@common/interfaces/available-action.interface';
 
 @Injectable({
     providedIn: 'root',
@@ -20,6 +21,8 @@ export class InGameService {
     private readonly _isTransitioning = signal<boolean>(false);
     private readonly _isGameStarted = signal<boolean>(false);
     private readonly _reachableTiles = signal<ReachableTile[]>([]);
+    private readonly _availableActions = signal<AvailableAction[]>([]);
+    private readonly _isActionModeActive = signal<boolean>(false);
 
     readonly isMyTurn = computed(() => this._inGameSession().currentTurn.activePlayerId === this.playerService.id());
     readonly currentTurn = computed(() => this._inGameSession().currentTurn);
@@ -34,6 +37,17 @@ export class InGameService {
     readonly inGamePlayers = computed(() => this._inGameSession().inGamePlayers);
     readonly inGameSession = this._inGameSession.asReadonly();
     readonly reachableTiles = this._reachableTiles.asReadonly();
+    readonly hasUsedAction = computed(() => this._inGameSession().currentTurn.hasUsedAction);
+    readonly availableActions = this._availableActions.asReadonly();
+    readonly isActionModeActive = this._isActionModeActive.asReadonly();
+
+    activateActionMode(): void {
+        this._isActionModeActive.set(true);
+    }
+
+    deactivateActionMode(): void {
+        this._isActionModeActive.set(false);
+    }
 
     constructor(
         private readonly inGameSocketService: InGameSocketService,
@@ -199,6 +213,10 @@ export class InGameService {
 
         this.inGameSocketService.onPlayerReachableTiles((data) => {
             this._reachableTiles.set(data);
+        });
+
+        this.inGameSocketService.onPlayerAvailableActions((data) => {
+            this._availableActions.set(data);
         });
     }
 }

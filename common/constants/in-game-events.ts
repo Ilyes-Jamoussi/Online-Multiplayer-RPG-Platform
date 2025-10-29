@@ -23,6 +23,7 @@ export enum InGameEvents {
     PlayerCombatAction = 'playerCombatAction',
     PlayerCombatResult = 'playerCombatResult',
     PlayerReachableTiles = 'playerReachableTiles',
+    PlayerAvailableActions = 'playerAvailableActions',
 
     LeftInGameSessionAck = 'leftInGameSessionAck',
 }

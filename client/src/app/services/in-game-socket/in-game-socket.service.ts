@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { SocketService } from '@app/services/socket/socket.service';
 import { InGameEvents } from '@common/constants/in-game-events';
 import { Orientation } from '@common/enums/orientation.enum';
+import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { InGameSession } from '@common/models/session.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 
@@ -75,5 +76,9 @@ export class InGameSocketService {
 
     onPlayerReachableTiles(callback: (data: ReachableTile[]) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerReachableTiles, callback);
+    }
+
+    onPlayerAvailableActions(callback: (data: AvailableAction[]) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerAvailableActions, callback);
     }
 }

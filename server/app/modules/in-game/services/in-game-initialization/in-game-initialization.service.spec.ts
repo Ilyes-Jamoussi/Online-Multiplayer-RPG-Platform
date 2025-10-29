@@ -1,14 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { InGameInitializationService } from './in-game-initialization.service';
-import { InGameSession } from '@common/models/session.interface';
 import { Game } from '@app/modules/game-store/entities/game.entity';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
+import { InGameInitializationService } from '@app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
 import { Avatar } from '@common/enums/avatar.enum';
-import { Orientation } from '@common/enums/orientation.enum';
-import { Types } from 'mongoose';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
+import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { InGameSession } from '@common/models/session.interface';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Types } from 'mongoose';
 
 describe('InGameInitializationService', () => {
     let service: InGameInitializationService;

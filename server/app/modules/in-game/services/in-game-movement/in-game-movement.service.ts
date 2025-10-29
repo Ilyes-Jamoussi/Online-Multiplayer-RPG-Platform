@@ -1,11 +1,11 @@
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileCost, TileKind } from '@common/enums/tile-kind.enum';
+import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/models/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { GameCacheService } from './game-cache.service';
-import { TileCost, TileKind } from '@common/enums/tile-kind.enum';
-import { Orientation } from '@common/enums/orientation.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 
 interface ReachableTileExplorationContext {
     session: InGameSession;

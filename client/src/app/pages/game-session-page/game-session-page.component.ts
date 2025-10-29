@@ -85,6 +85,21 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         return this.inGameService.isTransitioning();
     }
 
+    isActionDisabled(): boolean {
+        return !this.isMyTurn || 
+               !this.isGameStarted || 
+               this.hasUsedAction || 
+               !this.hasAvailableActions();
+    }
+
+    get hasUsedAction(): boolean {
+        return this.inGameService.hasUsedAction();
+    }
+
+    hasAvailableActions(): boolean {
+        return this.inGameService.availableActions().length > 0;
+    }
+
     getInGamePlayersCount(): number {
         return Object.keys(this.inGameService.inGameSession().inGamePlayers).length;
     }
@@ -97,7 +112,7 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
     }
 
     getReachableTilesCount(): number {
-        return this.gameMapComponent?.reachableTiles?.length || 0;
+        return this.inGameService.reachableTiles().length || 0;
     }
 
     getDebugInfo(): string {
@@ -126,6 +141,10 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
 
     onEndTurn(): void {
         this.inGameService.endTurn();
+    }
+
+    onAction(): void {
+        this.inGameService.activateActionMode();
     }
 
     onLeaveGame(): void {

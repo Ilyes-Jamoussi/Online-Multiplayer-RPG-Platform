@@ -1,14 +1,14 @@
 /* eslint-disable max-lines */
-import { Test, TestingModule } from '@nestjs/testing';
-import { TurnEngineService } from './turn-engine.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { InGameSession } from '@common/models/session.interface';
-import { InGameSessionRepository } from './in-game-session.repository';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
+import { InGameSession } from '@common/models/session.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Test, TestingModule } from '@nestjs/testing';
+import { TurnEngineService } from './turn-engine.service';
 
 describe('TurnEngineService', () => {
     let service: TurnEngineService;
@@ -250,7 +250,7 @@ describe('TurnEngineService', () => {
             const session = createMockSession({
                 currentTurn: { turnNumber: 1, activePlayerId: 'unknown-player' },
             });
-            
+
             session.inGamePlayers['unknown-player'] = {
                 id: 'unknown-player',
                 name: 'Unknown',

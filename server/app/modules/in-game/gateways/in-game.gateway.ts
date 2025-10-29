@@ -1,13 +1,13 @@
-import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
-import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
-import { InGameService } from '@app/modules/in-game/services/in-game.service';
-import { InGameEvents } from '@common/constants/in-game-events';
+import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
-import { InGameSession } from '@common/models/session.interface';
-import { OnEvent } from '@nestjs/event-emitter';
+import { InGameEvents } from '@common/constants/in-game-events';
 import { Orientation } from '@common/enums/orientation.enum';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+import { InGameSession } from '@common/models/session.interface';
+import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
+import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 @UsePipes(
     new ValidationPipe({
         transform: true,
@@ -79,6 +79,7 @@ export class InGameGateway {
     handleTurnStarted(payload: { session: InGameSession }) {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnStarted, successResponse(payload.session));
         this.inGameService.getReachableTiles(payload.session.id, payload.session.currentTurn.activePlayerId);
+        this.inGameService.getAvailableActions(payload.session.id, payload.session.currentTurn.activePlayerId);
         this.logger.log(`Turn ${payload.session.currentTurn.turnNumber} started for session ${payload.session.id}`);
     }
 
@@ -114,12 +115,21 @@ export class InGameGateway {
                 InGameEvents.PlayerMoved,
                 successResponse({ playerId: payload.playerId, x: payload.x, y: payload.y, movementPoints: payload.movementPoints }),
             );
+        
+        // Recalculer les actions disponibles après le mouvement
+        this.inGameService.getAvailableActions(payload.session.id, payload.playerId);
+        
         this.logger.log(`Player ${payload.playerId} moved to ${payload.x}, ${payload.y} in session ${payload.session.id}`);
     }
 
     @OnEvent('player.reachableTiles')
     handlePlayerReachableTiles(payload: { playerId: string; reachable: ReachableTile[] }) {
         this.server.to(payload.playerId).emit(InGameEvents.PlayerReachableTiles, successResponse(payload.reachable));
+    }
+
+    @OnEvent('player.availableActions')
+    handlePlayerAvailableActions(payload: { playerId: string; actions: any[] }) {
+        this.server.to(payload.playerId).emit(InGameEvents.PlayerAvailableActions, successResponse(payload.actions));
     }
 
     handleDisconnect(socket: Socket) {

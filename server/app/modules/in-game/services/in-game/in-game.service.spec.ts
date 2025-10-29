@@ -1,19 +1,19 @@
 /* eslint-disable max-lines */
-import { InGameService } from './in-game.service';
-import { TurnEngineService } from './turn-engine.service';
-import { GameCacheService } from './game-cache.service';
-import { InGameInitializationService } from './in-game-initialization.service';
-import { InGameSessionRepository } from './in-game-session.repository';
-import { InGameMovementService } from './in-game-movement.service';
-import { WaitingRoomSession, InGameSession } from '@common/models/session.interface';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Game } from '@app/modules/game-store/entities/game.entity';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { InGameInitializationService } from '@app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
+import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { TurnEngineService } from '@app/modules/in-game/services/turn-engine/turn-engine.service';
+import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
+import { InGameSession, WaitingRoomSession } from '@common/models/session.interface';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Types } from 'mongoose';
+import { InGameService } from './in-game.service';
 
 describe('InGameService', () => {
     let service: InGameService;

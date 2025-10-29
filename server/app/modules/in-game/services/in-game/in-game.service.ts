@@ -1,15 +1,17 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { WaitingRoomSession, InGameSession } from '@common/models/session.interface';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { TurnEngineService } from '@app/modules/in-game/services/turn-engine/turn-engine.service';
 import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
-import { TurnEngineService } from './turn-engine.service';
-import { GameCacheService } from './game-cache.service';
-import { InGameInitializationService } from './in-game-initialization.service';
-import { InGameSessionRepository } from './in-game-session.repository';
-import { InGameMovementService } from './in-game-movement.service';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
+import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { InGamePlayer } from '@common/models/player.interface';
+import { InGameSession, WaitingRoomSession } from '@common/models/session.interface';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { GameCacheService } from 'app/modules/in-game/services/game-cache/game-cache.service';
+import { InGameInitializationService } from 'app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
+import { InGameMovementService } from 'app/modules/in-game/services/in-game-movement/in-game-movement.service';
 
 @Injectable()
 export class InGameService {
@@ -19,6 +21,7 @@ export class InGameService {
         private readonly initialization: InGameInitializationService,
         private readonly sessionRepository: InGameSessionRepository,
         private readonly movementService: InGameMovementService,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async createInGameSession(waiting: WaitingRoomSession, mode: GameMode, mapSize: MapSize): Promise<InGameSession> {
@@ -31,7 +34,7 @@ export class InGameService {
             maxPlayers,
             isGameStarted: false,
             inGamePlayers: {},
-            currentTurn: { turnNumber: 1, activePlayerId: '' },
+            currentTurn: { turnNumber: 1, activePlayerId: '', hasUsedAction: false },
             startPoints: [],
             mapSize,
             mode,
@@ -127,5 +130,41 @@ export class InGameService {
     getReachableTiles(sessionId: string, playerId: string): void {
         const session = this.sessionRepository.findById(sessionId);
         this.movementService.calculateReachableTiles(session, playerId);
+    }
+
+    getAvailableActions(sessionId: string, playerId: string): void {
+        const session = this.sessionRepository.findById(sessionId);
+        this.calculateAvailableActions(session, playerId);
+    }
+
+    private calculateAvailableActions(session: InGameSession, playerId: string): void {
+        const player = session.inGamePlayers[playerId];
+        if (!player) return;
+
+        const actions = [];
+        const orientations = [Orientation.N, Orientation.E, Orientation.S, Orientation.W];
+
+        for (const orientation of orientations) {
+            try {
+                const pos = this.gameCache.getNextPosition(session.id, player.x, player.y, orientation);
+                
+                // Chercher joueur adjacent (ATTACK)
+                const occupantId = this.gameCache.getTileOccupant(session.id, pos.x, pos.y);
+                if (occupantId && occupantId !== playerId) {
+                    actions.push({ type: 'ATTACK', x: pos.x, y: pos.y });
+                }
+
+                // Chercher porte adjacente (DOOR)
+                const tile = this.gameCache.getTileAtPosition(session.id, pos.x, pos.y);
+                if (tile && tile.kind === 'DOOR') {
+                    actions.push({ type: 'DOOR', x: pos.x, y: pos.y });
+                }
+            } catch {
+                // Position hors limites, ignorer
+                continue;
+            }
+        }
+
+        this.eventEmitter.emit('player.availableActions', { playerId, actions });
     }
 }

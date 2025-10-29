@@ -1,12 +1,12 @@
+import { ACCESS_CODE_LENGTH, ACCESS_CODE_PADDING, ACCESS_CODE_RANGE } from '@app/constants/session.constants';
+import { SessionPreviewDto } from '@app/modules/session/dto/available-sessions-updated.dto';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
-import { SessionPreviewDto } from '@app/modules/session/dto/available-sessions-updated.dto';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Player } from '@common/models/player.interface';
 import { AvatarAssignment, WaitingRoomSession } from '@common/models/session.interface';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ACCESS_CODE_LENGTH, ACCESS_CODE_PADDING, ACCESS_CODE_RANGE } from '@app/constants/session.constants';
 @Injectable()
 export class SessionService {
     private readonly sessions = new Map<string, WaitingRoomSession>();
@@ -146,6 +146,18 @@ export class SessionService {
         }));
     }
 
+    releaseAvatar(sessionId: string, playerId: string): void {
+        const session = this.sessions.get(sessionId);
+        if (!session) return;
+
+        for (const avatar of session.avatarAssignments) {
+            if (avatar.chosenBy === playerId) {
+                avatar.chosenBy = null;
+                break;
+            }
+        }
+    }
+
     private getUniqueAccessCode(): string {
         let accessCode: string;
         do {
@@ -179,18 +191,6 @@ export class SessionService {
 
         const selectedAvatar = session.avatarAssignments.find((a) => a.avatar === avatar);
         selectedAvatar.chosenBy = playerId;
-    }
-
-    releaseAvatar(sessionId: string, playerId: string): void {
-        const session = this.sessions.get(sessionId);
-        if (!session) return;
-
-        for (const avatar of session.avatarAssignments) {
-            if (avatar.chosenBy === playerId) {
-                avatar.chosenBy = null;
-                break;
-            }
-        }
     }
 
     private generateUniqueName(baseName: string, existingPlayers: Player[]): string {
