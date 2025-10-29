@@ -78,6 +78,14 @@ export class InGameSocketService {
         this.socket.onSuccessEvent(InGameEvents.PlayerReachableTiles, callback);
     }
 
+    playerToggleDoorAction(sessionId: string, x: number, y: number): void {
+        this.socket.emit(InGameEvents.ToggleDoorAction, { sessionId, x, y });
+    }
+
+    onDoorToggled(callback: (data: { x: number; y: number; isOpen: boolean }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.DoorToggled, callback);
+    }
+
     onPlayerAvailableActions(callback: (data: AvailableAction[]) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerAvailableActions, callback);
     }

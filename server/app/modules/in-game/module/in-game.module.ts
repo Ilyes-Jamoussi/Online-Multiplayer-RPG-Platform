@@ -1,4 +1,5 @@
 import { Game, gameSchema } from '@app/modules/game-store/entities/game.entity';
+import { InGameActionService } from '@app/modules/in-game/services/in-game-action/in-game-action.service';
 import { InGameGateway } from '@app/modules/in-game/gateways/in-game.gateway';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameInitializationService } from '@app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
@@ -19,6 +20,7 @@ import { MongooseModule } from '@nestjs/mongoose';
         InGameInitializationService,
         InGameSessionRepository,
         InGameMovementService,
+        InGameActionService,
     ],
     exports: [InGameService],
     imports: [MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }]), EventEmitterModule.forRoot()],

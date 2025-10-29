@@ -41,6 +41,20 @@ export class InGameService {
     readonly availableActions = this._availableActions.asReadonly();
     readonly isActionModeActive = this._isActionModeActive.asReadonly();
 
+    toggleDoorAction(x: number, y: number): void {
+        this.inGameSocketService.playerToggleDoorAction(this.sessionService.id(), x, y);
+    }
+
+    useAction(): void {
+        this._inGameSession.update((session) => ({
+            ...session,
+            currentTurn: {
+                ...session.currentTurn,
+                hasUsedAction: true
+            }
+        }));
+    }
+
     activateActionMode(): void {
         this._isActionModeActive.set(true);
     }

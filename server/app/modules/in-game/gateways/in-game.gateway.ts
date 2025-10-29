@@ -66,6 +66,15 @@ export class InGameGateway {
         socket.leave(sessionId);
     }
 
+    @SubscribeMessage(InGameEvents.ToggleDoorAction)
+    toggleDoorAction(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
+        try {
+            this.inGameService.toggleDoorAction(payload.sessionId, socket.id, payload.x, payload.y);
+        } catch (error) {
+            socket.emit(InGameEvents.ToggleDoorAction, errorResponse(error.message));
+        }
+    }
+
     @SubscribeMessage(InGameEvents.PlayerMove)
     playerMove(socket: Socket, payload: { sessionId: string; orientation: Orientation }): void {
         try {
@@ -105,6 +114,13 @@ export class InGameGateway {
     handleForcedEnd(payload: { session: InGameSession }) {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnForcedEnd, successResponse(payload.session));
         this.logger.warn(`Forced end of turn for session ${payload.session.id}`);
+    }
+
+    @OnEvent('door.toggled')
+    handleDoorToggled(payload: { session: InGameSession; playerId: string; x: number; y: number; isOpen: boolean }) {
+        this.server
+            .to(payload.session.inGameId)
+            .emit(InGameEvents.DoorToggled, successResponse({ x: payload.x, y: payload.y, isOpen: payload.isOpen }));
     }
 
     @OnEvent('player.moved')

@@ -8,6 +8,7 @@ import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
 import { catchError, of, take, tap } from 'rxjs';
+import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { InGamePlayer } from '@common/models/player.interface';
@@ -47,7 +48,16 @@ export class GameMapService {
         private readonly notificationService: NotificationService,
         private readonly inGameService: InGameService,
         private readonly assetsService: AssetsService,
-    ) {}
+        private readonly inGameSocketService: InGameSocketService,
+    ) {
+        this.initDoorListener();
+    }
+
+    private initDoorListener(): void {
+        this.inGameSocketService.onDoorToggled((data) => {
+            this.updateTileState(data.x, data.y, data.isOpen);
+        });
+    }
 
     get players() {
         return this.inGameService.inGamePlayers();
@@ -129,23 +139,39 @@ export class GameMapService {
         return action?.type || null;
     }
 
+    deactivateActionMode(): void {
+        this.inGameService.deactivateActionMode();
+    }
+
     performAction(actionType: 'ATTACK' | 'DOOR', x: number, y: number): void {
         if (actionType === 'ATTACK') {
             this.attackPlayer(x, y);
         } else {
             this.toggleDoor(x, y);
         }
+        this.inGameService.useAction();
         this.inGameService.deactivateActionMode();
     }
 
     private attackPlayer(x: number, y: number): void {
-        // TODO: Implémenter attaque
-        console.log('Attack player at:', x, y);
+        this.notificationService.displayInformation({
+            title: 'Action exécutée',
+            message: `Attaque sur joueur à la position (${x}, ${y})`
+        });
     }
 
     private toggleDoor(x: number, y: number): void {
-        // TODO: Implémenter porte
-        console.log('Toggle door at:', x, y);
+        this.inGameService.toggleDoorAction(x, y);
+    }
+
+    updateTileState(x: number, y: number, isOpen: boolean): void {
+        this._tiles.update(tiles => 
+            tiles.map(tile => 
+                tile.x === x && tile.y === y 
+                    ? { ...tile, open: isOpen }
+                    : tile
+            )
+        );
     }
 
     getActiveTile(coords?: Vector2): GameEditorTileDto | null {

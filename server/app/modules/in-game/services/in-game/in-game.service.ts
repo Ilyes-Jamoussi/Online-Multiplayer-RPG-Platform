@@ -10,6 +10,7 @@ import { InGameSession, WaitingRoomSession } from '@common/models/session.interf
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameCacheService } from 'app/modules/in-game/services/game-cache/game-cache.service';
+import { InGameActionService } from 'app/modules/in-game/services/in-game-action/in-game-action.service';
 import { InGameInitializationService } from 'app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
 import { InGameMovementService } from 'app/modules/in-game/services/in-game-movement/in-game-movement.service';
 
@@ -21,6 +22,7 @@ export class InGameService {
         private readonly initialization: InGameInitializationService,
         private readonly sessionRepository: InGameSessionRepository,
         private readonly movementService: InGameMovementService,
+        private readonly actionService: InGameActionService,
         private readonly eventEmitter: EventEmitter2,
     ) {}
 
@@ -98,6 +100,13 @@ export class InGameService {
         }
         this.turnEngine.endTurnManual(session);
         return session;
+    }
+
+    toggleDoorAction(sessionId: string, playerId: string, x: number, y: number): void {
+        const session = this.sessionRepository.findById(sessionId);
+        this.actionService.toggleDoor(session, playerId, x, y);
+        session.currentTurn.hasUsedAction = true;
+        this.sessionRepository.save(session);
     }
 
     movePlayer(sessionId: string, playerId: string, orientation: Orientation): void {
