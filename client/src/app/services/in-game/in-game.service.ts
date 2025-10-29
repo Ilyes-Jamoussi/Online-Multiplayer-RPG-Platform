@@ -1,3 +1,4 @@
+import { CombatService } from '@app/services/combat/combat.service';
 import { Injectable, computed, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { ROUTES } from '@common/enums/routes.enum';
@@ -41,6 +42,10 @@ export class InGameService {
     readonly availableActions = this._availableActions.asReadonly();
     readonly isActionModeActive = this._isActionModeActive.asReadonly();
 
+    attackPlayerAction(x: number, y: number): void {
+        this.inGameSocketService.attackPlayerAction(this.sessionService.id(), x, y);
+    }
+
     toggleDoorAction(x: number, y: number): void {
         this.inGameSocketService.playerToggleDoorAction(this.sessionService.id(), x, y);
     }
@@ -69,6 +74,7 @@ export class InGameService {
         private readonly timerService: TimerService,
         private readonly playerService: PlayerService,
         private readonly notificationService: NotificationService,
+        private readonly combatService: CombatService,
     ) {
         this.initListeners();
     }
@@ -232,5 +238,33 @@ export class InGameService {
         this.inGameSocketService.onPlayerAvailableActions((data) => {
             this._availableActions.set(data);
         });
+
+        this.inGameSocketService.onCombatStarted((data) => {
+            this.handleCombatStarted(data.attackerId, data.targetId);
+        });
+    }
+
+    private handleCombatStarted(attackerId: string, targetId: string): void {
+        const myId = this.playerService.id();
+        const attacker = this.getPlayerByPlayerId(attackerId);
+        const target = this.getPlayerByPlayerId(targetId);
+        
+        if (!attacker || !target) return;
+
+        if (attackerId === myId) {
+            // JE SUIS L'ATTAQUANT
+            this.combatService.startCombat(attackerId, targetId, 'attacker');
+            
+        } else if (targetId === myId) {
+            // JE SUIS LA CIBLE
+            this.combatService.startCombat(attackerId, targetId, 'target');
+            
+        } else {
+            // JE SUIS SPECTATEUR
+            this.notificationService.displayInformation({
+                title: 'Combat en cours',
+                message: `${attacker.name} combat ${target.name}`
+            });
+        }
     }
 }

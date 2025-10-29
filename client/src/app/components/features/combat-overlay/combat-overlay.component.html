@@ -1,0 +1,47 @@
+@if (combatData) {
+    <div class="combat-overlay">
+        <div class="combat-modal">
+            <div class="combat-header">
+                <h2>Combat en cours</h2>
+            </div>
+            
+            <div class="combat-arena">
+                <!-- Attaquant -->
+                <div class="fighter attacker" [class.is-me]="combatData.userRole === 'attacker'">
+                    <div class="fighter-name">{{ attackerName }}</div>
+                    <div class="fighter-avatar">
+                        <img [src]="attackerAvatar" [alt]="attackerName" />
+                    </div>
+                    <div class="fighter-role">Attaquant</div>
+                </div>
+
+                <!-- VS -->
+                <div class="vs-section">
+                    <div class="vs-text">VS</div>
+                    <div class="combat-swords">⚔️</div>
+                </div>
+
+                <!-- Cible -->
+                <div class="fighter target" [class.is-me]="combatData.userRole === 'target'">
+                    <div class="fighter-name">{{ targetName }}</div>
+                    <div class="fighter-avatar">
+                        <img [src]="targetAvatar" [alt]="targetName" />
+                    </div>
+                    <div class="fighter-role">Défenseur</div>
+                </div>
+            </div>
+
+            <div class="combat-actions">
+                @if (combatData.userRole === 'attacker') {
+                    <p class="combat-message">Tu attaques {{ targetName }} !</p>
+                } @else {
+                    <p class="combat-message">{{ attackerName }} t'attaque !</p>
+                }
+                
+                <div class="action-buttons">
+                    <button class="combat-btn">Choisir posture</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

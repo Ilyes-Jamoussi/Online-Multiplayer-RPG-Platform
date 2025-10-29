@@ -1,3 +1,4 @@
+import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { GameInfoComponent } from '@app/components/features/game-info/game-info.component';
@@ -22,6 +23,7 @@ import { MapSize } from '@common/enums/map-size.enum';
         PlayerInfoComponent,
         PlayersListComponent,
         GameTimerComponent,
+        CombatOverlayComponent,
     ],
     templateUrl: './game-session-page.component.html',
     styleUrl: './game-session-page.component.scss',

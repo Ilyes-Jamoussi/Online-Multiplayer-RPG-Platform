@@ -82,6 +82,14 @@ export class InGameSocketService {
         this.socket.emit(InGameEvents.ToggleDoorAction, { sessionId, x, y });
     }
 
+    attackPlayerAction(sessionId: string, x: number, y: number): void {
+        this.socket.emit(InGameEvents.AttackPlayerAction, { sessionId, x, y });
+    }
+
+    onCombatStarted(callback: (data: { attackerId: string; targetId: string }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.CombatStarted, callback);
+    }
+
     onDoorToggled(callback: (data: { x: number; y: number; isOpen: boolean }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.DoorToggled, callback);
     }

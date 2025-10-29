@@ -11,6 +11,23 @@ export class InGameActionService {
         private readonly eventEmitter: EventEmitter2,
     ) {}
 
+    attackPlayer(session: InGameSession, playerId: string, x: number, y: number): void {
+        // Find target player at position
+        const targetPlayer = Object.values(session.inGamePlayers).find(
+            player => player.x === x && player.y === y
+        );
+        
+        if (targetPlayer) {
+            this.eventEmitter.emit('player.attacked', {
+                session,
+                attackerId: playerId,
+                targetId: targetPlayer.id,
+                x,
+                y
+            });
+        }
+    }
+
     toggleDoor(session: InGameSession, playerId: string, x: number, y: number): void {
         const gameMap = this.gameCache.getGameMapForSession(session.id);
         const tile = gameMap.tiles.find(t => t.x === x && t.y === y);

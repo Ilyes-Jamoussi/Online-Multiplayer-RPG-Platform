@@ -154,10 +154,7 @@ export class GameMapService {
     }
 
     private attackPlayer(x: number, y: number): void {
-        this.notificationService.displayInformation({
-            title: 'Action exécutée',
-            message: `Attaque sur joueur à la position (${x}, ${y})`
-        });
+        this.inGameService.attackPlayerAction(x, y);
     }
 
     private toggleDoor(x: number, y: number): void {

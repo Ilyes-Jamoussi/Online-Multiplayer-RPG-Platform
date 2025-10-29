@@ -102,6 +102,13 @@ export class InGameService {
         return session;
     }
 
+    attackPlayerAction(sessionId: string, playerId: string, x: number, y: number): void {
+        const session = this.sessionRepository.findById(sessionId);
+        this.actionService.attackPlayer(session, playerId, x, y);
+        session.currentTurn.hasUsedAction = true;
+        this.sessionRepository.save(session);
+    }
+
     toggleDoorAction(sessionId: string, playerId: string, x: number, y: number): void {
         const session = this.sessionRepository.findById(sessionId);
         this.actionService.toggleDoor(session, playerId, x, y);
