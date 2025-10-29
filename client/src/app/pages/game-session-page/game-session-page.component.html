@@ -1,49 +1,54 @@
-<app-ui-page-layout [hasHeader]="true" [hasFooter]="false" [showBackButton]="true" headerTitle="Session de Jeu" (backClick)="onBack()">
+<app-ui-page-layout [hasHeader]="true" [hasFooter]="false" [showBackButton]="true" headerTitle="Session de Jeu" (backClick)="onLeaveGame()">
     <app-game-timer></app-game-timer>
-    
+
     <div class="game-session-content">
         @if (gameId()) {
-            <app-game-map [gameId]="gameId()"></app-game-map>
+        <app-game-map [gameId]="gameId()"></app-game-map>
         } @else {
-            <div class="error">
-                <p>Aucune carte de jeu disponible</p>
-                <p>Retourne à la salle d'attente et redémarre le jeu</p>
-            </div>
+        <div class="error">
+            <p>Aucune carte de jeu disponible</p>
+            <p>Retourne à la salle d'attente et redémarre le jeu</p>
+        </div>
         }
     </div>
-    
+
     @if (gameId()) {
-        <app-players-list></app-players-list>
-        <app-player-info></app-player-info>
-        <app-game-info 
-            [mapSize]="mapSize" 
-            [activePlayer]="activePlayer">
-        </app-game-info>
+    <app-players-list></app-players-list>
+    <app-player-info></app-player-info>
+    <app-game-info [mapSize]="mapSize" [activePlayer]="activePlayer"> </app-game-info>
     }
 
-    <!-- Game controls -->
     <div class="game-controls">
-        <button [disabled]="!inGameService.isMyTurn() || !inGameService.isGameStarted()" (click)="onEndTurn()">Terminer le tour</button>
-        <button class="abandon-button" (click)="onAbandonGame()">Abandonner la partie</button>
-        
-        <!-- Debug info (à supprimer en production) -->
+        <button [disabled]="!isMyTurn || !isGameStarted" (click)="onEndTurn()">Terminer le tour</button>
+        <button class="abandon-button" (click)="onLeaveGame()">Abandonner la partie</button>
+        @if(!isGameStarted && isMyTurn) {
+        <button (click)="onStartGame()">Démarrer le jeu</button>
+        }
+
+        <!-- Debug info (à supprimer en production quand DebugPanel sera implémenté) -->
         <div class="debug-info">
-            <p>Taille de carte: {{ inGameService.mapSize() }}</p>
-            <p>Mode: {{ inGameService.mode() }}</p>
-            <p>Numéro de tour: {{ inGameService.turnNumber() }}</p>
-            <p>Jeu démarré: {{ inGameService.isGameStarted() }}</p>
-            <p>Mon tour: {{ inGameService.isMyTurn() }}</p>
-            <p>Temps restant: {{ inGameService.timeRemaining() }}</p>
+            <p>Taille de carte: {{ mapSizeValue }}</p>
+            <p>Mode: {{ mode }}</p>
+            <p>Numéro de tour: {{ turnNumber }}</p>
+            <p>Jeu démarré: {{ isGameStarted }}</p>
+            <p>Mon tour: {{ isMyTurn }}</p>
+            <p>Temps restant: {{ timeRemaining }}</p>
+            <p>Session ID: {{ inGameService.inGameSession().id }}</p>
+            <p>Active Player ID: {{ inGameService.inGameSession().currentTurn.activePlayerId }}</p>
+            <p>Joueurs en jeu: {{ getInGamePlayersCount() }}</p>
+            <p>Points de mouvement: {{ getCurrentPlayerMovementPoints() }}</p>
+            <p>Tuiles atteignables: {{ getReachableTilesCount() }}</p>
+            <p>Debug: {{ getDebugInfo() }}</p>
         </div>
     </div>
 </app-ui-page-layout>
 
-@if (inGameService.isTransitioning()) {
+@if (isTransitioning) {
 <div class="transition-overlay" (click)="$event.stopPropagation()">
     <div class="transition-modal">
         <h2>{{ transitionMessage }}</h2>
         <div class="loading-spinner">
-            <p>{{ inGameService.timeRemaining() }}</p>
+            <p>{{ timeRemaining }}</p>
         </div>
     </div>
 </div>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnDestroy, OnInit, Signal } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, Signal, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { GameInfoComponent } from '@app/components/features/game-info/game-info.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
@@ -7,11 +7,13 @@ import { GameTimerComponent } from '@app/components/features/game-timer/game-tim
 import { PlayerInfoComponent } from '@app/components/features/player-info/player-info.component';
 import { PlayersListComponent } from '@app/components/features/players-list/players-list.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
+import { InGameKeyboardEventsService } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
 import { SessionService } from '@app/services/session/session.service';
+import { MapSize } from '@common/enums/map-size.enum';
 
 @Component({
     selector: 'app-game-session-page',
@@ -22,19 +24,22 @@ import { SessionService } from '@app/services/session/session.service';
         GameInfoComponent,
         PlayerInfoComponent,
         PlayersListComponent,
-        GameTimerComponent
+        GameTimerComponent,
     ],
     templateUrl: './game-session-page.component.html',
     styleUrl: './game-session-page.component.scss',
-    providers: [GameMapService]
+    providers: [GameMapService],
 })
 export class GameSessionPageComponent implements OnInit, OnDestroy {
+    @ViewChild(GameMapComponent) gameMapComponent?: GameMapComponent;
+
     constructor(
         private readonly sessionService: SessionService,
         private readonly gameMapService: GameMapService,
         readonly inGameService: InGameService,
         private readonly router: Router,
-        readonly adminModeService: AdminModeService
+        readonly adminModeService: AdminModeService,
+        private readonly keyboardEventsService: InGameKeyboardEventsService,
     ) {}
 
     @HostListener('window:keydown', ['$event'])
@@ -68,12 +73,67 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         return !this.inGameService.isMyTurn() || this.inGameService.isGameStarted();
     }
 
+    get isMyTurn(): boolean {
+        return this.inGameService.isMyTurn();
+    }
+
+    get isGameStarted(): boolean {
+        return this.inGameService.isGameStarted();
+    }
+
+    get mapSizeValue(): MapSize {
+        return this.inGameService.mapSize();
+    }
+
+    get mode(): string {
+        return this.inGameService.mode();
+    }
+
+    get turnNumber(): number {
+        return this.inGameService.turnNumber();
+    }
+
+    get timeRemaining(): number {
+        return this.inGameService.timeRemaining();
+    }
+
+    get isTransitioning(): boolean {
+        return this.inGameService.isTransitioning();
+    }
+
+    getInGamePlayersCount(): number {
+        return Object.keys(this.inGameService.inGameSession().inGamePlayers).length;
+    }
+
+    getCurrentPlayerMovementPoints(): number {
+        const session = this.inGameService.inGameSession();
+        const activePlayerId = session.currentTurn.activePlayerId;
+        const player = session.inGamePlayers[activePlayerId];
+        return player?.movementPoints || 0;
+    }
+
+    getReachableTilesCount(): number {
+        return this.gameMapComponent?.reachableTiles?.length || 0;
+    }
+
+    getDebugInfo(): string {
+        const session = this.inGameService.inGameSession();
+        const activePlayerId = session.currentTurn.activePlayerId;
+        const player = session.inGamePlayers[activePlayerId];
+        
+        if (!player) return 'Joueur non trouvé';
+        
+        return `Pos:(${player.x},${player.y}) MP:${player.movementPoints}`;
+    }
+
     ngOnInit(): void {
         this.inGameService.loadInGameSession();
+        this.keyboardEventsService.startListening();
     }
 
     ngOnDestroy(): void {
-        this.inGameService.cleanupAll();
+        this.keyboardEventsService.stopListening();
+        this.inGameService.reset();
     }
 
     onStartGame(): void {
@@ -85,12 +145,16 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
     }
 
     onAbandonGame(): void {
-        this.inGameService.abandonGame();
+        this.inGameService.leaveGame();
         this.adminModeService.disableAdminModeOnAbandon();
     }
 
     onBack(): void {
-        this.inGameService.cleanupAll();
-        this.router.navigate([ROUTES.homePage]);
+        this.inGameService.reset();
+        this.router.navigate([ROUTES.HomePage]);
+    }
+
+    onLeaveGame(): void {
+        this.inGameService.leaveGame();
     }
 }

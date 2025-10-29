@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { GameMode } from '@common/enums/game-mode.enum';
@@ -66,13 +66,13 @@ describe('SessionCreationPageComponent', () => {
     it('should navigate back to home when back is clicked', () => {
         component.onBack();
 
-        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.homePage]);
+        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.HomePage]);
     });
 
     it('should navigate to character creation', () => {
         const mockGame = { id: 'test-game', name: 'Test Game' } as GamePreviewDto;
         component.onStartGame(mockGame);
 
-        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.characterCreationPage]);
+        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.CharacterCreationPage]);
     });
 });

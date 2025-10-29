@@ -26,7 +26,6 @@ export class GameEditorService {
         if (!game) {
             throw new NotFoundException(GAME_NOT_FOUND);
         }
-
         return this.gameDtoMapper.toGameEditorDto(game);
     }
 
@@ -48,8 +47,8 @@ export class GameEditorService {
         const update: GameDocument = {
             ...this.buildBasicUpdate(dto),
             ...(await this.buildImageUpdate(dto, id)),
-            ...(dto.tiles && { tiles: this.mapTiles(dto.tiles) }),
-            ...(dto.objects && { objects: this.mapObjects(dto.objects) }),
+            ...{ tiles: this.mapTiles(dto.tiles) },
+            ...{ objects: this.mapObjects(dto.objects) },
             lastModified: new Date(),
             draft: false,
             visibility: false,
@@ -61,10 +60,10 @@ export class GameEditorService {
 
     private buildBasicUpdate(dto: PatchGameEditorDto): Partial<GameDocument> {
         return {
-            ...(dto.name && { name: dto.name }),
-            ...(dto.description && { description: dto.description }),
-            ...(dto.size && { size: dto.size }),
-            ...(dto.mode && { mode: dto.mode }),
+            ...{ name: dto.name },
+            ...{ description: dto.description },
+            ...{ size: dto.size },
+            ...{ mode: dto.mode },
         };
     }
 
@@ -72,7 +71,7 @@ export class GameEditorService {
         if (!dto.gridPreviewUrl) return {};
 
         const existingGame = await this.gameModel.findById(id).lean();
-        if (existingGame?.gridPreviewUrl) await this.imageService.deleteImage(existingGame.gridPreviewUrl);
+        if (existingGame.gridPreviewUrl) await this.imageService.deleteImage(existingGame.gridPreviewUrl);
 
         const filename = `game-${id}-${Date.now()}-preview.png`;
         const gridPreviewUrl = await this.imageService.saveImage(dto.gridPreviewUrl, filename, 'game-previews');
@@ -80,6 +79,7 @@ export class GameEditorService {
     }
 
     private mapTiles(tiles: GameEditorTileDto[]): Tile[] {
+        if (!tiles) return [];
         return tiles.map((t) => ({
             kind: t.kind,
             x: t.x,
@@ -90,6 +90,7 @@ export class GameEditorService {
     }
 
     private mapObjects(objects: GameEditorPlaceableDto[]): Placeable[] {
+        if (!objects) return [];
         return objects.map((o) => ({
             id: o.id,
             kind: o.kind,

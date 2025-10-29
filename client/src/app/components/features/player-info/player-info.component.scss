@@ -48,6 +48,18 @@
     border-top: 1px solid #dee2e6;
 }
 
+.remaining-movement-points {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+    font-size: 0.8rem;
+    
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
 .stat-item {
     display: flex;
     justify-content: space-between;

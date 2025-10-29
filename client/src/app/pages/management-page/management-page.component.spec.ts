@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { GamePreviewCardComponent } from '@app/components/features/game-preview-card/game-preview-card.component';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { GameMode } from '@common/enums/game-mode.enum';
@@ -78,12 +78,12 @@ describe('ManagementPageComponent', () => {
 
     it('should navigate to game size selection on create new game', () => {
         component.onCreateNewGame();
-        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.parametersPage]);
+        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.ParametersPage]);
     });
 
     it('should navigate to game editor on edit game', () => {
         component.onEditGame('id');
-        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.editorPage, 'id']);
+        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.EditorPage, 'id']);
     });
 
     it('should delete game', () => {
@@ -100,6 +100,6 @@ describe('ManagementPageComponent', () => {
 
     it('should navigate to home on go back', () => {
         component.onBack();
-        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.homePage]);
+        expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.HomePage]);
     });
 });

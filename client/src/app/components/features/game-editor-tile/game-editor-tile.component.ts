@@ -18,8 +18,6 @@ import { TileKind } from '@common/enums/tile-kind.enum';
 export class GameEditorTileComponent extends TileSizeProbeDirective {
     @Input({ required: true }) tile: GameEditorTileDto;
 
-    readonly tileKinds = TileKind;
-
     constructor(
         private readonly gameEditorInteractionsService: GameEditorInteractionsService,
         private readonly gameEditorCheckService: GameEditorCheckService,
@@ -42,7 +40,8 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
     }
 
     get isDropHovered(): boolean {
-        return this.gameEditorInteractionsService.hoveredTiles()?.some((t) => t.x === this.tile.x && t.y === this.tile.y) ?? false;
+        const hoveredTiles = this.gameEditorInteractionsService.hoveredTiles();
+        return hoveredTiles?.some((t) => t.x === this.tile.x && t.y === this.tile.y) ?? false;
     }
 
     get isBrushHovered(): boolean {

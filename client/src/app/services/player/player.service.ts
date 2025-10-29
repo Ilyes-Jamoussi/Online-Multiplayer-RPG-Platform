@@ -2,7 +2,7 @@ import { computed, Injectable, Signal, signal, WritableSignal } from '@angular/c
 import { Router } from '@angular/router';
 import { CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
 import { DEFAULT_PLAYER } from '@app/constants/player.constants';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { SessionService } from '@app/services/session/session.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
@@ -66,15 +66,27 @@ export class PlayerService {
     }
 
     get characterName(): string {
-        const char = this._character();
-        return char?.name || this.player().name || 'Joueur';
+        return this.player().name;
     }
 
-    setCharacter(character: Character): void {
+    get remainingMovementPoints(): number {
+        return this.player().movementPoints;
+    }
+
+    set characterData(character: Character) {
         this._character.set(character);
-        this.updatePlayer({ 
+        this.updatePlayer({
             name: character.name,
-            avatar: character.avatar
+            avatar: character.avatar,
+            speed: character.attributes.speed,
+            health: character.attributes.life,
+            attack: Dice[character.diceAssignment.attack],
+            defense: Dice[character.diceAssignment.defense],
+            x: 0,
+            y: 0,
+            isInGame: false,
+            startPointId: '',
+            movementPoints: 0,
         });
     }
 
@@ -122,23 +134,28 @@ export class PlayerService {
         this.sessionSocketService.onSessionCreated((data) => {
             this.updatePlayer({ id: data.playerId });
             this.sessionService.updateSession({ id: data.sessionId });
-            this.router.navigate([ROUTES.waitingRoomPage]);
+            this.router.navigate([ROUTES.WaitingRoomPage]);
         });
 
-        this.sessionSocketService.onSessionEnded((data) => {
+        this.sessionSocketService.onSessionEnded((message) => {
             this.resetPlayer();
             this.sessionService.resetSession();
             this.notificationService.displayError({
                 title: 'Session terminée',
-                message: data.message,
-                redirectRoute: ROUTES.homePage,
+                message,
+                redirectRoute: ROUTES.HomePage,
             });
         });
 
         this.sessionSocketService.onAvatarSelectionJoined((data) => {
-            this.updatePlayer({ id: data.playerId, isAdmin: false });
+            this.updatePlayer({ id: data.playerId });
             this.sessionService.updateSession({ id: data.sessionId });
-            this.router.navigate([ROUTES.characterCreationPage]);
+            this.router.navigate([ROUTES.CharacterCreationPage]);
+        });
+
+        this.sessionSocketService.onSessionJoined((data) => {
+            if (data.modifiedPlayerName) this.updatePlayer({ name: data.modifiedPlayerName });
+            this.sessionService.handleSessionJoined({ gameId: data.gameId, maxPlayers: data.maxPlayers });
         });
     }
 }

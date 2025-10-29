@@ -50,6 +50,10 @@ export class PlayerInfoComponent {
     get defenseValue(): number { 
         return this.playerService.defensePoints; 
     }
+
+    get remainingMovementPoints(): number {
+        return this.playerService.remainingMovementPoints;
+    }
     
     get movementPoints(): number { return DEFAULT_MOVEMENT_POINTS; }
     get bonusMovementPoints(): number { return DEFAULT_BONUS_MOVEMENT; }

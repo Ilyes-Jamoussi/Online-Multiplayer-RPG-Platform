@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { NotificationService } from '@app/services/notification/notification.service';
@@ -109,7 +109,7 @@ describe('ParametersPageComponent', () => {
             description: '',
             visibility: false,
         });
-        expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.editorPage, 'test-game-id']);
+        expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.EditorPage, 'test-game-id']);
     });
 
     it('should handle create game error with error message', () => {

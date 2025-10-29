@@ -1,7 +1,6 @@
-import { Injectable, computed, signal, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Injectable, computed, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@common/enums/routes.enum';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { InGameSession } from '@common/models/session.interface';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
@@ -10,6 +9,8 @@ import { PlayerService } from '@app/services/player/player.service';
 import { InGamePlayer } from '@common/models/player.interface';
 import { TimerService } from '@app/services/timer/timer.service';
 import { NotificationService } from '@app/services/notification/notification.service';
+import { Orientation } from '@common/enums/orientation.enum';
+import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 
 @Injectable({
     providedIn: 'root',
@@ -18,7 +19,21 @@ export class InGameService {
     private readonly _inGameSession = signal<InGameSession>(DEFAULT_IN_GAME_SESSION);
     private readonly _isTransitioning = signal<boolean>(false);
     private readonly _isGameStarted = signal<boolean>(false);
-    private readonly router = inject(Router);
+    private readonly _reachableTiles = signal<ReachableTile[]>([]);
+
+    readonly isMyTurn = computed(() => this._inGameSession().currentTurn.activePlayerId === this.playerService.id());
+    readonly currentTurn = computed(() => this._inGameSession().currentTurn);
+    readonly turnNumber = computed(() => this._inGameSession().currentTurn.turnNumber);
+    readonly turnOrder = computed(() => this._inGameSession().turnOrder);
+    readonly startPoints = computed(() => this._inGameSession().startPoints);
+    readonly mapSize = computed(() => this._inGameSession().mapSize);
+    readonly mode = computed(() => this._inGameSession().mode);
+    readonly isGameStarted = computed(() => this._inGameSession().isGameStarted);
+    readonly isTransitioning = computed(() => this._isTransitioning());
+    readonly timeRemaining = computed(() => this.timerService.timeRemaining());
+    readonly inGamePlayers = computed(() => this._inGameSession().inGamePlayers);
+    readonly inGameSession = this._inGameSession.asReadonly();
+    readonly reachableTiles = this._reachableTiles.asReadonly();
 
     constructor(
         private readonly inGameSocketService: InGameSocketService,
@@ -30,46 +45,68 @@ export class InGameService {
         this.initListeners();
     }
 
-    readonly isMyTurn = computed(() => this._inGameSession().currentTurn.activePlayerId === this.playerService.id());
-    readonly currentTurn = computed(() => this._inGameSession().currentTurn);
-    readonly turnNumber = computed(() => this._inGameSession().currentTurn.turnNumber);
-    readonly turnOrderPlayerId = computed(() => this._inGameSession().turnOrderPlayerId);
-    readonly startPoints = computed(() => this._inGameSession().startPoints);
-    readonly mapSize = computed(() => this._inGameSession().mapSize);
-    readonly mode = computed(() => this._inGameSession().mode);
-    readonly isGameStarted = computed(() => this._inGameSession().isGameStarted);
-    readonly isTransitioning = computed(() => this._isTransitioning());
-    readonly timeRemaining = computed(() => this.timerService.timeRemaining());
-    readonly inGamePlayers = computed(() => this._inGameSession().inGamePlayers);
-
     get activePlayer(): InGamePlayer | undefined {
-        return this.inGamePlayers()[this.currentTurn().activePlayerId];
+        return this.getPlayerByPlayerId(this.currentTurn().activePlayerId);
+    }
+
+    get currentlyInGamePlayers(): InGamePlayer[] {
+        return Object.values(this.inGamePlayers()).filter((p) => p.isInGame);
     }
 
     get turnTransitionMessage(): string {
         return this.isMyTurn() ? "C'est ton tour !" : `C'est le tour de ${this.activePlayer?.name} !`;
     }
 
-    updateInGameSession(data: InGameSession): void {
-        this._inGameSession.update((inGameSession) => ({ ...inGameSession, ...data }));
+    getPlayerByPlayerId(playerId: string): InGamePlayer {
+        return this.inGamePlayers()[playerId];
     }
 
     loadInGameSession(): void {
-        this.inGameSocketService.playerJoinInGameSession(this.sessionService.id());
+        if (this.sessionService.id()) {
+            this.inGameSocketService.playerJoinInGameSession(this.sessionService.id());
+        } else {
+            this.reset();
+            this.notificationService.displayError({
+                title: 'Session non trouvée',
+                message: `Vous n'êtes connecté à aucune session`,
+                redirectRoute: ROUTES.HomePage,
+            });
+        }
+    }
+
+    leaveGame(): void {
+        this.inGameSocketService.playerLeaveInGameSession(this.sessionService.id());
     }
 
     startGame(): void {
         this.inGameSocketService.playerStartGame(this.sessionService.id());
     }
 
+    movePlayer(orientation: Orientation): void {
+        if (!this.isMyTurn() || !this.isGameStarted()) return;
+        this.inGameSocketService.playerMove(this.sessionService.id(), orientation);
+    }
+
     endTurn(): void {
         this.inGameSocketService.playerEndTurn(this.sessionService.id());
     }
 
-    abandonGame(): void {
-        this.inGameSocketService.playerAbandonGame(this.sessionService.id());
-        this.cleanupAll();
-        this.router.navigate([ROUTES.homePage]);
+    updateInGameSession(data: InGameSession): void {
+        this._inGameSession.update((inGameSession) => ({ ...inGameSession, ...data }));
+    }
+
+    updatePlayerPosition(playerId: string, x: number, y: number, movementPoints: number): void {
+        this._inGameSession.update((inGameSession) => ({
+            ...inGameSession,
+            inGamePlayers: { ...inGameSession.inGamePlayers, [playerId]: { ...inGameSession.inGamePlayers[playerId], x, y, movementPoints } },
+        }));
+        if (this.isMyTurn()) {
+            this.playerService.updatePlayer({
+                x,
+                y,
+                movementPoints,
+            });
+        }
     }
 
     startTurnTimer(): void {
@@ -95,12 +132,14 @@ export class InGameService {
         this._isTransitioning.set(false);
     }
 
-    cleanupAll(): void {
+    reset(): void {
         this.timerService.resetTimer();
         this._isGameStarted.set(false);
         this._isTransitioning.set(false);
-        this.inGameSocketService.leaveInGameSession(this.sessionService.id());
-        this.playerService.leaveSession();
+        this._reachableTiles.set([]);
+        this._inGameSession.set(DEFAULT_IN_GAME_SESSION);
+        this.sessionService.resetSession();
+        this.playerService.resetPlayer();
     }
 
     private initListeners(): void {
@@ -128,17 +167,38 @@ export class InGameService {
             this.turnTransitionEnded();
         });
 
-        this.inGameSocketService.onLeftInGameSession((data) => {
-            this.updateInGameSession(data);
-            this.cleanupAll();
-        });
-
-        this.inGameSocketService.onPlayerAbandoned((data) => {
+        this.inGameSocketService.onPlayerLeftInGameSession((data) => {
             this.updateInGameSession(data.session);
             this.notificationService.displayInformation({
                 title: 'Joueur parti',
-                message: `${data.playerName} a abandonné la partie`
+                message: `${data.playerName} a abandonné la partie`,
             });
+        });
+
+        this.inGameSocketService.onPlayerMoved((data) => {
+            this.updatePlayerPosition(data.playerId, data.x, data.y, data.movementPoints);
+        });
+
+        this.inGameSocketService.onLeftInGameSessionAck(() => {
+            this.reset();
+            this.notificationService.displayInformation({
+                title: 'Départ réussi',
+                message: `Tu as quitté la partie avec succès`,
+                redirectRoute: ROUTES.HomePage,
+            });
+        });
+
+        this.inGameSocketService.onGameForceStopped(() => {
+            this.reset();
+            this.notificationService.displayError({
+                title: 'Partie terminée par défaut',
+                message: `Il n'y a plus assez de joueurs pour continuer la partie, la partie est terminée`,
+                redirectRoute: ROUTES.HomePage,
+            });
+        });
+
+        this.inGameSocketService.onPlayerReachableTiles((data) => {
+            this._reachableTiles.set(data);
         });
     }
 }
