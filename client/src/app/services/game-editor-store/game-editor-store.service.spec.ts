@@ -543,9 +543,9 @@ describe('GameEditorStoreService', () => {
             const placedObject = service.getPlacedObjectAt(1, 1);
             expect(placedObject).toBeDefined();
 
-            const xy = 3;
-            service.placeObjectFromInventory(PlaceableKind.FLAG, xy, xy);
-            const afterSecondPlacement = service.getPlacedObjectAt(xy, xy);
+            const positionXY = 3;
+            service.placeObjectFromInventory(PlaceableKind.FLAG, positionXY, positionXY);
+            const afterSecondPlacement = service.getPlacedObjectAt(positionXY, positionXY);
             expect(afterSecondPlacement).toBeUndefined();
         });
 
@@ -574,14 +574,14 @@ describe('GameEditorStoreService', () => {
             expect(beforeObject).toBeDefined();
             expect(beforeObject?.id).toBe('start1');
 
-            const xy = 4;
+            const positionXY = 4;
 
-            service.movePlacedObject('start1', xy, xy);
-            const movedObject = service.getPlacedObjectAt(xy, xy);
+            service.movePlacedObject('start1', positionXY, positionXY);
+            const movedObject = service.getPlacedObjectAt(positionXY, positionXY);
             expect(movedObject).toBeDefined();
             expect(movedObject?.id).toBe('start1');
-            expect(movedObject?.x).toBe(xy);
-            expect(movedObject?.y).toBe(xy);
+            expect(movedObject?.x).toBe(positionXY);
+            expect(movedObject?.y).toBe(positionXY);
 
             const noObject = service.getPlacedObjectAt(0, 0);
             expect(noObject).toBeUndefined();
@@ -602,9 +602,9 @@ describe('GameEditorStoreService', () => {
             expect(beforeObject).toBeDefined();
             expect(beforeObject?.id).toBe('start1');
 
-            const xy = 4;
+            const positionXY = 4;
 
-            service.movePlacedObject('nonexistent-id', xy, xy);
+            service.movePlacedObject('nonexistent-id', positionXY, positionXY);
             const afterObject = service.getPlacedObjectAt(0, 0);
             expect(afterObject).toEqual(beforeObject);
         });
