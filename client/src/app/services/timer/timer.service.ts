@@ -1,45 +1,103 @@
 import { Injectable, signal } from '@angular/core';
 import { MILLISECONDS_PER_SECOND } from '@common/constants/in-game';
 
+const COMBAT_ROUND_DURATION = 5;
+
 @Injectable({
     providedIn: 'root',
 })
 export class TimerService {
-    private readonly _timeRemaining = signal<number>(0);
-    private readonly _isActive = signal<boolean>(false);
-    private timer: number | null = null;
+    private readonly _turnTimeRemaining = signal<number>(0);
+    private readonly _combatTimeRemaining = signal<number>(0);
+    private readonly _isTurnActive = signal<boolean>(false);
+    private readonly _isCombatActive = signal<boolean>(false);
+    
+    private turnTimer: number | null = null;
+    private combatTimer: number | null = null;
+    private pausedTurnTime: number = 0;
 
-    readonly timeRemaining = this._timeRemaining.asReadonly();
-    readonly isActive = this._isActive.asReadonly();
+    readonly turnTimeRemaining = this._turnTimeRemaining.asReadonly();
+    readonly combatTimeRemaining = this._combatTimeRemaining.asReadonly();
+    readonly isTurnActive = this._isTurnActive.asReadonly();
+    readonly isCombatActive = this._isCombatActive.asReadonly();
 
-    startTimer(duration: number): void {
-        this.stopTimer();
-        this._timeRemaining.set(duration / MILLISECONDS_PER_SECOND);
-        this._isActive.set(true);
+    startTurnTimer(duration: number): void {
+        this.stopTurnTimer();
+        this._turnTimeRemaining.set(duration / MILLISECONDS_PER_SECOND);
+        this._isTurnActive.set(true);
 
-        this.timer = window.setInterval(() => {
-            const currentTime = this._timeRemaining();
+        this.turnTimer = window.setInterval(() => {
+            const currentTime = this._turnTimeRemaining();
             if (currentTime <= 1) {
-                this.stopTimer();
-                this._timeRemaining.set(0);
-                this._isActive.set(false);
+                this.stopTurnTimer();
             } else {
-                this._timeRemaining.set(currentTime - 1);
+                this._turnTimeRemaining.set(currentTime - 1);
             }
         }, MILLISECONDS_PER_SECOND);
     }
 
-    stopTimer(): void {
-        if (this.timer) {
-            window.clearInterval(this.timer);
-            this.timer = null;
-        }
-        this._isActive.set(false);
+    startCombatTimer(): void {
+        // Sauvegarder le temps restant du turn timer
+        this.pausedTurnTime = this._turnTimeRemaining();
+        this.stopTurnTimer();
+        
+        // Démarrer le combat timer avec loop de 5 secondes
+        this._combatTimeRemaining.set(COMBAT_ROUND_DURATION);
+        this._isCombatActive.set(true);
+
+        this.combatTimer = window.setInterval(() => {
+            const currentTime = this._combatTimeRemaining();
+            if (currentTime <= 1) {
+                // Redémarrer le cycle de 5 secondes
+                this._combatTimeRemaining.set(COMBAT_ROUND_DURATION);
+            } else {
+                this._combatTimeRemaining.set(currentTime - 1);
+            }
+        }, MILLISECONDS_PER_SECOND);
     }
 
-    resetTimer(): void {
-        this.stopTimer();
-        this._timeRemaining.set(0);
+    stopTurnTimer(): void {
+        if (this.turnTimer) {
+            window.clearInterval(this.turnTimer);
+            this.turnTimer = null;
+        }
+        this._isTurnActive.set(false);
+        this._turnTimeRemaining.set(0);
+    }
+
+    stopCombatTimer(): void {
+        if (this.combatTimer) {
+            window.clearInterval(this.combatTimer);
+            this.combatTimer = null;
+        }
+        this._isCombatActive.set(false);
+        this._combatTimeRemaining.set(0);
+        
+        // Reprendre le turn timer si il était en cours
+        this.resumeTurnTimer();
+    }
+
+    private resumeTurnTimer(): void {
+        if (this.pausedTurnTime > 0) {
+            this._turnTimeRemaining.set(this.pausedTurnTime);
+            this._isTurnActive.set(true);
+            this.pausedTurnTime = 0;
+
+            this.turnTimer = window.setInterval(() => {
+                const currentTime = this._turnTimeRemaining();
+                if (currentTime <= 1) {
+                    this.stopTurnTimer();
+                } else {
+                    this._turnTimeRemaining.set(currentTime - 1);
+                }
+            }, MILLISECONDS_PER_SECOND);
+        }
+    }
+
+    resetAllTimers(): void {
+        this.stopTurnTimer();
+        this.stopCombatTimer();
+        this.pausedTurnTime = 0;
     }
 }
 

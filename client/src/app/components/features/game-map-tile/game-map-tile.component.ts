@@ -46,6 +46,22 @@ export class GameMapTileComponent {
         return obj ? this.assetsService.getPlaceableImage(obj.kind) : '';
     }
 
+    onTileClick(event: MouseEvent): void {
+        event.preventDefault();
+        
+        if (!this.gameMapService.isActionModeActive) {
+            return;
+        }
+
+        const actionType = this.gameMapService.getActionTypeAt(this.tile.x, this.tile.y);
+        
+        if (actionType) {
+            this.gameMapService.performAction(actionType, this.tile.x, this.tile.y);
+        } else {
+            this.gameMapService.deactivateActionMode();
+        }
+    }
+
     openModal(event: MouseEvent): void {
         event.preventDefault();
         this.gameMapService.openTileModal(this.tile);

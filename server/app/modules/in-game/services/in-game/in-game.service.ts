@@ -1,0 +1,207 @@
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
+import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
+import { Orientation } from '@common/enums/orientation.enum';
+import { InGamePlayer } from '@common/models/player.interface';
+import { InGameSession, WaitingRoomSession } from '@common/models/session.interface';
+import { BadRequestException, Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { GameCacheService } from 'app/modules/in-game/services/game-cache/game-cache.service';
+import { InGameActionService } from 'app/modules/in-game/services/in-game-action/in-game-action.service';
+import { InGameInitializationService } from 'app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
+import { InGameMovementService } from 'app/modules/in-game/services/in-game-movement/in-game-movement.service';
+
+@Injectable()
+export class InGameService {
+    constructor(
+        private readonly timerService: TimerService,
+        private readonly gameCache: GameCacheService,
+        private readonly initialization: InGameInitializationService,
+        private readonly sessionRepository: InGameSessionRepository,
+        private readonly movementService: InGameMovementService,
+    ) {}
+
+    @Inject(InGameActionService) private readonly actionService: InGameActionService;
+    @Inject(EventEmitter2) private readonly eventEmitter: EventEmitter2;
+
+    async createInGameSession(waiting: WaitingRoomSession, mode: GameMode, mapSize: MapSize): Promise<InGameSession> {
+        const { id, gameId, maxPlayers, players } = waiting;
+
+        const session: InGameSession = {
+            id,
+            inGameId: `${id}-${gameId}`,
+            gameId,
+            maxPlayers,
+            isGameStarted: false,
+            inGamePlayers: {},
+            currentTurn: { turnNumber: 1, activePlayerId: '', hasUsedAction: false },
+            startPoints: [],
+            mapSize,
+            mode,
+            turnOrder: [],
+        };
+
+        const game = await this.gameCache.fetchAndCacheGame(id, gameId);
+
+        const playerIdsOrder = this.initialization.makeTurnOrder(players);
+        session.turnOrder = playerIdsOrder;
+
+        session.inGamePlayers = Object.fromEntries(players.map((p) => [p.id, { ...p, x: 0, y: 0, startPointId: '', joined: false }]));
+
+        const firstPlayerId = playerIdsOrder[0];
+        session.currentTurn.activePlayerId = firstPlayerId;
+        if (session.inGamePlayers[firstPlayerId]) {
+            const player = session.inGamePlayers[firstPlayerId];
+            player.speed = player.baseSpeed + player.speedBonus;
+        }
+
+        this.initialization.assignStartPoints(session, game);
+        this.sessionRepository.save(session);
+        return session;
+    }
+
+    startSession(sessionId: string): InGameSession {
+        const session = this.sessionRepository.findById(sessionId);
+        if (session.isGameStarted) throw new BadRequestException('Game already started');
+
+        session.isGameStarted = true;
+        session.currentTurn = this.timerService.startFirstTurn(session, DEFAULT_TURN_DURATION);
+
+        return session;
+    }
+
+    getSession(sessionId: string): InGameSession | undefined {
+        return this.sessionRepository.findById(sessionId);
+    }
+
+    removeSession(sessionId: string): void {
+        this.sessionRepository.delete(sessionId);
+        this.gameCache.clearGameCache(sessionId);
+    }
+
+    updateSession(session: InGameSession): void {
+        this.sessionRepository.update(session);
+    }
+
+    joinInGameSession(sessionId: string, playerId: string): InGameSession {
+        const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (player.isInGame) throw new BadRequestException('Player already joined');
+        player.isInGame = true;
+        return session;
+    }
+
+    endPlayerTurn(sessionId: string, playerId: string): InGameSession {
+        const session = this.sessionRepository.findById(sessionId);
+        if (session.currentTurn.activePlayerId !== playerId) {
+            throw new BadRequestException('Not your turn');
+        }
+        this.timerService.endTurnManual(session);
+        return session;
+    }
+
+    attackPlayerAction(sessionId: string, playerId: string, x: number, y: number): void {
+        const session = this.sessionRepository.findById(sessionId);
+        this.actionService.attackPlayer(session, playerId, x, y);
+        session.currentTurn.hasUsedAction = true;
+        this.sessionRepository.save(session);
+    }
+
+    toggleDoorAction(sessionId: string, playerId: string, x: number, y: number): void {
+        const session = this.sessionRepository.findById(sessionId);
+        this.actionService.toggleDoor(session, playerId, x, y);
+        session.currentTurn.hasUsedAction = true;
+        this.sessionRepository.save(session);
+    }
+
+    movePlayer(sessionId: string, playerId: string, orientation: Orientation): void {
+        const session = this.sessionRepository.findById(sessionId);
+        if (playerId !== session.currentTurn.activePlayerId) throw new BadRequestException('Not your turn');
+        this.movementService.movePlayer(session, playerId, orientation);
+    }
+
+    leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string; sessionEnded: boolean } {
+        const player = this.sessionRepository.playerLeave(sessionId, playerId);
+        const session = this.sessionRepository.findById(sessionId);
+        const inGamePlayers = this.sessionRepository.inGamePlayersCount(sessionId);
+        let sessionEnded = false;
+        if (inGamePlayers < 2) {
+            this.timerService.forceStopTimer(sessionId);
+            sessionEnded = true;
+        }
+
+        return { session, playerName: player.name, sessionEnded };
+    }
+
+    getInGamePlayers(sessionId: string): InGamePlayer[] {
+        return this.sessionRepository.getIngamePlayers(sessionId);
+    }
+
+    findSessionByPlayerId(playerId: string): InGameSession | null {
+        return this.sessionRepository.findSessionByPlayerId(playerId);
+    }
+
+    getReachableTiles(sessionId: string, playerId: string): void {
+        const session = this.sessionRepository.findById(sessionId);
+        this.movementService.calculateReachableTiles(session, playerId);
+    }
+
+    getAvailableActions(sessionId: string, playerId: string): void {
+        const session = this.sessionRepository.findById(sessionId);
+        this.calculateAvailableActions(session, playerId);
+    }
+
+    endCombat(sessionId: string): void {
+        const session = this.sessionRepository.findById(sessionId);
+        this.eventEmitter.emit('combat.ended', { session });
+    }
+
+    combatChoice(sessionId: string, socketId: string, choice: 'offensive' | 'defensive'): void {
+        const session = this.sessionRepository.findById(sessionId);
+        this.eventEmitter.emit('combat.choice', { session, socketId, choice });
+    }
+
+    private calculateAvailableActions(session: InGameSession, playerId: string): void {
+        const player = session.inGamePlayers[playerId];
+        if (!player) return;
+
+        const actions = [];
+        const orientations = [Orientation.N, Orientation.E, Orientation.S, Orientation.W];
+
+        for (const orientation of orientations) {
+            try {
+                const pos = this.gameCache.getNextPosition(session.id, player.x, player.y, orientation);
+
+                // Chercher joueur adjacent (ATTACK)
+                const occupantId = this.gameCache.getTileOccupant(session.id, pos.x, pos.y);
+                if (occupantId && occupantId !== playerId) {
+                    actions.push({ type: 'ATTACK', x: pos.x, y: pos.y });
+                }
+
+                // Chercher porte adjacente (DOOR)
+                const tile = this.gameCache.getTileAtPosition(session.id, pos.x, pos.y);
+                if (tile && tile.kind === 'DOOR') {
+                    actions.push({ type: 'DOOR', x: pos.x, y: pos.y });
+                }
+            } catch {
+                // Position hors limites, ignorer
+                continue;
+            }
+        }
+
+        this.eventEmitter.emit('player.availableActions', { playerId, actions });
+    }
+
+    @OnEvent('combat.started')
+    handleCombatStarted(payload: { session: InGameSession; attackerId: string; targetId: string }): void {
+        this.timerService.startCombatTimer(payload.session.id);
+    }
+
+    @OnEvent('combat.ended')
+    handleCombatEnded(payload: { session: InGameSession }): void {
+        this.timerService.stopCombatTimer(payload.session.id);
+    }
+}

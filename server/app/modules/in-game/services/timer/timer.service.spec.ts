@@ -1,17 +1,17 @@
 /* eslint-disable max-lines */
-import { Test, TestingModule } from '@nestjs/testing';
-import { TurnEngineService } from './turn-engine.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { InGameSession } from '@common/models/session.interface';
-import { InGameSessionRepository } from './in-game-session.repository';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
+import { InGameSession } from '@common/models/session.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Test, TestingModule } from '@nestjs/testing';
+import { TimerService } from './timer.service';
 
-describe('TurnEngineService', () => {
-    let service: TurnEngineService;
+describe('TimerService', () => {
+    let service: TimerService;
     let eventEmitter: jest.Mocked<EventEmitter2>;
 
     const CUSTOM_TIMEOUT_SHORT = 1000;
@@ -45,9 +45,20 @@ describe('TurnEngineService', () => {
                 isAdmin: false,
                 speed: BASE_SPEED,
                 health: BASE_HEALTH,
-                attack: Dice.D6,
-                defense: Dice.D4,
-                movementPoints: 0,
+                attack: 6,
+                defense: 4,
+                baseHealth: BASE_HEALTH,
+                healthBonus: 0,
+                maxHealth: BASE_HEALTH,
+                baseSpeed: BASE_SPEED,
+                speedBonus: 0,
+                baseAttack: 6,
+                attackBonus: 0,
+                defenseBonus: 0,
+                baseDefense: 4,
+                attackDice: Dice.D6,
+                defenseDice: Dice.D4,
+                actionsRemaining: 1,
             },
             player2: {
                 id: 'player2',
@@ -60,9 +71,20 @@ describe('TurnEngineService', () => {
                 isAdmin: false,
                 speed: BASE_SPEED,
                 health: BASE_HEALTH,
-                attack: Dice.D6,
-                defense: Dice.D4,
-                movementPoints: 0,
+                attack: 6,
+                defense: 4,
+                baseHealth: BASE_HEALTH,
+                healthBonus: 0,
+                maxHealth: BASE_HEALTH,
+                baseSpeed: BASE_SPEED,
+                speedBonus: 0,
+                baseAttack: 6,
+                attackBonus: 0,
+                defenseBonus: 0,
+                baseDefense: 4,
+                attackDice: Dice.D6,
+                defenseDice: Dice.D4,
+                actionsRemaining: 1,
             },
             player3: {
                 id: 'player3',
@@ -75,12 +97,23 @@ describe('TurnEngineService', () => {
                 isAdmin: false,
                 speed: BASE_SPEED,
                 health: BASE_HEALTH,
-                attack: Dice.D6,
-                defense: Dice.D4,
-                movementPoints: 0,
+                attack: 6,
+                defense: 4,
+                baseHealth: BASE_HEALTH,
+                healthBonus: 0,
+                maxHealth: BASE_HEALTH,
+                baseSpeed: BASE_SPEED,
+                speedBonus: 0,
+                baseAttack: 6,
+                attackBonus: 0,
+                defenseBonus: 0,
+                baseDefense: 4,
+                attackDice: Dice.D6,
+                defenseDice: Dice.D4,
+                actionsRemaining: 1,
             },
         },
-        currentTurn: { turnNumber: 1, activePlayerId: 'player1' },
+        currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
         startPoints: [],
         mapSize: MapSize.MEDIUM,
         mode: GameMode.CLASSIC,
@@ -102,7 +135,7 @@ describe('TurnEngineService', () => {
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
-                TurnEngineService,
+                TimerService,
                 {
                     provide: EventEmitter2,
                     useValue: mockEventEmitter,
@@ -114,7 +147,7 @@ describe('TurnEngineService', () => {
             ],
         }).compile();
 
-        service = module.get<TurnEngineService>(TurnEngineService);
+        service = module.get<TimerService>(TimerService);
         eventEmitter = module.get(EventEmitter2);
 
         jest.useFakeTimers();
@@ -184,7 +217,7 @@ describe('TurnEngineService', () => {
     describe('nextTurn', () => {
         it('should advance to the next player in order', () => {
             const session = createMockSession({
-                currentTurn: { turnNumber: 1, activePlayerId: 'player1' },
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
             });
 
             const result = service.nextTurn(session);
@@ -196,7 +229,7 @@ describe('TurnEngineService', () => {
 
         it('should wrap around to first player after last player', () => {
             const session = createMockSession({
-                currentTurn: { turnNumber: TURN_NUMBER_THREE, activePlayerId: 'player3' },
+                currentTurn: { turnNumber: TURN_NUMBER_THREE, activePlayerId: 'player3', hasUsedAction: false },
             });
 
             const result = service.nextTurn(session);
@@ -248,9 +281,9 @@ describe('TurnEngineService', () => {
 
         it('should handle player not in order by returning first player', () => {
             const session = createMockSession({
-                currentTurn: { turnNumber: 1, activePlayerId: 'unknown-player' },
+                currentTurn: { turnNumber: 1, activePlayerId: 'unknown-player', hasUsedAction: false },
             });
-            
+
             session.inGamePlayers['unknown-player'] = {
                 id: 'unknown-player',
                 name: 'Unknown',
@@ -262,9 +295,20 @@ describe('TurnEngineService', () => {
                 isAdmin: false,
                 speed: BASE_SPEED,
                 health: BASE_HEALTH,
-                attack: Dice.D6,
-                defense: Dice.D4,
-                movementPoints: 0,
+                attack: 4,
+                defense: 4,
+                baseHealth: BASE_HEALTH,
+                healthBonus: 0,
+                maxHealth: BASE_HEALTH,
+                baseSpeed: BASE_SPEED,
+                speedBonus: 0,
+                baseAttack: 6,
+                attackBonus: 0,
+                defenseBonus: 0,
+                baseDefense: 4,
+                attackDice: Dice.D6,
+                defenseDice: Dice.D4,
+                actionsRemaining: 1,
             };
 
             const result = service.nextTurn(session);
@@ -276,7 +320,7 @@ describe('TurnEngineService', () => {
     describe('endTurnManual', () => {
         it('should end turn manually and advance to next player', () => {
             const session = createMockSession({
-                currentTurn: { turnNumber: 1, activePlayerId: 'player1' },
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
             });
 
             const result = service.endTurnManual(session);
@@ -300,7 +344,7 @@ describe('TurnEngineService', () => {
 
         it('should call nextTurn internally', () => {
             const session = createMockSession({
-                currentTurn: { turnNumber: 2, activePlayerId: 'player2' },
+                currentTurn: { turnNumber: 2, activePlayerId: 'player2', hasUsedAction: false },
             });
 
             service.endTurnManual(session);
@@ -312,7 +356,7 @@ describe('TurnEngineService', () => {
     describe('forceEndTurn', () => {
         it('should force end turn and advance to next player', () => {
             const session = createMockSession({
-                currentTurn: { turnNumber: 1, activePlayerId: 'player1' },
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
             });
 
             service.forceEndTurn(session);
@@ -335,7 +379,7 @@ describe('TurnEngineService', () => {
 
         it('should advance turn number', () => {
             const session = createMockSession({
-                currentTurn: { turnNumber: TURN_NUMBER_FIVE, activePlayerId: 'player3' },
+                currentTurn: { turnNumber: TURN_NUMBER_FIVE, activePlayerId: 'player3', hasUsedAction: false },
             });
 
             service.forceEndTurn(session);
@@ -386,7 +430,7 @@ describe('TurnEngineService', () => {
 
         it('should advance to next turn after timeout', () => {
             const session = createMockSession({
-                currentTurn: { turnNumber: 1, activePlayerId: 'player1' },
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
             });
             service.startFirstTurn(session);
 

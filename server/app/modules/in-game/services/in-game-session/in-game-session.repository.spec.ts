@@ -1,18 +1,18 @@
-import { InGameSessionRepository } from './in-game-session.repository';
-import { InGameSession } from '@common/models/session.interface';
-import { NotFoundException } from '@nestjs/common';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
+import { InGameSession } from '@common/models/session.interface';
+import { NotFoundException } from '@nestjs/common';
+import { InGameSessionRepository } from './in-game-session.repository';
 
 describe('InGameSessionRepository', () => {
     let repository: InGameSessionRepository;
 
     const BASE_SPEED = 5;
     const BASE_HEALTH = 100;
-    const BASE_ATTACK = Dice.D4;
-    const BASE_DEFENSE = Dice.D4;
+    const BASE_ATTACK = 4;
+    const BASE_DEFENSE = 4;
     const POSITION_FIVE = 5;
     const POSITION_TEN = 10;
     const TURN_NUMBER_TWO = 2;
@@ -37,7 +37,18 @@ describe('InGameSessionRepository', () => {
                 health: BASE_HEALTH,
                 attack: BASE_ATTACK,
                 defense: BASE_DEFENSE,
-                movementPoints: BASE_SPEED,
+                baseHealth: BASE_HEALTH,
+                healthBonus: 0,
+                maxHealth: BASE_HEALTH,
+                baseSpeed: BASE_SPEED,
+                speedBonus: 0,
+                baseAttack: BASE_ATTACK,
+                attackBonus: 0,
+                defenseBonus: 0,
+                baseDefense: BASE_DEFENSE,
+                attackDice: Dice.D4,
+                defenseDice: Dice.D4,
+                actionsRemaining: 1,
             },
             player2: {
                 id: 'player2',
@@ -52,10 +63,21 @@ describe('InGameSessionRepository', () => {
                 health: BASE_HEALTH,
                 attack: BASE_ATTACK,
                 defense: BASE_DEFENSE,
-                movementPoints: BASE_SPEED,
+                baseHealth: BASE_HEALTH,
+                healthBonus: 0,
+                maxHealth: BASE_HEALTH,
+                baseSpeed: BASE_SPEED,
+                speedBonus: 0,
+                baseAttack: BASE_ATTACK,
+                attackBonus: 0,
+                defenseBonus: 0,
+                baseDefense: BASE_DEFENSE,
+                attackDice: Dice.D4,
+                defenseDice: Dice.D4,
+                actionsRemaining: 1,
             },
         },
-        currentTurn: { turnNumber: 1, activePlayerId: 'player1' },
+        currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
         startPoints: [],
         mapSize: MapSize.MEDIUM,
         mode: GameMode.CLASSIC,

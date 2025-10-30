@@ -1,15 +1,15 @@
-import { Component, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, Signal } from '@angular/core';
 import { InGameService } from '@app/services/in-game/in-game.service';
 
 @Component({
-    selector: 'app-game-timer',
+    selector: 'app-turn-timer',
     standalone: true,
     imports: [CommonModule],
-    templateUrl: './game-timer.component.html',
-    styleUrl: './game-timer.component.scss'
+    templateUrl: './turn-timer.component.html',
+    styleUrl: './turn-timer.component.scss'
 })
-export class GameTimerComponent {
+export class TurnTimerComponent {
     constructor(private readonly inGameService: InGameService) {}
 
     get timeRemaining(): Signal<number> {

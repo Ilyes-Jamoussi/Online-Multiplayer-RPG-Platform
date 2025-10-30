@@ -1,0 +1,56 @@
+.combat-timer {
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    overflow: hidden;
+    width: 120px;
+    border: 2px solid #e74c3c;
+
+    .timer-progress {
+        background: linear-gradient(90deg, #e74c3c, #c0392b);
+    }
+}
+
+.timer-content {
+    padding: 0.3rem 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    gap: 0.5rem;
+}
+
+.timer-label {
+    font-size: 0.5rem;
+    font-weight: 600;
+    color: #e74c3c;
+    text-transform: uppercase;
+}
+
+.timer-display {
+    display: flex;
+    align-items: baseline;
+    gap: 0.1rem;
+}
+
+.time-value {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #e74c3c;
+    font-family: 'Courier New', monospace;
+}
+
+.time-unit {
+    font-size: 0.5rem;
+    color: #c0392b;
+    font-weight: 500;
+}
+
+.timer-progress {
+    height: 4px;
+    transition: width 1s linear;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}

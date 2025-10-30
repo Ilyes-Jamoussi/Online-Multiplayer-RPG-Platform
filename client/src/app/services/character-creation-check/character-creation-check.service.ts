@@ -1,25 +1,23 @@
 import { computed, Injectable } from '@angular/core';
 import { NAME_MIN_LENGTH, CHARACTER_NAME_MAX_LENGTH, WHITESPACE_PATTERN } from '@app/constants/validation.constants';
-import { CharacterEditorService } from '@app/services/character-editor/character-editor.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { Avatar } from '@common/enums/avatar.enum';
 
 @Injectable()
 export class CharacterCreationCheckService {
     constructor(
-        private readonly characterEditorService: CharacterEditorService,
         private readonly playerService: PlayerService,
     ) {}
 
     private readonly validationProblems = computed(() => {
-        const character = this.characterEditorService.character();
-        const name = character.name.trim() || '';
-        const selectedAvatar = this.playerService.avatar();
+        const player = this.playerService.player();
+        const name = player.name.trim() || '';
+        const selectedAvatar = player.avatar;
 
         return {
             nameValidation: this.checkNameValidation(name),
             avatarSelection: this.checkAvatarSelection(selectedAvatar),
-            bonusSelection: this.checkBonusSelection(character.bonus || null),
+            bonusSelection: this.checkBonusSelection(player.healthBonus > 0 || player.speedBonus > 0),
         };
     });
 
@@ -70,8 +68,8 @@ export class CharacterCreationCheckService {
         return { hasIssue: false };
     }
 
-    private checkBonusSelection(bonus: string | null): { hasIssue: boolean; message?: string } {
-        if (bonus === null) {
+    private checkBonusSelection(hasBonus: boolean): { hasIssue: boolean; message?: string } {
+        if (!hasBonus) {
             return {
                 hasIssue: true,
                 message: 'Un bonus doit être sélectionné.',

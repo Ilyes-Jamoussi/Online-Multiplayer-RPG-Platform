@@ -1,5 +1,5 @@
 import { AVATAR_SELECTION_ROOM_PREFIX } from '@app/constants/session.constants';
-import { InGameService } from '@app/modules/in-game/services/in-game.service';
+import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { AvailableSessionsUpdatedDto } from '@app/modules/session/dto/available-sessions-updated.dto';
 import { CreateSessionDto, SessionCreatedDto } from '@app/modules/session/dto/create-session.dto';
 import { AvatarSelectionJoinedDto, JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection';
@@ -156,13 +156,13 @@ export class SessionGateway implements OnGatewayDisconnect {
             socket.emit(SessionEvents.StartGameSession, errorResponse('Joueur non connecté à une session'));
             return;
         }
-        
+
         const waitingSession = this.sessionService.getSession(sessionId);
         if (!waitingSession) {
             socket.emit(SessionEvents.StartGameSession, errorResponse('Session introuvable'));
             return;
         }
-        
+
         let inGameSession;
         try {
             inGameSession = await this.inGameService.createInGameSession(
@@ -174,7 +174,7 @@ export class SessionGateway implements OnGatewayDisconnect {
             socket.emit(SessionEvents.StartGameSession, errorResponse(error.message));
             return;
         }
-        
+
         const players = this.sessionService.getPlayersSession(sessionId);
 
         for (const player of players) {

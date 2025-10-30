@@ -8,10 +8,13 @@ import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
 import { catchError, of, take, tap } from 'rxjs';
+import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { InGamePlayer } from '@common/models/player.interface';
 import { Vector2 } from '@app/interfaces/game-editor.interface';
+import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 
 @Injectable()
 export class GameMapService {
@@ -45,7 +48,16 @@ export class GameMapService {
         private readonly notificationService: NotificationService,
         private readonly inGameService: InGameService,
         private readonly assetsService: AssetsService,
-    ) {}
+        private readonly inGameSocketService: InGameSocketService,
+    ) {
+        this.initDoorListener();
+    }
+
+    private initDoorListener(): void {
+        this.inGameSocketService.onDoorToggled((data) => {
+            this.updateTileState(data.x, data.y, data.isOpen);
+        });
+    }
 
     get players() {
         return this.inGameService.inGamePlayers();
@@ -85,6 +97,78 @@ export class GameMapService {
 
     get isMyTurn() {
         return this.inGameService.isMyTurn();
+    }
+
+    get isActionModeActive() {
+        return this.inGameService.isActionModeActive();
+    }
+
+    get availableActions() {
+        return this.inGameService.availableActions();
+    }
+
+    getTileClass(x: number, y: number): string {
+        let classes = '';
+        
+        if (this.isReachable(x, y)) {
+            classes += 'reachable-tile ';
+        }
+        
+        if (this.isActionModeActive && this.hasActionAt(x, y)) {
+            classes += this.getActionClass(x, y) + ' ';
+        }
+        
+        return classes.trim();
+    }
+
+    private isReachable(x: number, y: number): boolean {
+        return this.reachableTiles.some((tile: ReachableTile) => tile.x === x && tile.y === y);
+    }
+
+    private hasActionAt(x: number, y: number): boolean {
+        return this.availableActions.some((action: AvailableAction) => action.x === x && action.y === y);
+    }
+
+    private getActionClass(x: number, y: number): string {
+        const action = this.availableActions.find((availableAction: AvailableAction) => availableAction.x === x && availableAction.y === y);
+        return action?.type === 'ATTACK' ? 'action-attack' : 'action-door';
+    }
+
+    getActionTypeAt(x: number, y: number): 'ATTACK' | 'DOOR' | null {
+        const action = this.availableActions.find((availableAction: AvailableAction) => availableAction.x === x && availableAction.y === y);
+        return action?.type || null;
+    }
+
+    deactivateActionMode(): void {
+        this.inGameService.deactivateActionMode();
+    }
+
+    performAction(actionType: 'ATTACK' | 'DOOR', x: number, y: number): void {
+        if (actionType === 'ATTACK') {
+            this.attackPlayer(x, y);
+        } else {
+            this.toggleDoor(x, y);
+        }
+        this.inGameService.useAction();
+        this.inGameService.deactivateActionMode();
+    }
+
+    private attackPlayer(x: number, y: number): void {
+        this.inGameService.attackPlayerAction(x, y);
+    }
+
+    private toggleDoor(x: number, y: number): void {
+        this.inGameService.toggleDoorAction(x, y);
+    }
+
+    updateTileState(x: number, y: number, isOpen: boolean): void {
+        this._tiles.update(tiles => 
+            tiles.map(tile => 
+                tile.x === x && tile.y === y 
+                    ? { ...tile, open: isOpen }
+                    : tile
+            )
+        );
     }
 
     getActiveTile(coords?: Vector2): GameEditorTileDto | null {

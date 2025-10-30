@@ -1,3 +1,4 @@
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileCost, TileKind } from '@common/enums/tile-kind.enum';
@@ -5,7 +6,6 @@ import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/models/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { GameCacheService } from './game-cache.service';
 
 interface ReachableTileExplorationContext {
     session: InGameSession;
@@ -42,7 +42,7 @@ export class InGameMovementService {
 
         if (moveCost === -1) {
             throw new BadRequestException('Cannot move onto this tile');
-        } else if (moveCost > player.movementPoints) {
+        } else if (moveCost > player.speed) {
             throw new BadRequestException('Not enough movement points for this tile');
         }
 
@@ -54,17 +54,17 @@ export class InGameMovementService {
 
         player.x = nextX;
         player.y = nextY;
-        player.movementPoints -= moveCost;
+        player.speed -= moveCost;
 
         this.eventEmitter.emit('player.moved', {
             session,
             playerId,
             x: nextX,
             y: nextY,
-            movementPoints: player.movementPoints,
+            speed: player.speed,
         });
 
-        if (player.movementPoints) {
+        if (player.speed) {
             this.calculateReachableTiles(session, playerId);
         } else {
             this.eventEmitter.emit('player.reachableTiles', { playerId, reachable: [] });
@@ -103,7 +103,7 @@ export class InGameMovementService {
                 x: player.x,
                 y: player.y,
                 cost: 0,
-                remainingPoints: player.movementPoints,
+                remainingPoints: player.speed,
             },
         ];
     }
@@ -174,7 +174,7 @@ export class InGameMovementService {
         const tile = this.gameCache.getTileAtPosition(sessionId, x, y);
         if (!tile) return null;
 
-        let tileCost = TileCost[tile.kind as keyof typeof TileCost];
+        let tileCost = TileCost[tile.kind];
         if (tileCost === undefined) return null;
 
         if (tile.kind === TileKind.DOOR) {

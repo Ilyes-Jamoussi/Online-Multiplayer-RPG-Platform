@@ -12,8 +12,8 @@
                     <h3>Nom *</h3>
                     <app-ui-input
                         type="text"
-                        placeholder="Nom du héros"
-                        [value]="character.name"
+                        placeholder="Nom du personnage"
+                        [value]="playerName"
                         (valueChange)="onNameChange($event)"
                         [maxLength]="characterNameMaxLength"
                         [minLength]="characterNameMinLength"
@@ -24,7 +24,7 @@
                     <h3>Vie</h3>
                     <app-stats-bar
                         label="Nombre de points de vie du personnage"
-                        [value]="character.attributes.life"
+                        [value]="playerHealth"
                         [maxValue]="6"
                         color="#e74c3c"
                     ></app-stats-bar>
@@ -32,7 +32,7 @@
 
                 <div class="field">
                     <h3>Vitesse</h3>
-                    <app-stats-bar label="Rapidité du personnage" [value]="character.attributes.speed" [maxValue]="6" color="#2ecc71"></app-stats-bar>
+                    <app-stats-bar label="Rapidité du personnage" [value]="playerSpeed" [maxValue]="6" color="#2ecc71"></app-stats-bar>
                 </div>
 
                 <div class="field">

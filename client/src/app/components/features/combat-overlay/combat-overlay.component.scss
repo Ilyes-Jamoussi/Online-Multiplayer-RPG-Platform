@@ -1,0 +1,179 @@
+.combat-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+app-combat-timer {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.combat-modal {
+    background: linear-gradient(135deg, #2c1810, #4a2c1a);
+    border: 3px solid #d4af37;
+    border-radius: 15px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+}
+
+.combat-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    
+    h2 {
+        color: #d4af37;
+        font-size: 2rem;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+}
+
+.combat-arena {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.fighter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    padding: 1rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    
+    &.is-me {
+        background: rgba(212, 175, 55, 0.1);
+        border: 2px solid #d4af37;
+    }
+}
+
+.fighter-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.fighter-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #d4af37;
+    margin-bottom: 0.5rem;
+    
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.fighter-role {
+    font-size: 0.9rem;
+    color: #ccc;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.vs-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 1rem;
+}
+
+.vs-text {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #d4af37;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.combat-swords {
+    font-size: 2rem;
+    margin-top: 0.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.combat-actions {
+    text-align: center;
+}
+
+.combat-message {
+    font-size: 1.1rem;
+    color: #fff;
+    margin-bottom: 1rem;
+    font-style: italic;
+}
+
+.stance-instruction {
+    font-size: 1rem;
+    color: #d4af37;
+    margin-bottom: 1.5rem;
+    font-weight: bold;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+}
+
+.combat-btn {
+    background: linear-gradient(135deg, #d4af37, #b8941f);
+    color: #2c1810;
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    min-width: 160px;
+    
+    &:hover {
+        background: linear-gradient(135deg, #b8941f, #d4af37);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    &.offensive {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        
+        &:hover {
+            background: linear-gradient(135deg, #c82333, #dc3545);
+        }
+    }
+
+    &.defensive {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        
+        &:hover {
+            background: linear-gradient(135deg, #0056b3, #007bff);
+        }
+    }
+}

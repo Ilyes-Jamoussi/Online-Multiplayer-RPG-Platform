@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, signal, inject } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { ROUTES } from '@common/enums/routes.enum';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
@@ -7,10 +7,12 @@ import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket
 import { SessionService } from '@app/services/session/session.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { InGamePlayer } from '@common/models/player.interface';
+import { CombatService } from '@app/services/combat/combat.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { Orientation } from '@common/enums/orientation.enum';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+import { AvailableAction } from '@common/interfaces/available-action.interface';
 
 @Injectable({
     providedIn: 'root',
@@ -20,6 +22,8 @@ export class InGameService {
     private readonly _isTransitioning = signal<boolean>(false);
     private readonly _isGameStarted = signal<boolean>(false);
     private readonly _reachableTiles = signal<ReachableTile[]>([]);
+    private readonly _availableActions = signal<AvailableAction[]>([]);
+    private readonly _isActionModeActive = signal<boolean>(false);
 
     readonly isMyTurn = computed(() => this._inGameSession().currentTurn.activePlayerId === this.playerService.id());
     readonly currentTurn = computed(() => this._inGameSession().currentTurn);
@@ -30,10 +34,45 @@ export class InGameService {
     readonly mode = computed(() => this._inGameSession().mode);
     readonly isGameStarted = computed(() => this._inGameSession().isGameStarted);
     readonly isTransitioning = computed(() => this._isTransitioning());
-    readonly timeRemaining = computed(() => this.timerService.timeRemaining());
+    readonly timeRemaining = computed(() => this.timerService.turnTimeRemaining());
     readonly inGamePlayers = computed(() => this._inGameSession().inGamePlayers);
     readonly inGameSession = this._inGameSession.asReadonly();
     readonly reachableTiles = this._reachableTiles.asReadonly();
+    readonly hasUsedAction = computed(() => this._inGameSession().currentTurn.hasUsedAction);
+
+    private readonly combatService = inject(CombatService);
+    readonly availableActions = this._availableActions.asReadonly();
+    readonly isActionModeActive = this._isActionModeActive.asReadonly();
+
+    sessionId(): string {
+        return this.sessionService.id();
+    }
+
+    attackPlayerAction(x: number, y: number): void {
+        this.inGameSocketService.attackPlayerAction(this.sessionService.id(), x, y);
+    }
+
+    toggleDoorAction(x: number, y: number): void {
+        this.inGameSocketService.playerToggleDoorAction(this.sessionService.id(), x, y);
+    }
+
+    useAction(): void {
+        this._inGameSession.update((session) => ({
+            ...session,
+            currentTurn: {
+                ...session.currentTurn,
+                hasUsedAction: true
+            }
+        }));
+    }
+
+    activateActionMode(): void {
+        this._isActionModeActive.set(true);
+    }
+
+    deactivateActionMode(): void {
+        this._isActionModeActive.set(false);
+    }
 
     constructor(
         private readonly inGameSocketService: InGameSocketService,
@@ -95,30 +134,30 @@ export class InGameService {
         this._inGameSession.update((inGameSession) => ({ ...inGameSession, ...data }));
     }
 
-    updatePlayerPosition(playerId: string, x: number, y: number, movementPoints: number): void {
+    updatePlayerPosition(playerId: string, x: number, y: number, speed: number): void {
         this._inGameSession.update((inGameSession) => ({
             ...inGameSession,
-            inGamePlayers: { ...inGameSession.inGamePlayers, [playerId]: { ...inGameSession.inGamePlayers[playerId], x, y, movementPoints } },
+            inGamePlayers: { ...inGameSession.inGamePlayers, [playerId]: { ...inGameSession.inGamePlayers[playerId], x, y, speed } },
         }));
         if (this.isMyTurn()) {
             this.playerService.updatePlayer({
                 x,
                 y,
-                movementPoints,
+                speed,
             });
         }
     }
 
     startTurnTimer(): void {
-        this.timerService.startTimer(DEFAULT_TURN_DURATION);
+        this.timerService.startTurnTimer(DEFAULT_TURN_DURATION);
     }
 
     stopTurnTimer(): void {
-        this.timerService.stopTimer();
+        this.timerService.stopTurnTimer();
     }
 
     startTurnTransitionTimer(): void {
-        this.timerService.startTimer(DEFAULT_TURN_TRANSITION_DURATION);
+        this.timerService.startTurnTimer(DEFAULT_TURN_TRANSITION_DURATION);
     }
 
     turnEnd(data: InGameSession): void {
@@ -133,7 +172,7 @@ export class InGameService {
     }
 
     reset(): void {
-        this.timerService.resetTimer();
+        this.timerService.resetAllTimers();
         this._isGameStarted.set(false);
         this._isTransitioning.set(false);
         this._reachableTiles.set([]);
@@ -176,7 +215,7 @@ export class InGameService {
         });
 
         this.inGameSocketService.onPlayerMoved((data) => {
-            this.updatePlayerPosition(data.playerId, data.x, data.y, data.movementPoints);
+            this.updatePlayerPosition(data.playerId, data.x, data.y, data.speed);
         });
 
         this.inGameSocketService.onLeftInGameSessionAck(() => {
@@ -200,5 +239,41 @@ export class InGameService {
         this.inGameSocketService.onPlayerReachableTiles((data) => {
             this._reachableTiles.set(data);
         });
+
+        this.inGameSocketService.onPlayerAvailableActions((data) => {
+            this._availableActions.set(data);
+        });
+
+        this.inGameSocketService.onCombatStarted((data) => {
+            this.handleCombatStarted(data.attackerId, data.targetId);
+        });
+
+        this.inGameSocketService.onCombatEnded(() => {
+            this.combatService.endCombat();
+        });
+    }
+
+    private handleCombatStarted(attackerId: string, targetId: string): void {
+        const myId = this.playerService.id();
+        const attacker = this.getPlayerByPlayerId(attackerId);
+        const target = this.getPlayerByPlayerId(targetId);
+        
+        if (!attacker || !target) return;
+
+        if (attackerId === myId) {
+            // JE SUIS L'ATTAQUANT
+            this.combatService.startCombat(attackerId, targetId, 'attacker');
+            
+        } else if (targetId === myId) {
+            // JE SUIS LA CIBLE
+            this.combatService.startCombat(attackerId, targetId, 'target');
+            
+        } else {
+            // JE SUIS SPECTATEUR
+            this.notificationService.displayInformation({
+                title: 'Combat en cours',
+                message: `${attacker.name} combat ${target.name}`
+            });
+        }
     }
 }

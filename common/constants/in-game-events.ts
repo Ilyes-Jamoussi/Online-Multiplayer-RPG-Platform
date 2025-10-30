@@ -23,6 +23,15 @@ export enum InGameEvents {
     PlayerCombatAction = 'playerCombatAction',
     PlayerCombatResult = 'playerCombatResult',
     PlayerReachableTiles = 'playerReachableTiles',
+    PlayerAvailableActions = 'playerAvailableActions',
+    ToggleDoorAction = 'toggleDoorAction',
+    AttackPlayerAction = 'attackPlayerAction',
+    CombatChoice = 'combatChoice',
+    CombatStarted = 'combatStarted',
+    CombatNotification = 'combatNotification',
+    CombatTimerUpdate = 'combatTimerUpdate',
+    CombatEnded = 'combatEnded',
+    DoorToggled = 'doorToggled',
 
     LeftInGameSessionAck = 'leftInGameSessionAck',
 }

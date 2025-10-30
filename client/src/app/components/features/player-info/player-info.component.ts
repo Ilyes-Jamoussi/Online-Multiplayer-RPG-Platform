@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { DEFAULT_ACTIONS, DEFAULT_BONUS_MOVEMENT, DEFAULT_MOVEMENT_POINTS, MAX_STAT_VALUE } from '@app/constants/player-info.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { Avatar } from '@common/enums/avatar.enum';
@@ -28,46 +27,46 @@ export class PlayerInfoComponent {
     }
 
     get currentHP(): number { 
-        return this.playerService.lifePoints;
+        return this.playerService.health();
     }
     
     get maxHP(): number { 
-        return MAX_STAT_VALUE;
+        return this.playerService.maxHealth();
     }
     
     get currentSpeed(): number {
-        return this.playerService.speedPoints;
+        return this.playerService.speed();
     }
     
     get maxSpeed(): number {
-        return MAX_STAT_VALUE;
+        return this.playerService.speed();
     }
     
     get attackValue(): number { 
-        return this.playerService.attackPoints; 
+        return this.playerService.attack(); 
     }
     
     get defenseValue(): number { 
-        return this.playerService.defensePoints; 
+        return this.playerService.defense(); 
     }
 
-    get remainingMovementPoints(): number {
-        return this.playerService.remainingMovementPoints;
+    get remainingSpeed(): number {
+        return this.playerService.speed();
     }
     
-    get movementPoints(): number { return DEFAULT_MOVEMENT_POINTS; }
-    get bonusMovementPoints(): number { return DEFAULT_BONUS_MOVEMENT; }
-    get actionsRemaining(): number { return DEFAULT_ACTIONS; }
+    get baseSpeed(): number { return this.playerService.baseSpeed(); }
+    get speedBonus(): number { return this.playerService.speedBonus(); }
+    get actionsRemaining(): number { return this.playerService.actionsRemaining(); }
 
     get attackDice(): string {
-        return this.playerService.attackDice;
+        return this.playerService.attackDice();
     }
 
     get defenseDice(): string {
-        return this.playerService.defenseDice;
+        return this.playerService.defenseDice();
     }
 
     get characterName(): string {
-        return this.playerService.characterName;
+        return this.playerService.name();
     }
 }

@@ -16,9 +16,21 @@ export interface PlayerDto {
     name: string;
     avatar: Avatar | null;
     isAdmin: boolean;
-    attack: Dice;
-    defense: Dice;
-    speed: number;
+    attackDice: Dice;
+    defenseDice: Dice;
+    baseHealth: number;
+    healthBonus: number;
     health: number;
+    maxHealth: number;
+    baseAttack: number;
+    attackBonus: number;
+    attack: number;
+    baseDefense: number;
+    defenseBonus: number;
+    defense: number;
+    baseSpeed: number;
+    speedBonus: number;
+    speed: number;
+    actionsRemaining: number;
 }
 
