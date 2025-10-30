@@ -173,7 +173,7 @@ export class GameEditorCheckService {
     // Todo: shorten this method
     private connectedWalkableComponents(grid: TileKind[][], size: number): { set: Set<string>; size: number }[] {
         const seen = new Set<string>();
-        const comps: { set: Set<string>; size: number }[] = [];
+        const components: { set: Set<string>; size: number }[] = [];
         const directions = [
             [1, 0],
             [-1, 0],
@@ -208,10 +208,10 @@ export class GameEditorCheckService {
                         }
                     }
                 }
-                comps.push({ set: component, size: component.size });
+                components.push({ set: component, size: component.size });
             }
         }
-        return comps;
+        return components;
     }
 
     private findInaccessibleTiles(tiles: GameEditorTileDto[], visited: Set<string>): AccesibilityIssue {
