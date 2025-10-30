@@ -35,12 +35,12 @@ describe('GameEditorService', () => {
         mockImageService.deleteImage = jest.fn().mockResolvedValue(undefined);
         mockMapper.toGamePreviewDto = jest
             .fn()
-            .mockImplementation((g: { _id: { toString: () => string }; name: string }) => ({ id: g._id.toString(), name: g.name }) as GamePreviewDto);
-        mockMapper.toGameEditorDto = jest.fn().mockImplementation((g: GameDocument) => ({
-            id: g._id.toString(),
-            name: g.name,
-            tiles: g.tiles,
-            objects: g.objects.map((obj) => ({ ...obj, id: obj._id.toString() })),
+            .mockImplementation((game: { _id: { toString: () => string }; name: string }) => ({ id: game._id.toString(), name: game.name }) as GamePreviewDto);
+        mockMapper.toGameEditorDto = jest.fn().mockImplementation((game: GameDocument) => ({
+            id: game._id.toString(),
+            name: game.name,
+            tiles: game.tiles,
+            objects: game.objects.map((obj) => ({ ...obj, id: obj._id.toString() })),
         }));
 
         service = new GameEditorService(mockModel as unknown as Model<GameDocument>, mockImageService as ImageService, mockMapper as GameDtoMapper);
