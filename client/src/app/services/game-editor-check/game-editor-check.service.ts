@@ -102,7 +102,7 @@ export class GameEditorCheckService {
     }
 
     private checkDoors(tiles: GameEditorTileDto[]): AccesibilityIssue {
-        const probs: AccesibilityIssue = {
+        const doorIssue: AccesibilityIssue = {
             tiles: [],
             hasIssue: false,
         };
@@ -119,15 +119,15 @@ export class GameEditorCheckService {
                 !this.isValidHorizontalDoor(leftKind, rightKind, topKind, bottomKind) &&
                 !this.isValidVerticalDoor(topKind, bottomKind, leftKind, rightKind)
             ) {
-                probs.tiles.push({
+                doorIssue.tiles.push({
                     x,
                     y,
                 });
-                probs.hasIssue = true;
-                probs.message = 'Une porte doit être placée entre deux murs et adossée à des tuiles de terrain.';
+                doorIssue.hasIssue = true;
+                doorIssue.message = 'Une porte doit être placée entre deux murs et adossée à des tuiles de terrain.';
             }
         }
-        return probs;
+        return doorIssue;
     }
 
     private checkTerrainCoverage(tiles: GameEditorTileDto[]): GameEditorIssue {
@@ -135,14 +135,14 @@ export class GameEditorCheckService {
         const total = size * size;
         const terrainCount = tiles.filter((tile) => this.isTerrainTile(tile.kind)).length;
         const ratio = terrainCount / total;
-        const probs: GameEditorIssue = { hasIssue: false };
+        const coverageIssue: GameEditorIssue = { hasIssue: false };
         if (ratio <= GameEditorCheckService.minTerrainRatio) {
-            probs.hasIssue = true;
-            probs.message = `Le ratio de tuiles de terrain est trop bas (${(ratio * GameEditorCheckService.percentBase).toFixed(
+            coverageIssue.hasIssue = true;
+            coverageIssue.message = `Le ratio de tuiles de terrain est trop bas (${(ratio * GameEditorCheckService.percentBase).toFixed(
                 2,
             )} %). Il doit être supérieur à ${GameEditorCheckService.minTerrainRatio * GameEditorCheckService.percentBase} %.`;
         }
-        return probs;
+        return coverageIssue;
     }
 
     private checkTerrainAccessibility(tiles: GameEditorTileDto[]): AccesibilityIssue {
@@ -215,18 +215,18 @@ export class GameEditorCheckService {
     }
 
     private findInaccessibleTiles(tiles: GameEditorTileDto[], visited: Set<string>): AccesibilityIssue {
-        const probs: AccesibilityIssue = { hasIssue: false, tiles: [] };
+        const inaccessibleTilesIssue: AccesibilityIssue = { hasIssue: false, tiles: [] };
         for (const tile of tiles) {
             if (this.isWalkableTile(tile.kind) && !visited.has(`${tile.x}:${tile.y}`)) {
-                probs.hasIssue = true;
-                probs.tiles.push({
+                inaccessibleTilesIssue.hasIssue = true;
+                inaccessibleTilesIssue.tiles.push({
                     x: tile.x,
                     y: tile.y,
                 });
-                probs.message = 'Certaines tuiles de terrain ne sont pas accessibles.';
+                inaccessibleTilesIssue.message = 'Certaines tuiles de terrain ne sont pas accessibles.';
             }
         }
-        return probs;
+        return inaccessibleTilesIssue;
     }
 
     private checkNameValidation(): GameEditorIssue {
