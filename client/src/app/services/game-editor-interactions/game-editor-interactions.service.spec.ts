@@ -189,10 +189,10 @@ describe('GameEditorInteractionsService', () => {
         it('returns one ToolbarItem per TileKind with correct image and class', () => {
             const brushes = service.getToolbarBrushes();
             expect(brushes.length).toBe(Object.keys(TileKind).length - 1);
-            brushes.forEach((b) => {
-                expect(b.image).toBeTruthy();
-                expect(b.class).toBe(b.tileKind.toLowerCase());
-                expect(b.tileKind).toBe(TileKind[b.tileKind]);
+            brushes.forEach((brush) => {
+                expect(brush.image).toBeTruthy();
+                expect(brush.class).toBe(brush.tileKind.toLowerCase());
+                expect(brush.tileKind).toBe(TileKind[brush.tileKind]);
             });
         });
     });
