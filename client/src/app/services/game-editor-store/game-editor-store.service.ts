@@ -53,7 +53,7 @@ export class GameEditorStoreService {
     get placedObjects(): ExtendedGameEditorPlaceableDto[] {
         const objs = this._objects();
         const placed = objs.filter((o) => o.placed);
-        const acc: ExtendedGameEditorPlaceableDto[] = [];
+        const accumulateur: ExtendedGameEditorPlaceableDto[] = [];
 
         for (const o of placed) {
             const footprint = PlaceableFootprint[PlaceableKind[o.kind]];
@@ -65,7 +65,7 @@ export class GameEditorStoreService {
                     ys.push(o.y + dy);
                 }
             }
-            acc.push({
+            accumulateur.push({
                 id: o.id,
                 kind: o.kind,
                 orientation: o.orientation,
@@ -77,7 +77,7 @@ export class GameEditorStoreService {
             });
         }
 
-        return acc;
+        return accumulateur;
     }
 
     readonly inventory = computed<Inventory>(() => {
