@@ -1,13 +1,13 @@
-import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
-import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
 import { InGameService } from '@app/modules/in-game/services/in-game.service';
-import { InGameEvents } from '@common/constants/in-game-events';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
-import { InGameSession } from '@common/models/session.interface';
-import { OnEvent } from '@nestjs/event-emitter';
+import { InGameEvents } from '@common/constants/in-game-events';
 import { Orientation } from '@common/enums/orientation.enum';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+import { InGameSession } from '@common/models/session.interface';
+import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
+import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 @UsePipes(
     new ValidationPipe({
         transform: true,
@@ -61,9 +61,10 @@ export class InGameGateway {
 
     @SubscribeMessage(InGameEvents.PlayerLeaveInGameSession)
     playerLeaveInGameSession(socket: Socket, sessionId: string): void {
+        const session = this.inGameService.getSession(sessionId);
         this.playerLeaveSession(sessionId, socket.id);
         this.server.to(socket.id).emit(InGameEvents.LeftInGameSessionAck, successResponse({}));
-        socket.leave(sessionId);
+        socket.leave(session.inGameId);
     }
 
     @SubscribeMessage(InGameEvents.PlayerMove)
