@@ -39,8 +39,8 @@ class StoreStub implements Partial<GameEditorStoreService> {
     setPlacedObjects(list: GameEditorPlaceableDto[]) {
         this.placedObjectsSig.set(list);
     }
-    setSize(n: number) {
-        this._size = n;
+    setSize(num: number) {
+        this._size = num;
     }
 
     getTileAt(x: number, y: number) {

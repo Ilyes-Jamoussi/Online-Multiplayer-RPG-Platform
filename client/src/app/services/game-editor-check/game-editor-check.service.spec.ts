@@ -74,10 +74,10 @@ export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
     }
 
     getTileAt(x: number, y: number) {
-        const n = this.sizeSig();
+        const num = this.sizeSig();
         const arr = this.tilesSig();
-        if (x < 0 || y < 0 || x >= n || y >= n) return undefined;
-        return arr[y * n + x];
+        if (x < 0 || y < 0 || x >= num || y >= num) return undefined;
+        return arr[y * num + x];
     }
 }
 

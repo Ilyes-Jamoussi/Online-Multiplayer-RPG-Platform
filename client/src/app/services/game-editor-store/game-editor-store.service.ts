@@ -411,8 +411,8 @@ export class GameEditorStoreService {
     }
 
     private inBounds(x: number, y: number): boolean {
-        const n = this.size();
-        return x >= 0 && y >= 0 && x < n && y < n;
+        const num = this.size();
+        return x >= 0 && y >= 0 && x < num && y < num;
     }
 
     private withBounds<T>(x: number, y: number, fn: () => T): T | undefined {
