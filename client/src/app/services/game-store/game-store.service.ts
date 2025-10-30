@@ -57,7 +57,11 @@ export class GameStoreService {
 
     private replaceGameDisplay(dto: GamePreviewDto): void {
         const exists = this._gameDisplays().some((g) => g.id === dto.id);
-        this._gameDisplays.update((games) => (exists ? games.map((g) => (g.id === dto.id ? dto : g)) : [...games, dto]));
+        if (!exists) {
+            this._gameDisplays.update((games) => [...games, dto]);
+            return;
+        }
+        this._gameDisplays.update((games) => games.map((g) => (g.id === dto.id ? dto : g)));
     }
 
     private removeGameDisplay(id: string): void {
