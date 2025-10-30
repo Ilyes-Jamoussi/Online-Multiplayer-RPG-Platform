@@ -174,7 +174,7 @@ export class GameEditorCheckService {
     private connectedWalkableComponents(grid: TileKind[][], size: number): { set: Set<string>; size: number }[] {
         const seen = new Set<string>();
         const comps: { set: Set<string>; size: number }[] = [];
-        const dirs = [
+        const directions = [
             [1, 0],
             [-1, 0],
             [0, 1],
@@ -198,7 +198,7 @@ export class GameEditorCheckService {
                         seen.add(k);
                         component.add(k);
 
-                        for (const [dx, dy] of dirs) {
+                        for (const [dx, dy] of directions) {
                             const nx = cx + dx;
                             const ny = cy + dy;
                             if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
