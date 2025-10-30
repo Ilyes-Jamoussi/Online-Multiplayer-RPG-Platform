@@ -54,8 +54,8 @@ export class GameEditorService {
             visibility: false,
         } as GameDocument;
 
-        const doc = await this.gameModel.findByIdAndUpdate(id, { $set: update }, { new: true, runValidators: true }).lean().exec();
-        return doc ? this.gameDtoMapper.toGamePreviewDto(doc) : null;
+        const updatedGame = await this.gameModel.findByIdAndUpdate(id, { $set: update }, { new: true, runValidators: true }).lean().exec();
+        return updatedGame ? this.gameDtoMapper.toGamePreviewDto(updatedGame) : null;
     }
 
     private buildBasicUpdate(dto: PatchGameEditorDto): Partial<GameDocument> {
