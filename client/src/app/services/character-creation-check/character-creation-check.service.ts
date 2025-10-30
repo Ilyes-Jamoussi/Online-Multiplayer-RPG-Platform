@@ -71,7 +71,7 @@ export class CharacterCreationCheckService {
     }
 
     private checkBonusSelection(bonus: string | null): { hasIssue: boolean; message?: string } {
-        if (bonus === null) {
+        if (!bonus) {
             return {
                 hasIssue: true,
                 message: 'Un bonus doit être sélectionné.',

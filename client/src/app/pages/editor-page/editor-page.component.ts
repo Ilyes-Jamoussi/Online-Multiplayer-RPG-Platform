@@ -62,7 +62,7 @@ export class EditorPageComponent implements OnInit, OnDestroy {
 
     get disableOverlayPointerEvents() {
         const tool = this.gameEditorInteractionsService.activeTool;
-        return tool !== null && tool.type === ToolType.TileBrushTool && (tool.leftDrag || tool.rightDrag);
+        return Boolean(tool && tool.type === ToolType.TileBrushTool && (tool.leftDrag || tool.rightDrag));
     }
 
     get tiles() {

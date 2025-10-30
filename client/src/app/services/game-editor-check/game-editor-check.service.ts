@@ -45,7 +45,7 @@ export class GameEditorCheckService {
         return !Object.values(this.editorProblems()).some((p) => p.hasIssue);
     }
 
-    private isTerrainTile(kind: TileKind): boolean {
+    private isTerrainTile(kind: TileKind | undefined): boolean {
         return kind === TileKind.BASE || kind === TileKind.WATER || kind === TileKind.ICE;
     }
 
@@ -58,9 +58,7 @@ export class GameEditorCheckService {
         return (
             left === TileKind.WALL &&
             right === TileKind.WALL &&
-            top !== undefined &&
             this.isTerrainTile(top) &&
-            bottom !== undefined &&
             this.isTerrainTile(bottom)
         );
     }
@@ -74,9 +72,7 @@ export class GameEditorCheckService {
         return (
             top === TileKind.WALL &&
             bottom === TileKind.WALL &&
-            left !== undefined &&
             this.isTerrainTile(left) &&
-            right !== undefined &&
             this.isTerrainTile(right)
         );
     }
