@@ -2,16 +2,16 @@ import { Injectable, Signal, computed, signal } from '@angular/core';
 import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { Vector2 } from '@app/interfaces/game-editor.interface';
+import { AssetsService } from '@app/services/assets/assets.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
+import { InGameService } from '@app/services/in-game/in-game.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
-import { catchError, of, take, tap } from 'rxjs';
-import { InGameService } from '@app/services/in-game/in-game.service';
-import { AssetsService } from '@app/services/assets/assets.service';
+import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { InGamePlayer } from '@common/models/player.interface';
-import { Vector2 } from '@app/interfaces/game-editor.interface';
+import { catchError, of, take, tap } from 'rxjs';
 
 @Injectable()
 export class GameMapService {
@@ -90,7 +90,7 @@ export class GameMapService {
     getActiveTile(coords?: Vector2): GameEditorTileDto | null {
         const targetCoords = coords ?? this._activeTileCoords();
         if (!targetCoords) return null;
-        return this.tiles().find((t) => t.x === targetCoords.x && t.y === targetCoords.y) ?? null;
+        return this.tiles().find((tile) => tile.x === targetCoords.x && tile.y === targetCoords.y) ?? null;
     }
 
     openTileModal(tile: GameEditorTileDto): void {
@@ -115,10 +115,10 @@ export class GameMapService {
     getObjectOnTile(coords?: Vector2): GameEditorPlaceableDto | undefined {
         const targetCoords = coords ?? this._activeTileCoords();
         if (!targetCoords) return undefined;
-        
+
         return this.visibleObjects().find((obj) => {
             if (obj.x === targetCoords.x && obj.y === targetCoords.y) return true;
-            
+
             if (PlaceableFootprint[obj.kind] === 2) {
                 return (
                     (obj.x === targetCoords.x - 1 && obj.y === targetCoords.y) ||
@@ -126,7 +126,7 @@ export class GameMapService {
                     (obj.x === targetCoords.x - 1 && obj.y === targetCoords.y - 1)
                 );
             }
-            
+
             return false;
         });
     }

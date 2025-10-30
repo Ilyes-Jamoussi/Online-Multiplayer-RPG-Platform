@@ -80,12 +80,12 @@ export class GameEditorService {
 
     private mapTiles(tiles: GameEditorTileDto[]): Tile[] {
         if (!tiles) return [];
-        return tiles.map((t) => ({
-            kind: t.kind,
-            x: t.x,
-            y: t.y,
-            open: t.open,
-            teleportChannel: t.teleportChannel,
+        return tiles.map((tile) => ({
+            kind: tile.kind,
+            x: tile.x,
+            y: tile.y,
+            open: tile.open,
+            teleportChannel: tile.teleportChannel,
         }));
     }
 

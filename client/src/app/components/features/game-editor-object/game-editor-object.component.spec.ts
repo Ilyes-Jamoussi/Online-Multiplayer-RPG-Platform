@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GameEditorObjectComponent } from './game-editor-object.component';
-import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { ActiveTool, ToolType } from '@app/interfaces/game-editor.interface';
+import { AssetsService } from '@app/services/assets/assets.service';
+import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { PlaceableKind, PlaceableLabel, PlaceableMime } from '@common/enums/placeable-kind.enum';
+import { GameEditorObjectComponent } from './game-editor-object.component';
 
 const NOOP = (): void => {
     /** no-op */
@@ -91,8 +91,8 @@ describe('GameEditorObjectComponent', () => {
 
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => activeToolState,
-            set: (t: ActiveTool | null) => {
-                activeToolState = t;
+            set: (tool: ActiveTool | null) => {
+                activeToolState = tool;
             },
             configurable: true,
         });

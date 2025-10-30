@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GameEditorToolbarComponent } from './game-editor-toolbar.component';
-import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { ActiveTool, ToolbarItem, ToolType } from '@app/interfaces/game-editor.interface';
+import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { TileKind } from '@common/enums/tile-kind.enum';
+import { GameEditorToolbarComponent } from './game-editor-toolbar.component';
 
 describe('GameEditorToolbarComponent', () => {
     let fixture: ComponentFixture<GameEditorToolbarComponent>;
@@ -20,8 +20,8 @@ describe('GameEditorToolbarComponent', () => {
 
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => activeToolState,
-            set: (t: ActiveTool | null) => {
-                activeToolState = t;
+            set: (tool: ActiveTool | null) => {
+                activeToolState = tool;
             },
             configurable: true,
         });

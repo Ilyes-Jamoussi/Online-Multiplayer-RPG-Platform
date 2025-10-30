@@ -13,16 +13,16 @@ describe('tile.factory', () => {
             expect(out.length).toBe(expectedTotal);
 
             const seen = new Set<string>();
-            for (const t of out) {
-                expect(typeof t.x).toBe('number');
-                expect(typeof t.y).toBe('number');
-                expect(t.kind).toBe(TileKind.BASE);
-                expect(t.x).toBeGreaterThanOrEqual(0);
-                expect(t.x).toBeLessThan(size);
-                expect(t.y).toBeGreaterThanOrEqual(0);
-                expect(t.y).toBeLessThan(size);
+            for (const tile of out) {
+                expect(typeof tile.x).toBe('number');
+                expect(typeof tile.y).toBe('number');
+                expect(tile.kind).toBe(TileKind.BASE);
+                expect(tile.x).toBeGreaterThanOrEqual(0);
+                expect(tile.x).toBeLessThan(size);
+                expect(tile.y).toBeGreaterThanOrEqual(0);
+                expect(tile.y).toBeLessThan(size);
 
-                const key = `${t.x},${t.y}`;
+                const key = `${tile.x},${tile.y}`;
                 expect(seen.has(key)).toBe(false);
                 seen.add(key);
             }

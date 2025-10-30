@@ -1,12 +1,12 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GameEditorTileComponent } from './game-editor-tile.component';
-import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
-import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { ActiveTool, GameEditorIssues, ToolType, Vector2 } from '@app/interfaces/game-editor.interface';
+import { AssetsService } from '@app/services/assets/assets.service';
+import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
+import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { TileKind } from '@common/enums/tile-kind.enum';
-import { signal } from '@angular/core';
+import { GameEditorTileComponent } from './game-editor-tile.component';
 
 const NOOP = (): void => {
     /** no-op */
@@ -111,8 +111,8 @@ describe('GameEditorTileComponent', () => {
 
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => activeToolState,
-            set: (t: ActiveTool | null) => {
-                activeToolState = t;
+            set: (tool: ActiveTool | null) => {
+                activeToolState = tool;
             },
             configurable: true,
         });

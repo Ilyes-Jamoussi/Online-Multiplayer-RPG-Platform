@@ -1,14 +1,14 @@
 import { computed, Injectable } from '@angular/core';
+import {
+    DESCRIPTION_MAX_LENGTH,
+    DESCRIPTION_MIN_LENGTH,
+    GAME_NAME_MAX_LENGTH,
+    NAME_MIN_LENGTH,
+    WHITESPACE_PATTERN,
+} from '@app/constants/validation.constants';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { AccesibilityIssue, GameEditorIssue, GameEditorIssues } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import {
-    NAME_MIN_LENGTH,
-    GAME_NAME_MAX_LENGTH,
-    DESCRIPTION_MIN_LENGTH,
-    DESCRIPTION_MAX_LENGTH,
-    WHITESPACE_PATTERN,
-} from '@app/constants/validation.constants';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
 
@@ -106,9 +106,9 @@ export class GameEditorCheckService {
             tiles: [],
             hasIssue: false,
         };
-        for (const t of tiles) {
-            if (t.kind !== TileKind.DOOR) continue;
-            const { x, y } = t;
+        for (const tile of tiles) {
+            if (tile.kind !== TileKind.DOOR) continue;
+            const { x, y } = tile;
 
             const leftKind = this.gameEditorStoreService.getTileAt(x - 1, y)?.kind;
             const rightKind = this.gameEditorStoreService.getTileAt(x + 1, y)?.kind;
@@ -133,7 +133,7 @@ export class GameEditorCheckService {
     private checkTerrainCoverage(tiles: GameEditorTileDto[]): GameEditorIssue {
         const size = this.gameEditorStoreService.size();
         const total = size * size;
-        const terrainCount = tiles.filter((t) => this.isTerrainTile(t.kind)).length;
+        const terrainCount = tiles.filter((tile) => this.isTerrainTile(tile.kind)).length;
         const ratio = terrainCount / total;
         const probs: GameEditorIssue = { hasIssue: false };
         if (ratio <= GameEditorCheckService.minTerrainRatio) {
@@ -160,8 +160,8 @@ export class GameEditorCheckService {
 
     private buildTileKindGrid(tiles: GameEditorTileDto[], size: number): TileKind[][] {
         const grid: TileKind[][] = Array.from({ length: size }, () => Array<TileKind>(size).fill(TileKind.WALL));
-        for (const t of tiles) {
-            grid[t.y][t.x] = t.kind;
+        for (const tile of tiles) {
+            grid[tile.y][tile.x] = tile.kind;
         }
         return grid;
     }
@@ -216,12 +216,12 @@ export class GameEditorCheckService {
 
     private findInaccessibleTiles(tiles: GameEditorTileDto[], visited: Set<string>): AccesibilityIssue {
         const probs: AccesibilityIssue = { hasIssue: false, tiles: [] };
-        for (const t of tiles) {
-            if (this.isWalkableTile(t.kind) && !visited.has(`${t.x}:${t.y}`)) {
+        for (const tile of tiles) {
+            if (this.isWalkableTile(tile.kind) && !visited.has(`${tile.x}:${tile.y}`)) {
                 probs.hasIssue = true;
                 probs.tiles.push({
-                    x: t.x,
-                    y: t.y,
+                    x: tile.x,
+                    y: tile.y,
                 });
                 probs.message = 'Certaines tuiles de terrain ne sont pas accessibles.';
             }
@@ -233,11 +233,11 @@ export class GameEditorCheckService {
         const name = this.gameEditorStoreService.name.trim();
         return name.length < NAME_MIN_LENGTH || name.length > GAME_NAME_MAX_LENGTH || name.replace(WHITESPACE_PATTERN, '').length === 0
             ? {
-                  hasIssue: true,
-                  message:
-                      `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${GAME_NAME_MAX_LENGTH} caractères ` +
-                      `et ne pas être composé uniquement d'espaces.`,
-              }
+                hasIssue: true,
+                message:
+                    `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${GAME_NAME_MAX_LENGTH} caractères ` +
+                    `et ne pas être composé uniquement d'espaces.`,
+            }
             : { hasIssue: false };
     }
 
@@ -247,11 +247,11 @@ export class GameEditorCheckService {
             description.length > DESCRIPTION_MAX_LENGTH ||
             description.replace(WHITESPACE_PATTERN, '').length === 0
             ? {
-                  hasIssue: true,
-                  message:
-                      `La description doit contenir entre ${DESCRIPTION_MIN_LENGTH} et ${DESCRIPTION_MAX_LENGTH} caractères ` +
-                      `et ne pas être composée uniquement d'espaces.`,
-              }
+                hasIssue: true,
+                message:
+                    `La description doit contenir entre ${DESCRIPTION_MIN_LENGTH} et ${DESCRIPTION_MAX_LENGTH} caractères ` +
+                    `et ne pas être composée uniquement d'espaces.`,
+            }
             : { hasIssue: false };
     }
 }
