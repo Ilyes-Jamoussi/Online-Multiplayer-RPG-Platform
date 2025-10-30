@@ -1,11 +1,11 @@
+import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileCost, TileKind } from '@common/enums/tile-kind.enum';
+import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/models/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { GameCacheService } from './game-cache.service';
-import { TileCost, TileKind } from '@common/enums/tile-kind.enum';
-import { Orientation } from '@common/enums/orientation.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+import { GameCacheService } from './game-cache.service';
 
 interface ReachableTileExplorationContext {
     session: InGameSession;
@@ -35,7 +35,11 @@ export class InGameMovementService {
             throw new NotFoundException('Tile not found');
         }
 
-        const moveCost = TileCost[tile.kind];
+        const moveCost =
+            tile.kind === TileKind.DOOR
+                ? (tile.open ? TileCost.DOOR_OPEN : -1)
+                : TileCost[tile.kind];
+
         if (moveCost === -1) {
             throw new BadRequestException('Cannot move onto this tile');
         } else if (moveCost > player.movementPoints) {
@@ -170,13 +174,14 @@ export class InGameMovementService {
         const tile = this.gameCache.getTileAtPosition(sessionId, x, y);
         if (!tile) return null;
 
-        const tileCost = TileCost[tile.kind as keyof typeof TileCost];
+        let tileCost = TileCost[tile.kind as keyof typeof TileCost];
         if (tileCost === undefined) return null;
-        if (tileCost === -1) return null;
 
-        if (tile.kind === TileKind.DOOR && !tile.open) {
-            return null;
+        if (tile.kind === TileKind.DOOR) {
+            tileCost = tile.open ? TileCost.DOOR_OPEN : -1;
         }
+
+        if (tileCost === -1) return null;
 
         if (tile.kind === TileKind.WATER && isOnBoat) {
             return 1;
