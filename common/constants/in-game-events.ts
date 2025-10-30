@@ -28,5 +28,7 @@ export enum InGameEvents {
 
     ToggleAdminMode = 'toggleAdminMode',
     AdminModeToggled = 'adminModeToggled',
+    PlayerTeleport = 'playerTeleport',
+    PlayerTeleported = 'playerTeleported',
     LeftInGameSessionAck = 'leftInGameSessionAck',
 }

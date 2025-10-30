@@ -36,6 +36,7 @@ export class InGameService {
             mapSize,
             mode,
             turnOrder: [],
+            isAdminModeActive: false,
         };
 
         const game = await this.gameCache.fetchAndCacheGame(id, gameId);
@@ -127,5 +128,51 @@ export class InGameService {
     getReachableTiles(sessionId: string, playerId: string): void {
         const session = this.sessionRepository.findById(sessionId);
         this.movementService.calculateReachableTiles(session, playerId);
+    }
+
+    toggleAdminMode(sessionId: string): InGameSession {
+        const session = this.sessionRepository.findById(sessionId);
+        session.isAdminModeActive = !session.isAdminModeActive;
+        this.sessionRepository.update(session);
+        return session;
+    }
+
+    teleportPlayer(sessionId: string, playerId: string, x: number, y: number): void {
+        const session = this.sessionRepository.findById(sessionId);
+        
+        if (!session.isAdminModeActive) {
+            throw new BadRequestException('Admin mode not active');
+        }
+        
+        if (session.currentTurn.activePlayerId !== playerId) {
+            throw new BadRequestException('Not your turn');
+        }
+        
+        if (!this.isTileFree(session, x, y)) {
+            throw new BadRequestException('Tile is not free');
+        }
+        
+        const player = session.inGamePlayers[playerId];
+        player.x = x;
+        player.y = y;
+        
+        this.sessionRepository.update(session);
+    }
+
+    private isTileFree(session: InGameSession, x: number, y: number): boolean {
+
+        const players = Object.values(session.inGamePlayers);
+        const isOccupiedByPlayer = players.some(player => player.x === x && player.y === y && player.isInGame);
+        
+        if (isOccupiedByPlayer) {
+            return false;
+        }
+
+        const objectsAtPosition = this.gameCache.getPlaceablesAtPosition(session.id, x, y);
+        if (objectsAtPosition.length > 0) {
+            return false;
+        }
+        
+        return true;
     }
 }

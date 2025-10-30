@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, Input } from '@angular/core';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { InGamePlayer } from '@common/models/player.interface';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { AssetsService } from '@app/services/assets/assets.service';
+import { InGameService } from '@app/services/in-game/in-game.service';
+import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 
 @Component({
     selector: 'app-game-map-tile',
@@ -22,6 +24,8 @@ export class GameMapTileComponent {
     constructor(
         private readonly gameMapService: GameMapService,
         private readonly assetsService: AssetsService,
+        private readonly inGameService: InGameService,
+        private readonly adminModeService: AdminModeService,
     ) {}
 
     get objectOnTile(): GameEditorPlaceableDto | undefined {
@@ -44,6 +48,21 @@ export class GameMapTileComponent {
     get objectImageSrc(): string {
         const obj = this.objectOnTile;
         return obj ? this.assetsService.getPlaceableImage(obj.kind) : '';
+    }
+
+    @HostListener('contextmenu', ['$event'])
+    onRightClick(event: MouseEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (this.adminModeService.isAdminModeActivated() && this.inGameService.isMyTurn() && this.inGameService.isGameStarted()) {
+            if (!this.playerOnTile && !this.objectOnTile) {
+                this.inGameService.teleportPlayer(this.tile.x, this.tile.y);
+                return;
+            }
+            return;
+        }
+        this.gameMapService.openTileModal(this.tile);
     }
 
     openModal(event: MouseEvent): void {

@@ -21,7 +21,7 @@
     <div class="game-controls">
         <button [disabled]="!isMyTurn || !isGameStarted" (click)="onEndTurn()">Terminer le tour</button>
         <button class="abandon-button" (click)="onLeaveGame()">Abandonner la partie</button>
-        @if(!isGameStarted && isMyTurn) {
+        @if(!isGameStarted && isAdmin) {
         <button (click)="onStartGame()">Démarrer le jeu</button>
         }
 

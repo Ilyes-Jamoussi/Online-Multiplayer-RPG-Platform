@@ -7,13 +7,14 @@ import { GameTimerComponent } from '@app/components/features/game-timer/game-tim
 import { PlayerInfoComponent } from '@app/components/features/player-info/player-info.component';
 import { PlayersListComponent } from '@app/components/features/players-list/players-list.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
-import { ROUTES } from '@common/enums/routes.enum';
 import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
-import { InGameService } from '@app/services/in-game/in-game.service';
 import { InGameKeyboardEventsService } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
+import { InGameService } from '@app/services/in-game/in-game.service';
+import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { MapSize } from '@common/enums/map-size.enum';
+import { ROUTES } from '@common/enums/routes.enum';
 
 @Component({
     selector: 'app-game-session-page',
@@ -40,13 +41,20 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         private readonly router: Router,
         readonly adminModeService: AdminModeService,
         private readonly keyboardEventsService: InGameKeyboardEventsService,
+        private readonly playerService: PlayerService,
     ) {}
 
     @HostListener('window:keydown', ['$event'])
     onKeyDown(e: KeyboardEvent) {
         if (e.repeat) return;
-        const tag = (document.activeElement?.tagName || '').toLowerCase();
-        const typingInField = tag === 'input' || tag === 'textarea' || tag === 'select' || (document.activeElement as any)?.isContentEditable;
+
+        const activeElement = document.activeElement as HTMLElement | null;
+        const tag = (activeElement?.tagName || '').toLowerCase();
+        const typingInField =
+            tag === 'input' ||
+            tag === 'textarea' ||
+            tag === 'select' ||
+            activeElement?.isContentEditable;
 
         if (!typingInField && (e.key === 'd' || e.key === 'D')) {
             this.adminModeService.toggleAdminMode();
@@ -101,6 +109,10 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         return this.inGameService.isTransitioning();
     }
 
+    get isAdmin(): boolean {
+        return this.playerService.isAdmin();
+    }
+
     getInGamePlayersCount(): number {
         return Object.keys(this.inGameService.inGameSession().inGamePlayers).length;
     }
@@ -120,9 +132,9 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         const session = this.inGameService.inGameSession();
         const activePlayerId = session.currentTurn.activePlayerId;
         const player = session.inGamePlayers[activePlayerId];
-        
+
         if (!player) return 'Joueur non trouvé';
-        
+
         return `Pos:(${player.x},${player.y}) MP:${player.movementPoints}`;
     }
 

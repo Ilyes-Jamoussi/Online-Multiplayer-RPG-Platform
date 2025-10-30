@@ -9,6 +9,7 @@ import { PlayerService } from '@app/services/player/player.service';
 import { InGamePlayer } from '@common/models/player.interface';
 import { TimerService } from '@app/services/timer/timer.service';
 import { NotificationService } from '@app/services/notification/notification.service';
+import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 import { Orientation } from '@common/enums/orientation.enum';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 
@@ -34,6 +35,7 @@ export class InGameService {
     readonly inGamePlayers = computed(() => this._inGameSession().inGamePlayers);
     readonly inGameSession = this._inGameSession.asReadonly();
     readonly reachableTiles = this._reachableTiles.asReadonly();
+    readonly isAdminModeActive = computed(() => this.adminModeService.isAdminModeActivated());
 
     constructor(
         private readonly inGameSocketService: InGameSocketService,
@@ -41,6 +43,7 @@ export class InGameService {
         private readonly timerService: TimerService,
         private readonly playerService: PlayerService,
         private readonly notificationService: NotificationService,
+        private readonly adminModeService: AdminModeService,
     ) {
         this.initListeners();
     }
@@ -89,6 +92,11 @@ export class InGameService {
 
     endTurn(): void {
         this.inGameSocketService.playerEndTurn(this.sessionService.id());
+    }
+
+    teleportPlayer(x: number, y: number): void {
+        if (!this.isMyTurn() || !this.isGameStarted() || !this.isAdminModeActive()) return;
+        this.inGameSocketService.playerTeleport(this.sessionService.id(), x, y);
     }
 
     updateInGameSession(data: InGameSession): void {
@@ -199,6 +207,10 @@ export class InGameService {
 
         this.inGameSocketService.onPlayerReachableTiles((data) => {
             this._reachableTiles.set(data);
+        });
+
+        this.inGameSocketService.onPlayerTeleported((data) => {
+            this.updatePlayerPosition(data.playerId, data.x, data.y, this.getPlayerByPlayerId(data.playerId).movementPoints);
         });
     }
 }

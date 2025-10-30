@@ -61,7 +61,7 @@ export class InGameSocketService {
         this.socket.emit(InGameEvents.ToggleAdminMode, sessionId);
     }
 
-    onAdminModeToggled(callback: () => void): void {
+    onAdminModeToggled(callback: (data: { isAdminModeActive: boolean }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.AdminModeToggled, callback);
     }
 
@@ -83,5 +83,13 @@ export class InGameSocketService {
 
     onPlayerReachableTiles(callback: (data: ReachableTile[]) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerReachableTiles, callback);
+    }
+
+    playerTeleport(sessionId: string, x: number, y: number): void {
+        this.socket.emit(InGameEvents.PlayerTeleport, { sessionId, x, y });
+    }
+
+    onPlayerTeleported(callback: (data: { playerId: string; x: number; y: number }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerTeleported, callback);
     }
 }

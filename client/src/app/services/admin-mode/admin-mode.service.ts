@@ -30,8 +30,8 @@ export class AdminModeService {
   }
 
   private initListeners(): void {
-    this.inGameSocketService.onAdminModeToggled(() => {
-      this.isAdminModeActivated.set(!this.isAdminModeActivated());
+    this.inGameSocketService.onAdminModeToggled((data: { isAdminModeActive: boolean }) => {
+      this.isAdminModeActivated.set(data.isAdminModeActive);
     });
   }
 }
