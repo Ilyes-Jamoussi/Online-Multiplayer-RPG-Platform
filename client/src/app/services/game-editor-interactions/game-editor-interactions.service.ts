@@ -185,10 +185,10 @@ export class GameEditorInteractionsService {
 
         for (let dy = 0; dy < footprint; dy++) {
             for (let dx = 0; dx < footprint; dx++) {
-                const tx = x + dx;
-                const ty = y + dy;
+                const tangentX = x + dx;
+                const tangentY = y + dy;
 
-                const tile = this.store.getTileAt(tx, ty);
+                const tile = this.store.getTileAt(tangentX, tangentY);
                 if (!tile) return false;
 
                 const tileKind = tile.kind;
@@ -199,7 +199,7 @@ export class GameEditorInteractionsService {
                     if (tileKind !== TileKind.WATER) return false;
                 }
 
-                const object = this.store.getPlacedObjectAt(tx, ty);
+                const object = this.store.getPlacedObjectAt(tangentX, tangentY);
                 if (object && object.id !== excludeId) return false;
             }
         }
