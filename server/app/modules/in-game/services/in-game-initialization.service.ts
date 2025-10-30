@@ -20,7 +20,7 @@ export class InGameInitializationService {
     }
 
     assignStartPoints(session: InGameSession, game: Game): void {
-        const shuffledStartPoints = this.shuffleArray(game.objects.filter((o) => o.kind === PlaceableKind.START));
+        const shuffledStartPoints = this.shuffleArray(game.objects.filter((object) => object.kind === PlaceableKind.START));
 
         if (shuffledStartPoints.length < session.turnOrder.length) {
             throw new Error(`Pas assez de points de départ sur la carte :

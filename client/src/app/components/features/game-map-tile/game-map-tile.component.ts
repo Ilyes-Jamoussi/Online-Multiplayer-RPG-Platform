@@ -27,7 +27,7 @@ export class GameMapTileComponent {
     get objectOnTile(): GameEditorPlaceableDto | undefined {
         return this.gameMapService
             .objects()
-            .find((o) => o.placed && o.x === this.tile.x && o.y === this.tile.y);
+            .find((object) => object.placed && object.x === this.tile.x && object.y === this.tile.y);
     }
 
     get playerOnTile(): InGamePlayer | undefined {

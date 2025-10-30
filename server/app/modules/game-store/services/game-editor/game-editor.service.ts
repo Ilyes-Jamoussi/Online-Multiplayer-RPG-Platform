@@ -91,13 +91,13 @@ export class GameEditorService {
 
     private mapObjects(objects: GameEditorPlaceableDto[]): Placeable[] {
         if (!objects) return [];
-        return objects.map((o) => ({
-            id: o.id,
-            kind: o.kind,
-            x: o.x,
-            y: o.y,
-            placed: o.placed,
-            orientation: o.orientation,
+        return objects.map((object) => ({
+            id: object.id,
+            kind: object.kind,
+            x: object.x,
+            y: object.y,
+            placed: object.placed,
+            orientation: object.orientation,
         }));
     }
 }

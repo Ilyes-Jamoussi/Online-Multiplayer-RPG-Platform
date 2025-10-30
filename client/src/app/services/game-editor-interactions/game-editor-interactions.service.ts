@@ -213,7 +213,7 @@ export class GameEditorInteractionsService {
     }
 
     private tryMoveObject(x: number, y: number, id: string): void {
-        const obj = this.store.placedObjects.find((o) => o.id === id);
+        const obj = this.store.placedObjects.find((object) => object.id === id);
         if (!obj) return;
 
         const kind = PlaceableKind[obj.kind];

@@ -59,7 +59,7 @@ class StoreStub implements Partial<GameEditorStoreService> {
     });
 
     getPlacedObjectAt = jasmine.createSpy('getPlacedObjectAt').and.callFake((x: number, y: number) => {
-        return this.placedObjectsSig().find((o) => o.x === x && o.y === y);
+        return this.placedObjectsSig().find((object) => object.x === x && object.y === y);
     });
 
     placeObjectFromInventory = jasmine.createSpy('placeObjectFromInventory').and.callFake((kind: PlaceableKind, x: number, y: number) => {
@@ -69,12 +69,12 @@ class StoreStub implements Partial<GameEditorStoreService> {
     });
 
     movePlacedObject = jasmine.createSpy('movePlacedObject').and.callFake((id: string, x: number, y: number) => {
-        const list = this.placedObjectsSig().map((o) => (o.id === id ? { ...o, x, y } : o));
+        const list = this.placedObjectsSig().map((object) => (object.id === id ? { ...object, x, y } : object));
         this.setPlacedObjects(list);
     });
 
     removeObject = jasmine.createSpy('removeObject').and.callFake((id: string) => {
-        this.setPlacedObjects(this.placedObjectsSig().filter((o) => o.id !== id));
+        this.setPlacedObjects(this.placedObjectsSig().filter((object) => object.id !== id));
     });
 }
 

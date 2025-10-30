@@ -52,26 +52,26 @@ export class GameEditorStoreService {
 
     get placedObjects(): ExtendedGameEditorPlaceableDto[] {
         const objs = this._objects();
-        const placed = objs.filter((o) => o.placed);
+        const placed = objs.filter((object) => object.placed);
         const accumulateur: ExtendedGameEditorPlaceableDto[] = [];
 
-        for (const o of placed) {
-            const footprint = PlaceableFootprint[PlaceableKind[o.kind]];
+        for (const object of placed) {
+            const footprint = PlaceableFootprint[PlaceableKind[object.kind]];
             const xs: number[] = [];
             const ys: number[] = [];
             for (let dx = 0; dx < footprint; dx++) {
                 for (let dy = 0; dy < footprint; dy++) {
-                    xs.push(o.x + dx);
-                    ys.push(o.y + dy);
+                    xs.push(object.x + dx);
+                    ys.push(object.y + dy);
                 }
             }
             accumulateur.push({
-                id: o.id,
-                kind: o.kind,
-                orientation: o.orientation,
-                placed: o.placed,
-                x: o.x,
-                y: o.y,
+                id: object.id,
+                kind: object.kind,
+                orientation: object.orientation,
+                placed: object.placed,
+                x: object.x,
+                y: object.y,
                 xs,
                 ys,
             });
@@ -84,13 +84,13 @@ export class GameEditorStoreService {
         const objs = this._objects();
         const inv: Inventory = {} as Inventory;
 
-        for (const o of objs) {
-            const kind = PlaceableKind[o.kind];
+        for (const object of objs) {
+            const kind = PlaceableKind[object.kind];
             if (!(kind in inv)) {
                 inv[kind] = { kind, total: 0, remaining: 0, disabled: false, image: this.assetsService.getPlaceableImage(kind) };
             }
             inv[kind].total += 1;
-            if (!o.placed) {
+            if (!object.placed) {
                 inv[kind].remaining += 1;
             }
         }
@@ -370,7 +370,7 @@ export class GameEditorStoreService {
 
     getPlacedObjectAt(x: number, y: number): GameEditorPlaceableDto | undefined {
         if (!this.inBounds(x, y)) return undefined;
-        return this.placedObjects.find((o) => o.xs.includes(x) && o.ys.includes(y));
+        return this.placedObjects.find((object) => object.xs.includes(x) && object.ys.includes(y));
     }
 
     placeObjectFromInventory(kind: PlaceableKind, x: number, y: number): void {
@@ -437,11 +437,11 @@ export class GameEditorStoreService {
     }
 
     private findObjectIndexById(draft: GameEditorPlaceableDto[], id: string): number {
-        return draft.findIndex((o) => o.id === id);
+        return draft.findIndex((object) => object.id === id);
     }
 
     private findFirstUnplacedIndexByKind(draft: GameEditorPlaceableDto[], kind: PlaceableKind): number {
-        return draft.findIndex((o) => o.kind === PlaceableKind[kind] && !o.placed);
+        return draft.findIndex((object) => object.kind === PlaceableKind[kind] && !object.placed);
     }
 
     private isOccupiedByOther(id: string | null, x: number, y: number): boolean {
