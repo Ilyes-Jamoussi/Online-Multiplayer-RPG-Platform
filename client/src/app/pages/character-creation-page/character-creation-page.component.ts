@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, OnInit, effect } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AvatarGridComponent } from '@app/components/features/avatar-grid/avatar-grid.component';
 import { ErrorsBadgeComponent } from '@app/components/features/errors-badge/errors-badge.component';
@@ -10,7 +10,6 @@ import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layou
 import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@app/constants/validation.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
-import { CharacterEditorService } from '@app/services/character-editor/character-editor.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { BonusType } from '@common/enums/character-creation.enum';
 import { Dice } from '@common/enums/dice.enum';
@@ -21,9 +20,9 @@ import { Dice } from '@common/enums/dice.enum';
     templateUrl: './character-creation-page.component.html',
     styleUrls: ['./character-creation-page.component.scss'],
     imports: [FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent, AvatarGridComponent],
-    providers: [CharacterCreationCheckService, CharacterEditorService],
+    providers: [CharacterCreationCheckService],
 })
-export class CharacterCreationPageComponent implements OnInit {
+export class CharacterCreationPageComponent {
     readonly dice = Dice;
     readonly bonusType = BonusType;
     readonly characterNameMinLength = NAME_MIN_LENGTH;
@@ -32,52 +31,32 @@ export class CharacterCreationPageComponent implements OnInit {
     constructor(
         private readonly assetsService: AssetsService,
         private readonly characterCreationCheckService: CharacterCreationCheckService,
-        private readonly characterEditorService: CharacterEditorService,
         private readonly playerService: PlayerService,
         private readonly location: Location,
-    ) {
-        // Synchroniser l'avatar PlayerService -> CharacterEditorService
-        effect(() => {
-            const playerAvatar = this.playerService.avatar();
-            if (playerAvatar) {
-                this.characterEditorService.avatar = playerAvatar;
-            }
-        });
-    }
-
-    ngOnInit(): void {
-        const currentAvatar = this.playerService.avatar();
-        if (currentAvatar) {
-            this.characterEditorService.avatar = currentAvatar;
-        }
-    }
+    ) {}
 
     get isLifeBonusSelected(): boolean {
-        return this.character.bonus === BonusType.Life || false;
+        return this.playerService.isLifeBonusSelected();
     }
 
     get isSpeedBonusSelected(): boolean {
-        return this.character.bonus === BonusType.Speed || false;
+        return this.playerService.isSpeedBonusSelected();
     }
 
     get isAttackD4Selected(): boolean {
-        return this.character.diceAssignment.attack === Dice.D4 || false;
+        return this.playerService.attackDice() === Dice.D4;
     }
 
     get isAttackD6Selected(): boolean {
-        return this.character.diceAssignment.attack === Dice.D6 || false;
+        return this.playerService.attackDice() === Dice.D6;
     }
 
     get isDefenseD4Selected(): boolean {
-        return this.character.diceAssignment.defense === Dice.D4 || false;
+        return this.playerService.defenseDice() === Dice.D4;
     }
 
     get isDefenseD6Selected(): boolean {
-        return this.character.diceAssignment.defense === Dice.D6 || false;
-    }
-
-    get character() {
-        return this.characterEditorService.character();
+        return this.playerService.defenseDice() === Dice.D6;
     }
 
     get canCreateCharacter(): boolean {
@@ -88,40 +67,43 @@ export class CharacterCreationPageComponent implements OnInit {
         return this.playerService.isAdmin();
     }
 
+    get playerName(): string {
+        return this.playerService.name();
+    }
+
+    get playerHealth(): number {
+        return this.playerService.health();
+    }
+
+    get playerSpeed(): number {
+        return this.playerService.speed();
+    }
+
     getDiceImage(dice: Dice): string {
         return this.assetsService.getDiceImage(dice);
     }
 
-    onNameChange(v: string): void {
-        this.characterEditorService.name = v;
+    onNameChange(name: string): void {
+        this.playerService.setName(name);
     }
 
     onBonusChange(bonus: BonusType): void {
-        this.characterEditorService.bonus = bonus;
+        this.playerService.setBonus(bonus);
     }
 
     onAttackDiceChange(value: Dice): void {
-        this.characterEditorService.setDice('attack', value);
+        this.playerService.setDice('attack', value);
     }
 
     onDefenseDiceChange(value: Dice): void {
-        this.characterEditorService.setDice('defense', value);
+        this.playerService.setDice('defense', value);
     }
 
     generateRandomCharacter(): void {
-        this.characterEditorService.generateRandom();
-        const avatar = this.characterEditorService.character().avatar;
-        if (avatar) {
-            this.playerService.selectAvatar(avatar);
-        }
+        this.playerService.generateRandom();
     }
 
     onSubmit(): void {
-        const character = this.character;
-        if (!character) return;
-
-        this.playerService.characterData = character;
-
         if (this.isPlayerAdmin) this.playerService.createSession();
         else this.playerService.joinSession();
     }

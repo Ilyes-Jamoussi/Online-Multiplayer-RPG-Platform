@@ -2,14 +2,13 @@ import { computed, Injectable, Signal, signal, WritableSignal } from '@angular/c
 import { Router } from '@angular/router';
 import { CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
 import { DEFAULT_PLAYER } from '@app/constants/player.constants';
-import { ROUTES } from '@common/enums/routes.enum';
 import { NotificationService } from '@app/services/notification/notification.service';
-import { SessionService } from '@app/services/session/session.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
+import { SessionService } from '@app/services/session/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { BonusType } from '@common/enums/character-creation.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { Character } from '@common/interfaces/character.interface';
+import { ROUTES } from '@common/enums/routes.enum';
 import { Player } from '@common/models/player.interface';
 
 @Injectable({
@@ -17,13 +16,26 @@ import { Player } from '@common/models/player.interface';
 })
 export class PlayerService {
     private readonly _player: WritableSignal<Player> = signal<Player>({ ...DEFAULT_PLAYER });
-    private readonly _character = signal<Character | null>(null);
 
     readonly player: Signal<Player> = this._player.asReadonly();
-    readonly character = this._character.asReadonly();
     readonly id: Signal<string> = computed(() => this.player().id);
     readonly isAdmin: Signal<boolean> = computed(() => this.player().isAdmin);
     readonly avatar: Signal<Avatar | null> = computed(() => this.player().avatar);
+
+    // Computed properties matching Player interface exactly
+    readonly name = computed(() => this.player().name);
+    readonly health = computed(() => this.player().health);
+    readonly maxHealth = computed(() => this.player().maxHealth);
+    readonly baseSpeed = computed(() => this.player().baseSpeed);
+    readonly speedBonus = computed(() => this.player().speedBonus);
+    readonly speed = computed(() => this.player().speed);
+    readonly attack = computed(() => this.player().attack);
+    readonly defense = computed(() => this.player().defense);
+    readonly attackDice = computed(() => this.player().attackDice);
+    readonly defenseDice = computed(() => this.player().defenseDice);
+    readonly actionsRemaining = computed(() => this.player().actionsRemaining);
+    readonly isLifeBonusSelected = computed(() => this.player().healthBonus > 0);
+    readonly isSpeedBonusSelected = computed(() => this.player().speedBonus > 0);
 
     constructor(
         private readonly sessionService: SessionService,
@@ -34,60 +46,51 @@ export class PlayerService {
         this.initListeners();
     }
 
-    // Getters pour les stats calculées dynamiquement
-    get lifePoints(): number {
-        const char = this._character();
-        if (!char) return CHARACTER_BASE;
-        return char.bonus === BonusType.Life ? CHARACTER_BASE + CHARACTER_PLUS : CHARACTER_BASE;
+    setName(name: string): void {
+        this.updatePlayer({ name });
     }
 
-    get speedPoints(): number {
-        const char = this._character();
-        if (!char) return CHARACTER_BASE;
-        return char.bonus === BonusType.Speed ? CHARACTER_BASE + CHARACTER_PLUS : CHARACTER_BASE;
-    }
+    setBonus(bonus: BonusType): void {
+        const baseHealth = CHARACTER_BASE;
+        const healthBonus = bonus === BonusType.Life ? CHARACTER_PLUS : 0;
+        const baseSpeed = CHARACTER_BASE;
+        const speedBonus = bonus === BonusType.Speed ? CHARACTER_PLUS : 0;
 
-    get attackPoints(): number {
-        return CHARACTER_BASE;
-    }
-
-    get defensePoints(): number {
-        return CHARACTER_BASE;
-    }
-
-    get attackDice(): Dice {
-        const char = this._character();
-        return char?.diceAssignment.attack || Dice.D4;
-    }
-
-    get defenseDice(): Dice {
-        const char = this._character();
-        return char?.diceAssignment.defense || Dice.D6;
-    }
-
-    get characterName(): string {
-        return this.player().name;
-    }
-
-    get remainingMovementPoints(): number {
-        return this.player().movementPoints;
-    }
-
-    set characterData(character: Character) {
-        this._character.set(character);
         this.updatePlayer({
-            name: character.name,
-            avatar: character.avatar,
-            speed: character.attributes.speed,
-            health: character.attributes.life,
-            attack: Dice[character.diceAssignment.attack],
-            defense: Dice[character.diceAssignment.defense],
-            x: 0,
-            y: 0,
-            isInGame: false,
-            startPointId: '',
-            movementPoints: 0,
+            baseHealth,
+            healthBonus,
+            health: baseHealth + healthBonus,
+            maxHealth: baseHealth + healthBonus,
+            baseSpeed,
+            speedBonus,
+            speed: baseSpeed + speedBonus,
         });
+    }
+
+    setDice(attr: 'attack' | 'defense', value: Dice): void {
+        const newDice = {
+            attackDice: attr === 'attack' ? value : (value === Dice.D6 ? Dice.D4 : Dice.D6),
+            defenseDice: attr === 'defense' ? value : (value === Dice.D6 ? Dice.D4 : Dice.D6)
+        };
+
+        this.updatePlayer({
+            attackDice: newDice.attackDice,
+            defenseDice: newDice.defenseDice,
+        });
+    }
+
+    generateRandom(): void {
+        const names = ['Aragorn', 'Legolas', 'Gimli', 'Gandalf', 'Frodo', 'Samwise', 'Boromir', 'Faramir', 'Eowyn', 'Arwen'];
+        const avatars = Object.values(Avatar);
+        const randomName = names[Math.floor(Math.random() * names.length)];
+        const randomAvatar = avatars[Math.floor(Math.random() * avatars.length)];
+        const RANDOM_THRESHOLD = 0.5;
+        const randomBonus = Math.random() < RANDOM_THRESHOLD ? BonusType.Life : BonusType.Speed;
+
+        this.setName(randomName);
+        this.selectAvatar(randomAvatar);
+        this.setBonus(randomBonus);
+        this.setDice(Math.random() < RANDOM_THRESHOLD ? 'attack' : 'defense', Dice.D6);
     }
 
     updatePlayer(partial: Partial<Player>): void {
@@ -96,10 +99,9 @@ export class PlayerService {
 
     resetPlayer(): void {
         this._player.set({ ...DEFAULT_PLAYER });
-        this._character.set(null);
     }
 
-    selectAvatar(avatar: Avatar): void {
+    selectAvatar(avatar: Avatar) {
         this.updatePlayer({ avatar });
         this.sessionService.updateAvatarAssignment(this.id(), avatar, this.isAdmin());
     }

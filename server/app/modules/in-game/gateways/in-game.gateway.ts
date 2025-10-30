@@ -2,6 +2,7 @@ import { InGameService } from '@app/modules/in-game/services/in-game/in-game.ser
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { InGameEvents } from '@common/constants/in-game-events';
 import { Orientation } from '@common/enums/orientation.enum';
+import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/models/session.interface';
 import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
@@ -75,6 +76,15 @@ export class InGameGateway {
         }
     }
 
+    @SubscribeMessage(InGameEvents.CombatChoice)
+    combatChoice(socket: Socket, payload: { sessionId: string; choice: 'offensive' | 'defensive' }): void {
+        try {
+            this.inGameService.combatChoice(payload.sessionId, socket.id, payload.choice);
+        } catch (error) {
+            socket.emit(InGameEvents.CombatChoice, errorResponse(error.message));
+        }
+    }
+
     @SubscribeMessage(InGameEvents.ToggleDoorAction)
     toggleDoorAction(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
         try {
@@ -125,14 +135,21 @@ export class InGameGateway {
         this.logger.warn(`Forced end of turn for session ${payload.session.id}`);
     }
 
-    @OnEvent('player.attacked')
-    handlePlayerAttacked(payload: { session: InGameSession; attackerId: string; targetId: string; x: number; y: number }) {
+    @OnEvent('combat.started')
+    handleCombatStarted(payload: { session: InGameSession; attackerId: string; targetId: string }) {
         this.server
             .to(payload.session.inGameId)
             .emit(InGameEvents.CombatStarted, successResponse({
                 attackerId: payload.attackerId,
                 targetId: payload.targetId
             }));
+    }
+
+    @OnEvent('combat.ended')
+    handleCombatEnded(payload: { session: InGameSession }) {
+        this.server
+            .to(payload.session.inGameId)
+            .emit(InGameEvents.CombatEnded, successResponse({}));
     }
 
     @OnEvent('door.toggled')
@@ -150,10 +167,10 @@ export class InGameGateway {
                 InGameEvents.PlayerMoved,
                 successResponse({ playerId: payload.playerId, x: payload.x, y: payload.y, movementPoints: payload.movementPoints }),
             );
-        
+
         // Recalculer les actions disponibles après le mouvement
         this.inGameService.getAvailableActions(payload.session.id, payload.playerId);
-        
+
         this.logger.log(`Player ${payload.playerId} moved to ${payload.x}, ${payload.y} in session ${payload.session.id}`);
     }
 
@@ -163,7 +180,7 @@ export class InGameGateway {
     }
 
     @OnEvent('player.availableActions')
-    handlePlayerAvailableActions(payload: { playerId: string; actions: any[] }) {
+    handlePlayerAvailableActions(payload: { playerId: string; actions: AvailableAction[] }) {
         this.server.to(payload.playerId).emit(InGameEvents.PlayerAvailableActions, successResponse(payload.actions));
     }
 

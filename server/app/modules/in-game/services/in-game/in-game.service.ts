@@ -1,14 +1,13 @@
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
-import { TurnEngineService } from '@app/modules/in-game/services/turn-engine/turn-engine.service';
+import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
-import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { InGamePlayer } from '@common/models/player.interface';
 import { InGameSession, WaitingRoomSession } from '@common/models/session.interface';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { BadRequestException, Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { GameCacheService } from 'app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameActionService } from 'app/modules/in-game/services/in-game-action/in-game-action.service';
 import { InGameInitializationService } from 'app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
@@ -17,14 +16,15 @@ import { InGameMovementService } from 'app/modules/in-game/services/in-game-move
 @Injectable()
 export class InGameService {
     constructor(
-        private readonly turnEngine: TurnEngineService,
+        private readonly timerService: TimerService,
         private readonly gameCache: GameCacheService,
         private readonly initialization: InGameInitializationService,
         private readonly sessionRepository: InGameSessionRepository,
         private readonly movementService: InGameMovementService,
-        private readonly actionService: InGameActionService,
-        private readonly eventEmitter: EventEmitter2,
     ) {}
+
+    @Inject(InGameActionService) private readonly actionService: InGameActionService;
+    @Inject(EventEmitter2) private readonly eventEmitter: EventEmitter2;
 
     async createInGameSession(waiting: WaitingRoomSession, mode: GameMode, mapSize: MapSize): Promise<InGameSession> {
         const { id, gameId, maxPlayers, players } = waiting;
@@ -53,7 +53,8 @@ export class InGameService {
         const firstPlayerId = playerIdsOrder[0];
         session.currentTurn.activePlayerId = firstPlayerId;
         if (session.inGamePlayers[firstPlayerId]) {
-            session.inGamePlayers[firstPlayerId].movementPoints = session.inGamePlayers[firstPlayerId].speed;
+            const player = session.inGamePlayers[firstPlayerId];
+            player.speed = player.baseSpeed + player.speedBonus;
         }
 
         this.initialization.assignStartPoints(session, game);
@@ -66,7 +67,7 @@ export class InGameService {
         if (session.isGameStarted) throw new BadRequestException('Game already started');
 
         session.isGameStarted = true;
-        session.currentTurn = this.turnEngine.startFirstTurn(session, DEFAULT_TURN_DURATION);
+        session.currentTurn = this.timerService.startFirstTurn(session, DEFAULT_TURN_DURATION);
 
         return session;
     }
@@ -98,7 +99,7 @@ export class InGameService {
         if (session.currentTurn.activePlayerId !== playerId) {
             throw new BadRequestException('Not your turn');
         }
-        this.turnEngine.endTurnManual(session);
+        this.timerService.endTurnManual(session);
         return session;
     }
 
@@ -128,7 +129,7 @@ export class InGameService {
         const inGamePlayers = this.sessionRepository.inGamePlayersCount(sessionId);
         let sessionEnded = false;
         if (inGamePlayers < 2) {
-            this.turnEngine.forceStopTimer(sessionId);
+            this.timerService.forceStopTimer(sessionId);
             sessionEnded = true;
         }
 
@@ -153,6 +154,16 @@ export class InGameService {
         this.calculateAvailableActions(session, playerId);
     }
 
+    endCombat(sessionId: string): void {
+        const session = this.sessionRepository.findById(sessionId);
+        this.eventEmitter.emit('combat.ended', { session });
+    }
+
+    combatChoice(sessionId: string, socketId: string, choice: 'offensive' | 'defensive'): void {
+        const session = this.sessionRepository.findById(sessionId);
+        this.eventEmitter.emit('combat.choice', { session, socketId, choice });
+    }
+
     private calculateAvailableActions(session: InGameSession, playerId: string): void {
         const player = session.inGamePlayers[playerId];
         if (!player) return;
@@ -163,7 +174,7 @@ export class InGameService {
         for (const orientation of orientations) {
             try {
                 const pos = this.gameCache.getNextPosition(session.id, player.x, player.y, orientation);
-                
+
                 // Chercher joueur adjacent (ATTACK)
                 const occupantId = this.gameCache.getTileOccupant(session.id, pos.x, pos.y);
                 if (occupantId && occupantId !== playerId) {
@@ -182,5 +193,15 @@ export class InGameService {
         }
 
         this.eventEmitter.emit('player.availableActions', { playerId, actions });
+    }
+
+    @OnEvent('combat.started')
+    handleCombatStarted(payload: { session: InGameSession; attackerId: string; targetId: string }): void {
+        this.timerService.startCombatTimer(payload.session.id);
+    }
+
+    @OnEvent('combat.ended')
+    handleCombatEnded(payload: { session: InGameSession }): void {
+        this.timerService.stopCombatTimer(payload.session.id);
     }
 }

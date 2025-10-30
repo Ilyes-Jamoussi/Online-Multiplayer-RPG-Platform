@@ -22,11 +22,59 @@ export class PlayerDto {
 
     @ApiProperty({ enum: Dice, enumName: 'Dice' })
     @IsEnum(Dice)
-    readonly attack: Dice;
+    readonly attackDice: Dice;
 
     @ApiProperty({ enum: Dice, enumName: 'Dice' })
     @IsEnum(Dice)
-    readonly defense: Dice;
+    readonly defenseDice: Dice;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly baseHealth: number;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly healthBonus: number;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly health: number;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly maxHealth: number;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly baseAttack: number;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly attackBonus: number;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly attack: number;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly baseDefense: number;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly defenseBonus: number;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly defense: number;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly baseSpeed: number;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly speedBonus: number;
 
     @ApiProperty()
     @IsNumber()
@@ -34,5 +82,5 @@ export class PlayerDto {
 
     @ApiProperty()
     @IsNumber()
-    readonly health: number;
+    readonly actionsRemaining: number;
 }

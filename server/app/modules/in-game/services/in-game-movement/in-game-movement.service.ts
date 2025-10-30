@@ -38,7 +38,7 @@ export class InGameMovementService {
         const moveCost = TileCost[tile.kind];
         if (moveCost === -1) {
             throw new BadRequestException('Cannot move onto this tile');
-        } else if (moveCost > player.movementPoints) {
+        } else if (moveCost > player.speed) {
             throw new BadRequestException('Not enough movement points for this tile');
         }
 
@@ -50,17 +50,17 @@ export class InGameMovementService {
 
         player.x = nextX;
         player.y = nextY;
-        player.movementPoints -= moveCost;
+        player.speed -= moveCost;
 
         this.eventEmitter.emit('player.moved', {
             session,
             playerId,
             x: nextX,
             y: nextY,
-            movementPoints: player.movementPoints,
+            speed: player.speed,
         });
 
-        if (player.movementPoints) {
+        if (player.speed) {
             this.calculateReachableTiles(session, playerId);
         } else {
             this.eventEmitter.emit('player.reachableTiles', { playerId, reachable: [] });
@@ -99,7 +99,7 @@ export class InGameMovementService {
                 x: player.x,
                 y: player.y,
                 cost: 0,
-                remainingPoints: player.movementPoints,
+                remainingPoints: player.speed,
             },
         ];
     }

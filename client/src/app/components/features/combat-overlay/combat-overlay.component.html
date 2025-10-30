@@ -1,6 +1,8 @@
 @if (combatData) {
     <div class="combat-overlay">
         <div class="combat-modal">
+            <app-combat-timer></app-combat-timer>
+            
             <div class="combat-header">
                 <h2>Combat en cours</h2>
             </div>
@@ -38,8 +40,15 @@
                     <p class="combat-message">{{ attackerName }} t'attaque !</p>
                 }
                 
+                <p class="stance-instruction">Choisissez votre posture :</p>
+                
                 <div class="action-buttons">
-                    <button class="combat-btn">Choisir posture</button>
+                    <button class="combat-btn offensive" (click)="chooseOffensive()">
+                        ⚔️ Offensive (+2 Attaque)
+                    </button>
+                    <button class="combat-btn defensive" (click)="chooseDefensive()">
+                        🛡️ Défensive (+2 Défense)
+                    </button>
                 </div>
             </div>
         </div>

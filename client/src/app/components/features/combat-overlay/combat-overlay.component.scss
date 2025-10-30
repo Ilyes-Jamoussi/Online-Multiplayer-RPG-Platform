@@ -11,6 +11,12 @@
     z-index: 1000;
 }
 
+app-combat-timer {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
 .combat-modal {
     background: linear-gradient(135deg, #2c1810, #4a2c1a);
     border: 3px solid #d4af37;
@@ -118,29 +124,56 @@
 .combat-message {
     font-size: 1.1rem;
     color: #fff;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     font-style: italic;
+}
+
+.stance-instruction {
+    font-size: 1rem;
+    color: #d4af37;
+    margin-bottom: 1.5rem;
+    font-weight: bold;
 }
 
 .action-buttons {
     display: flex;
     justify-content: center;
-    gap: 1rem;
+    gap: 1.5rem;
 }
 
 .combat-btn {
     background: linear-gradient(135deg, #d4af37, #b8941f);
     color: #2c1810;
     border: none;
-    padding: 0.8rem 1.5rem;
+    padding: 1rem 1.5rem;
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 0.9rem;
+    min-width: 160px;
     
     &:hover {
         background: linear-gradient(135deg, #b8941f, #d4af37);
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    &.offensive {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        
+        &:hover {
+            background: linear-gradient(135deg, #c82333, #dc3545);
+        }
+    }
+
+    &.defensive {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        
+        &:hover {
+            background: linear-gradient(135deg, #0056b3, #007bff);
+        }
     }
 }

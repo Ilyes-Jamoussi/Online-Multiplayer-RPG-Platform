@@ -1,15 +1,15 @@
-import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
 import { GameInfoComponent } from '@app/components/features/game-info/game-info.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
-import { GameTimerComponent } from '@app/components/features/game-timer/game-timer.component';
 import { PlayerInfoComponent } from '@app/components/features/player-info/player-info.component';
 import { PlayersListComponent } from '@app/components/features/players-list/players-list.component';
+import { TurnTimerComponent } from '@app/components/features/turn-timer/turn-timer.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { GameMapService } from '@app/services/game-map/game-map.service';
-import { InGameService } from '@app/services/in-game/in-game.service';
 import { InGameKeyboardEventsService } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
+import { InGameService } from '@app/services/in-game/in-game.service';
 import { SessionService } from '@app/services/session/session.service';
 import { MapSize } from '@common/enums/map-size.enum';
 
@@ -22,7 +22,7 @@ import { MapSize } from '@common/enums/map-size.enum';
         GameInfoComponent,
         PlayerInfoComponent,
         PlayersListComponent,
-        GameTimerComponent,
+        TurnTimerComponent,
         CombatOverlayComponent,
     ],
     templateUrl: './game-session-page.component.html',
@@ -88,10 +88,10 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
     }
 
     isActionDisabled(): boolean {
-        return !this.isMyTurn || 
-               !this.isGameStarted || 
-               this.hasUsedAction || 
-               !this.hasAvailableActions();
+        return !this.isMyTurn ||
+            !this.isGameStarted ||
+            this.hasUsedAction ||
+            !this.hasAvailableActions();
     }
 
     get hasUsedAction(): boolean {
@@ -106,11 +106,11 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         return Object.keys(this.inGameService.inGameSession().inGamePlayers).length;
     }
 
-    getCurrentPlayerMovementPoints(): number {
+    getCurrentPlayerSpeed(): number {
         const session = this.inGameService.inGameSession();
         const activePlayerId = session.currentTurn.activePlayerId;
         const player = session.inGamePlayers[activePlayerId];
-        return player?.movementPoints || 0;
+        return player?.speed || 0;
     }
 
     getReachableTilesCount(): number {
@@ -121,10 +121,10 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         const session = this.inGameService.inGameSession();
         const activePlayerId = session.currentTurn.activePlayerId;
         const player = session.inGamePlayers[activePlayerId];
-        
+
         if (!player) return 'Joueur non trouvé';
-        
-        return `Pos:(${player.x},${player.y}) MP:${player.movementPoints}`;
+
+        return `Pos:(${player.x},${player.y}) Vitesse:${player.speed}`;
     }
 
     ngOnInit(): void {

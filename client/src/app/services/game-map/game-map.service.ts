@@ -130,12 +130,12 @@ export class GameMapService {
     }
 
     private getActionClass(x: number, y: number): string {
-        const action = this.availableActions.find((action: AvailableAction) => action.x === x && action.y === y);
+        const action = this.availableActions.find((availableAction: AvailableAction) => availableAction.x === x && availableAction.y === y);
         return action?.type === 'ATTACK' ? 'action-attack' : 'action-door';
     }
 
     getActionTypeAt(x: number, y: number): 'ATTACK' | 'DOOR' | null {
-        const action = this.availableActions.find((action: AvailableAction) => action.x === x && action.y === y);
+        const action = this.availableActions.find((availableAction: AvailableAction) => availableAction.x === x && availableAction.y === y);
         return action?.type || null;
     }
 

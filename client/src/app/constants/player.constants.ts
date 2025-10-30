@@ -1,18 +1,29 @@
-import { Player } from '@common/models/player.interface';
 import { Dice } from '@common/enums/dice.enum';
+import { Player } from '@common/models/player.interface';
 
 export const DEFAULT_PLAYER: Player = {
     id: 'default-player-id',
     name: '',
     avatar: null,
     isAdmin: true,
-    speed: 0,
-    health: 0,
-    attack: Dice.D6,
-    defense: Dice.D6,
+    baseHealth: 4,
+    healthBonus: 0,
+    health: 4,
+    maxHealth: 4,
+    baseSpeed: 4,
+    speedBonus: 0,
+    speed: 4,
+    baseAttack: 4,
+    attackBonus: 0,
+    attack: 4,
+    baseDefense: 4,
+    defenseBonus: 0,
+    defense: 4,
+    attackDice: Dice.D6,
+    defenseDice: Dice.D6,
     x: 0,
     y: 0,
     isInGame: false,
     startPointId: '',
-    movementPoints: 0,
+    actionsRemaining: 1,
 };
