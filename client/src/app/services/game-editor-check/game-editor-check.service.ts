@@ -152,7 +152,7 @@ export class GameEditorCheckService {
         if (components.length === 0) return { hasIssue: true, tiles: [] };
 
         let largest = components[0];
-        for (const comp of components) if (comp.size > largest.size) largest = comp;
+        for (const component of components) if (component.size > largest.size) largest = component;
 
         const visited = largest;
         return this.findInaccessibleTiles(tiles, visited.set);
@@ -188,7 +188,7 @@ export class GameEditorCheckService {
                 if (seen.has(key0)) continue;
 
                 const q: [number, number][] = [[x, y]];
-                const comp = new Set<string>();
+                const component = new Set<string>();
                 while (q.length) {
                     const item = q.shift();
                     if (item) {
@@ -196,7 +196,7 @@ export class GameEditorCheckService {
                         const k = `${cx}:${cy}`;
                         if (seen.has(k)) continue;
                         seen.add(k);
-                        comp.add(k);
+                        component.add(k);
 
                         for (const [dx, dy] of dirs) {
                             const nx = cx + dx;
@@ -208,7 +208,7 @@ export class GameEditorCheckService {
                         }
                     }
                 }
-                comps.push({ set: comp, size: comp.size });
+                comps.push({ set: component, size: component.size });
             }
         }
         return comps;
