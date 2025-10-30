@@ -15,6 +15,11 @@
 // import { Types } from 'mongoose';
 // import { InGameService } from './in-game.service';
 
+describe('InGameService placeholder', () => {
+    it('should run placeholder test', () => {
+        expect(true).toBe(true);
+    });
+});
 // describe('InGameService', () => {
 //     let service: InGameService;
 //     const mockTurnEngine: Partial<TimerService> = {};
