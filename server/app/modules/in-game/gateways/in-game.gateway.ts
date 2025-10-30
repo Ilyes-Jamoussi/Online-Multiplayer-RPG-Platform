@@ -62,9 +62,10 @@ export class InGameGateway {
 
     @SubscribeMessage(InGameEvents.PlayerLeaveInGameSession)
     playerLeaveInGameSession(socket: Socket, sessionId: string): void {
+        const session = this.inGameService.getSession(sessionId);
         this.playerLeaveSession(sessionId, socket.id);
         this.server.to(socket.id).emit(InGameEvents.LeftInGameSessionAck, successResponse({}));
-        socket.leave(sessionId);
+        socket.leave(session.inGameId);
     }
 
     @SubscribeMessage(InGameEvents.AttackPlayerAction)

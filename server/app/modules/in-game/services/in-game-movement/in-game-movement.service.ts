@@ -35,7 +35,11 @@ export class InGameMovementService {
             throw new NotFoundException('Tile not found');
         }
 
-        const moveCost = TileCost[tile.kind];
+        const moveCost =
+            tile.kind === TileKind.DOOR
+                ? (tile.open ? TileCost.DOOR_OPEN : -1)
+                : TileCost[tile.kind];
+
         if (moveCost === -1) {
             throw new BadRequestException('Cannot move onto this tile');
         } else if (moveCost > player.speed) {
@@ -170,13 +174,14 @@ export class InGameMovementService {
         const tile = this.gameCache.getTileAtPosition(sessionId, x, y);
         if (!tile) return null;
 
-        const tileCost = TileCost[tile.kind as keyof typeof TileCost];
+        let tileCost = TileCost[tile.kind];
         if (tileCost === undefined) return null;
-        if (tileCost === -1) return null;
 
-        if (tile.kind === TileKind.DOOR && !tile.open) {
-            return null;
+        if (tile.kind === TileKind.DOOR) {
+            tileCost = tile.open ? TileCost.DOOR_OPEN : -1;
         }
+
+        if (tileCost === -1) return null;
 
         if (tile.kind === TileKind.WATER && isOnBoat) {
             return 1;
