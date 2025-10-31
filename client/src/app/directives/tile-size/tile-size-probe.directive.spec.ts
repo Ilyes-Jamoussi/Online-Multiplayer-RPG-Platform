@@ -71,9 +71,9 @@ describe('TileSizeProbeDirective', () => {
     }
 
     function requireLast(): ResizeObserverStub {
-        const ro = ResizeObserverStub.last();
-        if (!ro) throw new Error('ResizeObserver not created');
-        return ro;
+        const resizeObserverStub = ResizeObserverStub.last();
+        if (!resizeObserverStub) throw new Error('ResizeObserver not created');
+        return resizeObserverStub;
     }
 
     beforeAll(() => {
@@ -120,16 +120,16 @@ describe('TileSizeProbeDirective', () => {
         setRect(ACTIVE_INIT_W, ACTIVE_INIT_H);
         directive.ngOnChanges();
         expect(emitted).toEqual([ACTIVE_INIT_MIN]);
-        const ro = requireLast();
-        expect(ro.observedNode).toBe(host);
+        const resizeObserverStub = requireLast();
+        expect(resizeObserverStub.observedNode).toBe(host);
     });
 
     it('should emit on resize via ResizeObserver callback', () => {
         directive.probeActive = true;
         setRect(RESIZE_SETUP_W, RESIZE_SETUP_H);
         directive.ngOnChanges();
-        const ro = requireLast();
-        ro.trigger(RESIZE_TRIGGER_W, RESIZE_TRIGGER_H);
+        const resizeObserverStub = requireLast();
+        resizeObserverStub.trigger(RESIZE_TRIGGER_W, RESIZE_TRIGGER_H);
         expect(emitted[0]).toBe(RESIZE_SETUP_H);
         expect(emitted[1]).toBe(RESIZE_TRIGGER_H);
     });
@@ -138,9 +138,9 @@ describe('TileSizeProbeDirective', () => {
         directive.probeActive = true;
         setRect(DESTROY_W, DESTROY_H);
         directive.ngOnChanges();
-        const ro = requireLast();
+        const resizeObserverStub = requireLast();
         directive.ngOnDestroy();
-        expect(ro.disconnected).toBeTrue();
+        expect(resizeObserverStub.disconnected).toBeTrue();
     });
 
     it('calling ngOnChanges twice active should teardown previous and create a new observer', () => {
@@ -161,10 +161,10 @@ describe('TileSizeProbeDirective', () => {
         directive.probeActive = true;
         setRect(INACTIVE_SWITCH_W, INACTIVE_SWITCH_H);
         directive.ngOnChanges();
-        const ro = requireLast();
+        const resizeObserverStub = requireLast();
         directive.probeActive = false;
         directive.ngOnChanges();
-        expect(ro.disconnected).toBeTrue();
+        expect(resizeObserverStub.disconnected).toBeTrue();
         expect(emitted).toEqual([INACTIVE_SWITCH_EMIT]);
         expect(ResizeObserverStub.instances.length).toBe(1);
     });
