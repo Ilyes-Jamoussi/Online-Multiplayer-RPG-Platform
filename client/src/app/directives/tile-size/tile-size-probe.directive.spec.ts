@@ -66,8 +66,8 @@ describe('TileSizeProbeDirective', () => {
     let emitted: number[];
     let rectSpy: jasmine.Spy<() => DOMRect>;
 
-    function setRect(w: number, h: number): void {
-        rectSpy.and.returnValue({ width: w, height: h } as DOMRect);
+    function setRect(width: number, height: number): void {
+        rectSpy.and.returnValue({ width, height } as DOMRect);
     }
 
     function requireLast(): ResizeObserverStub {

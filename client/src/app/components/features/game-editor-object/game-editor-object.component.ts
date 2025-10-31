@@ -35,14 +35,14 @@ export class GameEditorObjectComponent {
 
     @HostBinding('style.grid-column')
     get gridCol(): string {
-        const w = this.gameEditorInteractionsService.getFootprintOf(PlaceableKind[this.object.kind]);
-        return `${this.object.x + 1} / span ${w}`;
+        const footprint = this.gameEditorInteractionsService.getFootprintOf(PlaceableKind[this.object.kind]);
+        return `${this.object.x + 1} / span ${footprint}`;
     }
 
     @HostBinding('style.grid-row')
     get gridRow(): string {
-        const h = this.gameEditorInteractionsService.getFootprintOf(PlaceableKind[this.object.kind]);
-        return `${this.object.y + 1} / span ${h}`;
+        const footprint = this.gameEditorInteractionsService.getFootprintOf(PlaceableKind[this.object.kind]);
+        return `${this.object.y + 1} / span ${footprint}`;
     }
 
     @HostBinding('style.--tile-px')
