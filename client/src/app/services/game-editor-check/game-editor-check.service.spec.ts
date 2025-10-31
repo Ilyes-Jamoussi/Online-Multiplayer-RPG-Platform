@@ -287,11 +287,11 @@ describe('GameEditorCheckService', () => {
         });
 
         it('should detect terrain accessibility issues (cross wall)', () => {
-            const m = mid(SIZE);
+            const midIndex = mid(SIZE);
             const tiles: GameEditorTileDto[] = [];
             for (let y = 0; y < SIZE; y++) {
                 for (let x = 0; x < SIZE; x++) {
-                    const isCrossWall = (x === m && y !== m) || (y === m && x !== m);
+                    const isCrossWall = (x === midIndex && y !== midIndex) || (y === midIndex && x !== midIndex);
                     tiles.push({ x, y, kind: isCrossWall ? TileKind.WALL : TileKind.BASE });
                 }
             }
@@ -315,11 +315,11 @@ describe('GameEditorCheckService', () => {
         });
 
         it('should be able to detect multiple terrain accessibility issues', () => {
-            const m = mid(SIZE);
+            const midIndex = mid(SIZE);
             const tiles: GameEditorTileDto[] = [];
             for (let y = 0; y < SIZE; y++) {
                 for (let x = 0; x < SIZE; x++) {
-                    const isCrossWall = (x === m && y !== m) || (y === m && x !== m);
+                    const isCrossWall = (x === midIndex && y !== midIndex) || (y === midIndex && x !== midIndex);
                     tiles.push({ x, y, kind: isCrossWall ? TileKind.WALL : TileKind.BASE });
                 }
             }

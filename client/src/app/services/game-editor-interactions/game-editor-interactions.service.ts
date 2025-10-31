@@ -54,7 +54,7 @@ export class GameEditorInteractionsService {
             .filter((tileKind) => tileKind !== TileKind.BASE)
             .map((tileKind) => ({
                 image: this.assetService.getTileImage(tileKind),
-                tileKind: tileKind,
+                tileKind,
                 class: tileKind.toLowerCase(),
                 disabled: tileKind === TileKind.TELEPORT,
             }));
@@ -150,7 +150,7 @@ export class GameEditorInteractionsService {
     resolveDropAction(evt: DragEvent): void {
         this._hoveredTiles.set([]);
         if (evt.dataTransfer) {
-            const mime = Object.values(PlaceableMime).find((m) => evt.dataTransfer?.types.includes(m));
+            const mime = Object.values(PlaceableMime).find((mimeType) => evt.dataTransfer?.types.includes(mimeType));
             if (!mime) return;
             const data = evt.dataTransfer.getData(mime);
             if (!data) return;
