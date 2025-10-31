@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
-import { InGamePlayer } from '@common/models/player.interface';
-import { GameMapService } from '@app/services/game-map/game-map.service';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { AssetsService } from '@app/services/assets/assets.service';
+import { GameMapService } from '@app/services/game-map/game-map.service';
+import { InGamePlayer } from '@common/models/player.interface';
 
 @Component({
     selector: 'app-game-map-tile',
@@ -32,7 +32,7 @@ export class GameMapTileComponent {
 
     get playerOnTile(): InGamePlayer | undefined {
         return this.gameMapService.currentlyInGamePlayers.find(
-            (p) => p.isInGame && p.x === this.tile.x && p.y === this.tile.y,
+            (player) => player.isInGame && player.x === this.tile.x && player.y === this.tile.y,
         );
     }
 

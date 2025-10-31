@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InGameSession } from '@common/models/session.interface';
 import { InGamePlayer } from '@common/models/player.interface';
+import { InGameSession } from '@common/models/session.interface';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class InGameSessionRepository {
@@ -12,7 +12,7 @@ export class InGameSessionRepository {
 
     getIngamePlayers(sessionId: string): InGamePlayer[] {
         const session = this.findById(sessionId);
-        return Object.values(session.inGamePlayers).filter((p) => p.isInGame);
+        return Object.values(session.inGamePlayers).filter((player) => player.isInGame);
     }
 
     save(session: InGameSession): void {

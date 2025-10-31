@@ -34,8 +34,12 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
 
     get isInvalid(): boolean {
         return (
-            this.gameEditorCheckService.editorProblems().terrainAccessibility.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y) ||
-            this.gameEditorCheckService.editorProblems().doors.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y)
+            this.gameEditorCheckService.editorProblems().terrainAccessibility.tiles.some(
+                (issueTile) => issueTile.x === this.tile.x && issueTile.y === this.tile.y,
+            ) ||
+            this.gameEditorCheckService.editorProblems().doors.tiles.some(
+                (issueTile) => issueTile.x === this.tile.x && issueTile.y === this.tile.y,
+            )
         );
     }
 

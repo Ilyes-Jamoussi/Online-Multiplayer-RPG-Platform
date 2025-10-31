@@ -1,19 +1,19 @@
 /* eslint-disable max-lines */
-import { InGameService } from './in-game.service';
-import { TurnEngineService } from './turn-engine.service';
-import { GameCacheService } from './game-cache.service';
-import { InGameInitializationService } from './in-game-initialization.service';
-import { InGameSessionRepository } from './in-game-session.repository';
-import { InGameMovementService } from './in-game-movement.service';
-import { WaitingRoomSession, InGameSession } from '@common/models/session.interface';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Game } from '@app/modules/game-store/entities/game.entity';
+import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
+import { InGameSession, WaitingRoomSession } from '@common/models/session.interface';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Types } from 'mongoose';
+import { GameCacheService } from './game-cache.service';
+import { InGameInitializationService } from './in-game-initialization.service';
+import { InGameMovementService } from './in-game-movement.service';
+import { InGameSessionRepository } from './in-game-session.repository';
+import { InGameService } from './in-game.service';
+import { TurnEngineService } from './turn-engine.service';
 
 describe('InGameService', () => {
     let service: InGameService;
@@ -479,7 +479,7 @@ describe('InGameService', () => {
 
             service.leaveInGameSession('session-123', 'player2');
 
-            const joinedCount = Object.values(session.inGamePlayers).filter((p) => p.isInGame).length;
+            const joinedCount = Object.values(session.inGamePlayers).filter((player) => player.isInGame).length;
             expect(joinedCount).toBe(1);
             expect(joinedCount).toBeLessThan(TWO_PLAYERS);
         });

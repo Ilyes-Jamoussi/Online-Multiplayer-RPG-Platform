@@ -1,11 +1,11 @@
+import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileCost, TileKind } from '@common/enums/tile-kind.enum';
+import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/models/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { GameCacheService } from './game-cache.service';
-import { TileCost, TileKind } from '@common/enums/tile-kind.enum';
-import { Orientation } from '@common/enums/orientation.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+import { GameCacheService } from './game-cache.service';
 
 interface ReachableTileExplorationContext {
     session: InGameSession;
@@ -187,7 +187,7 @@ export class InGameMovementService {
 
     private isPlayerOnBoat(sessionId: string, x: number, y: number): boolean {
         const placeables = this.gameCache.getPlaceablesAtPosition(sessionId, x, y);
-        return placeables.some((p) => p.kind === PlaceableKind.BOAT);
+        return placeables.some((placeable) => placeable.kind === PlaceableKind.BOAT);
     }
 
     private isPositionOccupied(session: InGameSession, x: number, y: number): boolean {

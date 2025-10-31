@@ -50,7 +50,7 @@ export class InGameService {
     }
 
     get currentlyInGamePlayers(): InGamePlayer[] {
-        return Object.values(this.inGamePlayers()).filter((p) => p.isInGame);
+        return Object.values(this.inGamePlayers()).filter((player) => player.isInGame);
     }
 
     get turnTransitionMessage(): string {

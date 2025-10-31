@@ -42,7 +42,7 @@ export class GameEditorCheckService {
     });
 
     canSave(): boolean {
-        return !Object.values(this.editorProblems()).some((p) => p.hasIssue);
+        return !Object.values(this.editorProblems()).some((issue) => issue.hasIssue);
     }
 
     private isTerrainTile(kind: TileKind | undefined): boolean {

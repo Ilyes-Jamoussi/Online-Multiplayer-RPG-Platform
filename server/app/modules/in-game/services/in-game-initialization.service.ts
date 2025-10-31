@@ -1,18 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { InGameSession } from '@common/models/session.interface';
 import { Game } from '@app/modules/game-store/entities/game.entity';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { InGamePlayer } from '@common/models/player.interface';
+import { InGameSession } from '@common/models/session.interface';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class InGameInitializationService {
     makeTurnOrder(players: InGamePlayer[]): string[] {
         const sortedPlayers = [...players].sort((a, b) => b.speed - a.speed);
-        const uniqueSpeeds = Array.from(new Set(sortedPlayers.map((p) => p.speed)));
+        const uniqueSpeeds = Array.from(new Set(sortedPlayers.map((player) => player.speed)));
         const orderedPlayerIds: string[] = [];
 
         for (const speed of uniqueSpeeds) {
-            const playerIdsAtSpeed = sortedPlayers.filter((p) => p.speed === speed).map((p) => p.id);
+            const playerIdsAtSpeed = sortedPlayers.filter((player) => player.speed === speed).map((player) => player.id);
             orderedPlayerIds.push(...this.shuffleArray(playerIdsAtSpeed));
         }
 

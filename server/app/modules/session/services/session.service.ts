@@ -1,12 +1,12 @@
+import { ACCESS_CODE_LENGTH, ACCESS_CODE_PADDING, ACCESS_CODE_RANGE } from '@app/constants/session.constants';
+import { SessionPreviewDto } from '@app/modules/session/dto/available-sessions-updated.dto';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
-import { SessionPreviewDto } from '@app/modules/session/dto/available-sessions-updated.dto';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Player } from '@common/models/player.interface';
 import { AvatarAssignment, WaitingRoomSession } from '@common/models/session.interface';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ACCESS_CODE_LENGTH, ACCESS_CODE_PADDING, ACCESS_CODE_RANGE } from '@app/constants/session.constants';
 @Injectable()
 export class SessionService {
     private readonly sessions = new Map<string, WaitingRoomSession>();
@@ -120,7 +120,7 @@ export class SessionService {
 
     isAdmin(playerId: string): boolean {
         for (const session of this.sessions.values()) {
-            const player = session.players.find((p) => p.id === playerId);
+            const player = session.players.find((candidate) => candidate.id === playerId);
             if (player) {
                 return player.isAdmin || false;
             }

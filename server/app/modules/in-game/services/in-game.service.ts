@@ -1,15 +1,15 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { WaitingRoomSession, InGameSession } from '@common/models/session.interface';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
 import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
-import { TurnEngineService } from './turn-engine.service';
-import { GameCacheService } from './game-cache.service';
-import { InGameInitializationService } from './in-game-initialization.service';
-import { InGameSessionRepository } from './in-game-session.repository';
-import { InGameMovementService } from './in-game-movement.service';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { InGamePlayer } from '@common/models/player.interface';
+import { InGameSession, WaitingRoomSession } from '@common/models/session.interface';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { GameCacheService } from './game-cache.service';
+import { InGameInitializationService } from './in-game-initialization.service';
+import { InGameMovementService } from './in-game-movement.service';
+import { InGameSessionRepository } from './in-game-session.repository';
+import { TurnEngineService } from './turn-engine.service';
 
 @Injectable()
 export class InGameService {
@@ -43,7 +43,7 @@ export class InGameService {
         const playerIdsOrder = this.initialization.makeTurnOrder(players);
         session.turnOrder = playerIdsOrder;
 
-        session.inGamePlayers = Object.fromEntries(players.map((p) => [p.id, { ...p, x: 0, y: 0, startPointId: '', joined: false }]));
+        session.inGamePlayers = Object.fromEntries(players.map((player) => [player.id, { ...player, x: 0, y: 0, startPointId: '', joined: false }]));
 
         const firstPlayerId = playerIdsOrder[0];
         session.currentTurn.activePlayerId = firstPlayerId;
