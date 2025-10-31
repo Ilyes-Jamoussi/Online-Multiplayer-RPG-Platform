@@ -9,11 +9,11 @@ class ResizeObserverStub implements ResizeObserver {
     static last(): ResizeObserverStub | undefined {
         return this.instances[this.instances.length - 1];
     }
-    private readonly cb: ROCallback;
+    private readonly callBack: ROCallback;
     observedNode: Element | null = null;
     disconnected = false;
-    constructor(cb: ROCallback) {
-        this.cb = cb;
+    constructor(callBack: ROCallback) {
+        this.callBack = callBack;
         ResizeObserverStub.instances.push(this);
     }
     observe(target: Element): void {
@@ -27,7 +27,7 @@ class ResizeObserverStub implements ResizeObserver {
     }
     trigger(width: number, height: number): void {
         const entry = { contentRect: { width, height } } as ResizeObserverEntry;
-        this.cb([entry], this as unknown as ResizeObserver);
+        this.callBack([entry], this as unknown as ResizeObserver);
     }
 }
 
