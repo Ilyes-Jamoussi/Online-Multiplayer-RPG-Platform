@@ -1,14 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { InGameInitializationService } from './in-game-initialization.service';
-import { InGameSession } from '@common/models/session.interface';
 import { Game } from '@app/modules/game-store/entities/game.entity';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
 import { Avatar } from '@common/enums/avatar.enum';
-import { Orientation } from '@common/enums/orientation.enum';
-import { Types } from 'mongoose';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
+import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { InGameSession } from '@common/models/session.interface';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Types } from 'mongoose';
+import { InGameInitializationService } from './in-game-initialization.service';
 
 describe('InGameInitializationService', () => {
     let service: InGameInitializationService;
@@ -179,8 +179,8 @@ describe('InGameInitializationService', () => {
             const input = [1, 1, PLAYER_STAT_TWO, PLAYER_STAT_TWO];
             const result = service.shuffleArray(input);
 
-            expect(result.filter((r) => r === 1).length).toBe(PLAYER_STAT_TWO);
-            expect(result.filter((r) => r === PLAYER_STAT_TWO).length).toBe(PLAYER_STAT_TWO);
+            expect(result.filter((val) => val === 1).length).toBe(PLAYER_STAT_TWO);
+            expect(result.filter((val) => val === PLAYER_STAT_TWO).length).toBe(PLAYER_STAT_TWO);
         });
     });
 
