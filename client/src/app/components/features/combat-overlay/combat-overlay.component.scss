@@ -104,6 +104,20 @@ app-combat-timer {
     }
 }
 
+.tile-effect-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px rgba(23, 162, 184, 0.6);
+    animation: badgePulse 2s ease-in-out infinite;
+    white-space: nowrap;
+}
+
 @keyframes badgePulse {
     0%, 100% { 
         transform: scale(1);
@@ -249,16 +263,31 @@ app-combat-timer {
     padding: 2px 4px;
     background: rgba(0, 0, 0, 0.15);
     border-radius: 4px;
+    
+    &.tile-effect-line {
+        background: rgba(23, 162, 184, 0.2);
+        border: 1px solid rgba(23, 162, 184, 0.4);
+    }
 }
 
 .stat-icon {
     font-size: 0.85rem;
 }
 
+.stat-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-right: auto;
+}
+
 .stat-value {
     font-size: 0.85rem;
     font-weight: bold;
     color: #d4af37;
+    
+    &.tile-effect {
+        color: #17a2b8;
+    }
 }
 
 .dice-info {

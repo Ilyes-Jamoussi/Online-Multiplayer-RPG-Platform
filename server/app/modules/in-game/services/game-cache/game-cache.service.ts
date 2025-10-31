@@ -33,6 +33,12 @@ export class GameCacheService {
         return game;
     }
 
+    getTileByPlayerId(sessionId: string, playerId: string): Tile & { playerId: string | null } | undefined {
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        return gameMap.tiles.find((tile) => tile.playerId === playerId);
+    }
+
     getGameForSession(sessionId: string): Game {
         const game = this.sessionsGames.get(sessionId);
         if (!game) throw new NotFoundException('Game not found');
@@ -120,12 +126,10 @@ export class GameCacheService {
     }
 
     isTileFree(sessionId: string, x: number, y: number): boolean {
-        // Check if tile is occupied by another player
         if (this.getTileOccupant(sessionId, x, y)) {
             return false;
         }
 
-        // Check tile type and accessibility
         const tile = this.getTileAtPosition(sessionId, x, y);
         if (!tile) {
             return false;

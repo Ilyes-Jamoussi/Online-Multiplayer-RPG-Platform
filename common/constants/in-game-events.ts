@@ -33,6 +33,7 @@ export enum InGameEvents {
     CombatStarted = 'combatStarted',
     CombatNotification = 'combatNotification',
     CombatTimerUpdate = 'combatTimerUpdate',
+    CombatTileEffect = 'combatTileEffect',
     CombatNewRoundStarted = 'combatNewRoundStarted',
     CombatVictory = 'combatVictory',
     CombatEnded = 'combatEnded',

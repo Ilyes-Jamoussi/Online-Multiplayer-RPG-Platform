@@ -39,7 +39,7 @@
                                         <span class="stat-icon">⚔️</span>
                                         <span class="stat-value">{{ playerADamage.totalAttack }}</span>
                                         <div class="dice-info">
-                                            <img [src]="assetsService.getDiceImage(playerADamage.attackDice)" class="dice-image" />
+                                            <img [src]="getDiceImage(playerADamage.attackDice)" class="dice-image" />
                                             <span class="dice-roll">{{ playerADamage.attackRoll }}</span>
                                         </div>
                                     </div>
@@ -47,10 +47,17 @@
                                         <span class="stat-icon">🛡️</span>
                                         <span class="stat-value">{{ playerADamage.totalDefense }}</span>
                                         <div class="dice-info">
-                                            <img [src]="assetsService.getDiceImage(playerADamage.defenseDice)" class="dice-image" />
+                                            <img [src]="getDiceImage(playerADamage.defenseDice)" class="dice-image" />
                                             <span class="dice-roll">{{ playerADamage.defenseRoll }}</span>
                                         </div>
                                     </div>
+                                    @if (playerADamage.tileEffect !== 0) {
+                                        <div class="stat-line tile-effect-line">
+                                            <span class="stat-icon">❄️</span>
+                                            <span class="stat-label">Glace</span>
+                                            <span class="stat-value tile-effect">{{ playerADamage.tileEffect }}</span>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         }
@@ -59,6 +66,11 @@
                             @if (playerAPosture) {
                                 <span class="posture-badge" [class.offensive]="playerAPosture === 'offensive'" [class.defensive]="playerAPosture === 'defensive'">
                                     {{ playerAPosture === 'offensive' ? '⚔️' : '🛡️' }}
+                                </span>
+                            }
+                            @if (playerATileEffectLabel) {
+                                <span class="tile-effect-badge">
+                                    ❄️ {{ playerATileEffectLabel }}
                                 </span>
                             }
                         </div>
@@ -97,7 +109,7 @@
                                         <span class="stat-icon">⚔️</span>
                                         <span class="stat-value">{{ playerBDamage.totalAttack }}</span>
                                         <div class="dice-info">
-                                            <img [src]="assetsService.getDiceImage(playerBDamage.attackDice)" class="dice-image" />
+                                            <img [src]="getDiceImage(playerBDamage.attackDice)" class="dice-image" />
                                             <span class="dice-roll">{{ playerBDamage.attackRoll }}</span>
                                         </div>
                                     </div>
@@ -105,10 +117,17 @@
                                         <span class="stat-icon">🛡️</span>
                                         <span class="stat-value">{{ playerBDamage.totalDefense }}</span>
                                         <div class="dice-info">
-                                            <img [src]="assetsService.getDiceImage(playerBDamage.defenseDice)" class="dice-image" />
+                                            <img [src]="getDiceImage(playerBDamage.defenseDice)" class="dice-image" />
                                             <span class="dice-roll">{{ playerBDamage.defenseRoll }}</span>
                                         </div>
                                     </div>
+                                    @if (playerBDamage.tileEffect !== 0) {
+                                        <div class="stat-line tile-effect-line">
+                                            <span class="stat-icon">❄️</span>
+                                            <span class="stat-label">Glace</span>
+                                            <span class="stat-value tile-effect">{{ playerBDamage.tileEffect }}</span>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         }
@@ -117,6 +136,11 @@
                             @if (playerBPosture) {
                                 <span class="posture-badge" [class.offensive]="playerBPosture === 'offensive'" [class.defensive]="playerBPosture === 'defensive'">
                                     {{ playerBPosture === 'offensive' ? '⚔️' : '🛡️' }}
+                                </span>
+                            }
+                            @if (playerBTileEffectLabel) {
+                                <span class="tile-effect-badge">
+                                    ❄️ {{ playerBTileEffectLabel }}
                                 </span>
                             }
                         </div>

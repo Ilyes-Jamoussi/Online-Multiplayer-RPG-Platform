@@ -15,7 +15,12 @@ export class CombatSocketService {
         this.socket.emit(InGameEvents.CombatChoice, { sessionId, choice });
     }
 
-    onCombatStarted(callback: (data: { attackerId: string; targetId: string }) => void): void {
+    onCombatStarted(callback: (data: { 
+        attackerId: string; 
+        targetId: string;
+        attackerTileEffect?: number;
+        targetTileEffect?: number;
+    }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.CombatStarted, callback);
     }
 

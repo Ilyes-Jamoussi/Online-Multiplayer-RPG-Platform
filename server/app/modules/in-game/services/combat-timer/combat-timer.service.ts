@@ -9,11 +9,13 @@ export class CombatTimerService {
 
     constructor(private readonly eventEmitter: EventEmitter2) {}
 
-    startCombatTimer(session: InGameSession, attackerId: string, targetId: string): void {
+    startCombatTimer(session: InGameSession, attackerId: string, targetId: string, attackerTileEffect?: number, targetTileEffect?: number): void {
         this.eventEmitter.emit('combat.started', {
             sessionId: session.id,
             attackerId,
             targetId,
+            attackerTileEffect,
+            targetTileEffect,
         });
         
         this.scheduleCombatLoop(session);

@@ -7,17 +7,21 @@ import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-s
 import { CombatState } from '@common/interfaces/combat.interface';
 import { Dice, DiceSides } from '@common/enums/dice.enum';
 import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { TileCombatEffect } from '@common/enums/tile-kind.enum';
 
 @Injectable()
 export class CombatService {
     private readonly activeCombats = new Map<string, CombatState>();
 
+    // eslint-disable-next-line max-params
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly timerService: TimerService,
         private readonly combatTimerService: CombatTimerService,
         private readonly sessionRepository: InGameSessionRepository,
         private readonly inGameMovementService: InGameMovementService,
+        private readonly gameCacheService: GameCacheService,
     ) {}
 
     getSession(sessionId: string): InGameSession {
@@ -63,18 +67,29 @@ export class CombatService {
     }
 
     startCombat(session: InGameSession, playerAId: string, playerBId: string): void {
+        const playerATile = this.gameCacheService.getTileByPlayerId(session.id, playerAId);
+        const playerBTile = this.gameCacheService.getTileByPlayerId(session.id, playerBId);
+
         const combatState: CombatState = {
             sessionId: session.id,
             playerAId,
             playerBId,
             playerAPosture: null,
             playerBPosture: null,
+            playerATileEffect: TileCombatEffect[playerATile?.kind] ?? 0,
+            playerBTileEffect: TileCombatEffect[playerBTile?.kind] ?? 0,
         };
 
         this.activeCombats.set(session.id, combatState);
 
         this.timerService.pauseTurnTimer(session.id);
-        this.combatTimerService.startCombatTimer(session, playerAId, playerBId);
+        this.combatTimerService.startCombatTimer(
+            session, 
+            playerAId, 
+            playerBId,
+            combatState.playerATileEffect,
+            combatState.playerBTileEffect
+        );
     }
 
     @OnEvent('combat.timerLoop')
@@ -96,14 +111,14 @@ export class CombatService {
     private startEndCombatTransition(session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null): void {
         this.activeCombats.delete(session.id);
         this.combatTimerService.stopCombatTimer(session);
-        
+
         this.eventEmitter.emit('combat.victory', {
             sessionId: session.id,
             playerAId,
             playerBId,
             winnerId,
         });
-        
+
         this.combatTimerService.startEndTransition(session);
     }
 
@@ -117,10 +132,10 @@ export class CombatService {
         const playerAId = combat.playerAId;
         const playerBId = combat.playerBId;
 
-        const playerAAttack = this.getPlayerAttack(sessionId, playerAId, combat.playerAPosture);
-        const playerADefense = this.getPlayerDefense(sessionId, playerAId, combat.playerAPosture);
-        const playerBAttack = this.getPlayerAttack(sessionId, playerBId, combat.playerBPosture);
-        const playerBDefense = this.getPlayerDefense(sessionId, playerBId, combat.playerBPosture);
+        const playerAAttack = this.getPlayerAttack(sessionId, playerAId, combat.playerAPosture, combat.playerATileEffect);
+        const playerADefense = this.getPlayerDefense(sessionId, playerAId, combat.playerAPosture, combat.playerATileEffect);
+        const playerBAttack = this.getPlayerAttack(sessionId, playerBId, combat.playerBPosture, combat.playerBTileEffect);
+        const playerBDefense = this.getPlayerDefense(sessionId, playerBId, combat.playerBPosture, combat.playerBTileEffect);
 
         const playerADamage = this.calculateDamage(playerBAttack.totalAttack, playerADefense.totalDefense);
         const playerBDamage = this.calculateDamage(playerAAttack.totalAttack, playerBDefense.totalDefense);
@@ -156,7 +171,7 @@ export class CombatService {
 
         if (playerAHealth <= 0 || playerBHealth <= 0) {
             let winnerId: string | null = null;
-            
+
             if (playerAHealth <= 0 && playerBHealth <= 0) {
                 // Draw
                 winnerId = null;
@@ -192,48 +207,51 @@ export class CombatService {
         sessionId: string,
         playerId: string,
         posture: 'offensive' | 'defensive',
+        tileCombatEffect: TileCombatEffect,
     ): {
         dice: Dice;
         diceRoll: number;
         baseDefense: number;
         defenseBonus: number;
         totalDefense: number;
+        tileCombatEffect: TileCombatEffect;
     } {
         const session = this.sessionRepository.findById(sessionId);
-        if (!session) return { dice: Dice.D4, diceRoll: 0, baseDefense: 0, defenseBonus: 0, totalDefense: 0 };
+        if (!session)
+            return { dice: Dice.D4, diceRoll: 0, baseDefense: 0, defenseBonus: 0, totalDefense: 0, tileCombatEffect: TileCombatEffect.BASE };
 
         const player = session.inGamePlayers[playerId];
-        if (!player) return { dice: Dice.D4, diceRoll: 0, baseDefense: 0, defenseBonus: 0, totalDefense: 0 };
+        if (!player) return { dice: Dice.D4, diceRoll: 0, baseDefense: 0, defenseBonus: 0, totalDefense: 0, tileCombatEffect: TileCombatEffect.BASE };
 
         const defenseRoll = this.rollDice(player.defenseDice);
         const baseDefense = player.baseDefense;
         const defenseBonus = posture === 'defensive' ? 2 : 0;
-        const totalDefense = baseDefense + defenseRoll + defenseBonus;
-        return { dice: player.defenseDice, diceRoll: defenseRoll, baseDefense, defenseBonus, totalDefense };
+        const totalDefense = baseDefense + defenseRoll + defenseBonus + tileCombatEffect;
+        return { dice: player.defenseDice, diceRoll: defenseRoll, baseDefense, defenseBonus, totalDefense, tileCombatEffect };
     }
 
     private getPlayerAttack(
         sessionId: string,
         playerId: string,
         posture: 'offensive' | 'defensive',
+        tileCombatEffect: TileCombatEffect,
     ): {
         dice: Dice;
         diceRoll: number;
         baseAttack: number;
         attackBonus: number;
         totalAttack: number;
+        tileCombatEffect: TileCombatEffect;
     } {
         const session = this.sessionRepository.findById(sessionId);
-        if (!session) return { dice: Dice.D4, diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0 };
-
+        if (!session) return { dice: Dice.D4, diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0, tileCombatEffect: TileCombatEffect.BASE };
         const player = session.inGamePlayers[playerId];
-        if (!player) return { dice: Dice.D4, diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0 };
-
+        if (!player) return { dice: Dice.D4, diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0, tileCombatEffect: TileCombatEffect.BASE };
         const attackRoll = this.rollDice(player.attackDice);
         const baseAttack = player.baseAttack;
         const attackBonus = posture === 'offensive' ? 2 : 0;
-        const totalAttack = baseAttack + attackRoll + attackBonus;
-        return { dice: player.attackDice, diceRoll: attackRoll, baseAttack, attackBonus, totalAttack };
+        const totalAttack = baseAttack + attackRoll + attackBonus + tileCombatEffect;
+        return { dice: player.attackDice, diceRoll: attackRoll, baseAttack, attackBonus, totalAttack, tileCombatEffect };
     }
 
     private calculateDamage(attack: number, defense: number): number {

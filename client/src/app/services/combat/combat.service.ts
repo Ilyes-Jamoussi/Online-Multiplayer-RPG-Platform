@@ -6,6 +6,7 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { CombatResult } from '@common/interfaces/combat.interface';
 import { Dice } from '@common/enums/dice.enum';
+import { TileCombatEffect } from '@common/enums/tile-kind.enum';
 
 const DAMAGE_DISPLAY_DURATION = 2000;
 
@@ -30,6 +31,7 @@ interface DamageDisplay {
     defenseRoll: number;
     defenseDice: Dice;
     totalDefense: number;
+    tileEffect: number;
     visible: boolean;
 }
 
@@ -43,12 +45,14 @@ export class CombatService {
     private readonly _selectedPosture = signal<'offensive' | 'defensive' | null>(null);
     private readonly _playerPostures = signal<Record<string, 'offensive' | 'defensive'>>({});
     private readonly _victoryData = signal<VictoryData | null>(null);
+    private readonly _tileEffects = signal<Record<string, TileCombatEffect>>({});
 
     readonly combatData = this._combatData.asReadonly();
     readonly damageDisplays = this._damageDisplays.asReadonly();
     readonly selectedPosture = this._selectedPosture.asReadonly();
     readonly playerPostures = this._playerPostures.asReadonly();
     readonly victoryData = this._victoryData.asReadonly();
+    readonly tileEffects = this._tileEffects.asReadonly();
 
     constructor(
         private readonly timerService: TimerService,
@@ -64,10 +68,19 @@ export class CombatService {
         return this.timerService.combatTimeRemaining();
     }
 
-    startCombat(attackerId: string, targetId: string, userRole: 'attacker' | 'target'): void {
+    startCombat(attackerId: string, targetId: string, userRole: 'attacker' | 'target', attackerTileEffect?: number, targetTileEffect?: number): void {
         this._combatData.set({ attackerId, targetId, userRole });
         this._selectedPosture.set(null);
         this._playerPostures.set({});
+        
+        if (attackerTileEffect !== undefined && targetTileEffect !== undefined) {
+            this._tileEffects.set({
+                [attackerId]: attackerTileEffect,
+                [targetId]: targetTileEffect,
+            });
+        } else {
+            this._tileEffects.set({});
+        }
     }
 
     handleCombatTimerRestart(): void {
@@ -83,19 +96,20 @@ export class CombatService {
         this._selectedPosture.set(null);
         this._playerPostures.set({});
         this._victoryData.set(null);
+        this._tileEffects.set({});
         this.timerService.stopCombatTimer();
     }
 
-    chooseOffensive(sessionId: string): void {
+    chooseOffensive(): void {
         if (this._selectedPosture() !== null) return;
         this._selectedPosture.set('offensive');
-        this.combatSocketService.combatChoice(sessionId, 'offensive');
+        this.combatSocketService.combatChoice(this.inGameService.sessionId(), 'offensive');
     }
 
-    chooseDefensive(sessionId: string): void {
+    chooseDefensive(): void {
         if (this._selectedPosture() !== null) return;
         this._selectedPosture.set('defensive');
-        this.combatSocketService.combatChoice(sessionId, 'defensive');
+        this.combatSocketService.combatChoice(this.inGameService.sessionId(), 'defensive');
     }
 
     attackPlayer(x: number, y: number): void {
@@ -104,7 +118,7 @@ export class CombatService {
 
     private initListeners(): void {
         this.combatSocketService.onCombatStarted((data) => {
-            this.handleCombatStarted(data.attackerId, data.targetId);
+            this.handleCombatStarted(data.attackerId, data.targetId, data.attackerTileEffect, data.targetTileEffect);
         });
 
         this.combatSocketService.onCombatEnded(() => {
@@ -138,6 +152,8 @@ export class CombatService {
     }
 
     private handleCombatResult(data: CombatResult): void {
+        const tileEffects = this._tileEffects();
+        
         this.showDamage({
             playerId: data.playerAId,
             damage: data.playerADamage,
@@ -147,6 +163,7 @@ export class CombatService {
             defenseRoll: data.playerADefense.diceRoll,
             defenseDice: data.playerADefense.dice,
             totalDefense: data.playerADefense.totalDefense,
+            tileEffect: tileEffects[data.playerAId] ?? 0,
             visible: true,
         });
 
@@ -159,6 +176,7 @@ export class CombatService {
             defenseRoll: data.playerBDefense.diceRoll,
             defenseDice: data.playerBDefense.dice,
             totalDefense: data.playerBDefense.totalDefense,
+            tileEffect: tileEffects[data.playerBId] ?? 0,
             visible: true,
         });
 
@@ -173,15 +191,21 @@ export class CombatService {
         }, DAMAGE_DISPLAY_DURATION);
     }
 
-    private handleCombatStarted(attackerId: string, targetId: string): void {
+    private handleCombatStarted(attackerId: string, targetId: string, attackerTileEffect?: number, targetTileEffect?: number): void {
         const myId = this.playerService.id();
 
         if (attackerId === myId) {
-            this.startCombat(attackerId, targetId, 'attacker');
+            this.startCombat(attackerId, targetId, 'attacker', attackerTileEffect, targetTileEffect);
         } else if (targetId === myId) {
-            this.startCombat(attackerId, targetId, 'target');
+            this.startCombat(attackerId, targetId, 'target', attackerTileEffect, targetTileEffect);
         } else {
             this._combatData.set({ attackerId, targetId, userRole: 'spectator' });
+            if (attackerTileEffect !== undefined && targetTileEffect !== undefined) {
+                this._tileEffects.set({
+                    [attackerId]: attackerTileEffect,
+                    [targetId]: targetTileEffect,
+                });
+            }
             this.notificationService.displayInformation({
                 title: 'Combat en cours',
                 message: 'Un combat est en cours',

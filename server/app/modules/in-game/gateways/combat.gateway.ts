@@ -43,7 +43,13 @@ export class CombatGateway {
     }
 
     @OnEvent('combat.started')
-    handleCombatStarted(payload: { sessionId: string; attackerId: string; targetId: string }) {
+    handleCombatStarted(payload: { 
+        sessionId: string; 
+        attackerId: string; 
+        targetId: string;
+        attackerTileEffect?: number;
+        targetTileEffect?: number;
+    }) {
         const session = this.combatService.getSession(payload.sessionId);
         if (session) {
             this.server.to(session.inGameId).emit(
@@ -51,6 +57,8 @@ export class CombatGateway {
                 successResponse({
                     attackerId: payload.attackerId,
                     targetId: payload.targetId,
+                    attackerTileEffect: payload.attackerTileEffect,
+                    targetTileEffect: payload.targetTileEffect,
                 }),
             );
         }
@@ -69,11 +77,14 @@ export class CombatGateway {
     handleCombatVictory(payload: { sessionId: string; playerAId: string; playerBId: string; winnerId: string | null }) {
         const session = this.combatService.getSession(payload.sessionId);
         if (session) {
-            this.server.to(session.inGameId).emit(InGameEvents.CombatVictory, successResponse({
-                playerAId: payload.playerAId,
-                playerBId: payload.playerBId,
-                winnerId: payload.winnerId,
-            }));
+            this.server.to(session.inGameId).emit(
+                InGameEvents.CombatVictory,
+                successResponse({
+                    playerAId: payload.playerAId,
+                    playerBId: payload.playerBId,
+                    winnerId: payload.winnerId,
+                }),
+            );
         }
     }
 
@@ -97,10 +108,13 @@ export class CombatGateway {
     handleCombatPostureSelected(payload: { sessionId: string; playerId: string; posture: 'offensive' | 'defensive' }) {
         const session = this.combatService.getSession(payload.sessionId);
         if (session) {
-            this.server.to(session.inGameId).emit(InGameEvents.CombatPostureSelected, successResponse({
-                playerId: payload.playerId,
-                posture: payload.posture,
-            }));
+            this.server.to(session.inGameId).emit(
+                InGameEvents.CombatPostureSelected,
+                successResponse({
+                    playerId: payload.playerId,
+                    posture: payload.posture,
+                }),
+            );
         }
     }
 
@@ -129,4 +143,5 @@ export class CombatGateway {
             .to(session.inGameId)
             .emit(InGameEvents.PlayerHealthChanged, successResponse({ playerId: payload.playerId, newHealth: payload.newHealth }));
     }
+
 }

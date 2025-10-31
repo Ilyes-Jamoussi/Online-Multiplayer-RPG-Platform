@@ -5,6 +5,7 @@ import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { Dice } from '@common/enums/dice.enum';
+import { TileCombatEffect } from '@common/enums/tile-kind.enum';
 
 const PERCENTAGE_MULTIPLIER = 100;
 
@@ -13,13 +14,13 @@ const PERCENTAGE_MULTIPLIER = 100;
     standalone: true,
     imports: [CommonModule, CombatTimerComponent],
     templateUrl: './combat-overlay.component.html',
-    styleUrls: ['./combat-overlay.component.scss']
+    styleUrls: ['./combat-overlay.component.scss'],
 })
 export class CombatOverlayComponent {
     constructor(
         private readonly combatService: CombatService,
         private readonly inGameService: InGameService,
-        private readonly assetsService: AssetsService
+        private readonly assetsService: AssetsService,
     ) {}
 
     get combatData() {
@@ -52,7 +53,7 @@ export class CombatOverlayComponent {
         return {
             current: player.health,
             max: player.maxHealth,
-            percentage: (player.health / player.maxHealth) * PERCENTAGE_MULTIPLIER
+            percentage: (player.health / player.maxHealth) * PERCENTAGE_MULTIPLIER,
         };
     }
 
@@ -62,16 +63,16 @@ export class CombatOverlayComponent {
         return {
             current: player.health,
             max: player.maxHealth,
-            percentage: (player.health / player.maxHealth) * PERCENTAGE_MULTIPLIER
+            percentage: (player.health / player.maxHealth) * PERCENTAGE_MULTIPLIER,
         };
     }
 
     get playerADamage() {
-        return this.combatService.damageDisplays().find(d => d.playerId === this.combatData?.attackerId && d.visible) || null;
+        return this.combatService.damageDisplays().find((d) => d.playerId === this.combatData?.attackerId && d.visible) || null;
     }
 
     get playerBDamage() {
-        return this.combatService.damageDisplays().find(d => d.playerId === this.combatData?.targetId && d.visible) || null;
+        return this.combatService.damageDisplays().find((d) => d.playerId === this.combatData?.targetId && d.visible) || null;
     }
 
     get selectedPosture() {
@@ -98,34 +99,34 @@ export class CombatOverlayComponent {
 
     get victoryMessage(): string {
         if (!this.victoryData) return '';
-        
+
         const myId = this.combatData?.userRole === 'attacker' ? this.combatData.attackerId : this.combatData?.targetId;
-        
+
         if (this.victoryData.winnerId === null) {
             return 'Match Nul !';
         }
-        
+
         if (this.victoryData.winnerId === myId) {
             return 'Victoire !';
         }
-        
+
         const winnerName = this.inGameService.getPlayerByPlayerId(this.victoryData.winnerId).name;
         return `${winnerName} a gagné !`;
     }
 
     get victorySubtitle(): string {
         if (!this.victoryData) return '';
-        
+
         const myId = this.combatData?.userRole === 'attacker' ? this.combatData.attackerId : this.combatData?.targetId;
-        
+
         if (this.victoryData.winnerId === null) {
             return 'Les deux combattants sont tombés';
         }
-        
+
         if (this.victoryData.winnerId === myId) {
             return 'Tu as gagné le combat !';
         }
-        
+
         return 'Tu as perdu le combat...';
     }
 
@@ -135,21 +136,40 @@ export class CombatOverlayComponent {
         return this.victoryData.winnerId === myId;
     }
 
-    get diceD4Image(): string {
-        return this.assetsService.getDiceImage(Dice.D4);
-    }
-
-    get diceD6Image(): string {
-        return this.assetsService.getDiceImage(Dice.D6);
-    }
 
     chooseOffensive(): void {
-        const sessionId = this.inGameService.sessionId();
-        this.combatService.chooseOffensive(sessionId);
+        this.combatService.chooseOffensive();
     }
 
     chooseDefensive(): void {
-        const sessionId = this.inGameService.sessionId();
-        this.combatService.chooseDefensive(sessionId);
+        this.combatService.chooseDefensive();
+    }
+
+    get playerATileEffect(): TileCombatEffect | null {
+        if (!this.combatData) return null;
+        return this.combatService.tileEffects()[this.combatData.attackerId] ?? null;
+    }
+
+    get playerBTileEffect(): TileCombatEffect | null {
+        if (!this.combatData) return null;
+        return this.combatService.tileEffects()[this.combatData.targetId] ?? null;
+    }
+
+    get playerATileEffectLabel(): string | null {
+        const effect = this.playerATileEffect;
+        if (effect === null || effect === TileCombatEffect.BASE) return null;
+        if (effect === TileCombatEffect.ICE) return `Glace ${effect}`;
+        return null;
+    }
+
+    get playerBTileEffectLabel(): string | null {
+        const effect = this.playerBTileEffect;
+        if (effect === null || effect === TileCombatEffect.BASE) return null;
+        if (effect === TileCombatEffect.ICE) return `Glace ${effect}`;
+        return null;
+    }
+
+    getDiceImage(dice: Dice): string {
+        return this.assetsService.getDiceImage(dice);
     }
 }
