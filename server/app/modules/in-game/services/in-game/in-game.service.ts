@@ -4,6 +4,7 @@ import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
+import { TurnTimerStates } from '@common/enums/turn-timer-states.enum';
 import { Player } from '@common/models/player.interface';
 import { InGameSession, WaitingRoomSession } from '@common/models/session.interface';
 import { BadRequestException, Injectable, NotFoundException, Inject } from '@nestjs/common';
@@ -91,7 +92,7 @@ export class InGameService {
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
         if (player.isInGame) throw new BadRequestException('Player already joined');
-        
+
         this.sessionRepository.updatePlayer(sessionId, playerId, { isInGame: true });
         return this.sessionRepository.findById(sessionId);
     }
@@ -124,7 +125,9 @@ export class InGameService {
     movePlayer(sessionId: string, playerId: string, orientation: Orientation): void {
         const session = this.sessionRepository.findById(sessionId);
         if (playerId !== session.currentTurn.activePlayerId) throw new BadRequestException('Not your turn');
+        if (this.timerService.getGameTimerState(sessionId) !== TurnTimerStates.PlayerTurn) throw new BadRequestException('Not your turn');
         this.movementService.movePlayer(session, playerId, orientation);
+        this.actionService.calculateAvailableActions(session, playerId);
     }
 
     leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string; sessionEnded: boolean } {
@@ -153,11 +156,6 @@ export class InGameService {
         this.movementService.calculateReachableTiles(session, playerId);
     }
 
-    getAvailableActions(sessionId: string, playerId: string): void {
-        const session = this.sessionRepository.findById(sessionId);
-        this.calculateAvailableActions(session, playerId);
-    }
-
     endCombat(sessionId: string): void {
         const session = this.sessionRepository.findById(sessionId);
         this.eventEmitter.emit('combat.ended', { session });
@@ -168,35 +166,9 @@ export class InGameService {
         this.eventEmitter.emit('combat.choice', { session, socketId, choice });
     }
 
-    private calculateAvailableActions(session: InGameSession, playerId: string): void {
-        const player = session.inGamePlayers[playerId];
-        if (!player) return;
-
-        const actions = [];
-        const orientations = [Orientation.N, Orientation.E, Orientation.S, Orientation.W];
-
-        for (const orientation of orientations) {
-            try {
-                const pos = this.gameCache.getNextPosition(session.id, player.x, player.y, orientation);
-
-                // Chercher joueur adjacent (ATTACK)
-                const occupantId = this.gameCache.getTileOccupant(session.id, pos.x, pos.y);
-                if (occupantId && occupantId !== playerId) {
-                    actions.push({ type: 'ATTACK', x: pos.x, y: pos.y });
-                }
-
-                // Chercher porte adjacente (DOOR)
-                const tile = this.gameCache.getTileAtPosition(session.id, pos.x, pos.y);
-                if (tile && tile.kind === 'DOOR') {
-                    actions.push({ type: 'DOOR', x: pos.x, y: pos.y });
-                }
-            } catch {
-                // Position hors limites, ignorer
-                continue;
-            }
-        }
-
-        this.eventEmitter.emit('player.availableActions', { playerId, actions });
+    getAvailableActions(sessionId: string, playerId: string) {
+        const session = this.sessionRepository.findById(sessionId);
+        this.actionService.calculateAvailableActions(session, playerId);
     }
 
     @OnEvent('combat.started')

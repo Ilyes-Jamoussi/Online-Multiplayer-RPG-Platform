@@ -55,19 +55,9 @@ export class InGameMovementService {
         this.gameCache.moveTileOccupant(session.id, nextX, nextY, player);
 
         const newSpeed = player.speed - moveCost;
-        this.sessionRepository.updatePlayer(session.id, playerId, {
-            x: nextX,
-            y: nextY,
-            speed: newSpeed
-        });
-
-        this.eventEmitter.emit('player.moved', {
-            session,
-            playerId,
-            x: nextX,
-            y: nextY,
-            speed: newSpeed,
-        });
+        player.x = nextX;
+        player.y = nextY;
+        player.speed = newSpeed;
 
         if (newSpeed > 0) {
             this.calculateReachableTiles(session, playerId);

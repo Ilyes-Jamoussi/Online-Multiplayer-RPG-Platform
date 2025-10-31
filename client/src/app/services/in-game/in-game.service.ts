@@ -61,8 +61,8 @@ export class InGameService {
             ...session,
             currentTurn: {
                 ...session.currentTurn,
-                hasUsedAction: true
-            }
+                hasUsedAction: true,
+            },
         }));
     }
 
@@ -134,17 +134,21 @@ export class InGameService {
         this._inGameSession.update((inGameSession) => ({ ...inGameSession, ...data }));
     }
 
-    updatePlayerPosition(playerId: string, x: number, y: number, speed: number): void {
+    updatePlayerPositionAndActions(playerId: string, x: number, y: number, speed: number, actions: AvailableAction[]): void {
+        const isCurrentPlayerMyTurn = playerId === this.playerService.id();
+
         this._inGameSession.update((inGameSession) => ({
             ...inGameSession,
             inGamePlayers: { ...inGameSession.inGamePlayers, [playerId]: { ...inGameSession.inGamePlayers[playerId], x, y, speed } },
         }));
-        if (this.isMyTurn()) {
+
+        if (isCurrentPlayerMyTurn) {
             this.playerService.updatePlayer({
                 x,
                 y,
                 speed,
             });
+            this._availableActions.set(actions);
         }
     }
 
@@ -215,7 +219,7 @@ export class InGameService {
         });
 
         this.inGameSocketService.onPlayerMoved((data) => {
-            this.updatePlayerPosition(data.playerId, data.x, data.y, data.speed);
+            this.updatePlayerPositionAndActions(data.playerId, data.x, data.y, data.speed, data.actions);
         });
 
         this.inGameSocketService.onLeftInGameSessionAck(() => {
@@ -240,10 +244,6 @@ export class InGameService {
             this._reachableTiles.set(data);
         });
 
-        this.inGameSocketService.onPlayerAvailableActions((data) => {
-            this._availableActions.set(data);
-        });
-
         this.inGameSocketService.onCombatStarted((data) => {
             this.handleCombatStarted(data.attackerId, data.targetId);
         });
@@ -257,22 +257,20 @@ export class InGameService {
         const myId = this.playerService.id();
         const attacker = this.getPlayerByPlayerId(attackerId);
         const target = this.getPlayerByPlayerId(targetId);
-        
+
         if (!attacker || !target) return;
 
         if (attackerId === myId) {
             // JE SUIS L'ATTAQUANT
             this.combatService.startCombat(attackerId, targetId, 'attacker');
-            
         } else if (targetId === myId) {
             // JE SUIS LA CIBLE
             this.combatService.startCombat(attackerId, targetId, 'target');
-            
         } else {
             // JE SUIS SPECTATEUR
             this.notificationService.displayInformation({
                 title: 'Combat en cours',
-                message: `${attacker.name} combat ${target.name}`
+                message: `${attacker.name} combat ${target.name}`,
             });
         }
     }

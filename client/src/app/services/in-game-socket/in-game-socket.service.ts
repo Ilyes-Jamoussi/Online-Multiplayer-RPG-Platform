@@ -60,7 +60,7 @@ export class InGameSocketService {
         this.socket.onSuccessEvent(InGameEvents.TurnForcedEnd, callback);
     }
 
-    onPlayerMoved(callback: (data: { playerId: string; x: number; y: number; speed: number }) => void): void {
+    onPlayerMoved(callback: (data: { playerId: string; x: number; y: number; speed: number; actions: AvailableAction[] }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerMoved, callback);
     }
 
@@ -106,10 +106,6 @@ export class InGameSocketService {
 
     onDoorToggled(callback: (data: { x: number; y: number; isOpen: boolean }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.DoorToggled, callback);
-    }
-
-    onPlayerAvailableActions(callback: (data: AvailableAction[]) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.PlayerAvailableActions, callback);
     }
 
     onPlayerUpdated(callback: (data: Player) => void): void {
