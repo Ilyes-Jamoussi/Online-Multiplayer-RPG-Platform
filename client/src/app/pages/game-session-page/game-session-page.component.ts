@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnDestroy, OnInit, Signal, ViewChild } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, Signal, ViewChild, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { GameInfoComponent } from '@app/components/features/game-info/game-info.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
@@ -34,15 +34,13 @@ import { ROUTES } from '@common/enums/routes.enum';
 export class GameSessionPageComponent implements OnInit, OnDestroy {
     @ViewChild(GameMapComponent) gameMapComponent?: GameMapComponent;
 
-    constructor(
-        private readonly sessionService: SessionService,
-        private readonly gameMapService: GameMapService,
-        readonly inGameService: InGameService,
-        private readonly router: Router,
-        readonly adminModeService: AdminModeService,
-        private readonly keyboardEventsService: InGameKeyboardEventsService,
-        private readonly playerService: PlayerService,
-    ) {}
+    private readonly sessionService = inject(SessionService);
+    private readonly gameMapService = inject(GameMapService);
+    readonly inGameService = inject(InGameService);
+    private readonly router = inject(Router);
+    readonly adminModeService = inject(AdminModeService);
+    private readonly keyboardEventsService = inject(InGameKeyboardEventsService);
+    private readonly playerService = inject(PlayerService);
 
     @HostListener('window:keydown', ['$event'])
     onKeyDown(e: KeyboardEvent) {

@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, signal, inject } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { ROUTES } from '@common/enums/routes.enum';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
@@ -37,14 +37,14 @@ export class InGameService {
     readonly reachableTiles = this._reachableTiles.asReadonly();
     readonly isAdminModeActive = computed(() => this.adminModeService.isAdminModeActivated());
 
-    constructor(
-        private readonly inGameSocketService: InGameSocketService,
-        private readonly sessionService: SessionService,
-        private readonly timerService: TimerService,
-        private readonly playerService: PlayerService,
-        private readonly notificationService: NotificationService,
-        private readonly adminModeService: AdminModeService,
-    ) {
+    private readonly inGameSocketService = inject(InGameSocketService);
+    private readonly sessionService = inject(SessionService);
+    private readonly timerService = inject(TimerService);
+    private readonly playerService = inject(PlayerService);
+    private readonly notificationService = inject(NotificationService);
+    private readonly adminModeService = inject(AdminModeService);    
+
+    constructor() {
         this.initListeners();
     }
 
