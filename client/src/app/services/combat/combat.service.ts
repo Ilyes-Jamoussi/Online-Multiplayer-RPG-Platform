@@ -15,11 +15,21 @@ interface CombatData {
     userRole: 'attacker' | 'target' | 'spectator';
 }
 
+interface VictoryData {
+    playerAId: string;
+    playerBId: string;
+    winnerId: string | null;
+}
+
 interface DamageDisplay {
     playerId: string;
     damage: number;
-    roll: number;
-    dice: Dice;
+    attackRoll: number;
+    attackDice: Dice;
+    totalAttack: number;
+    defenseRoll: number;
+    defenseDice: Dice;
+    totalDefense: number;
     visible: boolean;
 }
 
@@ -31,10 +41,14 @@ export class CombatService {
     private readonly _combatResult = signal<CombatResult | null>(null);
     private readonly _damageDisplays = signal<DamageDisplay[]>([]);
     private readonly _selectedPosture = signal<'offensive' | 'defensive' | null>(null);
+    private readonly _playerPostures = signal<Record<string, 'offensive' | 'defensive'>>({});
+    private readonly _victoryData = signal<VictoryData | null>(null);
 
     readonly combatData = this._combatData.asReadonly();
     readonly damageDisplays = this._damageDisplays.asReadonly();
     readonly selectedPosture = this._selectedPosture.asReadonly();
+    readonly playerPostures = this._playerPostures.asReadonly();
+    readonly victoryData = this._victoryData.asReadonly();
 
     constructor(
         private readonly timerService: TimerService,
@@ -53,6 +67,7 @@ export class CombatService {
     startCombat(attackerId: string, targetId: string, userRole: 'attacker' | 'target'): void {
         this._combatData.set({ attackerId, targetId, userRole });
         this._selectedPosture.set(null);
+        this._playerPostures.set({});
     }
 
     handleCombatTimerRestart(): void {
@@ -66,6 +81,8 @@ export class CombatService {
     endCombat(): void {
         this._combatData.set(null);
         this._selectedPosture.set(null);
+        this._playerPostures.set({});
+        this._victoryData.set(null);
         this.timerService.stopCombatTimer();
     }
 
@@ -110,29 +127,49 @@ export class CombatService {
         this.combatSocketService.onCombatTimerRestart(() => {
             this.handleCombatTimerRestart();
         });
+
+        this.combatSocketService.onCombatPostureSelected((data) => {
+            this.handlePostureSelected(data.playerId, data.posture);
+        });
+
+        this.combatSocketService.onCombatVictory((data) => {
+            this.handleVictory(data.playerAId, data.playerBId, data.winnerId);
+        });
     }
 
     private handleCombatResult(data: CombatResult): void {
-        if (data.playerADamage > 0) {
-            this.showDamage(data.playerAId, data.playerADamage, data.playerAAttack.diceRoll, data.playerAAttack.dice);
-        }
-        if (data.playerBDamage > 0) {
-            this.showDamage(data.playerBId, data.playerBDamage, data.playerBAttack.diceRoll, data.playerBAttack.dice);
-        }
+        this.showDamage({
+            playerId: data.playerAId,
+            damage: data.playerADamage,
+            attackRoll: data.playerAAttack.diceRoll,
+            attackDice: data.playerAAttack.dice,
+            totalAttack: data.playerAAttack.totalAttack,
+            defenseRoll: data.playerADefense.diceRoll,
+            defenseDice: data.playerADefense.dice,
+            totalDefense: data.playerADefense.totalDefense,
+            visible: true,
+        });
+
+        this.showDamage({
+            playerId: data.playerBId,
+            damage: data.playerBDamage,
+            attackRoll: data.playerBAttack.diceRoll,
+            attackDice: data.playerBAttack.dice,
+            totalAttack: data.playerBAttack.totalAttack,
+            defenseRoll: data.playerBDefense.diceRoll,
+            defenseDice: data.playerBDefense.dice,
+            totalDefense: data.playerBDefense.totalDefense,
+            visible: true,
+        });
 
         this._selectedPosture.set(null);
     }
 
-    private showDamage(playerId: string, damage: number, roll: number, dice: Dice): void {
-        if (damage <= 0) return;
-
-        this._damageDisplays.update((displays) => [
-            ...displays.filter((d) => d.playerId !== playerId),
-            { playerId, damage, roll, dice, visible: true },
-        ]);
+    private showDamage(damageDisplay: DamageDisplay): void {
+        this._damageDisplays.update((displays) => [...displays.filter((d) => d.playerId !== damageDisplay.playerId), damageDisplay]);
 
         setTimeout(() => {
-            this._damageDisplays.update((displays) => displays.map((d) => (d.playerId === playerId ? { ...d, visible: false } : d)));
+            this._damageDisplays.update((displays) => displays.map((d) => (d.playerId === damageDisplay.playerId ? { ...d, visible: false } : d)));
         }, DAMAGE_DISPLAY_DURATION);
     }
 
@@ -153,6 +190,15 @@ export class CombatService {
     }
 
     private handleHealthChanged(playerId: string, newHealth: number): void {
+        this.inGameService.updateInGameSession({
+            inGamePlayers: {
+                ...this.inGameService.inGameSession().inGamePlayers,
+                [playerId]: {
+                    ...this.inGameService.inGameSession().inGamePlayers[playerId],
+                    health: newHealth,
+                },
+            },
+        });
         if (playerId === this.playerService.id()) {
             this.playerService.updatePlayer({ health: newHealth });
         }
@@ -161,5 +207,17 @@ export class CombatService {
     private handleCombatNewRound(): void {
         this.timerService.resetCombatTimer();
         this._selectedPosture.set(null);
+        this._playerPostures.set({});
+    }
+
+    private handlePostureSelected(playerId: string, posture: 'offensive' | 'defensive'): void {
+        this._playerPostures.update((postures) => ({
+            ...postures,
+            [playerId]: posture,
+        }));
+    }
+
+    private handleVictory(playerAId: string, playerBId: string, winnerId: string | null): void {
+        this._victoryData.set({ playerAId, playerBId, winnerId });
     }
 }

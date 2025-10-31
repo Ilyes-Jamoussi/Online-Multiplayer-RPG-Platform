@@ -54,6 +54,8 @@ export class CombatService {
             combat.playerBPosture = choice;
         }
 
+        this.eventEmitter.emit('combat.postureSelected', { sessionId, playerId, posture: choice });
+
         if (combat.playerAPosture !== null && combat.playerBPosture !== null) {
             const session = this.sessionRepository.findById(sessionId);
             this.combatTimerService.forceNextLoop(session);
@@ -83,10 +85,26 @@ export class CombatService {
         }
     }
 
-    private endCombat(session: InGameSession): void {
+    @OnEvent('combat.transitionEnded')
+    handleCombatTransitionEnded(payload: { sessionId: string }): void {
+        const session = this.sessionRepository.findById(payload.sessionId);
+        if (session) {
+            this.timerService.resumeTurnTimer(session.id);
+        }
+    }
+
+    private startEndCombatTransition(session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null): void {
         this.activeCombats.delete(session.id);
         this.combatTimerService.stopCombatTimer(session);
-        this.timerService.resumeTurnTimer(session.id);
+        
+        this.eventEmitter.emit('combat.victory', {
+            sessionId: session.id,
+            playerAId,
+            playerBId,
+            winnerId,
+        });
+        
+        this.combatTimerService.startEndTransition(session);
     }
 
     combatRound(sessionId: string): void {
@@ -137,7 +155,18 @@ export class CombatService {
         this.resetCombatPosture(sessionId);
 
         if (playerAHealth <= 0 || playerBHealth <= 0) {
-            this.endCombat(session);
+            let winnerId: string | null = null;
+            
+            if (playerAHealth <= 0 && playerBHealth <= 0) {
+                // Draw
+                winnerId = null;
+            } else if (playerAHealth <= 0) {
+                winnerId = playerBId;
+            } else {
+                winnerId = playerAId;
+            }
+
+            this.startEndCombatTransition(session, playerAId, playerBId, winnerId);
 
             if (playerAHealth <= 0) {
                 this.inGameMovementService.movePlayerToStartPosition(session, playerAId);
@@ -164,22 +193,23 @@ export class CombatService {
         playerId: string,
         posture: 'offensive' | 'defensive',
     ): {
+        dice: Dice;
         diceRoll: number;
         baseDefense: number;
         defenseBonus: number;
         totalDefense: number;
     } {
         const session = this.sessionRepository.findById(sessionId);
-        if (!session) return { diceRoll: 0, baseDefense: 0, defenseBonus: 0, totalDefense: 0 };
+        if (!session) return { dice: Dice.D4, diceRoll: 0, baseDefense: 0, defenseBonus: 0, totalDefense: 0 };
 
         const player = session.inGamePlayers[playerId];
-        if (!player) return { diceRoll: 0, baseDefense: 0, defenseBonus: 0, totalDefense: 0 };
+        if (!player) return { dice: Dice.D4, diceRoll: 0, baseDefense: 0, defenseBonus: 0, totalDefense: 0 };
 
         const defenseRoll = this.rollDice(player.defenseDice);
         const baseDefense = player.baseDefense;
         const defenseBonus = posture === 'defensive' ? 2 : 0;
         const totalDefense = baseDefense + defenseRoll + defenseBonus;
-        return { diceRoll: defenseRoll, baseDefense, defenseBonus, totalDefense };
+        return { dice: player.defenseDice, diceRoll: defenseRoll, baseDefense, defenseBonus, totalDefense };
     }
 
     private getPlayerAttack(
@@ -187,22 +217,23 @@ export class CombatService {
         playerId: string,
         posture: 'offensive' | 'defensive',
     ): {
+        dice: Dice;
         diceRoll: number;
         baseAttack: number;
         attackBonus: number;
         totalAttack: number;
     } {
         const session = this.sessionRepository.findById(sessionId);
-        if (!session) return { diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0 };
+        if (!session) return { dice: Dice.D4, diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0 };
 
         const player = session.inGamePlayers[playerId];
-        if (!player) return { diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0 };
+        if (!player) return { dice: Dice.D4, diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0 };
 
         const attackRoll = this.rollDice(player.attackDice);
         const baseAttack = player.baseAttack;
         const attackBonus = posture === 'offensive' ? 2 : 0;
         const totalAttack = baseAttack + attackRoll + attackBonus;
-        return { diceRoll: attackRoll, baseAttack, attackBonus, totalAttack };
+        return { dice: player.attackDice, diceRoll: attackRoll, baseAttack, attackBonus, totalAttack };
     }
 
     private calculateDamage(attack: number, defense: number): number {

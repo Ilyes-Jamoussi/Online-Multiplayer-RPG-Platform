@@ -38,5 +38,13 @@ export class CombatSocketService {
     onCombatTimerRestart(callback: () => void): void {
         this.socket.onSuccessEvent(InGameEvents.CombatTimerRestart, callback);
     }
+
+    onCombatPostureSelected(callback: (data: { playerId: string; posture: 'offensive' | 'defensive' }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.CombatPostureSelected, callback);
+    }
+
+    onCombatVictory(callback: (data: { playerAId: string; playerBId: string; winnerId: string | null }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.CombatVictory, callback);
+    }
 }
 

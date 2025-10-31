@@ -6,6 +6,8 @@ import { InGameService } from '@app/services/in-game/in-game.service';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { Dice } from '@common/enums/dice.enum';
 
+const PERCENTAGE_MULTIPLIER = 100;
+
 @Component({
     selector: 'app-combat-overlay',
     standalone: true,
@@ -44,6 +46,26 @@ export class CombatOverlayComponent {
         return this.assetsService.getAvatarStaticImage(player.avatar);
     }
 
+    get playerAHealth() {
+        if (!this.combatData) return { current: 0, max: 0, percentage: 0 };
+        const player = this.inGameService.getPlayerByPlayerId(this.combatData.attackerId);
+        return {
+            current: player.health,
+            max: player.maxHealth,
+            percentage: (player.health / player.maxHealth) * PERCENTAGE_MULTIPLIER
+        };
+    }
+
+    get playerBHealth() {
+        if (!this.combatData) return { current: 0, max: 0, percentage: 0 };
+        const player = this.inGameService.getPlayerByPlayerId(this.combatData.targetId);
+        return {
+            current: player.health,
+            max: player.maxHealth,
+            percentage: (player.health / player.maxHealth) * PERCENTAGE_MULTIPLIER
+        };
+    }
+
     get playerADamage() {
         return this.combatService.damageDisplays().find(d => d.playerId === this.combatData?.attackerId && d.visible) || null;
     }
@@ -60,16 +82,65 @@ export class CombatOverlayComponent {
         return this.selectedPosture !== null;
     }
 
+    get playerAPosture(): 'offensive' | 'defensive' | null {
+        if (!this.combatData) return null;
+        return this.combatService.playerPostures()[this.combatData.attackerId] || null;
+    }
+
+    get playerBPosture(): 'offensive' | 'defensive' | null {
+        if (!this.combatData) return null;
+        return this.combatService.playerPostures()[this.combatData.targetId] || null;
+    }
+
+    get victoryData() {
+        return this.combatService.victoryData();
+    }
+
+    get victoryMessage(): string {
+        if (!this.victoryData) return '';
+        
+        const myId = this.combatData?.userRole === 'attacker' ? this.combatData.attackerId : this.combatData?.targetId;
+        
+        if (this.victoryData.winnerId === null) {
+            return 'Match Nul !';
+        }
+        
+        if (this.victoryData.winnerId === myId) {
+            return 'Victoire !';
+        }
+        
+        const winnerName = this.inGameService.getPlayerByPlayerId(this.victoryData.winnerId).name;
+        return `${winnerName} a gagné !`;
+    }
+
+    get victorySubtitle(): string {
+        if (!this.victoryData) return '';
+        
+        const myId = this.combatData?.userRole === 'attacker' ? this.combatData.attackerId : this.combatData?.targetId;
+        
+        if (this.victoryData.winnerId === null) {
+            return 'Les deux combattants sont tombés';
+        }
+        
+        if (this.victoryData.winnerId === myId) {
+            return 'Tu as gagné le combat !';
+        }
+        
+        return 'Tu as perdu le combat...';
+    }
+
+    get isVictory(): boolean {
+        if (!this.victoryData) return false;
+        const myId = this.combatData?.userRole === 'attacker' ? this.combatData.attackerId : this.combatData?.targetId;
+        return this.victoryData.winnerId === myId;
+    }
+
     get diceD4Image(): string {
         return this.assetsService.getDiceImage(Dice.D4);
     }
 
     get diceD6Image(): string {
         return this.assetsService.getDiceImage(Dice.D6);
-    }
-
-    getDiceImageForDisplay(dice: Dice): string {
-        return dice === Dice.D4 ? this.diceD4Image : this.diceD6Image;
     }
 
     chooseOffensive(): void {

@@ -65,6 +65,18 @@ export class CombatGateway {
         }
     }
 
+    @OnEvent('combat.victory')
+    handleCombatVictory(payload: { sessionId: string; playerAId: string; playerBId: string; winnerId: string | null }) {
+        const session = this.combatService.getSession(payload.sessionId);
+        if (session) {
+            this.server.to(session.inGameId).emit(InGameEvents.CombatVictory, successResponse({
+                playerAId: payload.playerAId,
+                playerBId: payload.playerBId,
+                winnerId: payload.winnerId,
+            }));
+        }
+    }
+
     @OnEvent('combat.ended')
     handleCombatEnded(payload: { sessionId: string }) {
         const session = this.combatService.getSession(payload.sessionId);
@@ -78,6 +90,17 @@ export class CombatGateway {
         const session = this.combatService.getSession(payload.sessionId);
         if (session) {
             this.server.to(session.inGameId).emit(InGameEvents.CombatNewRoundStarted, successResponse({}));
+        }
+    }
+
+    @OnEvent('combat.postureSelected')
+    handleCombatPostureSelected(payload: { sessionId: string; playerId: string; posture: 'offensive' | 'defensive' }) {
+        const session = this.combatService.getSession(payload.sessionId);
+        if (session) {
+            this.server.to(session.inGameId).emit(InGameEvents.CombatPostureSelected, successResponse({
+                playerId: payload.playerId,
+                posture: payload.posture,
+            }));
         }
     }
 
