@@ -1,16 +1,16 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { GameEditorInteractionsService } from './game-editor-interactions.service';
-import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { TestBed } from '@angular/core/testing';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { ActiveTool, ExtendedGameEditorPlaceableDto, TileBrushTool, ToolType } from '@app/interfaces/game-editor.interface';
-import { PlaceableKind, PlaceableFootprint, PlaceableMime } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { MapSize } from '@common/enums/map-size.enum';
+import { PlaceableFootprint, PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile-kind.enum';
+import { GameEditorInteractionsService } from './game-editor-interactions.service';
 
 class StoreStub implements Partial<GameEditorStoreService> {
     private _tileSizePx = 32;
@@ -22,8 +22,8 @@ class StoreStub implements Partial<GameEditorStoreService> {
     get tileSizePx() {
         return this._tileSizePx;
     }
-    set tileSizePx(v: number) {
-        this._tileSizePx = v;
+    set tileSizePx(value: number) {
+        this._tileSizePx = value;
     }
 
     get tiles() {
@@ -435,7 +435,7 @@ describe('GameEditorInteractionsService', () => {
             expect(hovered.length).toBe(4);
 
             const origin = service['objectDropVec2'];
-            const includesOrigin = hovered.some((v) => v.x === origin.x && v.y === origin.y);
+            const includesOrigin = hovered.some((tile) => tile.x === origin.x && tile.y === origin.y);
             expect(includesOrigin).toBeTrue();
         });
 

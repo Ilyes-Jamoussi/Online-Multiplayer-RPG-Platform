@@ -92,8 +92,8 @@ export class CharacterCreationPageComponent implements OnInit {
         return this.assetsService.getDiceImage(dice);
     }
 
-    onNameChange(v: string): void {
-        this.characterEditorService.name = v;
+    onNameChange(name: string): void {
+        this.characterEditorService.name = name;
     }
 
     onBonusChange(bonus: BonusType): void {

@@ -1,15 +1,15 @@
 /* eslint-disable  @typescript-eslint/naming-convention */
-import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { GameEditorCheckService } from './game-editor-check.service';
-import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
+import { TestBed } from '@angular/core/testing';
+import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { Inventory } from '@app/interfaces/game-editor.interface';
+import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
-import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile-kind.enum';
+import { GameEditorCheckService } from './game-editor-check.service';
 
 export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
     private _name = 'Test Game';
@@ -25,20 +25,20 @@ export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
     get name() {
         return this._name;
     }
-    set name(v: string) {
-        this._name = v;
+    set name(value: string) {
+        this._name = value;
     }
     get description() {
         return this._description;
     }
-    set description(v: string) {
-        this._description = v;
+    set description(value: string) {
+        this._description = value;
     }
     get tileSizePx() {
         return this._tileSizePx;
     }
-    set tileSizePx(v: number) {
-        this._tileSizePx = v;
+    set tileSizePx(value: number) {
+        this._tileSizePx = value;
     }
 
     get tiles() {
@@ -57,20 +57,20 @@ export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
         return this.inventorySig.asReadonly();
     }
 
-    setTiles(v: GameEditorTileDto[]) {
-        this.tilesSig.set(v);
+    setTiles(tiles: GameEditorTileDto[]) {
+        this.tilesSig.set(tiles);
     }
-    setObjects(v: GameEditorPlaceableDto[]) {
-        this.objectsSig.set(v);
+    setObjects(objects: GameEditorPlaceableDto[]) {
+        this.objectsSig.set(objects);
     }
-    setSize(v: MapSize) {
-        this.sizeSig.set(v);
+    setSize(size: MapSize) {
+        this.sizeSig.set(size);
     }
-    setMode(v: GameMode) {
-        this.modeSig.set(v);
+    setMode(mode: GameMode) {
+        this.modeSig.set(mode);
     }
-    setInventory(v: Inventory) {
-        this.inventorySig.set(v);
+    setInventory(inventory: Inventory) {
+        this.inventorySig.set(inventory);
     }
 
     getTileAt(x: number, y: number) {

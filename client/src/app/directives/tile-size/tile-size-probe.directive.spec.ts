@@ -97,7 +97,7 @@ describe('TileSizeProbeDirective', () => {
         directive = new TileSizeProbeDirective(elRef, zone);
         emitted = [];
         directive.sizeChange = new EventEmitter<number>();
-        directive.sizeChange.subscribe((v) => emitted.push(v));
+        directive.sizeChange.subscribe((value) => emitted.push(value));
         ResizeObserverStub.instances = [];
         rectSpy = spyOn(host, 'getBoundingClientRect').and.returnValue({ width: 1, height: 1 } as DOMRect);
     });

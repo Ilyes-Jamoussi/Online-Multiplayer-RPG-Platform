@@ -4,7 +4,7 @@ import { makeDefaultTiles } from './tile.util';
 
 describe('tile.factory', () => {
     it('creates a square grid of tiles for each MapSize with correct coordinates and kind', () => {
-        const sizes = Object.values(MapSize).filter((v) => typeof v === 'number') as unknown as MapSize[];
+        const sizes = Object.values(MapSize).filter((val) => typeof val === 'number') as unknown as MapSize[];
 
         for (const size of sizes) {
             const out = makeDefaultTiles(size);
