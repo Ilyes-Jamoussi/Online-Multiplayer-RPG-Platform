@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { Orientation } from '@common/enums/orientation.enum';
-import { InGamePlayer } from '@common/models/player.interface';
+import { Player } from '@common/models/player.interface';
 import { MapSize } from '@common/enums/map-size.enum';
 
 interface GameMap {
@@ -83,13 +83,13 @@ export class GameCacheService {
         return this.getGameForSession(sessionId).size;
     }
 
-    setTileOccupant(sessionId: string, x: number, y: number, player: InGamePlayer): void {
+    setTileOccupant(sessionId: string, x: number, y: number, player: Player): void {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
         gameMap.tiles[y * gameMap.size + x].playerId = player.id;
     }
 
-    moveTileOccupant(sessionId: string, x: number, y: number, player: InGamePlayer): void {
+    moveTileOccupant(sessionId: string, x: number, y: number, player: Player): void {
         this.clearTileOccupant(sessionId, player.x, player.y);
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');

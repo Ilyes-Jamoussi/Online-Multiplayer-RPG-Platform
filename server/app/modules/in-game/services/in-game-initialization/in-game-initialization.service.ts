@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InGameSession } from '@common/models/session.interface';
 import { Game } from '@app/modules/game-store/entities/game.entity';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { InGamePlayer } from '@common/models/player.interface';
+import { Player } from '@common/models/player.interface';
 
 @Injectable()
 export class InGameInitializationService {
-    makeTurnOrder(players: InGamePlayer[]): string[] {
+    makeTurnOrder(players: Player[]): string[] {
         const sortedPlayers = [...players].sort((a, b) => b.speed - a.speed);
         const uniqueSpeeds = Array.from(new Set(sortedPlayers.map((p) => p.speed)));
         const orderedPlayerIds: string[] = [];

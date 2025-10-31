@@ -3,6 +3,7 @@ import { InGameSession } from '@common/models/session.interface';
 import { TurnState } from '@common/models/turn-state.interface';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InGameSessionRepository } from '../in-game-session/in-game-session.repository';
 
 const COMBAT_ROUND_DURATION = 5000;
 
@@ -11,7 +12,10 @@ export class TimerService {
     private readonly turnTimers = new Map<string, NodeJS.Timeout>();
     private readonly combatTimers = new Map<string, NodeJS.Timeout>();
 
-    constructor(private readonly eventEmitter: EventEmitter2) {}
+    constructor(
+        private readonly eventEmitter: EventEmitter2,
+        private readonly sessionRepository: InGameSessionRepository
+    ) {}
 
     startFirstTurn(session: InGameSession, timeoutMs = DEFAULT_TURN_DURATION): TurnState {
         if (!session.turnOrder?.length) throw new Error('TURN_ORDER_NOT_DEFINED');
@@ -49,6 +53,7 @@ export class TimerService {
         this.eventEmitter.emit('turn.ended', { session });
 
         setTimeout(() => {
+            this.sessionRepository.updatePlayer(session.id, newTurn.activePlayerId, { actionsRemaining: 1 });
             this.scheduleTurnTimeout(session.id, timeoutMs, () => this.autoEndTurn(session));
 
             this.eventEmitter.emit('turn.transition', { session });

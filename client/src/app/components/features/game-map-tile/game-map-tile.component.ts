@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
-import { InGamePlayer } from '@common/models/player.interface';
+import { Player } from '@common/models/player.interface';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { AssetsService } from '@app/services/assets/assets.service';
 
@@ -30,8 +30,8 @@ export class GameMapTileComponent {
             .find((o) => o.placed && o.x === this.tile.x && o.y === this.tile.y);
     }
 
-    get playerOnTile(): InGamePlayer | undefined {
-        return this.gameMapService.currentlyInGamePlayers.find(
+    get playerOnTile(): Player | undefined {
+        return this.gameMapService.currentlyPlayers.find(
             (p) => p.isInGame && p.x === this.tile.x && p.y === this.tile.y,
         );
     }

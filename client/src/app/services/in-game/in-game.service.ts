@@ -6,7 +6,7 @@ import { InGameSession } from '@common/models/session.interface';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { SessionService } from '@app/services/session/session.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { InGamePlayer } from '@common/models/player.interface';
+import { Player } from '@common/models/player.interface';
 import { CombatService } from '@app/services/combat/combat.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { NotificationService } from '@app/services/notification/notification.service';
@@ -84,11 +84,11 @@ export class InGameService {
         this.initListeners();
     }
 
-    get activePlayer(): InGamePlayer | undefined {
+    get activePlayer(): Player | undefined {
         return this.getPlayerByPlayerId(this.currentTurn().activePlayerId);
     }
 
-    get currentlyInGamePlayers(): InGamePlayer[] {
+    get currentlyPlayers(): Player[] {
         return Object.values(this.inGamePlayers()).filter((p) => p.isInGame);
     }
 
@@ -96,7 +96,7 @@ export class InGameService {
         return this.isMyTurn() ? "C'est ton tour !" : `C'est le tour de ${this.activePlayer?.name} !`;
     }
 
-    getPlayerByPlayerId(playerId: string): InGamePlayer {
+    getPlayerByPlayerId(playerId: string): Player {
         return this.inGamePlayers()[playerId];
     }
 

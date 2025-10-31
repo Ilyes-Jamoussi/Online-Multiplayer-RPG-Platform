@@ -2,6 +2,7 @@ import { computed, Injectable, Signal, signal, WritableSignal } from '@angular/c
 import { Router } from '@angular/router';
 import { CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
 import { DEFAULT_PLAYER } from '@app/constants/player.constants';
+import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { SessionService } from '@app/services/session/session.service';
@@ -40,6 +41,7 @@ export class PlayerService {
     constructor(
         private readonly sessionService: SessionService,
         private readonly sessionSocketService: SessionSocketService,
+        private readonly inGameSocketService: InGameSocketService,
         private readonly notificationService: NotificationService,
         private readonly router: Router,
     ) {
@@ -158,6 +160,12 @@ export class PlayerService {
         this.sessionSocketService.onSessionJoined((data) => {
             if (data.modifiedPlayerName) this.updatePlayer({ name: data.modifiedPlayerName });
             this.sessionService.handleSessionJoined({ gameId: data.gameId, maxPlayers: data.maxPlayers });
+        });
+
+        this.inGameSocketService.onPlayerUpdated((updatedPlayer) => {
+            if (updatedPlayer.id === this.id()) {
+                this.updatePlayer(updatedPlayer);
+            }
         });
     }
 }

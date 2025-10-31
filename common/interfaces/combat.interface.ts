@@ -1,3 +1,5 @@
+import { Dice } from '@common/enums/dice.enum';
+
 export interface CombatState {
     sessionId: string;
     playerAId: string;
@@ -7,9 +9,12 @@ export interface CombatState {
 }
 
 export interface CombatResult {
-    playerADamage: number;
-    playerBDamage: number;
-    playerANewHp: number;
-    playerBNewHp: number;
-    isFinished: boolean;
+    playerAId: string;
+    playerBId: string;
+    damageToA: number;
+    damageToB: number;
+    playerARoll: number;
+    playerBRoll: number;
+    playerADice: Dice;
+    playerBDice: Dice;
 }

@@ -3,7 +3,7 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { InGameSession } from '@common/models/session.interface';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
-import { CombatState } from '@common/interfaces/combat.interface';
+import { CombatState, CombatResult } from '@common/interfaces/combat.interface';
 import { Dice } from '@common/enums/dice.enum';
 
 const DICE_D4_SIDES = 4;
@@ -80,23 +80,55 @@ export class CombatService {
         if (!playerA || !playerB) return;
 
         // Calculer les dégâts dans les deux sens
+        const playerADice = combat.playerAChoice === 'offensive' ? playerA.attackDice : playerA.defenseDice;
+        const playerBDice = combat.playerBChoice === 'offensive' ? playerB.attackDice : playerB.defenseDice;
+        
+        const playerARoll = this.rollDice(playerADice);
+        const playerBRoll = this.rollDice(playerBDice);
+        
         const damageToB = this.calculateDamage(
-            { attack: playerA.attack, dice: playerA.attackDice, choice: combat.playerAChoice },
-            { defense: playerB.defense, dice: playerB.defenseDice, choice: combat.playerBChoice }
+            { attack: playerA.attack, dice: playerA.attackDice, choice: combat.playerAChoice, roll: playerARoll },
+            { defense: playerB.defense, dice: playerB.defenseDice, choice: combat.playerBChoice, roll: playerBRoll }
         );
 
         const damageToA = this.calculateDamage(
-            { attack: playerB.attack, dice: playerB.attackDice, choice: combat.playerBChoice },
-            { defense: playerA.defense, dice: playerA.defenseDice, choice: combat.playerAChoice }
+            { attack: playerB.attack, dice: playerB.attackDice, choice: combat.playerBChoice, roll: playerBRoll },
+            { defense: playerA.defense, dice: playerA.defenseDice, choice: combat.playerAChoice, roll: playerARoll }
         );
 
         // Appliquer les dégâts (utilise health calculée, pas baseHealth)
-        playerA.health = Math.max(0, playerA.health - damageToA);
-        playerB.health = Math.max(0, playerB.health - damageToB);
+        this.sessionRepository.updatePlayer(sessionId, combat.playerAId, { 
+            health: Math.max(0, playerA.health - damageToA) 
+        });
+        this.sessionRepository.updatePlayer(sessionId, combat.playerBId, { 
+            health: Math.max(0, playerB.health - damageToB) 
+        });
+
+        // Émettre les résultats de combat pour l'affichage client
+        const combatResult: CombatResult = {
+            playerAId: combat.playerAId,
+            playerBId: combat.playerBId,
+            damageToA: damageToA,
+            damageToB: damageToB,
+            playerARoll: playerARoll,
+            playerBRoll: playerBRoll,
+            playerADice: playerADice,
+            playerBDice: playerBDice
+        };
+        
+        this.eventEmitter.emit('player.combatResult', { 
+            sessionId, 
+            ...combatResult
+        });
+
+        // Récupérer les joueurs mis à jour pour vérifier la fin de combat
+        const updatedSession = this.sessionRepository.findById(sessionId);
+        const updatedPlayerA = updatedSession.inGamePlayers[combat.playerAId];
+        const updatedPlayerB = updatedSession.inGamePlayers[combat.playerBId];
 
         // Vérifier fin de combat
-        if (playerA.health <= 0 || playerB.health <= 0) {
-            this.endCombat(session);
+        if (updatedPlayerA.health <= 0 || updatedPlayerB.health <= 0) {
+            this.endCombat(updatedSession);
             return;
         }
 
@@ -132,17 +164,14 @@ export class CombatService {
     }
 
     private calculateDamage(
-        attackStats: { attack: number; dice: Dice; choice: 'offensive' | 'defensive' | null },
-        defenseStats: { defense: number; dice: Dice; choice: 'offensive' | 'defensive' | null }
+        attackStats: { attack: number; dice: Dice; choice: 'offensive' | 'defensive' | null; roll: number },
+        defenseStats: { defense: number; dice: Dice; choice: 'offensive' | 'defensive' | null; roll: number }
     ): number {
-        const attackRoll = this.rollDice(attackStats.dice);
-        const defenseRoll = this.rollDice(defenseStats.dice);
-        
         const attackBonus = attackStats.choice === 'offensive' ? 2 : 0;
         const defenseBonus = defenseStats.choice === 'defensive' ? 2 : 0;
         
-        const totalAttack = attackStats.attack + attackRoll + attackBonus;
-        const totalDefense = defenseStats.defense + defenseRoll + defenseBonus;
+        const totalAttack = attackStats.attack + attackStats.roll + attackBonus;
+        const totalDefense = defenseStats.defense + defenseStats.roll + defenseBonus;
         
         const damage = totalAttack - totalDefense;
         return damage > 0 ? damage : 0;

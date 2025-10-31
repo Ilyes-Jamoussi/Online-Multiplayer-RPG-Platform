@@ -1,4 +1,5 @@
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileCost, TileKind } from '@common/enums/tile-kind.enum';
@@ -20,6 +21,7 @@ interface ReachableTileExplorationContext {
 export class InGameMovementService {
     constructor(
         private readonly gameCache: GameCacheService,
+        private readonly sessionRepository: InGameSessionRepository,
         private readonly eventEmitter: EventEmitter2,
     ) {}
 
@@ -52,19 +54,22 @@ export class InGameMovementService {
 
         this.gameCache.moveTileOccupant(session.id, nextX, nextY, player);
 
-        player.x = nextX;
-        player.y = nextY;
-        player.speed -= moveCost;
+        const newSpeed = player.speed - moveCost;
+        this.sessionRepository.updatePlayer(session.id, playerId, {
+            x: nextX,
+            y: nextY,
+            speed: newSpeed
+        });
 
         this.eventEmitter.emit('player.moved', {
             session,
             playerId,
             x: nextX,
             y: nextY,
-            speed: player.speed,
+            speed: newSpeed,
         });
 
-        if (player.speed) {
+        if (newSpeed > 0) {
             this.calculateReachableTiles(session, playerId);
         } else {
             this.eventEmitter.emit('player.reachableTiles', { playerId, reachable: [] });

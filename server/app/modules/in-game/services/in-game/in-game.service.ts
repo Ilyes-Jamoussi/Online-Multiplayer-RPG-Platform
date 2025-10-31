@@ -4,7 +4,7 @@ import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
-import { InGamePlayer } from '@common/models/player.interface';
+import { Player } from '@common/models/player.interface';
 import { InGameSession, WaitingRoomSession } from '@common/models/session.interface';
 import { BadRequestException, Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
@@ -54,7 +54,8 @@ export class InGameService {
         session.currentTurn.activePlayerId = firstPlayerId;
         if (session.inGamePlayers[firstPlayerId]) {
             const player = session.inGamePlayers[firstPlayerId];
-            player.speed = player.baseSpeed + player.speedBonus;
+            const newSpeed = player.baseSpeed + player.speedBonus;
+            player.speed = newSpeed; // Mise à jour temporaire avant sauvegarde
         }
 
         this.initialization.assignStartPoints(session, game);
@@ -90,8 +91,9 @@ export class InGameService {
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
         if (player.isInGame) throw new BadRequestException('Player already joined');
-        player.isInGame = true;
-        return session;
+        
+        this.sessionRepository.updatePlayer(sessionId, playerId, { isInGame: true });
+        return this.sessionRepository.findById(sessionId);
     }
 
     endPlayerTurn(sessionId: string, playerId: string): InGameSession {
@@ -106,6 +108,7 @@ export class InGameService {
     attackPlayerAction(sessionId: string, playerId: string, x: number, y: number): void {
         const session = this.sessionRepository.findById(sessionId);
         this.actionService.attackPlayer(session, playerId, x, y);
+        this.sessionRepository.updatePlayer(sessionId, playerId, { actionsRemaining: 0 });
         session.currentTurn.hasUsedAction = true;
         this.sessionRepository.save(session);
     }
@@ -113,6 +116,7 @@ export class InGameService {
     toggleDoorAction(sessionId: string, playerId: string, x: number, y: number): void {
         const session = this.sessionRepository.findById(sessionId);
         this.actionService.toggleDoor(session, playerId, x, y);
+        this.sessionRepository.updatePlayer(sessionId, playerId, { actionsRemaining: 0 });
         session.currentTurn.hasUsedAction = true;
         this.sessionRepository.save(session);
     }
@@ -136,7 +140,7 @@ export class InGameService {
         return { session, playerName: player.name, sessionEnded };
     }
 
-    getInGamePlayers(sessionId: string): InGamePlayer[] {
+    getPlayers(sessionId: string): Player[] {
         return this.sessionRepository.getIngamePlayers(sessionId);
     }
 

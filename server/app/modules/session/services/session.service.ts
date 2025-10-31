@@ -128,8 +128,12 @@ export class SessionService {
         session.players = session.players.filter((player) => player.id !== playerId);
     }
 
-    getSession(sessionId: string): WaitingRoomSession | undefined {
-        return this.sessions.get(sessionId);
+    getSession(sessionId: string): WaitingRoomSession {
+        const session = this.sessions.get(sessionId);
+        if (!session) {
+            throw new Error('Session non trouvée');
+        }
+        return session;
     }
 
     getAvailableSessions(): SessionPreviewDto[] {

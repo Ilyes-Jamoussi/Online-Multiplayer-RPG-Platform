@@ -11,7 +11,7 @@ import { catchError, of, take, tap } from 'rxjs';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { AssetsService } from '@app/services/assets/assets.service';
-import { InGamePlayer } from '@common/models/player.interface';
+import { Player } from '@common/models/player.interface';
 import { Vector2 } from '@app/interfaces/game-editor.interface';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
@@ -190,10 +190,10 @@ export class GameMapService {
         return !!coords && coords.x === tile.x && coords.y === tile.y;
     }
 
-    getPlayerOnTile(coords?: Vector2): InGamePlayer | undefined {
+    getPlayerOnTile(coords?: Vector2): Player | undefined {
         const targetCoords = coords ?? this._activeTileCoords();
         if (!targetCoords) return undefined;
-        return this.currentlyInGamePlayers.find((player) => player.x === targetCoords.x && player.y === targetCoords.y);
+        return this.currentlyPlayers.find((player) => player.x === targetCoords.x && player.y === targetCoords.y);
     }
 
     getObjectOnTile(coords?: Vector2): GameEditorPlaceableDto | undefined {
@@ -215,8 +215,8 @@ export class GameMapService {
         });
     }
 
-    get currentlyInGamePlayers(): InGamePlayer[] {
-        return this.inGameService.currentlyInGamePlayers;
+    get currentlyPlayers(): Player[] {
+        return this.inGameService.currentlyPlayers;
     }
 
     loadGameMap(gameId: string): void {
