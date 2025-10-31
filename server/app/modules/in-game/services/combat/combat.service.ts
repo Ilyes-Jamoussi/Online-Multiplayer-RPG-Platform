@@ -29,13 +29,13 @@ export class CombatService {
         };
 
         this.activeCombats.set(session.id, combatState);
-        
+
         this.eventEmitter.emit('combat.started', {
             session,
             attackerId: playerAId,
             targetId: playerBId,
             x,
-            y
+            y,
         });
     }
 
@@ -82,26 +82,26 @@ export class CombatService {
         // Calculer les dégâts dans les deux sens
         const playerADice = combat.playerAChoice === 'offensive' ? playerA.attackDice : playerA.defenseDice;
         const playerBDice = combat.playerBChoice === 'offensive' ? playerB.attackDice : playerB.defenseDice;
-        
+
         const playerARoll = this.rollDice(playerADice);
         const playerBRoll = this.rollDice(playerBDice);
-        
+
         const damageToB = this.calculateDamage(
             { attack: playerA.attack, dice: playerA.attackDice, choice: combat.playerAChoice, roll: playerARoll },
-            { defense: playerB.defense, dice: playerB.defenseDice, choice: combat.playerBChoice, roll: playerBRoll }
+            { defense: playerB.defense, dice: playerB.defenseDice, choice: combat.playerBChoice, roll: playerBRoll },
         );
 
         const damageToA = this.calculateDamage(
             { attack: playerB.attack, dice: playerB.attackDice, choice: combat.playerBChoice, roll: playerBRoll },
-            { defense: playerA.defense, dice: playerA.defenseDice, choice: combat.playerAChoice, roll: playerARoll }
+            { defense: playerA.defense, dice: playerA.defenseDice, choice: combat.playerAChoice, roll: playerARoll },
         );
 
         // Appliquer les dégâts (utilise health calculée, pas baseHealth)
-        this.sessionRepository.updatePlayer(sessionId, combat.playerAId, { 
-            health: Math.max(0, playerA.health - damageToA) 
+        this.sessionRepository.updatePlayer(sessionId, combat.playerAId, {
+            health: Math.max(0, playerA.health - damageToA),
         });
-        this.sessionRepository.updatePlayer(sessionId, combat.playerBId, { 
-            health: Math.max(0, playerB.health - damageToB) 
+        this.sessionRepository.updatePlayer(sessionId, combat.playerBId, {
+            health: Math.max(0, playerB.health - damageToB),
         });
 
         // Émettre les résultats de combat pour l'affichage client
@@ -113,12 +113,12 @@ export class CombatService {
             playerARoll,
             playerBRoll,
             playerADice,
-            playerBDice
+            playerBDice,
         };
-        
-        this.eventEmitter.emit('player.combatResult', { 
-            sessionId, 
-            ...combatResult
+
+        this.eventEmitter.emit('player.combatResult', {
+            sessionId,
+            ...combatResult,
         });
 
         // Récupérer les joueurs mis à jour pour vérifier la fin de combat
@@ -165,14 +165,14 @@ export class CombatService {
 
     private calculateDamage(
         attackStats: { attack: number; dice: Dice; choice: 'offensive' | 'defensive' | null; roll: number },
-        defenseStats: { defense: number; dice: Dice; choice: 'offensive' | 'defensive' | null; roll: number }
+        defenseStats: { defense: number; dice: Dice; choice: 'offensive' | 'defensive' | null; roll: number },
     ): number {
         const attackBonus = attackStats.choice === 'offensive' ? 2 : 0;
         const defenseBonus = defenseStats.choice === 'defensive' ? 2 : 0;
-        
+
         const totalAttack = attackStats.attack + attackStats.roll + attackBonus;
         const totalDefense = defenseStats.defense + defenseStats.roll + defenseBonus;
-        
+
         const damage = totalAttack - totalDefense;
         return damage > 0 ? damage : 0;
     }

@@ -25,7 +25,7 @@ export class InGameMovementService {
         private readonly eventEmitter: EventEmitter2,
     ) {}
 
-    movePlayer(session: InGameSession, playerId: string, orientation: Orientation): void {
+    movePlayer(session: InGameSession, playerId: string, orientation: Orientation): number {
         const player = session.inGamePlayers[playerId];
         if (!player) {
             throw new NotFoundException('Player not found');
@@ -64,6 +64,8 @@ export class InGameMovementService {
         } else {
             this.eventEmitter.emit('player.reachableTiles', { playerId, reachable: [] });
         }
+
+        return newSpeed;
     }
 
     calculateReachableTiles(session: InGameSession, playerId: string): void {

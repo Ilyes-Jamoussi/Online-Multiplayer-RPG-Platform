@@ -180,6 +180,7 @@ export class InGameGateway {
         this.server
             .to(payload.session.inGameId)
             .emit(InGameEvents.DoorToggled, successResponse({ x: payload.x, y: payload.y, isOpen: payload.isOpen }));
+        this.server.to(payload.playerId).emit(InGameEvents.PlayerActionUsed, successResponse({}));
     }
 
     @OnEvent('player.moved')

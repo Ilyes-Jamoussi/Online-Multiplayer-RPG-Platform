@@ -134,6 +134,10 @@ export class PlayerService {
         this.sessionService.resetSession();
     }
 
+    updateActionsRemaining(actionsRemaining: number): void {
+        this.updatePlayer({ actionsRemaining });
+    }
+
     private initListeners(): void {
         this.sessionSocketService.onSessionCreated((data) => {
             this.updatePlayer({ id: data.playerId });

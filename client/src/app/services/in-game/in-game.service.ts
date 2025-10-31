@@ -56,7 +56,7 @@ export class InGameService {
         this.inGameSocketService.playerToggleDoorAction(this.sessionService.id(), x, y);
     }
 
-    useAction(): void {
+    playerActionUsed(): void {
         this._inGameSession.update((session) => ({
             ...session,
             currentTurn: {
@@ -64,6 +64,7 @@ export class InGameService {
                 hasUsedAction: true,
             },
         }));
+        this.playerService.updateActionsRemaining(0);
     }
 
     activateActionMode(): void {
@@ -72,6 +73,7 @@ export class InGameService {
 
     deactivateActionMode(): void {
         this._isActionModeActive.set(false);
+        this._availableActions.set([]);
     }
 
     constructor(
@@ -134,7 +136,7 @@ export class InGameService {
         this._inGameSession.update((inGameSession) => ({ ...inGameSession, ...data }));
     }
 
-    updatePlayerPositionAndActions(playerId: string, x: number, y: number, speed: number, actions: AvailableAction[]): void {
+    updatePlayerPosAndAvailableActions(playerId: string, x: number, y: number, speed: number, actions: AvailableAction[]): void {
         const isCurrentPlayerMyTurn = playerId === this.playerService.id();
 
         this._inGameSession.update((inGameSession) => ({
@@ -219,7 +221,7 @@ export class InGameService {
         });
 
         this.inGameSocketService.onPlayerMoved((data) => {
-            this.updatePlayerPositionAndActions(data.playerId, data.x, data.y, data.speed, data.actions);
+            this.updatePlayerPosAndAvailableActions(data.playerId, data.x, data.y, data.speed, data.actions);
         });
 
         this.inGameSocketService.onLeftInGameSessionAck(() => {
@@ -250,6 +252,11 @@ export class InGameService {
 
         this.inGameSocketService.onCombatEnded(() => {
             this.combatService.endCombat();
+        });
+
+        this.inGameSocketService.onPlayerActionUsed(() => {
+            this.playerActionUsed();
+            this.deactivateActionMode();
         });
     }
 

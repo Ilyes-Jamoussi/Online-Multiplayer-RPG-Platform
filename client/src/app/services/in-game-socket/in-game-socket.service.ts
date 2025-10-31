@@ -111,4 +111,8 @@ export class InGameSocketService {
     onPlayerUpdated(callback: (data: Player) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerUpdated, callback);
     }
+
+    onPlayerActionUsed(callback: () => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerActionUsed, callback);
+    }
 }

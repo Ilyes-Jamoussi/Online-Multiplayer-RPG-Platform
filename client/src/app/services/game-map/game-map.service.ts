@@ -149,8 +149,6 @@ export class GameMapService {
         } else {
             this.toggleDoor(x, y);
         }
-        this.inGameService.useAction();
-        this.inGameService.deactivateActionMode();
     }
 
     private attackPlayer(x: number, y: number): void {

@@ -108,26 +108,40 @@ export class InGameService {
 
     attackPlayerAction(sessionId: string, playerId: string, x: number, y: number): void {
         const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
         this.actionService.attackPlayer(session, playerId, x, y);
-        this.sessionRepository.updatePlayer(sessionId, playerId, { actionsRemaining: 0 });
+        player.actionsRemaining--;
         session.currentTurn.hasUsedAction = true;
-        this.sessionRepository.save(session);
+        if(!player.actionsRemaining && !player.speed) {
+            this.timerService.endTurnManual(session);
+        }
     }
 
     toggleDoorAction(sessionId: string, playerId: string, x: number, y: number): void {
         const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
         this.actionService.toggleDoor(session, playerId, x, y);
-        this.sessionRepository.updatePlayer(sessionId, playerId, { actionsRemaining: 0 });
+        player.actionsRemaining--;
         session.currentTurn.hasUsedAction = true;
-        this.sessionRepository.save(session);
+        this.movementService.calculateReachableTiles(session, playerId);
+        if(!player.actionsRemaining && !player.speed) {
+            this.timerService.endTurnManual(session);
+        }
     }
 
     movePlayer(sessionId: string, playerId: string, orientation: Orientation): void {
         const session = this.sessionRepository.findById(sessionId);
         if (playerId !== session.currentTurn.activePlayerId) throw new BadRequestException('Not your turn');
         if (this.timerService.getGameTimerState(sessionId) !== TurnTimerStates.PlayerTurn) throw new BadRequestException('Not your turn');
-        this.movementService.movePlayer(session, playerId, orientation);
-        this.actionService.calculateAvailableActions(session, playerId);
+        const remainingSpeed = this.movementService.movePlayer(session, playerId, orientation);
+        const availableActions =this.actionService.calculateAvailableActions(session, playerId);
+        if(!remainingSpeed && !availableActions.length) {
+            this.timerService.endTurnManual(session);
+        }
     }
 
     leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string; sessionEnded: boolean } {
