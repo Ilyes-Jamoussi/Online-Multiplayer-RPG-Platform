@@ -49,7 +49,7 @@ export class InGameSessionRepository {
 
     removeStartPoint(sessionId: string, startPointId: string): void {
         const session = this.findById(sessionId);
-        session.startPoints = session.startPoints.filter((s) => s.id !== startPointId);
+        session.startPoints = session.startPoints.filter((startPoint) => startPoint.id !== startPointId);
     }
 
     removePlayerFromTurnOrder(sessionId: string, playerId: string): void {

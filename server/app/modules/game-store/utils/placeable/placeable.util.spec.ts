@@ -24,7 +24,7 @@ describe('placeable.factory', () => {
 
         const out = makeDefaultPlaceables(size, mode);
 
-        const totalExpected = Object.values(expected).reduce((s, n) => s + (n ?? 0), 0);
+        const totalExpected = Object.values(expected).reduce((total, n) => total + (n ?? 0), 0);
         expect(out.length).toBe(totalExpected);
 
         const counts: Partial<Record<PlaceableKind, number>> = {};
@@ -69,7 +69,7 @@ describe('placeable.factory', () => {
                 const expected = expectedCounts(size, mode);
                 const out = makeDefaultPlaceables(size, mode);
 
-                const totalExpected = Object.values(expected).reduce((s, n) => s + (n ?? 0), 0);
+                const totalExpected = Object.values(expected).reduce((total, n) => total + (n ?? 0), 0);
                 expect(out.length).toBe(totalExpected);
 
                 const expectedKinds = new Set(Object.keys(expected));

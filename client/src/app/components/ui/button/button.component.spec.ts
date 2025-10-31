@@ -104,10 +104,10 @@ describe('UiButtonComponent', () => {
 
     it('classes getter should reflect size changes', () => {
         const sizes: string[] = ['sm', 'md', 'lg'];
-        for (const s of sizes) {
-            component.size = s;
+        for (const size of sizes) {
+            component.size = size;
             const cls = component.classes.split(' ').filter(Boolean);
-            expect(cls).toContain(`ui-button--${s}`);
+            expect(cls).toContain(`ui-button--${size}`);
         }
     });
 
