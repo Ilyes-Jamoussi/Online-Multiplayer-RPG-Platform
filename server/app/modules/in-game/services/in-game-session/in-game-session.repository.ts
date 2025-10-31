@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InGameSession } from '@common/models/session.interface';
 import { Player } from '@common/models/player.interface';
+import { StartPoint } from '@common/models/start-point.interface';
 
 @Injectable()
 export class InGameSessionRepository {
@@ -21,6 +22,16 @@ export class InGameSessionRepository {
             sessionId,
             player
         });
+    }
+
+    decreasePlayerHealth(sessionId: string, playerId: string, health: number): number {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        const newHealth = player.health - health;
+        player.health = newHealth > 0 ? newHealth : 0;
+        
+        return player.health;
     }
 
     inGamePlayersCount(sessionId: string): number {
@@ -81,5 +92,10 @@ export class InGameSessionRepository {
             }
         }
         return null;
+    }
+
+    findStartPointById(sessionId: string, startPointId: string): StartPoint | null {
+        const session = this.findById(sessionId);
+        return session.startPoints.find((s) => s.id === startPointId);
     }
 }

@@ -143,19 +143,7 @@ export class GameMapService {
         this.inGameService.deactivateActionMode();
     }
 
-    performAction(actionType: 'ATTACK' | 'DOOR', x: number, y: number): void {
-        if (actionType === 'ATTACK') {
-            this.attackPlayer(x, y);
-        } else {
-            this.toggleDoor(x, y);
-        }
-    }
-
-    private attackPlayer(x: number, y: number): void {
-        this.inGameService.attackPlayerAction(x, y);
-    }
-
-    private toggleDoor(x: number, y: number): void {
+    toggleDoor(x: number, y: number): void {
         this.inGameService.toggleDoorAction(x, y);
     }
 

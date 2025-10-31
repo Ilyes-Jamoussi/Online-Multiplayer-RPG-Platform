@@ -1,10 +1,9 @@
-import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { Orientation } from '@common/enums/orientation.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { InGameSession } from '@common/models/session.interface';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -12,15 +11,13 @@ export class InGameActionService {
     constructor(
         private readonly gameCache: GameCacheService,
         private readonly eventEmitter: EventEmitter2,
-        private readonly combatService: CombatService,
     ) {}
 
     attackPlayer(session: InGameSession, playerId: string, x: number, y: number): void {
-        const targetPlayer = Object.values(session.inGamePlayers).find((player) => player.x === x && player.y === y);
-
-        if (targetPlayer) {
-            this.combatService.startCombat(session, playerId, targetPlayer.id, x, y);
-        }
+        const targetPlayerId = this.gameCache.getTileOccupant(session.id, x, y);
+        if (!targetPlayerId) throw new NotFoundException('Target player not found');
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
     }
 
     toggleDoor(session: InGameSession, playerId: string, x: number, y: number): void {

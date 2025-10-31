@@ -210,18 +210,35 @@ app-combat-timer {
     font-size: 0.9rem;
     min-width: 160px;
     
-    &:hover {
+    &:hover:not(:disabled) {
         background: linear-gradient(135deg, #b8941f, #d4af37);
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    &.selected {
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+        border: 3px solid #d4af37;
+        transform: scale(1.05);
+        animation: selectedPulse 1s ease-in-out infinite;
     }
 
     &.offensive {
         background: linear-gradient(135deg, #dc3545, #c82333);
         color: white;
         
-        &:hover {
+        &:hover:not(:disabled) {
             background: linear-gradient(135deg, #c82333, #dc3545);
+        }
+
+        &.selected {
+            box-shadow: 0 0 20px rgba(220, 53, 69, 0.8);
+            border-color: #dc3545;
         }
     }
 
@@ -229,8 +246,24 @@ app-combat-timer {
         background: linear-gradient(135deg, #007bff, #0056b3);
         color: white;
         
-        &:hover {
+        &:hover:not(:disabled) {
             background: linear-gradient(135deg, #0056b3, #007bff);
         }
+
+        &.selected {
+            box-shadow: 0 0 20px rgba(0, 123, 255, 0.8);
+            border-color: #007bff;
+        }
+    }
+}
+
+@keyframes selectedPulse {
+    0%, 100% { 
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+    }
+    50% { 
+        transform: scale(1.08);
+        box-shadow: 0 0 30px rgba(212, 175, 55, 1);
     }
 }

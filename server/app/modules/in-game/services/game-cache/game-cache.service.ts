@@ -7,7 +7,7 @@ import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { Orientation } from '@common/enums/orientation.enum';
 import { Player } from '@common/models/player.interface';
 import { MapSize } from '@common/enums/map-size.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileCost, TileKind } from '@common/enums/tile-kind.enum';
 
 interface GameMap {
     tiles: (Tile & { playerId: string | null })[];
@@ -117,5 +117,29 @@ export class GameCacheService {
         if (tile.kind !== TileKind.DOOR) throw new BadRequestException('Tile is not a door');
         tile.open = !tile.open;
         gameMap.tiles[y * gameMap.size + x] = tile;
+    }
+
+    isTileFree(sessionId: string, x: number, y: number): boolean {
+        // Check if tile is occupied by another player
+        if (this.getTileOccupant(sessionId, x, y)) {
+            return false;
+        }
+
+        // Check tile type and accessibility
+        const tile = this.getTileAtPosition(sessionId, x, y);
+        if (!tile) {
+            return false;
+        }
+
+        const tileCost = TileCost[tile.kind];
+        if (tileCost === -1) {
+            return false;
+        }
+
+        if (tile.kind === TileKind.DOOR && !tile.open) {
+            return false;
+        }
+
+        return true;
     }
 }

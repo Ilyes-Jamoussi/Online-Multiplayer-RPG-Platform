@@ -3,7 +3,6 @@ import { errorResponse, successResponse } from '@app/utils/socket-response/socke
 import { InGameEvents } from '@common/constants/in-game-events';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
-import { CombatResult } from '@common/interfaces/combat.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { Player } from '@common/models/player.interface';
 import { InGameSession } from '@common/models/session.interface';
@@ -70,24 +69,6 @@ export class InGameGateway {
         socket.leave(session.inGameId);
     }
 
-    @SubscribeMessage(InGameEvents.AttackPlayerAction)
-    attackPlayerAction(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
-        try {
-            this.inGameService.attackPlayerAction(payload.sessionId, socket.id, payload.x, payload.y);
-        } catch (error) {
-            socket.emit(InGameEvents.AttackPlayerAction, errorResponse(error.message));
-        }
-    }
-
-    @SubscribeMessage(InGameEvents.CombatChoice)
-    combatChoice(socket: Socket, payload: { sessionId: string; choice: 'offensive' | 'defensive' }): void {
-        try {
-            this.inGameService.combatChoice(payload.sessionId, socket.id, payload.choice);
-        } catch (error) {
-            socket.emit(InGameEvents.CombatChoice, errorResponse(error.message));
-        }
-    }
-
     @SubscribeMessage(InGameEvents.ToggleDoorAction)
     toggleDoorAction(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
         try {
@@ -138,43 +119,6 @@ export class InGameGateway {
         this.logger.warn(`Forced end of turn for session ${payload.session.id}`);
     }
 
-    @OnEvent('combat.started')
-    handleCombatStarted(payload: { session: InGameSession; attackerId: string; targetId: string }) {
-        this.server
-            .to(payload.session.inGameId)
-            .emit(InGameEvents.CombatStarted, successResponse({
-                attackerId: payload.attackerId,
-                targetId: payload.targetId
-            }));
-    }
-
-    @OnEvent('combat.ended')
-    handleCombatEnded(payload: { session: InGameSession }) {
-        this.server
-            .to(payload.session.inGameId)
-            .emit(InGameEvents.CombatEnded, successResponse({}));
-    }
-
-    @OnEvent('player.combatResult')
-    handlePlayerCombatResult(payload: { sessionId: string } & CombatResult) {
-        const session = this.inGameService.getSession(payload.sessionId);
-        if (session) {
-            const combatResult: CombatResult = {
-                playerAId: payload.playerAId,
-                playerBId: payload.playerBId,
-                damageToA: payload.damageToA,
-                damageToB: payload.damageToB,
-                playerARoll: payload.playerARoll,
-                playerBRoll: payload.playerBRoll,
-                playerADice: payload.playerADice,
-                playerBDice: payload.playerBDice
-            };
-            this.server
-                .to(session.inGameId)
-                .emit(InGameEvents.PlayerCombatResult, successResponse(combatResult));
-        }
-    }
-
     @OnEvent('door.toggled')
     handleDoorToggled(payload: { session: InGameSession; playerId: string; x: number; y: number; isOpen: boolean }) {
         this.server
@@ -198,7 +142,6 @@ export class InGameGateway {
     handlePlayerReachableTiles(payload: { playerId: string; reachable: ReachableTile[] }) {
         this.server.to(payload.playerId).emit(InGameEvents.PlayerReachableTiles, successResponse(payload.reachable));
     }
-
 
     @OnEvent('player.updated')
     handlePlayerUpdated(payload: { sessionId: string; player: Player }) {

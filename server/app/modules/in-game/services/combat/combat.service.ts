@@ -1,13 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { InGameSession } from '@common/models/session.interface';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
+import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
-import { CombatState, CombatResult } from '@common/interfaces/combat.interface';
-import { Dice } from '@common/enums/dice.enum';
-
-const DICE_D4_SIDES = 4;
-const DICE_D6_SIDES = 6;
+import { CombatState } from '@common/interfaces/combat.interface';
+import { Dice, DiceSides } from '@common/enums/dice.enum';
+import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
 
 @Injectable()
 export class CombatService {
@@ -16,164 +15,200 @@ export class CombatService {
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly timerService: TimerService,
+        private readonly combatTimerService: CombatTimerService,
         private readonly sessionRepository: InGameSessionRepository,
+        private readonly inGameMovementService: InGameMovementService,
     ) {}
 
-    startCombat(session: InGameSession, playerAId: string, playerBId: string, x: number, y: number): void {
+    getSession(sessionId: string): InGameSession {
+        return this.sessionRepository.findById(sessionId);
+    }
+
+    attackPlayerAction(sessionId: string, playerId: string, x: number, y: number): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+
+        if (!player) throw new NotFoundException('Player not found');
+        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
+
+        const targetPlayer = Object.values(session.inGamePlayers).find((p) => p.x === x && p.y === y && p.id !== playerId);
+
+        if (!targetPlayer) {
+            throw new BadRequestException('No opponent at this position');
+        }
+
+        player.actionsRemaining--;
+        session.currentTurn.hasUsedAction = true;
+
+        this.startCombat(session, playerId, targetPlayer.id);
+    }
+
+    combatChoice(sessionId: string, playerId: string, choice: 'offensive' | 'defensive'): void {
+        const combat = this.activeCombats.get(sessionId);
+        if (!combat) return;
+
+        if (combat.playerAId !== playerId && combat.playerBId !== playerId) throw new BadRequestException('Player not in combat');
+        if (combat.playerAId === playerId) {
+            combat.playerAPosture = choice;
+        } else if (combat.playerBId === playerId) {
+            combat.playerBPosture = choice;
+        }
+
+        if (combat.playerAPosture !== null && combat.playerBPosture !== null) {
+            const session = this.sessionRepository.findById(sessionId);
+            this.combatTimerService.forceNextLoop(session);
+        }
+    }
+
+    startCombat(session: InGameSession, playerAId: string, playerBId: string): void {
         const combatState: CombatState = {
             sessionId: session.id,
             playerAId,
             playerBId,
-            playerAChoice: null,
-            playerBChoice: null,
+            playerAPosture: null,
+            playerBPosture: null,
         };
 
         this.activeCombats.set(session.id, combatState);
 
-        this.eventEmitter.emit('combat.started', {
-            session,
-            attackerId: playerAId,
-            targetId: playerBId,
-            x,
-            y,
-        });
-    }
-
-    makeChoice(sessionId: string, playerId: string, choice: 'offensive' | 'defensive'): void {
-        const combat = this.activeCombats.get(sessionId);
-        if (!combat) return;
-
-        if (combat.playerAId === playerId) {
-            combat.playerAChoice = choice;
-        } else if (combat.playerBId === playerId) {
-            combat.playerBChoice = choice;
-        }
-
-        // Si les 2 ont choisi, exécuter immédiatement
-        if (combat.playerAChoice !== null && combat.playerBChoice !== null) {
-            this.processCombatRound(sessionId);
-        }
+        this.timerService.pauseTurnTimer(session.id);
+        this.combatTimerService.startCombatTimer(session, playerAId, playerBId);
     }
 
     @OnEvent('combat.timerLoop')
     handleTimerLoop(payload: { sessionId: string }): void {
         const combat = this.activeCombats.get(payload.sessionId);
         if (combat) {
-            this.processCombatRound(payload.sessionId);
+            this.combatRound(payload.sessionId);
         }
     }
 
-    @OnEvent('combat.choice')
-    handleCombatChoice(payload: { sessionId: string; playerId: string; choice: 'offensive' | 'defensive' }): void {
-        this.makeChoice(payload.sessionId, payload.playerId, payload.choice);
+    private endCombat(session: InGameSession): void {
+        this.activeCombats.delete(session.id);
+        this.combatTimerService.stopCombatTimer(session);
+        this.timerService.resumeTurnTimer(session.id);
     }
 
-    private processCombatRound(sessionId: string): void {
+    combatRound(sessionId: string): void {
         const combat = this.activeCombats.get(sessionId);
         if (!combat) return;
 
         const session = this.sessionRepository.findById(sessionId);
         if (!session) return;
 
-        const playerA = session.inGamePlayers[combat.playerAId];
-        const playerB = session.inGamePlayers[combat.playerBId];
-        if (!playerA || !playerB) return;
+        const playerAId = combat.playerAId;
+        const playerBId = combat.playerBId;
 
-        // Calculer les dégâts dans les deux sens
-        const playerADice = combat.playerAChoice === 'offensive' ? playerA.attackDice : playerA.defenseDice;
-        const playerBDice = combat.playerBChoice === 'offensive' ? playerB.attackDice : playerB.defenseDice;
+        const playerAAttack = this.getPlayerAttack(sessionId, playerAId, combat.playerAPosture);
+        const playerADefense = this.getPlayerDefense(sessionId, playerAId, combat.playerAPosture);
+        const playerBAttack = this.getPlayerAttack(sessionId, playerBId, combat.playerBPosture);
+        const playerBDefense = this.getPlayerDefense(sessionId, playerBId, combat.playerBPosture);
 
-        const playerARoll = this.rollDice(playerADice);
-        const playerBRoll = this.rollDice(playerBDice);
+        const playerADamage = this.calculateDamage(playerBAttack.totalAttack, playerADefense.totalDefense);
+        const playerBDamage = this.calculateDamage(playerAAttack.totalAttack, playerBDefense.totalDefense);
 
-        const damageToB = this.calculateDamage(
-            { attack: playerA.attack, dice: playerA.attackDice, choice: combat.playerAChoice, roll: playerARoll },
-            { defense: playerB.defense, dice: playerB.defenseDice, choice: combat.playerBChoice, roll: playerBRoll },
-        );
+        const playerAHealth = this.sessionRepository.decreasePlayerHealth(sessionId, playerAId, playerADamage);
+        const playerBHealth = this.sessionRepository.decreasePlayerHealth(sessionId, playerBId, playerBDamage);
 
-        const damageToA = this.calculateDamage(
-            { attack: playerB.attack, dice: playerB.attackDice, choice: combat.playerBChoice, roll: playerBRoll },
-            { defense: playerA.defense, dice: playerA.defenseDice, choice: combat.playerAChoice, roll: playerARoll },
-        );
-
-        // Appliquer les dégâts (utilise health calculée, pas baseHealth)
-        this.sessionRepository.updatePlayer(sessionId, combat.playerAId, {
-            health: Math.max(0, playerA.health - damageToA),
-        });
-        this.sessionRepository.updatePlayer(sessionId, combat.playerBId, {
-            health: Math.max(0, playerB.health - damageToB),
+        this.eventEmitter.emit('player.healthChanged', {
+            sessionId,
+            playerId: playerAId,
+            newHealth: playerAHealth,
         });
 
-        // Émettre les résultats de combat pour l'affichage client
-        const combatResult: CombatResult = {
-            playerAId: combat.playerAId,
-            playerBId: combat.playerBId,
-            damageToA,
-            damageToB,
-            playerARoll,
-            playerBRoll,
-            playerADice,
-            playerBDice,
-        };
+        this.eventEmitter.emit('player.healthChanged', {
+            sessionId,
+            playerId: playerBId,
+            newHealth: playerBHealth,
+        });
 
         this.eventEmitter.emit('player.combatResult', {
             sessionId,
-            ...combatResult,
+            playerAId,
+            playerBId,
+            playerAAttack,
+            playerBAttack,
+            playerADefense,
+            playerBDefense,
+            playerADamage,
+            playerBDamage,
         });
 
-        // Récupérer les joueurs mis à jour pour vérifier la fin de combat
-        const updatedSession = this.sessionRepository.findById(sessionId);
-        const updatedPlayerA = updatedSession.inGamePlayers[combat.playerAId];
-        const updatedPlayerB = updatedSession.inGamePlayers[combat.playerBId];
+        this.resetCombatPosture(sessionId);
 
-        // Vérifier fin de combat
-        if (updatedPlayerA.health <= 0 || updatedPlayerB.health <= 0) {
-            this.endCombat(updatedSession);
-            return;
+        if (playerAHealth <= 0 || playerBHealth <= 0) {
+            this.endCombat(session);
+            
+            if (playerAHealth <= 0) {
+                this.inGameMovementService.movePlayerToStartPosition(session, playerAId);
+            }
+            
+            if (playerBHealth <= 0) {
+                this.inGameMovementService.movePlayerToStartPosition(session, playerBId);
+            }
         }
-
-        // Reset des choix pour le prochain round
-        combat.playerAChoice = null;
-        combat.playerBChoice = null;
     }
 
-    endCombat(session: InGameSession): void {
-        this.activeCombats.delete(session.id);
-        this.eventEmitter.emit('combat.ended', { session });
+    private resetCombatPosture(sessionId: string): void {
+        const combat = this.activeCombats.get(sessionId);
+        if (!combat) return;
+
+        combat.playerAPosture = null;
+        combat.playerBPosture = null;
     }
 
-    @OnEvent('combat.started')
-    handleCombatStarted(payload: { session: InGameSession; attackerId: string; targetId: string }): void {
-        this.timerService.startCombatTimer(payload.session.id);
+    private getPlayerDefense(
+        sessionId: string,
+        playerId: string,
+        posture: 'offensive' | 'defensive',
+    ): {
+        diceRoll: number;
+        baseDefense: number;
+        defenseBonus: number;
+        totalDefense: number;
+    } {
+        const session = this.sessionRepository.findById(sessionId);
+        if (!session) return { diceRoll: 0, baseDefense: 0, defenseBonus: 0, totalDefense: 0 };
+
+        const player = session.inGamePlayers[playerId];
+        if (!player) return { diceRoll: 0, baseDefense: 0, defenseBonus: 0, totalDefense: 0 };
+
+        const defenseRoll = this.rollDice(player.defenseDice);
+        const baseDefense = player.baseDefense;
+        const defenseBonus = posture === 'defensive' ? 2 : 0;
+        const totalDefense = baseDefense + defenseRoll + defenseBonus;
+        return { diceRoll: defenseRoll, baseDefense, defenseBonus, totalDefense };
     }
 
-    @OnEvent('combat.ended')
-    handleCombatEnded(payload: { session: InGameSession }): void {
-        this.timerService.stopCombatTimer(payload.session.id);
+    private getPlayerAttack(
+        sessionId: string,
+        playerId: string,
+        posture: 'offensive' | 'defensive',
+    ): {
+        diceRoll: number;
+        baseAttack: number;
+        attackBonus: number;
+        totalAttack: number;
+    } {
+        const session = this.sessionRepository.findById(sessionId);
+        if (!session) return { diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0 };
+
+        const player = session.inGamePlayers[playerId];
+        if (!player) return { diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0 };
+
+        const attackRoll = this.rollDice(player.attackDice);
+        const baseAttack = player.baseAttack;
+        const attackBonus = posture === 'offensive' ? 2 : 0;
+        const totalAttack = baseAttack + attackRoll + attackBonus;
+        return { diceRoll: attackRoll, baseAttack, attackBonus, totalAttack };
+    }
+
+    private calculateDamage(attack: number, defense: number): number {
+        const damage = attack - defense;
+        return damage > 0 ? damage : 0;
     }
 
     private rollDice(dice: Dice): number {
-        switch (dice) {
-            case Dice.D4:
-                return Math.floor(Math.random() * DICE_D4_SIDES) + 1;
-            case Dice.D6:
-                return Math.floor(Math.random() * DICE_D6_SIDES) + 1;
-            default:
-                return 1;
-        }
-    }
-
-    private calculateDamage(
-        attackStats: { attack: number; dice: Dice; choice: 'offensive' | 'defensive' | null; roll: number },
-        defenseStats: { defense: number; dice: Dice; choice: 'offensive' | 'defensive' | null; roll: number },
-    ): number {
-        const attackBonus = attackStats.choice === 'offensive' ? 2 : 0;
-        const defenseBonus = defenseStats.choice === 'defensive' ? 2 : 0;
-
-        const totalAttack = attackStats.attack + attackStats.roll + attackBonus;
-        const totalDefense = defenseStats.defense + defenseStats.roll + defenseBonus;
-
-        const damage = totalAttack - totalDefense;
-        return damage > 0 ? damage : 0;
+        return Math.floor(Math.random() * DiceSides[dice]) + 1;
     }
 }

@@ -8,7 +8,7 @@ import { TurnTimerStates } from '@common/enums/turn-timer-states.enum';
 import { Player } from '@common/models/player.interface';
 import { InGameSession, WaitingRoomSession } from '@common/models/session.interface';
 import { BadRequestException, Injectable, NotFoundException, Inject } from '@nestjs/common';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameCacheService } from 'app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameActionService } from 'app/modules/in-game/services/in-game-action/in-game-action.service';
 import { InGameInitializationService } from 'app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
@@ -106,18 +106,6 @@ export class InGameService {
         return session;
     }
 
-    attackPlayerAction(sessionId: string, playerId: string, x: number, y: number): void {
-        const session = this.sessionRepository.findById(sessionId);
-        const player = session.inGamePlayers[playerId];
-        if (!player) throw new NotFoundException('Player not found');
-        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
-        this.actionService.attackPlayer(session, playerId, x, y);
-        player.actionsRemaining--;
-        session.currentTurn.hasUsedAction = true;
-        if(!player.actionsRemaining && !player.speed) {
-            this.timerService.endTurnManual(session);
-        }
-    }
 
     toggleDoorAction(sessionId: string, playerId: string, x: number, y: number): void {
         const session = this.sessionRepository.findById(sessionId);
@@ -174,28 +162,8 @@ export class InGameService {
         }
     }
 
-    endCombat(sessionId: string): void {
-        const session = this.sessionRepository.findById(sessionId);
-        this.eventEmitter.emit('combat.ended', { session });
-    }
-
-    combatChoice(sessionId: string, socketId: string, choice: 'offensive' | 'defensive'): void {
-        const session = this.sessionRepository.findById(sessionId);
-        this.eventEmitter.emit('combat.choice', { session, socketId, choice });
-    }
-
     getAvailableActions(sessionId: string, playerId: string) {
         const session = this.sessionRepository.findById(sessionId);
         this.actionService.calculateAvailableActions(session, playerId);
-    }
-
-    @OnEvent('combat.started')
-    handleCombatStarted(payload: { session: InGameSession; attackerId: string; targetId: string }): void {
-        this.timerService.startCombatTimer(payload.session.id);
-    }
-
-    @OnEvent('combat.ended')
-    handleCombatEnded(payload: { session: InGameSession }): void {
-        this.timerService.stopCombatTimer(payload.session.id);
     }
 }

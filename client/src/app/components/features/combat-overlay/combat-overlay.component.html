@@ -54,13 +54,27 @@
             </div>
 
             <div class="combat-actions">
-                <p class="stance-instruction">Choisissez votre posture :</p>
+                <p class="stance-instruction">
+                    @if (isPostureSelected) {
+                        Posture sélectionnée : {{ selectedPosture === 'offensive' ? '⚔️ Offensive' : '🛡️ Défensive' }}
+                    } @else {
+                        Choisissez votre posture :
+                    }
+                </p>
                 
                 <div class="action-buttons">
-                    <button class="combat-btn offensive" (click)="chooseOffensive()">
+                    <button 
+                        class="combat-btn offensive" 
+                        [class.selected]="selectedPosture === 'offensive'"
+                        [disabled]="isPostureSelected"
+                        (click)="chooseOffensive()">
                         ⚔️ Offensive (+2 Attaque)
                     </button>
-                    <button class="combat-btn defensive" (click)="chooseDefensive()">
+                    <button 
+                        class="combat-btn defensive" 
+                        [class.selected]="selectedPosture === 'defensive'"
+                        [disabled]="isPostureSelected"
+                        (click)="chooseDefensive()">
                         🛡️ Défensive (+2 Défense)
                     </button>
                 </div>

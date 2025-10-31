@@ -1,21 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { CombatTimerComponent } from '@app/components/features/combat-timer/combat-timer.component';
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { Dice } from '@common/enums/dice.enum';
-
-const DAMAGE_DISPLAY_DURATION = 2000;
-
-interface DamageDisplay {
-    playerId: string;
-    damage: number;
-    roll: number;
-    dice: Dice;
-    visible: boolean;
-}
 
 @Component({
     selector: 'app-combat-overlay',
@@ -24,26 +13,12 @@ interface DamageDisplay {
     templateUrl: './combat-overlay.component.html',
     styleUrls: ['./combat-overlay.component.scss']
 })
-export class CombatOverlayComponent implements OnInit {
-    private readonly damageDisplays = signal<DamageDisplay[]>([]);
-
+export class CombatOverlayComponent {
     constructor(
         private readonly combatService: CombatService,
         private readonly inGameService: InGameService,
-        private readonly inGameSocketService: InGameSocketService,
         private readonly assetsService: AssetsService
     ) {}
-
-    ngOnInit(): void {
-        this.inGameSocketService.onPlayerCombatResult((data) => {
-            if (data.damageToA > 0) {
-                this.showDamage(data.playerAId, data.damageToA, data.playerARoll, data.playerADice);
-            }
-            if (data.damageToB > 0) {
-                this.showDamage(data.playerBId, data.damageToB, data.playerBRoll, data.playerBDice);
-            }
-        });
-    }
 
     get combatData() {
         return this.combatService.combatData();
@@ -69,27 +44,20 @@ export class CombatOverlayComponent implements OnInit {
         return this.assetsService.getAvatarStaticImage(player.avatar);
     }
 
-    get playerADamage(): DamageDisplay | null {
-        return this.damageDisplays().find(d => d.playerId === this.combatData?.attackerId && d.visible) || null;
+    get playerADamage() {
+        return this.combatService.damageDisplays().find(d => d.playerId === this.combatData?.attackerId && d.visible) || null;
     }
 
-    get playerBDamage(): DamageDisplay | null {
-        return this.damageDisplays().find(d => d.playerId === this.combatData?.targetId && d.visible) || null;
+    get playerBDamage() {
+        return this.combatService.damageDisplays().find(d => d.playerId === this.combatData?.targetId && d.visible) || null;
     }
 
-    private showDamage(playerId: string, damage: number, roll: number, dice: Dice): void {
-        if (damage <= 0) return;
-        
-        this.damageDisplays.update(displays => [
-            ...displays.filter(d => d.playerId !== playerId),
-            { playerId, damage, roll, dice, visible: true }
-        ]);
+    get selectedPosture() {
+        return this.combatService.selectedPosture();
+    }
 
-        setTimeout(() => {
-            this.damageDisplays.update(displays => 
-                displays.map(d => d.playerId === playerId ? { ...d, visible: false } : d)
-            );
-        }, DAMAGE_DISPLAY_DURATION);
+    get isPostureSelected(): boolean {
+        return this.selectedPosture !== null;
     }
 
     get diceD4Image(): string {

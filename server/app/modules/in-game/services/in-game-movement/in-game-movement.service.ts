@@ -37,10 +37,7 @@ export class InGameMovementService {
             throw new NotFoundException('Tile not found');
         }
 
-        const moveCost =
-            tile.kind === TileKind.DOOR
-                ? (tile.open ? TileCost.DOOR_OPEN : -1)
-                : TileCost[tile.kind];
+        const moveCost = tile.kind === TileKind.DOOR ? (tile.open ? TileCost.DOOR_OPEN : -1) : TileCost[tile.kind];
 
         if (moveCost === -1) {
             throw new BadRequestException('Cannot move onto this tile');
@@ -66,6 +63,25 @@ export class InGameMovementService {
         }
 
         return newSpeed;
+    }
+
+    movePlayerToStartPosition(session: InGameSession, playerId: string): void {
+        const player = session.inGamePlayers[playerId];
+        if (!player) {
+            throw new NotFoundException('Player not found');
+        }
+        const startPointId = player.startPointId;
+        const startPoint = this.sessionRepository.findStartPointById(session.id, startPointId);
+        if (!startPoint) {
+            throw new NotFoundException('Start point not found');
+        }
+        const { x: nextX, y: nextY } = this.findClosestFreeTile(session, startPoint.x, startPoint.y);
+        this.gameCache.moveTileOccupant(session.id, nextX, nextY, player);
+        player.x = nextX;
+        player.y = nextY;
+        player.health = player.maxHealth;
+        this.calculateReachableTiles(session, session.currentTurn.activePlayerId);
+        this.eventEmitter.emit('player.moved', { session, playerId, x: nextX, y: nextY, speed: player.speed, actions: [] });
     }
 
     calculateReachableTiles(session: InGameSession, playerId: string): ReachableTile[] {
@@ -195,5 +211,50 @@ export class InGameMovementService {
 
     private isPositionOccupied(session: InGameSession, x: number, y: number): boolean {
         return Boolean(this.gameCache.getTileOccupant(session.id, x, y));
+    }
+
+    private findClosestFreeTile(session: InGameSession, x: number, y: number): { x: number; y: number } {
+        const mapSize = this.gameCache.getMapSize(session.id);
+
+        if (this.gameCache.isTileFree(session.id, x, y)) {
+            return { x, y };
+        }
+
+        const visited = new Set<string>();
+        const queue: { x: number; y: number; distance: number }[] = [{ x, y, distance: 0 }];
+        visited.add(`${x},${y}`);
+
+        while (queue.length > 0) {
+            const current = queue.shift();
+            if (!current) continue;
+
+            const neighbors = [
+                { x: current.x - 1, y: current.y },
+                { x: current.x + 1, y: current.y },
+                { x: current.x, y: current.y - 1 },
+                { x: current.x, y: current.y + 1 },
+            ];
+
+            for (const neighbor of neighbors) {
+                const key = `${neighbor.x},${neighbor.y}`;
+
+                if (neighbor.x < 0 || neighbor.x >= mapSize || neighbor.y < 0 || neighbor.y >= mapSize) {
+                    continue;
+                }
+
+                if (visited.has(key)) {
+                    continue;
+                }
+
+                visited.add(key);
+                if (this.gameCache.isTileFree(session.id, neighbor.x, neighbor.y)) {
+                    return { x: neighbor.x, y: neighbor.y };
+                }
+
+                queue.push({ x: neighbor.x, y: neighbor.y, distance: current.distance + 1 });
+            }
+        }
+
+        throw new NotFoundException('No free tile found near start point');
     }
 }

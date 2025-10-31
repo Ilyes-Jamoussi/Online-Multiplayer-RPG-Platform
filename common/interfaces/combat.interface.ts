@@ -4,17 +4,41 @@ export interface CombatState {
     sessionId: string;
     playerAId: string;
     playerBId: string;
-    playerAChoice: 'offensive' | 'defensive' | null;
-    playerBChoice: 'offensive' | 'defensive' | null;
+    playerAPosture: 'offensive' | 'defensive' | null;
+    playerBPosture: 'offensive' | 'defensive' | null;
 }
 
 export interface CombatResult {
     playerAId: string;
     playerBId: string;
-    damageToA: number;
-    damageToB: number;
-    playerARoll: number;
-    playerBRoll: number;
-    playerADice: Dice;
-    playerBDice: Dice;
+    playerAAttack: {
+        dice: Dice;
+        diceRoll: number;
+        baseAttack: number;
+        attackBonus: number;
+        totalAttack: number;
+    };
+    playerBAttack: {
+        dice: Dice;
+        diceRoll: number;
+        baseAttack: number;
+        attackBonus: number;
+        totalAttack: number;
+    };
+    playerADefense: {
+        dice: Dice;
+        diceRoll: number;
+        baseDefense: number;
+        defenseBonus: number;
+        totalDefense: number;
+    };
+    playerBDefense: {
+        dice: Dice;
+        diceRoll: number;
+        baseDefense: number;
+        defenseBonus: number;
+        totalDefense: number;
+    };
+    playerADamage: number;
+    playerBDamage: number;
 }
