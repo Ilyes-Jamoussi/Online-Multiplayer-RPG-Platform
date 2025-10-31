@@ -95,7 +95,7 @@ function makeDragEvent(
 ): DragEvent {
     const types = opts.types;
     const dataByType = opts.dataByType ?? {};
-    const dt: DataTransfer = {
+    const dataTransfer: DataTransfer = {
         dropEffect: 'none',
         effectAllowed: (opts.effectAllowed ?? 'all') as DataTransfer['effectAllowed'],
         files: {},
@@ -107,7 +107,7 @@ function makeDragEvent(
         getData: (format: string) => dataByType[format] ?? '',
         setData: (format: string, data: string) => {
             dataByType[format] = data;
-            (dt.types as string[]).push(format);
+            (dataTransfer.types as string[]).push(format);
             return true;
         },
         setDragImage: () => {
@@ -119,7 +119,7 @@ function makeDragEvent(
     } as unknown as DataTransfer;
 
     return {
-        dataTransfer: dt,
+        dataTransfer,
         offsetX: opts.offsetX ?? 0,
         offsetY: opts.offsetY ?? 0,
     } as DragEvent;
@@ -131,12 +131,11 @@ function makeDragEventWithSpies(opts: { offsetX?: number; offsetY?: number } = {
     const store: Record<string, string> = {};
     const setData = jasmine.createSpy('setData').and.callFake((fmt: string, data: string) => {
         store[fmt] = data;
-        dt.types.push(fmt);
+        dataTransfer.types.push(fmt);
         return true;
     });
     const getData = jasmine.createSpy('getData').and.callFake((fmt: string) => store[fmt] ?? '');
-
-    const dt: Partial<DataTransfer> & { types: string[] } = {
+    const dataTransfer: Partial<DataTransfer> & { types: string[] } = {
         types: [],
         effectAllowed: 'all',
         setData,
@@ -153,7 +152,7 @@ function makeDragEventWithSpies(opts: { offsetX?: number; offsetY?: number } = {
     };
 
     const evt = {
-        dataTransfer: dt as DataTransfer,
+        dataTransfer: dataTransfer as DataTransfer,
         offsetX: opts.offsetX ?? 0,
         offsetY: opts.offsetY ?? 0,
         _spies: { setData, getData },

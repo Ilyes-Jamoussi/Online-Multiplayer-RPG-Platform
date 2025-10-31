@@ -11,7 +11,7 @@ const NOOP = (): void => {
 };
 
 function createDataTransferStub(types: readonly string[], data: Readonly<Record<string, string>>): DataTransfer {
-    const dt: DataTransfer = {
+    const dataTransfer: DataTransfer = {
         dropEffect: 'none',
         effectAllowed: 'none',
         files: {} as FileList,
@@ -23,7 +23,7 @@ function createDataTransferStub(types: readonly string[], data: Readonly<Record<
         setDragImage: NOOP,
     } as unknown as DataTransfer;
 
-    return dt;
+    return dataTransfer;
 }
 
 type DragEvtInit = Partial<
@@ -170,9 +170,9 @@ describe('GameEditorObjectComponent', () => {
     });
 
     it('onDragStart should delegate to interactions and set isDragging when dataTransfer exists', () => {
-        const dt = createDataTransferStub([PlaceableMime.BOAT], {});
+        const dataTransfer = createDataTransferStub([PlaceableMime.BOAT], {});
         const evt = makeDragEvent({
-            dataTransfer: dt,
+            dataTransfer,
             preventDefault: NOOP,
         });
 
