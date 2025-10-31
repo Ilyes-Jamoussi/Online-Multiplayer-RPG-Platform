@@ -187,10 +187,10 @@ export class GameEditorCheckService {
                 const key0 = `${x}:${y}`;
                 if (seen.has(key0)) continue;
 
-                const q: [number, number][] = [[x, y]];
+                const queue: [number, number][] = [[x, y]];
                 const component = new Set<string>();
-                while (q.length) {
-                    const item = q.shift();
+                while (queue.length) {
+                    const item = queue.shift();
                     if (item) {
                         const [currentX, currentY] = item;
                         const cellKey = `${currentX}:${currentY}`;
@@ -204,7 +204,7 @@ export class GameEditorCheckService {
                             if (neighborX < 0 || neighborY < 0 || neighborX >= size || neighborY >= size) continue;
                             if (!this.isWalkableTile(grid[neighborY][neighborX])) continue;
                             const neighborKey = `${neighborX}:${neighborY}`;
-                            if (!seen.has(neighborKey)) q.push([neighborX, neighborY]);
+                            if (!seen.has(neighborKey)) queue.push([neighborX, neighborY]);
                         }
                     }
                 }
