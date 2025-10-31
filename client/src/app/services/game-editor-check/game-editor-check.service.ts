@@ -192,19 +192,19 @@ export class GameEditorCheckService {
                 while (q.length) {
                     const item = q.shift();
                     if (item) {
-                        const [cx, cy] = item;
-                        const k = `${cx}:${cy}`;
-                        if (seen.has(k)) continue;
-                        seen.add(k);
-                        component.add(k);
+                        const [currentX, currentY] = item;
+                        const cellKey = `${currentX}:${currentY}`;
+                        if (seen.has(cellKey)) continue;
+                        seen.add(cellKey);
+                        component.add(cellKey);
 
                         for (const [dx, dy] of directions) {
-                            const nx = cx + dx;
-                            const ny = cy + dy;
-                            if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
-                            if (!this.isWalkableTile(grid[ny][nx])) continue;
-                            const neighborKey = `${nx}:${ny}`;
-                            if (!seen.has(neighborKey)) q.push([nx, ny]);
+                            const neighborX = currentX + dx;
+                            const neighborY = currentY + dy;
+                            if (neighborX < 0 || neighborY < 0 || neighborX >= size || neighborY >= size) continue;
+                            if (!this.isWalkableTile(grid[neighborY][neighborX])) continue;
+                            const neighborKey = `${neighborX}:${neighborY}`;
+                            if (!seen.has(neighborKey)) q.push([neighborX, neighborY]);
                         }
                     }
                 }
