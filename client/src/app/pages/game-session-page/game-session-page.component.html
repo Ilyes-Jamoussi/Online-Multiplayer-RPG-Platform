@@ -36,7 +36,7 @@
             <p>Temps restant: {{ timeRemaining }}</p>
             <p>Session ID: {{ inGameService.inGameSession().id }}</p>
             <p>Active Player ID: {{ inGameService.inGameSession().currentTurn.activePlayerId }}</p>
-            <p>Joueurs en jeu: {{ getInGamePlayersCount() }}</p>
+            <p>Joueurs en jeu: {{ getPlayersCount() }}</p>
             <p>Points de mouvement: {{ getCurrentPlayerSpeed() }}</p>
             <p>Tuiles atteignables: {{ getReachableTilesCount() }}</p>
             <p>Debug: {{ getDebugInfo() }}</p>

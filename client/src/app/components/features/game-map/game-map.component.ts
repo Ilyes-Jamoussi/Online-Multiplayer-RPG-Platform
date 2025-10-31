@@ -5,7 +5,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
-import { InGamePlayer } from '@common/models/player.interface';
+import { Player } from '@common/models/player.interface';
 import { StartPoint } from '@common/models/start-point.interface';
 import { GameMapTileComponent } from '@app/components/features/game-map-tile/game-map-tile.component';
 import { GameMapTileModalComponent } from '@app/components/features/game-map-tile-modal/game-map-tile-modal.component';
@@ -33,7 +33,7 @@ export class GameMapComponent implements OnInit {
     }
 
     get players() {
-        return this.gameMapService.currentlyInGamePlayers;
+        return this.gameMapService.currentlyPlayers;
     }
 
     get tiles() {
@@ -87,7 +87,7 @@ export class GameMapComponent implements OnInit {
         };
     }
 
-    getPlayerStyle(player: InGamePlayer) {
+    getPlayerStyle(player: Player) {
         return {
             gridColumn: `${player.x + 1}`,
             gridRow: `${player.y + 1}`,

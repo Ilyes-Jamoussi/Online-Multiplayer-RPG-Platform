@@ -1,16 +1,33 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InGameSession } from '@common/models/session.interface';
-import { InGamePlayer } from '@common/models/player.interface';
+import { Player } from '@common/models/player.interface';
 
 @Injectable()
 export class InGameSessionRepository {
     private readonly sessions = new Map<string, InGameSession>();
 
+    constructor(private readonly eventEmitter: EventEmitter2) {}
+
+    updatePlayer(sessionId: string, playerId: string, updates: Partial<Player>): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+
+        Object.assign(player, updates);
+        this.update(session);
+
+        this.eventEmitter.emit('player.updated', {
+            sessionId,
+            player
+        });
+    }
+
     inGamePlayersCount(sessionId: string): number {
         return this.getIngamePlayers(sessionId).length;
     }
 
-    getIngamePlayers(sessionId: string): InGamePlayer[] {
+    getIngamePlayers(sessionId: string): Player[] {
         const session = this.findById(sessionId);
         return Object.values(session.inGamePlayers).filter((p) => p.isInGame);
     }
@@ -37,7 +54,7 @@ export class InGameSessionRepository {
         this.sessions.clear();
     }
 
-    playerLeave(sessionId: string, playerId: string): InGamePlayer {
+    playerLeave(sessionId: string, playerId: string): Player {
         const session = this.findById(sessionId);
         session.inGamePlayers[playerId].isInGame = false;
         session.inGamePlayers[playerId].x = -1;

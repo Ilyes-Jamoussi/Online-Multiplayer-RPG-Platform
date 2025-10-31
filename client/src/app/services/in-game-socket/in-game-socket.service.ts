@@ -3,7 +3,9 @@ import { SocketService } from '@app/services/socket/socket.service';
 import { InGameEvents } from '@common/constants/in-game-events';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { CombatResult } from '@common/interfaces/combat.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+import { Player } from '@common/models/player.interface';
 import { InGameSession } from '@common/models/session.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -98,11 +100,19 @@ export class InGameSocketService {
         this.socket.onSuccessEvent(InGameEvents.CombatEnded, callback);
     }
 
+    onPlayerCombatResult(callback: (data: CombatResult) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerCombatResult, callback);
+    }
+
     onDoorToggled(callback: (data: { x: number; y: number; isOpen: boolean }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.DoorToggled, callback);
     }
 
     onPlayerAvailableActions(callback: (data: AvailableAction[]) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerAvailableActions, callback);
+    }
+
+    onPlayerUpdated(callback: (data: Player) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerUpdated, callback);
     }
 }

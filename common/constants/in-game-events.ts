@@ -22,6 +22,7 @@ export enum InGameEvents {
     PlayerMoved = 'playerMoved',
     PlayerCombatAction = 'playerCombatAction',
     PlayerCombatResult = 'playerCombatResult',
+    PlayerUpdated = 'playerUpdated',
     PlayerReachableTiles = 'playerReachableTiles',
     PlayerAvailableActions = 'playerAvailableActions',
     ToggleDoorAction = 'toggleDoorAction',

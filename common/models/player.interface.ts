@@ -27,5 +27,3 @@ export interface Player {
     startPointId: string;
     actionsRemaining: number;      // nombre d'actions restantes
 }
-
-export interface InGamePlayer extends Player {}

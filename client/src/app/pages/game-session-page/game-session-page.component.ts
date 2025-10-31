@@ -102,7 +102,7 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         return this.inGameService.availableActions().length > 0;
     }
 
-    getInGamePlayersCount(): number {
+    getPlayersCount(): number {
         return Object.keys(this.inGameService.inGameSession().inGamePlayers).length;
     }
 

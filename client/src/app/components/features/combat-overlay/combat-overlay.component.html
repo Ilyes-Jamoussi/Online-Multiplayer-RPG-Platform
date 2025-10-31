@@ -8,13 +8,23 @@
             </div>
             
             <div class="combat-arena">
-                <!-- Attaquant -->
-                <div class="fighter attacker" [class.is-me]="combatData.userRole === 'attacker'">
-                    <div class="fighter-name">{{ attackerName }}</div>
-                    <div class="fighter-avatar">
-                        <img [src]="attackerAvatar" [alt]="attackerName" />
+                <!-- Player A -->
+                <div class="fighter player-a" [class.is-me]="combatData.userRole === 'attacker'">
+                    <div class="fighter-container">
+                        @if (playerADamage) {
+                            <div class="damage-display">
+                                <span class="damage-value">-{{ playerADamage.damage }}</span>
+                                <div class="dice-info">
+                                    <img [src]="getDiceImageForDisplay(playerADamage.dice)" class="dice-image" />
+                                    <span class="dice-roll">{{ playerADamage.roll }}</span>
+                                </div>
+                            </div>
+                        }
+                        <div class="fighter-name">{{ playerAName }}</div>
+                        <div class="fighter-avatar">
+                            <img [src]="playerAAvatar" [alt]="playerAName" />
+                        </div>
                     </div>
-                    <div class="fighter-role">Attaquant</div>
                 </div>
 
                 <!-- VS -->
@@ -23,23 +33,27 @@
                     <div class="combat-swords">⚔️</div>
                 </div>
 
-                <!-- Cible -->
-                <div class="fighter target" [class.is-me]="combatData.userRole === 'target'">
-                    <div class="fighter-name">{{ targetName }}</div>
-                    <div class="fighter-avatar">
-                        <img [src]="targetAvatar" [alt]="targetName" />
+                <!-- Player B -->
+                <div class="fighter player-b" [class.is-me]="combatData.userRole === 'target'">
+                    <div class="fighter-container">
+                        @if (playerBDamage) {
+                            <div class="damage-display">
+                                <span class="damage-value">-{{ playerBDamage.damage }}</span>
+                                <div class="dice-info">
+                                    <img [src]="getDiceImageForDisplay(playerBDamage.dice)" class="dice-image" />
+                                    <span class="dice-roll">{{ playerBDamage.roll }}</span>
+                                </div>
+                            </div>
+                        }
+                        <div class="fighter-name">{{ playerBName }}</div>
+                        <div class="fighter-avatar">
+                            <img [src]="playerBAvatar" [alt]="playerBName" />
+                        </div>
                     </div>
-                    <div class="fighter-role">Défenseur</div>
                 </div>
             </div>
 
             <div class="combat-actions">
-                @if (combatData.userRole === 'attacker') {
-                    <p class="combat-message">Tu attaques {{ targetName }} !</p>
-                } @else {
-                    <p class="combat-message">{{ attackerName }} t'attaque !</p>
-                }
-                
                 <p class="stance-instruction">Choisissez votre posture :</p>
                 
                 <div class="action-buttons">
