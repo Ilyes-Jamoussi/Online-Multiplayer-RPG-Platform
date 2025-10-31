@@ -22,10 +22,10 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         private readonly gameEditorInteractionsService: GameEditorInteractionsService,
         private readonly gameEditorCheckService: GameEditorCheckService,
         private readonly assetService: AssetsService,
-        el: ElementRef<HTMLElement>,
+        element: ElementRef<HTMLElement>,
         zone: NgZone,
     ) {
-        super(el, zone);
+        super(element, zone);
     }
 
     get tileImage(): string {
