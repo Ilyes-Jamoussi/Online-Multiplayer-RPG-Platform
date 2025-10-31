@@ -203,8 +203,8 @@ export class GameEditorCheckService {
                             const ny = cy + dy;
                             if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
                             if (!this.isWalkableTile(grid[ny][nx])) continue;
-                            const nk = `${nx}:${ny}`;
-                            if (!seen.has(nk)) q.push([nx, ny]);
+                            const neighborKey = `${nx}:${ny}`;
+                            if (!seen.has(neighborKey)) q.push([nx, ny]);
                         }
                     }
                 }
