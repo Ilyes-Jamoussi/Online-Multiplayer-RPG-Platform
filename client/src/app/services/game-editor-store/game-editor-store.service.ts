@@ -57,12 +57,12 @@ export class GameEditorStoreService {
 
         for (const object of placed) {
             const footprint = PlaceableFootprint[PlaceableKind[object.kind]];
-            const xs: number[] = [];
-            const ys: number[] = [];
+            const xCoordinates: number[] = [];
+            const yCoordinates: number[] = [];
             for (let dx = 0; dx < footprint; dx++) {
                 for (let dy = 0; dy < footprint; dy++) {
-                    xs.push(object.x + dx);
-                    ys.push(object.y + dy);
+                    xCoordinates.push(object.x + dx);
+                    yCoordinates.push(object.y + dy);
                 }
             }
             accumulateur.push({
@@ -72,8 +72,8 @@ export class GameEditorStoreService {
                 placed: object.placed,
                 x: object.x,
                 y: object.y,
-                xs,
-                ys,
+                xCoordinates,
+                yCoordinates,
             });
         }
 
@@ -370,7 +370,7 @@ export class GameEditorStoreService {
 
     getPlacedObjectAt(x: number, y: number): GameEditorPlaceableDto | undefined {
         if (!this.inBounds(x, y)) return undefined;
-        return this.placedObjects.find((object) => object.xs.includes(x) && object.ys.includes(y));
+        return this.placedObjects.find((object) => object.xCoordinates.includes(x) && object.yCoordinates.includes(y));
     }
 
     placeObjectFromInventory(kind: PlaceableKind, x: number, y: number): void {
