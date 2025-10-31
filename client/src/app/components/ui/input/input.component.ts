@@ -73,6 +73,6 @@ export class UiInputComponent {
 
     private filterInvalidChars(value: string): string {
         const pattern = this.type === InputVariants.NUMBER ? NUMBER_ALLOWED_CHARS_PATTERN : TEXT_ALLOWED_CHARS_PATTERN;
-        return [...value].filter((c) => pattern.test(c) || c === ' ').join('');
+        return [...value].filter((chr) => pattern.test(chr) || chr === ' ').join('');
     }
 }
