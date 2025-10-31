@@ -108,12 +108,12 @@ export class CombatService {
         const combatResult: CombatResult = {
             playerAId: combat.playerAId,
             playerBId: combat.playerBId,
-            damageToA: damageToA,
-            damageToB: damageToB,
-            playerARoll: playerARoll,
-            playerBRoll: playerBRoll,
-            playerADice: playerADice,
-            playerBDice: playerBDice
+            damageToA,
+            damageToB,
+            playerARoll,
+            playerBRoll,
+            playerADice,
+            playerBDice
         };
         
         this.eventEmitter.emit('player.combatResult', { 

@@ -3,7 +3,7 @@ import { InGameSession } from '@common/models/session.interface';
 import { TurnState } from '@common/models/turn-state.interface';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { InGameSessionRepository } from '../in-game-session/in-game-session.repository';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 
 const COMBAT_ROUND_DURATION = 5000;
 

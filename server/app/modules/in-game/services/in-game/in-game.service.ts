@@ -55,7 +55,7 @@ export class InGameService {
         if (session.inGamePlayers[firstPlayerId]) {
             const player = session.inGamePlayers[firstPlayerId];
             const newSpeed = player.baseSpeed + player.speedBonus;
-            player.speed = newSpeed; // Mise à jour temporaire avant sauvegarde
+            player.speed = newSpeed;
         }
 
         this.initialization.assignStartPoints(session, game);

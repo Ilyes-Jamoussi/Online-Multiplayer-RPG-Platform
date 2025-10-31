@@ -7,6 +7,8 @@ import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket
 import { AssetsService } from '@app/services/assets/assets.service';
 import { Dice } from '@common/enums/dice.enum';
 
+const DAMAGE_DISPLAY_DURATION = 2000;
+
 interface DamageDisplay {
     playerId: string;
     damage: number;
@@ -87,7 +89,7 @@ export class CombatOverlayComponent implements OnInit {
             this.damageDisplays.update(displays => 
                 displays.map(d => d.playerId === playerId ? { ...d, visible: false } : d)
             );
-        }, 2000);
+        }, DAMAGE_DISPLAY_DURATION);
     }
 
     get diceD4Image(): string {
