@@ -24,7 +24,7 @@ interface DamageDisplay {
 }
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class CombatService {
     private readonly _combatData = signal<CombatData | null>(null);
@@ -41,7 +41,7 @@ export class CombatService {
         private readonly combatSocketService: CombatSocketService,
         private readonly playerService: PlayerService,
         private readonly notificationService: NotificationService,
-        private readonly inGameService: InGameService
+        private readonly inGameService: InGameService,
     ) {
         this.initListeners();
     }
@@ -53,7 +53,14 @@ export class CombatService {
     startCombat(attackerId: string, targetId: string, userRole: 'attacker' | 'target'): void {
         this._combatData.set({ attackerId, targetId, userRole });
         this._selectedPosture.set(null);
-        this.timerService.startCombatTimer();
+    }
+
+    handleCombatTimerRestart(): void {
+        if (!this.timerService.isCombatActive()) {
+            this.timerService.startCombatTimer();
+        } else {
+            this.timerService.resetCombatTimer();
+        }
     }
 
     endCombat(): void {
@@ -99,6 +106,10 @@ export class CombatService {
         this.combatSocketService.onCombatNewRoundStarted(() => {
             this.handleCombatNewRound();
         });
+
+        this.combatSocketService.onCombatTimerRestart(() => {
+            this.handleCombatTimerRestart();
+        });
     }
 
     private handleCombatResult(data: CombatResult): void {
@@ -108,22 +119,20 @@ export class CombatService {
         if (data.playerBDamage > 0) {
             this.showDamage(data.playerBId, data.playerBDamage, data.playerBAttack.diceRoll, data.playerBAttack.dice);
         }
-        
+
         this._selectedPosture.set(null);
     }
 
     private showDamage(playerId: string, damage: number, roll: number, dice: Dice): void {
         if (damage <= 0) return;
-        
-        this._damageDisplays.update(displays => [
-            ...displays.filter(d => d.playerId !== playerId),
-            { playerId, damage, roll, dice, visible: true }
+
+        this._damageDisplays.update((displays) => [
+            ...displays.filter((d) => d.playerId !== playerId),
+            { playerId, damage, roll, dice, visible: true },
         ]);
 
         setTimeout(() => {
-            this._damageDisplays.update(displays => 
-                displays.map(d => d.playerId === playerId ? { ...d, visible: false } : d)
-            );
+            this._damageDisplays.update((displays) => displays.map((d) => (d.playerId === playerId ? { ...d, visible: false } : d)));
         }, DAMAGE_DISPLAY_DURATION);
     }
 

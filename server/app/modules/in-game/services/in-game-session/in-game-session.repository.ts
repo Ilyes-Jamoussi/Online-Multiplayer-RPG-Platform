@@ -20,7 +20,7 @@ export class InGameSessionRepository {
 
         this.eventEmitter.emit('player.updated', {
             sessionId,
-            player
+            player,
         });
     }
 
@@ -30,8 +30,21 @@ export class InGameSessionRepository {
         if (!player) throw new NotFoundException('Player not found');
         const newHealth = player.health - health;
         player.health = newHealth > 0 ? newHealth : 0;
-        
+
         return player.health;
+    }
+
+    resetPlayerHealth(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.health = player.maxHealth;
+
+        this.eventEmitter.emit('player.healthChanged', {
+            sessionId,
+            playerId,
+            newHealth: player.health,
+        });
     }
 
     inGamePlayersCount(sessionId: string): number {

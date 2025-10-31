@@ -138,13 +138,15 @@ export class CombatService {
 
         if (playerAHealth <= 0 || playerBHealth <= 0) {
             this.endCombat(session);
-            
+
             if (playerAHealth <= 0) {
                 this.inGameMovementService.movePlayerToStartPosition(session, playerAId);
+                this.sessionRepository.resetPlayerHealth(sessionId, playerAId);
             }
-            
+
             if (playerBHealth <= 0) {
                 this.inGameMovementService.movePlayerToStartPosition(session, playerBId);
+                this.sessionRepository.resetPlayerHealth(sessionId, playerBId);
             }
         }
     }

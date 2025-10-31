@@ -2,7 +2,6 @@ import { CombatService } from '@app/modules/in-game/services/combat/combat.servi
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { InGameEvents } from '@common/constants/in-game-events';
 import { CombatResult } from '@common/interfaces/combat.interface';
-import { InGameSession } from '@common/models/session.interface';
 import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
@@ -44,24 +43,42 @@ export class CombatGateway {
     }
 
     @OnEvent('combat.started')
-    handleCombatStarted(payload: { session: InGameSession; attackerId: string; targetId: string }) {
-        this.server.to(payload.session.inGameId).emit(
-            InGameEvents.CombatStarted,
-            successResponse({
-                attackerId: payload.attackerId,
-                targetId: payload.targetId,
-            }),
-        );
+    handleCombatStarted(payload: { sessionId: string; attackerId: string; targetId: string }) {
+        const session = this.combatService.getSession(payload.sessionId);
+        if (session) {
+            this.server.to(session.inGameId).emit(
+                InGameEvents.CombatStarted,
+                successResponse({
+                    attackerId: payload.attackerId,
+                    targetId: payload.targetId,
+                }),
+            );
+        }
+    }
+
+    @OnEvent('combat.timerRestart')
+    handleCombatTimerRestart(payload: { sessionId: string }): void {
+        const session = this.combatService.getSession(payload.sessionId);
+        if (session) {
+            this.logger.log(`Combat timer restarted for session ${session.id}`);
+            this.server.to(session.inGameId).emit(InGameEvents.CombatTimerRestart, successResponse({}));
+        }
     }
 
     @OnEvent('combat.ended')
-    handleCombatEnded(payload: { session: InGameSession }) {
-        this.server.to(payload.session.inGameId).emit(InGameEvents.CombatEnded, successResponse({}));
+    handleCombatEnded(payload: { sessionId: string }) {
+        const session = this.combatService.getSession(payload.sessionId);
+        if (session) {
+            this.server.to(session.inGameId).emit(InGameEvents.CombatEnded, successResponse({}));
+        }
     }
 
     @OnEvent('combat.newRound')
-    handleCombatNewRound(payload: { session: InGameSession }) {
-        this.server.to(payload.session.inGameId).emit(InGameEvents.CombatNewRoundStarted, successResponse({}));
+    handleCombatNewRound(payload: { sessionId: string }) {
+        const session = this.combatService.getSession(payload.sessionId);
+        if (session) {
+            this.server.to(session.inGameId).emit(InGameEvents.CombatNewRoundStarted, successResponse({}));
+        }
     }
 
     @OnEvent('player.combatResult')
@@ -90,4 +107,3 @@ export class CombatGateway {
             .emit(InGameEvents.PlayerHealthChanged, successResponse({ playerId: payload.playerId, newHealth: payload.newHealth }));
     }
 }
-

@@ -34,5 +34,9 @@ export class CombatSocketService {
     onPlayerHealthChanged(callback: (data: { playerId: string; newHealth: number }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerHealthChanged, callback);
     }
+
+    onCombatTimerRestart(callback: () => void): void {
+        this.socket.onSuccessEvent(InGameEvents.CombatTimerRestart, callback);
+    }
 }
 
