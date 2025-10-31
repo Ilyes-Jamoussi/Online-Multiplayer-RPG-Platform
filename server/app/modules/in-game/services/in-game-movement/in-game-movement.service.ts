@@ -68,7 +68,7 @@ export class InGameMovementService {
         return newSpeed;
     }
 
-    calculateReachableTiles(session: InGameSession, playerId: string): void {
+    calculateReachableTiles(session: InGameSession, playerId: string): ReachableTile[] {
         const player = session.inGamePlayers[playerId];
         if (!player) {
             throw new NotFoundException('Player not found');
@@ -92,6 +92,7 @@ export class InGameMovementService {
         }
 
         this.eventEmitter.emit('player.reachableTiles', { playerId, reachable });
+        return reachable;
     }
 
     private initializeQueue(player: InGameSession['inGamePlayers'][string]): ReachableTile[] {

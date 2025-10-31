@@ -167,7 +167,11 @@ export class InGameService {
 
     getReachableTiles(sessionId: string, playerId: string): void {
         const session = this.sessionRepository.findById(sessionId);
-        this.movementService.calculateReachableTiles(session, playerId);
+        const player = session.inGamePlayers[playerId];
+        const reachableTiles = this.movementService.calculateReachableTiles(session, playerId);
+        if(!reachableTiles.length && !player.actionsRemaining) {
+            this.timerService.endTurnManual(session);
+        }
     }
 
     endCombat(sessionId: string): void {
