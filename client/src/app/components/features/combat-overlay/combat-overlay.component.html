@@ -1,33 +1,23 @@
 @if (combatData) {
-    <div class="combat-overlay">
-        <div class="combat-modal">
-            @if (combatData.userRole === 'spectator') {
+    @if (combatData.userRole === 'spectator') {
+        <div class="spectator-notification">
+            <div class="notification-content">
                 @if (victoryData) {
-                    <div class="spectator-view spectator-victory">
-                        <div class="spectator-icon">
-                            @if (victoryData.winnerId === null) {
-                                ⚔️
-                            } @else {
-                                🏆
-                            }
-                        </div>
-                        <h2 class="spectator-title">{{ spectatorVictoryTitle }}</h2>
-                        <p class="spectator-message">{{ spectatorVictoryMessage }}</p>
-                    </div>
+                    <span class="combat-icon">🏆</span>
+                    <span class="combat-text">
+                        {{ spectatorVictoryTitle }}
+                    </span>
                 } @else {
-                    <div class="spectator-view">
-                        <div class="spectator-icon">⚔️</div>
-                        <h2 class="spectator-title">Combat en cours</h2>
-                        <p class="spectator-message">
-                            {{ playerAName }} <span class="vs-text">VS</span> {{ playerBName }}
-                        </p>
-                        <div class="paused-timer-info">
-                            <span class="pause-icon">⏸️</span>
-                            <span class="pause-text">Timer du tour pausé à {{ pausedTurnTime }}s</span>
-                        </div>
-                    </div>
+                    <span class="combat-icon">⚔️</span>
+                    <span class="combat-text">
+                        Combat {{ playerAName }} vs {{ playerBName }} en cours - Timer en pause : {{ pausedTurnTime }}s
+                    </span>
                 }
-            } @else {
+            </div>
+        </div>
+    } @else {
+        <div class="combat-overlay">
+            <div class="combat-modal">
                 @if (!victoryData) {
                     <app-combat-timer></app-combat-timer>
                 }
@@ -216,7 +206,7 @@
                     </div>
                 </div>
                 }
-            }
+            </div>
         </div>
-    </div>
+    }
 }
