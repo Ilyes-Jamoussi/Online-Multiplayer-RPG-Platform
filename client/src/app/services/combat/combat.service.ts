@@ -147,6 +147,22 @@ export class CombatService {
         this.combatSocketService.onCombatVictory((data) => {
             this.handleVictory(data.playerAId, data.playerBId, data.winnerId);
         });
+
+        this.combatSocketService.onCombatCountChanged((data) => {
+            this.playerService.updatePlayer({ combatCount: data.combatCount });
+        });
+
+        this.combatSocketService.onCombatWinsChanged((data) => {
+            this.playerService.updatePlayer({ combatWins: data.combatWins });
+        });
+
+        this.combatSocketService.onCombatLossesChanged((data) => {
+            this.playerService.updatePlayer({ combatLosses: data.combatLosses });
+        });
+
+        this.combatSocketService.onCombatDrawsChanged((data) => {
+            this.playerService.updatePlayer({ combatDraws: data.combatDraws });
+        });
     }
 
     private handleCombatResult(data: CombatResult): void {

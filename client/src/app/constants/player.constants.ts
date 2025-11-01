@@ -26,4 +26,8 @@ export const DEFAULT_PLAYER: Player = {
     isInGame: false,
     startPointId: '',
     actionsRemaining: 1,
+    combatCount: 0,
+    combatWins: 0,
+    combatLosses: 0,
+    combatDraws: 0,
 };

@@ -43,9 +43,9 @@ export class CombatGateway {
     }
 
     @OnEvent('combat.started')
-    handleCombatStarted(payload: { 
-        sessionId: string; 
-        attackerId: string; 
+    handleCombatStarted(payload: {
+        sessionId: string;
+        attackerId: string;
         targetId: string;
         attackerTileEffect?: number;
         targetTileEffect?: number;
@@ -144,4 +144,23 @@ export class CombatGateway {
             .emit(InGameEvents.PlayerHealthChanged, successResponse({ playerId: payload.playerId, newHealth: payload.newHealth }));
     }
 
+    @OnEvent('player.combatCountChanged')
+    handlePlayerCombatCountChanged(payload: { playerId: string; combatCount: number }) {
+        this.server.to(payload.playerId).emit(InGameEvents.CombatCountChanged, successResponse({ combatCount: payload.combatCount }));
+    }
+
+    @OnEvent('player.combatWinsChanged')
+    handlePlayerCombatWinsChanged(payload: { playerId: string; combatWins: number }) {
+        this.server.to(payload.playerId).emit(InGameEvents.CombatWinsChanged, successResponse({ combatWins: payload.combatWins }));
+    }
+
+    @OnEvent('player.combatLossesChanged')
+    handlePlayerCombatLossesChanged(payload: { playerId: string; combatLosses: number }) {
+        this.server.to(payload.playerId).emit(InGameEvents.CombatLossesChanged, successResponse({ combatLosses: payload.combatLosses }));
+    }
+
+    @OnEvent('player.combatDrawsChanged')
+    handlePlayerCombatDrawsChanged(payload: { playerId: string; combatDraws: number }) {
+        this.server.to(payload.playerId).emit(InGameEvents.CombatDrawsChanged, successResponse({ combatDraws: payload.combatDraws }));
+    }
 }

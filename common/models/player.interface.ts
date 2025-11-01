@@ -8,22 +8,26 @@ export interface Player {
     isAdmin: boolean;
     baseHealth: number;
     healthBonus: number;
-    health: number;        // current HP
-    maxHealth: number;     // baseHealth + healthBonus (max HP)
+    health: number;
+    maxHealth: number;
     baseSpeed: number;
     speedBonus: number;
-    speed: number;         // baseSpeed + speedBonus (rapidité/mouvement)
+    speed: number;
     baseAttack: number;
     attackBonus: number;
-    attack: number;        // baseAttack + attackBonus
+    attack: number;
     baseDefense: number;
     defenseBonus: number;
-    defense: number;       // baseDefense + defenseBonus
+    defense: number;
     attackDice: Dice;
     defenseDice: Dice;
     x: number;
     y: number;
     isInGame: boolean;
     startPointId: string;
-    actionsRemaining: number;      // nombre d'actions restantes
+    actionsRemaining: number;
+    combatCount: number;
+    combatWins: number;
+    combatLosses: number;
+    combatDraws: number;
 }

@@ -47,6 +47,54 @@ export class InGameSessionRepository {
         });
     }
 
+    incrementPlayerCombatCount(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.combatCount++;
+        this.eventEmitter.emit('player.combatCountChanged', {
+            sessionId,
+            playerId,
+            combatCount: player.combatCount,
+        });
+    }
+
+    incrementPlayerCombatWins(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.combatWins++;
+        this.eventEmitter.emit('player.combatWinsChanged', {
+            sessionId,
+            playerId,
+            combatWins: player.combatWins,
+        });
+    }
+
+    incrementPlayerCombatLosses(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.combatLosses++;
+        this.eventEmitter.emit('player.combatLossesChanged', {
+            sessionId,
+            playerId,
+            combatLosses: player.combatLosses,
+        });
+    }
+
+    incrementPlayerCombatDraws(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.combatDraws++;
+        this.eventEmitter.emit('player.combatDrawsChanged', {
+            sessionId,
+            playerId,
+            combatDraws: player.combatDraws,
+        });
+    }
+
     inGamePlayersCount(sessionId: string): number {
         return this.getIngamePlayers(sessionId).length;
     }

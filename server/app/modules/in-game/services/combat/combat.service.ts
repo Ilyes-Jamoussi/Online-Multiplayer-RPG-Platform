@@ -83,13 +83,10 @@ export class CombatService {
         this.activeCombats.set(session.id, combatState);
 
         this.timerService.pauseTurnTimer(session.id);
-        this.combatTimerService.startCombatTimer(
-            session, 
-            playerAId, 
-            playerBId,
-            combatState.playerATileEffect,
-            combatState.playerBTileEffect
-        );
+        this.combatTimerService.startCombatTimer(session, playerAId, playerBId, combatState.playerATileEffect, combatState.playerBTileEffect);
+
+        this.sessionRepository.incrementPlayerCombatCount(session.id, playerAId);
+        this.sessionRepository.incrementPlayerCombatCount(session.id, playerBId);
     }
 
     @OnEvent('combat.timerLoop')
@@ -174,10 +171,16 @@ export class CombatService {
 
             if (playerAHealth <= 0 && playerBHealth <= 0) {
                 winnerId = null;
+                this.sessionRepository.incrementPlayerCombatDraws(sessionId, playerAId);
+                this.sessionRepository.incrementPlayerCombatDraws(sessionId, playerBId);
             } else if (playerAHealth <= 0) {
                 winnerId = playerBId;
+                this.sessionRepository.incrementPlayerCombatLosses(sessionId, playerAId);
+                this.sessionRepository.incrementPlayerCombatWins(sessionId, playerBId);
             } else {
                 winnerId = playerAId;
+                this.sessionRepository.incrementPlayerCombatWins(sessionId, playerAId);
+                this.sessionRepository.incrementPlayerCombatLosses(sessionId, playerBId);
             }
 
             this.startEndCombatTransition(session, playerAId, playerBId, winnerId);

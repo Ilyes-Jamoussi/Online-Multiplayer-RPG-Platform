@@ -51,5 +51,21 @@ export class CombatSocketService {
     onCombatVictory(callback: (data: { playerAId: string; playerBId: string; winnerId: string | null }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.CombatVictory, callback);
     }
+
+    onCombatCountChanged(callback: (data: { combatCount: number }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.CombatCountChanged, callback);
+    }
+
+    onCombatWinsChanged(callback: (data: { combatWins: number }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.CombatWinsChanged, callback);
+    }
+
+    onCombatLossesChanged(callback: (data: { combatLosses: number }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.CombatLossesChanged, callback);
+    }
+
+    onCombatDrawsChanged(callback: (data: { combatDraws: number }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.CombatDrawsChanged, callback);
+    }
 }
 

@@ -39,6 +39,11 @@ export class SessionService {
             y: 0,
             isInGame: false,
             startPointId: '',
+            combatCount: 0,
+            combatWins: 0,
+            combatLosses: 0,
+            combatDraws: 0,
+            actionsRemaining: 1,
         };
         session.players.push(player);
 
@@ -218,6 +223,11 @@ export class SessionService {
             y: 0,
             isInGame: false,
             startPointId: '',
+            combatCount: 0,
+            combatWins: 0,
+            combatLosses: 0,
+            combatDraws: 0,
+            actionsRemaining: 1,
         };
         return {
             players: [adminPlayer],
