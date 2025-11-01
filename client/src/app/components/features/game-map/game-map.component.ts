@@ -3,6 +3,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
+import { PlayerService } from '@app/services/player/player.service';
+import { CombatService } from '@app/services/combat/combat.service';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { Player } from '@common/models/player.interface';
@@ -24,6 +26,8 @@ export class GameMapComponent implements OnInit {
     constructor(
         private readonly gameMapService: GameMapService,
         private readonly assetsService: AssetsService,
+        private readonly playerService: PlayerService,
+        private readonly combatService: CombatService,
     ) {}
 
     ngOnInit(): void {
@@ -107,5 +111,26 @@ export class GameMapComponent implements OnInit {
 
     getTileClass(x: number, y: number): string {
         return this.gameMapService.getTileClass(x, y);
+    }
+
+    isCurrentUser(player: Player): boolean {
+        return player.id === this.playerService.id();
+    }
+
+    onPlayerClick(event: MouseEvent, player: Player): void {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (!this.gameMapService.isActionModeActive) {
+            return;
+        }
+
+        const actionType = this.gameMapService.getActionTypeAt(player.x, player.y);
+
+        if (actionType === 'ATTACK') {
+            this.combatService.attackPlayer(player.x, player.y);
+        } else if (actionType === 'DOOR') {
+            this.gameMapService.toggleDoor(player.x, player.y);
+        }
     }
 }

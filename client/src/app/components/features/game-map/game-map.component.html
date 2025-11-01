@@ -44,8 +44,9 @@
                 @for (player of players; track player.id) {
                     <div 
                         class="map-player"
+                        [class.current-user]="isCurrentUser(player)"
                         [ngStyle]="getPlayerStyle(player)"
-                        [title]="player.name"
+                        (click)="onPlayerClick($event, player)"
                     >
                         <img 
                             [src]="getPlayerAvatarImage(player.id)" 
@@ -53,6 +54,7 @@
                             class="player-avatar"
                             draggable="false"
                         />
+                        <span class="player-tooltip">{{ player.name }}</span>
                     </div>
                 }
             </div>

@@ -2,12 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
 import { GameOverOverlayComponent } from '@app/components/features/game-over-overlay/game-over-overlay.component';
-import { GameInfoComponent } from '@app/components/features/game-info/game-info.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
 import { PlayerInfoComponent } from '@app/components/features/player-info/player-info.component';
 import { PlayersListComponent } from '@app/components/features/players-list/players-list.component';
 import { TurnTimerComponent } from '@app/components/features/turn-timer/turn-timer.component';
-import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameKeyboardEventsService } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
@@ -18,9 +16,7 @@ import { MapSize } from '@common/enums/map-size.enum';
     selector: 'app-game-session-page',
     imports: [
         CommonModule,
-        UiPageLayoutComponent,
         GameMapComponent,
-        GameInfoComponent,
         PlayerInfoComponent,
         PlayersListComponent,
         TurnTimerComponent,
@@ -106,6 +102,15 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
 
     getPlayersCount(): number {
         return Object.keys(this.inGameService.inGameSession().inGamePlayers).length;
+    }
+
+    getMapSizeLabel(): string {
+        switch (this.mapSizeValue) {
+            case MapSize.SMALL: return 'Petite';
+            case MapSize.MEDIUM: return 'Moyenne';
+            case MapSize.LARGE: return 'Grande';
+            default: return 'Inconnue';
+        }
     }
 
     getCurrentPlayerSpeed(): number {

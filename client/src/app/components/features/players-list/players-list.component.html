@@ -12,6 +12,18 @@
                         {{ player.name }}
                     </span>
                     
+                    <div class="player-health">
+                        <span class="health-value">{{ player.health }}/{{ player.maxHealth }}</span>
+                        <div class="health-bar-small">
+                            <div class="health-bar-fill-small" 
+                                 [style.width.%]="getHealthPercentage(player)"
+                                 [class.hp-high]="getHealthPercentage(player) > 70"
+                                 [class.hp-medium]="getHealthPercentage(player) > 30 && getHealthPercentage(player) <= 70"
+                                 [class.hp-critical]="getHealthPercentage(player) <= 30">
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="player-badges">
                         @if (isAdmin(player)) {
                             <span class="badge admin">👑</span>
