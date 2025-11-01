@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InGameSession } from '@common/models/session.interface';
 import { Player } from '@common/models/player.interface';
+import { StartPoint } from '@common/models/start-point.interface';
 
 @Injectable()
 export class InGameSessionRepository {
@@ -19,7 +20,78 @@ export class InGameSessionRepository {
 
         this.eventEmitter.emit('player.updated', {
             sessionId,
-            player
+            player,
+        });
+    }
+
+    decreasePlayerHealth(sessionId: string, playerId: string, health: number): number {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        const newHealth = player.health - health;
+        player.health = newHealth > 0 ? newHealth : 0;
+
+        return player.health;
+    }
+
+    resetPlayerHealth(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.health = player.maxHealth;
+
+        this.eventEmitter.emit('player.healthChanged', {
+            sessionId,
+            playerId,
+            newHealth: player.health,
+        });
+    }
+
+    incrementPlayerCombatCount(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.combatCount++;
+        this.eventEmitter.emit('player.combatCountChanged', {
+            sessionId,
+            playerId,
+            combatCount: player.combatCount,
+        });
+    }
+
+    incrementPlayerCombatWins(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.combatWins++;
+        this.eventEmitter.emit('player.combatWinsChanged', {
+            sessionId,
+            playerId,
+            combatWins: player.combatWins,
+        });
+    }
+
+    incrementPlayerCombatLosses(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.combatLosses++;
+        this.eventEmitter.emit('player.combatLossesChanged', {
+            sessionId,
+            playerId,
+            combatLosses: player.combatLosses,
+        });
+    }
+
+    incrementPlayerCombatDraws(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.combatDraws++;
+        this.eventEmitter.emit('player.combatDrawsChanged', {
+            sessionId,
+            playerId,
+            combatDraws: player.combatDraws,
         });
     }
 
@@ -81,5 +153,10 @@ export class InGameSessionRepository {
             }
         }
         return null;
+    }
+
+    findStartPointById(sessionId: string, startPointId: string): StartPoint | null {
+        const session = this.findById(sessionId);
+        return session.startPoints.find((s) => s.id === startPointId);
     }
 }

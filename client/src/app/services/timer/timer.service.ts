@@ -21,6 +21,10 @@ export class TimerService {
     readonly isTurnActive = this._isTurnActive.asReadonly();
     readonly isCombatActive = this._isCombatActive.asReadonly();
 
+    getPausedTurnTime(): number {
+        return this.pausedTurnTime;
+    }
+
     startTurnTimer(duration: number): void {
         this.stopTurnTimer();
         this._turnTimeRemaining.set(duration / MILLISECONDS_PER_SECOND);
@@ -37,18 +41,15 @@ export class TimerService {
     }
 
     startCombatTimer(): void {
-        // Sauvegarder le temps restant du turn timer
         this.pausedTurnTime = this._turnTimeRemaining();
         this.stopTurnTimer();
         
-        // Démarrer le combat timer avec loop de 5 secondes
         this._combatTimeRemaining.set(COMBAT_ROUND_DURATION);
         this._isCombatActive.set(true);
 
         this.combatTimer = window.setInterval(() => {
             const currentTime = this._combatTimeRemaining();
             if (currentTime <= 1) {
-                // Redémarrer le cycle de 5 secondes
                 this._combatTimeRemaining.set(COMBAT_ROUND_DURATION);
             } else {
                 this._combatTimeRemaining.set(currentTime - 1);
@@ -73,8 +74,11 @@ export class TimerService {
         this._isCombatActive.set(false);
         this._combatTimeRemaining.set(0);
         
-        // Reprendre le turn timer si il était en cours
         this.resumeTurnTimer();
+    }
+
+    resetCombatTimer(): void {
+        this._combatTimeRemaining.set(COMBAT_ROUND_DURATION);
     }
 
     private resumeTurnTimer(): void {

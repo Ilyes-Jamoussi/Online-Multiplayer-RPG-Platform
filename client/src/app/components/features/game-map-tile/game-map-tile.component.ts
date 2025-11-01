@@ -5,6 +5,7 @@ import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { Player } from '@common/models/player.interface';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { AssetsService } from '@app/services/assets/assets.service';
+import { CombatService } from '@app/services/combat/combat.service';
 
 @Component({
     selector: 'app-game-map-tile',
@@ -22,6 +23,7 @@ export class GameMapTileComponent {
     constructor(
         private readonly gameMapService: GameMapService,
         private readonly assetsService: AssetsService,
+        private readonly combatService: CombatService,
     ) {}
 
     get objectOnTile(): GameEditorPlaceableDto | undefined {
@@ -55,10 +57,10 @@ export class GameMapTileComponent {
 
         const actionType = this.gameMapService.getActionTypeAt(this.tile.x, this.tile.y);
         
-        if (actionType) {
-            this.gameMapService.performAction(actionType, this.tile.x, this.tile.y);
-        } else {
-            this.gameMapService.deactivateActionMode();
+        if (actionType === 'DOOR') {
+            this.gameMapService.toggleDoor(this.tile.x, this.tile.y);
+        } else if (actionType === 'ATTACK') {
+            this.combatService.attackPlayer(this.tile.x, this.tile.y);
         }
     }
 

@@ -4,6 +4,8 @@ import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { Player } from '@common/models/player.interface';
 
+const PERCENTAGE_MULTIPLIER = 100;
+
 @Component({
     selector: 'app-players-list',
     standalone: true,
@@ -40,8 +42,12 @@ export class PlayersListComponent {
         return !player.isInGame;
     }
 
-    getCombatWins(): number {
-        // TODO: Implement combat wins tracking
-        return 0;
+    getCombatWins(player: Player): number {
+        return player.combatWins;
+    }
+
+    getHealthPercentage(player: Player): number {
+        if (player.maxHealth === 0) return 0;
+        return (player.health / player.maxHealth) * PERCENTAGE_MULTIPLIER;
     }
 }

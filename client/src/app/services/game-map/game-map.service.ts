@@ -136,6 +136,9 @@ export class GameMapService {
 
     getActionTypeAt(x: number, y: number): 'ATTACK' | 'DOOR' | null {
         const action = this.availableActions.find((availableAction: AvailableAction) => availableAction.x === x && availableAction.y === y);
+        if (action) {
+            this.inGameService.deactivateActionMode();
+        }
         return action?.type || null;
     }
 
@@ -143,21 +146,7 @@ export class GameMapService {
         this.inGameService.deactivateActionMode();
     }
 
-    performAction(actionType: 'ATTACK' | 'DOOR', x: number, y: number): void {
-        if (actionType === 'ATTACK') {
-            this.attackPlayer(x, y);
-        } else {
-            this.toggleDoor(x, y);
-        }
-        this.inGameService.useAction();
-        this.inGameService.deactivateActionMode();
-    }
-
-    private attackPlayer(x: number, y: number): void {
-        this.inGameService.attackPlayerAction(x, y);
-    }
-
-    private toggleDoor(x: number, y: number): void {
+    toggleDoor(x: number, y: number): void {
         this.inGameService.toggleDoorAction(x, y);
     }
 

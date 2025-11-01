@@ -1,4 +1,5 @@
 import { Game, gameSchema } from '@app/modules/game-store/entities/game.entity';
+import { CombatGateway } from '@app/modules/in-game/gateways/combat.gateway';
 import { InGameGateway } from '@app/modules/in-game/gateways/in-game.gateway';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameActionService } from '@app/modules/in-game/services/in-game-action/in-game-action.service';
@@ -8,6 +9,7 @@ import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-s
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
+import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
 import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -16,7 +18,9 @@ import { MongooseModule } from '@nestjs/mongoose';
     providers: [
         InGameService,
         InGameGateway,
+        CombatGateway,
         TimerService,
+        CombatTimerService,
         GameCacheService,
         InGameInitializationService,
         InGameSessionRepository,

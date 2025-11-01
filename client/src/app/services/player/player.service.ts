@@ -37,6 +37,10 @@ export class PlayerService {
     readonly actionsRemaining = computed(() => this.player().actionsRemaining);
     readonly isLifeBonusSelected = computed(() => this.player().healthBonus > 0);
     readonly isSpeedBonusSelected = computed(() => this.player().speedBonus > 0);
+    readonly combatCount = computed(() => this.player().combatCount);
+    readonly combatWins = computed(() => this.player().combatWins);
+    readonly combatLosses = computed(() => this.player().combatLosses);
+    readonly combatDraws = computed(() => this.player().combatDraws);
 
     constructor(
         private readonly sessionService: SessionService,
@@ -132,6 +136,10 @@ export class PlayerService {
 
         this.resetPlayer();
         this.sessionService.resetSession();
+    }
+
+    updateActionsRemaining(actionsRemaining: number): void {
+        this.updatePlayer({ actionsRemaining });
     }
 
     private initListeners(): void {

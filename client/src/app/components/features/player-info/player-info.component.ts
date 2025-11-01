@@ -88,4 +88,20 @@ export class PlayerInfoComponent {
         if (percentage > HP_MEDIUM_THRESHOLD) return 'hp-medium';
         return 'hp-critical';
     }
+
+    get totalCombats(): number {
+        return this.playerService.combatCount();
+    }
+
+    get combatWins(): number {
+        return this.playerService.combatWins();
+    }
+
+    get combatLosses(): number {
+        return this.playerService.combatLosses();
+    }
+
+    get combatDraws(): number {
+        return this.playerService.combatDraws();
+    }
 }
