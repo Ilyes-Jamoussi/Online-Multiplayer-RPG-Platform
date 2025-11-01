@@ -1,5 +1,4 @@
-import { Injectable, computed, signal, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Injectable, computed, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { ROUTES } from '@common/enums/routes.enum';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
@@ -73,8 +72,6 @@ export class InGameService {
         this._isActionModeActive.set(false);
         this._availableActions.set([]);
     }
-
-    private readonly router = inject(Router);
 
     constructor(
         private readonly inGameSocketService: InGameSocketService,
@@ -204,7 +201,6 @@ export class InGameService {
         });
 
         this.inGameSocketService.onPlayerMoved((data) => {
-            //this.updatePlayerPosAndAvailableActions(data.playerId, data.x, data.y, data.speed, data.actions);
             this.updateInGameSession({
                 inGamePlayers: {
                     ...this.inGameSession().inGamePlayers,
@@ -264,7 +260,7 @@ export class InGameService {
             
             setTimeout(() => {
                 this.reset();
-                this.router.navigate([ROUTES.HomePage]);
+                window.location.href = ROUTES.HomePage;
             }, GAME_OVER_REDIRECT_DELAY);
         });
     }

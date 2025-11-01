@@ -8,7 +8,6 @@ import { TurnTimerStates } from '@common/enums/turn-timer-states.enum';
 import { Player } from '@common/models/player.interface';
 import { InGameSession, WaitingRoomSession } from '@common/models/session.interface';
 import { BadRequestException, Injectable, NotFoundException, Inject } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameCacheService } from 'app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameActionService } from 'app/modules/in-game/services/in-game-action/in-game-action.service';
 import { InGameInitializationService } from 'app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
@@ -25,8 +24,6 @@ export class InGameService {
     ) {}
 
     @Inject(InGameActionService) private readonly actionService: InGameActionService;
-    @Inject(EventEmitter2) private readonly eventEmitter: EventEmitter2;
-
     async createInGameSession(waiting: WaitingRoomSession, mode: GameMode, mapSize: MapSize): Promise<InGameSession> {
         const { id, gameId, maxPlayers, players } = waiting;
 

@@ -136,6 +136,9 @@ export class GameMapService {
 
     getActionTypeAt(x: number, y: number): 'ATTACK' | 'DOOR' | null {
         const action = this.availableActions.find((availableAction: AvailableAction) => availableAction.x === x && availableAction.y === y);
+        if (action) {
+            this.inGameService.deactivateActionMode();
+        }
         return action?.type || null;
     }
 

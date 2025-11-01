@@ -62,8 +62,6 @@ export class GameMapTileComponent {
         } else if (actionType === 'ATTACK') {
             this.combatService.attackPlayer(this.tile.x, this.tile.y);
         }
-
-        this.gameMapService.deactivateActionMode();
     }
 
     openModal(event: MouseEvent): void {
