@@ -4,6 +4,7 @@ import { CombatTimerComponent } from '@app/components/features/combat-timer/comb
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { AssetsService } from '@app/services/assets/assets.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile-kind.enum';
 
@@ -21,6 +22,7 @@ export class CombatOverlayComponent {
         private readonly combatService: CombatService,
         private readonly inGameService: InGameService,
         private readonly assetsService: AssetsService,
+        private readonly timerService: TimerService,
     ) {}
 
     get combatData() {
@@ -136,6 +138,30 @@ export class CombatOverlayComponent {
         return this.victoryData.winnerId === myId;
     }
 
+    get spectatorVictoryTitle(): string {
+        if (!this.victoryData) return '';
+
+        if (this.victoryData.winnerId === null) {
+            return 'Match Nul !';
+        }
+
+        const winnerName = this.inGameService.getPlayerByPlayerId(this.victoryData.winnerId).name;
+        return `${winnerName} a gagné !`;
+    }
+
+    get spectatorVictoryMessage(): string {
+        if (!this.victoryData) return '';
+
+        if (this.victoryData.winnerId === null) {
+            return 'Les deux combattants sont tombés';
+        }
+
+        const winnerName = this.inGameService.getPlayerByPlayerId(this.victoryData.winnerId).name;
+        const loserName = this.inGameService.getPlayerByPlayerId(
+            this.victoryData.winnerId === this.victoryData.playerAId ? this.victoryData.playerBId : this.victoryData.playerAId
+        ).name;
+        return `${winnerName} a vaincu ${loserName}`;
+    }
 
     chooseOffensive(): void {
         this.combatService.chooseOffensive();
@@ -171,5 +197,9 @@ export class CombatOverlayComponent {
 
     getDiceImage(dice: Dice): string {
         return this.assetsService.getDiceImage(dice);
+    }
+
+    get pausedTurnTime(): number {
+        return this.timerService.getPausedTurnTime();
     }
 }

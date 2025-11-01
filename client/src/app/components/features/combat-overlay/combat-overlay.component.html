@@ -1,31 +1,58 @@
 @if (combatData) {
     <div class="combat-overlay">
         <div class="combat-modal">
-            @if (!victoryData) {
-                <app-combat-timer></app-combat-timer>
-            }
-            
-            @if (victoryData) {
-                <div class="victory-screen" [class.victory]="isVictory" [class.defeat]="!isVictory && victoryData.winnerId !== null">
-                    <div class="victory-icon">
-                        @if (victoryData.winnerId === null) {
-                            ⚔️
-                        } @else if (isVictory) {
-                            🏆
-                        } @else {
-                            💀
-                        }
+            @if (combatData.userRole === 'spectator') {
+                @if (victoryData) {
+                    <div class="spectator-view spectator-victory">
+                        <div class="spectator-icon">
+                            @if (victoryData.winnerId === null) {
+                                ⚔️
+                            } @else {
+                                🏆
+                            }
+                        </div>
+                        <h2 class="spectator-title">{{ spectatorVictoryTitle }}</h2>
+                        <p class="spectator-message">{{ spectatorVictoryMessage }}</p>
                     </div>
-                    <h1 class="victory-title">{{ victoryMessage }}</h1>
-                    <p class="victory-subtitle">{{ victorySubtitle }}</p>
-                </div>
+                } @else {
+                    <div class="spectator-view">
+                        <div class="spectator-icon">⚔️</div>
+                        <h2 class="spectator-title">Combat en cours</h2>
+                        <p class="spectator-message">
+                            {{ playerAName }} <span class="vs-text">VS</span> {{ playerBName }}
+                        </p>
+                        <div class="paused-timer-info">
+                            <span class="pause-icon">⏸️</span>
+                            <span class="pause-text">Timer du tour pausé à {{ pausedTurnTime }}s</span>
+                        </div>
+                    </div>
+                }
             } @else {
-                <div class="combat-header">
-                    <h2>Combat en cours</h2>
-                </div>
-            }
-            
-            <div class="combat-arena">
+                @if (!victoryData) {
+                    <app-combat-timer></app-combat-timer>
+                }
+                
+                @if (victoryData) {
+                    <div class="victory-screen" [class.victory]="isVictory" [class.defeat]="!isVictory && victoryData.winnerId !== null">
+                        <div class="victory-icon">
+                            @if (victoryData.winnerId === null) {
+                                ⚔️
+                            } @else if (isVictory) {
+                                🏆
+                            } @else {
+                                💀
+                            }
+                        </div>
+                        <h1 class="victory-title">{{ victoryMessage }}</h1>
+                        <p class="victory-subtitle">{{ victorySubtitle }}</p>
+                    </div>
+                } @else {
+                    <div class="combat-header">
+                        <h2>Combat en cours</h2>
+                    </div>
+                }
+                
+                <div class="combat-arena">
                 <!-- Player A -->
                 <div class="fighter player-a" [class.is-me]="combatData.userRole === 'attacker'">
                     <div class="fighter-container">
@@ -161,33 +188,34 @@
                 </div>
             </div>
 
-            @if (!victoryData) {
-                <div class="combat-actions">
-                <p class="stance-instruction">
-                    @if (isPostureSelected) {
-                        Posture sélectionnée : {{ selectedPosture === 'offensive' ? '⚔️ Offensive' : '🛡️ Défensive' }}
-                    } @else {
-                        Choisissez votre posture :
-                    }
-                </p>
-                
-                <div class="action-buttons">
-                    <button 
-                        class="combat-btn offensive" 
-                        [class.selected]="selectedPosture === 'offensive'"
-                        [disabled]="isPostureSelected"
-                        (click)="chooseOffensive()">
-                        ⚔️ Offensive (+2 Attaque)
-                    </button>
-                    <button 
-                        class="combat-btn defensive" 
-                        [class.selected]="selectedPosture === 'defensive'"
-                        [disabled]="isPostureSelected"
-                        (click)="chooseDefensive()">
-                        🛡️ Défensive (+2 Défense)
-                    </button>
+                @if (!victoryData) {
+                    <div class="combat-actions">
+                    <p class="stance-instruction">
+                        @if (isPostureSelected) {
+                            Posture sélectionnée : {{ selectedPosture === 'offensive' ? '⚔️ Offensive' : '🛡️ Défensive' }}
+                        } @else {
+                            Choisissez votre posture :
+                        }
+                    </p>
+                    
+                    <div class="action-buttons">
+                        <button 
+                            class="combat-btn offensive" 
+                            [class.selected]="selectedPosture === 'offensive'"
+                            [disabled]="isPostureSelected"
+                            (click)="chooseOffensive()">
+                            ⚔️ Offensive (+2 Attaque)
+                        </button>
+                        <button 
+                            class="combat-btn defensive" 
+                            [class.selected]="selectedPosture === 'defensive'"
+                            [disabled]="isPostureSelected"
+                            (click)="chooseDefensive()">
+                            🛡️ Défensive (+2 Défense)
+                        </button>
+                    </div>
                 </div>
-            </div>
+                }
             }
         </div>
     </div>

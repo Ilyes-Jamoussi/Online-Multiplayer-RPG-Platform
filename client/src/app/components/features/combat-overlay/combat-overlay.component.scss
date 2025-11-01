@@ -39,6 +39,81 @@ app-combat-timer {
     }
 }
 
+.spectator-view {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(255, 215, 0, 0.05));
+    border: 2px solid #d4af37;
+    border-radius: 10px;
+    animation: spectatorAppear 0.5s ease-out;
+    
+    &.spectator-victory {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(255, 215, 0, 0.1));
+        border: 3px solid #d4af37;
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+    }
+}
+
+.spectator-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    animation: pulse 2s infinite;
+}
+
+.spectator-title {
+    color: #d4af37;
+    font-size: 2rem;
+    margin: 0 0 1.5rem 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.spectator-message {
+    color: #fff;
+    font-size: 1.5rem;
+    margin: 0 0 1.5rem 0;
+    font-weight: bold;
+    
+    .vs-text {
+        color: #d4af37;
+        margin: 0 1rem;
+        font-size: 1.8rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+}
+
+.paused-timer-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.pause-icon {
+    font-size: 1.2rem;
+}
+
+.pause-text {
+    color: #d4af37;
+    font-size: 1rem;
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes spectatorAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 .combat-arena {
     display: flex;
     justify-content: space-between;

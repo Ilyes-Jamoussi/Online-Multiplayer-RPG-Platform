@@ -21,6 +21,10 @@ export class TimerService {
     readonly isTurnActive = this._isTurnActive.asReadonly();
     readonly isCombatActive = this._isCombatActive.asReadonly();
 
+    getPausedTurnTime(): number {
+        return this.pausedTurnTime;
+    }
+
     startTurnTimer(duration: number): void {
         this.stopTurnTimer();
         this._turnTimeRemaining.set(duration / MILLISECONDS_PER_SECOND);

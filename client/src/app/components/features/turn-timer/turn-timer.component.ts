@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Signal } from '@angular/core';
 import { InGameService } from '@app/services/in-game/in-game.service';
+import { TimerService } from '@app/services/timer/timer.service';
 
 @Component({
     selector: 'app-turn-timer',
@@ -10,7 +11,10 @@ import { InGameService } from '@app/services/in-game/in-game.service';
     styleUrl: './turn-timer.component.scss'
 })
 export class TurnTimerComponent {
-    constructor(private readonly inGameService: InGameService) {}
+    constructor(
+        private readonly inGameService: InGameService,
+        private readonly timerService: TimerService,
+    ) {}
 
     get timeRemaining(): Signal<number> {
         return this.inGameService.timeRemaining;
@@ -41,6 +45,6 @@ export class TurnTimerComponent {
     }
 
     get shouldShowTimer(): boolean {
-        return this.isGameStarted() && this.timeRemaining() > 0;
+        return this.isGameStarted() && this.timerService.isTurnActive();
     }
 }

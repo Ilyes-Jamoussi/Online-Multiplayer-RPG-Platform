@@ -2,7 +2,6 @@ import { Injectable, signal } from '@angular/core';
 import { TimerService } from '@app/services/timer/timer.service';
 import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { NotificationService } from '@app/services/notification/notification.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { CombatResult } from '@common/interfaces/combat.interface';
 import { Dice } from '@common/enums/dice.enum';
@@ -58,7 +57,6 @@ export class CombatService {
         private readonly timerService: TimerService,
         private readonly combatSocketService: CombatSocketService,
         private readonly playerService: PlayerService,
-        private readonly notificationService: NotificationService,
         private readonly inGameService: InGameService,
     ) {
         this.initListeners();
@@ -206,10 +204,6 @@ export class CombatService {
                     [targetId]: targetTileEffect,
                 });
             }
-            this.notificationService.displayInformation({
-                title: 'Combat en cours',
-                message: 'Un combat est en cours',
-            });
         }
     }
 
