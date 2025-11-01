@@ -94,4 +94,8 @@ export class InGameSocketService {
     onPlayerActionUsed(callback: () => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerActionUsed, callback);
     }
+
+    onGameOver(callback: (data: { winnerId: string; winnerName: string }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.GameOver, callback);
+    }
 }

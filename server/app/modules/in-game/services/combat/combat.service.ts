@@ -9,6 +9,7 @@ import { Dice, DiceSides } from '@common/enums/dice.enum';
 import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { TileCombatEffect } from '@common/enums/tile-kind.enum';
+import { COMBAT_WINS_TO_WIN_GAME } from '@app/constants/game-config.constants';
 
 @Injectable()
 export class CombatService {
@@ -183,8 +184,6 @@ export class CombatService {
                 this.sessionRepository.incrementPlayerCombatLosses(sessionId, playerBId);
             }
 
-            this.startEndCombatTransition(session, playerAId, playerBId, winnerId);
-
             if (playerAHealth <= 0) {
                 this.inGameMovementService.movePlayerToStartPosition(session, playerAId);
                 this.sessionRepository.resetPlayerHealth(sessionId, playerAId);
@@ -193,6 +192,10 @@ export class CombatService {
             if (playerBHealth <= 0) {
                 this.inGameMovementService.movePlayerToStartPosition(session, playerBId);
                 this.sessionRepository.resetPlayerHealth(sessionId, playerBId);
+            }
+
+            if (winnerId) {
+                this.checkGameVictory(sessionId, winnerId, playerAId, playerBId);
             }
         }
     }
@@ -263,5 +266,22 @@ export class CombatService {
 
     private rollDice(dice: Dice): number {
         return Math.floor(Math.random() * DiceSides[dice]) + 1;
+    }
+
+    private checkGameVictory(sessionId: string, winnerId: string, playerAId: string, playerBId: string): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const winner = session.inGamePlayers[winnerId];
+
+        if (winner && winner.combatWins >= COMBAT_WINS_TO_WIN_GAME) {
+            this.timerService.forceStopTimer(sessionId);
+            this.combatTimerService.stopCombatTimer(session);
+            this.eventEmitter.emit('game.over', {
+                sessionId,
+                winnerId,
+                winnerName: winner.name,
+            });
+        } else {
+            this.startEndCombatTransition(session, playerAId, playerBId, winnerId);
+        }
     }
 }

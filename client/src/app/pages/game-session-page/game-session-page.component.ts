@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
+import { GameOverOverlayComponent } from '@app/components/features/game-over-overlay/game-over-overlay.component';
 import { GameInfoComponent } from '@app/components/features/game-info/game-info.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
 import { PlayerInfoComponent } from '@app/components/features/player-info/player-info.component';
@@ -24,6 +25,7 @@ import { MapSize } from '@common/enums/map-size.enum';
         PlayersListComponent,
         TurnTimerComponent,
         CombatOverlayComponent,
+        GameOverOverlayComponent,
     ],
     templateUrl: './game-session-page.component.html',
     styleUrl: './game-session-page.component.scss',

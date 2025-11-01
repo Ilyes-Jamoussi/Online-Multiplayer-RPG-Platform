@@ -149,19 +149,67 @@ export class CombatService {
         });
 
         this.combatSocketService.onCombatCountChanged((data) => {
-            this.playerService.updatePlayer({ combatCount: data.combatCount });
+            this.inGameService.updateInGameSession({
+                inGamePlayers: {
+                    ...this.inGameService.inGameSession().inGamePlayers,
+                    [data.playerId]: {
+                        ...this.inGameService.inGameSession().inGamePlayers[data.playerId],
+                        combatCount: data.combatCount,
+                    },
+                },
+            });
+
+            if (data.playerId === this.playerService.id()) {
+                this.playerService.updatePlayer({ combatCount: data.combatCount });
+            }
         });
 
         this.combatSocketService.onCombatWinsChanged((data) => {
-            this.playerService.updatePlayer({ combatWins: data.combatWins });
+            this.inGameService.updateInGameSession({
+                inGamePlayers: {
+                    ...this.inGameService.inGameSession().inGamePlayers,
+                    [data.playerId]: {
+                        ...this.inGameService.inGameSession().inGamePlayers[data.playerId],
+                        combatWins: data.combatWins,
+                    },
+                },
+            });
+
+            if (data.playerId === this.playerService.id()) {
+                this.playerService.updatePlayer({ combatWins: data.combatWins });
+            }
         });
 
         this.combatSocketService.onCombatLossesChanged((data) => {
-            this.playerService.updatePlayer({ combatLosses: data.combatLosses });
+            this.inGameService.updateInGameSession({
+                inGamePlayers: {
+                    ...this.inGameService.inGameSession().inGamePlayers,
+                    [data.playerId]: {
+                        ...this.inGameService.inGameSession().inGamePlayers[data.playerId],
+                        combatLosses: data.combatLosses,
+                    },
+                },
+            });
+
+            if (data.playerId === this.playerService.id()) {
+                this.playerService.updatePlayer({ combatLosses: data.combatLosses });
+            }
         });
 
         this.combatSocketService.onCombatDrawsChanged((data) => {
-            this.playerService.updatePlayer({ combatDraws: data.combatDraws });
+            this.inGameService.updateInGameSession({
+                inGamePlayers: {
+                    ...this.inGameService.inGameSession().inGamePlayers,
+                    [data.playerId]: {
+                        ...this.inGameService.inGameSession().inGamePlayers[data.playerId],
+                        combatDraws: data.combatDraws,
+                    },
+                },
+            });
+
+            if (data.playerId === this.playerService.id()) {
+                this.playerService.updatePlayer({ combatDraws: data.combatDraws });
+            }
         });
     }
 

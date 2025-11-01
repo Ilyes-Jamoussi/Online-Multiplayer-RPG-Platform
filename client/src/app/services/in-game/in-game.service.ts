@@ -1,4 +1,5 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, signal, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { ROUTES } from '@common/enums/routes.enum';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
@@ -13,6 +14,8 @@ import { Orientation } from '@common/enums/orientation.enum';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 
+const GAME_OVER_REDIRECT_DELAY = 10000;
+
 @Injectable({
     providedIn: 'root',
 })
@@ -23,6 +26,7 @@ export class InGameService {
     private readonly _reachableTiles = signal<ReachableTile[]>([]);
     private readonly _availableActions = signal<AvailableAction[]>([]);
     private readonly _isActionModeActive = signal<boolean>(false);
+    private readonly _gameOverData = signal<{ winnerId: string; winnerName: string } | null>(null);
 
     readonly isMyTurn = computed(() => this._inGameSession().currentTurn.activePlayerId === this.playerService.id());
     readonly currentTurn = computed(() => this._inGameSession().currentTurn);
@@ -40,6 +44,7 @@ export class InGameService {
     readonly hasUsedAction = computed(() => this._inGameSession().currentTurn.hasUsedAction);
     readonly availableActions = this._availableActions.asReadonly();
     readonly isActionModeActive = this._isActionModeActive.asReadonly();
+    readonly gameOverData = this._gameOverData.asReadonly();
 
     sessionId(): string {
         return this.sessionService.id();
@@ -68,6 +73,8 @@ export class InGameService {
         this._isActionModeActive.set(false);
         this._availableActions.set([]);
     }
+
+    private readonly router = inject(Router);
 
     constructor(
         private readonly inGameSocketService: InGameSocketService,
@@ -158,6 +165,7 @@ export class InGameService {
         this._isTransitioning.set(false);
         this._reachableTiles.set([]);
         this._inGameSession.set(DEFAULT_IN_GAME_SESSION);
+        this._gameOverData.set(null);
         this.sessionService.resetSession();
         this.playerService.resetPlayer();
     }
@@ -248,6 +256,16 @@ export class InGameService {
         this.inGameSocketService.onPlayerActionUsed(() => {
             this.playerActionUsed();
             this.deactivateActionMode();
+        });
+
+        this.inGameSocketService.onGameOver((data) => {
+            this._gameOverData.set(data);
+            this.stopTurnTimer();
+            
+            setTimeout(() => {
+                this.reset();
+                this.router.navigate([ROUTES.HomePage]);
+            }, GAME_OVER_REDIRECT_DELAY);
         });
     }
 }

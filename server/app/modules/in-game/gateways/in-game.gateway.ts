@@ -151,6 +151,16 @@ export class InGameGateway {
         this.logger.log(`Player ${payload.player.id} updated in session ${payload.sessionId}`);
     }
 
+    @OnEvent('game.over')
+    handleGameOver(payload: { sessionId: string; winnerId: string; winnerName: string }) {
+        const session = this.inGameService.getSession(payload.sessionId);
+        this.server.to(session.inGameId).emit(InGameEvents.GameOver, successResponse({ winnerId: payload.winnerId, winnerName: payload.winnerName }));
+        
+        this.server.socketsLeave(session.inGameId);
+        this.server.socketsLeave(session.id);
+        this.logger.log(`Game over for session ${payload.sessionId}. Winner: ${payload.winnerName} (${payload.winnerId})`);
+    }
+
     handleDisconnect(socket: Socket) {
         const session = this.inGameService.findSessionByPlayerId(socket.id);
         if (session) {

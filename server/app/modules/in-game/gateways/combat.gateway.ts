@@ -145,22 +145,34 @@ export class CombatGateway {
     }
 
     @OnEvent('player.combatCountChanged')
-    handlePlayerCombatCountChanged(payload: { playerId: string; combatCount: number }) {
-        this.server.to(payload.playerId).emit(InGameEvents.CombatCountChanged, successResponse({ combatCount: payload.combatCount }));
+    handlePlayerCombatCountChanged(payload: { sessionId: string; playerId: string; combatCount: number }) {
+        const session = this.combatService.getSession(payload.sessionId);
+        this.server
+            .to(session.inGameId)
+            .emit(InGameEvents.CombatCountChanged, successResponse({ playerId: payload.playerId, combatCount: payload.combatCount }));
     }
 
     @OnEvent('player.combatWinsChanged')
-    handlePlayerCombatWinsChanged(payload: { playerId: string; combatWins: number }) {
-        this.server.to(payload.playerId).emit(InGameEvents.CombatWinsChanged, successResponse({ combatWins: payload.combatWins }));
+    handlePlayerCombatWinsChanged(payload: { sessionId: string; playerId: string; combatWins: number }) {
+        const session = this.combatService.getSession(payload.sessionId);
+        this.server
+            .to(session.inGameId)
+            .emit(InGameEvents.CombatWinsChanged, successResponse({ playerId: payload.playerId, combatWins: payload.combatWins }));
     }
 
     @OnEvent('player.combatLossesChanged')
-    handlePlayerCombatLossesChanged(payload: { playerId: string; combatLosses: number }) {
-        this.server.to(payload.playerId).emit(InGameEvents.CombatLossesChanged, successResponse({ combatLosses: payload.combatLosses }));
+    handlePlayerCombatLossesChanged(payload: { sessionId: string; playerId: string; combatLosses: number }) {
+        const session = this.combatService.getSession(payload.sessionId);
+        this.server
+            .to(session.inGameId)
+            .emit(InGameEvents.CombatLossesChanged, successResponse({ playerId: payload.playerId, combatLosses: payload.combatLosses }));
     }
 
     @OnEvent('player.combatDrawsChanged')
-    handlePlayerCombatDrawsChanged(payload: { playerId: string; combatDraws: number }) {
-        this.server.to(payload.playerId).emit(InGameEvents.CombatDrawsChanged, successResponse({ combatDraws: payload.combatDraws }));
+    handlePlayerCombatDrawsChanged(payload: { sessionId: string; playerId: string; combatDraws: number }) {
+        const session = this.combatService.getSession(payload.sessionId);
+        this.server
+            .to(session.inGameId)
+            .emit(InGameEvents.CombatDrawsChanged, successResponse({ playerId: payload.playerId, combatDraws: payload.combatDraws }));
     }
 }
