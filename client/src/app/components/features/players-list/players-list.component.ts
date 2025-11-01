@@ -40,8 +40,7 @@ export class PlayersListComponent {
         return !player.isInGame;
     }
 
-    getCombatWins(): number {
-        // TODO: Implement combat wins tracking
-        return 0;
+    getCombatWins(player: Player): number {
+        return player.combatWins;
     }
 }
