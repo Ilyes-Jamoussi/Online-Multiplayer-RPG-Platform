@@ -173,7 +173,6 @@ export class CombatService {
             let winnerId: string | null = null;
 
             if (playerAHealth <= 0 && playerBHealth <= 0) {
-                // Draw
                 winnerId = null;
             } else if (playerAHealth <= 0) {
                 winnerId = playerBId;
