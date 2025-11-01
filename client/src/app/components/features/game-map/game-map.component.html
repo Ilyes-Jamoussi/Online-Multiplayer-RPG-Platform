@@ -46,7 +46,6 @@
                         class="map-player"
                         [class.current-user]="isCurrentUser(player)"
                         [ngStyle]="getPlayerStyle(player)"
-                        (click)="onPlayerClick($event, player)"
                     >
                         <img 
                             [src]="getPlayerAvatarImage(player.id)" 
@@ -54,7 +53,6 @@
                             class="player-avatar"
                             draggable="false"
                         />
-                        <span class="player-tooltip">{{ player.name }}</span>
                     </div>
                 }
             </div>
