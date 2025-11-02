@@ -37,6 +37,7 @@ export enum InGameEvents {
     CombatNewRoundStarted = 'combatNewRoundStarted',
     CombatVictory = 'combatVictory',
     CombatEnded = 'combatEnded',
+    CombatAbandon = 'combatAbandon',
     CombatCountChanged = 'combatCountChanged',
     CombatWinsChanged = 'combatWinsChanged',
     CombatLossesChanged = 'combatLossesChanged',

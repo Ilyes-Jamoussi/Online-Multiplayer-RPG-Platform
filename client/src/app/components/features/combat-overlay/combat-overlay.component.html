@@ -1,21 +1,4 @@
-@if (combatData) {
-    @if (combatData.userRole === 'spectator') {
-        <div class="spectator-notification">
-            <div class="notification-content">
-                @if (victoryData) {
-                    <span class="combat-icon">🏆</span>
-                    <span class="combat-text">
-                        {{ spectatorVictoryTitle }}
-                    </span>
-                } @else {
-                    <span class="combat-icon">⚔️</span>
-                    <span class="combat-text">
-                        Combat {{ playerAName }} vs {{ playerBName }} en cours - Timer en pause : {{ pausedTurnTime }}s
-                    </span>
-                }
-            </div>
-        </div>
-    } @else {
+@if (combatData && combatData.userRole !== 'spectator') {
         <div class="combat-overlay" [class.victory-mode]="isVictoryNotificationVisible">
             <div class="combat-modal">
                 @if (!isVictoryNotificationVisible) {
@@ -212,5 +195,4 @@
                 }
             </div>
         </div>
-    }
 }

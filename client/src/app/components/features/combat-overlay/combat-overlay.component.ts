@@ -143,6 +143,14 @@ export class CombatOverlayComponent {
 
         const myId = this.combatData?.userRole === 'attacker' ? this.combatData.attackerId : this.combatData?.targetId;
 
+        if (this.victoryData.abandon) {
+            if (this.victoryData.winnerId === myId) {
+                return 'Victoire par abandon !';
+            } else {
+                return 'Défaite par abandon...';
+            }
+        }
+
         if (this.victoryData.winnerId === null) {
             return 'Les deux combattants sont tombés';
         }
@@ -182,6 +190,11 @@ export class CombatOverlayComponent {
         const loserName = this.inGameService.getPlayerByPlayerId(
             this.victoryData.winnerId === this.victoryData.playerAId ? this.victoryData.playerBId : this.victoryData.playerAId
         ).name;
+
+        if (this.victoryData.abandon) {
+            return `${winnerName} a gagné par abandon contre ${loserName}`;
+        }
+
         return `${winnerName} a vaincu ${loserName}`;
     }
 

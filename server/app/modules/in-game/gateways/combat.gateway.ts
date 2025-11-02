@@ -42,6 +42,15 @@ export class CombatGateway {
         }
     }
 
+    @SubscribeMessage(InGameEvents.CombatAbandon)
+    combatAbandon(socket: Socket, payload: { sessionId: string }): void {
+        try {
+            this.combatService.combatAbandon(payload.sessionId, socket.id);
+        } catch (error) {
+            socket.emit(InGameEvents.CombatAbandon, errorResponse(error.message));
+        }
+    }
+
     @OnEvent('combat.started')
     handleCombatStarted(payload: {
         sessionId: string;
@@ -74,7 +83,7 @@ export class CombatGateway {
     }
 
     @OnEvent('combat.victory')
-    handleCombatVictory(payload: { sessionId: string; playerAId: string; playerBId: string; winnerId: string | null }) {
+    handleCombatVictory(payload: { sessionId: string; playerAId: string; playerBId: string; winnerId: string | null; abandon: boolean }) {
         const session = this.combatService.getSession(payload.sessionId);
         if (session) {
             this.server.to(session.inGameId).emit(
@@ -83,6 +92,7 @@ export class CombatGateway {
                     playerAId: payload.playerAId,
                     playerBId: payload.playerBId,
                     winnerId: payload.winnerId,
+                    abandon: payload.abandon,
                 }),
             );
         }
