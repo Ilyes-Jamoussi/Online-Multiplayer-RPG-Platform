@@ -32,4 +32,4 @@ const bootstrap = async (): Promise<void> => {
     await app.listen(process.env.PORT);
 };
 
-bootstrap();
+void bootstrap();

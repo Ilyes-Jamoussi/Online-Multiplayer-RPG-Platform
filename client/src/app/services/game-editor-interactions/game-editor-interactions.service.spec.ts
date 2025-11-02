@@ -1,6 +1,6 @@
-/* eslint-disable max-lines */
-/* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
+/* eslint-disable @typescript-eslint/naming-convention -- Test file uses mock objects with underscores */
+/* eslint-disable @typescript-eslint/no-magic-numbers -- Test file uses literal values for assertions */
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { GameEditorInteractionsService } from './game-editor-interactions.service';

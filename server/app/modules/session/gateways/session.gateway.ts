@@ -45,7 +45,7 @@ export class SessionGateway implements OnGatewayDisconnect {
         try {
             const adminId = socket.id;
             const sessionId = this.sessionService.createSession(adminId, data);
-            socket.join(sessionId);
+            void socket.join(sessionId);
 
             const players = this.sessionService.getPlayersSession(sessionId);
             socket.emit(SessionEvents.SessionCreated, successResponse<SessionCreatedDto>({ sessionId, playerId: adminId }));
@@ -57,7 +57,7 @@ export class SessionGateway implements OnGatewayDisconnect {
     }
 
     @SubscribeMessage(SessionEvents.JoinSession)
-    async joinSession(socket: Socket, data: JoinSessionDto): Promise<void> {
+    joinSession(socket: Socket, data: JoinSessionDto): void {
         const validationError = this.validateSessionJoin(data.sessionId);
         if (validationError) {
             socket.emit(SessionEvents.SessionJoined, validationError);
@@ -80,13 +80,13 @@ export class SessionGateway implements OnGatewayDisconnect {
     }
 
     @SubscribeMessage(SessionEvents.JoinAvatarSelection)
-    async joinAvatarSelection(socket: Socket, data: JoinAvatarSelectionDto): Promise<void> {
+    joinAvatarSelection(socket: Socket, data: JoinAvatarSelectionDto): void {
         const validationError = this.validateSessionJoin(data.sessionId);
         if (validationError) {
             socket.emit(SessionEvents.AvatarSelectionJoined, validationError);
             return;
         }
-        socket.join(this.getAvatarSelectionRoomId(data.sessionId));
+        void socket.join(this.getAvatarSelectionRoomId(data.sessionId));
 
         const avatarAssignments = this.sessionService.getChosenAvatars(data.sessionId);
         socket.emit(
@@ -102,7 +102,7 @@ export class SessionGateway implements OnGatewayDisconnect {
     @SubscribeMessage(SessionEvents.LeaveAvatarSelection)
     leaveAvatarSelection(socket: Socket, data: JoinAvatarSelectionDto): void {
         const roomId = this.getAvatarSelectionRoomId(data.sessionId);
-        socket.leave(roomId);
+        void socket.leave(roomId);
 
         this.sessionService.releaseAvatar(data.sessionId, socket.id);
         const avatarAssignments = this.sessionService.getChosenAvatars(data.sessionId);
@@ -111,7 +111,7 @@ export class SessionGateway implements OnGatewayDisconnect {
     }
 
     @SubscribeMessage(SessionEvents.UpdateAvatarAssignments)
-    async updateAvatarAssignments(socket: Socket, data: UpdateAvatarAssignmentsDto): Promise<void> {
+    updateAvatarAssignments(socket: Socket, data: UpdateAvatarAssignmentsDto): void {
         const roomId = this.getAvatarSelectionRoomId(data.sessionId);
         this.sessionService.chooseAvatar(data.sessionId, socket.id, data.avatar);
         const avatarAssignments = this.sessionService.getChosenAvatars(data.sessionId);
@@ -140,7 +140,7 @@ export class SessionGateway implements OnGatewayDisconnect {
 
             const kickedSocket = this.server.sockets.sockets.get(data.playerId);
             if (kickedSocket) {
-                kickedSocket.leave(sessionId);
+                void kickedSocket.leave(sessionId);
                 kickedSocket.emit(SessionEvents.SessionEnded, successResponse({ message: 'Vous avez été exclu de la session' }));
             }
 
@@ -183,7 +183,7 @@ export class SessionGateway implements OnGatewayDisconnect {
         for (const player of players) {
             const playerSocket = this.server.sockets.sockets.get(player.id);
             if (playerSocket) {
-                playerSocket.join(inGameSession.inGameId);
+                void playerSocket.join(inGameSession.inGameId);
             }
         }
 
@@ -192,7 +192,7 @@ export class SessionGateway implements OnGatewayDisconnect {
         for (const player of players) {
             const playerSocket = this.server.sockets.sockets.get(player.id);
             if (playerSocket) {
-                playerSocket.leave(sessionId);
+                void playerSocket.leave(sessionId);
             }
         }
         this.sessionService.endSession(sessionId);
@@ -213,7 +213,7 @@ export class SessionGateway implements OnGatewayDisconnect {
                 for (const player of session.players) {
                     const playerSocket = this.server.sockets.sockets.get(player.id);
                     if (playerSocket) {
-                        playerSocket.leave(sessionId);
+                        void playerSocket.leave(sessionId);
                     }
                 }
 
@@ -222,7 +222,7 @@ export class SessionGateway implements OnGatewayDisconnect {
                 return;
             }
 
-            socket.leave(sessionId);
+            void socket.leave(sessionId);
             this.sessionService.leaveSession(sessionId, socket.id);
 
             const players = this.sessionService.getPlayersSession(sessionId);
@@ -277,8 +277,8 @@ export class SessionGateway implements OnGatewayDisconnect {
     }
 
     private handleJoinSession(socket: Socket, data: JoinSessionDto): string {
-        socket.leave(this.getAvatarSelectionRoomId(data.sessionId));
-        socket.join(data.sessionId);
+        void socket.leave(this.getAvatarSelectionRoomId(data.sessionId));
+        void socket.join(data.sessionId);
 
         return this.sessionService.joinSession(socket.id, data);
     }

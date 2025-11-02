@@ -15,7 +15,7 @@ import { COMBAT_WINS_TO_WIN_GAME } from '@app/constants/game-config.constants';
 export class CombatService {
     private readonly activeCombats = new Map<string, CombatState>();
 
-    // eslint-disable-next-line max-params
+    // eslint-disable-next-line max-params -- NestJS dependency injection requires multiple parameters
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly timerService: TimerService,

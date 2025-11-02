@@ -37,7 +37,8 @@ export class InGameMovementService {
             throw new NotFoundException('Tile not found');
         }
 
-        const moveCost = tile.kind === TileKind.DOOR ? (tile.open ? TileCost.DOOR_OPEN : -1) : TileCost[tile.kind];
+        const doorCost = tile.open ? TileCost.DOOR_OPEN : -1;
+        const moveCost = tile.kind === TileKind.DOOR ? doorCost : TileCost[tile.kind];
 
         if (moveCost === -1) {
             throw new BadRequestException('Cannot move onto this tile');

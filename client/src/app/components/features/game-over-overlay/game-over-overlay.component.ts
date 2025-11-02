@@ -47,7 +47,7 @@ export class GameOverOverlayComponent {
 
     returnToHome(): void {
         this.inGameService.reset();
-        this.router.navigate([ROUTES.HomePage]);
+        void this.router.navigate([ROUTES.HomePage]);
     }
 }
 

@@ -29,14 +29,14 @@ export class HomePageComponent implements OnInit {
     }
 
     navigateToCreateGame(): void {
-        this.router.navigate([ROUTES.SessionCreationPage]);
+        void this.router.navigate([ROUTES.SessionCreationPage]);
     }
 
     navigateToAdminPage(): void {
-        this.router.navigate([ROUTES.ManagementPage]);
+        void this.router.navigate([ROUTES.ManagementPage]);
     }
 
     navigateToJoinGame(): void {
-        this.router.navigate([ROUTES.JoinSessionPage]);
+        void this.router.navigate([ROUTES.JoinSessionPage]);
     }
 }

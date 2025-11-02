@@ -61,6 +61,6 @@ const APP_ROUTES: Routes = [
 ];
 
 enableProfiling();
-bootstrapApplication(AppComponent, {
+void bootstrapApplication(AppComponent, {
     providers: [provideHttpClient(), provideRouter(APP_ROUTES, withHashLocation()), provideAnimations()],
 });

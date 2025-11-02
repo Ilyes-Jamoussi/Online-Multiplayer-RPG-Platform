@@ -1,3 +1,5 @@
+import eslintComments from 'eslint-plugin-eslint-comments';
+
 export default (tsParser, tsPlugin) => [
     {
         files: ['**/*.js', '**/*.ts'],
@@ -69,9 +71,18 @@ export default (tsParser, tsPlugin) => [
             '@typescript-eslint/no-unused-vars': 'error',
             '@typescript-eslint/dot-notation': 'error',
             '@typescript-eslint/no-unused-expressions': 'error',
-            // Added lint rules for code quality - COMMENTED OUT
-            // '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'warn',
-            // '@typescript-eslint/no-unnecessary-condition': 'warn',
+            
+            // Expressions booléennes
+            'no-nested-ternary': 'warn',
+            // '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'warn', // Disabled: requires strictNullChecks
+            // '@typescript-eslint/no-unnecessary-condition': 'warn', // Disabled: too many false positives
+            
+            // Code asynchrone
+            '@typescript-eslint/no-floating-promises': 'warn',
+            '@typescript-eslint/require-await': 'warn',
+            
+            // Messages d'erreur
+            '@typescript-eslint/only-throw-error': 'warn',
             '@typescript-eslint/no-magic-numbers': [
                 'error',
                 {
@@ -124,8 +135,16 @@ export default (tsParser, tsPlugin) => [
                     "selector": "enumMember"
                 }
             ],
-            // "@typescript-eslint/explicit-function-return-type": "warn",
-            "@typescript-eslint/no-unnecessary-type-assertion": "warn"
+            // '@typescript-eslint/explicit-function-return-type': 'warn',
+            '@typescript-eslint/no-unnecessary-type-assertion': 'warn'
+        },
+    },
+    {
+        files: ['**/*.js', '**/*.ts'],
+        plugins: { 'eslint-comments': eslintComments },
+        rules: {
+            'eslint-comments/no-unlimited-disable': 'warn',
+            'eslint-comments/require-description': 'warn',
         },
     },
     {
