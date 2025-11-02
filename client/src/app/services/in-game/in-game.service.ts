@@ -1,17 +1,17 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
-import { ROUTES } from '@common/enums/routes.enum';
-import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
-import { InGameSession } from '@common/models/session.interface';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
-import { SessionService } from '@app/services/session/session.service';
-import { PlayerService } from '@app/services/player/player.service';
-import { Player } from '@common/models/player.interface';
-import { TimerService } from '@app/services/timer/timer.service';
 import { NotificationService } from '@app/services/notification/notification.service';
+import { PlayerService } from '@app/services/player/player.service';
+import { SessionService } from '@app/services/session/session.service';
+import { TimerService } from '@app/services/timer/timer.service';
+import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { Orientation } from '@common/enums/orientation.enum';
-import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+import { ROUTES } from '@common/enums/routes.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+import { Player } from '@common/models/player.interface';
+import { InGameSession } from '@common/models/session.interface';
 
 const GAME_OVER_REDIRECT_DELAY = 10000;
 
@@ -163,8 +163,6 @@ export class InGameService {
         this._reachableTiles.set([]);
         this._inGameSession.set(DEFAULT_IN_GAME_SESSION);
         this._gameOverData.set(null);
-        this.sessionService.resetSession();
-        this.playerService.resetPlayer();
     }
 
     private initListeners(): void {
@@ -257,7 +255,7 @@ export class InGameService {
         this.inGameSocketService.onGameOver((data) => {
             this._gameOverData.set(data);
             this.stopTurnTimer();
-            
+
             setTimeout(() => {
                 this.reset();
                 window.location.href = ROUTES.HomePage;
