@@ -25,16 +25,6 @@ export class CombatService {
         private readonly gameCacheService: GameCacheService,
     ) {}
 
-    combatAbandon(sessionId: string, playerId: string): void {
-        const combat = this.activeCombats.get(sessionId);
-        if (!combat) throw new NotFoundException('Combat not found');
-        if (combat.playerAId !== playerId && combat.playerBId !== playerId) throw new BadRequestException('Player not in combat');
-        const winnerId = combat.playerAId === playerId ? combat.playerBId : combat.playerAId;
-        const session = this.sessionRepository.findById(sessionId);
-        if (!session) throw new NotFoundException('Session not found');
-        this.endCombat(session, combat.playerAId, combat.playerBId, winnerId, true);
-    }
-
     getSession(sessionId: string): InGameSession {
         return this.sessionRepository.findById(sessionId);
     }
@@ -108,7 +98,7 @@ export class CombatService {
         }
     }
 
-    private endCombat(session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean = false): void {
+    private endCombat(session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null): void {
         this.activeCombats.delete(session.id);
         this.combatTimerService.stopCombatTimer(session);
 
@@ -117,7 +107,6 @@ export class CombatService {
             playerAId,
             playerBId,
             winnerId,
-            abandon,
         });
 
         if (winnerId !== null && winnerId !== session.currentTurn.activePlayerId) {
