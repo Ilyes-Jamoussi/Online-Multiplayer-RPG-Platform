@@ -3,9 +3,15 @@ import { InGameSession } from '@common/models/session.interface';
 import { Game } from '@app/modules/game-store/entities/game.entity';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { Player } from '@common/models/player.interface';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 
 @Injectable()
 export class InGameInitializationService {
+    constructor(
+        private readonly sessionRepository: InGameSessionRepository,
+        private readonly gameCache: GameCacheService,
+    ) {}
     makeTurnOrder(players: Player[]): string[] {
         const sortedPlayers = [...players].sort((a, b) => b.speed - a.speed);
         const uniqueSpeeds = Array.from(new Set(sortedPlayers.map((p) => p.speed)));
@@ -30,9 +36,11 @@ export class InGameInitializationService {
         session.startPoints = session.turnOrder.map((playerId, index) => {
             const startPoint = shuffledStartPoints[index];
             const player = session.inGamePlayers[playerId];
+            player.startPointId = startPoint._id.toString();
+
+            this.gameCache.setTileOccupant(session.id, startPoint.x, startPoint.y, player);
             player.x = startPoint.x;
             player.y = startPoint.y;
-            player.startPointId = startPoint._id.toString();
 
             return {
                 id: startPoint._id.toString(),

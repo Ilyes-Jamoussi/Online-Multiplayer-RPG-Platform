@@ -36,13 +36,13 @@ export class GameOverOverlayComponent {
 
         const players = Object.values(this.inGameService.inGamePlayers());
         return players
-            .filter(p => p.isInGame)
-            .map(p => ({
-                name: p.name,
-                wins: p.combatWins,
-                isWinner: p.id === this.gameOverData?.winnerId
+            .filter((player) => player.isInGame)
+            .map((player) => ({
+                name: player.name,
+                wins: player.combatWins,
+                isWinner: player.id === this.gameOverData?.winnerId
             }))
-            .sort((a, b) => b.wins - a.wins);
+            .sort((playerA, playerB) => playerB.wins - playerA.wins);
     }
 
     returnToHome(): void {

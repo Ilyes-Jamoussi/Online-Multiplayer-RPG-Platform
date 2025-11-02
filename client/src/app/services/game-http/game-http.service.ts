@@ -7,11 +7,11 @@ import { PatchGameEditorDto } from '@app/dto/patch-game-editor-dto';
 import { ToggleVisibilityDto } from '@app/dto/toggle-visibility-dto';
 import { API_PATHS } from '@common/constants/api-paths';
 import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { ENVIRONMENT } from 'src/environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class GameHttpService {
-    private readonly baseUrl = environment.serverUrl;
+    private readonly baseUrl = ENVIRONMENT.serverUrl;
     private readonly gamesEndpoint = `${this.baseUrl}${API_PATHS.games.base}`;
 
     constructor(private readonly http: HttpClient) {}

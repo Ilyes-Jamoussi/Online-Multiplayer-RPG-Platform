@@ -19,7 +19,9 @@ export class GameCacheService {
     private readonly sessionsGames = new Map<string, Game>();
     private readonly sessionsGameMaps = new Map<string, GameMap>();
 
-    constructor(@InjectModel(Game.name) private readonly gameModel: Model<GameDocument>) {}
+    constructor(
+        @InjectModel(Game.name) private readonly gameModel: Model<GameDocument>,
+    ) {}
 
     async fetchAndCacheGame(sessionId: string, gameId: string): Promise<Game> {
         const game = await this.gameModel.findById(gameId).lean();
@@ -96,7 +98,12 @@ export class GameCacheService {
         gameMap.tiles[y * gameMap.size + x].playerId = player.id;
     }
 
-    moveTileOccupant(sessionId: string, x: number, y: number, player: Player): void {
+    moveTileOccupant(
+        sessionId: string,
+        x: number,
+        y: number,
+        player: Player,
+    ): void {
         this.clearTileOccupant(sessionId, player.x, player.y);
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');

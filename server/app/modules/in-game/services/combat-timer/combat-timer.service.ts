@@ -1,4 +1,4 @@
-import { COMBAT_DURATION, COMBAT_END_TRANSITION_DURATION } from '@common/constants/in-game';
+import { COMBAT_DURATION } from '@common/constants/in-game';
 import { InGameSession } from '@common/models/session.interface';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -12,7 +12,7 @@ export class CombatTimerService {
 
     startCombatTimer(session: InGameSession, attackerId: string, targetId: string, attackerTileEffect?: number, targetTileEffect?: number): void {
         this.activeCombats.add(session.id);
-        
+
         this.eventEmitter.emit('combat.started', {
             sessionId: session.id,
             attackerId,
@@ -20,7 +20,7 @@ export class CombatTimerService {
             attackerTileEffect,
             targetTileEffect,
         });
-        
+
         this.scheduleCombatLoop(session);
         this.eventEmitter.emit('combat.timerRestart', { sessionId: session.id });
     }
@@ -32,13 +32,6 @@ export class CombatTimerService {
             clearTimeout(timer);
             this.combatTimers.delete(session.id);
         }
-    }
-
-    startEndTransition(session: InGameSession): void {
-        setTimeout(() => {
-            this.eventEmitter.emit('combat.ended', { sessionId: session.id });
-            this.eventEmitter.emit('combat.transitionEnded', { sessionId: session.id });
-        }, COMBAT_END_TRANSITION_DURATION);
     }
 
     forceNextLoop(session: InGameSession): void {
@@ -71,4 +64,3 @@ export class CombatTimerService {
         }
     }
 }
-

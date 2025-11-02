@@ -122,14 +122,16 @@ export class InGameService {
         const session = this.sessionRepository.findById(sessionId);
         if (playerId !== session.currentTurn.activePlayerId) throw new BadRequestException('Not your turn');
         if (this.timerService.getGameTimerState(sessionId) !== TurnTimerStates.PlayerTurn) throw new BadRequestException('Not your turn');
+        
         const remainingSpeed = this.movementService.movePlayer(session, playerId, orientation);
-        const availableActions =this.actionService.calculateAvailableActions(session, playerId);
+        const availableActions = this.actionService.calculateAvailableActions(session, playerId);
+        
         if(!remainingSpeed && !availableActions.length) {
             this.timerService.endTurnManual(session);
         }
     }
 
-    leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string; sessionEnded: boolean } {
+    leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string; playerId: string; sessionEnded: boolean } {
         const player = this.sessionRepository.playerLeave(sessionId, playerId);
         const session = this.sessionRepository.findById(sessionId);
         const inGamePlayers = this.sessionRepository.inGamePlayersCount(sessionId);
@@ -139,7 +141,7 @@ export class InGameService {
             sessionEnded = true;
         }
 
-        return { session, playerName: player.name, sessionEnded };
+        return { session, playerName: player.name, playerId, sessionEnded };
     }
 
     getPlayers(sessionId: string): Player[] {

@@ -52,29 +52,51 @@ export class CombatOverlayComponent {
     get playerAHealth() {
         if (!this.combatData) return { current: 0, max: 0, percentage: 0 };
         const player = this.inGameService.getPlayerByPlayerId(this.combatData.attackerId);
+        const minHealth = this.combatService.minHealthDuringCombat();
+        const displayedHealth = this.victoryData 
+            ? Math.max(0, minHealth[this.combatData.attackerId] ?? player.health)
+            : player.health;
         return {
-            current: player.health,
+            current: displayedHealth,
             max: player.maxHealth,
-            percentage: (player.health / player.maxHealth) * PERCENTAGE_MULTIPLIER,
+            percentage: (displayedHealth / player.maxHealth) * PERCENTAGE_MULTIPLIER,
         };
     }
 
     get playerBHealth() {
         if (!this.combatData) return { current: 0, max: 0, percentage: 0 };
         const player = this.inGameService.getPlayerByPlayerId(this.combatData.targetId);
+        const minHealth = this.combatService.minHealthDuringCombat();
+        const displayedHealth = this.victoryData 
+            ? Math.max(0, minHealth[this.combatData.targetId] ?? player.health)
+            : player.health;
         return {
-            current: player.health,
+            current: displayedHealth,
             max: player.maxHealth,
-            percentage: (player.health / player.maxHealth) * PERCENTAGE_MULTIPLIER,
+            percentage: (displayedHealth / player.maxHealth) * PERCENTAGE_MULTIPLIER,
         };
     }
 
     get playerADamage() {
-        return this.combatService.damageDisplays().find((d) => d.playerId === this.combatData?.attackerId && d.visible) || null;
+        return (
+            this.combatService
+                .damageDisplays()
+                .find(
+                    (damageDisplay) =>
+                        damageDisplay.playerId === this.combatData?.attackerId && damageDisplay.visible,
+                ) || null
+        );
     }
 
     get playerBDamage() {
-        return this.combatService.damageDisplays().find((d) => d.playerId === this.combatData?.targetId && d.visible) || null;
+        return (
+            this.combatService
+                .damageDisplays()
+                .find(
+                    (damageDisplay) =>
+                        damageDisplay.playerId === this.combatData?.targetId && damageDisplay.visible,
+                ) || null
+        );
     }
 
     get selectedPosture() {
@@ -201,5 +223,13 @@ export class CombatOverlayComponent {
 
     get pausedTurnTime(): number {
         return this.timerService.getPausedTurnTime();
+    }
+
+    get isVictoryNotificationVisible(): boolean {
+        return this.combatService.isVictoryNotificationVisible();
+    }
+
+    closeVictoryOverlay(): void {
+        this.combatService.closeVictoryOverlay();
     }
 }

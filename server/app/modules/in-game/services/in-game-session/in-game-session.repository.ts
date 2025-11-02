@@ -3,12 +3,16 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InGameSession } from '@common/models/session.interface';
 import { Player } from '@common/models/player.interface';
 import { StartPoint } from '@common/models/start-point.interface';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 
 @Injectable()
 export class InGameSessionRepository {
     private readonly sessions = new Map<string, InGameSession>();
 
-    constructor(private readonly eventEmitter: EventEmitter2) {}
+    constructor(
+        private readonly eventEmitter: EventEmitter2,
+        private readonly gameCache: GameCacheService,
+    ) {}
 
     updatePlayer(sessionId: string, playerId: string, updates: Partial<Player>): void {
         const session = this.findById(sessionId);
@@ -128,12 +132,19 @@ export class InGameSessionRepository {
 
     playerLeave(sessionId: string, playerId: string): Player {
         const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+
         session.inGamePlayers[playerId].isInGame = false;
-        session.inGamePlayers[playerId].x = -1;
-        session.inGamePlayers[playerId].y = -1;
-        this.removeStartPoint(sessionId, session.inGamePlayers[playerId].startPointId);
-        this.removePlayerFromTurnOrder(sessionId, playerId);
-        return session.inGamePlayers[playerId];
+
+        if (player.x >= 0 && player.y >= 0) {
+            this.gameCache.clearTileOccupant(sessionId, player.x, player.y);
+        }
+
+        player.x = -1;
+        player.y = -1;
+        this.removeStartPoint(sessionId, player.startPointId);
+        return player;
     }
 
     removeStartPoint(sessionId: string, startPointId: string): void {
@@ -158,5 +169,36 @@ export class InGameSessionRepository {
     findStartPointById(sessionId: string, startPointId: string): StartPoint | null {
         const session = this.findById(sessionId);
         return session.startPoints.find((s) => s.id === startPointId);
+    }
+
+    movePlayerPosition(
+        sessionId: string,
+        playerId: string,
+        newX: number,
+        newY: number,
+        cost: number,
+    ): { oldX: number; oldY: number; newX: number; newY: number } {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+
+        const oldX = player.x;
+        const oldY = player.y;
+
+        this.gameCache.moveTileOccupant(sessionId, newX, newY, player);
+
+        player.x = newX;
+        player.y = newY;
+        player.speed = player.speed - cost;
+
+        this.eventEmitter.emit('player.moved', {
+            session,
+            playerId,
+            x: newX,
+            y: newY,
+            speed: player.speed,
+        });
+
+        return { oldX, oldY, newX, newY };
     }
 }

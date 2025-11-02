@@ -27,7 +27,9 @@ export class TimerService {
     startFirstTurn(session: InGameSession, timeoutMs = DEFAULT_TURN_DURATION): TurnState {
         if (!session.turnOrder?.length) throw new Error('TURN_ORDER_NOT_DEFINED');
 
-        const firstPlayer = session.turnOrder[0];
+        const firstPlayer = this.getNextActivePlayer(session, null);
+        if (!firstPlayer) throw new Error('NO_ACTIVE_PLAYER');
+
         session.inGamePlayers[firstPlayer].speed = session.inGamePlayers[firstPlayer].speed;
         const newTurn: TurnState = {
             turnNumber: 1,
@@ -80,11 +82,12 @@ export class TimerService {
         return newTurn;
     }
 
-    endTurnManual(session: InGameSession): TurnState {
+    endTurnManual(session: InGameSession): void {
         this.clearTurnTimer(session.id);
         this.eventEmitter.emit('turn.manualEnd', { session });
-        return this.nextTurn(session);
+        this.nextTurn(session);
     }
+
 
     getGameTimerState(sessionId: string): TurnTimerStates {
         return this.gameTimerStates.get(sessionId) || TurnTimerStates.PlayerTurn;
@@ -100,11 +103,41 @@ export class TimerService {
     }
 
     private getNextPlayer(session: InGameSession, currentId: string): string {
-        const order = session.turnOrder;
-        const idx = order.indexOf(currentId);
-        if (idx === -1) return order[0];
-        return order[(idx + 1) % order.length];
+        return this.getNextActivePlayer(session, currentId) || session.turnOrder[0];
     }
+
+    private getNextActivePlayer(session: InGameSession, currentId: string | null): string | null {
+        const order = session.turnOrder;
+        if (!order.length) return null;
+
+        let startIdx = 0;
+        if (currentId !== null) {
+            const idx = order.indexOf(currentId);
+            if (idx === -1) startIdx = 0;
+            else startIdx = (idx + 1) % order.length;
+        }
+
+        const checkedIds = new Set<string>();
+        let attempts = 0;
+        
+        while (attempts < order.length) {
+            const playerId = order[startIdx];
+            
+            if (!checkedIds.has(playerId)) {
+                checkedIds.add(playerId);
+                const player = session.inGamePlayers[playerId];
+                if (player && player.isInGame) {
+                    return playerId;
+                }
+            }
+
+            startIdx = (startIdx + 1) % order.length;
+            attempts++;
+        }
+
+        return null;
+    }
+    
     pauseTurnTimer(sessionId: string): void {
         const timerData = this.turnTimers.get(sessionId);
         if (timerData && timerData.timeout) {
@@ -144,12 +177,6 @@ export class TimerService {
         const timerData = this.turnTimers.get(sessionId);
         if (timerData?.timeout) clearTimeout(timerData.timeout);
         this.turnTimers.delete(sessionId);
-    }
-
-    forceEndTurn(session: InGameSession): void {
-        this.clearTurnTimer(session.id);
-        this.eventEmitter.emit('turn.forcedEnd', { session });
-        this.nextTurn(session);
     }
 
     forceStopTimer(sessionId: string): void {

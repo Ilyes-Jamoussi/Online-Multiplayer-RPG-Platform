@@ -63,7 +63,12 @@ export class InGameActionService {
             }
         }
 
-        this.eventEmitter.emit('player.moved', { session, speed: player.speed, playerId, actions, x: player.x, y: player.y });
+        this.eventEmitter.emit('player.availableActions', {
+            session,
+            playerId,
+            actions,
+        });
+
         return actions;
     }
 }

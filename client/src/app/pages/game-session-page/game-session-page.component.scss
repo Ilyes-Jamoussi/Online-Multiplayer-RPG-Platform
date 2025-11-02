@@ -323,6 +323,48 @@ $shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     }
 }
 
+.abandon-button-fixed {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, $danger-color, $danger-dark);
+    border: 2px solid $danger-darker;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba($danger-color, 0.4);
+    backdrop-filter: blur(10px);
+    
+    .btn-icon {
+        font-size: 1.1rem;
+    }
+    
+    &:hover {
+        background: linear-gradient(135deg, $danger-dark, $danger-darker);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba($danger-color, 0.5);
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+@media (min-width: 1001px) {
+    .hide-on-overlay {
+        display: none;
+    }
+}
+
 @media (max-width: 1000px) {
     .game-session-container {
         grid-template-columns: 1fr;
@@ -354,5 +396,9 @@ $shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
                 justify-content: center;
             }
         }
+    }
+    
+    .abandon-button-fixed {
+        display: none;
     }
 }

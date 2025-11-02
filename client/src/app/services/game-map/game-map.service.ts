@@ -163,7 +163,7 @@ export class GameMapService {
     getActiveTile(coords?: Vector2): GameEditorTileDto | null {
         const targetCoords = coords ?? this._activeTileCoords();
         if (!targetCoords) return null;
-        return this.tiles().find((t) => t.x === targetCoords.x && t.y === targetCoords.y) ?? null;
+        return this.tiles().find((tile) => tile.x === targetCoords.x && tile.y === targetCoords.y) ?? null;
     }
 
     openTileModal(tile: GameEditorTileDto): void {

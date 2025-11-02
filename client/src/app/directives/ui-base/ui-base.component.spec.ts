@@ -24,28 +24,28 @@ describe('UiBaseComponent', () => {
     });
 
     it('classes should reflect defaults', () => {
-        const c = comp.classes;
-        expect(c['c-primary']).toBeTrue();
-        expect(c['st-filled']).toBeTrue();
-        expect(c['s-md']).toBeTrue();
-        expect(c['sh-rounded']).toBeTrue();
-        expect(c['isDisabled']).toBeFalse();
-        expect(c['isFull']).toBeFalsy();
-        expect(c['al-center']).toBeTrue();
-        expect(c['gap-md']).toBeTrue();
-        expect(c['elev-none']).toBeTrue();
-        expect(c['popOut']).toBeTrue();
-        expect(c['disableHoverEffects']).toBeFalse();
+        const classes = comp.classes;
+        expect(classes['c-primary']).toBeTrue();
+        expect(classes['st-filled']).toBeTrue();
+        expect(classes['s-md']).toBeTrue();
+        expect(classes['sh-rounded']).toBeTrue();
+        expect(classes['isDisabled']).toBeFalse();
+        expect(classes['isFull']).toBeFalsy();
+        expect(classes['al-center']).toBeTrue();
+        expect(classes['gap-md']).toBeTrue();
+        expect(classes['elev-none']).toBeTrue();
+        expect(classes['popOut']).toBeTrue();
+        expect(classes['disableHoverEffects']).toBeFalse();
     });
 
     it('classes should reflect boolean flags', () => {
         comp.disabled = true;
         comp.fullWidth = true;
         comp.popOut = false;
-        const c = comp.classes;
-        expect(c['isDisabled']).toBeTrue();
-        expect(c['isFull']).toBeTrue();
-        expect(c['popOut']).toBeFalse();
+        const classes = comp.classes;
+        expect(classes['isDisabled']).toBeTrue();
+        expect(classes['isFull']).toBeTrue();
+        expect(classes['popOut']).toBeFalse();
     });
 
     it('should return color when color input is set', () => {
@@ -65,13 +65,13 @@ describe('UiBaseComponent', () => {
         comp.alignContent = 'start' as UiAlignment;
         comp.gap = 'lg' as UiSpacing;
         comp.elevation = 'md' as UiElevation;
-        const c = comp.classes;
-        expect(c['v-secondary']).toBeTrue();
-        expect(c['s-lg']).toBeTrue();
-        expect(c['sh-square']).toBeTrue();
-        expect(c['al-start']).toBeTrue();
-        expect(c['gap-lg']).toBeTrue();
-        expect(c['elev-md']).toBeTrue();
+        const classes = comp.classes;
+        expect(classes['v-secondary']).toBeTrue();
+        expect(classes['s-lg']).toBeTrue();
+        expect(classes['sh-square']).toBeTrue();
+        expect(classes['al-start']).toBeTrue();
+        expect(classes['gap-lg']).toBeTrue();
+        expect(classes['elev-md']).toBeTrue();
     });
 
     it('classes should fallback to defaults when string inputs are falsy', () => {
@@ -81,13 +81,13 @@ describe('UiBaseComponent', () => {
         comp.alignContent = '' as unknown as UiAlignment;
         comp.gap = '' as unknown as UiSpacing;
         comp.elevation = '' as unknown as UiElevation;
-        const c = comp.classes;
-        expect(c['c-primary']).toBeTrue();
-        expect(c['st-filled']).toBeTrue();
-        expect(c['s-md']).toBeTrue();
-        expect(c['sh-rounded']).toBeTrue();
-        expect(c['al-center']).toBeTrue();
-        expect(c['gap-md']).toBeTrue();
-        expect(c['elev-none']).toBeTrue();
+        const classes = comp.classes;
+        expect(classes['c-primary']).toBeTrue();
+        expect(classes['st-filled']).toBeTrue();
+        expect(classes['s-md']).toBeTrue();
+        expect(classes['sh-rounded']).toBeTrue();
+        expect(classes['al-center']).toBeTrue();
+        expect(classes['gap-md']).toBeTrue();
+        expect(classes['elev-none']).toBeTrue();
     });
 });

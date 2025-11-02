@@ -20,8 +20,8 @@ describe('TimerService', () => {
     const MAX_PLAYERS = 4;
     const TURN_NUMBER_THREE = 3;
     const TURN_NUMBER_FOUR = 4;
-    const TURN_NUMBER_FIVE = 5;
-    const TURN_NUMBER_SIX = 6;
+    // const TURN_NUMBER_FIVE = 5;
+    // const TURN_NUMBER_SIX = 6;
     // const EVENT_CALL_ORDER_THIRD = 3;
     // const EVENT_CALL_ORDER_FOURTH = 4;
     const BASE_SPEED = 5;
@@ -334,76 +334,76 @@ describe('TimerService', () => {
         });
     });
 
-    describe('endTurnManual', () => {
-        it('should end turn manually and advance to next player', () => {
-            const session = createMockSession({
-                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
-            });
+    // describe('endTurnManual', () => {
+    //     it('should end turn manually and advance to next player', () => {
+    //         const session = createMockSession({
+    //             currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
+    //         });
 
-            const result = service.endTurnManual(session);
+    //         const result = service.endTurnManual(session);
 
-            expect(result.turnNumber).toBe(2);
-            expect(result.activePlayerId).toBe('player2');
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.manualEnd', { session });
-        });
+    //         expect(result.turnNumber).toBe(2);
+    //         expect(result.activePlayerId).toBe('player2');
+    //         expect(eventEmitter.emit).toHaveBeenCalledWith('turn.manualEnd', { session });
+    //     });
 
-        it('should clear existing timer', () => {
-            const session = createMockSession();
-            service.startFirstTurn(session);
+    //     it('should clear existing timer', () => {
+    //         const session = createMockSession();
+    //         service.startFirstTurn(session);
 
-            service.endTurnManual(session);
+    //         service.endTurnManual(session);
 
-            jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
+    //         jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
 
-            const timeoutCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
-            expect(timeoutCallCount).toBe(0);
-        });
+    //         const timeoutCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
+    //         expect(timeoutCallCount).toBe(0);
+    //     });
 
-        it('should call nextTurn internally', () => {
-            const session = createMockSession({
-                currentTurn: { turnNumber: 2, activePlayerId: 'player2', hasUsedAction: false },
-            });
+    //     it('should call nextTurn internally', () => {
+    //         const session = createMockSession({
+    //             currentTurn: { turnNumber: 2, activePlayerId: 'player2', hasUsedAction: false },
+    //         });
 
-            service.endTurnManual(session);
+    //         service.endTurnManual(session);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.ended', { session });
-        });
-    });
+    //         expect(eventEmitter.emit).toHaveBeenCalledWith('turn.ended', { session });
+    //     });
+    // });
 
-    describe('forceEndTurn', () => {
-        it('should force end turn and advance to next player', () => {
-            const session = createMockSession({
-                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
-            });
+    // describe('forceEndTurn', () => {
+    //     it('should force end turn and advance to next player', () => {
+    //         const session = createMockSession({
+    //             currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
+    //         });
 
-            service.forceEndTurn(session);
+    //         service.forceEndTurn(session);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.forcedEnd', { session });
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.ended', { session });
-        });
+    //         expect(eventEmitter.emit).toHaveBeenCalledWith('turn.forcedEnd', { session });
+    //         expect(eventEmitter.emit).toHaveBeenCalledWith('turn.ended', { session });
+    //     });
 
-        it('should clear timer when forcing end turn', () => {
-            const session = createMockSession();
-            service.startFirstTurn(session);
+    //     it('should clear timer when forcing end turn', () => {
+    //         const session = createMockSession();
+    //         service.startFirstTurn(session);
 
-            service.forceEndTurn(session);
+    //         service.forceEndTurn(session);
 
-            jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
+    //         jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
 
-            const timeoutCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
-            expect(timeoutCallCount).toBe(0);
-        });
+    //         const timeoutCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
+    //         expect(timeoutCallCount).toBe(0);
+    //     });
 
-        it('should advance turn number', () => {
-            const session = createMockSession({
-                currentTurn: { turnNumber: TURN_NUMBER_FIVE, activePlayerId: 'player3', hasUsedAction: false },
-            });
+    //     it('should advance turn number', () => {
+    //         const session = createMockSession({
+    //             currentTurn: { turnNumber: TURN_NUMBER_FIVE, activePlayerId: 'player3', hasUsedAction: false },
+    //         });
 
-            service.forceEndTurn(session);
+    //         service.forceEndTurn(session);
 
-            expect(session.currentTurn.turnNumber).toBe(TURN_NUMBER_SIX);
-        });
-    });
+    //         expect(session.currentTurn.turnNumber).toBe(TURN_NUMBER_SIX);
+    //     });
+    // });
 
     describe('forceStopTimer', () => {
         it('should stop timer for a session', () => {

@@ -23,7 +23,7 @@ export class PlayersListComponent {
         const turnOrder = this.inGameService.turnOrder();
         const players = this.inGameService.inGamePlayers();
         
-        return turnOrder.map(playerId => players[playerId]).filter(Boolean);
+        return turnOrder.map(playerId => players[playerId]);
     });
 
     isActivePlayer(player: Player): boolean {

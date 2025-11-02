@@ -11,7 +11,7 @@ const NOOP = (): void => {
 };
 
 function createDataTransferStub(types: readonly string[], data: Readonly<Record<string, string>>): DataTransfer {
-    const dt: DataTransfer = {
+    const dataTransfer: DataTransfer = {
         dropEffect: 'none',
         effectAllowed: 'none',
         files: {} as FileList,
@@ -23,7 +23,7 @@ function createDataTransferStub(types: readonly string[], data: Readonly<Record<
         setDragImage: NOOP,
     } as unknown as DataTransfer;
 
-    return dt;
+    return dataTransfer;
 }
 
 type DragEvtInit = Partial<
@@ -80,16 +80,16 @@ describe('GameEditorInventoryComponent', () => {
         });
         Object.defineProperty(storeSpy, 'tileSizePx', {
             get: (): number => tileSize,
-            set: (v: number) => {
-                tileSize = v;
+            set: (newValue: number) => {
+                tileSize = newValue;
             },
             configurable: true,
         });
 
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => activeToolState,
-            set: (t: ActiveTool | null) => {
-                activeToolState = t;
+            set: (activeTool: ActiveTool | null) => {
+                activeToolState = activeTool;
             },
             configurable: true,
         });
@@ -202,39 +202,39 @@ describe('GameEditorInventoryComponent', () => {
 
     it('should not set dropEffect when slot does not accept', () => {
         const kind: PlaceableKind = PlaceableKind.BOAT;
-        const dt = createDataTransferStub(['text/plain'], {});
+        const dataTransfer = createDataTransferStub(['text/plain'], {});
         const evt = makeDragEvent({
-            dataTransfer: dt,
+            dataTransfer,
             preventDefault: NOOP,
             stopPropagation: NOOP,
         });
 
         component.onSlotDragOver(evt, kind);
 
-        expect(dt.dropEffect).toBe('none');
+        expect(dataTransfer.dropEffect).toBe('none');
     });
 
     it('should set dropEffect to move when slot accepts', () => {
         const kind: PlaceableKind = PlaceableKind.BOAT;
         const mime = PlaceableMime[kind];
-        const dt = createDataTransferStub([mime], {});
+        const dataTransfer = createDataTransferStub([mime], {});
         const evt = makeDragEvent({
-            dataTransfer: dt,
+            dataTransfer,
             preventDefault: NOOP,
             stopPropagation: NOOP,
         });
 
         component.onSlotDragOver(evt, kind);
 
-        expect(dt.dropEffect).toBe('move');
+        expect(dataTransfer.dropEffect).toBe('move');
     });
 
     it('should set dragOver on drag enter when accepted', () => {
         const kind: PlaceableKind = PlaceableKind.BOAT;
         const mime = PlaceableMime[kind];
-        const dt = createDataTransferStub([mime], {});
+        const dataTransfer = createDataTransferStub([mime], {});
         const evt = makeDragEvent({
-            dataTransfer: dt,
+            dataTransfer,
             preventDefault: NOOP,
             stopPropagation: NOOP,
         });
@@ -246,9 +246,9 @@ describe('GameEditorInventoryComponent', () => {
 
     it('should not set dragOver on drag enter when not accepted', () => {
         const kind: PlaceableKind = PlaceableKind.BOAT;
-        const dt = createDataTransferStub(['x'], {});
+        const dataTransfer = createDataTransferStub(['x'], {});
         const evt = makeDragEvent({
-            dataTransfer: dt,
+            dataTransfer,
             preventDefault: NOOP,
             stopPropagation: NOOP,
         });
@@ -280,9 +280,9 @@ describe('GameEditorInventoryComponent', () => {
     it('should ignore slot drop when no id in dataTransfer', () => {
         const kind: PlaceableKind = PlaceableKind.BOAT;
         const mime = PlaceableMime[kind];
-        const dt = createDataTransferStub([mime], { [mime]: '' });
+        const dataTransfer = createDataTransferStub([mime], { [mime]: '' });
         const evt = makeDragEvent({
-            dataTransfer: dt,
+            dataTransfer,
             preventDefault: NOOP,
             stopPropagation: NOOP,
         });
@@ -295,9 +295,9 @@ describe('GameEditorInventoryComponent', () => {
     it('should erase object on valid slot drop and clear dragOver', () => {
         const kind: PlaceableKind = PlaceableKind.BOAT;
         const mime = PlaceableMime[kind];
-        const dt = createDataTransferStub([mime], { [mime]: 'obj-1' });
+        const dataTransfer = createDataTransferStub([mime], { [mime]: 'obj-1' });
         const evt = makeDragEvent({
-            dataTransfer: dt,
+            dataTransfer,
             preventDefault: NOOP,
             stopPropagation: NOOP,
         });

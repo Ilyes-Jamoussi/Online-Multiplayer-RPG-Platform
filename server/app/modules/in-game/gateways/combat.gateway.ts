@@ -88,14 +88,6 @@ export class CombatGateway {
         }
     }
 
-    @OnEvent('combat.ended')
-    handleCombatEnded(payload: { sessionId: string }) {
-        const session = this.combatService.getSession(payload.sessionId);
-        if (session) {
-            this.server.to(session.inGameId).emit(InGameEvents.CombatEnded, successResponse({}));
-        }
-    }
-
     @OnEvent('combat.newRound')
     handleCombatNewRound(payload: { sessionId: string }) {
         const session = this.combatService.getSession(payload.sessionId);

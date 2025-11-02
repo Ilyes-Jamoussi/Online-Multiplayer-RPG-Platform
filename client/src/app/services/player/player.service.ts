@@ -93,13 +93,13 @@ export class PlayerService {
         
         const randomName = names[Math.floor(Math.random() * names.length)];
         const randomAvatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
-        const RANDOM_THRESHOLD = 0.5;
-        const randomBonus = Math.random() < RANDOM_THRESHOLD ? BonusType.Life : BonusType.Speed;
+        const randomThreshold = 0.5;
+        const randomBonus = Math.random() < randomThreshold ? BonusType.Life : BonusType.Speed;
 
         this.setName(randomName);
         this.selectAvatar(randomAvatar);
         this.setBonus(randomBonus);
-        this.setDice(Math.random() < RANDOM_THRESHOLD ? 'attack' : 'defense', Dice.D6);
+        this.setDice(Math.random() < randomThreshold ? 'attack' : 'defense', Dice.D6);
     }
 
     updatePlayer(partial: Partial<Player>): void {

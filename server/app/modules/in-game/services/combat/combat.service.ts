@@ -98,15 +98,7 @@ export class CombatService {
         }
     }
 
-    @OnEvent('combat.transitionEnded')
-    handleCombatTransitionEnded(payload: { sessionId: string }): void {
-        const session = this.sessionRepository.findById(payload.sessionId);
-        if (session) {
-            this.timerService.resumeTurnTimer(session.id);
-        }
-    }
-
-    private startEndCombatTransition(session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null): void {
+    private endCombat(session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null): void {
         this.activeCombats.delete(session.id);
         this.combatTimerService.stopCombatTimer(session);
 
@@ -117,7 +109,11 @@ export class CombatService {
             winnerId,
         });
 
-        this.combatTimerService.startEndTransition(session);
+        if (winnerId !== null && winnerId !== session.currentTurn.activePlayerId) {
+            this.timerService.endTurnManual(session);
+        } else {
+            this.timerService.resumeTurnTimer(session.id);
+        }
     }
 
     combatRound(sessionId: string): void {
@@ -281,7 +277,7 @@ export class CombatService {
                 winnerName: winner.name,
             });
         } else {
-            this.startEndCombatTransition(session, playerAId, playerBId, winnerId);
+            this.endCombat(session, playerAId, playerBId, winnerId);
         }
     }
 }

@@ -41,7 +41,7 @@
                         <span class="btn-text">Action</span>
                     </button>
                     
-                    <button class="action-btn danger" (click)="onLeaveGame()">
+                    <button class="action-btn danger hide-on-overlay" (click)="onLeaveGame()">
                         <span class="btn-icon">🚪</span>
                         <span class="btn-text">Abandonner</span>
                     </button>
@@ -81,3 +81,10 @@
 <app-combat-overlay></app-combat-overlay>
 
 <app-game-over-overlay></app-game-over-overlay>
+
+<button class="abandon-button-fixed" (click)="onLeaveGame()" title="Abandonner la partie">
+    <span class="btn-icon">🚪</span>
+    <span class="btn-text">Abandonner</span>
+</button>
+
+<app-toast></app-toast>

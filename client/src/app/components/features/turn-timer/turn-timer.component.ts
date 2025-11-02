@@ -45,6 +45,8 @@ export class TurnTimerComponent {
     }
 
     get shouldShowTimer(): boolean {
-        return this.isGameStarted() && this.timerService.isTurnActive();
+        const gameStarted = this.isGameStarted();
+        const turnActive = this.timerService.isTurnActive();
+        return gameStarted && turnActive;
     }
 }

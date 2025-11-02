@@ -1,10 +1,11 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { inject, Injectable, computed, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { TimerService } from '@app/services/timer/timer.service';
+import { ToastService } from '@app/services/toast/toast.service';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { Orientation } from '@common/enums/orientation.enum';
 import { ROUTES } from '@common/enums/routes.enum';
@@ -73,6 +74,8 @@ export class InGameService {
         this._availableActions.set([]);
     }
 
+    private readonly toastService = inject(ToastService);
+
     constructor(
         private readonly inGameSocketService: InGameSocketService,
         private readonly sessionService: SessionService,
@@ -88,7 +91,7 @@ export class InGameService {
     }
 
     get currentlyPlayers(): Player[] {
-        return Object.values(this.inGamePlayers()).filter((p) => p.isInGame);
+        return Object.values(this.inGamePlayers()).filter((player) => player.isInGame);
     }
 
     get turnTransitionMessage(): string {
@@ -192,10 +195,9 @@ export class InGameService {
 
         this.inGameSocketService.onPlayerLeftInGameSession((data) => {
             this.updateInGameSession(data.session);
-            this.notificationService.displayInformation({
-                title: 'Joueur parti',
-                message: `${data.playerName} a abandonné la partie`,
-            });
+            if(this.playerService.id() !== data.playerId) {
+                this.toastService.info(`${data.playerName} a abandonné la partie`);
+            }
         });
 
         this.inGameSocketService.onPlayerMoved((data) => {
@@ -216,12 +218,13 @@ export class InGameService {
                     y: data.y,
                     speed: data.speed,
                 });
-                if (data.actions) {
-                    this._availableActions.set(data.actions);
-                    if (this.playerService.id() === data.playerId) {
-                        this.playerService.updateActionsRemaining(data.actions.length);
-                    }
-                }
+            }
+        });
+
+        this.inGameSocketService.onPlayerAvailableActions((actions) => {
+            this._availableActions.set(actions);
+            if (this.isMyTurn()) {
+                this.playerService.updateActionsRemaining(actions.length);
             }
         });
 

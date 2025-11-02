@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+ 
 import { ElementRef, EventEmitter, NgZone } from '@angular/core';
 import { TileSizeProbeDirective } from './tile-size-probe.directive';
 
@@ -9,11 +9,11 @@ class ResizeObserverStub implements ResizeObserver {
     static last(): ResizeObserverStub | undefined {
         return this.instances[this.instances.length - 1];
     }
-    private readonly cb: ROCallback;
+    private readonly callback: ROCallback;
     observedNode: Element | null = null;
     disconnected = false;
-    constructor(cb: ROCallback) {
-        this.cb = cb;
+    constructor(callback: ROCallback) {
+        this.callback = callback;
         ResizeObserverStub.instances.push(this);
     }
     observe(target: Element): void {
@@ -27,7 +27,7 @@ class ResizeObserverStub implements ResizeObserver {
     }
     trigger(width: number, height: number): void {
         const entry = { contentRect: { width, height } } as ResizeObserverEntry;
-        this.cb([entry], this as unknown as ResizeObserver);
+        this.callback([entry], this as unknown as ResizeObserver);
     }
 }
 
@@ -66,14 +66,14 @@ describe('TileSizeProbeDirective', () => {
     let emitted: number[];
     let rectSpy: jasmine.Spy<() => DOMRect>;
 
-    function setRect(w: number, h: number): void {
-        rectSpy.and.returnValue({ width: w, height: h } as DOMRect);
+    function setRect(width: number, height: number): void {
+        rectSpy.and.returnValue({ width, height } as DOMRect);
     }
 
     function requireLast(): ResizeObserverStub {
-        const ro = ResizeObserverStub.last();
-        if (!ro) throw new Error('ResizeObserver not created');
-        return ro;
+        const resizeObserver = ResizeObserverStub.last();
+        if (!resizeObserver) throw new Error('ResizeObserver not created');
+        return resizeObserver;
     }
 
     beforeAll(() => {
@@ -90,14 +90,14 @@ describe('TileSizeProbeDirective', () => {
         document.body.appendChild(host);
         elRef = new ElementRef<HTMLElement>(host);
         const fakeZone: Pick<NgZone, 'runOutsideAngular' | 'run'> = {
-            runOutsideAngular: <T>(fn: () => T): T => fn(),
-            run: <T>(fn: () => T): T => fn(),
+            runOutsideAngular: <T>(functionToRun: () => T): T => functionToRun(),
+            run: <T>(functionToRun: () => T): T => functionToRun(),
         };
         zone = fakeZone as NgZone;
         directive = new TileSizeProbeDirective(elRef, zone);
         emitted = [];
         directive.sizeChange = new EventEmitter<number>();
-        directive.sizeChange.subscribe((v) => emitted.push(v));
+        directive.sizeChange.subscribe((value) => emitted.push(value));
         ResizeObserverStub.instances = [];
         rectSpy = spyOn(host, 'getBoundingClientRect').and.returnValue({ width: 1, height: 1 } as DOMRect);
     });
@@ -120,16 +120,16 @@ describe('TileSizeProbeDirective', () => {
         setRect(ACTIVE_INIT_W, ACTIVE_INIT_H);
         directive.ngOnChanges();
         expect(emitted).toEqual([ACTIVE_INIT_MIN]);
-        const ro = requireLast();
-        expect(ro.observedNode).toBe(host);
+        const resizeObserver = requireLast();
+        expect(resizeObserver.observedNode).toBe(host);
     });
 
     it('should emit on resize via ResizeObserver callback', () => {
         directive.probeActive = true;
         setRect(RESIZE_SETUP_W, RESIZE_SETUP_H);
         directive.ngOnChanges();
-        const ro = requireLast();
-        ro.trigger(RESIZE_TRIGGER_W, RESIZE_TRIGGER_H);
+        const resizeObserver = requireLast();
+        resizeObserver.trigger(RESIZE_TRIGGER_W, RESIZE_TRIGGER_H);
         expect(emitted[0]).toBe(RESIZE_SETUP_H);
         expect(emitted[1]).toBe(RESIZE_TRIGGER_H);
     });
@@ -138,21 +138,21 @@ describe('TileSizeProbeDirective', () => {
         directive.probeActive = true;
         setRect(DESTROY_W, DESTROY_H);
         directive.ngOnChanges();
-        const ro = requireLast();
+        const resizeObserver = requireLast();
         directive.ngOnDestroy();
-        expect(ro.disconnected).toBeTrue();
+        expect(resizeObserver.disconnected).toBeTrue();
     });
 
     it('calling ngOnChanges twice active should teardown previous and create a new observer', () => {
         directive.probeActive = true;
         setRect(TEARDOWN_FIRST_W, TEARDOWN_FIRST_H);
         directive.ngOnChanges();
-        const ro1 = requireLast();
+        const resizeObserver1 = requireLast();
         setRect(TEARDOWN_SECOND_W, TEARDOWN_SECOND_H);
         directive.ngOnChanges();
-        const ro2 = requireLast();
-        expect(ro1).not.toBe(ro2);
-        expect(ro1.disconnected).toBeTrue();
+        const resizeObserver2 = requireLast();
+        expect(resizeObserver1).not.toBe(resizeObserver2);
+        expect(resizeObserver1.disconnected).toBeTrue();
         expect(emitted[0]).toBe(TEARDOWN_FIRST_EMIT);
         expect(emitted[1]).toBe(TEARDOWN_SECOND_EMIT);
     });
@@ -161,10 +161,10 @@ describe('TileSizeProbeDirective', () => {
         directive.probeActive = true;
         setRect(INACTIVE_SWITCH_W, INACTIVE_SWITCH_H);
         directive.ngOnChanges();
-        const ro = requireLast();
+        const resizeObserver = requireLast();
         directive.probeActive = false;
         directive.ngOnChanges();
-        expect(ro.disconnected).toBeTrue();
+        expect(resizeObserver.disconnected).toBeTrue();
         expect(emitted).toEqual([INACTIVE_SWITCH_EMIT]);
         expect(ResizeObserverStub.instances.length).toBe(1);
     });
