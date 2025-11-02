@@ -1,3 +1,4 @@
+// Force pipeline trigger
 import { AppModule } from '@app/app.module';
 import { ASSETS_FOLDER_NAME, ASSETS_URL_PREFIX } from '@app/constants/image.constants';
 import { ValidationPipe } from '@nestjs/common';
