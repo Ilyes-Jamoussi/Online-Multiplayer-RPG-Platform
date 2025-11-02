@@ -8,7 +8,6 @@ import { PlayerInfoComponent } from '@app/components/features/player-info/player
 import { PlayersListComponent } from '@app/components/features/players-list/players-list.component';
 import { TurnTimerComponent } from '@app/components/features/turn-timer/turn-timer.component';
 import { ToastComponent } from '@app/components/features/toast/toast.component';
-import { CombatService } from '@app/services/combat/combat.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameKeyboardEventsService } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
@@ -40,7 +39,6 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         private readonly gameMapService: GameMapService,
         readonly inGameService: InGameService,
         private readonly keyboardEventsService: InGameKeyboardEventsService,
-        private readonly combatService: CombatService,
     ) {}
 
     get gameId(): string {
@@ -163,7 +161,6 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
     }
 
     onLeaveGame(): void {
-        this.combatService.combatAbandon(); 
         this.inGameService.leaveGame();
     }
 }
