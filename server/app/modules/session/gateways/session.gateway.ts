@@ -50,6 +50,7 @@ export class SessionGateway implements OnGatewayDisconnect {
             const players = this.sessionService.getPlayersSession(sessionId);
             socket.emit(SessionEvents.SessionCreated, successResponse<SessionCreatedDto>({ sessionId, playerId: adminId }));
             socket.emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
+            this.handleAvailabilityChange();
         } catch (error) {
             socket.emit(SessionEvents.SessionCreated, errorResponse(error.message));
         }
@@ -75,6 +76,7 @@ export class SessionGateway implements OnGatewayDisconnect {
         }
         socket.emit(SessionEvents.SessionJoined, successResponse(dto));
         this.server.to(data.sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
+        this.handleAvailabilityChange();
     }
 
     @SubscribeMessage(SessionEvents.JoinAvatarSelection)
@@ -144,6 +146,7 @@ export class SessionGateway implements OnGatewayDisconnect {
 
             const players = this.sessionService.getPlayersSession(sessionId);
             this.server.to(sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
+            this.handleAvailabilityChange();
         } catch (error) {
             socket.emit(SessionEvents.SessionEnded, errorResponse(error.message));
         }
@@ -215,6 +218,7 @@ export class SessionGateway implements OnGatewayDisconnect {
                 }
 
                 this.sessionService.endSession(sessionId);
+                this.handleAvailabilityChange();
                 return;
             }
 
@@ -223,6 +227,7 @@ export class SessionGateway implements OnGatewayDisconnect {
 
             const players = this.sessionService.getPlayersSession(sessionId);
             this.server.to(sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
+            this.handleAvailabilityChange();
         } catch (error) {
             this.logger.error('Error leaving session:', error.message);
         }

@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AvatarGridComponent } from '@app/components/features/avatar-grid/avatar-grid.component';
 import { ErrorsBadgeComponent } from '@app/components/features/errors-badge/errors-badge.component';
@@ -10,9 +10,11 @@ import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layou
 import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@app/constants/validation.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { BonusType } from '@common/enums/character-creation.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { ROUTES } from '@common/enums/routes.enum';
 
 @Component({
     standalone: true,
@@ -22,7 +24,7 @@ import { Dice } from '@common/enums/dice.enum';
     imports: [FormsModule, UiButtonComponent, UiInputComponent, UiPageLayoutComponent, StatsBarComponent, ErrorsBadgeComponent, AvatarGridComponent],
     providers: [CharacterCreationCheckService],
 })
-export class CharacterCreationPageComponent {
+export class CharacterCreationPageComponent implements OnInit {
     readonly dice = Dice;
     readonly bonusType = BonusType;
     readonly characterNameMinLength = NAME_MIN_LENGTH;
@@ -33,7 +35,19 @@ export class CharacterCreationPageComponent {
         private readonly characterCreationCheckService: CharacterCreationCheckService,
         private readonly playerService: PlayerService,
         private readonly location: Location,
+        private readonly notificationService: NotificationService,
     ) {}
+
+    ngOnInit(): void {
+        if (!this.playerService.isConnected()) {
+            this.notificationService.displayError({ 
+                title: 'Session expirée',
+                message: 'Veuillez rejoindre une session.',
+                redirectRoute: ROUTES.HomePage,
+            });
+            return;
+        }
+    }
 
     get isLifeBonusSelected(): boolean {
         return this.playerService.isLifeBonusSelected();

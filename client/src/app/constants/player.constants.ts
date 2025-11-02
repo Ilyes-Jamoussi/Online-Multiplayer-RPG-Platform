@@ -1,8 +1,10 @@
 import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/models/player.interface';
 
+const DEFAULT_PLAYER_ID = 'default-player-id';
+
 export const DEFAULT_PLAYER: Player = {
-    id: 'default-player-id',
+    id: DEFAULT_PLAYER_ID,
     name: '',
     avatar: null,
     isAdmin: true,

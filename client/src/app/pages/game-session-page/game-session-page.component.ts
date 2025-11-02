@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChatComponent } from '@app/components/features/chat/chat.component';
 import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
 import { GameOverOverlayComponent } from '@app/components/features/game-over-overlay/game-over-overlay.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
@@ -24,6 +25,7 @@ import { MapSize } from '@common/enums/map-size.enum';
         CombatOverlayComponent,
         GameOverOverlayComponent,
         ToastComponent,
+        ChatComponent,
     ],
     templateUrl: './game-session-page.component.html',
     styleUrl: './game-session-page.component.scss',
