@@ -159,10 +159,6 @@ export class CombatService {
             this.handleVictory(data.playerAId, data.playerBId, data.winnerId);
         });
 
-        this.combatSocketService.onCombatEnded(() => {
-            this.combatTimerService.stopCombatTimer();
-        });
-
         this.combatSocketService.onCombatCountChanged((data) => {
             this.inGameService.updateInGameSession({
                 inGamePlayers: {

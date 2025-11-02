@@ -109,8 +109,11 @@ export class CombatService {
             winnerId,
         });
 
-        this.combatTimerService.endCombatTimer(session);
-        this.timerService.resumeTurnTimer(session.id);
+        if (winnerId !== null && winnerId !== session.currentTurn.activePlayerId) {
+            this.timerService.endTurnManual(session);
+        } else {
+            this.timerService.resumeTurnTimer(session.id);
+        }
     }
 
     combatRound(sessionId: string): void {

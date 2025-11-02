@@ -80,11 +80,12 @@ export class TimerService {
         return newTurn;
     }
 
-    endTurnManual(session: InGameSession): TurnState {
+    endTurnManual(session: InGameSession): void {
         this.clearTurnTimer(session.id);
         this.eventEmitter.emit('turn.manualEnd', { session });
-        return this.nextTurn(session);
+        this.nextTurn(session);
     }
+
 
     getGameTimerState(sessionId: string): TurnTimerStates {
         return this.gameTimerStates.get(sessionId) || TurnTimerStates.PlayerTurn;
@@ -144,12 +145,6 @@ export class TimerService {
         const timerData = this.turnTimers.get(sessionId);
         if (timerData?.timeout) clearTimeout(timerData.timeout);
         this.turnTimers.delete(sessionId);
-    }
-
-    forceEndTurn(session: InGameSession): void {
-        this.clearTurnTimer(session.id);
-        this.eventEmitter.emit('turn.forcedEnd', { session });
-        this.nextTurn(session);
     }
 
     forceStopTimer(sessionId: string): void {

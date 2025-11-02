@@ -42,18 +42,6 @@ export class CombatTimerService {
         this.scheduleCombatLoop(session);
     }
 
-    endCombatTimer(session: InGameSession): void {
-        this.activeCombats.delete(session.id);
-        const timer = this.combatTimers.get(session.id);
-        if (timer) {
-            clearTimeout(timer);
-            this.combatTimers.delete(session.id);
-        }
-
-        this.eventEmitter.emit('combat.ended', { sessionId: session.id });
-        this.eventEmitter.emit('combat.timerEnded', { sessionId: session.id });
-    }
-
     private scheduleCombatLoop(session: InGameSession): void {
         this.clearCombatTimer(session);
         const sessionId = session.id;
