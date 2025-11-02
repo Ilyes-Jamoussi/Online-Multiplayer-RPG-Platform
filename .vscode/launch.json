@@ -2,57 +2,16 @@
     "version": "1.0.0",
     "configurations": [
         {
-            "name": "Debug Server (Launch)",
-            "type": "node",
-            "request": "launch",
-            "program": "${workspaceFolder}/server/node_modules/@nestjs/cli/bin/nest.js",
-            "args": ["start", "--watch", "--debug"],
-            "cwd": "${workspaceFolder}/server",
-            "console": "integratedTerminal",
-            "restart": true,
-            "env": {
-                "NODE_ENV": "development",
-                "PORT": "3000",
-                "DATABASE_CONNECTION_STRING": "mongodb://localhost:27017/log2990-game",
-                "DEBUG_PORT": "9229",
-                "CORS_ORIGIN": "http://localhost:4200",
-                "LOG_LEVEL": "debug"
-            },
-            "envFile": "${workspaceFolder}/server/.env",
-            "sourceMaps": true,
-            "outFiles": ["${workspaceFolder}/server/out/**/*.js"],
-            "skipFiles": [
-                "<node_internals>/**",
-                "node_modules/**"
-            ],
-            "resolveSourceMapLocations": [
-                "${workspaceFolder}/**",
-                "!**/node_modules/**"
-            ]
-        },
-        {
-            "name": "Debug Server (Attach)",
-            "type": "node",
-            "request": "attach",
+            "name": "Debug server (Attach)",
             "port": 9229,
-            "restart": true,
-            "localRoot": "${workspaceFolder}/server",
-            "remoteRoot": "${workspaceFolder}/server",
-            "env": {
-                "PORT": "3000",
-                "DATABASE_CONNECTION_STRING": "mongodb://127.0.0.1:27017/test-db",
-            },
-            "envFile": "${workspaceFolder}/server/.env",
-            "sourceMaps": true,
-            "outFiles": ["${workspaceFolder}/server/out/**/*.js"],
+            "request": "attach",
             "skipFiles": [
-                "<node_internals>/**",
-                "node_modules/**"
+                "<node_internals>/**"
             ],
-            "resolveSourceMapLocations": [
-                "${workspaceFolder}/**",
-                "!**/node_modules/**"
-            ]
+            "restart": true,
+            "sourceMaps": true,
+            "localRoot": "${workspaceFolder}/server",
+            "type": "node"
         },
         {
             "name": "Launch Client With Debug",
@@ -65,7 +24,7 @@
             "type": "node-terminal",
             "name": "Test Server with Debug",
             "request": "launch",
-            "command": "npm run test:debug",
+            "command": "npm run test",
             "cwd": "${workspaceFolder}/server"
         },
         {
@@ -74,6 +33,6 @@
             "type": "chrome",
             "url": "http://localhost:9876",
             "webRoot": "${workspaceFolder}/client"
-        }
+        },
     ]
 }
