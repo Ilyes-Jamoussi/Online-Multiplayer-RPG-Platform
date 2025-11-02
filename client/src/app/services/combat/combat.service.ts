@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { TimerService } from '@app/services/timer/timer.service';
+import { CombatTimerService } from '@app/services/combat-timer/combat-timer.service';
 import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
@@ -8,6 +9,7 @@ import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile-kind.enum';
 
 const DAMAGE_DISPLAY_DURATION = 2000;
+const VICTORY_NOTIFICATION_DURATION = 3000;
 
 interface CombatData {
     attackerId: string;
@@ -46,6 +48,9 @@ export class CombatService {
     private readonly _victoryData = signal<VictoryData | null>(null);
     private readonly _tileEffects = signal<Record<string, TileCombatEffect>>({});
     private readonly _minHealthDuringCombat = signal<Record<string, number>>({});
+    private readonly _isVictoryNotificationVisible = signal<boolean>(false);
+    private readonly _isCombatActive = signal<boolean>(false);
+    private victoryNotificationTimeout: ReturnType<typeof setTimeout> | null = null;
 
     readonly combatData = this._combatData.asReadonly();
     readonly damageDisplays = this._damageDisplays.asReadonly();
@@ -54,9 +59,11 @@ export class CombatService {
     readonly victoryData = this._victoryData.asReadonly();
     readonly tileEffects = this._tileEffects.asReadonly();
     readonly minHealthDuringCombat = this._minHealthDuringCombat.asReadonly();
-
+    readonly isVictoryNotificationVisible = this._isVictoryNotificationVisible.asReadonly();
+    readonly isCombatActive = this._isCombatActive.asReadonly();
     constructor(
         private readonly timerService: TimerService,
+        private readonly combatTimerService: CombatTimerService,
         private readonly combatSocketService: CombatSocketService,
         private readonly playerService: PlayerService,
         private readonly inGameService: InGameService,
@@ -64,23 +71,20 @@ export class CombatService {
         this.initListeners();
     }
 
-    get timeRemaining(): number {
-        return this.timerService.combatTimeRemaining();
-    }
-
     startCombat(attackerId: string, targetId: string, userRole: 'attacker' | 'target', attackerTileEffect?: number, targetTileEffect?: number): void {
         this._combatData.set({ attackerId, targetId, userRole });
         this._selectedPosture.set(null);
         this._playerPostures.set({});
-        
+
+        this._isCombatActive.set(true);
         const attackerPlayer = this.inGameService.getPlayerByPlayerId(attackerId);
         const targetPlayer = this.inGameService.getPlayerByPlayerId(targetId);
-        
+
         this._minHealthDuringCombat.set({
             [attackerId]: attackerPlayer.health,
             [targetId]: targetPlayer.health,
         });
-        
+
         if (attackerTileEffect !== undefined && targetTileEffect !== undefined) {
             this._tileEffects.set({
                 [attackerId]: attackerTileEffect,
@@ -91,22 +95,19 @@ export class CombatService {
         }
     }
 
-    handleCombatTimerRestart(): void {
-        if (!this.timerService.isCombatActive()) {
-            this.timerService.startCombatTimer();
-        } else {
-            this.timerService.resetCombatTimer();
+    closeVictoryOverlay(): void {
+        if (this.victoryNotificationTimeout) {
+            clearTimeout(this.victoryNotificationTimeout);
+            this.victoryNotificationTimeout = null;
         }
-    }
 
-    endCombat(): void {
+        this._isVictoryNotificationVisible.set(false);
         this._combatData.set(null);
         this._selectedPosture.set(null);
         this._playerPostures.set({});
         this._victoryData.set(null);
         this._tileEffects.set({});
         this._minHealthDuringCombat.set({});
-        this.timerService.stopCombatTimer();
     }
 
     chooseOffensive(): void {
@@ -128,10 +129,6 @@ export class CombatService {
     private initListeners(): void {
         this.combatSocketService.onCombatStarted((data) => {
             this.handleCombatStarted(data.attackerId, data.targetId, data.attackerTileEffect, data.targetTileEffect);
-        });
-
-        this.combatSocketService.onCombatEnded(() => {
-            this.endCombat();
         });
 
         this.combatSocketService.onPlayerCombatResult((data: CombatResult) => {
@@ -156,7 +153,14 @@ export class CombatService {
         });
 
         this.combatSocketService.onCombatVictory((data) => {
+            this._isCombatActive.set(false);
+            this.combatTimerService.stopCombatTimer();
+            this.timerService.resumeTurnTimer();
             this.handleVictory(data.playerAId, data.playerBId, data.winnerId);
+        });
+
+        this.combatSocketService.onCombatEnded(() => {
+            this.combatTimerService.stopCombatTimer();
         });
 
         this.combatSocketService.onCombatCountChanged((data) => {
@@ -226,7 +230,7 @@ export class CombatService {
 
     private handleCombatResult(data: CombatResult): void {
         const tileEffects = this._tileEffects();
-        
+
         this.showDamage({
             playerId: data.playerAId,
             damage: data.playerADamage,
@@ -265,6 +269,11 @@ export class CombatService {
     }
 
     private handleCombatStarted(attackerId: string, targetId: string, attackerTileEffect?: number, targetTileEffect?: number): void {
+        this.timerService.pauseTurnTimer();
+        if (!this.combatTimerService.isCombatActive()) {
+            this.combatTimerService.startCombatTimer();
+        }
+
         const myId = this.playerService.id();
 
         if (attackerId === myId) {
@@ -275,12 +284,12 @@ export class CombatService {
             this._combatData.set({ attackerId, targetId, userRole: 'spectator' });
             const attackerPlayer = this.inGameService.getPlayerByPlayerId(attackerId);
             const targetPlayer = this.inGameService.getPlayerByPlayerId(targetId);
-            
+
             this._minHealthDuringCombat.set({
                 [attackerId]: attackerPlayer.health,
                 [targetId]: targetPlayer.health,
             });
-            
+
             if (attackerTileEffect !== undefined && targetTileEffect !== undefined) {
                 this._tileEffects.set({
                     [attackerId]: attackerTileEffect,
@@ -303,7 +312,7 @@ export class CombatService {
         if (playerId === this.playerService.id()) {
             this.playerService.updatePlayer({ health: newHealth });
         }
-        
+
         if (this._combatData() && !this._victoryData()) {
             this._minHealthDuringCombat.update((minHealth) => ({
                 ...minHealth,
@@ -312,8 +321,17 @@ export class CombatService {
         }
     }
 
+    private handleCombatTimerRestart(): void {
+        if (!this.combatTimerService.isCombatActive() && this._isCombatActive()) {
+            this.timerService.pauseTurnTimer();
+            this.combatTimerService.startCombatTimer();
+        } else {
+            this.combatTimerService.resetCombatTimer();
+        }
+    }
+
     private handleCombatNewRound(): void {
-        this.timerService.resetCombatTimer();
+        this.combatTimerService.resetCombatTimer();
         this._selectedPosture.set(null);
         this._playerPostures.set({});
     }
@@ -327,5 +345,14 @@ export class CombatService {
 
     private handleVictory(playerAId: string, playerBId: string, winnerId: string | null): void {
         this._victoryData.set({ playerAId, playerBId, winnerId });
+        this._isVictoryNotificationVisible.set(true);
+
+        if (this.victoryNotificationTimeout) {
+            clearTimeout(this.victoryNotificationTimeout);
+        }
+
+        this.victoryNotificationTimeout = setTimeout(() => {
+            this.closeVictoryOverlay();
+        }, VICTORY_NOTIFICATION_DURATION);
     }
 }

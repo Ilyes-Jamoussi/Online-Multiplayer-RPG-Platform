@@ -55,6 +55,15 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    
+    &.victory-mode {
+        background: transparent;
+        pointer-events: none;
+        
+        .combat-modal {
+            pointer-events: auto;
+        }
+    }
 }
 
 app-combat-timer {
@@ -566,11 +575,18 @@ app-combat-timer {
 }
 
 .victory-screen {
+    position: relative;
     text-align: center;
     padding: 2rem;
     margin-bottom: 2rem;
     border-radius: 10px;
     animation: victoryAppear 0.5s ease-out;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    
+    &:hover {
+        transform: scale(1.02);
+    }
     
     &.victory {
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(255, 215, 0, 0.1));
@@ -610,6 +626,33 @@ app-combat-timer {
     color: #fff;
     margin: 0;
     opacity: 0.9;
+}
+
+.close-victory-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    font-size: 1.2rem;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    
+    &:hover {
+        background: rgba(0, 0, 0, 0.5);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    &:active {
+        transform: scale(0.95);
+    }
 }
 
 @keyframes victoryAppear {

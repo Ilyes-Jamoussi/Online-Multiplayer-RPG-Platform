@@ -210,4 +210,12 @@ export class CombatOverlayComponent {
     get pausedTurnTime(): number {
         return this.timerService.getPausedTurnTime();
     }
+
+    get isVictoryNotificationVisible(): boolean {
+        return this.combatService.isVictoryNotificationVisible();
+    }
+
+    closeVictoryOverlay(): void {
+        this.combatService.closeVictoryOverlay();
+    }
 }

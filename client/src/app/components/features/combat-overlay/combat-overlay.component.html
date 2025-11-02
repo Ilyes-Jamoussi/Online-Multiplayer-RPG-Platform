@@ -16,14 +16,17 @@
             </div>
         </div>
     } @else {
-        <div class="combat-overlay">
+        <div class="combat-overlay" [class.victory-mode]="isVictoryNotificationVisible">
             <div class="combat-modal">
-                @if (!victoryData) {
+                @if (!isVictoryNotificationVisible) {
                     <app-combat-timer></app-combat-timer>
                 }
                 
-                @if (victoryData) {
-                    <div class="victory-screen" [class.victory]="isVictory" [class.defeat]="!isVictory && victoryData.winnerId !== null">
+                @if (victoryData && isVictoryNotificationVisible) {
+                    <div class="victory-screen" 
+                         [class.victory]="isVictory" 
+                         [class.defeat]="!isVictory && victoryData.winnerId !== null"
+                         (click)="closeVictoryOverlay()">
                         <div class="victory-icon">
                             @if (victoryData.winnerId === null) {
                                 ⚔️
@@ -35,6 +38,7 @@
                         </div>
                         <h1 class="victory-title">{{ victoryMessage }}</h1>
                         <p class="victory-subtitle">{{ victorySubtitle }}</p>
+                        <button class="close-victory-btn" (click)="$event.stopPropagation(); closeVictoryOverlay()">✕</button>
                     </div>
                 } @else {
                     <div class="combat-header">
