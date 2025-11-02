@@ -49,20 +49,15 @@ export class InGameMovementService {
             throw new BadRequestException('Tile is occupied');
         }
 
-        this.gameCache.moveTileOccupant(session.id, nextX, nextY, player);
+        this.sessionRepository.movePlayerPosition(session.id, playerId, nextX, nextY, moveCost);
 
-        const newSpeed = player.speed - moveCost;
-        player.x = nextX;
-        player.y = nextY;
-        player.speed = newSpeed;
-
-        if (newSpeed > 0) {
+        if (player.speed > 0) {
             this.calculateReachableTiles(session, playerId);
         } else {
             this.eventEmitter.emit('player.reachableTiles', { playerId, reachable: [] });
         }
 
-        return newSpeed;
+        return player.speed;
     }
 
     movePlayerToStartPosition(session: InGameSession, playerId: string): void {
@@ -76,12 +71,9 @@ export class InGameMovementService {
             throw new NotFoundException('Start point not found');
         }
         const { x: nextX, y: nextY } = this.findClosestFreeTile(session, startPoint.x, startPoint.y);
-        this.gameCache.moveTileOccupant(session.id, nextX, nextY, player);
-        player.x = nextX;
-        player.y = nextY;
         player.health = player.maxHealth;
+        this.sessionRepository.movePlayerPosition(session.id, playerId, nextX, nextY, 0);
         this.calculateReachableTiles(session, session.currentTurn.activePlayerId);
-        this.eventEmitter.emit('player.moved', { session, playerId, x: nextX, y: nextY, speed: player.speed, actions: [] });
     }
 
     calculateReachableTiles(session: InGameSession, playerId: string): ReachableTile[] {

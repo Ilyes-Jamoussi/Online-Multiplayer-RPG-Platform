@@ -218,12 +218,13 @@ export class InGameService {
                     y: data.y,
                     speed: data.speed,
                 });
-                if (data.actions) {
-                    this._availableActions.set(data.actions);
-                    if (this.playerService.id() === data.playerId) {
-                        this.playerService.updateActionsRemaining(data.actions.length);
-                    }
-                }
+            }
+        });
+
+        this.inGameSocketService.onPlayerAvailableActions((actions) => {
+            this._availableActions.set(actions);
+            if (this.isMyTurn()) {
+                this.playerService.updateActionsRemaining(actions.length);
             }
         });
 

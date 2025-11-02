@@ -128,12 +128,12 @@ export class InGameGateway {
     }
 
     @OnEvent('player.moved')
-    handlePlayerMoved(payload: { session: InGameSession; playerId: string; x: number; y: number; speed: number; actions: AvailableAction[] }) {
+    handlePlayerMoved(payload: { session: InGameSession; playerId: string; x: number; y: number; speed: number }) {
         this.server
             .to(payload.session.inGameId)
             .emit(
                 InGameEvents.PlayerMoved,
-                successResponse({ playerId: payload.playerId, x: payload.x, y: payload.y, speed: payload.speed, actions: payload.actions }),
+                successResponse({ playerId: payload.playerId, x: payload.x, y: payload.y, speed: payload.speed }),
             );
         this.logger.log(`Player ${payload.playerId} moved to ${payload.x}, ${payload.y} in session ${payload.session.id}`);
     }
@@ -151,11 +151,17 @@ export class InGameGateway {
         this.logger.log(`Player ${payload.player.id} updated in session ${payload.sessionId}`);
     }
 
+    @OnEvent('player.availableActions')
+    handlePlayerAvailableActions(payload: { session: InGameSession; playerId: string; actions: AvailableAction[] }) {
+        this.server.to(payload.playerId).emit(InGameEvents.PlayerAvailableActions, successResponse(payload.actions));
+        this.logger.log(`Player ${payload.playerId} has ${payload.actions.length} available actions in session ${payload.session.id}`);
+    }
+
     @OnEvent('game.over')
     handleGameOver(payload: { sessionId: string; winnerId: string; winnerName: string }) {
         const session = this.inGameService.getSession(payload.sessionId);
         this.server.to(session.inGameId).emit(InGameEvents.GameOver, successResponse({ winnerId: payload.winnerId, winnerName: payload.winnerName }));
-        
+
         this.server.socketsLeave(session.inGameId);
         this.server.socketsLeave(session.id);
         this.logger.log(`Game over for session ${payload.sessionId}. Winner: ${payload.winnerName} (${payload.winnerId})`);

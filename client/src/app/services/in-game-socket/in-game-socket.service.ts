@@ -59,7 +59,7 @@ export class InGameSocketService {
         this.socket.onSuccessEvent(InGameEvents.TurnForcedEnd, callback);
     }
 
-    onPlayerMoved(callback: (data: { playerId: string; x: number; y: number; speed: number; actions: AvailableAction[] }) => void): void {
+    onPlayerMoved(callback: (data: { playerId: string; x: number; y: number; speed: number }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerMoved, callback);
     }
 
@@ -93,6 +93,10 @@ export class InGameSocketService {
 
     onPlayerActionUsed(callback: () => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerActionUsed, callback);
+    }
+
+    onPlayerAvailableActions(callback: (data: AvailableAction[]) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerAvailableActions, callback);
     }
 
     onGameOver(callback: (data: { winnerId: string; winnerName: string }) => void): void {

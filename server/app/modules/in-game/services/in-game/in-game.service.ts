@@ -122,8 +122,10 @@ export class InGameService {
         const session = this.sessionRepository.findById(sessionId);
         if (playerId !== session.currentTurn.activePlayerId) throw new BadRequestException('Not your turn');
         if (this.timerService.getGameTimerState(sessionId) !== TurnTimerStates.PlayerTurn) throw new BadRequestException('Not your turn');
+        
         const remainingSpeed = this.movementService.movePlayer(session, playerId, orientation);
-        const availableActions =this.actionService.calculateAvailableActions(session, playerId);
+        const availableActions = this.actionService.calculateAvailableActions(session, playerId);
+        
         if(!remainingSpeed && !availableActions.length) {
             this.timerService.endTurnManual(session);
         }
