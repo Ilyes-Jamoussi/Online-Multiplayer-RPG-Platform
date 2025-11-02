@@ -120,7 +120,7 @@ export class CombatService {
             abandon,
         });
 
-        if (winnerId !== null && winnerId !== session.currentTurn.activePlayerId) {
+        if (winnerId && winnerId !== session.currentTurn.activePlayerId) {
             this.timerService.endTurnManual(session);
         } else {
             this.timerService.resumeTurnTimer(session.id);
@@ -183,22 +183,16 @@ export class CombatService {
                 this.sessionRepository.incrementPlayerCombatDraws(sessionId, playerBId);
             } else if (playerAHealth <= 0) {
                 winnerId = playerBId;
+                this.inGameMovementService.movePlayerToStartPosition(session, playerAId);
+                this.sessionRepository.resetPlayerHealth(sessionId, playerAId);
                 this.sessionRepository.incrementPlayerCombatLosses(sessionId, playerAId);
                 this.sessionRepository.incrementPlayerCombatWins(sessionId, playerBId);
             } else {
                 winnerId = playerAId;
-                this.sessionRepository.incrementPlayerCombatWins(sessionId, playerAId);
-                this.sessionRepository.incrementPlayerCombatLosses(sessionId, playerBId);
-            }
-
-            if (playerAHealth <= 0) {
-                this.inGameMovementService.movePlayerToStartPosition(session, playerAId);
-                this.sessionRepository.resetPlayerHealth(sessionId, playerAId);
-            }
-
-            if (playerBHealth <= 0) {
                 this.inGameMovementService.movePlayerToStartPosition(session, playerBId);
                 this.sessionRepository.resetPlayerHealth(sessionId, playerBId);
+                this.sessionRepository.incrementPlayerCombatWins(sessionId, playerAId);
+                this.sessionRepository.incrementPlayerCombatLosses(sessionId, playerBId);
             }
 
             if (winnerId) {
