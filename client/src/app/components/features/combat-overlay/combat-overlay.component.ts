@@ -53,9 +53,7 @@ export class CombatOverlayComponent {
         if (!this.combatData) return { current: 0, max: 0, percentage: 0 };
         const player = this.inGameService.getPlayerByPlayerId(this.combatData.attackerId);
         const minHealth = this.combatService.minHealthDuringCombat();
-        const displayedHealth = this.victoryData 
-            ? Math.max(0, minHealth[this.combatData.attackerId] ?? player.health)
-            : player.health;
+        const displayedHealth = this.victoryData ? Math.max(0, minHealth[this.combatData.attackerId] ?? player.health) : player.health;
         return {
             current: displayedHealth,
             max: player.maxHealth,
@@ -67,9 +65,7 @@ export class CombatOverlayComponent {
         if (!this.combatData) return { current: 0, max: 0, percentage: 0 };
         const player = this.inGameService.getPlayerByPlayerId(this.combatData.targetId);
         const minHealth = this.combatService.minHealthDuringCombat();
-        const displayedHealth = this.victoryData 
-            ? Math.max(0, minHealth[this.combatData.targetId] ?? player.health)
-            : player.health;
+        const displayedHealth = this.victoryData ? Math.max(0, minHealth[this.combatData.targetId] ?? player.health) : player.health;
         return {
             current: displayedHealth,
             max: player.maxHealth,
@@ -81,10 +77,7 @@ export class CombatOverlayComponent {
         return (
             this.combatService
                 .damageDisplays()
-                .find(
-                    (damageDisplay) =>
-                        damageDisplay.playerId === this.combatData?.attackerId && damageDisplay.visible,
-                ) || null
+                .find((damageDisplay) => damageDisplay.playerId === this.combatData?.attackerId && damageDisplay.visible) || null
         );
     }
 
@@ -92,10 +85,7 @@ export class CombatOverlayComponent {
         return (
             this.combatService
                 .damageDisplays()
-                .find(
-                    (damageDisplay) =>
-                        damageDisplay.playerId === this.combatData?.targetId && damageDisplay.visible,
-                ) || null
+                .find((damageDisplay) => damageDisplay.playerId === this.combatData?.targetId && damageDisplay.visible) || null
         );
     }
 
@@ -188,7 +178,7 @@ export class CombatOverlayComponent {
 
         const winnerName = this.inGameService.getPlayerByPlayerId(this.victoryData.winnerId).name;
         const loserName = this.inGameService.getPlayerByPlayerId(
-            this.victoryData.winnerId === this.victoryData.playerAId ? this.victoryData.playerBId : this.victoryData.playerAId
+            this.victoryData.winnerId === this.victoryData.playerAId ? this.victoryData.playerBId : this.victoryData.playerAId,
         ).name;
 
         if (this.victoryData.abandon) {

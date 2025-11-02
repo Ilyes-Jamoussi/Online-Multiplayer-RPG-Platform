@@ -64,6 +64,7 @@ export class CombatService {
     readonly minHealthDuringCombat = this._minHealthDuringCombat.asReadonly();
     readonly isVictoryNotificationVisible = this._isVictoryNotificationVisible.asReadonly();
     readonly isCombatActive = this._isCombatActive.asReadonly();
+    // eslint-disable-next-line max-params
     constructor(
         private readonly timerService: TimerService,
         private readonly combatTimerService: CombatTimerService,
@@ -358,8 +359,6 @@ export class CombatService {
     }
 
     private handleVictory(playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean): void {
-        this._victoryData.set({ playerAId, playerBId, winnerId, abandon });
-        
         const combatData = this._combatData();
         if (combatData?.userRole === 'spectator') {
             const winnerName = winnerId ? this.inGameService.getPlayerByPlayerId(winnerId).name : null;
@@ -379,6 +378,7 @@ export class CombatService {
             this._combatData.set(null);
             this._isCombatActive.set(false);
         } else {
+            this._victoryData.set({ playerAId, playerBId, winnerId, abandon });
             this._isVictoryNotificationVisible.set(true);
 
             if (this.victoryNotificationTimeout) {
