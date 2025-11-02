@@ -29,11 +29,11 @@ export class ManagementPageComponent implements OnInit {
     }
 
     onCreateNewGame(): void {
-        this.router.navigate([ROUTES.ParametersPage]);
+        void this.router.navigate([ROUTES.ParametersPage]);
     }
 
     onEditGame(id: string): void {
-        this.router.navigate([ROUTES.EditorPage, id]);
+        void this.router.navigate([ROUTES.EditorPage, id]);
     }
 
     onDeleteGame(gameId: string): void {
@@ -45,6 +45,6 @@ export class ManagementPageComponent implements OnInit {
     }
 
     onBack(): void {
-        this.router.navigate([ROUTES.HomePage]);
+        void this.router.navigate([ROUTES.HomePage]);
     }
 }

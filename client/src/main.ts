@@ -1,5 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { enableProdMode, enableProfiling } from '@angular/core';
+// Force pipeline trigger
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { Routes, provideRouter, withHashLocation } from '@angular/router';
@@ -61,6 +62,6 @@ const APP_ROUTES: Routes = [
 ];
 
 enableProfiling();
-bootstrapApplication(AppComponent, {
+void bootstrapApplication(AppComponent, {
     providers: [provideHttpClient(), provideRouter(APP_ROUTES, withHashLocation()), provideAnimations()],
 });

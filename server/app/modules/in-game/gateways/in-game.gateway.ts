@@ -66,7 +66,7 @@ export class InGameGateway {
         const session = this.inGameService.getSession(sessionId);
         this.playerLeaveSession(sessionId, socket.id);
         this.server.to(socket.id).emit(InGameEvents.LeftInGameSessionAck, successResponse({}));
-        socket.leave(session.inGameId);
+        void socket.leave(session.inGameId);
     }
 
     @SubscribeMessage(InGameEvents.ToggleDoorAction)
