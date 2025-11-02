@@ -3,10 +3,11 @@ import angularTemplate from '@angular-eslint/eslint-plugin-template';
 import templateParser from '@angular-eslint/template-parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+import eslintComments from 'eslint-plugin-eslint-comments';
 import baseConfig from '../eslint.config.basic.mjs';
 
 export default [
-    ...baseConfig(tsParser, tsPlugin),
+    ...baseConfig(tsParser, tsPlugin, eslintComments),
     {
         files: ['**/*.ts'],
         languageOptions: {

@@ -1,6 +1,4 @@
-import eslintComments from 'eslint-plugin-eslint-comments';
-
-export default (tsParser, tsPlugin) => [
+export default (tsParser, tsPlugin, eslintComments) => [
     {
         files: ['**/*.js', '**/*.ts'],
         languageOptions: {
