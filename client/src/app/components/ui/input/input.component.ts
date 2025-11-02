@@ -49,11 +49,11 @@ export class UiInputComponent {
 
     onInput(event: Event): void {
         const input = event.target as HTMLInputElement | HTMLTextAreaElement;
-        const SPACE_DOT_LENGTH = 2;
+        const spaceDotLength = 2;
         let value = input.value;
 
         if (value.endsWith('. ')) {
-            value = value.slice(0, -SPACE_DOT_LENGTH) + ' ';
+            value = value.slice(0, -spaceDotLength) + ' ';
             input.value = value;
         }
         value = this.filterInvalidChars(value);
@@ -73,6 +73,6 @@ export class UiInputComponent {
 
     private filterInvalidChars(value: string): string {
         const pattern = this.type === InputVariants.NUMBER ? NUMBER_ALLOWED_CHARS_PATTERN : TEXT_ALLOWED_CHARS_PATTERN;
-        return [...value].filter((c) => pattern.test(c) || c === ' ').join('');
+        return [...value].filter((char) => pattern.test(char) || char === ' ').join('');
     }
 }

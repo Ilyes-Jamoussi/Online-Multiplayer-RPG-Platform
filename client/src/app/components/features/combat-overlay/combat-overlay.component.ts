@@ -78,11 +78,25 @@ export class CombatOverlayComponent {
     }
 
     get playerADamage() {
-        return this.combatService.damageDisplays().find((d) => d.playerId === this.combatData?.attackerId && d.visible) || null;
+        return (
+            this.combatService
+                .damageDisplays()
+                .find(
+                    (damageDisplay) =>
+                        damageDisplay.playerId === this.combatData?.attackerId && damageDisplay.visible,
+                ) || null
+        );
     }
 
     get playerBDamage() {
-        return this.combatService.damageDisplays().find((d) => d.playerId === this.combatData?.targetId && d.visible) || null;
+        return (
+            this.combatService
+                .damageDisplays()
+                .find(
+                    (damageDisplay) =>
+                        damageDisplay.playerId === this.combatData?.targetId && damageDisplay.visible,
+                ) || null
+        );
     }
 
     get selectedPosture() {

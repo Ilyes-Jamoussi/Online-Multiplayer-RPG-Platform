@@ -22,10 +22,10 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         private readonly gameEditorInteractionsService: GameEditorInteractionsService,
         private readonly gameEditorCheckService: GameEditorCheckService,
         private readonly assetService: AssetsService,
-        el: ElementRef<HTMLElement>,
+        elementRef: ElementRef<HTMLElement>,
         zone: NgZone,
     ) {
-        super(el, zone);
+        super(elementRef, zone);
     }
 
     get tileImage(): string {
@@ -34,14 +34,16 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
 
     get isInvalid(): boolean {
         return (
-            this.gameEditorCheckService.editorProblems().terrainAccessibility.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y) ||
-            this.gameEditorCheckService.editorProblems().doors.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y)
+            this.gameEditorCheckService
+                .editorProblems()
+                .terrainAccessibility.tiles.some((position) => position.x === this.tile.x && position.y === this.tile.y) ||
+            this.gameEditorCheckService.editorProblems().doors.tiles.some((position) => position.x === this.tile.x && position.y === this.tile.y)
         );
     }
 
     get isDropHovered(): boolean {
         const hoveredTiles = this.gameEditorInteractionsService.hoveredTiles();
-        return hoveredTiles?.some((t) => t.x === this.tile.x && t.y === this.tile.y) ?? false;
+        return hoveredTiles?.some((tile) => tile.x === this.tile.x && tile.y === this.tile.y) ?? false;
     }
 
     get isBrushHovered(): boolean {

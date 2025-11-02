@@ -257,10 +257,12 @@ export class CombatService {
     }
 
     private showDamage(damageDisplay: DamageDisplay): void {
-        this._damageDisplays.update((displays) => [...displays.filter((d) => d.playerId !== damageDisplay.playerId), damageDisplay]);
+        this._damageDisplays.update((displays) => [...displays.filter((display) => display.playerId !== damageDisplay.playerId), damageDisplay]);
 
         setTimeout(() => {
-            this._damageDisplays.update((displays) => displays.map((d) => (d.playerId === damageDisplay.playerId ? { ...d, visible: false } : d)));
+            this._damageDisplays.update((displays) =>
+                displays.map((display) => (display.playerId === damageDisplay.playerId ? { ...display, visible: false } : display)),
+            );
         }, DAMAGE_DISPLAY_DURATION);
     }
 

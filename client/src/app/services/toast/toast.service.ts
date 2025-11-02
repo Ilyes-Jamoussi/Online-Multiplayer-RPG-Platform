@@ -50,7 +50,7 @@ export class ToastService {
     }
 
     remove(id: string): void {
-        this._toasts.update((toasts) => toasts.filter((t) => t.id !== id));
+        this._toasts.update((toasts) => toasts.filter((toast) => toast.id !== id));
     }
 
     clear(): void {

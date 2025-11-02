@@ -5,7 +5,7 @@ import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { MAP_SIZE_LABELS } from '@common/constants/game.constants';
 import { MapSize } from '@common/enums/map-size.enum';
-import { environment } from '@src/environments/environment';
+import { ENVIRONMENT } from '@src/environments/environment';
 import { GamePreviewCardComponent } from './game-preview-card.component';
 import { GameMode } from '@common/enums/game-mode.enum';
 
@@ -104,7 +104,7 @@ describe('GamePreviewCardComponent', () => {
     });
 
     it('should build image url from environment socketUrl and game preview path', () => {
-        const expected = `${environment.socketUrl}${mockGame.gridPreviewUrl}`;
+        const expected = `${ENVIRONMENT.socketUrl}${mockGame.gridPreviewUrl}`;
         expect(component.imageUrl).toBe(expected);
     });
 

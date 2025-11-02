@@ -51,12 +51,12 @@ export class GameEditorInteractionsService {
 
     getToolbarBrushes(): ToolbarItem[] {
         return Object.values(TileKind)
-            .filter((tk) => tk !== TileKind.BASE)
-            .map((tk) => ({
-                image: this.assetService.getTileImage(tk),
-                tileKind: tk,
-                class: tk.toLowerCase(),
-                disabled: tk === TileKind.TELEPORT,
+            .filter((tileKind) => tileKind !== TileKind.BASE)
+            .map((tileKind) => ({
+                image: this.assetService.getTileImage(tileKind),
+                tileKind,
+                class: tileKind.toLowerCase(),
+                disabled: tileKind === TileKind.TELEPORT,
             }));
     }
 
@@ -136,9 +136,9 @@ export class GameEditorInteractionsService {
 
         this.objectDropVec2 = { x: closestX, y: closestY };
 
-        for (let dy = 0; dy < footprint; dy++) {
-            for (let dx = 0; dx < footprint; dx++) {
-                hoveredTiles.push({ x: closestX + dx, y: closestY + dy });
+        for (let deltaY = 0; deltaY < footprint; deltaY++) {
+            for (let deltaX = 0; deltaX < footprint; deltaX++) {
+                hoveredTiles.push({ x: closestX + deltaX, y: closestY + deltaY });
             }
         }
 
@@ -149,7 +149,7 @@ export class GameEditorInteractionsService {
     resolveDropAction(evt: DragEvent): void {
         this._hoveredTiles.set([]);
         if (evt.dataTransfer) {
-            const mime = Object.values(PlaceableMime).find((m) => evt.dataTransfer?.types.includes(m));
+            const mime = Object.values(PlaceableMime).find((mimeType) => evt.dataTransfer?.types.includes(mimeType));
             if (!mime) return;
             const data = evt.dataTransfer.getData(mime);
             if (!data) return;
@@ -182,23 +182,23 @@ export class GameEditorInteractionsService {
     private canPlaceObject(x: number, y: number, kind: PlaceableKind, excludeId?: string): boolean {
         const footprint = PlaceableFootprint[kind];
 
-        for (let dy = 0; dy < footprint; dy++) {
-            for (let dx = 0; dx < footprint; dx++) {
-                const tx = x + dx;
-                const ty = y + dy;
+        for (let deltaY = 0; deltaY < footprint; deltaY++) {
+            for (let deltaX = 0; deltaX < footprint; deltaX++) {
+                const targetX = x + deltaX;
+                const targetY = y + deltaY;
 
-                const tile = this.store.getTileAt(tx, ty);
+                const tile = this.store.getTileAt(targetX, targetY);
                 if (!tile) return false;
 
-                const tk = tile.kind;
+                const tileKind = tile.kind;
 
-                if (tk === TileKind.WALL || tk === TileKind.DOOR || tk === TileKind.TELEPORT) return false;
+                if (tileKind === TileKind.WALL || tileKind === TileKind.DOOR || tileKind === TileKind.TELEPORT) return false;
 
                 if (kind === PlaceableKind.BOAT) {
-                    if (tk !== TileKind.WATER) return false;
+                    if (tileKind !== TileKind.WATER) return false;
                 }
 
-                const object = this.store.getPlacedObjectAt(tx, ty);
+                const object = this.store.getPlacedObjectAt(targetX, targetY);
                 if (object && object.id !== excludeId) return false;
             }
         }
@@ -212,10 +212,10 @@ export class GameEditorInteractionsService {
     }
 
     private tryMoveObject(x: number, y: number, id: string): void {
-        const obj = this.store.placedObjects.find((o) => o.id === id);
-        if (!obj) return;
+        const object = this.store.placedObjects.find((obj) => obj.id === id);
+        if (!object) return;
 
-        const kind = PlaceableKind[obj.kind];
+        const kind = PlaceableKind[object.kind];
         if (!this.canPlaceObject(x, y, kind, id)) return;
         this.store.movePlacedObject(id, x, y);
     }

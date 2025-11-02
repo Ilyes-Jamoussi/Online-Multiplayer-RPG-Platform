@@ -29,12 +29,12 @@ export class GameMapTileComponent {
     get objectOnTile(): GameEditorPlaceableDto | undefined {
         return this.gameMapService
             .objects()
-            .find((o) => o.placed && o.x === this.tile.x && o.y === this.tile.y);
+            .find((object) => object.placed && object.x === this.tile.x && object.y === this.tile.y);
     }
 
     get playerOnTile(): Player | undefined {
         return this.gameMapService.currentlyPlayers.find(
-            (p) => p.isInGame && p.x === this.tile.x && p.y === this.tile.y,
+            (player) => player.isInGame && player.x === this.tile.x && player.y === this.tile.y,
         );
     }
 

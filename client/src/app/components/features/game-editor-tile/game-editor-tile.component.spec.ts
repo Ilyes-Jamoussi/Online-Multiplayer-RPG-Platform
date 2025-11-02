@@ -13,7 +13,7 @@ const NOOP = (): void => {
 };
 
 function createDataTransferStub(types: readonly string[]): DataTransfer {
-    const dt: DataTransfer = {
+    const dataTransfer: DataTransfer = {
         dropEffect: 'none',
         effectAllowed: 'none',
         files: {} as FileList,
@@ -24,7 +24,7 @@ function createDataTransferStub(types: readonly string[]): DataTransfer {
         clearData: NOOP,
         setDragImage: NOOP,
     } as DataTransfer;
-    return dt;
+    return dataTransfer;
 }
 
 type DragEvtInit = Partial<
@@ -111,8 +111,8 @@ describe('GameEditorTileComponent', () => {
 
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => activeToolState,
-            set: (t: ActiveTool | null) => {
-                activeToolState = t;
+            set: (activeTool: ActiveTool | null) => {
+                activeToolState = activeTool;
             },
             configurable: true,
         });
@@ -242,9 +242,9 @@ describe('GameEditorTileComponent', () => {
 
     it('onTileDragOver should ignore when hasMime is false', () => {
         interactionsSpy.hasMime.and.returnValue(false);
-        const dt = createDataTransferStub([]);
+        const dataTransfer = createDataTransferStub([]);
         let prevented = false;
-        const evt = makeDragEvent({ dataTransfer: dt, preventDefault: () => (prevented = true) });
+        const evt = makeDragEvent({ dataTransfer, preventDefault: () => (prevented = true) });
         component.onTileDragOver(evt);
         expect(prevented).toBeFalse();
         expect(interactionsSpy.resolveHoveredTiles).not.toHaveBeenCalled();
@@ -261,12 +261,12 @@ describe('GameEditorTileComponent', () => {
 
     it('onTileDragOver should set dropEffect move and resolveHoveredTiles when accepted', () => {
         interactionsSpy.hasMime.and.returnValue(true);
-        const dt = createDataTransferStub([]);
+        const dataTransfer = createDataTransferStub([]);
         let prevented = false;
-        const evt = makeDragEvent({ dataTransfer: dt, preventDefault: () => (prevented = true) });
+        const evt = makeDragEvent({ dataTransfer, preventDefault: () => (prevented = true) });
         component.onTileDragOver(evt);
         expect(prevented).toBeTrue();
-        expect(dt.dropEffect).toBe('move');
+        expect(dataTransfer.dropEffect).toBe('move');
         expect(interactionsSpy.resolveHoveredTiles).toHaveBeenCalled();
     });
 
