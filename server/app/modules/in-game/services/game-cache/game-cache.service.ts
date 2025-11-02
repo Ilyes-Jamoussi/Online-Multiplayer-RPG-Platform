@@ -8,7 +8,6 @@ import { Orientation } from '@common/enums/orientation.enum';
 import { Player } from '@common/models/player.interface';
 import { MapSize } from '@common/enums/map-size.enum';
 import { TileCost, TileKind } from '@common/enums/tile-kind.enum';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 
 interface GameMap {
     tiles: (Tile & { playerId: string | null })[];
@@ -22,7 +21,6 @@ export class GameCacheService {
 
     constructor(
         @InjectModel(Game.name) private readonly gameModel: Model<GameDocument>,
-        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async fetchAndCacheGame(sessionId: string, gameId: string): Promise<Game> {

@@ -45,6 +45,7 @@ export class CombatService {
     private readonly _playerPostures = signal<Record<string, 'offensive' | 'defensive'>>({});
     private readonly _victoryData = signal<VictoryData | null>(null);
     private readonly _tileEffects = signal<Record<string, TileCombatEffect>>({});
+    private readonly _minHealthDuringCombat = signal<Record<string, number>>({});
 
     readonly combatData = this._combatData.asReadonly();
     readonly damageDisplays = this._damageDisplays.asReadonly();
@@ -52,6 +53,7 @@ export class CombatService {
     readonly playerPostures = this._playerPostures.asReadonly();
     readonly victoryData = this._victoryData.asReadonly();
     readonly tileEffects = this._tileEffects.asReadonly();
+    readonly minHealthDuringCombat = this._minHealthDuringCombat.asReadonly();
 
     constructor(
         private readonly timerService: TimerService,
@@ -70,6 +72,14 @@ export class CombatService {
         this._combatData.set({ attackerId, targetId, userRole });
         this._selectedPosture.set(null);
         this._playerPostures.set({});
+        
+        const attackerPlayer = this.inGameService.getPlayerByPlayerId(attackerId);
+        const targetPlayer = this.inGameService.getPlayerByPlayerId(targetId);
+        
+        this._minHealthDuringCombat.set({
+            [attackerId]: attackerPlayer.health,
+            [targetId]: targetPlayer.health,
+        });
         
         if (attackerTileEffect !== undefined && targetTileEffect !== undefined) {
             this._tileEffects.set({
@@ -95,6 +105,7 @@ export class CombatService {
         this._playerPostures.set({});
         this._victoryData.set(null);
         this._tileEffects.set({});
+        this._minHealthDuringCombat.set({});
         this.timerService.stopCombatTimer();
     }
 
@@ -262,6 +273,14 @@ export class CombatService {
             this.startCombat(attackerId, targetId, 'target', attackerTileEffect, targetTileEffect);
         } else {
             this._combatData.set({ attackerId, targetId, userRole: 'spectator' });
+            const attackerPlayer = this.inGameService.getPlayerByPlayerId(attackerId);
+            const targetPlayer = this.inGameService.getPlayerByPlayerId(targetId);
+            
+            this._minHealthDuringCombat.set({
+                [attackerId]: attackerPlayer.health,
+                [targetId]: targetPlayer.health,
+            });
+            
             if (attackerTileEffect !== undefined && targetTileEffect !== undefined) {
                 this._tileEffects.set({
                     [attackerId]: attackerTileEffect,
@@ -283,6 +302,13 @@ export class CombatService {
         });
         if (playerId === this.playerService.id()) {
             this.playerService.updatePlayer({ health: newHealth });
+        }
+        
+        if (this._combatData() && !this._victoryData()) {
+            this._minHealthDuringCombat.update((minHealth) => ({
+                ...minHealth,
+                [playerId]: Math.min(minHealth[playerId] ?? newHealth, newHealth),
+            }));
         }
     }
 
