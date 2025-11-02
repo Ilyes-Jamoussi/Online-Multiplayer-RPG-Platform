@@ -81,7 +81,7 @@ export class SessionService {
 
     initializeSessionWithGame(gameId: string, mapSize: MapSize): void {
         const maxPlayers = MAP_SIZE_TO_MAX_PLAYERS[mapSize];
-        this.updateSession({ gameId, maxPlayers });
+        this.updateSession({ id: Date.now().toString(), gameId, maxPlayers });
         this.router.navigate([ROUTES.CharacterCreationPage]);
     }
 
@@ -153,15 +153,26 @@ export class SessionService {
         });
 
         this.sessionSocketService.onSessionCreatedError((error) => {
-            this.notificationService.displayError({ title: 'Erreur de création', message: error });
+            this.notificationService.displayError({ 
+                title: 'Erreur de création', 
+                message: error,
+                redirectRoute: ROUTES.HomePage,
+            });
         });
 
         this.sessionSocketService.onSessionJoinError((message) => {
-            this.notificationService.displayError({ title: 'Erreur', message });
+            this.notificationService.displayError({ 
+                title: 'Erreur', 
+                message,
+                redirectRoute: ROUTES.HomePage,
+            });
         });
 
         this.sessionSocketService.onAvatarSelectionJoinError((message) => {
-            this.notificationService.displayError({ title: 'Erreur de connexion', message });
+            this.notificationService.displayError({ 
+                title: 'Erreur de connexion', 
+                message,
+            });
         });
 
         this.sessionSocketService.onAvatarSelectionJoined((data) => {
@@ -178,7 +189,10 @@ export class SessionService {
         });
 
         this.sessionSocketService.onStartGameSessionError((msg) => {
-            this.notificationService.displayError({ title: 'Impossible de démarrer le jeu', message: msg });
+            this.notificationService.displayError({ 
+                title: 'Impossible de démarrer le jeu', 
+                message: msg,
+            });
         });
     }
 }

@@ -6,6 +6,7 @@ import { ROUTES } from '@common/enums/routes.enum';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { SessionService } from '@app/services/session/session.service';
+import { PlayerService } from '@app/services/player/player.service';
 
 @Component({
     selector: 'app-session-creation-page',
@@ -19,6 +20,7 @@ export class SessionCreationPageComponent implements OnInit {
         private readonly router: Router,
         private readonly gameStoreService: GameStoreService,
         private readonly sessionService: SessionService,
+        private readonly playerService: PlayerService,
     ) {}
 
     get visibleGameDisplays(): Signal<GamePreviewDto[]> {
@@ -26,6 +28,7 @@ export class SessionCreationPageComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.playerService.setAsAdmin();
         this.gameStoreService.loadGames().subscribe();
     }
 

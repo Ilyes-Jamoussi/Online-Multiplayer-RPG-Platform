@@ -87,9 +87,12 @@ export class PlayerService {
 
     generateRandom(): void {
         const names = ['Aragorn', 'Legolas', 'Gimli', 'Gandalf', 'Frodo', 'Samwise', 'Boromir', 'Faramir', 'Eowyn', 'Arwen'];
-        const avatars = Object.values(Avatar);
+        const availableAvatars = this.sessionService.avatarAssignments()
+            .filter(assignment => assignment.chosenBy === null)
+            .map(assignment => assignment.avatar);
+        
         const randomName = names[Math.floor(Math.random() * names.length)];
-        const randomAvatar = avatars[Math.floor(Math.random() * avatars.length)];
+        const randomAvatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
         const RANDOM_THRESHOLD = 0.5;
         const randomBonus = Math.random() < RANDOM_THRESHOLD ? BonusType.Life : BonusType.Speed;
 
@@ -103,8 +106,21 @@ export class PlayerService {
         this._player.update((player) => ({ ...player, ...partial }));
     }
 
-    resetPlayer(): void {
+    reset(): void {
         this._player.set({ ...DEFAULT_PLAYER });
+        this.sessionService.resetSession();
+    }
+
+    setAsAdmin(): void {
+        this.updatePlayer({ isAdmin: true });
+    }
+
+    setAsGuest(): void {
+        this.updatePlayer({ isAdmin: false });
+    }
+
+    isConnected(): boolean {
+        return this.sessionService.id() !== '';
     }
 
     selectAvatar(avatar: Avatar) {
@@ -125,7 +141,6 @@ export class PlayerService {
     }
 
     leaveSession(): void {
-        this.resetPlayer();
         this.sessionService.leaveSession();
     }
 
@@ -133,9 +148,6 @@ export class PlayerService {
         if (!this.isAdmin()) {
             this.sessionService.leaveAvatarSelection();
         }
-
-        this.resetPlayer();
-        this.sessionService.resetSession();
     }
 
     updateActionsRemaining(actionsRemaining: number): void {
@@ -150,8 +162,6 @@ export class PlayerService {
         });
 
         this.sessionSocketService.onSessionEnded((message) => {
-            this.resetPlayer();
-            this.sessionService.resetSession();
             this.notificationService.displayError({
                 title: 'Session terminée',
                 message,
