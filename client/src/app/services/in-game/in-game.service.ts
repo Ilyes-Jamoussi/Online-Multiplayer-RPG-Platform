@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { inject, Injectable, computed, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { ROUTES } from '@common/enums/routes.enum';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
@@ -9,6 +9,7 @@ import { PlayerService } from '@app/services/player/player.service';
 import { Player } from '@common/models/player.interface';
 import { TimerService } from '@app/services/timer/timer.service';
 import { NotificationService } from '@app/services/notification/notification.service';
+import { ToastService } from '@app/services/toast/toast.service';
 import { Orientation } from '@common/enums/orientation.enum';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
@@ -72,6 +73,8 @@ export class InGameService {
         this._isActionModeActive.set(false);
         this._availableActions.set([]);
     }
+
+    private readonly toastService = inject(ToastService);
 
     constructor(
         private readonly inGameSocketService: InGameSocketService,
@@ -194,10 +197,9 @@ export class InGameService {
 
         this.inGameSocketService.onPlayerLeftInGameSession((data) => {
             this.updateInGameSession(data.session);
-            this.notificationService.displayInformation({
-                title: 'Joueur parti',
-                message: `${data.playerName} a abandonné la partie`,
-            });
+            if(this.playerService.id() !== data.playerId) {
+                this.toastService.info(`${data.playerName} a abandonné la partie`);
+            }
         });
 
         this.inGameSocketService.onPlayerMoved((data) => {

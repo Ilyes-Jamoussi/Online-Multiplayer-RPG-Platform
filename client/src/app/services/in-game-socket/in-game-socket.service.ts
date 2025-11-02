@@ -43,7 +43,7 @@ export class InGameSocketService {
         this.socket.emit(InGameEvents.PlayerLeaveInGameSession, sessionId);
     }
 
-    onPlayerLeftInGameSession(callback: (data: { session: InGameSession; playerName: string }) => void): void {
+    onPlayerLeftInGameSession(callback: (data: { session: InGameSession; playerName: string; playerId: string }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerLeftInGameSession, callback);
     }
 

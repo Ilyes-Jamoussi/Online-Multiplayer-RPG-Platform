@@ -144,7 +144,6 @@ export class InGameSessionRepository {
         player.x = -1;
         player.y = -1;
         this.removeStartPoint(sessionId, player.startPointId);
-        this.removePlayerFromTurnOrder(sessionId, playerId);
         return player;
     }
 

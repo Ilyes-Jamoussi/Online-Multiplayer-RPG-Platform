@@ -131,7 +131,7 @@ export class InGameService {
         }
     }
 
-    leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string; sessionEnded: boolean } {
+    leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string; playerId: string; sessionEnded: boolean } {
         const player = this.sessionRepository.playerLeave(sessionId, playerId);
         const session = this.sessionRepository.findById(sessionId);
         const inGamePlayers = this.sessionRepository.inGamePlayersCount(sessionId);
@@ -141,7 +141,7 @@ export class InGameService {
             sessionEnded = true;
         }
 
-        return { session, playerName: player.name, sessionEnded };
+        return { session, playerName: player.name, playerId, sessionEnded };
     }
 
     getPlayers(sessionId: string): Player[] {
