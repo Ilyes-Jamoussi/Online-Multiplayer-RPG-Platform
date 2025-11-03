@@ -70,9 +70,11 @@ export class InGameMovementService {
         if (!startPoint) {
             throw new NotFoundException('Start point not found');
         }
-        const { x: nextX, y: nextY } = this.findClosestFreeTile(session, startPoint.x, startPoint.y);
-        player.health = player.maxHealth;
-        this.sessionRepository.movePlayerPosition(session.id, playerId, nextX, nextY, 0);
+        if (!(startPoint.x === player.x && startPoint.y === player.y)) {
+            const { x: nextX, y: nextY } = this.findClosestFreeTile(session, startPoint.x, startPoint.y);
+            player.health = player.maxHealth;
+            this.sessionRepository.movePlayerPosition(session.id, playerId, nextX, nextY, 0);
+        }
         this.calculateReachableTiles(session, session.currentTurn.activePlayerId);
     }
 
