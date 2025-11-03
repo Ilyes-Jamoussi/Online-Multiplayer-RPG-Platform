@@ -1,16 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, ViewChild, inject} from '@angular/core';
 import { ChatComponent } from '@app/components/features/chat/chat.component';
 import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
-import { GameOverOverlayComponent } from '@app/components/features/game-over-overlay/game-over-overlay.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
+import { GameOverOverlayComponent } from '@app/components/features/game-over-overlay/game-over-overlay.component';
 import { PlayerInfoComponent } from '@app/components/features/player-info/player-info.component';
 import { PlayersListComponent } from '@app/components/features/players-list/players-list.component';
-import { TurnTimerComponent } from '@app/components/features/turn-timer/turn-timer.component';
 import { ToastComponent } from '@app/components/features/toast/toast.component';
+import { TurnTimerComponent } from '@app/components/features/turn-timer/turn-timer.component';
+import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameKeyboardEventsService } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
+import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { MapSize } from '@common/enums/map-size.enum';
 
@@ -34,12 +36,29 @@ import { MapSize } from '@common/enums/map-size.enum';
 export class GameSessionPageComponent implements OnInit, OnDestroy {
     @ViewChild(GameMapComponent) gameMapComponent?: GameMapComponent;
 
-    constructor(
-        private readonly sessionService: SessionService,
-        private readonly gameMapService: GameMapService,
-        readonly inGameService: InGameService,
-        private readonly keyboardEventsService: InGameKeyboardEventsService,
-    ) {}
+    private readonly sessionService = inject(SessionService);
+    private readonly gameMapService = inject(GameMapService);
+    readonly inGameService = inject(InGameService);
+    readonly adminModeService = inject(AdminModeService);
+    private readonly keyboardEventsService = inject(InGameKeyboardEventsService);
+    private readonly playerService = inject(PlayerService);
+
+    @HostListener('window:keydown', ['$event'])
+    onKeyDown(event: KeyboardEvent) {
+        if (event.repeat) return;
+
+        const activeElement = document.activeElement as HTMLElement | null;
+        const tag = (activeElement?.tagName || '').toLowerCase();
+        const typingInField =
+            tag === 'input' ||
+            tag === 'textarea' ||
+            tag === 'select' ||
+            activeElement?.isContentEditable;
+
+        if (!typingInField && (event.key === 'd' || event.key === 'D')) {
+            this.adminModeService.toggleAdminMode();
+        }
+    }
 
     get gameId(): string {
         return this.sessionService.gameId();
@@ -89,6 +108,10 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         return this.inGameService.isTransitioning();
     }
 
+    get isAdmin(): boolean {
+        return this.playerService.isAdmin();
+    }
+
     isActionDisabled(): boolean {
         return !this.isMyTurn ||
             !this.isGameStarted ||
@@ -134,8 +157,12 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         const player = session.inGamePlayers[activePlayerId];
 
         if (!player) return 'Joueur non trouvé';
+        
+        return `Pos:(${player.x},${player.y}) Speed:${player.speed}`;
+    }
 
-        return `Pos:(${player.x},${player.y}) Vitesse:${player.speed}`;
+    onAction(): void {
+        this.inGameService.activateActionMode();
     }
 
     ngOnInit(): void {
@@ -154,10 +181,6 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
 
     onEndTurn(): void {
         this.inGameService.endTurn();
-    }
-
-    onAction(): void {
-        this.inGameService.activateActionMode();
     }
 
     onLeaveGame(): void {

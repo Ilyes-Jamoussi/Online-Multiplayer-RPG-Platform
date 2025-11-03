@@ -2,6 +2,7 @@ import { inject, Injectable, computed, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationService } from '@app/services/notification/notification.service';
+import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { TimerService } from '@app/services/timer/timer.service';
@@ -41,6 +42,7 @@ export class InGameService {
     readonly inGamePlayers = computed(() => this._inGameSession().inGamePlayers);
     readonly inGameSession = this._inGameSession.asReadonly();
     readonly reachableTiles = this._reachableTiles.asReadonly();
+    readonly isAdminModeActive = computed(() => this.adminModeService.isAdminModeActivated());
     readonly hasUsedAction = computed(() => this._inGameSession().currentTurn.hasUsedAction);
     readonly availableActions = this._availableActions.asReadonly();
     readonly isActionModeActive = this._isActionModeActive.asReadonly();
@@ -76,13 +78,14 @@ export class InGameService {
 
     private readonly toastService = inject(ToastService);
 
-    constructor(
-        private readonly inGameSocketService: InGameSocketService,
-        private readonly sessionService: SessionService,
-        private readonly timerService: TimerService,
-        private readonly playerService: PlayerService,
-        private readonly notificationService: NotificationService,
-    ) {
+    private readonly inGameSocketService = inject(InGameSocketService);
+    private readonly sessionService = inject(SessionService);
+    private readonly timerService = inject(TimerService);
+    private readonly playerService = inject(PlayerService);
+    private readonly notificationService = inject(NotificationService);
+    private readonly adminModeService = inject(AdminModeService);    
+
+    constructor() {
         this.initListeners();
     }
 
@@ -130,6 +133,11 @@ export class InGameService {
 
     endTurn(): void {
         this.inGameSocketService.playerEndTurn(this.sessionService.id());
+    }
+
+    teleportPlayer(x: number, y: number): void {
+        if (!this.isMyTurn() || !this.isGameStarted() || !this.isAdminModeActive()) return;
+        this.inGameSocketService.playerTeleport(this.sessionService.id(), x, y);
     }
 
     updateInGameSession(data: Partial<InGameSession>): void {
@@ -248,6 +256,25 @@ export class InGameService {
 
         this.inGameSocketService.onPlayerReachableTiles((data) => {
             this._reachableTiles.set(data);
+        });
+
+        this.inGameSocketService.onPlayerTeleported((data) => {
+            this.updateInGameSession({
+                inGamePlayers: {
+                    ...this.inGameSession().inGamePlayers,
+                    [data.playerId]: {
+                        ...this.inGameSession().inGamePlayers[data.playerId],
+                        x: data.x,
+                        y: data.y,
+                    },
+                },
+            });
+            if (this.playerService.id() === data.playerId) {
+                this.playerService.updatePlayer({
+                    x: data.x,
+                    y: data.y,
+                });
+            }
         });
 
         this.inGameSocketService.onPlayerActionUsed(() => {

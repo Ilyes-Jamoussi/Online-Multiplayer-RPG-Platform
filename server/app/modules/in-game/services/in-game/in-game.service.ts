@@ -39,6 +39,7 @@ export class InGameService {
             mapSize,
             mode,
             turnOrder: [],
+            isAdminModeActive: false,
         };
 
         const game = await this.gameCache.fetchAndCacheGame(id, gameId);
@@ -131,9 +132,26 @@ export class InGameService {
         }
     }
 
-    leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string; playerId: string; sessionEnded: boolean } {
+    leaveInGameSession(
+        sessionId: string,
+        playerId: string,
+    ): {
+        session: InGameSession;
+        playerName: string;
+        playerId: string;
+        sessionEnded: boolean;
+        adminModeDeactivated: boolean;
+    } {
         const player = this.sessionRepository.playerLeave(sessionId, playerId);
         const session = this.sessionRepository.findById(sessionId);
+        
+        let adminModeDeactivated = false;
+        if (player.isAdmin && session.isAdminModeActive) {
+            session.isAdminModeActive = false;
+            this.sessionRepository.update(session);
+            adminModeDeactivated = true;
+        }
+        
         const inGamePlayers = this.sessionRepository.inGamePlayersCount(sessionId);
         let sessionEnded = false;
         if (inGamePlayers < 2) {
@@ -141,7 +159,7 @@ export class InGameService {
             sessionEnded = true;
         }
 
-        return { session, playerName: player.name, playerId, sessionEnded };
+        return { session, playerName: player.name, playerId, sessionEnded, adminModeDeactivated };
     }
 
     getPlayers(sessionId: string): Player[] {
@@ -165,4 +183,43 @@ export class InGameService {
         const session = this.sessionRepository.findById(sessionId);
         this.actionService.calculateAvailableActions(session, playerId);
     }
+
+    toggleAdminMode(sessionId: string, playerId: string): InGameSession {
+        const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        
+        if (!player) {
+            throw new NotFoundException('Player not found');
+        }
+        
+        if (!player.isAdmin) {
+            throw new BadRequestException('Only admin can toggle admin mode');
+        }
+        
+        session.isAdminModeActive = !session.isAdminModeActive;
+        this.sessionRepository.update(session);
+        return session;
+    }
+
+    teleportPlayer(sessionId: string, playerId: string, x: number, y: number): void {
+        const session = this.sessionRepository.findById(sessionId);
+        
+        if (!session.isAdminModeActive) {
+            throw new BadRequestException('Admin mode not active');
+        }
+        
+        if (session.currentTurn.activePlayerId !== playerId) {
+            throw new BadRequestException('Not your turn');
+        }
+        
+        if (!this.gameCache.isTileFree(sessionId, x, y)) {
+            throw new BadRequestException('Tile is not free');
+        }
+        
+        this.sessionRepository.movePlayerPosition(sessionId, playerId, x, y, 0);
+        this.movementService.calculateReachableTiles(session, playerId);
+        this.actionService.calculateAvailableActions(session, playerId);
+    }
+
+
 }
