@@ -52,7 +52,7 @@ export class TimerService {
         }
 
         if (this._isTurnActive() && this._turnTimeRemaining() > 0) {
-            this.pausedTurnTime = this._turnTimeRemaining();
+            this.pausedTurnTime = this._turnTimeRemaining() - 1;
         }
 
         this._isTurnActive.set(false);
