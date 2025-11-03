@@ -172,10 +172,35 @@ export class GameEditorCheckService {
         return kind === TileKind.BASE || kind === TileKind.ICE || kind === TileKind.WATER || kind === TileKind.DOOR || kind === TileKind.TELEPORT;
     }
 
-    // Todo: shorten this method
     private connectedWalkableComponents(grid: TileKind[][], size: number): ConnectedComponent[] {
         const seen = new Set<string>();
         const components: ConnectedComponent[] = [];
+
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                if (!this.isWalkableTile(grid[y][x])) continue;
+                const startKey = this.cellKey(x, y);
+                if (seen.has(startKey)) continue;
+
+                const component = this.bfsComponent(x, y, grid, size, seen);
+                components.push({ set: component, size: component.size });
+            }
+        }
+
+        return components;
+    }
+
+    private cellKey(x: number, y: number): string {
+        return `${x}:${y}`;
+    }
+
+    private isInBounds(x: number, y: number, size: number): boolean {
+        return x >= 0 && y >= 0 && x < size && y < size;
+    }
+
+    private bfsComponent(startX: number, startY: number, grid: TileKind[][], size: number, seen: Set<string>): Set<string> {
+        const queue: [number, number][] = [[startX, startY]];
+        const component = new Set<string>();
         const directions = [
             [1, 0],
             [-1, 0],
@@ -183,37 +208,27 @@ export class GameEditorCheckService {
             [0, -1],
         ] as const;
 
-        for (let y = 0; y < size; y++) {
-            for (let x = 0; x < size; x++) {
-                if (!this.isWalkableTile(grid[y][x])) continue;
-                const key0 = `${x}:${y}`;
-                if (seen.has(key0)) continue;
+        while (queue.length) {
+            const item = queue.shift();
+            if (!item) continue;
+            const [currentX, currentY] = item;
+            const cellKey = this.cellKey(currentX, currentY);
+            if (seen.has(cellKey)) continue;
 
-                const queue: [number, number][] = [[x, y]];
-                const component = new Set<string>();
-                while (queue.length) {
-                    const item = queue.shift();
-                    if (item) {
-                        const [currentX, currentY] = item;
-                        const cellKey = `${currentX}:${currentY}`;
-                        if (seen.has(cellKey)) continue;
-                        seen.add(cellKey);
-                        component.add(cellKey);
+            seen.add(cellKey);
+            component.add(cellKey);
 
-                        for (const [dx, dy] of directions) {
-                            const neighborX = currentX + dx;
-                            const neighborY = currentY + dy;
-                            if (neighborX < 0 || neighborY < 0 || neighborX >= size || neighborY >= size) continue;
-                            if (!this.isWalkableTile(grid[neighborY][neighborX])) continue;
-                            const neighborKey = `${neighborX}:${neighborY}`;
-                            if (!seen.has(neighborKey)) queue.push([neighborX, neighborY]);
-                        }
-                    }
-                }
-                components.push({ set: component, size: component.size });
+            for (const [dx, dy] of directions) {
+                const neighborX = currentX + dx;
+                const neighborY = currentY + dy;
+                if (!this.isInBounds(neighborX, neighborY, size)) continue;
+                if (!this.isWalkableTile(grid[neighborY][neighborX])) continue;
+                const neighborKey = this.cellKey(neighborX, neighborY);
+                if (!seen.has(neighborKey)) queue.push([neighborX, neighborY]);
             }
         }
-        return components;
+
+        return component;
     }
 
     private findInaccessibleTiles(tiles: GameEditorTileDto[], visited: Set<string>): AccesibilityIssue {

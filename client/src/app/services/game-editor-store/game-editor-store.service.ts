@@ -176,63 +176,6 @@ export class GameEditorStoreService {
             .subscribe();
     }
 
-    // async saveGame(gridElement: HTMLElement): Promise<void> {
-    //     try {
-    //         const gridPreviewImage = await this.screenshotService.captureElementAsBase64(gridElement);
-
-    //         const current = {
-    //             name: this._name(),
-    //             description: this._description(),
-    //             tiles: this._tiles(),
-    //             objects: this._objects(),
-    //             gridPreviewUrl: gridPreviewImage ?? this._gridPreviewUrl(),
-    //         };
-    //         const game: PatchGameEditorDto = this.pickChangedProperties(current, this._initial());
-
-    //         await firstValueFrom(
-    //             this.gameHttpService.patchGameEditorById(this._id(), game).pipe(
-    //                 take(1),
-    //                 catchError((err) => {
-    //                     if (err.statusText === 'Conflict') {
-    //                         return throwError(() => new Error('Un jeu avec ce nom existe déjà.'));
-    //                     }
-    //                     const createDto: CreateGameDto = {
-    //                         name: this._name(),
-    //                         description: this._description(),
-    //                         size: this._size(),
-    //                         mode: this._mode(),
-    //                     };
-    //                     return this.gameHttpService.createGame(createDto).pipe(
-    //                         switchMap((newGame) => {
-    //                             this._id.set(newGame.id);
-    //                             const updateGame: PatchGameEditorDto = {
-    //                                 tiles: this._tiles(),
-    //                                 objects: this._objects(),
-    //                                 gridPreviewUrl: gridPreviewImage,
-    //                             };
-    //                             return this.gameHttpService.patchGameEditorById(newGame.id, updateGame);
-    //                         }),
-    //                     );
-    //                 }),
-    //             ),
-    //         );
-
-    //         this.notificationService.displaySuccess({
-    //             title: 'Jeu sauvegardé',
-    //             message: 'Votre jeu a été sauvegardé avec succès !',
-    //             redirectRoute: ROUTES.managementPage,
-    //         });
-    //     } catch (error) {
-    //         if (error instanceof Error) {
-    //             this.notificationService.displayError({
-    //                 title: 'Erreur lors de la sauvegarde',
-    //                 message: error.message,
-    //             });
-    //         }
-    //         throw error;
-    //     }
-    // }
-
     // helper methods for saveGame()
     //{ 
     private async captureGridPreview(gridElement: HTMLElement): Promise<string | undefined> {
