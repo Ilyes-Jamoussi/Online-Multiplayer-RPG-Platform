@@ -11,6 +11,8 @@ import { AccesibilityIssue, GameEditorIssue, GameEditorIssues } from '@app/inter
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
+import { ConnectedComponent } from '@common/interfaces/connected-component.interface';
+
 
 @Injectable()
 export class GameEditorCheckService {
@@ -171,9 +173,9 @@ export class GameEditorCheckService {
     }
 
     // Todo: shorten this method
-    private connectedWalkableComponents(grid: TileKind[][], size: number): { set: Set<string>; size: number }[] {
+    private connectedWalkableComponents(grid: TileKind[][], size: number): ConnectedComponent[] {
         const seen = new Set<string>();
-        const components: { set: Set<string>; size: number }[] = [];
+        const components: ConnectedComponent[] = [];
         const directions = [
             [1, 0],
             [-1, 0],
@@ -231,7 +233,12 @@ export class GameEditorCheckService {
 
     private checkNameValidation(): GameEditorIssue {
         const name = this.gameEditorStoreService.name.trim();
-        return name.length < NAME_MIN_LENGTH || name.length > GAME_NAME_MAX_LENGTH || name.replace(WHITESPACE_PATTERN, '').length === 0
+        const invalid =
+            name.length < NAME_MIN_LENGTH ||
+            name.length > GAME_NAME_MAX_LENGTH ||
+            name.replace(WHITESPACE_PATTERN, '').length === 0;
+
+        const result: GameEditorIssue = invalid
             ? {
                 hasIssue: true,
                 message:
@@ -239,13 +246,18 @@ export class GameEditorCheckService {
                     `et ne pas être composé uniquement d'espaces.`,
             }
             : { hasIssue: false };
+
+        return result;
     }
 
     private checkDescriptionValidation(): GameEditorIssue {
         const description = this.gameEditorStoreService.description.trim();
-        return description.length < DESCRIPTION_MIN_LENGTH ||
+        const invalid =
+            description.length < DESCRIPTION_MIN_LENGTH ||
             description.length > DESCRIPTION_MAX_LENGTH ||
-            description.replace(WHITESPACE_PATTERN, '').length === 0
+            description.replace(WHITESPACE_PATTERN, '').length === 0;
+
+        const result: GameEditorIssue = invalid
             ? {
                 hasIssue: true,
                 message:
@@ -253,5 +265,7 @@ export class GameEditorCheckService {
                     `et ne pas être composée uniquement d'espaces.`,
             }
             : { hasIssue: false };
+
+        return result;
     }
 }
