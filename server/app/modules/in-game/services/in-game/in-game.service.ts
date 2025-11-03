@@ -189,11 +189,9 @@ export class InGameService {
             throw new BadRequestException('Tile is not free');
         }
         
-        const player = session.inGamePlayers[playerId];
-        player.x = x;
-        player.y = y;
-        
-        this.sessionRepository.update(session);
+        this.sessionRepository.movePlayerPosition(sessionId, playerId, x, y, 0);
+        this.movementService.calculateReachableTiles(session, playerId);
+        this.actionService.calculateAvailableActions(session, playerId);
     }
 
     private isTileFree(session: InGameSession, x: number, y: number): boolean {

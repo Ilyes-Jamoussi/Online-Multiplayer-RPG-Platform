@@ -269,6 +269,12 @@ export class InGameService {
                     },
                 },
             });
+            if (this.playerService.id() === data.playerId) {
+                this.playerService.updatePlayer({
+                    x: data.x,
+                    y: data.y,
+                });
+            }
         });
 
         this.inGameSocketService.onPlayerActionUsed(() => {
