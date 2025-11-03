@@ -42,7 +42,7 @@ export class GameEditorCheckService {
     });
 
     canSave(): boolean {
-        return !Object.values(this.editorProblems()).some((p) => p.hasIssue);
+        return !Object.values(this.editorProblems()).some((problem) => problem.hasIssue);
     }
 
     private isTerrainTile(kind: TileKind): boolean {
@@ -106,13 +106,13 @@ export class GameEditorCheckService {
     }
 
     private checkDoors(tiles: GameEditorTileDto[]): AccesibilityIssue {
-        const probs: AccesibilityIssue = {
+        const problems: AccesibilityIssue = {
             tiles: [],
             hasIssue: false,
         };
-        for (const t of tiles) {
-            if (t.kind !== TileKind.DOOR) continue;
-            const { x, y } = t;
+        for (const tile of tiles) {
+            if (tile.kind !== TileKind.DOOR) continue;
+            const { x, y } = tile;
 
             const leftKind = this.gameEditorStoreService.getTileAt(x - 1, y)?.kind;
             const rightKind = this.gameEditorStoreService.getTileAt(x + 1, y)?.kind;
@@ -123,30 +123,30 @@ export class GameEditorCheckService {
                 !this.isValidHorizontalDoor(leftKind, rightKind, topKind, bottomKind) &&
                 !this.isValidVerticalDoor(topKind, bottomKind, leftKind, rightKind)
             ) {
-                probs.tiles.push({
+                problems.tiles.push({
                     x,
                     y,
                 });
-                probs.hasIssue = true;
-                probs.message = 'Une porte doit être placée entre deux murs et adossée à des tuiles de terrain.';
+                problems.hasIssue = true;
+                problems.message = 'Une porte doit être placée entre deux murs et adossée à des tuiles de terrain.';
             }
         }
-        return probs;
+        return problems;
     }
 
     private checkTerrainCoverage(tiles: GameEditorTileDto[]): GameEditorIssue {
         const size = this.gameEditorStoreService.size();
         const total = size * size;
-        const terrainCount = tiles.filter((t) => this.isTerrainTile(t.kind)).length;
+        const terrainCount = tiles.filter((tile) => this.isTerrainTile(tile.kind)).length;
         const ratio = terrainCount / total;
-        const probs: GameEditorIssue = { hasIssue: false };
+        const problems: GameEditorIssue = { hasIssue: false };
         if (ratio <= GameEditorCheckService.minTerrainRatio) {
-            probs.hasIssue = true;
-            probs.message = `Le ratio de tuiles de terrain est trop bas (${(ratio * GameEditorCheckService.percentBase).toFixed(
+            problems.hasIssue = true;
+            problems.message = `Le ratio de tuiles de terrain est trop bas (${(ratio * GameEditorCheckService.percentBase).toFixed(
                 2,
             )} %). Il doit être supérieur à ${GameEditorCheckService.minTerrainRatio * GameEditorCheckService.percentBase} %.`;
         }
-        return probs;
+        return problems;
     }
 
     private checkTerrainAccessibility(tiles: GameEditorTileDto[]): AccesibilityIssue {
@@ -164,8 +164,8 @@ export class GameEditorCheckService {
 
     private buildTileKindGrid(tiles: GameEditorTileDto[], size: number): TileKind[][] {
         const grid: TileKind[][] = Array.from({ length: size }, () => Array<TileKind>(size).fill(TileKind.WALL));
-        for (const t of tiles) {
-            grid[t.y][t.x] = t.kind;
+        for (const tile of tiles) {
+            grid[tile.y][tile.x] = tile.kind;
         }
         return grid;
     }
@@ -177,8 +177,8 @@ export class GameEditorCheckService {
     // Todo: shorten this method
     private connectedWalkableComponents(grid: TileKind[][], size: number): { set: Set<string>; size: number }[] {
         const seen = new Set<string>();
-        const comps: { set: Set<string>; size: number }[] = [];
-        const dirs = [
+        const components: { set: Set<string>; size: number }[] = [];
+        const directions = [
             [1, 0],
             [-1, 0],
             [0, 1],
@@ -188,49 +188,49 @@ export class GameEditorCheckService {
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
                 if (!this.isWalkableTile(grid[y][x])) continue;
-                const key0 = `${x}:${y}`;
-                if (seen.has(key0)) continue;
+                const initialKey = `${x}:${y}`;
+                if (seen.has(initialKey)) continue;
 
-                const q: [number, number][] = [[x, y]];
-                const comp = new Set<string>();
-                while (q.length) {
-                    const item = q.shift();
+                const queue: [number, number][] = [[x, y]];
+                const component = new Set<string>();
+                while (queue.length) {
+                    const item = queue.shift();
                     if (item) {
-                        const [cx, cy] = item;
-                        const k = `${cx}:${cy}`;
-                        if (seen.has(k)) continue;
-                        seen.add(k);
-                        comp.add(k);
+                        const [currentX, currentY] = item;
+                        const key = `${currentX}:${currentY}`;
+                        if (seen.has(key)) continue;
+                        seen.add(key);
+                        component.add(key);
 
-                        for (const [dx, dy] of dirs) {
-                            const nx = cx + dx;
-                            const ny = cy + dy;
-                            if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
-                            if (!this.isWalkableTile(grid[ny][nx])) continue;
-                            const nk = `${nx}:${ny}`;
-                            if (!seen.has(nk)) q.push([nx, ny]);
+                        for (const [deltaX, deltaY] of directions) {
+                            const nextX = currentX + deltaX;
+                            const nextY = currentY + deltaY;
+                            if (nextX < 0 || nextY < 0 || nextX >= size || nextY >= size) continue;
+                            if (!this.isWalkableTile(grid[nextY][nextX])) continue;
+                            const nextKey = `${nextX}:${nextY}`;
+                            if (!seen.has(nextKey)) queue.push([nextX, nextY]);
                         }
                     }
                 }
-                comps.push({ set: comp, size: comp.size });
+                components.push({ set: component, size: component.size });
             }
         }
-        return comps;
+        return components;
     }
 
     private findInaccessibleTiles(tiles: GameEditorTileDto[], visited: Set<string>): AccesibilityIssue {
-        const probs: AccesibilityIssue = { hasIssue: false, tiles: [] };
-        for (const t of tiles) {
-            if (this.isWalkableTile(t.kind) && !visited.has(`${t.x}:${t.y}`)) {
-                probs.hasIssue = true;
-                probs.tiles.push({
-                    x: t.x,
-                    y: t.y,
+        const problems: AccesibilityIssue = { hasIssue: false, tiles: [] };
+        for (const tile of tiles) {
+            if (this.isWalkableTile(tile.kind) && !visited.has(`${tile.x}:${tile.y}`)) {
+                problems.hasIssue = true;
+                problems.tiles.push({
+                    x: tile.x,
+                    y: tile.y,
                 });
-                probs.message = 'Certaines tuiles de terrain ne sont pas accessibles.';
+                problems.message = 'Certaines tuiles de terrain ne sont pas accessibles.';
             }
         }
-        return probs;
+        return problems;
     }
 
     private checkNameValidation(): GameEditorIssue {

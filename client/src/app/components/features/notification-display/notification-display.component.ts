@@ -24,7 +24,7 @@ export class NotificationDisplayComponent {
         this.notificationService.reset();
 
         if (currentNotification?.redirectRoute) {
-            this.router.navigate([currentNotification.redirectRoute]);
+            void this.router.navigate([currentNotification.redirectRoute]);
         }
     }
 }

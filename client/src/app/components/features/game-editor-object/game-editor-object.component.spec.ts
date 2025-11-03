@@ -11,7 +11,7 @@ const NOOP = (): void => {
 };
 
 function createDataTransferStub(types: readonly string[], data: Readonly<Record<string, string>>): DataTransfer {
-    const dt: DataTransfer = {
+    const dataTransfer: DataTransfer = {
         dropEffect: 'none',
         effectAllowed: 'none',
         files: {} as FileList,
@@ -23,7 +23,7 @@ function createDataTransferStub(types: readonly string[], data: Readonly<Record<
         setDragImage: NOOP,
     } as unknown as DataTransfer;
 
-    return dt;
+    return dataTransfer;
 }
 
 type DragEvtInit = Partial<
@@ -69,7 +69,7 @@ describe('GameEditorObjectComponent', () => {
     let assetsSpy: jasmine.SpyObj<AssetsService>;
 
     let activeToolState: ActiveTool | null = null;
-    const OBJ: GameEditorPlaceableDto = {
+    const mockObject: GameEditorPlaceableDto = {
         id: 'obj-1',
 
         kind: PlaceableKind.BOAT,
@@ -91,8 +91,8 @@ describe('GameEditorObjectComponent', () => {
 
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => activeToolState,
-            set: (t: ActiveTool | null) => {
-                activeToolState = t;
+            set: (activeTool: ActiveTool | null) => {
+                activeToolState = activeTool;
             },
             configurable: true,
         });
@@ -108,7 +108,7 @@ describe('GameEditorObjectComponent', () => {
         fixture = TestBed.createComponent(GameEditorObjectComponent);
         component = fixture.componentInstance;
 
-        component.object = { ...OBJ };
+        component.object = { ...mockObject };
         component.tileSize = 64;
 
         interactionsSpy.getFootprintOf.and.returnValue(2);
@@ -170,9 +170,9 @@ describe('GameEditorObjectComponent', () => {
     });
 
     it('onDragStart should delegate to interactions and set isDragging when dataTransfer exists', () => {
-        const dt = createDataTransferStub([PlaceableMime.BOAT], {});
+        const dataTransfer = createDataTransferStub([PlaceableMime.BOAT], {});
         const evt = makeDragEvent({
-            dataTransfer: dt,
+            dataTransfer,
             preventDefault: NOOP,
         });
 

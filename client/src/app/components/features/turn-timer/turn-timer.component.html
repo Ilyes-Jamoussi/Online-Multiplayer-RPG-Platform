@@ -1,0 +1,12 @@
+@if (shouldShowTimer) {
+<div class="turn-timer" [class]="timerClass">
+    <div class="timer-content">
+        <span class="timer-label">{{ timerLabel }}</span>
+        <div class="timer-display">
+            <span class="time-value">{{ timeRemaining() }}</span>
+            <span class="time-unit">s</span>
+        </div>
+    </div>
+    <div class="timer-progress" [style.width.%]="(timeRemaining() / 30) * 100"></div>
+</div>
+}

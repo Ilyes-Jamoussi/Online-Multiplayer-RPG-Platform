@@ -2,8 +2,10 @@ import { Injectable } from '@angular/core';
 import { SocketService } from '@app/services/socket/socket.service';
 import { InGameEvents } from '@common/constants/in-game-events';
 import { Orientation } from '@common/enums/orientation.enum';
-import { InGameSession } from '@common/models/session.interface';
+import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+import { Player } from '@common/models/player.interface';
+import { InGameSession } from '@common/models/session.interface';
 
 @Injectable({ providedIn: 'root' })
 export class InGameSocketService {
@@ -41,7 +43,7 @@ export class InGameSocketService {
         this.socket.emit(InGameEvents.PlayerLeaveInGameSession, sessionId);
     }
 
-    onPlayerLeftInGameSession(callback: (data: { session: InGameSession; playerName: string }) => void): void {
+    onPlayerLeftInGameSession(callback: (data: { session: InGameSession; playerName: string; playerId: string }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerLeftInGameSession, callback);
     }
 
@@ -65,7 +67,7 @@ export class InGameSocketService {
         this.socket.onSuccessEvent(InGameEvents.AdminModeToggled, callback);
     }
 
-    onPlayerMoved(callback: (data: { playerId: string; x: number; y: number; movementPoints: number }) => void): void {
+    onPlayerMoved(callback: (data: { playerId: string; x: number; y: number; speed: number }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerMoved, callback);
     }
 
@@ -91,5 +93,29 @@ export class InGameSocketService {
 
     onPlayerTeleported(callback: (data: { playerId: string; x: number; y: number }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerTeleported, callback);
+    }
+
+    playerToggleDoorAction(sessionId: string, x: number, y: number): void {
+        this.socket.emit(InGameEvents.ToggleDoorAction, { sessionId, x, y });
+    }
+
+    onDoorToggled(callback: (data: { x: number; y: number; isOpen: boolean }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.DoorToggled, callback);
+    }
+
+    onPlayerUpdated(callback: (data: Player) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerUpdated, callback);
+    }
+
+    onPlayerActionUsed(callback: () => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerActionUsed, callback);
+    }
+
+    onPlayerAvailableActions(callback: (data: AvailableAction[]) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerAvailableActions, callback);
+    }
+
+    onGameOver(callback: (data: { winnerId: string; winnerName: string }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.GameOver, callback);
     }
 }

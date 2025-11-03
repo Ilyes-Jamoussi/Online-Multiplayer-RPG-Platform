@@ -1,8 +1,10 @@
-import { InGameService } from '@app/modules/in-game/services/in-game.service';
+import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { InGameEvents } from '@common/constants/in-game-events';
 import { Orientation } from '@common/enums/orientation.enum';
+import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+import { Player } from '@common/models/player.interface';
 import { InGameSession } from '@common/models/session.interface';
 import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -61,9 +63,19 @@ export class InGameGateway {
 
     @SubscribeMessage(InGameEvents.PlayerLeaveInGameSession)
     playerLeaveInGameSession(socket: Socket, sessionId: string): void {
+        const session = this.inGameService.getSession(sessionId);
         this.playerLeaveSession(sessionId, socket.id);
         this.server.to(socket.id).emit(InGameEvents.LeftInGameSessionAck, successResponse({}));
-        socket.leave(sessionId);
+        void socket.leave(session.inGameId);
+    }
+
+    @SubscribeMessage(InGameEvents.ToggleDoorAction)
+    toggleDoorAction(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
+        try {
+            this.inGameService.toggleDoorAction(payload.sessionId, socket.id, payload.x, payload.y);
+        } catch (error) {
+            socket.emit(InGameEvents.ToggleDoorAction, errorResponse(error.message));
+        }
     }
 
     @SubscribeMessage(InGameEvents.PlayerMove)
@@ -79,6 +91,7 @@ export class InGameGateway {
     handleTurnStarted(payload: { session: InGameSession }) {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnStarted, successResponse(payload.session));
         this.inGameService.getReachableTiles(payload.session.id, payload.session.currentTurn.activePlayerId);
+        this.inGameService.getAvailableActions(payload.session.id, payload.session.currentTurn.activePlayerId);
         this.logger.log(`Turn ${payload.session.currentTurn.turnNumber} started for session ${payload.session.id}`);
     }
 
@@ -106,13 +119,21 @@ export class InGameGateway {
         this.logger.warn(`Forced end of turn for session ${payload.session.id}`);
     }
 
+    @OnEvent('door.toggled')
+    handleDoorToggled(payload: { session: InGameSession; playerId: string; x: number; y: number; isOpen: boolean }) {
+        this.server
+            .to(payload.session.inGameId)
+            .emit(InGameEvents.DoorToggled, successResponse({ x: payload.x, y: payload.y, isOpen: payload.isOpen }));
+        this.server.to(payload.playerId).emit(InGameEvents.PlayerActionUsed, successResponse({}));
+    }
+
     @OnEvent('player.moved')
-    handlePlayerMoved(payload: { session: InGameSession; playerId: string; x: number; y: number; movementPoints: number }) {
+    handlePlayerMoved(payload: { session: InGameSession; playerId: string; x: number; y: number; speed: number }) {
         this.server
             .to(payload.session.inGameId)
             .emit(
                 InGameEvents.PlayerMoved,
-                successResponse({ playerId: payload.playerId, x: payload.x, y: payload.y, movementPoints: payload.movementPoints }),
+                successResponse({ playerId: payload.playerId, x: payload.x, y: payload.y, speed: payload.speed }),
             );
         this.logger.log(`Player ${payload.playerId} moved to ${payload.x}, ${payload.y} in session ${payload.session.id}`);
     }
@@ -146,6 +167,30 @@ export class InGameGateway {
         } catch (error) {
             socket.emit(InGameEvents.PlayerTeleported, errorResponse(error.message));
         }
+    }
+
+    @OnEvent('player.updated')
+    handlePlayerUpdated(payload: { sessionId: string; player: Player }) {
+        const session = this.inGameService.getSession(payload.sessionId);
+        this.logger.log('player updated sent to client', payload);
+        this.server.to(session.inGameId).emit(InGameEvents.PlayerUpdated, successResponse(payload.player));
+        this.logger.log(`Player ${payload.player.id} updated in session ${payload.sessionId}`);
+    }
+
+    @OnEvent('player.availableActions')
+    handlePlayerAvailableActions(payload: { session: InGameSession; playerId: string; actions: AvailableAction[] }) {
+        this.server.to(payload.playerId).emit(InGameEvents.PlayerAvailableActions, successResponse(payload.actions));
+        this.logger.log(`Player ${payload.playerId} has ${payload.actions.length} available actions in session ${payload.session.id}`);
+    }
+
+    @OnEvent('game.over')
+    handleGameOver(payload: { sessionId: string; winnerId: string; winnerName: string }) {
+        const session = this.inGameService.getSession(payload.sessionId);
+        this.server.to(session.inGameId).emit(InGameEvents.GameOver, successResponse({ winnerId: payload.winnerId, winnerName: payload.winnerName }));
+
+        this.server.socketsLeave(session.inGameId);
+        this.server.socketsLeave(session.id);
+        this.logger.log(`Game over for session ${payload.sessionId}. Winner: ${payload.winnerName} (${payload.winnerId})`);
     }
 
     handleDisconnect(socket: Socket) {

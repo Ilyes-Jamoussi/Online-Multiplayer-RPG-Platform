@@ -6,14 +6,14 @@ import { SessionEvents } from '@common/constants/session-events';
 import { SocketResponse } from '@common/types/socket-response.type';
 import { fromEvent, Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
-import { environment } from 'src/environments/environment';
+import { ENVIRONMENT } from 'src/environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SocketService {
     private readonly socket: Socket;
 
     constructor(private readonly destroyRef: DestroyRef) {
-        this.socket = io(environment.socketUrl);
+        this.socket = io(ENVIRONMENT.socketUrl);
     }
 
     emit<T>(event: SessionEvents | GameStoreEvents | InGameEvents, data: T): void {

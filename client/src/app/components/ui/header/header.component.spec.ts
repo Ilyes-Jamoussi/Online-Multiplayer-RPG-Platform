@@ -32,8 +32,8 @@ describe('UiHeaderComponent', () => {
         component.title = testTitle;
         fixture.detectChanges();
 
-        const el = fixture.debugElement.nativeElement as HTMLElement;
-        expect(el.textContent).toContain(testTitle);
+        const element = fixture.debugElement.nativeElement as HTMLElement;
+        expect(element.textContent).toContain(testTitle);
     });
 
     it('should emit backClick when observed', () => {

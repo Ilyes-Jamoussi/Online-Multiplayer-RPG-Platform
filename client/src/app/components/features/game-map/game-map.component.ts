@@ -3,9 +3,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
+import { PlayerService } from '@app/services/player/player.service';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
-import { InGamePlayer } from '@common/models/player.interface';
+import { Player } from '@common/models/player.interface';
 import { StartPoint } from '@common/models/start-point.interface';
 import { GameMapTileComponent } from '@app/components/features/game-map-tile/game-map-tile.component';
 import { GameMapTileModalComponent } from '@app/components/features/game-map-tile-modal/game-map-tile-modal.component';
@@ -26,6 +27,7 @@ export class GameMapComponent implements OnInit {
         private readonly gameMapService: GameMapService,
         private readonly assetsService: AssetsService,
         private readonly adminModeService: AdminModeService,
+        private readonly playerService: PlayerService,
     ) {}
 
     ngOnInit(): void {
@@ -35,7 +37,7 @@ export class GameMapComponent implements OnInit {
     }
 
     get players() {
-        return this.gameMapService.currentlyInGamePlayers;
+        return this.gameMapService.currentlyPlayers;
     }
 
     get tiles() {
@@ -70,6 +72,7 @@ export class GameMapComponent implements OnInit {
         return this.gameMapService.reachableTiles;
     }
 
+
     getTileImage(tileKind: string, opened: boolean = false): string {
         return this.assetsService.getTileImage(tileKind as TileKind, opened);
     }
@@ -94,7 +97,7 @@ export class GameMapComponent implements OnInit {
         };
     }
 
-    getPlayerStyle(player: InGamePlayer) {
+    getPlayerStyle(player: Player) {
         return {
             gridColumn: `${player.x + 1}`,
             gridRow: `${player.y + 1}`,
@@ -112,11 +115,11 @@ export class GameMapComponent implements OnInit {
         };
     }
 
-    isReachable(x: number, y: number): boolean {
-        return this.reachableTiles.some((tile) => tile.x === x && tile.y === y);
+    getTileClass(x: number, y: number): string {
+        return this.gameMapService.getTileClass(x, y);
     }
 
-    getTileClass(x: number, y: number): string {
-        return this.isReachable(x, y) ? 'reachable-tile' : '';
+    isCurrentUser(player: Player): boolean {
+        return player.id === this.playerService.id();
     }
 }

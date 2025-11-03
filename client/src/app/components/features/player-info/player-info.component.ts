@@ -1,9 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { DEFAULT_ACTIONS, DEFAULT_BONUS_MOVEMENT, DEFAULT_MOVEMENT_POINTS, MAX_STAT_VALUE } from '@app/constants/player-info.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { Avatar } from '@common/enums/avatar.enum';
+
+const PERCENTAGE_MULTIPLIER = 100;
+const HP_HIGH_THRESHOLD = 70;
+const HP_MEDIUM_THRESHOLD = 30;
 
 @Component({
     selector: 'app-player-info',
@@ -27,47 +30,78 @@ export class PlayerInfoComponent {
         return this.assetsService.getAvatarStaticImage(avatar);
     }
 
-    get currentHP(): number { 
-        return this.playerService.lifePoints;
+    get playerName(): string {
+        return this.playerService.name();
+    }
+
+    get currentHealth(): number { 
+        return this.playerService.health();
     }
     
-    get maxHP(): number { 
-        return MAX_STAT_VALUE;
+    get maxHealth(): number { 
+        return this.playerService.maxHealth();
     }
     
-    get currentSpeed(): number {
-        return this.playerService.speedPoints;
-    }
-    
-    get maxSpeed(): number {
-        return MAX_STAT_VALUE;
+    get rapidityValue(): number {
+        return this.playerService.speed();
     }
     
     get attackValue(): number { 
-        return this.playerService.attackPoints; 
+        return this.playerService.attack(); 
     }
     
     get defenseValue(): number { 
-        return this.playerService.defensePoints; 
+        return this.playerService.defense(); 
     }
 
-    get remainingMovementPoints(): number {
-        return this.playerService.remainingMovementPoints;
+    get attackDiceType(): string {
+        return this.playerService.attackDice();
+    }
+
+    get defenseDiceType(): string {
+        return this.playerService.defenseDice();
+    }
+
+    get remainingBaseMovementPoints(): number {
+        const totalSpeed = this.playerService.speed();
+        const bonusSpeed = this.playerService.speedBonus();
+        return Math.max(0, totalSpeed - bonusSpeed);
     }
     
-    get movementPoints(): number { return DEFAULT_MOVEMENT_POINTS; }
-    get bonusMovementPoints(): number { return DEFAULT_BONUS_MOVEMENT; }
-    get actionsRemaining(): number { return DEFAULT_ACTIONS; }
-
-    get attackDice(): string {
-        return this.playerService.attackDice;
+    get remainingBonusMovementPoints(): number { 
+        const totalSpeed = this.playerService.speed();
+        const bonusSpeed = this.playerService.speedBonus();
+        return Math.min(bonusSpeed, totalSpeed);
+    }
+    
+    get actionsRemaining(): number { 
+        return this.playerService.actionsRemaining(); 
     }
 
-    get defenseDice(): string {
-        return this.playerService.defenseDice;
+    get hpPercentage(): number {
+        return this.maxHealth > 0 ? (this.currentHealth / this.maxHealth) * PERCENTAGE_MULTIPLIER : 0;
     }
 
-    get characterName(): string {
-        return this.playerService.characterName;
+    get hpColorClass(): string {
+        const percentage = this.hpPercentage;
+        if (percentage > HP_HIGH_THRESHOLD) return 'hp-high';
+        if (percentage > HP_MEDIUM_THRESHOLD) return 'hp-medium';
+        return 'hp-critical';
+    }
+
+    get totalCombats(): number {
+        return this.playerService.combatCount();
+    }
+
+    get combatWins(): number {
+        return this.playerService.combatWins();
+    }
+
+    get combatLosses(): number {
+        return this.playerService.combatLosses();
+    }
+
+    get combatDraws(): number {
+        return this.playerService.combatDraws();
     }
 }

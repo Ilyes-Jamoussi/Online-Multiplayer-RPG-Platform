@@ -14,7 +14,7 @@ export interface ReachableTile extends Position {
 export interface ReachableTilesOptions {
     startX: number;
     startY: number;
-    movementPoints: number;
+    speed: number;
     getTileKind: (x: number, y: number) => TileKind | null;
     isOccupied: (x: number, y: number) => boolean;
     isOnBoat?: boolean;
@@ -25,10 +25,10 @@ export interface ReachableTilesOptions {
 export class ReachableTilesService {
     
     calculateReachableTiles(options: ReachableTilesOptions): ReachableTile[] {
-        const { startX, startY, movementPoints, getTileKind, isOccupied, isOnBoat = false, hasSanctuary = () => false } = options;
+        const { startX, startY, speed, getTileKind, isOccupied, isOnBoat = false, hasSanctuary = () => false } = options;
         const reachable: ReachableTile[] = [];
         const visited = new Set<string>();
-        const queue: ReachableTile[] = [{ x: startX, y: startY, cost: 0, remainingPoints: movementPoints }];
+        const queue: ReachableTile[] = [{ x: startX, y: startY, cost: 0, remainingPoints: speed }];
         
         while (queue.length > 0) {
             const current = queue.shift();

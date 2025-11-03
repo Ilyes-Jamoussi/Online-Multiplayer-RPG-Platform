@@ -6,15 +6,28 @@ export interface Player {
     name: string;
     avatar: Avatar | null;
     isAdmin: boolean;
-    speed: number;
+    baseHealth: number;
+    healthBonus: number;
     health: number;
-    attack: Dice;
-    defense: Dice;
+    maxHealth: number;
+    baseSpeed: number;
+    speedBonus: number;
+    speed: number;
+    baseAttack: number;
+    attackBonus: number;
+    attack: number;
+    baseDefense: number;
+    defenseBonus: number;
+    defense: number;
+    attackDice: Dice;
+    defenseDice: Dice;
     x: number;
     y: number;
     isInGame: boolean;
     startPointId: string;
-    movementPoints: number;
+    actionsRemaining: number;
+    combatCount: number;
+    combatWins: number;
+    combatLosses: number;
+    combatDraws: number;
 }
-
-export interface InGamePlayer extends Player {}

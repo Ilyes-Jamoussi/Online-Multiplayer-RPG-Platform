@@ -14,6 +14,6 @@ export class StatsBarComponent {
     @Input() dice: string = '';
 
     get segments(): boolean[] {
-        return Array.from({ length: this.maxValue }, (_, i) => i < this.value);
+        return Array.from({ length: this.maxValue }, (_unused, index) => index < this.value);
     }
 }

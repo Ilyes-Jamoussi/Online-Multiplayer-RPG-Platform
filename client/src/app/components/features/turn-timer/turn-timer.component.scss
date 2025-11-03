@@ -1,0 +1,107 @@
+$primary-color: #6366f1;
+$primary-dark: #4f46e5;
+$success-color: #10b981;
+$success-dark: #059669;
+$warning-color: #f59e0b;
+$warning-dark: #d97706;
+$bg-overlay: rgba(255, 255, 255, 0.05);
+$border-color: rgba(255, 255, 255, 0.1);
+$text-primary: #ffffff;
+$text-secondary: rgba(255, 255, 255, 0.7);
+
+.turn-timer {
+    position: relative;
+    background: $bg-overlay;
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    border: 1px solid $border-color;
+    overflow: hidden;
+    min-width: 180px;
+    flex: 1;
+
+    &.my-turn {
+        border-color: $success-color;
+        box-shadow: 0 0 0 2px rgba($success-color, 0.2);
+        
+        .timer-progress {
+            background: linear-gradient(90deg, $success-color, $success-dark);
+        }
+        
+        .timer-label {
+            color: $success-color;
+        }
+    }
+
+    &.other-turn {
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+        
+        .timer-progress {
+            background: linear-gradient(90deg, $primary-color, $primary-dark);
+        }
+        
+        .timer-label {
+            color: $primary-color;
+        }
+    }
+
+    &.transition {
+        border-color: $warning-color;
+        box-shadow: 0 0 0 2px rgba($warning-color, 0.2);
+        
+        .timer-progress {
+            background: linear-gradient(90deg, $warning-color, $warning-dark);
+        }
+        
+        .timer-label {
+            color: $warning-color;
+        }
+    }
+}
+
+.timer-content {
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    gap: 1rem;
+}
+
+.timer-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: $text-secondary;
+}
+
+.timer-display {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+}
+
+.time-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: $text-primary;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.time-unit {
+    font-size: 0.7rem;
+    color: $text-secondary;
+    font-weight: 600;
+}
+
+.timer-progress {
+    height: 4px;
+    transition: width 1s linear;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
