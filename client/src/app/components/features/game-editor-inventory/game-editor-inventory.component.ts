@@ -39,7 +39,7 @@ export class GameEditorInventoryComponent {
     }
 
     onDragStart(evt: DragEvent, kind: PlaceableKind, disabled: boolean): void {
-        if (disabled || !evt.dataTransfer) {
+        if (disabled || this.isDisabled(kind) || !evt.dataTransfer) {
             evt.preventDefault();
             return;
         }
@@ -59,6 +59,10 @@ export class GameEditorInventoryComponent {
 
     onDragEnd(): void {
         this.gameEditorInteractionsService.revertToPreviousTool();
+    }
+
+    isDisabled(kind: PlaceableKind): boolean {
+        return kind === PlaceableKind.HEAL || kind === PlaceableKind.FIGHT || kind === PlaceableKind.BOAT;
     }
 
     onSlotDragOver(evt: DragEvent, kind: PlaceableKind): void {

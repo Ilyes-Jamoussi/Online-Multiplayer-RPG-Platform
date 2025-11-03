@@ -2,7 +2,7 @@
     @for (item of invKeys; track item) {
     <div
         class="slot"
-        [class.disabled]="inventory[item].remaining === 0"
+        [class.disabled]="inventory[item].remaining === 0 || isDisabled(inventory[item].kind)"
         [class.drag-over]="dragOver === item"
         [attr.title]="placeableLabel[inventory[item].kind]"
         (dragover)="onSlotDragOver($event, item)"
@@ -13,7 +13,7 @@
         <div
             class="icon-cell"
             [class.drag-over]="dragOver === inventory[item].kind"
-            [draggable]="inventory[item].remaining > 0"
+            [draggable]="inventory[item].remaining > 0 && !isDisabled(inventory[item].kind)"
             [ngStyle]="{ 'background-image': 'url(' + inventory[item].image + ')' }"
             (dragend)="onDragEnd()"
             (dragstart)="onDragStart($event, inventory[item].kind, inventory[item].remaining === 0)"
