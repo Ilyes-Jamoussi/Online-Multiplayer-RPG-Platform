@@ -58,7 +58,7 @@ export class GameMapTileComponent {
         event.stopPropagation();
         
         if (this.adminModeService.isAdminModeActivated() && this.inGameService.isMyTurn() && this.inGameService.isGameStarted()) {
-            if (!this.playerOnTile && !this.objectOnTile) {
+            if (!this.playerOnTile) {
                 this.inGameService.teleportPlayer(this.tile.x, this.tile.y);
             }
             return;
