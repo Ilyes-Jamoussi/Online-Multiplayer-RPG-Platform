@@ -132,7 +132,16 @@ export class InGameService {
         }
     }
 
-    leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string; playerId: string; sessionEnded: boolean; adminModeDeactivated: boolean } {
+    leaveInGameSession(
+        sessionId: string,
+        playerId: string,
+    ): {
+        session: InGameSession;
+        playerName: string;
+        playerId: string;
+        sessionEnded: boolean;
+        adminModeDeactivated: boolean;
+    } {
         const player = this.sessionRepository.playerLeave(sessionId, playerId);
         const session = this.sessionRepository.findById(sessionId);
         
