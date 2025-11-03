@@ -192,6 +192,8 @@ export class CombatService {
 
             if (winnerId) {
                 this.checkGameVictory(sessionId, winnerId, playerAId, playerBId);
+            } else {
+                this.endCombat(session, playerAId, playerBId, winnerId);
             }
         }
     }
