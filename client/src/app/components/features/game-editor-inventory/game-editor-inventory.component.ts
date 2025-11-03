@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
 import { ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { PlaceableFootprint, PlaceableKind, PlaceableLabel, PlaceableMime } from '@common/enums/placeable-kind.enum';
+import { PlaceableDisabled, PlaceableFootprint, PlaceableKind, PlaceableLabel, PlaceableMime } from '@common/enums/placeable-kind.enum';
 
 @Component({
     selector: 'app-editor-inventory',
@@ -62,7 +62,7 @@ export class GameEditorInventoryComponent {
     }
 
     isDisabled(kind: PlaceableKind): boolean {
-        return kind === PlaceableKind.HEAL || kind === PlaceableKind.FIGHT || kind === PlaceableKind.BOAT;
+        return PlaceableDisabled[kind];
     }
 
     onSlotDragOver(evt: DragEvent, kind: PlaceableKind): void {

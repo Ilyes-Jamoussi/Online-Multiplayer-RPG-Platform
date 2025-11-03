@@ -4,7 +4,7 @@ import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket
 import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
-import { TimerService } from '@app/services/timer/timer.service';
+import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
 import { ToastService } from '@app/services/toast/toast.service';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { Orientation } from '@common/enums/orientation.enum';
@@ -37,7 +37,7 @@ export class InGameService {
     readonly mode = computed(() => this._inGameSession().mode);
     readonly isGameStarted = computed(() => this._inGameSession().isGameStarted);
     readonly isTransitioning = computed(() => this._isTransitioning());
-    readonly timeRemaining = computed(() => this.timerService.turnTimeRemaining());
+    readonly timeRemaining = computed(() => this.timerCoordinatorService.turnTimeRemaining());
     readonly inGamePlayers = computed(() => this._inGameSession().inGamePlayers);
     readonly inGameSession = this._inGameSession.asReadonly();
     readonly reachableTiles = this._reachableTiles.asReadonly();
@@ -79,7 +79,7 @@ export class InGameService {
     constructor(
         private readonly inGameSocketService: InGameSocketService,
         private readonly sessionService: SessionService,
-        private readonly timerService: TimerService,
+        private readonly timerCoordinatorService: TimerCoordinatorService,
         private readonly playerService: PlayerService,
         private readonly notificationService: NotificationService,
     ) {
@@ -137,15 +137,15 @@ export class InGameService {
     }
 
     startTurnTimer(): void {
-        this.timerService.startTurnTimer(DEFAULT_TURN_DURATION);
+        this.timerCoordinatorService.startTurnTimer(DEFAULT_TURN_DURATION);
     }
 
     stopTurnTimer(): void {
-        this.timerService.stopTurnTimer();
+        this.timerCoordinatorService.stopTurnTimer();
     }
 
     startTurnTransitionTimer(): void {
-        this.timerService.startTurnTimer(DEFAULT_TURN_TRANSITION_DURATION);
+        this.timerCoordinatorService.startTurnTimer(DEFAULT_TURN_TRANSITION_DURATION);
     }
 
     turnEnd(data: InGameSession): void {
@@ -160,7 +160,7 @@ export class InGameService {
     }
 
     reset(): void {
-        this.timerService.resetAllTimers();
+        this.timerCoordinatorService.resetAllTimers();
         this._isGameStarted.set(false);
         this._isTransitioning.set(false);
         this._reachableTiles.set([]);

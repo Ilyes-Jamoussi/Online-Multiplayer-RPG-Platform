@@ -29,3 +29,11 @@ export enum PlaceableLabel {
     FIGHT = 'Sanctuaire Combat',
     BOAT = 'Bateau',
 }
+
+export const PlaceableDisabled: Record<PlaceableKind, boolean> = {
+    [PlaceableKind.START]: false,
+    [PlaceableKind.FLAG]: false,
+    [PlaceableKind.HEAL]: true,
+    [PlaceableKind.FIGHT]: true,
+    [PlaceableKind.BOAT]: true,
+};

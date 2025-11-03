@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Signal } from '@angular/core';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { TimerService } from '@app/services/timer/timer.service';
+import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
 import { CombatService } from '@app/services/combat/combat.service';
 
 @Component({
@@ -14,7 +14,7 @@ import { CombatService } from '@app/services/combat/combat.service';
 export class TurnTimerComponent {
     constructor(
         private readonly inGameService: InGameService,
-        private readonly timerService: TimerService,
+        private readonly timerCoordinatorService: TimerCoordinatorService,
         private readonly combatService: CombatService,
     ) {}
 
@@ -40,7 +40,7 @@ export class TurnTimerComponent {
 
     get displayedTime(): number {
         if (this.isCombatActive) {
-            return this.timerService.getPausedTurnTime();
+            return this.timerCoordinatorService.getPausedTurnTime();
         }
         return this.timeRemaining();
     }
@@ -61,7 +61,7 @@ export class TurnTimerComponent {
 
     get shouldShowTimer(): boolean {
         const gameStarted = this.isGameStarted();
-        const turnActive = this.timerService.isTurnActive() || this.isCombatActive;
+        const turnActive = this.timerCoordinatorService.isTurnActive() || this.isCombatActive;
         return gameStarted && turnActive;
     }
 }

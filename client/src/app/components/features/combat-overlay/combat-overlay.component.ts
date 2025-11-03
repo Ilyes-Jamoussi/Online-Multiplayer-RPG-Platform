@@ -4,7 +4,7 @@ import { CombatTimerComponent } from '@app/components/features/combat-timer/comb
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { AssetsService } from '@app/services/assets/assets.service';
-import { TimerService } from '@app/services/timer/timer.service';
+import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile-kind.enum';
 
@@ -22,7 +22,7 @@ export class CombatOverlayComponent {
         private readonly combatService: CombatService,
         private readonly inGameService: InGameService,
         private readonly assetsService: AssetsService,
-        private readonly timerService: TimerService,
+        private readonly timerCoordinatorService: TimerCoordinatorService,
     ) {}
 
     get combatData() {
@@ -225,7 +225,7 @@ export class CombatOverlayComponent {
     }
 
     get pausedTurnTime(): number {
-        return this.timerService.getPausedTurnTime();
+        return this.timerCoordinatorService.getPausedTurnTime();
     }
 
     get isVictoryNotificationVisible(): boolean {

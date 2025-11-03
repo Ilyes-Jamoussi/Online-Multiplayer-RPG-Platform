@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Signal } from '@angular/core';
 import { CombatService } from '@app/services/combat/combat.service';
-import { CombatTimerService } from '@app/services/combat-timer/combat-timer.service';
+import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
 
 @Component({
     selector: 'app-combat-timer',
@@ -13,11 +13,11 @@ import { CombatTimerService } from '@app/services/combat-timer/combat-timer.serv
 export class CombatTimerComponent {
     constructor(
         private readonly combatService: CombatService,
-        private readonly combatTimerService: CombatTimerService
+        private readonly timerCoordinatorService: TimerCoordinatorService
     ) {}
 
     get timeRemaining(): Signal<number> {
-        return this.combatTimerService.combatTimeRemaining;
+        return this.timerCoordinatorService.combatTimeRemaining;
     }
 
     get timerLabel(): string {

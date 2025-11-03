@@ -1,18 +1,25 @@
 import { Injectable, signal } from '@angular/core';
 import { MILLISECONDS_PER_SECOND } from '@common/constants/in-game';
 
+const COMBAT_ROUND_DURATION = 5;
+
 @Injectable({
     providedIn: 'root',
 })
-export class TimerService {
+export class TimerCoordinatorService {
     private readonly _turnTimeRemaining = signal<number>(0);
     private readonly _isTurnActive = signal<boolean>(false);
+    private readonly _combatTimeRemaining = signal<number>(0);
+    private readonly _isCombatActive = signal<boolean>(false);
 
     private turnTimer: number | null = null;
     private pausedTurnTime: number = 0;
+    private combatTimer: number | null = null;
 
     readonly turnTimeRemaining = this._turnTimeRemaining.asReadonly();
     readonly isTurnActive = this._isTurnActive.asReadonly();
+    readonly combatTimeRemaining = this._combatTimeRemaining.asReadonly();
+    readonly isCombatActive = this._isCombatActive.asReadonly();
 
     getPausedTurnTime(): number {
         return this.pausedTurnTime;
@@ -76,7 +83,41 @@ export class TimerService {
         }
     }
 
+    startCombatTimer(): void {
+        if (this.combatTimer) {
+            this.resetCombatTimer();
+            return;
+        }
+
+        this._combatTimeRemaining.set(COMBAT_ROUND_DURATION);
+        this._isCombatActive.set(true);
+
+        this.combatTimer = window.setInterval(() => {
+            const currentTime = this._combatTimeRemaining();
+            if (currentTime <= 1) {
+                this._combatTimeRemaining.set(COMBAT_ROUND_DURATION);
+            } else {
+                this._combatTimeRemaining.set(currentTime - 1);
+            }
+        }, MILLISECONDS_PER_SECOND);
+    }
+
+    stopCombatTimer(): void {
+        if (this.combatTimer) {
+            window.clearInterval(this.combatTimer);
+            this.combatTimer = null;
+        }
+        this._isCombatActive.set(false);
+        this._combatTimeRemaining.set(0);
+    }
+
+    resetCombatTimer(): void {
+        this._combatTimeRemaining.set(COMBAT_ROUND_DURATION);
+    }
+
     resetAllTimers(): void {
         this.stopTurnTimer();
+        this.stopCombatTimer();
     }
 }
+

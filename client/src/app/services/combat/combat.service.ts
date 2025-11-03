@@ -1,6 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { TimerService } from '@app/services/timer/timer.service';
-import { CombatTimerService } from '@app/services/combat-timer/combat-timer.service';
+import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
 import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
@@ -64,10 +63,8 @@ export class CombatService {
     readonly minHealthDuringCombat = this._minHealthDuringCombat.asReadonly();
     readonly isVictoryNotificationVisible = this._isVictoryNotificationVisible.asReadonly();
     readonly isCombatActive = this._isCombatActive.asReadonly();
-    // eslint-disable-next-line max-params
     constructor(
-        private readonly timerService: TimerService,
-        private readonly combatTimerService: CombatTimerService,
+        private readonly timerCoordinatorService: TimerCoordinatorService,
         private readonly combatSocketService: CombatSocketService,
         private readonly playerService: PlayerService,
         private readonly inGameService: InGameService,
@@ -168,8 +165,8 @@ export class CombatService {
 
         this.combatSocketService.onCombatVictory((data) => {
             this._isCombatActive.set(false);
-            this.combatTimerService.stopCombatTimer();
-            this.timerService.resumeTurnTimer();
+            this.timerCoordinatorService.stopCombatTimer();
+            this.timerCoordinatorService.resumeTurnTimer();
             this.handleVictory(data.playerAId, data.playerBId, data.winnerId, data.abandon);
         });
 
@@ -281,9 +278,9 @@ export class CombatService {
     }
 
     private handleCombatStarted(attackerId: string, targetId: string, attackerTileEffect?: number, targetTileEffect?: number): void {
-        this.timerService.pauseTurnTimer();
-        if (!this.combatTimerService.isCombatActive()) {
-            this.combatTimerService.startCombatTimer();
+        this.timerCoordinatorService.pauseTurnTimer();
+        if (!this.timerCoordinatorService.isCombatActive()) {
+            this.timerCoordinatorService.startCombatTimer();
         }
 
         const myId = this.playerService.id();
@@ -337,16 +334,16 @@ export class CombatService {
     }
 
     private handleCombatTimerRestart(): void {
-        if (!this.combatTimerService.isCombatActive() && this._isCombatActive()) {
-            this.timerService.pauseTurnTimer();
-            this.combatTimerService.startCombatTimer();
+        if (!this.timerCoordinatorService.isCombatActive() && this._isCombatActive()) {
+            this.timerCoordinatorService.pauseTurnTimer();
+            this.timerCoordinatorService.startCombatTimer();
         } else {
-            this.combatTimerService.resetCombatTimer();
+            this.timerCoordinatorService.resetCombatTimer();
         }
     }
 
     private handleCombatNewRound(): void {
-        this.combatTimerService.resetCombatTimer();
+        this.timerCoordinatorService.resetCombatTimer();
         this._selectedPosture.set(null);
         this._playerPostures.set({});
     }
