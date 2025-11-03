@@ -44,8 +44,8 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
     private readonly playerService = inject(PlayerService);
 
     @HostListener('window:keydown', ['$event'])
-    onKeyDown(e: KeyboardEvent) {
-        if (e.repeat) return;
+    onKeyDown(event: KeyboardEvent) {
+        if (event.repeat) return;
 
         const activeElement = document.activeElement as HTMLElement | null;
         const tag = (activeElement?.tagName || '').toLowerCase();
@@ -55,7 +55,7 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
             tag === 'select' ||
             activeElement?.isContentEditable;
 
-        if (!typingInField && (e.key === 'd' || e.key === 'D')) {
+        if (!typingInField && (event.key === 'd' || event.key === 'D')) {
             this.adminModeService.toggleAdminMode();
         }
     }
