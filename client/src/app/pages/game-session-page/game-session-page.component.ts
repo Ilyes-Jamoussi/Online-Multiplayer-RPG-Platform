@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnDestroy, OnInit, ViewChild, inject, Signal } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, ViewChild, inject} from '@angular/core';
 import { ChatComponent } from '@app/components/features/chat/chat.component';
 import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
@@ -60,8 +60,8 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         }
     }
 
-    get gameId(): Signal<string> {
-        return this.sessionService.gameId;
+    get gameId(): string {
+        return this.sessionService.gameId();
     }
 
     get mapSize() {

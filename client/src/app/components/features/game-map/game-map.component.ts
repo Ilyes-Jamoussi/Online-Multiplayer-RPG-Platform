@@ -10,7 +10,6 @@ import { Player } from '@common/models/player.interface';
 import { StartPoint } from '@common/models/start-point.interface';
 import { GameMapTileComponent } from '@app/components/features/game-map-tile/game-map-tile.component';
 import { GameMapTileModalComponent } from '@app/components/features/game-map-tile-modal/game-map-tile-modal.component';
-import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 
 @Component({
     selector: 'app-game-map',
@@ -26,7 +25,6 @@ export class GameMapComponent implements OnInit {
     constructor(
         private readonly gameMapService: GameMapService,
         private readonly assetsService: AssetsService,
-        private readonly adminModeService: AdminModeService,
         private readonly playerService: PlayerService,
     ) {}
 
@@ -66,12 +64,6 @@ export class GameMapComponent implements OnInit {
     get visibleObjects() {
         return this.gameMapService.visibleObjects();
     }
-
-    get reachableTiles() {
-        if (!this.gameMapService.isMyTurn || this.adminModeService.isAdminModeActivated()) return [];
-        return this.gameMapService.reachableTiles;
-    }
-
 
     getTileImage(tileKind: string, opened: boolean = false): string {
         return this.assetsService.getTileImage(tileKind as TileKind, opened);

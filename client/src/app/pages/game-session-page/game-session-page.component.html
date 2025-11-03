@@ -49,8 +49,8 @@
         </div>
 
         <div class="game-map-container">
-            @if (gameId()) {
-            <app-game-map [gameId]="gameId()"></app-game-map>
+            @if (gameId) {
+            <app-game-map [gameId]="gameId"></app-game-map>
             } @else {
             <div class="error-state">
                 <div class="error-icon">⚠️</div>
