@@ -132,9 +132,17 @@ export class InGameService {
         }
     }
 
-    leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string; playerId: string; sessionEnded: boolean } {
+    leaveInGameSession(sessionId: string, playerId: string): { session: InGameSession; playerName: string; playerId: string; sessionEnded: boolean; adminModeDeactivated: boolean } {
         const player = this.sessionRepository.playerLeave(sessionId, playerId);
         const session = this.sessionRepository.findById(sessionId);
+        
+        let adminModeDeactivated = false;
+        if (player.isAdmin && session.isAdminModeActive) {
+            session.isAdminModeActive = false;
+            this.sessionRepository.update(session);
+            adminModeDeactivated = true;
+        }
+        
         const inGamePlayers = this.sessionRepository.inGamePlayersCount(sessionId);
         let sessionEnded = false;
         if (inGamePlayers < 2) {
@@ -142,7 +150,7 @@ export class InGameService {
             sessionEnded = true;
         }
 
-        return { session, playerName: player.name, playerId, sessionEnded };
+        return { session, playerName: player.name, playerId, sessionEnded, adminModeDeactivated };
     }
 
     getPlayers(sessionId: string): Player[] {
@@ -167,8 +175,18 @@ export class InGameService {
         this.actionService.calculateAvailableActions(session, playerId);
     }
 
-    toggleAdminMode(sessionId: string): InGameSession {
+    toggleAdminMode(sessionId: string, playerId: string): InGameSession {
         const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        
+        if (!player) {
+            throw new NotFoundException('Player not found');
+        }
+        
+        if (!player.isAdmin) {
+            throw new BadRequestException('Only admin can toggle admin mode');
+        }
+        
         session.isAdminModeActive = !session.isAdminModeActive;
         this.sessionRepository.update(session);
         return session;
@@ -185,7 +203,7 @@ export class InGameService {
             throw new BadRequestException('Not your turn');
         }
         
-        if (!this.isTileFree(session, x, y)) {
+        if (!this.gameCache.isTileFree(sessionId, x, y)) {
             throw new BadRequestException('Tile is not free');
         }
         
@@ -194,20 +212,5 @@ export class InGameService {
         this.actionService.calculateAvailableActions(session, playerId);
     }
 
-    private isTileFree(session: InGameSession, x: number, y: number): boolean {
 
-        const players = Object.values(session.inGamePlayers);
-        const isOccupiedByPlayer = players.some(player => player.x === x && player.y === y && player.isInGame);
-        
-        if (isOccupiedByPlayer) {
-            return false;
-        }
-
-        const objectsAtPosition = this.gameCache.getPlaceablesAtPosition(session.id, x, y);
-        if (objectsAtPosition.length > 0) {
-            return false;
-        }
-        
-        return true;
-    }
 }

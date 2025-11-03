@@ -146,10 +146,11 @@ export class InGameGateway {
     @SubscribeMessage(InGameEvents.ToggleAdminMode)
     handleToggleAdminMode(socket: Socket, sessionId: string): void {
         try {
-            const session = this.inGameService.toggleAdminMode(sessionId);
+            const session = this.inGameService.toggleAdminMode(sessionId, socket.id);
             this.server.to(session.inGameId).emit(InGameEvents.AdminModeToggled, successResponse({ isAdminModeActive: session.isAdminModeActive }));
         } catch (error) {
             this.logger.error('Error toggling admin mode:', error.message);
+            socket.emit(InGameEvents.AdminModeToggled, errorResponse(error.message));
         }
     }
 
@@ -207,6 +208,9 @@ export class InGameGateway {
                 this.server.to(result.session.inGameId).emit(InGameEvents.GameForceStopped, successResponse({}));
                 this.server.socketsLeave(sessionId);
             } else {
+                if (result.adminModeDeactivated) {
+                    this.server.to(result.session.inGameId).emit(InGameEvents.AdminModeToggled, successResponse({ isAdminModeActive: false }));
+                }
                 this.server.to(result.session.inGameId).emit(InGameEvents.PlayerLeftInGameSession, successResponse(result));
                 this.logger.log(`Player ${result.playerName} left session ${sessionId}`);
             }
