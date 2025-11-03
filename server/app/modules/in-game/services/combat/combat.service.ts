@@ -124,6 +124,8 @@ export class CombatService {
             this.timerService.endTurnManual(session);
         } else {
             this.timerService.resumeTurnTimer(session.id);
+            this.inGameMovementService.calculateReachableTiles(session, session.currentTurn.activePlayerId);
+
         }
     }
 
