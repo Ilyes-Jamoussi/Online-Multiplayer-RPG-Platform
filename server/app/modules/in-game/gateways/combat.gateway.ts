@@ -1,5 +1,6 @@
 import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
 import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
@@ -34,7 +35,7 @@ export class CombatGateway {
     }
 
     @SubscribeMessage(InGameEvents.CombatChoice)
-    combatChoice(socket: Socket, payload: { sessionId: string; choice: 'offensive' | 'defensive' }): void {
+    combatChoice(socket: Socket, payload: { sessionId: string; choice: CombatPosture }): void {
         try {
             this.combatService.combatChoice(payload.sessionId, socket.id, payload.choice);
         } catch (error) {
@@ -107,7 +108,7 @@ export class CombatGateway {
     }
 
     @OnEvent('combat.postureSelected')
-    handleCombatPostureSelected(payload: { sessionId: string; playerId: string; posture: 'offensive' | 'defensive' }) {
+    handleCombatPostureSelected(payload: { sessionId: string; playerId: string; posture: CombatPosture }) {
         const session = this.combatService.getSession(payload.sessionId);
         if (session) {
             this.server.to(session.inGameId).emit(

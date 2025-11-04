@@ -1,7 +1,13 @@
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
+import { DoorToggledDto } from '@app/modules/in-game/dto/door-toggled.dto';
+import { GameOverDto } from '@app/modules/in-game/dto/game-over.dto';
+import { PlayerMoveDto } from '@app/modules/in-game/dto/player-move.dto';
+import { PlayerMovedDto } from '@app/modules/in-game/dto/player-moved.dto';
+import { PlayerTeleportDto } from '@app/modules/in-game/dto/player-teleport.dto';
+import { PlayerTeleportedDto } from '@app/modules/in-game/dto/player-teleported.dto';
+import { ToggleDoorActionDto } from '@app/modules/in-game/dto/toggle-door-action.dto';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
-import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
@@ -75,7 +81,7 @@ export class InGameGateway {
     }
 
     @SubscribeMessage(InGameEvents.ToggleDoorAction)
-    toggleDoorAction(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
+    toggleDoorAction(socket: Socket, payload: ToggleDoorActionDto): void {
         try {
             this.inGameService.toggleDoorAction(payload.sessionId, socket.id, payload.x, payload.y);
         } catch (error) {
@@ -84,7 +90,7 @@ export class InGameGateway {
     }
 
     @SubscribeMessage(InGameEvents.PlayerMove)
-    playerMove(socket: Socket, payload: { sessionId: string; orientation: Orientation }): void {
+    playerMove(socket: Socket, payload: PlayerMoveDto): void {
         try {
             this.inGameService.movePlayer(payload.sessionId, socket.id, payload.orientation);
         } catch (error) {
@@ -128,7 +134,7 @@ export class InGameGateway {
     handleDoorToggled(payload: { session: InGameSession; playerId: string; x: number; y: number; isOpen: boolean }) {
         this.server
             .to(payload.session.inGameId)
-            .emit(InGameEvents.DoorToggled, successResponse({ x: payload.x, y: payload.y, isOpen: payload.isOpen }));
+            .emit(InGameEvents.DoorToggled, successResponse<DoorToggledDto>({ x: payload.x, y: payload.y, isOpen: payload.isOpen }));
         this.server.to(payload.playerId).emit(InGameEvents.PlayerActionUsed, successResponse({}));
     }
 
@@ -136,7 +142,10 @@ export class InGameGateway {
     handlePlayerMoved(payload: { session: InGameSession; playerId: string; x: number; y: number; speed: number }) {
         this.server
             .to(payload.session.inGameId)
-            .emit(InGameEvents.PlayerMoved, successResponse({ playerId: payload.playerId, x: payload.x, y: payload.y, speed: payload.speed }));
+            .emit(
+                InGameEvents.PlayerMoved,
+                successResponse<PlayerMovedDto>({ playerId: payload.playerId, x: payload.x, y: payload.y, speed: payload.speed }),
+            );
         this.logger.log(`Player ${payload.playerId} moved to ${payload.x}, ${payload.y} in session ${payload.session.id}`);
     }
 
@@ -157,12 +166,14 @@ export class InGameGateway {
     }
 
     @SubscribeMessage(InGameEvents.PlayerTeleport)
-    playerTeleport(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
+    playerTeleport(socket: Socket, payload: PlayerTeleportDto): void {
         try {
             this.inGameService.teleportPlayer(payload.sessionId, socket.id, payload.x, payload.y);
             const session = this.inGameService.getSession(payload.sessionId);
             const player = session.inGamePlayers[socket.id];
-            this.server.to(session.inGameId).emit(InGameEvents.PlayerTeleported, successResponse({ playerId: socket.id, x: player.x, y: player.y }));
+            this.server
+                .to(session.inGameId)
+                .emit(InGameEvents.PlayerTeleported, successResponse<PlayerTeleportedDto>({ playerId: socket.id, x: player.x, y: player.y }));
             this.inGameService.getReachableTiles(payload.sessionId, socket.id);
         } catch (error) {
             socket.emit(InGameEvents.PlayerTeleported, errorResponse(error.message));
@@ -180,13 +191,17 @@ export class InGameGateway {
     @OnEvent('player.availableActions')
     handlePlayerAvailableActions(payload: { session: InGameSession; playerId: string; actions: AvailableAction[] }) {
         this.server.to(payload.playerId).emit(InGameEvents.PlayerAvailableActions, successResponse(payload.actions));
-        this.logger.log(`Player ${payload.playerId} has ${payload.actions.length} available actions in session ${payload.session.id}`);
+        this.logger.log(
+            `Player ${payload.playerId} has ${payload.actions.length} available actions in session ${payload.session.id}`,
+        );
     }
 
     @OnEvent('game.over')
     handleGameOver(payload: { sessionId: string; winnerId: string; winnerName: string }) {
         const session = this.inGameService.getSession(payload.sessionId);
-        this.server.to(session.inGameId).emit(InGameEvents.GameOver, successResponse({ winnerId: payload.winnerId, winnerName: payload.winnerName }));
+        this.server
+            .to(session.inGameId)
+            .emit(InGameEvents.GameOver, successResponse<GameOverDto>({ winnerId: payload.winnerId, winnerName: payload.winnerName }));
 
         this.server.socketsLeave(session.inGameId);
         this.server.socketsLeave(session.id);
