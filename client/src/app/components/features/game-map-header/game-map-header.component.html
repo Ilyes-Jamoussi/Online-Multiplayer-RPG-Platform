@@ -7,16 +7,6 @@
         <app-turn-timer></app-turn-timer>
     </div>
     <div class="header-actions">
-        @if (!isGameStarted && isMyTurn) {
-        <button
-            class="start-game-btn"
-            (click)="onStartGame()"
-            title="Démarrer la partie"
-        >
-            <span class="btn-icon">▶️</span>
-            <span class="btn-text">Démarrer</span>
-        </button>
-        }
         <button
             class="end-turn-btn"
             [disabled]="!isMyTurn || !isGameStarted"

@@ -25,10 +25,6 @@ export class GameMapHeaderComponent {
         return this.inGameService.isGameStarted();
     }
 
-    onStartGame(): void {
-        this.inGameService.startGame();
-    }
-
     onEndTurn(): void {
         this.inGameService.endTurn();
     }
