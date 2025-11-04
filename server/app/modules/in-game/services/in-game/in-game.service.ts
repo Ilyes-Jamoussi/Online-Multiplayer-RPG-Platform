@@ -8,10 +8,10 @@ import { Orientation } from '@common/enums/orientation.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { InGameSession, WaitingRoomSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { GameCacheService } from 'app/modules/in-game/services/game-cache/game-cache.service';
-import { InGameActionService } from 'app/modules/in-game/services/in-game-action/in-game-action.service';
-import { InGameInitializationService } from 'app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
-import { InGameMovementService } from 'app/modules/in-game/services/in-game-movement/in-game-movement.service';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { InGameActionService } from '@app/modules/in-game/services/in-game-action/in-game-action.service';
+import { InGameInitializationService } from '@app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
+import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
 
 @Injectable()
 export class InGameService {
