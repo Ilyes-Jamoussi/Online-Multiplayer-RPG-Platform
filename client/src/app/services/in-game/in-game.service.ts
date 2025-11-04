@@ -48,7 +48,7 @@ export class InGameService {
     }
 
     toggleDoorAction(x: number, y: number): void {
-        this.inGameSocketService.playerToggleDoorAction(this.sessionService.id(), x, y);
+        this.inGameSocketService.playerToggleDoorAction({ sessionId: this.sessionService.id(), x, y });
     }
 
     playerActionUsed(): void {
@@ -116,7 +116,7 @@ export class InGameService {
 
     movePlayer(orientation: Orientation): void {
         if (!this.isMyTurn() || !this.isGameStarted()) return;
-        this.inGameSocketService.playerMove(this.sessionService.id(), orientation);
+        this.inGameSocketService.playerMove({ sessionId: this.sessionService.id(), orientation });
     }
 
     endTurn(): void {

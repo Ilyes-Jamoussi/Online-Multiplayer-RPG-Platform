@@ -1,14 +1,15 @@
 import { computed, Injectable, Signal, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { MAP_SIZE_TO_MAX_PLAYERS } from '@app/constants/map-size.constants';
 import { DEFAULT_SESSION, MIN_SESSION_PLAYERS } from '@app/constants/session.constants';
 import { CreateSessionDto } from '@app/dto/create-session-dto';
 import { JoinSessionDto } from '@app/dto/join-session-dto';
+import { SessionJoinedDto } from '@app/dto/session-joined-dto';
 import { SessionPreviewDto } from '@app/dto/session-preview-dto';
 import { ROUTES } from '@app/enums/routes.enum';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
-import { MAP_SIZE_TO_MAX_PLAYERS } from '@app/constants/map-size.constants';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { AvatarAssignment, WaitingRoomSession } from '@common/interfaces/session.interface';
@@ -121,7 +122,7 @@ export class SessionService {
         this.sessionSocketService.loadAvailableSessions();
     }
 
-    handleSessionJoined(data: { gameId: string; maxPlayers: number }): void {
+    handleSessionJoined(data: SessionJoinedDto): void {
         this.updateSession({ gameId: data.gameId, maxPlayers: data.maxPlayers });
         void this.router.navigate([ROUTES.WaitingRoomPage]);
     }
@@ -189,10 +190,10 @@ export class SessionService {
             this.updateSession({ isRoomLocked: true });
         });
 
-        this.sessionSocketService.onStartGameSessionError((msg) => {
+        this.sessionSocketService.onStartGameSessionError((message) => {
             this.notificationCoordinatorService.displayErrorPopup({
                 title: 'Impossible de démarrer le jeu',
-                message: msg,
+                message,
             });
         });
     }

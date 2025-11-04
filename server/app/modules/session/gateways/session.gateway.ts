@@ -9,9 +9,9 @@ import { AvatarAssignmentsUpdatedDto, UpdateAvatarAssignmentsDto } from '@app/mo
 import { SessionPlayersUpdatedDto } from '@app/modules/session/dto/update-session.dto';
 import { SessionService } from '@app/modules/session/services/session.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
-import { SessionEvents } from '@common/enums/session-events.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { SessionEvents } from '@common/enums/session-events.enum';
 import { SocketResponse } from '@common/types/socket-response.type';
 import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -146,14 +146,13 @@ export class SessionGateway implements OnGatewayDisconnect {
 
             const players = this.sessionService.getPlayersSession(sessionId);
             this.server.to(sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
-            
-            // Notifier la mise à jour des avatars dans la sélection d'avatar
+
             const avatarAssignments = this.sessionService.getChosenAvatars(sessionId);
             const avatarRoomId = this.getAvatarSelectionRoomId(sessionId);
             this.server
                 .to(avatarRoomId)
                 .emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
-            
+
             this.handleAvailabilityChange();
         } catch (error) {
             socket.emit(SessionEvents.SessionEnded, errorResponse(error.message));
@@ -232,14 +231,13 @@ export class SessionGateway implements OnGatewayDisconnect {
 
             const players = this.sessionService.getPlayersSession(sessionId);
             this.server.to(sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
-            
-            // Notifier la mise à jour des avatars dans la sélection d'avatar
+
             const avatarAssignments = this.sessionService.getChosenAvatars(sessionId);
             const avatarRoomId = this.getAvatarSelectionRoomId(sessionId);
             this.server
                 .to(avatarRoomId)
                 .emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
-            
+
             this.handleAvailabilityChange();
         } catch (error) {
             this.logger.error('Error leaving session:', error.message);
