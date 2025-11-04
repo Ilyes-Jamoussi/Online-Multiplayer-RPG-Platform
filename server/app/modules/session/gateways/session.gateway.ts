@@ -9,11 +9,11 @@ import { AvatarAssignmentsUpdatedDto, UpdateAvatarAssignmentsDto } from '@app/mo
 import { SessionPlayersUpdatedDto } from '@app/modules/session/dto/update-session.dto';
 import { SessionService } from '@app/modules/session/services/session.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
-import { SessionEvents } from '@common/enums/session-events.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { SessionEvents } from '@common/enums/session-events.enum';
 import { SocketResponse } from '@common/types/socket-response.type';
-import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -31,7 +31,6 @@ import { validationExceptionFactory } from '@app/utils/validation/validation.uti
 @Injectable()
 export class SessionGateway implements OnGatewayDisconnect {
     @WebSocketServer() private readonly server: Server;
-    private readonly logger = new Logger(SessionGateway.name);
 
     constructor(
         private readonly sessionService: SessionService,
@@ -144,14 +143,13 @@ export class SessionGateway implements OnGatewayDisconnect {
 
             const players = this.sessionService.getPlayersSession(sessionId);
             this.server.to(sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
-            
-            // Notifier la mise à jour des avatars dans la sélection d'avatar
+
             const avatarAssignments = this.sessionService.getChosenAvatars(sessionId);
             const avatarRoomId = this.getAvatarSelectionRoomId(sessionId);
             this.server
                 .to(avatarRoomId)
                 .emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
-            
+
             this.handleAvailabilityChange();
         } catch (error) {
             socket.emit(SessionEvents.SessionEnded, errorResponse(error.message));
@@ -202,46 +200,41 @@ export class SessionGateway implements OnGatewayDisconnect {
 
     @SubscribeMessage(SessionEvents.LeaveSession)
     leaveSession(socket: Socket): void {
-        try {
-            const sessionId = this.sessionService.getPlayerSessionId(socket.id);
-            if (!sessionId) return;
+        const sessionId = this.sessionService.getPlayerSessionId(socket.id);
+        if (!sessionId) return;
 
-            const session = this.sessionService.getSession(sessionId);
-            const isAdmin = this.sessionService.isAdmin(socket.id);
+        const session = this.sessionService.getSession(sessionId);
+        const isAdmin = this.sessionService.isAdmin(socket.id);
 
-            if (isAdmin) {
-                socket.broadcast.to(sessionId).emit(SessionEvents.SessionEnded, successResponse({ message: "L'organisateur a quitté" }));
+        if (isAdmin) {
+            socket.broadcast.to(sessionId).emit(SessionEvents.SessionEnded, successResponse({ message: "L'organisateur a quitté" }));
 
-                for (const player of session.players) {
-                    const playerSocket = this.server.sockets.sockets.get(player.id);
-                    if (playerSocket) {
-                        void playerSocket.leave(sessionId);
-                    }
-                    this.sessionService.releaseAvatar(sessionId, player.id);
+            for (const player of session.players) {
+                const playerSocket = this.server.sockets.sockets.get(player.id);
+                if (playerSocket) {
+                    void playerSocket.leave(sessionId);
                 }
-
-                this.sessionService.endSession(sessionId);
-                this.handleAvailabilityChange();
-                return;
+                this.sessionService.releaseAvatar(sessionId, player.id);
             }
 
-            void socket.leave(sessionId);
-            this.sessionService.leaveSession(sessionId, socket.id);
-
-            const players = this.sessionService.getPlayersSession(sessionId);
-            this.server.to(sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
-            
-            // Notifier la mise à jour des avatars dans la sélection d'avatar
-            const avatarAssignments = this.sessionService.getChosenAvatars(sessionId);
-            const avatarRoomId = this.getAvatarSelectionRoomId(sessionId);
-            this.server
-                .to(avatarRoomId)
-                .emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
-            
+            this.sessionService.endSession(sessionId);
             this.handleAvailabilityChange();
-        } catch (error) {
-            this.logger.error('Error leaving session:', error.message);
+            return;
         }
+
+        void socket.leave(sessionId);
+        this.sessionService.leaveSession(sessionId, socket.id);
+
+        const players = this.sessionService.getPlayersSession(sessionId);
+        this.server.to(sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
+
+        const avatarAssignments = this.sessionService.getChosenAvatars(sessionId);
+        const avatarRoomId = this.getAvatarSelectionRoomId(sessionId);
+        this.server
+            .to(avatarRoomId)
+            .emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
+
+        this.handleAvailabilityChange();
     }
 
     handleDisconnect(socket: Socket): void {

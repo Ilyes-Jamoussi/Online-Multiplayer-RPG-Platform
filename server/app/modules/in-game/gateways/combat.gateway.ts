@@ -1,8 +1,9 @@
 import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
-import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -18,7 +19,6 @@ import { validationExceptionFactory } from '@app/utils/validation/validation.uti
 @Injectable()
 export class CombatGateway {
     @WebSocketServer() private readonly server: Server;
-    private readonly logger = new Logger(CombatGateway.name);
 
     constructor(private readonly combatService: CombatService) {}
 
@@ -32,7 +32,7 @@ export class CombatGateway {
     }
 
     @SubscribeMessage(InGameEvents.CombatChoice)
-    combatChoice(socket: Socket, payload: { sessionId: string; choice: 'offensive' | 'defensive' }): void {
+    combatChoice(socket: Socket, payload: { sessionId: string; choice: CombatPosture }): void {
         try {
             this.combatService.combatChoice(payload.sessionId, socket.id, payload.choice);
         } catch (error) {
@@ -75,7 +75,6 @@ export class CombatGateway {
     handleCombatTimerRestart(payload: { sessionId: string }): void {
         const session = this.combatService.getSession(payload.sessionId);
         if (session) {
-            this.logger.log(`Combat timer restarted for session ${session.id}`);
             this.server.to(session.inGameId).emit(InGameEvents.CombatTimerRestart, successResponse({}));
         }
     }
@@ -105,7 +104,7 @@ export class CombatGateway {
     }
 
     @OnEvent('combat.postureSelected')
-    handleCombatPostureSelected(payload: { sessionId: string; playerId: string; posture: 'offensive' | 'defensive' }) {
+    handleCombatPostureSelected(payload: { sessionId: string; playerId: string; posture: CombatPosture }) {
         const session = this.combatService.getSession(payload.sessionId);
         if (session) {
             this.server.to(session.inGameId).emit(
