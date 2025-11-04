@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Game, GameDocument } from '@app/modules/game-store/entities/game.entity';
+import { Game } from '@app/modules/game-store/entities/game.entity';
+import { GameDocument } from '@app/types/mongoose-documents.types';
 import { GameMap } from '@app/interfaces/game-map.interface';
 import { Model } from 'mongoose';
 import { Tile } from '@app/modules/game-store/entities/tile.entity';

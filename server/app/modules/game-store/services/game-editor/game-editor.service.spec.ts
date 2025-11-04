@@ -1,6 +1,6 @@
 import { NAME_ALREADY_EXISTS } from '@app/constants/error-messages.constants';
 import { GamePreviewDto } from '@app/modules/game-store/dto/game-preview.dto';
-import { GameDocument } from '@app/modules/game-store/entities/game.entity';
+import { GameDocument } from '@app/types/mongoose-documents.types';
 import { GameEditorService } from '@app/modules/game-store/services/game-editor/game-editor.service';
 import { ImageService } from '@app/modules/game-store/services/image/image.service';
 import { GameDtoMapper } from '@app/modules/game-store/utils/game-dto-mapper/game-dto-mapper.util';

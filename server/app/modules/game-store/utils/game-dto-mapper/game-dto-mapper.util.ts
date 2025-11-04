@@ -1,6 +1,6 @@
 import { GameEditorDto } from '@app/modules/game-store/dto/game-editor.dto';
 import { GamePreviewDto } from '@app/modules/game-store/dto/game-preview.dto';
-import { GameDocument } from '@app/modules/game-store/entities/game.entity';
+import { GameDocument } from '@app/types/mongoose-documents.types';
 import { DEFAULT_DRAFT_GAME_DESCRIPTION, DEFAULT_DRAFT_GAME_NAME } from '@common/constants/game.constants';
 import { Injectable } from '@nestjs/common';
 import { FlattenMaps } from 'mongoose';

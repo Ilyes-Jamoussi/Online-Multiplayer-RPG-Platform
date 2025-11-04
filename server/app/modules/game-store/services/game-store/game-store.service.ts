@@ -1,7 +1,8 @@
 import { GAME_NOT_FOUND } from '@app/constants/error-messages.constants';
 import { CreateGameDto } from '@app/modules/game-store/dto/create-game.dto';
 import { GamePreviewDto } from '@app/modules/game-store/dto/game-preview.dto';
-import { Game, GameDocument } from '@app/modules/game-store/entities/game.entity';
+import { Game } from '@app/modules/game-store/entities/game.entity';
+import { GameDocument } from '@app/types/mongoose-documents.types';
 import { ImageService } from '@app/modules/game-store/services/image/image.service';
 import { GameDtoMapper } from '@app/modules/game-store/utils/game-dto-mapper/game-dto-mapper.util';
 import { makeDefaultPlaceables } from '@app/modules/game-store/utils/placeable/placeable.util';

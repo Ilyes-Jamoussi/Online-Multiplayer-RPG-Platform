@@ -1,5 +1,6 @@
 import { CreateGameDto } from '@app/modules/game-store/dto/create-game.dto';
-import { Game, GameDocument } from '@app/modules/game-store/entities/game.entity';
+import { Game } from '@app/modules/game-store/entities/game.entity';
+import { GameDocument } from '@app/types/mongoose-documents.types';
 import { GameStoreService } from '@app/modules/game-store/services/game-store/game-store.service';
 import { ImageService } from '@app/modules/game-store/services/image/image.service';
 import { GameDtoMapper } from '@app/modules/game-store/utils/game-dto-mapper/game-dto-mapper.util';
