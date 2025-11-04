@@ -63,11 +63,12 @@ export class CombatService {
         const combat = this.activeCombats.get(sessionId);
         if (!combat) return;
 
-        if (combat.playerAId !== playerId && combat.playerBId !== playerId) throw new BadRequestException('Player not in combat');
         if (combat.playerAId === playerId) {
             combat.playerAPosture = choice;
         } else if (combat.playerBId === playerId) {
             combat.playerBPosture = choice;
+        } else {
+            throw new BadRequestException('Player not in combat');
         }
 
         this.eventEmitter.emit('combat.postureSelected', { sessionId, playerId, posture: choice });
