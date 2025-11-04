@@ -125,7 +125,6 @@ export class CombatService {
         } else {
             this.timerService.resumeTurnTimer(session.id);
             this.inGameMovementService.calculateReachableTiles(session, session.currentTurn.activePlayerId);
-
         }
     }
 
@@ -177,24 +176,28 @@ export class CombatService {
         this.resetCombatPosture(sessionId);
 
         if (playerAHealth <= 0 || playerBHealth <= 0) {
-            let winnerId: string | null = null;
+            const playerADead = playerAHealth <= 0;
+            const playerBDead = playerBHealth <= 0;
+            const isDraw = playerADead && playerBDead;
+            const winnerId = isDraw ? null : playerADead ? playerBId : playerAId;
 
-            if (playerAHealth <= 0 && playerBHealth <= 0) {
-                winnerId = null;
-                this.sessionRepository.incrementPlayerCombatDraws(sessionId, playerAId);
-                this.sessionRepository.incrementPlayerCombatDraws(sessionId, playerBId);
-            } else if (playerAHealth <= 0) {
-                winnerId = playerBId;
+            if (playerADead) {
                 this.inGameMovementService.movePlayerToStartPosition(session, playerAId);
                 this.sessionRepository.resetPlayerHealth(sessionId, playerAId);
-                this.sessionRepository.incrementPlayerCombatLosses(sessionId, playerAId);
-                this.sessionRepository.incrementPlayerCombatWins(sessionId, playerBId);
-            } else {
-                winnerId = playerAId;
+            }
+
+            if (playerBDead) {
                 this.inGameMovementService.movePlayerToStartPosition(session, playerBId);
                 this.sessionRepository.resetPlayerHealth(sessionId, playerBId);
-                this.sessionRepository.incrementPlayerCombatWins(sessionId, playerAId);
-                this.sessionRepository.incrementPlayerCombatLosses(sessionId, playerBId);
+            }
+
+            if (isDraw) {
+                this.sessionRepository.incrementPlayerCombatDraws(sessionId, playerAId);
+                this.sessionRepository.incrementPlayerCombatDraws(sessionId, playerBId);
+            } else {
+                const loserId = playerADead ? playerAId : playerBId;
+                this.sessionRepository.incrementPlayerCombatWins(sessionId, winnerId);
+                this.sessionRepository.incrementPlayerCombatLosses(sessionId, loserId);
             }
 
             if (winnerId) {
