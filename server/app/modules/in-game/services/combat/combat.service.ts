@@ -121,7 +121,7 @@ export class CombatService {
             abandon,
         });
 
-        if (winnerId && winnerId !== session.currentTurn.activePlayerId) {
+        if (!winnerId || (winnerId && winnerId !== session.currentTurn.activePlayerId)) {
             this.timerService.endTurnManual(session);
         } else {
             this.timerService.resumeTurnTimer(session.id);
