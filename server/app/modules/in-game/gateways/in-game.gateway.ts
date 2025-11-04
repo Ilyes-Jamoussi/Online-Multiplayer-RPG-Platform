@@ -16,12 +16,12 @@ import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { validationExceptionFactory } from '@app/utils/validation/validation.util';
+
 @UsePipes(
     new ValidationPipe({
         transform: true,
-        exceptionFactory: (): Error => {
-            throw new Error('Validation échouée');
-        },
+        exceptionFactory: validationExceptionFactory,
     }),
 )
 @WebSocketGateway({})
@@ -42,16 +42,6 @@ export class InGameGateway {
             }
         } catch (error) {
             socket.emit(InGameEvents.PlayerJoinedInGameSession, errorResponse(error.message));
-        }
-    }
-
-    @SubscribeMessage(InGameEvents.GameStart)
-    startGame(socket: Socket, sessionId: string): void {
-        try {
-            const started = this.inGameService.startSession(sessionId);
-            this.server.to(started.inGameId).emit(InGameEvents.GameStarted, successResponse(started));
-        } catch (error) {
-            socket.emit(InGameEvents.GameStarted, errorResponse(error.message));
         }
     }
 

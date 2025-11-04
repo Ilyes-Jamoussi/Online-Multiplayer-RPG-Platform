@@ -1,12 +1,13 @@
 import { Dice } from '@common/enums/dice.enum';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 
 export interface CombatState {
     sessionId: string;
     playerAId: string;
     playerBId: string;
-    playerAPosture: 'offensive' | 'defensive' | null;
-    playerBPosture: 'offensive' | 'defensive' | null;
+    playerAPosture: CombatPosture | null;
+    playerBPosture: CombatPosture | null;
     playerATileEffect: TileCombatEffect | null;
     playerBTileEffect: TileCombatEffect | null;
 }

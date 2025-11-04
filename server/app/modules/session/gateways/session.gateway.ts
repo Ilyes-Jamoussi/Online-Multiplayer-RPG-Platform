@@ -17,13 +17,12 @@ import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { validationExceptionFactory } from '@app/utils/validation/validation.util';
 
 @UsePipes(
     new ValidationPipe({
         transform: true,
-        exceptionFactory: (): Error => {
-            throw new Error('Validation échouée');
-        },
+        exceptionFactory: validationExceptionFactory,
     }),
 )
 @WebSocketGateway({

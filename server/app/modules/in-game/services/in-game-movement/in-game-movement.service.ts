@@ -179,7 +179,7 @@ export class InGameMovementService {
         if (tileCost === undefined) return null;
 
         if (tile.kind === TileKind.DOOR) {
-            tileCost = tile.open ? TileCost.DOOR_OPEN : -1;
+            tileCost = tile.open ? TileCost.DOOR_OPEN : TileCost.DOOR;
         }
 
         if (tileCost === -1) return null;

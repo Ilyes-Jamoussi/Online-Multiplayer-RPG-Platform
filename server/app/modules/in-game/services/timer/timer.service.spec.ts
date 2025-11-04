@@ -1,4 +1,5 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
+import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { Avatar } from '@common/enums/avatar.enum';
@@ -13,6 +14,7 @@ import { TimerService } from './timer.service';
 describe('TimerService', () => {
     let service: TimerService;
     let eventEmitter: jest.Mocked<EventEmitter2>;
+    let module: TestingModule;
 
     const CUSTOM_TIMEOUT_SHORT = 1000;
     const CUSTOM_TIMEOUT_LONG = 5000;
@@ -22,6 +24,9 @@ describe('TimerService', () => {
     const TURN_NUMBER_FOUR = 4;
     const BASE_SPEED = 5;
     const BASE_HEALTH = 100;
+    const SPEED_BONUS = 2;
+    const TIMER_BUFFER = 100;
+    const EXPECTED_SPEED_WITH_BONUS = 7;
 
     const createMockSession = (overrides: Partial<InGameSession> = {}): InGameSession => ({
         id: 'session-123',
@@ -142,7 +147,7 @@ describe('TimerService', () => {
             updatePlayer: jest.fn(),
         };
 
-        const module: TestingModule = await Test.createTestingModule({
+        module = await Test.createTestingModule({
             providers: [
                 TimerService,
                 {
@@ -171,94 +176,50 @@ describe('TimerService', () => {
         expect(service).toBeDefined();
     });
 
-    describe('startFirstTurn', () => {
-        it('should start the first turn with the first player', () => {
+    describe('startFirstTurnWithTransition', () => {
+        it('should start the first turn with transition', () => {
             const session = createMockSession();
 
-            const result = service.startFirstTurn(session);
+            const result = service.startFirstTurnWithTransition(session);
 
             expect(result.turnNumber).toBe(1);
             expect(result.activePlayerId).toBe('player1');
             expect(session.currentTurn).toEqual(result);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.started', { session });
         });
 
-        it('should throw error when turnOrderPlayerId is empty', () => {
+        it('should throw error when turnOrder is empty', () => {
             const session = createMockSession({ turnOrder: [] });
 
-            expect(() => service.startFirstTurn(session)).toThrow('TURN_ORDER_NOT_DEFINED');
+            expect(() => service.startFirstTurnWithTransition(session)).toThrow('TURN_ORDER_NOT_DEFINED');
         });
 
-        it('should throw error when turnOrderPlayerId is undefined', () => {
+        it('should throw error when turnOrder is undefined', () => {
             const session = createMockSession({ turnOrder: undefined as unknown as string[] });
 
-            expect(() => service.startFirstTurn(session)).toThrow('TURN_ORDER_NOT_DEFINED');
+            expect(() => service.startFirstTurnWithTransition(session)).toThrow('TURN_ORDER_NOT_DEFINED');
         });
 
-        it('should schedule timeout for automatic turn end', () => {
+        it('should throw error when no active player', () => {
+            const session = createMockSession();
+            session.inGamePlayers.player1.isInGame = false;
+            session.inGamePlayers.player2.isInGame = false;
+            session.inGamePlayers.player3.isInGame = false;
+
+            expect(() => service.startFirstTurnWithTransition(session)).toThrow('NO_ACTIVE_PLAYER');
+        });
+
+        it('should set game timer state to TurnTransition initially', () => {
             const session = createMockSession();
 
-            service.startFirstTurn(session, CUSTOM_TIMEOUT_LONG);
+            service.startFirstTurnWithTransition(session);
 
-            expect(jest.getTimerCount()).toBe(1);
-        });
-
-        it('should trigger autoEndTurn after timeout', () => {
-            const session = createMockSession();
-
-            service.startFirstTurn(session, CUSTOM_TIMEOUT_SHORT);
-
-            jest.advanceTimersByTime(CUSTOM_TIMEOUT_SHORT);
-
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.timeout', { session });
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.ended', { session });
-        });
-
-        it('should use default timeout when not provided', () => {
-            const session = createMockSession();
-
-            service.startFirstTurn(session);
-
-            expect(jest.getTimerCount()).toBe(1);
-        });
-    });
-
-    describe('nextTurn', () => {
-        it('should advance to the next player in order', () => {
-            const session = createMockSession({
-                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
-            });
-
-            const result = service.nextTurn(session);
-
-            expect(result.turnNumber).toBe(2);
-            expect(result.activePlayerId).toBe('player2');
-            expect(session.currentTurn).toEqual(result);
-        });
-
-        it('should wrap around to first player after last player', () => {
-            const session = createMockSession({
-                currentTurn: { turnNumber: TURN_NUMBER_THREE, activePlayerId: 'player3', hasUsedAction: false },
-            });
-
-            const result = service.nextTurn(session);
-
-            expect(result.turnNumber).toBe(TURN_NUMBER_FOUR);
-            expect(result.activePlayerId).toBe('player1');
-        });
-
-        it('should emit turn.ended event', () => {
-            const session = createMockSession();
-
-            service.nextTurn(session);
-
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.ended', { session });
+            expect(service.getGameTimerState(session.id)).toBe(TurnTimerStates.TurnTransition);
         });
 
         it('should emit turn.transition and turn.started after transition delay', () => {
             const session = createMockSession();
 
-            service.nextTurn(session);
+            service.startFirstTurnWithTransition(session);
 
             jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
 
@@ -266,26 +227,126 @@ describe('TimerService', () => {
             expect(eventEmitter.emit).toHaveBeenCalledWith('turn.started', { session });
         });
 
-        it('should schedule new timeout after transition', () => {
+        it('should update player actions remaining after transition', () => {
+            const session = createMockSession();
+            const mockSessionRepository = module.get<InGameSessionRepository>(InGameSessionRepository);
+
+            service.startFirstTurnWithTransition(session);
+
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(mockSessionRepository.updatePlayer).toHaveBeenCalledWith(session.id, 'player1', { actionsRemaining: 1 });
+        });
+
+        it('should set game timer state to PlayerTurn after transition', () => {
             const session = createMockSession();
 
-            service.nextTurn(session, CUSTOM_TIMEOUT_LONG);
+            service.startFirstTurnWithTransition(session);
+
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(service.getGameTimerState(session.id)).toBe(TurnTimerStates.PlayerTurn);
+        });
+
+        it('should schedule timeout after transition', () => {
+            const session = createMockSession();
+
+            service.startFirstTurnWithTransition(session, CUSTOM_TIMEOUT_LONG);
 
             jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
 
             expect(jest.getTimerCount()).toBe(1);
         });
 
-        it('should clear previous timer', () => {
+        it('should set player speed with base speed and bonus', () => {
             const session = createMockSession();
-            service.startFirstTurn(session);
+            session.inGamePlayers.player1.baseSpeed = BASE_SPEED;
+            session.inGamePlayers.player1.speedBonus = SPEED_BONUS;
 
-            const timerCountBefore = jest.getTimerCount();
-            service.nextTurn(session);
-            const timerCountAfter = jest.getTimerCount();
+            service.startFirstTurnWithTransition(session);
 
-            expect(timerCountBefore).toBe(1);
-            expect(timerCountAfter).toBe(1);
+            expect(session.inGamePlayers.player1.speed).toBe(EXPECTED_SPEED_WITH_BONUS);
+        });
+
+        it('should use default timeout when not provided', () => {
+            const session = createMockSession();
+
+            service.startFirstTurnWithTransition(session);
+
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(jest.getTimerCount()).toBe(1);
+        });
+    });
+
+    describe('endTurnManual', () => {
+        it('should clear turn timer', () => {
+            const session = createMockSession();
+            service.startFirstTurnWithTransition(session, CUSTOM_TIMEOUT_SHORT);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(jest.getTimerCount()).toBe(1);
+
+            service.endTurnManual(session);
+
+            const timeoutCallCountBefore = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
+
+            jest.advanceTimersByTime(CUSTOM_TIMEOUT_SHORT);
+
+            const timeoutCallCountAfter = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
+
+            expect(timeoutCallCountAfter).toBe(timeoutCallCountBefore);
+        });
+
+        it('should emit turn.manualEnd event', () => {
+            const session = createMockSession();
+
+            service.endTurnManual(session);
+
+            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.manualEnd', { session });
+        });
+
+        it('should advance to next turn', () => {
+            const session = createMockSession({
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
+            });
+
+            service.endTurnManual(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(session.currentTurn.activePlayerId).toBe('player2');
+            expect(session.currentTurn.turnNumber).toBe(2);
+        });
+
+        it('should emit turn.ended event', () => {
+            const session = createMockSession();
+
+            service.endTurnManual(session);
+
+            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.ended', { session });
+        });
+
+        it('should emit turn.transition and turn.started after transition delay', () => {
+            const session = createMockSession();
+
+            service.endTurnManual(session);
+
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.transition', { session });
+            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.started', { session });
+        });
+
+        it('should wrap around to first player after last player', () => {
+            const session = createMockSession({
+                currentTurn: { turnNumber: TURN_NUMBER_THREE, activePlayerId: 'player3', hasUsedAction: false },
+            });
+
+            service.endTurnManual(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(session.currentTurn.turnNumber).toBe(TURN_NUMBER_FOUR);
+            expect(session.currentTurn.activePlayerId).toBe('player1');
         });
 
         it('should handle player not in order by returning first player', () => {
@@ -324,16 +385,37 @@ describe('TimerService', () => {
                 combatDraws: 0,
             };
 
-            const result = service.nextTurn(session);
+            service.endTurnManual(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
 
-            expect(result.activePlayerId).toBe('player1');
+            expect(session.currentTurn.activePlayerId).toBe('player1');
+        });
+    });
+
+    describe('getGameTimerState', () => {
+        it('should return default state when no state is set', () => {
+            const sessionId = 'new-session-id';
+
+            const state = service.getGameTimerState(sessionId);
+
+            expect(state).toBe(TurnTimerStates.PlayerTurn);
+        });
+
+        it('should return set state', () => {
+            const session = createMockSession();
+            service.startFirstTurnWithTransition(session);
+
+            const state = service.getGameTimerState(session.id);
+
+            expect(state).toBe(TurnTimerStates.TurnTransition);
         });
     });
 
     describe('forceStopTimer', () => {
         it('should stop timer for a session', () => {
             const session = createMockSession();
-            service.startFirstTurn(session);
+            service.startFirstTurnWithTransition(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
 
             expect(jest.getTimerCount()).toBe(1);
 
@@ -351,19 +433,31 @@ describe('TimerService', () => {
 
         it('should clear timer from timers map', () => {
             const session = createMockSession();
-            service.startFirstTurn(session);
+            service.startFirstTurnWithTransition(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
 
             service.forceStopTimer(session.id);
 
             const timerCount = jest.getTimerCount();
             expect(timerCount).toBe(0);
         });
+
+        it('should emit turn.forceStopTimer event', () => {
+            const session = createMockSession();
+            service.startFirstTurnWithTransition(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            service.forceStopTimer(session.id);
+
+            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.forceStopTimer', { sessionId: session.id });
+        });
     });
 
     describe('autoEndTurn (private, tested via timeout)', () => {
         it('should emit turn.timeout event when turn times out', () => {
             const session = createMockSession();
-            service.startFirstTurn(session);
+            service.startFirstTurnWithTransition(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
 
             jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
 
@@ -374,31 +468,228 @@ describe('TimerService', () => {
             const session = createMockSession({
                 currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
             });
-            service.startFirstTurn(session);
+            service.startFirstTurnWithTransition(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
 
             jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
 
             expect(session.currentTurn.activePlayerId).toBe('player2');
             expect(session.currentTurn.turnNumber).toBe(2);
         });
     });
 
-    describe('clearTimer (private, tested via multiple operations)', () => {
-        it('should clear timer when scheduling new timeout', () => {
+    describe('pauseTurnTimer', () => {
+        it('should pause an active timer', () => {
             const session = createMockSession();
-            service.startFirstTurn(session, CUSTOM_TIMEOUT_SHORT);
-            service.startFirstTurn(session, CUSTOM_TIMEOUT_MEDIUM);
+            service.startFirstTurnWithTransition(session, CUSTOM_TIMEOUT_LONG);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
 
-            jest.advanceTimersByTime(CUSTOM_TIMEOUT_SHORT);
+            expect(jest.getTimerCount()).toBe(1);
 
-            const timeoutCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
-            expect(timeoutCallCount).toBe(0);
+            jest.advanceTimersByTime(CUSTOM_TIMEOUT_MEDIUM);
+            service.pauseTurnTimer(session.id);
+
+            expect(jest.getTimerCount()).toBe(0);
+            expect(service.getGameTimerState(session.id)).toBe(TurnTimerStates.CombatTurn);
         });
 
-        it('should handle clearing non-existent timer', () => {
-            const session = createMockSession();
+        it('should handle pausing when no timer exists gracefully', () => {
+            const sessionId = 'no-timer-session';
 
-            expect(() => service.nextTurn(session)).not.toThrow();
+            expect(() => service.pauseTurnTimer(sessionId)).not.toThrow();
+        });
+
+        it('should handle pausing when timer is already paused', () => {
+            const session = createMockSession();
+            service.startFirstTurnWithTransition(session, CUSTOM_TIMEOUT_LONG);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+            service.pauseTurnTimer(session.id);
+
+            expect(() => service.pauseTurnTimer(session.id)).not.toThrow();
+        });
+
+        it('should save remaining time when pausing', () => {
+            const session = createMockSession();
+            service.startFirstTurnWithTransition(session, CUSTOM_TIMEOUT_LONG);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            jest.advanceTimersByTime(CUSTOM_TIMEOUT_MEDIUM);
+            service.pauseTurnTimer(session.id);
+
+            service.resumeTurnTimer(session.id);
+            jest.advanceTimersByTime(CUSTOM_TIMEOUT_LONG - CUSTOM_TIMEOUT_MEDIUM - TIMER_BUFFER);
+
+            expect(jest.getTimerCount()).toBe(1);
+        });
+    });
+
+    describe('resumeTurnTimer', () => {
+        it('should resume a paused timer', () => {
+            const session = createMockSession();
+            service.startFirstTurnWithTransition(session, CUSTOM_TIMEOUT_LONG);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+            jest.advanceTimersByTime(CUSTOM_TIMEOUT_MEDIUM);
+            service.pauseTurnTimer(session.id);
+
+            expect(jest.getTimerCount()).toBe(0);
+
+            service.resumeTurnTimer(session.id);
+
+            expect(jest.getTimerCount()).toBe(1);
+            expect(service.getGameTimerState(session.id)).toBe(TurnTimerStates.PlayerTurn);
+        });
+
+        it('should handle resuming when no timer exists gracefully', () => {
+            const sessionId = 'no-timer-session';
+
+            expect(() => service.resumeTurnTimer(sessionId)).not.toThrow();
+        });
+
+        it('should handle resuming when timer is already active', () => {
+            const session = createMockSession();
+            service.startFirstTurnWithTransition(session, CUSTOM_TIMEOUT_LONG);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(() => service.resumeTurnTimer(session.id)).not.toThrow();
+        });
+
+        it('should trigger callback after resumed timer expires', () => {
+            const session = createMockSession();
+            service.startFirstTurnWithTransition(session, CUSTOM_TIMEOUT_LONG);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+            jest.advanceTimersByTime(CUSTOM_TIMEOUT_MEDIUM);
+            service.pauseTurnTimer(session.id);
+            service.resumeTurnTimer(session.id);
+
+            jest.advanceTimersByTime(CUSTOM_TIMEOUT_LONG - CUSTOM_TIMEOUT_MEDIUM + TIMER_BUFFER);
+
+            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.timeout', { session });
+        });
+
+        it('should handle resumeTurnTimer when remainingTime is zero or negative', () => {
+            const session = createMockSession();
+            service.startFirstTurnWithTransition(session, CUSTOM_TIMEOUT_SHORT);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+            jest.advanceTimersByTime(CUSTOM_TIMEOUT_SHORT);
+            service.pauseTurnTimer(session.id);
+
+            type ServiceWithPrivateMethod = {
+                turnTimers: Map<
+                    string,
+                    {
+                        remainingTime: number;
+                        timeout: number | null;
+                        callback: () => void;
+                        startTime: number;
+                        duration: number;
+                    }
+                >;
+            };
+
+            const timerData = (service as unknown as ServiceWithPrivateMethod).turnTimers.get(session.id);
+            if (timerData) {
+                timerData.remainingTime = 0;
+            }
+
+            service.resumeTurnTimer(session.id);
+
+            expect(jest.getTimerCount()).toBeGreaterThanOrEqual(0);
+        });
+    });
+
+    describe('getNextActivePlayer edge cases (private, tested via nextTurn)', () => {
+        it('should handle when current player is not in turn order', () => {
+            const session = createMockSession({
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
+            });
+
+            session.turnOrder = ['player2', 'player3'];
+
+            service.endTurnManual(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(session.currentTurn.activePlayerId).toBe('player2');
+        });
+
+        it('should skip inactive players', () => {
+            const session = createMockSession({
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
+            });
+            session.inGamePlayers.player2.isInGame = false;
+
+            service.endTurnManual(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(session.currentTurn.activePlayerId).toBe('player3');
+        });
+
+        it('should return first player from turnOrder when getNextActivePlayer returns null', () => {
+            const session = createMockSession({
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
+            });
+            session.inGamePlayers.player1.isInGame = false;
+            session.inGamePlayers.player2.isInGame = false;
+            session.inGamePlayers.player3.isInGame = false;
+
+            service.endTurnManual(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(session.currentTurn.activePlayerId).toBe('player1');
+        });
+
+        it('should handle empty turnOrder in getNextActivePlayer', () => {
+            const session = createMockSession({
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
+            });
+
+            type ServiceWithPrivateMethod = {
+                getNextActivePlayer: (session: InGameSession, currentId: string | null) => string | null;
+            };
+
+            const emptyTurnOrderSession = { ...session, turnOrder: [] };
+            const result = (service as unknown as ServiceWithPrivateMethod).getNextActivePlayer(emptyTurnOrderSession, 'player1');
+
+            expect(result).toBeNull();
+        });
+
+        it('should handle duplicate playerId in checkedIds by skipping it when already checked', () => {
+            const session = createMockSession({
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
+            });
+            session.turnOrder = ['player1', 'player1', 'player2'];
+            session.inGamePlayers.player1.isInGame = false;
+
+            service.endTurnManual(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(session.currentTurn.activePlayerId).toBe('player2');
+        });
+
+        it('should skip playerId that is already in checkedIds during loop iteration', () => {
+            const session = createMockSession({
+                currentTurn: { turnNumber: 1, activePlayerId: 'player2', hasUsedAction: false },
+            });
+            session.turnOrder = ['player1', 'player1', 'player2', 'player3'];
+            session.inGamePlayers.player1.isInGame = false;
+
+            service.endTurnManual(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(session.currentTurn.activePlayerId).toBe('player3');
+        });
+
+        it('should handle multiple duplicates where checkedIds.has returns true', () => {
+            const session = createMockSession({
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
+            });
+            session.turnOrder = ['player1', 'player1', 'player1', 'player2'];
+            session.inGamePlayers.player1.isInGame = false;
+
+            service.endTurnManual(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(session.currentTurn.activePlayerId).toBe('player2');
         });
     });
 
@@ -406,7 +697,8 @@ describe('TimerService', () => {
         it('should handle complete turn cycle', () => {
             const session = createMockSession();
 
-            service.startFirstTurn(session);
+            service.startFirstTurnWithTransition(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
             expect(session.currentTurn.activePlayerId).toBe('player1');
 
             jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
@@ -425,7 +717,8 @@ describe('TimerService', () => {
         it('should handle mix of manual and automatic turn endings', () => {
             const session = createMockSession();
 
-            service.startFirstTurn(session);
+            service.startFirstTurnWithTransition(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
             expect(session.currentTurn.activePlayerId).toBe('player1');
 
             service.endTurnManual(session);
@@ -435,6 +728,12 @@ describe('TimerService', () => {
             jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
             jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
             expect(session.currentTurn.activePlayerId).toBe('player3');
+        });
+        
+        it('should handle clearing non-existent timer', () => {
+            const session = createMockSession();
+
+            expect(() => service.endTurnManual(session)).not.toThrow();
         });
     });
 });

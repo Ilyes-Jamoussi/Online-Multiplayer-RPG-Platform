@@ -148,12 +148,12 @@ export class GameCacheService {
             return false;
         }
 
-        const tileCost = TileCost[tile.kind];
-        if (tileCost === -1) {
-            return false;
+        let tileCost = TileCost[tile.kind];
+        if (tile.kind === TileKind.DOOR) {
+            tileCost = tile.open ? TileCost.DOOR_OPEN : -1;
         }
 
-        if (tile.kind === TileKind.DOOR && !tile.open) {
+        if (tileCost === -1) {
             return false;
         }
 

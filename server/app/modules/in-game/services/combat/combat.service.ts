@@ -5,6 +5,7 @@ import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-
 import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatState } from '@common/interfaces/combat.interface';
@@ -59,15 +60,16 @@ export class CombatService {
         this.startCombat(session, playerId, targetPlayer.id);
     }
 
-    combatChoice(sessionId: string, playerId: string, choice: 'offensive' | 'defensive'): void {
+    combatChoice(sessionId: string, playerId: string, choice: CombatPosture): void {
         const combat = this.activeCombats.get(sessionId);
         if (!combat) return;
 
-        if (combat.playerAId !== playerId && combat.playerBId !== playerId) throw new BadRequestException('Player not in combat');
         if (combat.playerAId === playerId) {
             combat.playerAPosture = choice;
         } else if (combat.playerBId === playerId) {
             combat.playerBPosture = choice;
+        } else {
+            throw new BadRequestException('Player not in combat');
         }
 
         this.eventEmitter.emit('combat.postureSelected', { sessionId, playerId, posture: choice });
@@ -223,7 +225,7 @@ export class CombatService {
     private getPlayerDefense(
         sessionId: string,
         playerId: string,
-        posture: 'offensive' | 'defensive',
+        posture: CombatPosture,
         tileCombatEffect: TileCombatEffect,
     ): {
         dice: Dice;
@@ -242,7 +244,7 @@ export class CombatService {
 
         const defenseRoll = this.rollDice(player.defenseDice, sessionId, false);
         const baseDefense = player.baseDefense;
-        const defenseBonus = posture === 'defensive' ? 2 : 0;
+        const defenseBonus = posture === CombatPosture.DEFENSIVE ? 2 : 0;
         const totalDefense = baseDefense + defenseRoll + defenseBonus + tileCombatEffect;
         return { dice: player.defenseDice, diceRoll: defenseRoll, baseDefense, defenseBonus, totalDefense, tileCombatEffect };
     }
@@ -250,7 +252,7 @@ export class CombatService {
     private getPlayerAttack(
         sessionId: string,
         playerId: string,
-        posture: 'offensive' | 'defensive',
+        posture: CombatPosture,
         tileCombatEffect: TileCombatEffect,
     ): {
         dice: Dice;
@@ -266,7 +268,7 @@ export class CombatService {
         if (!player) return { dice: Dice.D4, diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0, tileCombatEffect: TileCombatEffect.BASE };
         const attackRoll = this.rollDice(player.attackDice, sessionId, true);
         const baseAttack = player.baseAttack;
-        const attackBonus = posture === 'offensive' ? 2 : 0;
+        const attackBonus = posture === CombatPosture.OFFENSIVE ? 2 : 0;
         const totalAttack = baseAttack + attackRoll + attackBonus + tileCombatEffect;
         return { dice: player.attackDice, diceRoll: attackRoll, baseAttack, attackBonus, totalAttack, tileCombatEffect };
     }
