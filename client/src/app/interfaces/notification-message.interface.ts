@@ -1,4 +1,4 @@
-import { ROUTES } from '@common/enums/routes.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 
 export interface NotificationMessage {
     title: string;

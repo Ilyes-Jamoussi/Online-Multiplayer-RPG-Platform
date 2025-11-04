@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, HostListener, Input } from '@angular/core';
-import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
-import { Player } from '@common/models/player.interface';
-import { GameMapService } from '@app/services/game-map/game-map.service';
-import { AssetsService } from '@app/services/assets/assets.service';
-import { InGameService } from '@app/services/in-game/in-game.service';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
+import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
+import { GameMapService } from '@app/services/game-map/game-map.service';
+import { InGameService } from '@app/services/in-game/in-game.service';
+import { Player } from '@common/interfaces/player.interface';
 
 @Component({
     selector: 'app-game-map-tile',

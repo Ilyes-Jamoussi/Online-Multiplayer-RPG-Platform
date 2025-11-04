@@ -29,9 +29,7 @@
             </div>
         </div>
     </section>
-    }
-
-    @if (playerOnTile) {
+    } @if (playerOnTile) {
     <section class="tile-modal__section">
         <h4>Joueur sur la tuile</h4>
         <div class="tile-modal__player">
@@ -41,9 +39,7 @@
             </div>
         </div>
     </section>
-    }
-
-    @if (!objectOnTile && !playerOnTile) {
+    } @if (!objectOnTile && !playerOnTile) {
     <section class="tile-modal__section">
         <em>Aucun objet ni joueur sur cette tuile.</em>
     </section>

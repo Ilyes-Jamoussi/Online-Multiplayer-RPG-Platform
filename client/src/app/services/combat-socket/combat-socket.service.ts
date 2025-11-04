@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SocketService } from '@app/services/socket/socket.service';
-import { InGameEvents } from '@common/constants/in-game-events';
+import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -19,12 +19,9 @@ export class CombatSocketService {
         this.socket.emit(InGameEvents.CombatAbandon, { sessionId });
     }
 
-    onCombatStarted(callback: (data: { 
-        attackerId: string; 
-        targetId: string;
-        attackerTileEffect?: number;
-        targetTileEffect?: number;
-    }) => void): void {
+    onCombatStarted(
+        callback: (data: { attackerId: string; targetId: string; attackerTileEffect?: number; targetTileEffect?: number }) => void,
+    ): void {
         this.socket.onSuccessEvent(InGameEvents.CombatStarted, callback);
     }
 
@@ -71,7 +68,4 @@ export class CombatSocketService {
     onCombatDrawsChanged(callback: (data: { playerId: string; combatDraws: number }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.CombatDrawsChanged, callback);
     }
-
-
 }
-

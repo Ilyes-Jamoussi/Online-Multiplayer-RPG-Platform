@@ -1,6 +1,6 @@
 import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { MapSize } from '@common/enums/map-size.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 
 export function makeDefaultTiles(size: MapSize): Tile[] {
     const out: Tile[] = [];

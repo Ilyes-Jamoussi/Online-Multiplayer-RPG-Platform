@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatIconModule } from '@angular/material/icon';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { ROUTES } from '@common/enums/routes.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { PopupNotificationDisplayComponent } from './popup-notification-display.component';
 
@@ -107,7 +107,7 @@ describe('NotificationDisplayComponent', () => {
             type: 'error' as const,
             title: 'Error Title',
             message: 'Error Message',
-            redirectRoute: ROUTES.HomePage
+            redirectRoute: ROUTES.HomePage,
         };
 
         component.notification = signal(mockNotificationWithRedirect);

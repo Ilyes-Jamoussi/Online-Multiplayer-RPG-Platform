@@ -1,16 +1,17 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
 /* eslint-disable @typescript-eslint/naming-convention -- Test file uses mock objects with underscores */
 /* eslint-disable @typescript-eslint/no-magic-numbers -- Test file uses literal values for assertions */
-import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { GameEditorInteractionsService } from './game-editor-interactions.service';
-import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { TestBed } from '@angular/core/testing';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ActiveTool, ExtendedGameEditorPlaceableDto, TileBrushTool, ToolType } from '@app/interfaces/game-editor.interface';
-import { PlaceableKind, PlaceableFootprint, PlaceableMime } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { MapSize } from '@common/enums/map-size.enum';
+import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
+import { GameEditorInteractionsService } from './game-editor-interactions.service';
 
 class StoreStub implements Partial<GameEditorStoreService> {
     private _tileSizePx = 32;

@@ -1,15 +1,15 @@
 import { CommonModule, NgStyle } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
+import { GameMapTileModalComponent } from '@app/components/features/game-map-tile-modal/game-map-tile-modal.component';
+import { GameMapTileComponent } from '@app/components/features/game-map-tile/game-map-tile.component';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
-import { Player } from '@common/models/player.interface';
-import { StartPoint } from '@common/models/start-point.interface';
-import { GameMapTileComponent } from '@app/components/features/game-map-tile/game-map-tile.component';
-import { GameMapTileModalComponent } from '@app/components/features/game-map-tile-modal/game-map-tile-modal.component';
+import { TileKind } from '@common/enums/tile.enum';
+import { Player } from '@common/interfaces/player.interface';
+import { StartPoint } from '@common/interfaces/start-point.interface';
 
 @Component({
     selector: 'app-game-map',

@@ -3,8 +3,10 @@ import { GameEditorObjectComponent } from './game-editor-object.component';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { PlaceableLabel } from '@app/enums/placeable-label.enum';
+import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ActiveTool, ToolType } from '@app/interfaces/game-editor.interface';
-import { PlaceableKind, PlaceableLabel, PlaceableMime } from '@common/enums/placeable-kind.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 
 const NOOP = (): void => {
     /** no-op */

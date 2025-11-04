@@ -1,11 +1,11 @@
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
-import { InGameEvents } from '@common/constants/in-game-events';
+import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
-import { Player } from '@common/models/player.interface';
-import { InGameSession } from '@common/models/session.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
 import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
@@ -131,10 +131,7 @@ export class InGameGateway {
     handlePlayerMoved(payload: { session: InGameSession; playerId: string; x: number; y: number; speed: number }) {
         this.server
             .to(payload.session.inGameId)
-            .emit(
-                InGameEvents.PlayerMoved,
-                successResponse({ playerId: payload.playerId, x: payload.x, y: payload.y, speed: payload.speed }),
-            );
+            .emit(InGameEvents.PlayerMoved, successResponse({ playerId: payload.playerId, x: payload.x, y: payload.y, speed: payload.speed }));
         this.logger.log(`Player ${payload.playerId} moved to ${payload.x}, ${payload.y} in session ${payload.session.id}`);
     }
 
@@ -160,10 +157,7 @@ export class InGameGateway {
             this.inGameService.teleportPlayer(payload.sessionId, socket.id, payload.x, payload.y);
             const session = this.inGameService.getSession(payload.sessionId);
             const player = session.inGamePlayers[socket.id];
-            this.server.to(session.inGameId).emit(
-                InGameEvents.PlayerTeleported,
-                successResponse({ playerId: socket.id, x: player.x, y: player.y })
-            );
+            this.server.to(session.inGameId).emit(InGameEvents.PlayerTeleported, successResponse({ playerId: socket.id, x: player.x, y: player.y }));
             this.inGameService.getReachableTiles(payload.sessionId, socket.id);
         } catch (error) {
             socket.emit(InGameEvents.PlayerTeleported, errorResponse(error.message));

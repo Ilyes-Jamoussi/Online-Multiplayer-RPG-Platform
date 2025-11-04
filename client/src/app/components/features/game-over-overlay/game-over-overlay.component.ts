@@ -3,20 +3,20 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { ROUTES } from '@common/enums/routes.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 
 @Component({
     selector: 'app-game-over-overlay',
     standalone: true,
     imports: [CommonModule],
     templateUrl: './game-over-overlay.component.html',
-    styleUrls: ['./game-over-overlay.component.scss']
+    styleUrls: ['./game-over-overlay.component.scss'],
 })
 export class GameOverOverlayComponent {
     constructor(
         private readonly inGameService: InGameService,
         private readonly playerService: PlayerService,
-        private readonly router: Router
+        private readonly router: Router,
     ) {}
 
     get gameOverData() {
@@ -40,7 +40,7 @@ export class GameOverOverlayComponent {
             .map((player) => ({
                 name: player.name,
                 wins: player.combatWins,
-                isWinner: player.id === this.gameOverData?.winnerId
+                isWinner: player.id === this.gameOverData?.winnerId,
             }))
             .sort((playerA, playerB) => playerB.wins - playerA.wins);
     }
@@ -50,4 +50,3 @@ export class GameOverOverlayComponent {
         void this.router.navigate([ROUTES.HomePage]);
     }
 }
-

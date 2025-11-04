@@ -7,15 +7,6 @@ export enum TileKind {
     TELEPORT = 'TELEPORT',
 }
 
-export enum TileLabel {
-    WATER = 'Eau',
-    WALL = 'Mur',
-    ICE = 'Glace',
-    DOOR = 'Porte',
-    BASE = 'Base',
-    TELEPORT = 'Téléporteur',
-}
-
 export enum TileCost {
     WALL = -1,
     DOOR = -1,

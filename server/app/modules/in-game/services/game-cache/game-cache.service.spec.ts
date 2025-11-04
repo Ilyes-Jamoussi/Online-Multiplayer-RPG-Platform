@@ -1,5 +1,6 @@
 import { GameCacheService } from './game-cache.service';
-import { Game, GameDocument } from '@app/modules/game-store/entities/game.entity';
+import { Game } from '@app/modules/game-store/entities/game.entity';
+import { GameDocument } from '@app/types/mongoose-documents.types';
 import { Model, Types } from 'mongoose';
 import { NotFoundException } from '@nestjs/common';
 import { MapSize } from '@common/enums/map-size.enum';

@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/naming-convention -- Test file uses mock objects with underscores */
-import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { GameEditorCheckService } from './game-editor-check.service';
-import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
+import { TestBed } from '@angular/core/testing';
+import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { Inventory } from '@app/interfaces/game-editor.interface';
+import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
-import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
+import { GameEditorCheckService } from './game-editor-check.service';
 
 export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
     private _name = 'Test Game';

@@ -1,6 +1,6 @@
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 
 export enum ToolType {
     TileBrushTool = 'tile-brush-tool',
@@ -46,14 +46,6 @@ interface InventoryItem {
     disabled: boolean;
     image: string;
 }
-
-export const PLACEABLE_ORDER: PlaceableKind[] = [
-    PlaceableKind.START,
-    PlaceableKind.FLAG,
-    PlaceableKind.FIGHT,
-    PlaceableKind.HEAL,
-    PlaceableKind.BOAT,
-];
 
 export interface TileBrushTool {
     type: ToolType.TileBrushTool;

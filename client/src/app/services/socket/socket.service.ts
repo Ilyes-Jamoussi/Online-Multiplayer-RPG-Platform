@@ -1,8 +1,8 @@
 import { DestroyRef, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { GameStoreEvents } from '@common/constants/game-store-events';
-import { InGameEvents } from '@common/constants/in-game-events';
-import { SessionEvents } from '@common/constants/session-events';
+import { GameStoreEvents } from '@common/enums/game-store-events.enum';
+import { InGameEvents } from '@common/enums/in-game-events.enum';
+import { SessionEvents } from '@common/enums/session-events.enum';
 import { SocketResponse } from '@common/types/socket-response.type';
 import { fromEvent, Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';

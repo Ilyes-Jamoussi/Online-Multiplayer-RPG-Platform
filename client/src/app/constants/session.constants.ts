@@ -1,7 +1,7 @@
 import { DEFAULT_AVATAR_ASSIGNMENTS } from '@common/constants/default-avatar-assignments.constants';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { InGameSession, WaitingRoomSession } from '@common/models/session.interface';
+import { InGameSession, WaitingRoomSession } from '@common/interfaces/session.interface';
 
 export const MIN_SESSION_PLAYERS = 2;
 

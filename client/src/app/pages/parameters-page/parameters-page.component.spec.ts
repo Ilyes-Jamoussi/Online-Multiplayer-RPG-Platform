@@ -2,12 +2,13 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { ROUTES } from '@common/enums/routes.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { MAP_SIZE_TO_MAX_PLAYERS } from '@app/constants/map-size.constants';
 import { GameMode } from '@common/enums/game-mode.enum';
-import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { of, throwError } from 'rxjs';
 import { ParametersPageComponent } from './parameters-page.component';
 

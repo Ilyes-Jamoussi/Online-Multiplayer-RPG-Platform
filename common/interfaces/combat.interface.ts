@@ -1,5 +1,5 @@
 import { Dice } from '@common/enums/dice.enum';
-import { TileCombatEffect } from '@common/enums/tile-kind.enum';
+import { TileCombatEffect } from '@common/enums/tile.enum';
 
 export interface CombatState {
     sessionId: string;

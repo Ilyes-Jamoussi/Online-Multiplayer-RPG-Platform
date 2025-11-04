@@ -40,7 +40,8 @@
     padding: 1rem 1.25rem;
 }
 
-.tile-modal__object, .tile-modal__player {
+.tile-modal__object,
+.tile-modal__player {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -78,5 +79,3 @@
 .tile-modal__footer button:hover {
     background: #0b1220;
 }
-
-
