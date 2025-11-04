@@ -1,49 +1,12 @@
-<div class="game-session-container">
-    <!-- Sidebar gauche : Liste des joueurs -->
-    <aside class="left-sidebar">
+<div class="game-session-grid">
+    <aside class="players-list-container">
         <app-players-list></app-players-list>
+        <app-in-game-chat></app-in-game-chat>
     </aside>
 
-    <main class="game-area">
-        <div class="game-header">
-            <app-turn-timer></app-turn-timer>
-
-            <div class="game-info-header">
-                <div class="info-item">
-                    <span class="info-label">Carte</span>
-                    <span class="info-value">{{ getMapSizeLabel() }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Joueurs</span>
-                    <span class="info-value">{{ getPlayersCount() }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Actif</span>
-                    <span class="info-value active">{{ activePlayer }}</span>
-                </div>
-            </div>
-
-            <div class="header-actions">
-                @if (!isGameStarted && isMyTurn) {
-                <button class="action-btn start-game-btn" (click)="onStartGame()">
-                    <span class="btn-icon">▶️</span>
-                    <span class="btn-text">Démarrer</span>
-                </button>
-                }
-
-                <button class="action-btn primary" [disabled]="!isMyTurn || !isGameStarted" (click)="onEndTurn()">
-                    <span class="btn-icon">✓</span>
-                    <span class="btn-text">Terminer le tour</span>
-                </button>
-
-                <button class="action-btn secondary" [disabled]="isActionDisabled()" (click)="onAction()">
-                    <span class="btn-icon">⚡</span>
-                    <span class="btn-text">Action</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="game-map-container">
+    <div class="game-map-container">
+        <app-game-map-header></app-game-map-header>
+        <div class="game-map-content">
             @if (gameId) {
             <app-game-map [gameId]="gameId"></app-game-map>
             } @else {
@@ -54,11 +17,11 @@
             </div>
             }
         </div>
-    </main>
+        <app-game-map-footer></app-game-map-footer>
+    </div>
 
-    <aside class="right-sidebar">
+    <aside class="player-info-container">
         <app-player-info></app-player-info>
-        <app-chat></app-chat>
     </aside>
 </div>
 

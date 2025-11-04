@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { AssetsService } from '@app/services/assets/assets.service';
+import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { HP_HIGH_THRESHOLD_PERCENT, HP_MEDIUM_THRESHOLD_PERCENT, PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { Avatar } from '@common/enums/avatar.enum';
@@ -16,6 +17,7 @@ export class PlayerInfoComponent {
     constructor(
         private readonly playerService: PlayerService,
         private readonly assetsService: AssetsService,
+        readonly inGameService: InGameService,
     ) {}
 
     get player() {
@@ -43,20 +45,44 @@ export class PlayerInfoComponent {
         return this.playerService.speed();
     }
 
-    get attackValue(): number {
-        return this.playerService.attack();
+    get baseAttack(): number {
+        return this.player.baseAttack;
     }
 
-    get defenseValue(): number {
-        return this.playerService.defense();
+    get attackValue(): number {
+        return this.playerService.attack();
     }
 
     get attackDiceType(): string {
         return this.playerService.attackDice();
     }
 
+    get baseDefense(): number {
+        return this.player.baseDefense;
+    }
+
+    get defenseValue(): number {
+        return this.playerService.defense();
+    }
+
     get defenseDiceType(): string {
         return this.playerService.defenseDice();
+    }
+
+    get baseSpeed(): number {
+        return this.player.baseSpeed;
+    }
+
+    get speedBonus(): number {
+        return this.player.speedBonus;
+    }
+
+    get baseHealth(): number {
+        return this.player.baseHealth;
+    }
+
+    get healthBonus(): number {
+        return this.player.healthBonus;
     }
 
     get remainingBaseMovementPoints(): number {
@@ -100,5 +126,22 @@ export class PlayerInfoComponent {
 
     get combatDraws(): number {
         return this.playerService.combatDraws();
+    }
+
+    isActionDisabled(): boolean {
+        return (
+            !this.inGameService.isMyTurn() ||
+            !this.inGameService.isGameStarted() ||
+            this.inGameService.hasUsedAction() ||
+            !this.hasAvailableActions()
+        );
+    }
+
+    hasAvailableActions(): boolean {
+        return this.inGameService.availableActions().length > 0;
+    }
+
+    onAction(): void {
+        this.inGameService.activateActionMode();
     }
 }
