@@ -20,8 +20,8 @@ describe('GameEditorToolbarComponent', () => {
 
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => activeToolState,
-            set: (tool: ActiveTool | null) => {
-                activeToolState = tool;
+            set: (activeTool: ActiveTool | null) => {
+                activeToolState = activeTool;
             },
             configurable: true,
         });

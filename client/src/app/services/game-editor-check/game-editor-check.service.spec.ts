@@ -1,6 +1,6 @@
-/* eslint-disable  @typescript-eslint/naming-convention */
-import { signal } from '@angular/core';
+/* eslint-disable @typescript-eslint/naming-convention -- Test file uses mock objects with underscores */
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { Inventory } from '@app/interfaces/game-editor.interface';
@@ -57,27 +57,27 @@ export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
         return this.inventorySig.asReadonly();
     }
 
-    setTiles(tiles: GameEditorTileDto[]) {
-        this.tilesSig.set(tiles);
+    setTiles(value: GameEditorTileDto[]) {
+        this.tilesSig.set(value);
     }
-    setObjects(objects: GameEditorPlaceableDto[]) {
-        this.objectsSig.set(objects);
+    setObjects(value: GameEditorPlaceableDto[]) {
+        this.objectsSig.set(value);
     }
-    setSize(size: MapSize) {
-        this.sizeSig.set(size);
+    setSize(value: MapSize) {
+        this.sizeSig.set(value);
     }
-    setMode(mode: GameMode) {
-        this.modeSig.set(mode);
+    setMode(value: GameMode) {
+        this.modeSig.set(value);
     }
-    setInventory(inventory: Inventory) {
-        this.inventorySig.set(inventory);
+    setInventory(value: Inventory) {
+        this.inventorySig.set(value);
     }
 
     getTileAt(x: number, y: number) {
-        const num = this.sizeSig();
-        const arr = this.tilesSig();
-        if (x < 0 || y < 0 || x >= num || y >= num) return undefined;
-        return arr[y * num + x];
+        const size = this.sizeSig();
+        const tilesArray = this.tilesSig();
+        if (x < 0 || y < 0 || x >= size || y >= size) return undefined;
+        return tilesArray[y * size + x];
     }
 }
 
@@ -287,11 +287,11 @@ describe('GameEditorCheckService', () => {
         });
 
         it('should detect terrain accessibility issues (cross wall)', () => {
-            const midIndex = mid(SIZE);
+            const middle = mid(SIZE);
             const tiles: GameEditorTileDto[] = [];
             for (let y = 0; y < SIZE; y++) {
                 for (let x = 0; x < SIZE; x++) {
-                    const isCrossWall = (x === midIndex && y !== midIndex) || (y === midIndex && x !== midIndex);
+                    const isCrossWall = (x === middle && y !== middle) || (y === middle && x !== middle);
                     tiles.push({ x, y, kind: isCrossWall ? TileKind.WALL : TileKind.BASE });
                 }
             }
@@ -315,11 +315,11 @@ describe('GameEditorCheckService', () => {
         });
 
         it('should be able to detect multiple terrain accessibility issues', () => {
-            const midIndex = mid(SIZE);
+            const middle = mid(SIZE);
             const tiles: GameEditorTileDto[] = [];
             for (let y = 0; y < SIZE; y++) {
                 for (let x = 0; x < SIZE; x++) {
-                    const isCrossWall = (x === midIndex && y !== midIndex) || (y === midIndex && x !== midIndex);
+                    const isCrossWall = (x === middle && y !== middle) || (y === middle && x !== middle);
                     tiles.push({ x, y, kind: isCrossWall ? TileKind.WALL : TileKind.BASE });
                 }
             }

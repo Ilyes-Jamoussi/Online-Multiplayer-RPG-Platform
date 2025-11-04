@@ -1,5 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { enableProdMode, enableProfiling } from '@angular/core';
+// Force pipeline trigger
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { Routes, provideRouter, withHashLocation } from '@angular/router';
@@ -15,13 +16,13 @@ import { ParametersPageComponent } from '@app/pages/parameters-page/parameters-p
 import { SessionCreationPageComponent } from '@app/pages/session-creation-page/session-creation-page.component';
 import { WaitingRoomPageComponent } from '@app/pages/waiting-room-page/waiting-room-page.component';
 import { removeLeadingSlash } from '@src/utils/route/route.util';
-import { environment } from './environments/environment';
+import { ENVIRONMENT } from './environments/environment';
 
-if (environment.production) {
+if (ENVIRONMENT.production) {
     enableProdMode();
 }
 
-const routes: Routes = [
+const APP_ROUTES: Routes = [
     { path: '', redirectTo: removeLeadingSlash(ROUTES.HomePage), pathMatch: 'full' },
 
     {
@@ -61,6 +62,6 @@ const routes: Routes = [
 ];
 
 enableProfiling();
-bootstrapApplication(AppComponent, {
-    providers: [provideHttpClient(), provideRouter(routes, withHashLocation()), provideAnimations()],
+void bootstrapApplication(AppComponent, {
+    providers: [provideHttpClient(), provideRouter(APP_ROUTES, withHashLocation()), provideAnimations()],
 });

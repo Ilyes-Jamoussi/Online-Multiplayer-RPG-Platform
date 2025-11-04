@@ -1,4 +1,4 @@
-/* eslint-disable max-lines */
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { TestBed } from '@angular/core/testing';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { of, Subject, throwError } from 'rxjs';
@@ -543,9 +543,9 @@ describe('GameEditorStoreService', () => {
             const placedObject = service.getPlacedObjectAt(1, 1);
             expect(placedObject).toBeDefined();
 
-            const positionXY = 3;
-            service.placeObjectFromInventory(PlaceableKind.FLAG, positionXY, positionXY);
-            const afterSecondPlacement = service.getPlacedObjectAt(positionXY, positionXY);
+            const coordinate = 3;
+            service.placeObjectFromInventory(PlaceableKind.FLAG, coordinate, coordinate);
+            const afterSecondPlacement = service.getPlacedObjectAt(coordinate, coordinate);
             expect(afterSecondPlacement).toBeUndefined();
         });
 
@@ -574,14 +574,14 @@ describe('GameEditorStoreService', () => {
             expect(beforeObject).toBeDefined();
             expect(beforeObject?.id).toBe('start1');
 
-            const positionXY = 4;
+            const coordinate = 4;
 
-            service.movePlacedObject('start1', positionXY, positionXY);
-            const movedObject = service.getPlacedObjectAt(positionXY, positionXY);
+            service.movePlacedObject('start1', coordinate, coordinate);
+            const movedObject = service.getPlacedObjectAt(coordinate, coordinate);
             expect(movedObject).toBeDefined();
             expect(movedObject?.id).toBe('start1');
-            expect(movedObject?.x).toBe(positionXY);
-            expect(movedObject?.y).toBe(positionXY);
+            expect(movedObject?.x).toBe(coordinate);
+            expect(movedObject?.y).toBe(coordinate);
 
             const noObject = service.getPlacedObjectAt(0, 0);
             expect(noObject).toBeUndefined();
@@ -602,9 +602,9 @@ describe('GameEditorStoreService', () => {
             expect(beforeObject).toBeDefined();
             expect(beforeObject?.id).toBe('start1');
 
-            const positionXY = 4;
+            const coordinate = 4;
 
-            service.movePlacedObject('nonexistent-id', positionXY, positionXY);
+            service.movePlacedObject('nonexistent-id', coordinate, coordinate);
             const afterObject = service.getPlacedObjectAt(0, 0);
             expect(afterObject).toEqual(beforeObject);
         });

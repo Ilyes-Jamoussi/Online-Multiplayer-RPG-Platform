@@ -55,7 +55,7 @@ export class EditorPageComponent implements OnInit, OnDestroy {
     ) {}
 
     readonly gameId$ = this.activatedRoute.paramMap.pipe(
-        map((paramMap) => paramMap.get('id')),
+        map((params) => params.get('id')),
         filter((id): id is string => !!id),
         distinctUntilChanged(),
     );

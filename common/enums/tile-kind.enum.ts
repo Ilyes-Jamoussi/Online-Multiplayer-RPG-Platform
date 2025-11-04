@@ -25,3 +25,13 @@ export enum TileCost {
     WATER = 2,
     TELEPORT = 0,
 }
+
+export enum TileCombatEffect {
+    ICE = -2,
+    BASE = 0,
+    TELEPORT = 0,
+    WATER = 0,
+    WALL = 0,
+    DOOR = 0,
+    DOOR_OPEN = 0,
+}

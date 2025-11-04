@@ -69,7 +69,7 @@ describe('GameEditorObjectComponent', () => {
     let assetsSpy: jasmine.SpyObj<AssetsService>;
 
     let activeToolState: ActiveTool | null = null;
-    const OBJ: GameEditorPlaceableDto = {
+    const mockObject: GameEditorPlaceableDto = {
         id: 'obj-1',
 
         kind: PlaceableKind.BOAT,
@@ -91,8 +91,8 @@ describe('GameEditorObjectComponent', () => {
 
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => activeToolState,
-            set: (tool: ActiveTool | null) => {
-                activeToolState = tool;
+            set: (activeTool: ActiveTool | null) => {
+                activeToolState = activeTool;
             },
             configurable: true,
         });
@@ -108,7 +108,7 @@ describe('GameEditorObjectComponent', () => {
         fixture = TestBed.createComponent(GameEditorObjectComponent);
         component = fixture.componentInstance;
 
-        component.object = { ...OBJ };
+        component.object = { ...mockObject };
         component.tileSize = 64;
 
         interactionsSpy.getFootprintOf.and.returnValue(2);

@@ -19,7 +19,7 @@ export const DEFAULT_IN_GAME_SESSION: InGameSession = {
     inGameId: '',
     isGameStarted: false,
     inGamePlayers: {},
-    currentTurn: { turnNumber: 0, activePlayerId: '' },
+    currentTurn: { turnNumber: 0, activePlayerId: '', hasUsedAction: false },
     startPoints: [],
     turnOrder: [],
     mapSize: MapSize.SMALL,

@@ -44,7 +44,7 @@ export class GameEditorCheckService {
     });
 
     canSave(): boolean {
-        return !Object.values(this.editorProblems()).some((issue) => issue.hasIssue);
+        return !Object.values(this.editorProblems()).some((problem) => problem.hasIssue);
     }
 
     private isTerrainTile(kind: TileKind | undefined): boolean {
@@ -104,7 +104,7 @@ export class GameEditorCheckService {
     }
 
     private checkDoors(tiles: GameEditorTileDto[]): AccesibilityIssue {
-        const doorIssue: AccesibilityIssue = {
+        const problems: AccesibilityIssue = {
             tiles: [],
             hasIssue: false,
         };
@@ -121,15 +121,15 @@ export class GameEditorCheckService {
                 !this.isValidHorizontalDoor(leftKind, rightKind, topKind, bottomKind) &&
                 !this.isValidVerticalDoor(topKind, bottomKind, leftKind, rightKind)
             ) {
-                doorIssue.tiles.push({
+                problems.tiles.push({
                     x,
                     y,
                 });
-                doorIssue.hasIssue = true;
-                doorIssue.message = 'Une porte doit être placée entre deux murs et adossée à des tuiles de terrain.';
+                problems.hasIssue = true;
+                problems.message = 'Une porte doit être placée entre deux murs et adossée à des tuiles de terrain.';
             }
         }
-        return doorIssue;
+        return problems;
     }
 
     private checkTerrainCoverage(tiles: GameEditorTileDto[]): GameEditorIssue {
@@ -137,14 +137,14 @@ export class GameEditorCheckService {
         const total = size * size;
         const terrainCount = tiles.filter((tile) => this.isTerrainTile(tile.kind)).length;
         const ratio = terrainCount / total;
-        const coverageIssue: GameEditorIssue = { hasIssue: false };
+        const problems: GameEditorIssue = { hasIssue: false };
         if (ratio <= GameEditorCheckService.minTerrainRatio) {
-            coverageIssue.hasIssue = true;
-            coverageIssue.message = `Le ratio de tuiles de terrain est trop bas (${(ratio * GameEditorCheckService.percentBase).toFixed(
+            problems.hasIssue = true;
+            problems.message = `Le ratio de tuiles de terrain est trop bas (${(ratio * GameEditorCheckService.percentBase).toFixed(
                 2,
             )} %). Il doit être supérieur à ${GameEditorCheckService.minTerrainRatio * GameEditorCheckService.percentBase} %.`;
         }
-        return coverageIssue;
+        return problems;
     }
 
     private checkTerrainAccessibility(tiles: GameEditorTileDto[]): AccesibilityIssue {

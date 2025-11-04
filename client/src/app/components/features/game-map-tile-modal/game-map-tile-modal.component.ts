@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { GameMapService } from '@app/services/game-map/game-map.service';
-import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
-import { InGamePlayer } from '@common/models/player.interface';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { AssetsService } from '@app/services/assets/assets.service';
+import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlaceableKind, PlaceableLabel } from '@common/enums/placeable-kind.enum';
 import { TileKind, TileLabel } from '@common/enums/tile-kind.enum';
+import { Player } from '@common/models/player.interface';
 
 @Component({
     selector: 'app-game-map-tile-modal',
@@ -31,7 +31,7 @@ export class GameMapTileModalComponent {
         return this.gameMapService.getObjectOnTile();
     }
 
-    get playerOnTile(): InGamePlayer | undefined {
+    get playerOnTile(): Player | undefined {
         return this.gameMapService.getPlayerOnTile();
     }
 

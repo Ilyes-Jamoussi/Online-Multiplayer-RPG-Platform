@@ -44,8 +44,8 @@
                 @for (player of players; track player.id) {
                     <div 
                         class="map-player"
+                        [class.current-user]="isCurrentUser(player)"
                         [ngStyle]="getPlayerStyle(player)"
-                        [title]="player.name"
                     >
                         <img 
                             [src]="getPlayerAvatarImage(player.id)" 

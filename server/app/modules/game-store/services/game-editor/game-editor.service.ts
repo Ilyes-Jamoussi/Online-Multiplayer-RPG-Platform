@@ -47,8 +47,8 @@ export class GameEditorService {
         const update: GameDocument = {
             ...this.buildBasicUpdate(dto),
             ...(await this.buildImageUpdate(dto, id)),
-            ...{ tiles: this.mapTiles(dto.tiles) },
-            ...{ objects: this.mapObjects(dto.objects) },
+            ...{ tiles: dto.tiles ? this.mapTiles(dto.tiles) : undefined },
+            ...{ objects: dto.objects ? this.mapObjects(dto.objects) : undefined },
             lastModified: new Date(),
             draft: false,
             visibility: false,

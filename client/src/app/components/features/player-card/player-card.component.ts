@@ -31,8 +31,8 @@ export class PlayerCardComponent {
 
     get cardClasses(): { [key: string]: boolean } {
         return {
-            me: this.isMe,
-            admin: this.isAdmin,
+            'is-me': this.isMe,
+            'admin': this.isAdmin,
         };
     }
 

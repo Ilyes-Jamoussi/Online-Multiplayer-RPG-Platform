@@ -80,8 +80,8 @@ describe('GameEditorInventoryComponent', () => {
         });
         Object.defineProperty(storeSpy, 'tileSizePx', {
             get: (): number => tileSize,
-            set: (value: number) => {
-                tileSize = value;
+            set: (newValue: number) => {
+                tileSize = newValue;
             },
             configurable: true,
         });
@@ -89,8 +89,8 @@ describe('GameEditorInventoryComponent', () => {
 
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => activeToolState,
-            set: (tool: ActiveTool | null) => {
-                activeToolState = tool;
+            set: (activeTool: ActiveTool | null) => {
+                activeToolState = activeTool;
             },
             configurable: true,
         });

@@ -92,7 +92,7 @@ export class GameEditorInventoryComponent {
     }
 
     private slotAccepts(evt: DragEvent, kind: PlaceableKind): boolean {
-        const types = Array.from(evt.dataTransfer?.types ?? []);
-        return types.includes(this.dndMime[kind]);
+        const transferTypes = Array.from(evt.dataTransfer?.types ?? []);
+        return transferTypes.includes(this.dndMime[kind]);
     }
 }

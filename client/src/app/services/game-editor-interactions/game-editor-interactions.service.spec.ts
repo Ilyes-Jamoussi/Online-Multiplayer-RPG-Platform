@@ -1,8 +1,8 @@
-/* eslint-disable max-lines */
-/* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-import { signal } from '@angular/core';
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
+/* eslint-disable @typescript-eslint/naming-convention -- Test file uses mock objects with underscores */
+/* eslint-disable @typescript-eslint/no-magic-numbers -- Test file uses literal values for assertions */
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { ActiveTool, ExtendedGameEditorPlaceableDto, TileBrushTool, ToolType } from '@app/interfaces/game-editor.interface';
@@ -39,8 +39,8 @@ class StoreStub implements Partial<GameEditorStoreService> {
     setPlacedObjects(list: GameEditorPlaceableDto[]) {
         this.placedObjectsSig.set(list);
     }
-    setSize(num: number) {
-        this._size = num;
+    setSize(size: number) {
+        this._size = size;
     }
 
     getTileAt(x: number, y: number) {
@@ -63,9 +63,9 @@ class StoreStub implements Partial<GameEditorStoreService> {
     });
 
     placeObjectFromInventory = jasmine.createSpy('placeObjectFromInventory').and.callFake((kind: PlaceableKind, x: number, y: number) => {
-        const k = PlaceableKind[kind] as unknown as PlaceableKind;
+        const placeableKind = PlaceableKind[kind] as unknown as PlaceableKind;
         const id = `${kind}-${x}-${y}`;
-        this.setPlacedObjects([...this.placedObjectsSig(), { id, kind: k, x, y, placed: true, orientation: 'N' }]);
+        this.setPlacedObjects([...this.placedObjectsSig(), { id, kind: placeableKind, x, y, placed: true, orientation: 'N' }]);
     });
 
     movePlacedObject = jasmine.createSpy('movePlacedObject').and.callFake((id: string, x: number, y: number) => {
@@ -129,12 +129,13 @@ function makeDragEventWithSpies(opts: { offsetX?: number; offsetY?: number } = {
     _spies: { setData: jasmine.Spy; getData: jasmine.Spy };
 } {
     const store: Record<string, string> = {};
-    const setData = jasmine.createSpy('setData').and.callFake((fmt: string, data: string) => {
-        store[fmt] = data;
-        dataTransfer.types.push(fmt);
+    const setData = jasmine.createSpy('setData').and.callFake((format: string, data: string) => {
+        store[format] = data;
+        dataTransfer.types.push(format);
         return true;
     });
-    const getData = jasmine.createSpy('getData').and.callFake((fmt: string) => store[fmt] ?? '');
+    const getData = jasmine.createSpy('getData').and.callFake((format: string) => store[format] ?? '');
+
     const dataTransfer: Partial<DataTransfer> & { types: string[] } = {
         types: [],
         effectAllowed: 'all',

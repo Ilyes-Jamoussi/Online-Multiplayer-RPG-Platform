@@ -2,7 +2,9 @@ import { Component, computed, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { InGamePlayer } from '@common/models/player.interface';
+import { Player } from '@common/models/player.interface';
+
+const PERCENTAGE_MULTIPLIER = 100;
 
 @Component({
     selector: 'app-players-list',
@@ -17,31 +19,35 @@ export class PlayersListComponent {
         private readonly playerService: PlayerService,
     ) {}
 
-    readonly orderedPlayers: Signal<InGamePlayer[]> = computed(() => {
+    readonly orderedPlayers: Signal<Player[]> = computed(() => {
         const turnOrder = this.inGameService.turnOrder();
         const players = this.inGameService.inGamePlayers();
         
-        return turnOrder.map(playerId => players[playerId]).filter(Boolean);
+        return turnOrder.map(playerId => players[playerId]);
     });
 
-    isActivePlayer(player: InGamePlayer): boolean {
+    isActivePlayer(player: Player): boolean {
         return player.id === this.inGameService.activePlayer?.id;
     }
 
-    isCurrentUser(player: InGamePlayer): boolean {
+    isCurrentUser(player: Player): boolean {
         return player.id === this.playerService.id();
     }
 
-    isAdmin(player: InGamePlayer): boolean {
+    isAdmin(player: Player): boolean {
         return player.isAdmin;
     }
 
-    hasAbandoned(player: InGamePlayer): boolean {
+    hasAbandoned(player: Player): boolean {
         return !player.isInGame;
     }
 
-    getCombatWins(): number {
-        // TODO: Implement combat wins tracking
-        return 0;
+    getCombatWins(player: Player): number {
+        return player.combatWins;
+    }
+
+    getHealthPercentage(player: Player): number {
+        if (player.maxHealth === 0) return 0;
+        return (player.health / player.maxHealth) * PERCENTAGE_MULTIPLIER;
     }
 }

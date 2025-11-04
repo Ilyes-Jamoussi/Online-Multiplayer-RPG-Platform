@@ -37,7 +37,7 @@ export class GameStoreService {
     }
 
     toggleGameVisibility(id: string): Observable<void> {
-        const game = this._gameDisplays().find((game) => game.id === id);
+        const game = this._gameDisplays().find((gameDisplay) => gameDisplay.id === id);
         if (!game) {
             throw new Error('Game not found');
         }
@@ -56,19 +56,19 @@ export class GameStoreService {
     }
 
     private replaceGameDisplay(dto: GamePreviewDto): void {
-        const exists = this._gameDisplays().some((game) => game.id === dto.id);
-        if (!exists) {
-            this._gameDisplays.update((games) => [...games, dto]);
-            return;
-        }
-        this._gameDisplays.update((games) => games.map((game) => (game.id === dto.id ? dto : game)));
+        const exists = this._gameDisplays().some((gameDisplay) => gameDisplay.id === dto.id);
+        this._gameDisplays.update((games) =>
+            exists ? games.map((gameDisplay) => (gameDisplay.id === dto.id ? dto : gameDisplay)) : [...games, dto],
+        );
     }
 
     private removeGameDisplay(id: string): void {
-        this._gameDisplays.update((games) => games.filter((game) => game.id !== id));
+        this._gameDisplays.update((games) => games.filter((gameDisplay) => gameDisplay.id !== id));
     }
 
     private toggleGameDisplayVisibility(id: string): void {
-        this._gameDisplays.update((games) => games.map((game) => (game.id === id ? { ...game, visibility: !game.visibility } : game)));
+        this._gameDisplays.update((games) =>
+            games.map((gameDisplay) => (gameDisplay.id === id ? { ...gameDisplay, visibility: !gameDisplay.visibility } : gameDisplay)),
+        );
     }
 }

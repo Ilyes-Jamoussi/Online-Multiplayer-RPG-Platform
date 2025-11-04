@@ -1,52 +1,66 @@
 <div class="player-info-panel">
     <div class="player-header">
-        <img [src]="avatarImage" [alt]="characterName" class="avatar">
-        <h3>{{ characterName }}</h3>
+        <img [src]="avatarImage" [alt]="playerName" class="avatar">
+        <h3>{{ playerName }}</h3>
     </div>
     
     <div class="stats-section">
         <div class="stat-item hp">
-            <span class="label">Vie :</span>
-            <span class="value">{{ currentHP }}/{{ maxHP }}</span>
+            <span class="label">Points de vie :</span>
+            <div class="hp-bar">
+                <div class="hp-fill" [style.width.%]="hpPercentage" [class]="hpColorClass"></div>
+                <span class="hp-text">{{ currentHealth }}/{{ maxHealth }}</span>
+            </div>
         </div>
         
         <div class="stat-item">
             <span class="label">Rapidité :</span>
-            <span class="value">{{ currentSpeed }}/{{ maxSpeed }}</span>
+            <span class="value">{{ rapidityValue }}</span>
         </div>
         
         <div class="stat-item">
             <span class="label">Attaque :</span>
-            <span class="value">{{ attackValue }} ({{ attackDice }})</span>
+            <span class="value">{{ attackValue }} ({{ attackDiceType }})</span>
         </div>
         
         <div class="stat-item">
             <span class="label">Défense :</span>
-            <span class="value">{{ defenseValue }} ({{ defenseDice }})</span>
-        </div>
-    </div>
-    
-    <div class="turn-section">
-        <div class="stat-item">
-            <span class="label">Mouvement :</span>
-            <span class="value">{{ movementPoints }}</span>
+            <span class="value">{{ defenseValue }} ({{ defenseDiceType }})</span>
         </div>
         
         <div class="stat-item">
-            <span class="label">Mouvement bonus :</span>
-            <span class="value">{{ bonusMovementPoints }}</span>
+            <span class="label">Points de mouvement restants :</span>
+            <span class="value">{{ remainingBaseMovementPoints }}</span>
         </div>
         
         <div class="stat-item">
-            <span class="label">Actions :</span>
+            <span class="label">Points de mouvement bonus :</span>
+            <span class="value">{{ remainingBonusMovementPoints }}</span>
+        </div>
+        
+        <div class="stat-item">
+            <span class="label">Actions restantes :</span>
             <span class="value">{{ actionsRemaining }}</span>
         </div>
+        
+        <div class="stat-item">
+            <span class="label">Combats totaux :</span>
+            <span class="value">{{ totalCombats }}</span>
+        </div>
+        
+        <div class="stat-item">
+            <span class="label">Victoires :</span>
+            <span class="value">{{ combatWins }}</span>
+        </div>
+        
+        <div class="stat-item">
+            <span class="label">Défaites :</span>
+            <span class="value">{{ combatLosses }}</span>
+        </div>
+        
+        <div class="stat-item">
+            <span class="label">Égalités :</span>
+            <span class="value">{{ combatDraws }}</span>
+        </div>
     </div>
-
-    <div class="remaining-movement-points">
-        <span class="label">Mouvement restant :</span>
-        <span class="value">{{ remainingMovementPoints }}</span>
-    </div>
-
-    
 </div>

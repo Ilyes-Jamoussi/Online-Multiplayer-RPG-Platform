@@ -51,59 +51,59 @@ export class GameEditorStoreService {
     private readonly _tileSizePx = signal<number>(0);
 
     get placedObjects(): ExtendedGameEditorPlaceableDto[] {
-        const objs = this._objects();
-        const placed = objs.filter((object) => object.placed);
-        const accumulateur: ExtendedGameEditorPlaceableDto[] = [];
+        const objects = this._objects();
+        const placed = objects.filter((object) => object.placed);
+        const accumulator: ExtendedGameEditorPlaceableDto[] = [];
 
         for (const object of placed) {
             const footprint = PlaceableFootprint[PlaceableKind[object.kind]];
-            const xCoordinates: number[] = [];
-            const yCoordinates: number[] = [];
-            for (let dx = 0; dx < footprint; dx++) {
-                for (let dy = 0; dy < footprint; dy++) {
-                    xCoordinates.push(object.x + dx);
-                    yCoordinates.push(object.y + dy);
+            const xPositions: number[] = [];
+            const yPositions: number[] = [];
+            for (let deltaX = 0; deltaX < footprint; deltaX++) {
+                for (let deltaY = 0; deltaY < footprint; deltaY++) {
+                    xPositions.push(object.x + deltaX);
+                    yPositions.push(object.y + deltaY);
                 }
             }
-            accumulateur.push({
+            accumulator.push({
                 id: object.id,
                 kind: object.kind,
                 orientation: object.orientation,
                 placed: object.placed,
                 x: object.x,
                 y: object.y,
-                xCoordinates,
-                yCoordinates,
+                xPositions,
+                yPositions,
             });
         }
 
-        return accumulateur;
+        return accumulator;
     }
 
     readonly inventory = computed<Inventory>(() => {
-        const objs = this._objects();
-        const inv: Inventory = {} as Inventory;
+        const objects = this._objects();
+        const inventory: Inventory = {} as Inventory;
 
-        for (const object of objs) {
+        for (const object of objects) {
             const kind = PlaceableKind[object.kind];
-            if (!(kind in inv)) {
-                inv[kind] = { kind, total: 0, remaining: 0, disabled: false, image: this.assetsService.getPlaceableImage(kind) };
+            if (!(kind in inventory)) {
+                inventory[kind] = { kind, total: 0, remaining: 0, disabled: false, image: this.assetsService.getPlaceableImage(kind) };
             }
-            inv[kind].total += 1;
+            inventory[kind].total += 1;
             if (!object.placed) {
-                inv[kind].remaining += 1;
+                inventory[kind].remaining += 1;
             }
         }
 
-        for (const k of PLACEABLE_ORDER) {
-            if (!(k in inv)) {
-                inv[k] = { total: 0, remaining: 0, kind: k, disabled: true, image: this.assetsService.getPlaceableImage(k) };
+        for (const kind of PLACEABLE_ORDER) {
+            if (!(kind in inventory)) {
+                inventory[kind] = { total: 0, remaining: 0, kind, disabled: true, image: this.assetsService.getPlaceableImage(kind) };
             } else {
-                inv[k].disabled = inv[k].remaining === 0;
+                inventory[kind].disabled = inventory[kind].remaining === 0;
             }
         }
 
-        return inv;
+        return inventory;
     });
 
     get name() {
@@ -313,7 +313,7 @@ export class GameEditorStoreService {
 
     getPlacedObjectAt(x: number, y: number): GameEditorPlaceableDto | undefined {
         if (!this.inBounds(x, y)) return undefined;
-        return this.placedObjects.find((object) => object.xCoordinates.includes(x) && object.yCoordinates.includes(y));
+        return this.placedObjects.find((object) => object.xPositions.includes(x) && object.yPositions.includes(y));
     }
 
     placeObjectFromInventory(kind: PlaceableKind, x: number, y: number): void {
@@ -354,13 +354,13 @@ export class GameEditorStoreService {
     }
 
     private inBounds(x: number, y: number): boolean {
-        const num = this.size();
-        return x >= 0 && y >= 0 && x < num && y < num;
+        const size = this.size();
+        return x >= 0 && y >= 0 && x < size && y < size;
     }
 
-    private withBounds<T>(x: number, y: number, fn: () => T): T | undefined {
+    private withBounds<T>(x: number, y: number, functionToRun: () => T): T | undefined {
         if (!this.inBounds(x, y)) return undefined;
-        return fn();
+        return functionToRun();
     }
 
     private updateTiles(mutator: (draft: GameEditorTileDto[]) => void): void {

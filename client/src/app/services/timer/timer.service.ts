@@ -5,41 +5,78 @@ import { MILLISECONDS_PER_SECOND } from '@common/constants/in-game';
     providedIn: 'root',
 })
 export class TimerService {
-    private readonly _timeRemaining = signal<number>(0);
-    private readonly _isActive = signal<boolean>(false);
-    private timer: number | null = null;
+    private readonly _turnTimeRemaining = signal<number>(0);
+    private readonly _isTurnActive = signal<boolean>(false);
 
-    readonly timeRemaining = this._timeRemaining.asReadonly();
-    readonly isActive = this._isActive.asReadonly();
+    private turnTimer: number | null = null;
+    private pausedTurnTime: number = 0;
 
-    startTimer(duration: number): void {
-        this.stopTimer();
-        this._timeRemaining.set(duration / MILLISECONDS_PER_SECOND);
-        this._isActive.set(true);
+    readonly turnTimeRemaining = this._turnTimeRemaining.asReadonly();
+    readonly isTurnActive = this._isTurnActive.asReadonly();
 
-        this.timer = window.setInterval(() => {
-            const currentTime = this._timeRemaining();
+    getPausedTurnTime(): number {
+        return this.pausedTurnTime;
+    }
+
+    startTurnTimer(duration: number): void {
+        this.stopTurnTimer();
+        const timeInSeconds = duration / MILLISECONDS_PER_SECOND;
+
+        this._turnTimeRemaining.set(timeInSeconds);
+        this._isTurnActive.set(true);
+
+        this.turnTimer = window.setInterval(() => {
+            const currentTime = this._turnTimeRemaining();
             if (currentTime <= 1) {
-                this.stopTimer();
-                this._timeRemaining.set(0);
-                this._isActive.set(false);
+                this.stopTurnTimer();
             } else {
-                this._timeRemaining.set(currentTime - 1);
+                this._turnTimeRemaining.set(currentTime - 1);
             }
         }, MILLISECONDS_PER_SECOND);
     }
 
-    stopTimer(): void {
-        if (this.timer) {
-            window.clearInterval(this.timer);
-            this.timer = null;
+    stopTurnTimer(): void {
+        if (this.turnTimer) {
+            window.clearInterval(this.turnTimer);
+            this.turnTimer = null;
         }
-        this._isActive.set(false);
+        this._isTurnActive.set(false);
+        this._turnTimeRemaining.set(0);
+        this.pausedTurnTime = 0;
     }
 
-    resetTimer(): void {
-        this.stopTimer();
-        this._timeRemaining.set(0);
+    pauseTurnTimer(): void {
+        if (this.turnTimer) {
+            window.clearInterval(this.turnTimer);
+            this.turnTimer = null;
+        }
+
+        if (this._isTurnActive() && this._turnTimeRemaining() > 0) {
+            this.pausedTurnTime = this._turnTimeRemaining();
+        }
+
+        this._isTurnActive.set(false);
+        this._turnTimeRemaining.set(0);
+    }
+
+    resumeTurnTimer(): void {
+        if (this.pausedTurnTime > 0) {
+            this._turnTimeRemaining.set(this.pausedTurnTime);
+            this._isTurnActive.set(true);
+            this.pausedTurnTime = 0;
+
+            this.turnTimer = window.setInterval(() => {
+                const currentTime = this._turnTimeRemaining();
+                if (currentTime <= 1) {
+                    this.stopTurnTimer();
+                } else {
+                    this._turnTimeRemaining.set(currentTime - 1);
+                }
+            }, MILLISECONDS_PER_SECOND);
+        }
+    }
+
+    resetAllTimers(): void {
+        this.stopTurnTimer();
     }
 }
-

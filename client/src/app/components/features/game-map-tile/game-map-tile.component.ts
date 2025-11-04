@@ -3,8 +3,9 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { AssetsService } from '@app/services/assets/assets.service';
+import { CombatService } from '@app/services/combat/combat.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
-import { InGamePlayer } from '@common/models/player.interface';
+import { Player } from '@common/models/player.interface';
 
 @Component({
     selector: 'app-game-map-tile',
@@ -22,6 +23,7 @@ export class GameMapTileComponent {
     constructor(
         private readonly gameMapService: GameMapService,
         private readonly assetsService: AssetsService,
+        private readonly combatService: CombatService,
     ) {}
 
     get objectOnTile(): GameEditorPlaceableDto | undefined {
@@ -30,8 +32,8 @@ export class GameMapTileComponent {
             .find((object) => object.placed && object.x === this.tile.x && object.y === this.tile.y);
     }
 
-    get playerOnTile(): InGamePlayer | undefined {
-        return this.gameMapService.currentlyInGamePlayers.find(
+    get playerOnTile(): Player | undefined {
+        return this.gameMapService.currentlyPlayers.find(
             (player) => player.isInGame && player.x === this.tile.x && player.y === this.tile.y,
         );
     }
@@ -44,6 +46,22 @@ export class GameMapTileComponent {
     get objectImageSrc(): string {
         const obj = this.objectOnTile;
         return obj ? this.assetsService.getPlaceableImage(obj.kind) : '';
+    }
+
+    onTileClick(event: MouseEvent): void {
+        event.preventDefault();
+
+        if (!this.gameMapService.isActionModeActive) {
+            return;
+        }
+
+        const actionType = this.gameMapService.getActionTypeAt(this.tile.x, this.tile.y);
+
+        if (actionType === 'DOOR') {
+            this.gameMapService.toggleDoor(this.tile.x, this.tile.y);
+        } else if (actionType === 'ATTACK') {
+            this.combatService.attackPlayer(this.tile.x, this.tile.y);
+        }
     }
 
     openModal(event: MouseEvent): void {

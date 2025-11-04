@@ -79,8 +79,8 @@ export interface Vector2 {
 }
 
 export interface ExtendedGameEditorPlaceableDto extends GameEditorPlaceableDto {
-    xCoordinates: number[];
-    yCoordinates: number[];
+    xPositions: number[];
+    yPositions: number[];
 }
 
 export type ToolbarItem = {

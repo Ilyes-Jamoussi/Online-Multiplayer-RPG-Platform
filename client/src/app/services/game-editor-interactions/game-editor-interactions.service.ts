@@ -137,9 +137,9 @@ export class GameEditorInteractionsService {
 
         this.objectDropVec2 = { x: closestX, y: closestY };
 
-        for (let dy = 0; dy < footprint; dy++) {
-            for (let dx = 0; dx < footprint; dx++) {
-                hoveredTiles.push({ x: closestX + dx, y: closestY + dy });
+        for (let deltaY = 0; deltaY < footprint; deltaY++) {
+            for (let deltaX = 0; deltaX < footprint; deltaX++) {
+                hoveredTiles.push({ x: closestX + deltaX, y: closestY + deltaY });
             }
         }
 
@@ -183,12 +183,12 @@ export class GameEditorInteractionsService {
     private canPlaceObject(x: number, y: number, kind: PlaceableKind, excludeId?: string): boolean {
         const footprint = PlaceableFootprint[kind];
 
-        for (let dy = 0; dy < footprint; dy++) {
-            for (let dx = 0; dx < footprint; dx++) {
-                const tangentX = x + dx;
-                const tangentY = y + dy;
+        for (let deltaY = 0; deltaY < footprint; deltaY++) {
+            for (let deltaX = 0; deltaX < footprint; deltaX++) {
+                const targetX = x + deltaX;
+                const targetY = y + deltaY;
 
-                const tile = this.store.getTileAt(tangentX, tangentY);
+                const tile = this.store.getTileAt(targetX, targetY);
                 if (!tile) return false;
 
                 const tileKind = tile.kind;
@@ -199,7 +199,7 @@ export class GameEditorInteractionsService {
                     if (tileKind !== TileKind.WATER) return false;
                 }
 
-                const object = this.store.getPlacedObjectAt(tangentX, tangentY);
+                const object = this.store.getPlacedObjectAt(targetX, targetY);
                 if (object && object.id !== excludeId) return false;
             }
         }
@@ -213,10 +213,10 @@ export class GameEditorInteractionsService {
     }
 
     private tryMoveObject(x: number, y: number, id: string): void {
-        const obj = this.store.placedObjects.find((object) => object.id === id);
-        if (!obj) return;
+        const object = this.store.placedObjects.find((obj) => obj.id === id);
+        if (!object) return;
 
-        const kind = PlaceableKind[obj.kind];
+        const kind = PlaceableKind[object.kind];
         if (!this.canPlaceObject(x, y, kind, id)) return;
         this.store.movePlacedObject(id, x, y);
     }
