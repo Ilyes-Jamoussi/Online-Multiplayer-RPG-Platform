@@ -9,6 +9,7 @@ import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 
 describe('InGameSessionRepository', () => {
     let service: InGameSessionRepository;
@@ -218,7 +219,7 @@ describe('InGameSessionRepository', () => {
 
             service.updatePlayer(SESSION_ID, PLAYER_A_ID, { health: NEW_HEALTH });
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.updated', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerUpdated, {
                 sessionId: SESSION_ID,
                 player: service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID],
             });
@@ -287,7 +288,7 @@ describe('InGameSessionRepository', () => {
 
             service.resetPlayerHealth(SESSION_ID, PLAYER_A_ID);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.healthChanged', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerHealthChanged, {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_A_ID,
                 newHealth: BASE_HEALTH,
@@ -322,7 +323,7 @@ describe('InGameSessionRepository', () => {
 
             service.incrementPlayerCombatCount(SESSION_ID, PLAYER_A_ID);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.combatCountChanged', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatCountChanged, {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_A_ID,
                 combatCount: 1,
@@ -357,7 +358,7 @@ describe('InGameSessionRepository', () => {
 
             service.incrementPlayerCombatWins(SESSION_ID, PLAYER_A_ID);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.combatWinsChanged', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatWinsChanged, {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_A_ID,
                 combatWins: 1,
@@ -392,7 +393,7 @@ describe('InGameSessionRepository', () => {
 
             service.incrementPlayerCombatLosses(SESSION_ID, PLAYER_A_ID);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.combatLossesChanged', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatLossesChanged, {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_A_ID,
                 combatLosses: 1,
@@ -427,7 +428,7 @@ describe('InGameSessionRepository', () => {
 
             service.incrementPlayerCombatDraws(SESSION_ID, PLAYER_A_ID);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.combatDrawsChanged', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatDrawsChanged, {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_A_ID,
                 combatDraws: 1,
@@ -696,7 +697,7 @@ describe('InGameSessionRepository', () => {
 
             service.movePlayerPosition(SESSION_ID, PLAYER_A_ID, POS_X_2, POS_Y_3, MOVE_COST);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.moved', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerMoved, {
                 session: service.findById(SESSION_ID),
                 playerId: PLAYER_A_ID,
                 x: POS_X_2,

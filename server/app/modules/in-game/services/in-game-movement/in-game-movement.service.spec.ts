@@ -7,6 +7,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Orientation } from '@common/enums/orientation.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -283,7 +284,7 @@ describe('InGameMovementService', () => {
 
             service.movePlayer(session, PLAYER_A_ID, Orientation.N);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.reachableTiles', { playerId: PLAYER_A_ID, reachable: [] });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerReachableTiles, { playerId: PLAYER_A_ID, reachable: [] });
         });
     });
 
@@ -371,7 +372,7 @@ describe('InGameMovementService', () => {
             const result = service.calculateReachableTiles(session, PLAYER_A_ID);
 
             expect(result).toEqual([]);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.reachableTiles', { playerId: PLAYER_A_ID, reachable: [] });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerReachableTiles, { playerId: PLAYER_A_ID, reachable: [] });
         });
 
         it('should calculate reachable tiles for base tiles', () => {
@@ -390,7 +391,7 @@ describe('InGameMovementService', () => {
             const result = service.calculateReachableTiles(session, PLAYER_A_ID);
 
             expect(result.length).toBeGreaterThan(0);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.reachableTiles', { playerId: PLAYER_A_ID, reachable: result });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerReachableTiles, { playerId: PLAYER_A_ID, reachable: result });
         });
 
         it('should not include start position in reachable tiles', () => {
@@ -589,7 +590,7 @@ describe('InGameMovementService', () => {
 
             const result = service.calculateReachableTiles(session, PLAYER_A_ID);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.reachableTiles', { playerId: PLAYER_A_ID, reachable: result });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerReachableTiles, { playerId: PLAYER_A_ID, reachable: result });
         });
 
         it('should handle queue.shift() returning undefined', () => {

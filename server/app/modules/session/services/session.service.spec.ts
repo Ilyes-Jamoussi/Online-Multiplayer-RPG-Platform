@@ -6,6 +6,7 @@ import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
 import { SessionService } from '@app/modules/session/services/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('SessionService', () => {
@@ -82,7 +83,7 @@ describe('SessionService', () => {
 
             expect(sessionId).toBeDefined();
             expect(sessionId.length).toBe(ACCESS_CODE_LENGTH);
-            expect(mockEventEmitter.emit).toHaveBeenCalledWith('session.availabilityChanged');
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionAvailabilityChanged);
         });
 
         it('should create session with admin player', () => {
@@ -146,7 +147,7 @@ describe('SessionService', () => {
             service.endSession(sessionId);
 
             expect(() => service.getSession(sessionId)).toThrow('Session non trouvée');
-            expect(mockEventEmitter.emit).toHaveBeenCalledWith('session.availabilityChanged');
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionAvailabilityChanged);
         });
     });
 
@@ -194,7 +195,7 @@ describe('SessionService', () => {
             service.joinSession(PLAYER_ID_1, joinDto);
 
             expect(service.isRoomLocked(sessionId)).toBe(true);
-            expect(mockEventEmitter.emit).toHaveBeenCalledWith('session.autoLocked', sessionId);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionAutoLocked, sessionId);
         });
 
         it('should not auto-lock when session not full', () => {
@@ -205,7 +206,7 @@ describe('SessionService', () => {
             service.joinSession(PLAYER_ID_1, joinDto);
 
             expect(service.isRoomLocked(sessionId)).toBe(false);
-            expect(mockEventEmitter.emit).not.toHaveBeenCalledWith('session.autoLocked', expect.anything());
+            expect(mockEventEmitter.emit).not.toHaveBeenCalledWith(ServerEvents.SessionAutoLocked, expect.anything());
         });
 
         it('should initialize player with default game values', () => {
@@ -401,7 +402,7 @@ describe('SessionService', () => {
             service.lock(sessionId);
 
             expect(service.isRoomLocked(sessionId)).toBe(true);
-            expect(mockEventEmitter.emit).toHaveBeenCalledWith('session.availabilityChanged');
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionAvailabilityChanged);
         });
 
         it('should throw error when locking non-existent session', () => {
@@ -425,7 +426,7 @@ describe('SessionService', () => {
             service.unlock(sessionId);
 
             expect(service.isRoomLocked(sessionId)).toBe(false);
-            expect(mockEventEmitter.emit).toHaveBeenCalledWith('session.availabilityChanged');
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionAvailabilityChanged);
         });
     });
 

@@ -1,4 +1,5 @@
 import { COMBAT_DURATION } from '@common/constants/in-game';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -77,7 +78,7 @@ describe('CombatTimerService', () => {
 
             service.startCombatTimer(session, ATTACKER_ID, TARGET_ID, ATTACKER_TILE_EFFECT, TARGET_TILE_EFFECT);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.started', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatStarted, {
                 sessionId: session.id,
                 attackerId: ATTACKER_ID,
                 targetId: TARGET_ID,
@@ -91,7 +92,7 @@ describe('CombatTimerService', () => {
 
             service.startCombatTimer(session, ATTACKER_ID, TARGET_ID);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.started', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatStarted, {
                 sessionId: session.id,
                 attackerId: ATTACKER_ID,
                 targetId: TARGET_ID,
@@ -105,7 +106,7 @@ describe('CombatTimerService', () => {
 
             service.startCombatTimer(session, ATTACKER_ID, TARGET_ID);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.timerRestart', { sessionId: session.id });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatTimerRestart, { sessionId: session.id });
         });
 
         it('should schedule combat loop', () => {
@@ -139,7 +140,7 @@ describe('CombatTimerService', () => {
 
             jest.advanceTimersByTime(COMBAT_DURATION);
 
-            expect(eventEmitter.emit).not.toHaveBeenCalledWith('combat.newRound', { sessionId: session.id });
+            expect(eventEmitter.emit).not.toHaveBeenCalledWith(ServerEvents.CombatNewRound, { sessionId: session.id });
         });
 
         it('should clear and delete timer when timer exists', () => {
@@ -166,7 +167,7 @@ describe('CombatTimerService', () => {
 
             jest.advanceTimersByTime(COMBAT_DURATION);
 
-            const newRoundCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'combat.newRound').length;
+            const newRoundCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === ServerEvents.CombatNewRound).length;
             expect(newRoundCallCount).toBe(0);
         });
     });
@@ -188,7 +189,7 @@ describe('CombatTimerService', () => {
 
             service.forceNextLoop(session);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.newRound', { sessionId: session.id });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatNewRound, { sessionId: session.id });
         });
 
         it('should emit combat.timerLoop event', () => {
@@ -196,7 +197,7 @@ describe('CombatTimerService', () => {
 
             service.forceNextLoop(session);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.timerLoop', { sessionId: session.id });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatTimerLoop, { sessionId: session.id });
         });
 
         it('should emit combat.timerRestart event', () => {
@@ -204,7 +205,7 @@ describe('CombatTimerService', () => {
 
             service.forceNextLoop(session);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.timerRestart', { sessionId: session.id });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatTimerRestart, { sessionId: session.id });
         });
 
         it('should schedule new combat loop', () => {
@@ -221,9 +222,9 @@ describe('CombatTimerService', () => {
             service.forceNextLoop(session);
 
             const emitCalls = (eventEmitter.emit as jest.Mock).mock.calls;
-            const newRoundIndex = emitCalls.findIndex((call) => call[0] === 'combat.newRound');
-            const timerLoopIndex = emitCalls.findIndex((call) => call[0] === 'combat.timerLoop');
-            const timerRestartIndex = emitCalls.findIndex((call) => call[0] === 'combat.timerRestart');
+            const newRoundIndex = emitCalls.findIndex((call) => call[0] === ServerEvents.CombatNewRound);
+            const timerLoopIndex = emitCalls.findIndex((call) => call[0] === ServerEvents.CombatTimerLoop);
+            const timerRestartIndex = emitCalls.findIndex((call) => call[0] === ServerEvents.CombatTimerRestart);
 
             expect(newRoundIndex).toBeLessThan(timerLoopIndex);
             expect(timerLoopIndex).toBeLessThan(timerRestartIndex);
@@ -237,11 +238,11 @@ describe('CombatTimerService', () => {
 
             jest.advanceTimersByTime(COMBAT_DURATION - 1);
 
-            expect(eventEmitter.emit).not.toHaveBeenCalledWith('combat.newRound', { sessionId: session.id });
+            expect(eventEmitter.emit).not.toHaveBeenCalledWith(ServerEvents.CombatNewRound, { sessionId: session.id });
 
             jest.advanceTimersByTime(1);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.newRound', { sessionId: session.id });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatNewRound, { sessionId: session.id });
         });
 
         it('should emit combat.newRound when timer expires and combat is active', () => {
@@ -250,7 +251,7 @@ describe('CombatTimerService', () => {
 
             jest.advanceTimersByTime(COMBAT_DURATION);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.newRound', { sessionId: session.id });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatNewRound, { sessionId: session.id });
         });
 
         it('should emit combat.timerLoop when timer expires and combat is active', () => {
@@ -259,7 +260,7 @@ describe('CombatTimerService', () => {
 
             jest.advanceTimersByTime(COMBAT_DURATION);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.timerLoop', { sessionId: session.id });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatTimerLoop, { sessionId: session.id });
         });
 
         it('should emit combat.timerRestart when timer expires and combat is active', () => {
@@ -268,7 +269,7 @@ describe('CombatTimerService', () => {
 
             jest.advanceTimersByTime(COMBAT_DURATION);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.timerRestart', { sessionId: session.id });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatTimerRestart, { sessionId: session.id });
         });
 
         it('should schedule next loop when timer expires and combat is active', () => {
@@ -293,7 +294,7 @@ describe('CombatTimerService', () => {
 
             jest.advanceTimersByTime(COMBAT_DURATION);
 
-            const newRoundCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'combat.newRound').length;
+            const newRoundCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === ServerEvents.CombatNewRound).length;
             expect(newRoundCallCount).toBe(0);
         });
 
@@ -302,10 +303,10 @@ describe('CombatTimerService', () => {
             service.startCombatTimer(session, ATTACKER_ID, TARGET_ID);
 
             jest.advanceTimersByTime(COMBAT_DURATION);
-            const firstRoundCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'combat.newRound').length;
+            const firstRoundCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === ServerEvents.CombatNewRound).length;
 
             jest.advanceTimersByTime(COMBAT_DURATION);
-            const secondRoundCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'combat.newRound').length;
+            const secondRoundCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === ServerEvents.CombatNewRound).length;
 
             expect(firstRoundCallCount).toBe(1);
             expect(secondRoundCallCount).toBe(2);
@@ -320,7 +321,7 @@ describe('CombatTimerService', () => {
 
             jest.advanceTimersByTime(COMBAT_DURATION);
 
-            const newRoundCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'combat.newRound').length;
+            const newRoundCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === ServerEvents.CombatNewRound).length;
             expect(newRoundCallCount).toBe(1);
         });
     });
@@ -384,7 +385,7 @@ describe('CombatTimerService', () => {
 
             jest.advanceTimersByTime(COMBAT_DURATION);
 
-            const newRoundCalls = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'combat.newRound');
+            const newRoundCalls = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === ServerEvents.CombatNewRound);
             expect(newRoundCalls.length).toBe(1);
             expect(newRoundCalls[0][1]).toEqual({ sessionId: SESSION_ID_2 });
         });
@@ -399,7 +400,7 @@ describe('CombatTimerService', () => {
 
             jest.advanceTimersByTime(COMBAT_DURATION);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.newRound', { sessionId: session.id });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatNewRound, { sessionId: session.id });
         });
 
         it('should handle forceNextLoop during active combat', () => {
@@ -409,7 +410,7 @@ describe('CombatTimerService', () => {
             jest.advanceTimersByTime(COMBAT_DURATION / 2);
             service.forceNextLoop(session);
 
-            const newRoundCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'combat.newRound').length;
+            const newRoundCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === ServerEvents.CombatNewRound).length;
 
             expect(newRoundCallCount).toBe(1);
             expect(jest.getTimerCount()).toBe(1);
@@ -424,13 +425,15 @@ describe('CombatTimerService', () => {
 
             jest.advanceTimersByTime(COMBAT_DURATION / 2);
 
-            const newRoundCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'combat.newRound').length;
+            const newRoundCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === ServerEvents.CombatNewRound).length;
 
             expect(newRoundCallCount).toBe(1);
 
             jest.advanceTimersByTime(COMBAT_DURATION / 2);
 
-            const newRoundCallCountAfter = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'combat.newRound').length;
+            const newRoundCallCountAfter = (eventEmitter.emit as jest.Mock).mock.calls.filter(
+                (call) => call[0] === ServerEvents.CombatNewRound,
+            ).length;
 
             expect(newRoundCallCountAfter).toBe(2);
         });
@@ -463,7 +466,7 @@ describe('CombatTimerService', () => {
 
             service.forceNextLoop(session);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.newRound', { sessionId: session.id });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatNewRound, { sessionId: session.id });
             expect(jest.getTimerCount()).toBe(1);
         });
 

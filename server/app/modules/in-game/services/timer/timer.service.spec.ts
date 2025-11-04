@@ -6,6 +6,7 @@ import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -223,8 +224,8 @@ describe('TimerService', () => {
 
             jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.transition', { session });
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.started', { session });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.TurnTransition, { session });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.TurnStarted, { session });
         });
 
         it('should update player actions remaining after transition', () => {
@@ -289,11 +290,11 @@ describe('TimerService', () => {
 
             service.endTurnManual(session);
 
-            const timeoutCallCountBefore = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
+            const timeoutCallCountBefore = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === ServerEvents.TurnTimeout).length;
 
             jest.advanceTimersByTime(CUSTOM_TIMEOUT_SHORT);
 
-            const timeoutCallCountAfter = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
+            const timeoutCallCountAfter = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === ServerEvents.TurnTimeout).length;
 
             expect(timeoutCallCountAfter).toBe(timeoutCallCountBefore);
         });
@@ -303,7 +304,7 @@ describe('TimerService', () => {
 
             service.endTurnManual(session);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.manualEnd', { session });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.TurnManualEnd, { session });
         });
 
         it('should advance to next turn', () => {
@@ -323,7 +324,7 @@ describe('TimerService', () => {
 
             service.endTurnManual(session);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.ended', { session });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.TurnEnded, { session });
         });
 
         it('should emit turn.transition and turn.started after transition delay', () => {
@@ -333,8 +334,8 @@ describe('TimerService', () => {
 
             jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.transition', { session });
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.started', { session });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.TurnTransition, { session });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.TurnStarted, { session });
         });
 
         it('should wrap around to first player after last player', () => {
@@ -423,7 +424,7 @@ describe('TimerService', () => {
 
             jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
 
-            const timeoutCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
+            const timeoutCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === ServerEvents.TurnTimeout).length;
             expect(timeoutCallCount).toBe(0);
         });
 
@@ -449,7 +450,7 @@ describe('TimerService', () => {
 
             service.forceStopTimer(session.id);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.forceStopTimer', { sessionId: session.id });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.TurnForceStopTimer, { sessionId: session.id });
         });
     });
 
@@ -461,7 +462,7 @@ describe('TimerService', () => {
 
             jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.timeout', { session });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.TurnTimeout, { session });
         });
 
         it('should advance to next turn after timeout', () => {
@@ -564,7 +565,7 @@ describe('TimerService', () => {
 
             jest.advanceTimersByTime(CUSTOM_TIMEOUT_LONG - CUSTOM_TIMEOUT_MEDIUM + TIMER_BUFFER);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('turn.timeout', { session });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.TurnTimeout, { session });
         });
 
         it('should handle resumeTurnTimer when remainingTime is zero or negative', () => {
