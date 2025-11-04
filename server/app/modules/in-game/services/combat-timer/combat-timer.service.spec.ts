@@ -431,7 +431,9 @@ describe('CombatTimerService', () => {
 
             jest.advanceTimersByTime(COMBAT_DURATION / 2);
 
-            const newRoundCallCountAfter = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === ServerEvents.CombatNewRound).length;
+            const newRoundCallCountAfter = (eventEmitter.emit as jest.Mock).mock.calls.filter(
+                (call) => call[0] === ServerEvents.CombatNewRound,
+            ).length;
 
             expect(newRoundCallCountAfter).toBe(2);
         });
