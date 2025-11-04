@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { PlayersListComponent } from './players-list.component';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { Player } from '@common/models/player.interface';
+import { Player } from '@common/interfaces/player.interface';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 

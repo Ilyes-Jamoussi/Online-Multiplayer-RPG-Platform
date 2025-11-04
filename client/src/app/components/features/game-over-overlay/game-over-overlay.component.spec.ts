@@ -4,8 +4,8 @@ import { signal } from '@angular/core';
 import { GameOverOverlayComponent } from './game-over-overlay.component';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { ROUTES } from '@common/enums/routes.enum';
-import { Player } from '@common/models/player.interface';
+import { ROUTES } from '@app/enums/routes.enum';
+import { Player } from '@common/interfaces/player.interface';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 

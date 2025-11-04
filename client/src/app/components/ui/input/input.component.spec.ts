@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UiInputComponent } from './input.component';
-import { InputVariants } from '@common/enums/input-variants.enum';
+import { InputVariants } from '@app/enums/input-variants.enum';
 
 describe('UiInputComponent', () => {
     let component: UiInputComponent;
