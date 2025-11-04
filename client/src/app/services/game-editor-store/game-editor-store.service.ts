@@ -1,22 +1,22 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { computed, Injectable, signal } from '@angular/core';
+import { CreateGameDto } from '@app/dto/create-game-dto';
 import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
-import { GameMode } from '@common/enums/game-mode.enum';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { catchError, switchMap, take, tap } from 'rxjs/operators';
-import { TileKind } from '@common/enums/tile-kind.enum';
 import { PatchGameEditorDto } from '@app/dto/patch-game-editor-dto';
 import { ExtendedGameEditorPlaceableDto, Inventory, PLACEABLE_ORDER } from '@app/interfaces/game-editor.interface';
-import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { firstValueFrom, of, throwError } from 'rxjs';
 import { AssetsService } from '@app/services/assets/assets.service';
-import { CreateGameDto } from '@app/dto/create-game-dto';
-import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
+import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
+import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { ROUTES } from '@common/enums/routes.enum';
-import { HttpErrorResponse } from '@angular/common/http';
+import { TileKind } from '@common/enums/tile-kind.enum';
+import { firstValueFrom, of, throwError } from 'rxjs';
+import { catchError, switchMap, take, tap } from 'rxjs/operators';
 
 @Injectable()
 export class GameEditorStoreService {
@@ -126,17 +126,9 @@ export class GameEditorStoreService {
         return this._tiles.asReadonly();
     }
 
-    // get objects() {
-    //     return this._objects.asReadonly();
-    // }
-
     get size() {
         return this._size.asReadonly();
     }
-
-    // get gridPreviewUrl() {
-    //     return this._gridPreviewUrl.asReadonly();
-    // }
 
     get mode() {
         return this._mode.asReadonly();
@@ -176,65 +168,6 @@ export class GameEditorStoreService {
             .subscribe();
     }
 
-    // async saveGame(gridElement: HTMLElement): Promise<void> {
-    //     try {
-    //         const gridPreviewImage = await this.screenshotService.captureElementAsBase64(gridElement);
-
-    //         const current = {
-    //             name: this._name(),
-    //             description: this._description(),
-    //             tiles: this._tiles(),
-    //             objects: this._objects(),
-    //             gridPreviewUrl: gridPreviewImage ?? this._gridPreviewUrl(),
-    //         };
-    //         const game: PatchGameEditorDto = this.pickChangedProperties(current, this._initial());
-
-    //         await firstValueFrom(
-    //             this.gameHttpService.patchGameEditorById(this._id(), game).pipe(
-    //                 take(1),
-    //                 catchError((err) => {
-    //                     if (err.statusText === 'Conflict') {
-    //                         return throwError(() => new Error('Un jeu avec ce nom existe déjà.'));
-    //                     }
-    //                     const createDto: CreateGameDto = {
-    //                         name: this._name(),
-    //                         description: this._description(),
-    //                         size: this._size(),
-    //                         mode: this._mode(),
-    //                     };
-    //                     return this.gameHttpService.createGame(createDto).pipe(
-    //                         switchMap((newGame) => {
-    //                             this._id.set(newGame.id);
-    //                             const updateGame: PatchGameEditorDto = {
-    //                                 tiles: this._tiles(),
-    //                                 objects: this._objects(),
-    //                                 gridPreviewUrl: gridPreviewImage,
-    //                             };
-    //                             return this.gameHttpService.patchGameEditorById(newGame.id, updateGame);
-    //                         }),
-    //                     );
-    //                 }),
-    //             ),
-    //         );
-
-    //         this.popupNotificationService.displaySuccess({
-    //             title: 'Jeu sauvegardé',
-    //             message: 'Votre jeu a été sauvegardé avec succès !',
-    //             redirectRoute: ROUTES.managementPage,
-    //         });
-    //     } catch (error) {
-    //         if (error instanceof Error) {
-    //             this.popupNotificationService.displayError({
-    //                 title: 'Erreur lors de la sauvegarde',
-    //                 message: error.message,
-    //             });
-    //         }
-    //         throw error;
-    //     }
-    // }
-
-    // helper methods for saveGame()
-    //{ 
     private async captureGridPreview(gridElement: HTMLElement): Promise<string | undefined> {
         return await this.screenshotService.captureElementAsBase64(gridElement);
     }

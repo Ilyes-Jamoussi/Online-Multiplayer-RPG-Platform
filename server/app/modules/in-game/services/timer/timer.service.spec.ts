@@ -20,10 +20,6 @@ describe('TimerService', () => {
     const MAX_PLAYERS = 4;
     const TURN_NUMBER_THREE = 3;
     const TURN_NUMBER_FOUR = 4;
-    // const TURN_NUMBER_FIVE = 5;
-    // const TURN_NUMBER_SIX = 6;
-    // const EVENT_CALL_ORDER_THIRD = 3;
-    // const EVENT_CALL_ORDER_FOURTH = 4;
     const BASE_SPEED = 5;
     const BASE_HEALTH = 100;
 
@@ -334,77 +330,6 @@ describe('TimerService', () => {
         });
     });
 
-    // describe('endTurnManual', () => {
-    //     it('should end turn manually and advance to next player', () => {
-    //         const session = createMockSession({
-    //             currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
-    //         });
-
-    //         const result = service.endTurnManual(session);
-
-    //         expect(result.turnNumber).toBe(2);
-    //         expect(result.activePlayerId).toBe('player2');
-    //         expect(eventEmitter.emit).toHaveBeenCalledWith('turn.manualEnd', { session });
-    //     });
-
-    //     it('should clear existing timer', () => {
-    //         const session = createMockSession();
-    //         service.startFirstTurn(session);
-
-    //         service.endTurnManual(session);
-
-    //         jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
-
-    //         const timeoutCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
-    //         expect(timeoutCallCount).toBe(0);
-    //     });
-
-    //     it('should call nextTurn internally', () => {
-    //         const session = createMockSession({
-    //             currentTurn: { turnNumber: 2, activePlayerId: 'player2', hasUsedAction: false },
-    //         });
-
-    //         service.endTurnManual(session);
-
-    //         expect(eventEmitter.emit).toHaveBeenCalledWith('turn.ended', { session });
-    //     });
-    // });
-
-    // describe('forceEndTurn', () => {
-    //     it('should force end turn and advance to next player', () => {
-    //         const session = createMockSession({
-    //             currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
-    //         });
-
-    //         service.forceEndTurn(session);
-
-    //         expect(eventEmitter.emit).toHaveBeenCalledWith('turn.forcedEnd', { session });
-    //         expect(eventEmitter.emit).toHaveBeenCalledWith('turn.ended', { session });
-    //     });
-
-    //     it('should clear timer when forcing end turn', () => {
-    //         const session = createMockSession();
-    //         service.startFirstTurn(session);
-
-    //         service.forceEndTurn(session);
-
-    //         jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
-
-    //         const timeoutCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
-    //         expect(timeoutCallCount).toBe(0);
-    //     });
-
-    //     it('should advance turn number', () => {
-    //         const session = createMockSession({
-    //             currentTurn: { turnNumber: TURN_NUMBER_FIVE, activePlayerId: 'player3', hasUsedAction: false },
-    //         });
-
-    //         service.forceEndTurn(session);
-
-    //         expect(session.currentTurn.turnNumber).toBe(TURN_NUMBER_SIX);
-    //     });
-    // });
-
     describe('forceStopTimer', () => {
         it('should stop timer for a session', () => {
             const session = createMockSession();
@@ -511,20 +436,6 @@ describe('TimerService', () => {
             jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
             expect(session.currentTurn.activePlayerId).toBe('player3');
         });
-
-        // it('should emit all expected events in correct order', () => {
-        //     const session = createMockSession();
-
-        //     service.startFirstTurn(session);
-        //     expect(eventEmitter.emit).toHaveBeenNthCalledWith(1, 'turn.started', { session });
-
-        //     service.nextTurn(session);
-        //     expect(eventEmitter.emit).toHaveBeenNthCalledWith(2, 'turn.ended', { session });
-
-        //     jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
-        //     expect(eventEmitter.emit).toHaveBeenNthCalledWith(EVENT_CALL_ORDER_THIRD, 'turn.transition', { session });
-        //     expect(eventEmitter.emit).toHaveBeenNthCalledWith(EVENT_CALL_ORDER_FOURTH, 'turn.started', { session });
-        // });
     });
 });
 

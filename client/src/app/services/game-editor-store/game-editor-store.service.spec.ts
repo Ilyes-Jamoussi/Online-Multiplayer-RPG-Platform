@@ -1,20 +1,20 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { TestBed } from '@angular/core/testing';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { of, Subject, throwError } from 'rxjs';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
+import { of, Subject, throwError } from 'rxjs';
 
-import { GameEditorDto } from '@app/dto/game-editor-dto';
-import { GameEditorStoreService } from './game-editor-store.service';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
-import { TileKind } from '@common/enums/tile-kind.enum';
-import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
-import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { HttpErrorResponse } from '@angular/common/http';
+import { GameEditorDto } from '@app/dto/game-editor-dto';
+import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { GamePreviewDto } from '@app/dto/game-preview-dto';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile-kind.enum';
+import { GameEditorStoreService } from './game-editor-store.service';
 
 describe('GameEditorStoreService', () => {
     let service: GameEditorStoreService;
@@ -107,13 +107,11 @@ describe('GameEditorStoreService', () => {
         });
 
         it('should get correct gridPreviewUrl', () => {
-            // expect(service.gridPreviewUrl()).toBe('');
             const subject = new Subject<GameEditorDto>();
             gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
             service.loadGameById('1');
             subject.next(mockEditorData);
             subject.complete();
-            // expect(service.gridPreviewUrl()).toBe('/assets/test-game.png');      // is this test useful?
         });
 
         it('should get correct size and mode', () => {
@@ -146,7 +144,6 @@ describe('GameEditorStoreService', () => {
             expect(initial.size).toBe(MapSize.SMALL);
             expect(initial.mode).toBe(GameMode.CTF);
             expect(service.tiles().length).toBe(mockEditorData.tiles.length);
-            // expect(service.objects().length).toBe(mockEditorData.objects.length);
         });
         it('should handle error when id not found', () => {
             gameHttpServiceSpy.getGameEditorById.and.returnValue(throwError(() => new Error('Game with ID 999 not found')));
@@ -259,13 +256,11 @@ describe('GameEditorStoreService', () => {
         it('should send only tiles if only tiles were modified (no new screenshot)', async () => {
             const gridEl = document.createElement('div');
             expect(service.tiles()).toEqual(mockEditorData.tiles);
-            // expect(service.objects()).toEqual(mockEditorData.objects);
 
             service.setTileAt(0, 0, TileKind.WATER);
 
             expect(service.getTileAt(0, 0)?.kind).toBe(TileKind.WATER);
             expect(service.tiles()).not.toEqual(mockEditorData.tiles);
-            // expect(service.objects()).toEqual(mockEditorData.objects);
 
             await service.saveGame(gridEl);
 
@@ -277,22 +272,14 @@ describe('GameEditorStoreService', () => {
         it('should send only objects if only objects were modified (no new screenshot)', async () => {
             const gridEl = document.createElement('div');
             expect(service.tiles()).toEqual(mockEditorData.tiles);
-            // expect(service.objects()).toEqual(mockEditorData.objects);
 
             service.placeObjectFromInventory(PlaceableKind.FLAG, 1, 1);
 
             expect(service.getPlacedObjectAt(1, 1)?.kind).toBe(PlaceableKind.FLAG);
             expect(service.tiles()).toEqual(mockEditorData.tiles);
-            // expect(service.objects()).not.toEqual(mockEditorData.objects);
 
             await service.saveGame(gridEl);
 
-            // is this test useful if objects getter is removed?
-            // if not useful, can the test be deleted?
-
-            // expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
-            //     objects: service.objects(),
-            // });
         });
 
         it('should create a new game if patchGameEditorById throws a not found error', async () => {
@@ -331,7 +318,6 @@ describe('GameEditorStoreService', () => {
                 '2',
                 jasmine.objectContaining({
                     tiles: service.tiles(),
-                    // objects: service.objects(),      // can it be deleted?
                     gridPreviewUrl: newPreviewUrl,
                 }),
             );

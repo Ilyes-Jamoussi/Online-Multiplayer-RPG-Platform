@@ -1,21 +1,19 @@
 import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/models/player.interface';
 
-// Player creation constants
-export const BASE_STAT_VALUE = 4;
-export const BONUS_STAT_VALUE = 2;
+export const CHARACTER_BASE = 4;
+export const CHARACTER_PLUS = 2;
+export const CHARACTER_AVATARS_COUNT = 12;
 
-// Player stats constants
 export const MAX_STAT_VALUE = 6;
 export const DEFAULT_BASE_SPEED = 3;
 export const DEFAULT_SPEED_BONUS = 1;
+export const DEFAULT_ACTIONS = 2;
 
-// Player display constants
 export const PERCENTAGE_MULTIPLIER = 100;
-export const HP_HIGH_THRESHOLD_PERCENT = 70;
-export const HP_MEDIUM_THRESHOLD_PERCENT = 30;
+export const HP_HIGH_THRESHOLD = 70;
+export const HP_MEDIUM_THRESHOLD = 30;
 
-// Default player instance
 const DEFAULT_PLAYER_ID = 'default-player-id';
 
 export const DEFAULT_PLAYER: Player = {
