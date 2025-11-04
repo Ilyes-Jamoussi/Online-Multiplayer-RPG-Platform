@@ -32,7 +32,7 @@ export class PlayerCardComponent {
     get cardClasses(): { [key: string]: boolean } {
         return {
             'is-me': this.isMe,
-            admin: this.isAdmin,
+            'admin': this.isAdmin,
         };
     }
 
