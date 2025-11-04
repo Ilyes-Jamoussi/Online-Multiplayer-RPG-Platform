@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SocketService } from '@app/services/socket/socket.service';
-import { InGameEvents } from '@common/constants/in-game-events';
+import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';

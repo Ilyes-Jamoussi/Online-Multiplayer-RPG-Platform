@@ -9,7 +9,7 @@ import { AvatarAssignmentsUpdatedDto, UpdateAvatarAssignmentsDto } from '@app/mo
 import { SessionPlayersUpdatedDto } from '@app/modules/session/dto/update-session.dto';
 import { SessionService } from '@app/modules/session/services/session.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
-import { SessionEvents } from '@common/constants/session-events';
+import { SessionEvents } from '@common/enums/session-events.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { SocketResponse } from '@common/types/socket-response.type';

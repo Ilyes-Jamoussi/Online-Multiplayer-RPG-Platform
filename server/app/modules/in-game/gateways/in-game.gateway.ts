@@ -1,6 +1,6 @@
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
-import { InGameEvents } from '@common/constants/in-game-events';
+import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';

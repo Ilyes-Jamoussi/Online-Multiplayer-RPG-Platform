@@ -1,6 +1,6 @@
 import { GamePreviewDto } from '@app/modules/game-store/dto/game-preview.dto';
 import { successResponse } from '@app/utils/socket-response/socket-response.util';
-import { GameStoreEvents } from '@common/constants/game-store-events';
+import { GameStoreEvents } from '@common/enums/game-store-events.enum';
 import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';

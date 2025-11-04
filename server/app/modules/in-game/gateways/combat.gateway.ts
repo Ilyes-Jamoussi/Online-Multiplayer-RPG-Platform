@@ -1,6 +1,6 @@
 import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
-import { InGameEvents } from '@common/constants/in-game-events';
+import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
 import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
