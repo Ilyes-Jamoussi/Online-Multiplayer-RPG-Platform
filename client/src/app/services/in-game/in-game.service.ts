@@ -114,10 +114,6 @@ export class InGameService {
         this.inGameSocketService.playerLeaveInGameSession(this.sessionService.id());
     }
 
-    startGame(): void {
-        this.inGameSocketService.playerStartGame(this.sessionService.id());
-    }
-
     movePlayer(orientation: Orientation): void {
         if (!this.isMyTurn() || !this.isGameStarted()) return;
         this.inGameSocketService.playerMove({ sessionId: this.sessionService.id(), orientation });
@@ -170,8 +166,9 @@ export class InGameService {
 
         this.inGameSocketService.onGameStarted((data) => {
             this.updateInGameSession(data);
-            this.startTurnTimer();
             this._isGameStarted.set(true);
+            this.startTurnTransitionTimer();
+            this._isTransitioning.set(true);
         });
 
         this.inGameSocketService.onTurnStarted((data) => {
@@ -185,6 +182,7 @@ export class InGameService {
         });
 
         this.inGameSocketService.onTurnTransitionEnded(() => {
+            this.stopTurnTimer();
             this.turnTransitionEnded();
         });
 
