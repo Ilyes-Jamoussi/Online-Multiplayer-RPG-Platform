@@ -20,4 +20,3 @@ export class ToastNotificationDisplayComponent {
         this.notificationCoordinatorService.removeToast(id);
     }
 }
-

@@ -12,9 +12,9 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { BonusType } from '@common/enums/character-creation.enum';
+import { BonusType } from '@app/enums/character-creation.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { ROUTES } from '@common/enums/routes.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 
 @Component({
     standalone: true,
@@ -40,7 +40,7 @@ export class CharacterCreationPageComponent implements OnInit {
 
     ngOnInit(): void {
         if (!this.playerService.isConnected()) {
-            this.notificationCoordinatorService.displayErrorPopup({ 
+            this.notificationCoordinatorService.displayErrorPopup({
                 title: 'Session expirée',
                 message: 'Veuillez rejoindre une session.',
                 redirectRoute: ROUTES.HomePage,

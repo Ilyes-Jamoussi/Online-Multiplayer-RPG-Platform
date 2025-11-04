@@ -1,5 +1,18 @@
 import { Dice } from '@common/enums/dice.enum';
-import { Player } from '@common/models/player.interface';
+import { Player } from '@common/interfaces/player.interface';
+
+export const BASE_STAT_VALUE = 4;
+export const BONUS_STAT_VALUE = 2;
+export const CHARACTER_AVATARS_COUNT = 12;
+
+export const MAX_STAT_VALUE = 6;
+export const DEFAULT_BASE_SPEED = 3;
+export const DEFAULT_SPEED_BONUS = 1;
+export const DEFAULT_ACTIONS = 2;
+
+export const PERCENTAGE_MULTIPLIER = 100;
+export const HP_HIGH_THRESHOLD_PERCENT = 70;
+export const HP_MEDIUM_THRESHOLD_PERCENT = 30;
 
 const DEFAULT_PLAYER_ID = 'default-player-id';
 
@@ -8,19 +21,19 @@ export const DEFAULT_PLAYER: Player = {
     name: '',
     avatar: null,
     isAdmin: true,
-    baseHealth: 4,
+    baseHealth: BASE_STAT_VALUE,
     healthBonus: 0,
-    health: 4,
-    maxHealth: 4,
-    baseSpeed: 4,
+    health: BASE_STAT_VALUE,
+    maxHealth: BASE_STAT_VALUE,
+    baseSpeed: BASE_STAT_VALUE,
     speedBonus: 0,
-    speed: 4,
-    baseAttack: 4,
+    speed: BASE_STAT_VALUE,
+    baseAttack: BASE_STAT_VALUE,
     attackBonus: 0,
-    attack: 4,
-    baseDefense: 4,
+    attack: BASE_STAT_VALUE,
+    baseDefense: BASE_STAT_VALUE,
     defenseBonus: 0,
-    defense: 4,
+    defense: BASE_STAT_VALUE,
     attackDice: Dice.D6,
     defenseDice: Dice.D6,
     x: 0,

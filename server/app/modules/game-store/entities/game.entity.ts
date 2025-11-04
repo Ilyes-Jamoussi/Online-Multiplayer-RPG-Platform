@@ -1,11 +1,9 @@
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { Placeable, placeableSchema } from './placeable.entity';
 import { Tile, tileSchema } from './tile.entity';
-
-export type GameDocument = Game & Document;
 
 @Schema({ versionKey: false })
 export class Game {

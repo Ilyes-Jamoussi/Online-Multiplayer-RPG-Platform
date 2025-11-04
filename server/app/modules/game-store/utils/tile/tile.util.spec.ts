@@ -1,5 +1,5 @@
 import { MapSize } from '@common/enums/map-size.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { makeDefaultTiles } from './tile.util';
 
 describe('tile.factory', () => {

@@ -5,16 +5,16 @@ import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { Vector2 } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
+import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
-import { catchError, of, take, tap } from 'rxjs';
-import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
-import { Player } from '@common/models/player.interface';
+import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+import { catchError, of, take, tap } from 'rxjs';
 
 @Injectable()
 export class GameMapService {
@@ -109,15 +109,15 @@ export class GameMapService {
 
     getTileClass(x: number, y: number): string {
         let classes = '';
-        
+
         if (this.isReachable(x, y)) {
             classes += 'reachable-tile ';
         }
-        
+
         if (this.isActionModeActive && this.hasActionAt(x, y)) {
             classes += this.getActionClass(x, y) + ' ';
         }
-        
+
         return classes.trim();
     }
 
@@ -151,13 +151,7 @@ export class GameMapService {
     }
 
     updateTileState(x: number, y: number, isOpen: boolean): void {
-        this._tiles.update(tiles => 
-            tiles.map(tile => 
-                tile.x === x && tile.y === y 
-                    ? { ...tile, open: isOpen }
-                    : tile
-            )
-        );
+        this._tiles.update((tiles) => tiles.map((tile) => (tile.x === x && tile.y === y ? { ...tile, open: isOpen } : tile)));
     }
 
     getActiveTile(coords?: Vector2): GameEditorTileDto | null {

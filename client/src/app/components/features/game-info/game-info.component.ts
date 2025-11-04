@@ -8,7 +8,7 @@ import { MapSize } from '@common/enums/map-size.enum';
     standalone: true,
     imports: [CommonModule],
     templateUrl: './game-info.component.html',
-    styleUrls: ['./game-info.component.scss']
+    styleUrls: ['./game-info.component.scss'],
 })
 export class GameInfoComponent {
     @Input() mapSize: MapSize = MapSize.MEDIUM;
@@ -26,10 +26,14 @@ export class GameInfoComponent {
 
     get mapSizeLabel(): string {
         switch (this.mapSize) {
-            case MapSize.SMALL: return 'Petite';
-            case MapSize.MEDIUM: return 'Moyenne';
-            case MapSize.LARGE: return 'Grande';
-            default: return 'Inconnue';
+            case MapSize.SMALL:
+                return 'Petite';
+            case MapSize.MEDIUM:
+                return 'Moyenne';
+            case MapSize.LARGE:
+                return 'Grande';
+            default:
+                return 'Inconnue';
         }
     }
 }

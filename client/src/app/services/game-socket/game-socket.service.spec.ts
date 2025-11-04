@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { SocketService } from '@app/services/socket/socket.service';
-import { GameStoreEvents } from '@common/constants/game-store-events';
+import { GameStoreEvents } from '@common/enums/game-store-events.enum';
 import { GameSocketService } from './game-socket.service';
 
 describe('GameStoreSocketService', () => {

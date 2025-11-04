@@ -10,9 +10,8 @@ import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { AccesibilityIssue, GameEditorIssue, GameEditorIssues } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameMode } from '@common/enums/game-mode.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { ConnectedComponent } from '@common/interfaces/connected-component.interface';
-
 
 @Injectable()
 export class GameEditorCheckService {

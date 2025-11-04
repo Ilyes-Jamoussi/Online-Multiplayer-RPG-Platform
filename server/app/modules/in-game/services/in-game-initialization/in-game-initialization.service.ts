@@ -2,8 +2,8 @@ import { Game } from '@app/modules/game-store/entities/game.entity';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { Player } from '@common/models/player.interface';
-import { InGameSession } from '@common/models/session.interface';
+import { Player } from '@common/interfaces/player.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

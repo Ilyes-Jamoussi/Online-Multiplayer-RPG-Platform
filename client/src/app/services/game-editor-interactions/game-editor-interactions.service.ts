@@ -1,10 +1,11 @@
 import { Injectable, signal } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ActiveTool, ToolbarItem, ToolType, Vector2 } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { PlaceableFootprint, PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 
 @Injectable()
 export class GameEditorInteractionsService {

@@ -9,7 +9,7 @@ import { GameEditorInteractionsService } from '@app/services/game-editor-interac
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { MapSize } from '@common/enums/map-size.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { Subject } from 'rxjs';
 import { EditorPageComponent } from './editor-page.component';
 

@@ -4,7 +4,8 @@ import { GameEditorTileDto } from '@app/modules/game-store/dto/game-editor-tile.
 import { GameEditorDto } from '@app/modules/game-store/dto/game-editor.dto';
 import { GamePreviewDto } from '@app/modules/game-store/dto/game-preview.dto';
 import { PatchGameEditorDto } from '@app/modules/game-store/dto/patch-game-editor.dto';
-import { Game, GameDocument } from '@app/modules/game-store/entities/game.entity';
+import { Game } from '@app/modules/game-store/entities/game.entity';
+import { GameDocument } from '@app/types/mongoose-documents.types';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { ImageService } from '@app/modules/game-store/services/image/image.service';

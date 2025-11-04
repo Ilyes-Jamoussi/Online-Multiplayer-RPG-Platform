@@ -2,23 +2,20 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { HP_HIGH_THRESHOLD_PERCENT, HP_MEDIUM_THRESHOLD_PERCENT, PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { Avatar } from '@common/enums/avatar.enum';
-
-const PERCENTAGE_MULTIPLIER = 100;
-const HP_HIGH_THRESHOLD = 70;
-const HP_MEDIUM_THRESHOLD = 30;
 
 @Component({
     selector: 'app-player-info',
     standalone: true,
     imports: [CommonModule],
     templateUrl: './player-info.component.html',
-    styleUrls: ['./player-info.component.scss']
+    styleUrls: ['./player-info.component.scss'],
 })
 export class PlayerInfoComponent {
     constructor(
         private readonly playerService: PlayerService,
-        private readonly assetsService: AssetsService
+        private readonly assetsService: AssetsService,
     ) {}
 
     get player() {
@@ -34,24 +31,24 @@ export class PlayerInfoComponent {
         return this.playerService.name();
     }
 
-    get currentHealth(): number { 
+    get currentHealth(): number {
         return this.playerService.health();
     }
-    
-    get maxHealth(): number { 
+
+    get maxHealth(): number {
         return this.playerService.maxHealth();
     }
-    
+
     get rapidityValue(): number {
         return this.playerService.speed();
     }
-    
-    get attackValue(): number { 
-        return this.playerService.attack(); 
+
+    get attackValue(): number {
+        return this.playerService.attack();
     }
-    
-    get defenseValue(): number { 
-        return this.playerService.defense(); 
+
+    get defenseValue(): number {
+        return this.playerService.defense();
     }
 
     get attackDiceType(): string {
@@ -67,15 +64,15 @@ export class PlayerInfoComponent {
         const bonusSpeed = this.playerService.speedBonus();
         return Math.max(0, totalSpeed - bonusSpeed);
     }
-    
-    get remainingBonusMovementPoints(): number { 
+
+    get remainingBonusMovementPoints(): number {
         const totalSpeed = this.playerService.speed();
         const bonusSpeed = this.playerService.speedBonus();
         return Math.min(bonusSpeed, totalSpeed);
     }
-    
-    get actionsRemaining(): number { 
-        return this.playerService.actionsRemaining(); 
+
+    get actionsRemaining(): number {
+        return this.playerService.actionsRemaining();
     }
 
     get hpPercentage(): number {
@@ -84,8 +81,8 @@ export class PlayerInfoComponent {
 
     get hpColorClass(): string {
         const percentage = this.hpPercentage;
-        if (percentage > HP_HIGH_THRESHOLD) return 'hp-high';
-        if (percentage > HP_MEDIUM_THRESHOLD) return 'hp-medium';
+        if (percentage > HP_HIGH_THRESHOLD_PERCENT) return 'hp-high';
+        if (percentage > HP_MEDIUM_THRESHOLD_PERCENT) return 'hp-medium';
         return 'hp-critical';
     }
 

@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
-import { Player } from '@common/models/player.interface';
+import { Player } from '@common/interfaces/player.interface';
 
 @Component({
     selector: 'app-player-card',

@@ -6,9 +6,7 @@ import { ValidationResult } from '@common/interfaces/validation-result.interface
 
 @Injectable()
 export class CharacterCreationCheckService {
-    constructor(
-        private readonly playerService: PlayerService,
-    ) {}
+    constructor(private readonly playerService: PlayerService) {}
 
     private readonly validationProblems = computed(() => {
         const player = this.playerService.player();

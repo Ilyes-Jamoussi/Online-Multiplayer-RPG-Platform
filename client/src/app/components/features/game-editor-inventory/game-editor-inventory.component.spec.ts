@@ -1,11 +1,11 @@
-import { Signal, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActiveTool, Inventory, ToolType } from '@app/interfaces/game-editor.interface';
-import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
 import { GameEditorInventoryComponent } from './game-editor-inventory.component';
-
+import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
+import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { PlaceableMime } from '@app/enums/placeable-mime.enum';
+import { ActiveTool, Inventory, ToolType } from '@app/interfaces/game-editor.interface';
+import { Signal, signal } from '@angular/core';
+import { PlaceableKind} from '@common/enums/placeable-kind.enum';
 const NOOP = (): void => {
     /** no-op */
 };

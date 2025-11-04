@@ -1,16 +1,15 @@
 import { computed, Injectable, Signal, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
-import { CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
-import { DEFAULT_PLAYER } from '@app/constants/player.constants';
+import { BASE_STAT_VALUE, BONUS_STAT_VALUE, DEFAULT_PLAYER } from '@app/constants/player.constants';
+import { BonusType } from '@app/enums/character-creation.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { SessionService } from '@app/services/session/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
-import { BonusType } from '@common/enums/character-creation.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { ROUTES } from '@common/enums/routes.enum';
-import { Player } from '@common/models/player.interface';
+import { Player } from '@common/interfaces/player.interface';
 
 @Injectable({
     providedIn: 'root',
@@ -23,7 +22,6 @@ export class PlayerService {
     readonly isAdmin: Signal<boolean> = computed(() => this.player().isAdmin);
     readonly avatar: Signal<Avatar | null> = computed(() => this.player().avatar);
 
-    // Computed properties matching Player interface exactly
     readonly name = computed(() => this.player().name);
     readonly health = computed(() => this.player().health);
     readonly maxHealth = computed(() => this.player().maxHealth);
@@ -57,10 +55,10 @@ export class PlayerService {
     }
 
     setBonus(bonus: BonusType): void {
-        const baseHealth = CHARACTER_BASE;
-        const healthBonus = bonus === BonusType.Life ? CHARACTER_PLUS : 0;
-        const baseSpeed = CHARACTER_BASE;
-        const speedBonus = bonus === BonusType.Speed ? CHARACTER_PLUS : 0;
+        const baseHealth = BASE_STAT_VALUE;
+        const healthBonus = bonus === BonusType.Life ? BONUS_STAT_VALUE : 0;
+        const baseSpeed = BASE_STAT_VALUE;
+        const speedBonus = bonus === BonusType.Speed ? BONUS_STAT_VALUE : 0;
 
         this.updatePlayer({
             baseHealth,
@@ -75,10 +73,10 @@ export class PlayerService {
 
     setDice(attr: 'attack' | 'defense', value: Dice): void {
         const otherDiceValue = value === Dice.D6 ? Dice.D4 : Dice.D6;
-        
+
         const newDice = {
             attackDice: attr === 'attack' ? value : otherDiceValue,
-            defenseDice: attr === 'defense' ? value : otherDiceValue
+            defenseDice: attr === 'defense' ? value : otherDiceValue,
         };
 
         this.updatePlayer({
@@ -89,10 +87,11 @@ export class PlayerService {
 
     generateRandom(): void {
         const names = ['Aragorn', 'Legolas', 'Gimli', 'Gandalf', 'Frodo', 'Samwise', 'Boromir', 'Faramir', 'Eowyn', 'Arwen'];
-        const availableAvatars = this.sessionService.avatarAssignments()
-            .filter(assignment => assignment.chosenBy === null)
-            .map(assignment => assignment.avatar);
-        
+        const availableAvatars = this.sessionService
+            .avatarAssignments()
+            .filter((assignment) => assignment.chosenBy === null)
+            .map((assignment) => assignment.avatar);
+
         const randomName = names[Math.floor(Math.random() * names.length)];
         const randomAvatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
         const randomThreshold = 0.5;

@@ -6,7 +6,7 @@
 // import { MapSize } from '@common/enums/map-size.enum';
 // import { Orientation } from '@common/enums/orientation.enum';
 // import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-// import { InGameSession } from '@common/models/session.interface';
+// import { InGameSession } from '@common/interfaces/ session.interface';
 // import { Test, TestingModule } from '@nestjs/testing';
 // import { Types } from 'mongoose';
 

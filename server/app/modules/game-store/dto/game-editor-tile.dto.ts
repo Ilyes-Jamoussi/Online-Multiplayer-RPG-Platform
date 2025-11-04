@@ -1,5 +1,5 @@
 import { MAX_TELEPORT_CHANNEL, MIN_TELEPORT_CHANNEL } from '@app/constants/game-config.constants';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 

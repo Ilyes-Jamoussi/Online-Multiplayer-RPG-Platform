@@ -1,15 +1,15 @@
 /* eslint-disable max-len -- Test file max-len goes over by 9 lines*/
 import { NAME_ALREADY_EXISTS } from '@app/constants/error-messages.constants';
 import { GamePreviewDto } from '@app/modules/game-store/dto/game-preview.dto';
-import { GameDocument } from '@app/modules/game-store/entities/game.entity';
 import { GameEditorService } from '@app/modules/game-store/services/game-editor/game-editor.service';
 import { ImageService } from '@app/modules/game-store/services/image/image.service';
 import { GameDtoMapper } from '@app/modules/game-store/utils/game-dto-mapper/game-dto-mapper.util';
+import { GameDocument } from '@app/types/mongoose-documents.types';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { NotFoundException } from '@nestjs/common';
 import { Model } from 'mongoose';
 

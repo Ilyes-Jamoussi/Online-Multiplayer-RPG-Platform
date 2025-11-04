@@ -11,10 +11,7 @@ describe('GameSessionPageComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [GameSessionPageComponent],
-            providers: [
-                provideHttpClient(),
-                provideRouter([])
-            ]
+            providers: [provideHttpClient(), provideRouter([])],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GameSessionPageComponent);
