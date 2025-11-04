@@ -1,3 +1,4 @@
+/* eslint-disable max-len -- Test file max-len goes over by 9 lines*/
 import { NAME_ALREADY_EXISTS } from '@app/constants/error-messages.constants';
 import { GamePreviewDto } from '@app/modules/game-store/dto/game-preview.dto';
 import { GameDocument } from '@app/modules/game-store/entities/game.entity';

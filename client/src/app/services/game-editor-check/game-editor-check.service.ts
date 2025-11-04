@@ -218,9 +218,9 @@ export class GameEditorCheckService {
             seen.add(cellKey);
             component.add(cellKey);
 
-            for (const [dx, dy] of directions) {
-                const neighborX = currentX + dx;
-                const neighborY = currentY + dy;
+            for (const [directionX, directionY] of directions) {
+                const neighborX = currentX + directionX;
+                const neighborY = currentY + directionY;
                 if (!this.isInBounds(neighborX, neighborY, size)) continue;
                 if (!this.isWalkableTile(grid[neighborY][neighborX])) continue;
                 const neighborKey = this.cellKey(neighborX, neighborY);
