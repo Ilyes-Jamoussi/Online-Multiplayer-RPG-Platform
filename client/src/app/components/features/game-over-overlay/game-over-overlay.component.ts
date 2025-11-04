@@ -45,7 +45,7 @@ export class GameOverOverlayComponent implements OnDestroy {
     get title(): string {
         return this.isWinner ? 'Tu as gagné la partie !' : `${this.gameOverData?.winnerName} a gagné la partie !`;
     }
-
+    // todo: create interface
     get playerStats(): { name: string; wins: number; isWinner: boolean }[] {
         if (!this.gameOverData) return [];
 

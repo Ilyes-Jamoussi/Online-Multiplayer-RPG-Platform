@@ -28,7 +28,7 @@ export class PlayerCardComponent {
     get isAdmin(): boolean {
         return this.player.isAdmin;
     }
-
+    // todo: create interface
     get cardClasses(): { [key: string]: boolean } {
         return {
             'is-me': this.isMe,
