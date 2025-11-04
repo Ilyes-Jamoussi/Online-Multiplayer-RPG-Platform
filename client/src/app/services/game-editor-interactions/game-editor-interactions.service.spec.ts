@@ -8,7 +8,7 @@ import { GameEditorStoreService } from '@app/services/game-editor-store/game-edi
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { ActiveTool, ExtendedGameEditorPlaceableDto, TileBrushTool, ToolType } from '@app/interfaces/game-editor.interface';
-import { PlaceableKind, PlaceableFootprint, PlaceableMime } from '@common/enums/placeable-kind.enum';
+import { PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 

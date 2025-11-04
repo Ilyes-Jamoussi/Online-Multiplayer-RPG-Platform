@@ -1,10 +1,11 @@
 import { NgStyle } from '@angular/common';
 import { ChangeDetectionStrategy, Component, HostBinding, Input } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { PlaceableLabel } from '@app/enums/placeable-label.enum';
 import { ToolType } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { PlaceableKind, PlaceableLabel } from '@common/enums/placeable-kind.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 
 @Component({
     selector: 'app-editor-placed-object',

@@ -1,9 +1,11 @@
 import { NgStyle } from '@angular/common';
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { PlaceableLabel } from '@app/enums/placeable-label.enum';
+import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { PlaceableDisabled, PlaceableFootprint, PlaceableKind, PlaceableLabel, PlaceableMime } from '@common/enums/placeable-kind.enum';
+import { PlaceableDisabled, PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 
 @Component({
     selector: 'app-editor-inventory',

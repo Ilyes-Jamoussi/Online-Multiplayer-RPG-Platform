@@ -3,7 +3,7 @@ import { GameEditorInventoryComponent } from './game-editor-inventory.component'
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { ActiveTool, Inventory, ToolType } from '@app/interfaces/game-editor.interface';
-import { PlaceableKind, PlaceableMime } from '@common/enums/placeable-kind.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { Signal, signal } from '@angular/core';
 
 const NOOP = (): void => {

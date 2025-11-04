@@ -2,10 +2,12 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { PlaceableLabel } from '@app/enums/placeable-label.enum';
+import { TileLabel } from '@app/enums/tile-label.enum';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
-import { PlaceableKind, PlaceableLabel } from '@common/enums/placeable-kind.enum';
-import { TileKind, TileLabel } from '@common/enums/tile-kind.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile-kind.enum';
 import { Player } from '@common/interfaces/player.interface';
 
 @Component({
