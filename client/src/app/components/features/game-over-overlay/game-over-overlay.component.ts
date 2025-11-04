@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, effect, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
 import { ROUTES } from '@app/enums/routes.enum';
 
 @Component({
@@ -12,15 +13,29 @@ import { ROUTES } from '@app/enums/routes.enum';
     templateUrl: './game-over-overlay.component.html',
     styleUrls: ['./game-over-overlay.component.scss'],
 })
-export class GameOverOverlayComponent {
+export class GameOverOverlayComponent implements OnDestroy {
     constructor(
         private readonly inGameService: InGameService,
         private readonly playerService: PlayerService,
         private readonly router: Router,
-    ) {}
+        private readonly timerCoordinatorService: TimerCoordinatorService,
+    ) {
+        effect(() => {
+            const gameOverData = this.inGameService.gameOverData();
+            if (gameOverData) {
+                this.timerCoordinatorService.startGameOverTimer(this.router);
+            } else {
+                this.timerCoordinatorService.stopGameOverTimer();
+            }
+        });
+    }
 
     get gameOverData() {
         return this.inGameService.gameOverData();
+    }
+
+    get gameOverTimeRemaining(): number {
+        return this.timerCoordinatorService.gameOverTimeRemaining();
     }
 
     get isWinner(): boolean {
@@ -45,7 +60,12 @@ export class GameOverOverlayComponent {
             .sort((playerA, playerB) => playerB.wins - playerA.wins);
     }
 
+    ngOnDestroy(): void {
+        this.timerCoordinatorService.stopGameOverTimer();
+    }
+
     returnToHome(): void {
+        this.timerCoordinatorService.stopGameOverTimer();
         this.inGameService.reset();
         void this.router.navigate([ROUTES.HomePage]);
     }

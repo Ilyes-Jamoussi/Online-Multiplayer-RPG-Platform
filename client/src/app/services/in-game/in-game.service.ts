@@ -1,5 +1,4 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { GAME_OVER_REDIRECT_DELAY_MS } from '@app/constants/game.constants';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
@@ -273,11 +272,6 @@ export class InGameService {
         this.inGameSocketService.onGameOver((data) => {
             this._gameOverData.set(data);
             this.stopTurnTimer();
-
-            setTimeout(() => {
-                this.reset();
-                window.location.href = ROUTES.HomePage;
-            }, GAME_OVER_REDIRECT_DELAY_MS);
         });
     }
 }

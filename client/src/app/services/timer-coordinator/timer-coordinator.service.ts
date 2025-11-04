@@ -1,6 +1,9 @@
 import { Injectable, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { MILLISECONDS_PER_SECOND } from '@common/constants/in-game';
 import { COMBAT_ROUND_DURATION_SECONDS } from '@app/constants/combat.constants';
+import { ROUTES } from '@app/enums/routes.enum';
+import { GAME_OVER_REDIRECT_DELAY_MS } from '@app/constants/game.constants';
 
 @Injectable({
     providedIn: 'root',
@@ -10,15 +13,20 @@ export class TimerCoordinatorService {
     private readonly _isTurnActive = signal<boolean>(false);
     private readonly _combatTimeRemaining = signal<number>(0);
     private readonly _isCombatActive = signal<boolean>(false);
+    private readonly _gameOverTimeRemaining = signal<number>(0);
+    private readonly _isGameOverActive = signal<boolean>(false);
 
     private turnTimer: number | null = null;
     private pausedTurnTime: number = 0;
     private combatTimer: number | null = null;
+    private gameOverTimer: number | null = null;
 
     readonly turnTimeRemaining = this._turnTimeRemaining.asReadonly();
     readonly isTurnActive = this._isTurnActive.asReadonly();
     readonly combatTimeRemaining = this._combatTimeRemaining.asReadonly();
     readonly isCombatActive = this._isCombatActive.asReadonly();
+    readonly gameOverTimeRemaining = this._gameOverTimeRemaining.asReadonly();
+    readonly isGameOverActive = this._isGameOverActive.asReadonly();
 
     getPausedTurnTime(): number {
         return this.pausedTurnTime;
@@ -114,8 +122,36 @@ export class TimerCoordinatorService {
         this._combatTimeRemaining.set(COMBAT_ROUND_DURATION_SECONDS);
     }
 
+    startGameOverTimer(router: Router): void {
+        this.stopGameOverTimer();
+        const gameOverDurationSeconds = GAME_OVER_REDIRECT_DELAY_MS / MILLISECONDS_PER_SECOND;
+
+        this._gameOverTimeRemaining.set(gameOverDurationSeconds);
+        this._isGameOverActive.set(true);
+
+        this.gameOverTimer = window.setInterval(() => {
+            const currentTime = this._gameOverTimeRemaining();
+            if (currentTime <= 1) {
+                this.stopGameOverTimer();
+                void router.navigate([ROUTES.HomePage]);
+            } else {
+                this._gameOverTimeRemaining.set(currentTime - 1);
+            }
+        }, MILLISECONDS_PER_SECOND);
+    }
+
+    stopGameOverTimer(): void {
+        if (this.gameOverTimer) {
+            window.clearInterval(this.gameOverTimer);
+            this.gameOverTimer = null;
+        }
+        this._isGameOverActive.set(false);
+        this._gameOverTimeRemaining.set(0);
+    }
+
     resetAllTimers(): void {
         this.stopTurnTimer();
         this.stopCombatTimer();
+        this.stopGameOverTimer();
     }
 }
