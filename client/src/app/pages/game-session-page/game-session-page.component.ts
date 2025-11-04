@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ChatComponent } from '@app/components/features/chat/chat.component';
+import { InGameChatComponent } from '@app/components/features/in-game-chat/in-game-chat.component';
 import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
+import { GameMapFooterComponent } from '@app/components/features/game-map-footer/game-map-footer.component';
+import { GameMapHeaderComponent } from '@app/components/features/game-map-header/game-map-header.component';
 import { GameOverOverlayComponent } from '@app/components/features/game-over-overlay/game-over-overlay.component';
 import { PlayerInfoComponent } from '@app/components/features/player-info/player-info.component';
 import { PlayersListComponent } from '@app/components/features/players-list/players-list.component';
-import { TurnTimerComponent } from '@app/components/features/turn-timer/turn-timer.component';
 import { ToastNotificationDisplayComponent } from '@app/components/features/toast-notification-display/toast-notification-display.component';
 import { AdminBadgeComponent } from '@app/components/features/admin-badge/admin-badge.component';
 import { CombatService } from '@app/services/combat/combat.service';
@@ -21,13 +22,14 @@ import { MapSize } from '@common/enums/map-size.enum';
     imports: [
         CommonModule,
         GameMapComponent,
+        GameMapFooterComponent,
+        GameMapHeaderComponent,
         PlayerInfoComponent,
         PlayersListComponent,
-        TurnTimerComponent,
         CombatOverlayComponent,
         GameOverOverlayComponent,
         ToastNotificationDisplayComponent,
-        ChatComponent,
+        InGameChatComponent,
         AdminBadgeComponent,
     ],
     templateUrl: './game-session-page.component.html',
@@ -61,18 +63,6 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         return this.inGameService.turnTransitionMessage;
     }
 
-    get disableStartButton(): boolean {
-        return !this.inGameService.isMyTurn() || this.inGameService.isGameStarted();
-    }
-
-    get isMyTurn(): boolean {
-        return this.inGameService.isMyTurn();
-    }
-
-    get isGameStarted(): boolean {
-        return this.inGameService.isGameStarted();
-    }
-
     get mapSizeValue(): MapSize {
         return this.inGameService.mapSize();
     }
@@ -81,28 +71,12 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         return this.inGameService.mode();
     }
 
-    get turnNumber(): number {
-        return this.inGameService.turnNumber();
-    }
-
     get timeRemaining(): number {
         return this.inGameService.timeRemaining();
     }
 
     get isTransitioning(): boolean {
         return this.inGameService.isTransitioning();
-    }
-
-    isActionDisabled(): boolean {
-        return !this.isMyTurn || !this.isGameStarted || this.hasUsedAction || !this.hasAvailableActions();
-    }
-
-    get hasUsedAction(): boolean {
-        return this.inGameService.hasUsedAction();
-    }
-
-    hasAvailableActions(): boolean {
-        return this.inGameService.availableActions().length > 0;
     }
 
     getPlayersCount(): number {
@@ -151,18 +125,6 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.keyboardEventsService.stopListening();
         this.inGameService.reset();
-    }
-
-    onStartGame(): void {
-        this.inGameService.startGame();
-    }
-
-    onEndTurn(): void {
-        this.inGameService.endTurn();
-    }
-
-    onAction(): void {
-        this.inGameService.activateActionMode();
     }
 
     onLeaveGame(): void {
