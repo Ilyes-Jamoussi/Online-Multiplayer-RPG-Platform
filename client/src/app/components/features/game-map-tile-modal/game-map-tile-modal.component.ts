@@ -7,7 +7,7 @@ import { TileLabel } from '@app/enums/tile-label.enum';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 
 @Component({

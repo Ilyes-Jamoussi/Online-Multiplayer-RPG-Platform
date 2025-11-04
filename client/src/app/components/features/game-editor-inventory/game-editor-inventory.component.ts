@@ -1,11 +1,12 @@
 import { NgStyle } from '@angular/common';
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { PLACEABLE_DISABLED } from '@app/constants/placeable.constants';
 import { PlaceableLabel } from '@app/enums/placeable-label.enum';
 import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { PlaceableDisabled, PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 
 @Component({
     selector: 'app-editor-inventory',
@@ -64,7 +65,7 @@ export class GameEditorInventoryComponent {
     }
 
     isDisabled(kind: PlaceableKind): boolean {
-        return PlaceableDisabled[kind];
+        return PLACEABLE_DISABLED[kind];
     }
 
     onSlotDragOver(evt: DragEvent, kind: PlaceableKind): void {

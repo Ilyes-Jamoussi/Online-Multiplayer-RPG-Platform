@@ -1,12 +1,13 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { computed, Injectable, signal } from '@angular/core';
+import { PLACEABLE_ORDER } from '@app/constants/game-editor.constants';
 import { CreateGameDto } from '@app/dto/create-game-dto';
 import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { PatchGameEditorDto } from '@app/dto/patch-game-editor-dto';
+import { ROUTES } from '@app/enums/routes.enum';
 import { ExtendedGameEditorPlaceableDto, Inventory } from '@app/interfaces/game-editor.interface';
-import { PLACEABLE_ORDER } from '@app/constants/game-editor.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
@@ -14,8 +15,7 @@ import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { ROUTES } from '@app/enums/routes.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { catchError, switchMap, take, tap } from 'rxjs/operators';
 

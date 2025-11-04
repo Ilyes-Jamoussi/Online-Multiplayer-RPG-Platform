@@ -1,12 +1,12 @@
 import { COMBAT_WINS_TO_WIN_GAME } from '@app/constants/game-config.constants';
+import { DiceSides } from '@app/enums/dice-sides.enum';
 import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { Dice } from '@common/enums/dice.enum';
-import { DiceSides } from '@app/enums/dice-sides.enum';
-import { TileCombatEffect } from '@common/enums/tile-kind.enum';
+import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatState } from '@common/interfaces/combat.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';

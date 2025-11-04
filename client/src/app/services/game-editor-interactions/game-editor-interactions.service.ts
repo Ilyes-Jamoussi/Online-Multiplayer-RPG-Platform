@@ -4,8 +4,8 @@ import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ActiveTool, ToolbarItem, ToolType, Vector2 } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 
 @Injectable()
 export class GameEditorInteractionsService {

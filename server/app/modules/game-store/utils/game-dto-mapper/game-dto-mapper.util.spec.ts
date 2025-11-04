@@ -2,7 +2,7 @@ import { GameDocument } from '@app/types/mongoose-documents.types';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { Types } from 'mongoose';
 import { GameDtoMapper } from './game-dto-mapper.util';
 

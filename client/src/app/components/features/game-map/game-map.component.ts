@@ -7,7 +7,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { StartPoint } from '@common/interfaces/start-point.interface';
 

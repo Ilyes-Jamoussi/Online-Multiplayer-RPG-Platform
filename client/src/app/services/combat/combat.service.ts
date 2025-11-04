@@ -1,15 +1,15 @@
 import { Injectable, signal } from '@angular/core';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { COMBAT_TOAST_DURATION_MS, DAMAGE_DISPLAY_DURATION_MS, VICTORY_NOTIFICATION_DURATION_MS } from '@app/constants/combat.constants';
+import { CombatData } from '@app/interfaces/combat-data.interface';
+import { DamageDisplay } from '@app/interfaces/damage-display.interface';
+import { VictoryData } from '@app/interfaces/victory-data.interface';
 import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
-import { PlayerService } from '@app/services/player/player.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
-import { CombatData } from '@app/interfaces/combat-data.interface';
-import { VictoryData } from '@app/interfaces/victory-data.interface';
-import { DamageDisplay } from '@app/interfaces/damage-display.interface';
-import { DAMAGE_DISPLAY_DURATION_MS, VICTORY_NOTIFICATION_DURATION_MS, COMBAT_TOAST_DURATION_MS } from '@app/constants/combat.constants';
+import { PlayerService } from '@app/services/player/player.service';
+import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
-import { TileCombatEffect } from '@common/enums/tile-kind.enum';
 
 @Injectable({
     providedIn: 'root',

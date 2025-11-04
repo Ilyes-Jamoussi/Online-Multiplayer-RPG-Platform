@@ -13,11 +13,3 @@ export enum PlaceableFootprint {
     FIGHT = 2,
     BOAT = 1,
 }
-
-export const PlaceableDisabled: Record<PlaceableKind, boolean> = {
-    [PlaceableKind.START]: false,
-    [PlaceableKind.FLAG]: false,
-    [PlaceableKind.HEAL]: true,
-    [PlaceableKind.FIGHT]: true,
-    [PlaceableKind.BOAT]: true,
-};

@@ -3,7 +3,7 @@ import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { TileCost, TileKind } from '@common/enums/tile-kind.enum';
+import { TileCost, TileKind } from '@common/enums/tile.enum';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';

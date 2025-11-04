@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { CombatTimerComponent } from '@app/components/features/combat-timer/combat-timer.component';
+import { PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
+import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { AssetsService } from '@app/services/assets/assets.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
-import { PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { Dice } from '@common/enums/dice.enum';
-import { TileCombatEffect } from '@common/enums/tile-kind.enum';
+import { TileCombatEffect } from '@common/enums/tile.enum';
 
 @Component({
     selector: 'app-combat-overlay',

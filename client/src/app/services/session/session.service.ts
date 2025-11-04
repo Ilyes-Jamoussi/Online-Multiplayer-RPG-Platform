@@ -8,7 +8,8 @@ import { ROUTES } from '@app/enums/routes.enum';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
-import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
+import { MAP_SIZE_TO_MAX_PLAYERS } from '@app/constants/map-size.constants';
+import { MapSize } from '@common/enums/map-size.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { AvatarAssignment, WaitingRoomSession } from '@common/interfaces/session.interface';
 

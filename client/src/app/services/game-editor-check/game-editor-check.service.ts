@@ -10,7 +10,7 @@ import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { AccesibilityIssue, GameEditorIssue, GameEditorIssues } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameMode } from '@common/enums/game-mode.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 
 @Injectable()
 export class GameEditorCheckService {
@@ -236,11 +236,11 @@ export class GameEditorCheckService {
         const name = this.gameEditorStoreService.name.trim();
         return name.length < NAME_MIN_LENGTH || name.length > GAME_NAME_MAX_LENGTH || name.replace(WHITESPACE_PATTERN, '').length === 0
             ? {
-                  hasIssue: true,
-                  message:
-                      `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${GAME_NAME_MAX_LENGTH} caractères ` +
-                      `et ne pas être composé uniquement d'espaces.`,
-              }
+                hasIssue: true,
+                message:
+                    `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${GAME_NAME_MAX_LENGTH} caractères ` +
+                    `et ne pas être composé uniquement d'espaces.`,
+            }
             : { hasIssue: false };
     }
 
@@ -250,11 +250,11 @@ export class GameEditorCheckService {
             description.length > DESCRIPTION_MAX_LENGTH ||
             description.replace(WHITESPACE_PATTERN, '').length === 0
             ? {
-                  hasIssue: true,
-                  message:
-                      `La description doit contenir entre ${DESCRIPTION_MIN_LENGTH} et ${DESCRIPTION_MAX_LENGTH} caractères ` +
-                      `et ne pas être composée uniquement d'espaces.`,
-              }
+                hasIssue: true,
+                message:
+                    `La description doit contenir entre ${DESCRIPTION_MIN_LENGTH} et ${DESCRIPTION_MAX_LENGTH} caractères ` +
+                    `et ne pas être composée uniquement d'espaces.`,
+            }
             : { hasIssue: false };
     }
 }

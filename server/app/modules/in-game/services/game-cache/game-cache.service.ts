@@ -4,7 +4,7 @@ import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { GameDocument } from '@app/types/mongoose-documents.types';
 import { Orientation } from '@common/enums/orientation.enum';
-import { TileCost, TileKind } from '@common/enums/tile-kind.enum';
+import { TileCost, TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';

@@ -8,8 +8,9 @@ import { ROUTES } from '@app/enums/routes.enum';
 import { GameModeOption, MapSizeOption } from '@app/interfaces/game-parameters.interface';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { MAP_SIZE_TO_MAX_PLAYERS } from '@app/constants/map-size.constants';
 import { GameMode } from '@common/enums/game-mode.enum';
-import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 
 @Component({
     selector: 'app-parameters-page',

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { TileLabel } from '@app/enums/tile-label.enum';
 import { ToolbarItem, ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 
 @Component({
     selector: 'app-editor-toolbar',

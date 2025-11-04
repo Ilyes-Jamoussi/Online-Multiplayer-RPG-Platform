@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { TileCost, TileKind } from '@common/enums/tile-kind.enum';
+import { TileCost, TileKind } from '@common/enums/tile.enum';
 
 export interface Position {
     x: number;
