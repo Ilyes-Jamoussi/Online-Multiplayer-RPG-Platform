@@ -3,10 +3,7 @@
         @if (availableSessions() && availableSessions().length > 0) {
         <div class="sessions-grid">
             @for (session of availableSessions(); track session.id) {
-            <app-session-card 
-                [session]="session" 
-                (joinSession)="onJoinSession($event)">
-            </app-session-card>
+            <app-session-card [session]="session" (joinSession)="onJoinSession($event)"> </app-session-card>
             }
         </div>
         } @else {

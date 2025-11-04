@@ -168,11 +168,7 @@ export class SessionGateway implements OnGatewayDisconnect {
 
         let inGameSession;
         try {
-            inGameSession = await this.inGameService.createInGameSession(
-                waitingSession,
-                GameMode.CLASSIC,
-                MapSize.SMALL,
-            );
+            inGameSession = await this.inGameService.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.SMALL);
         } catch (error) {
             socket.emit(SessionEvents.StartGameSession, errorResponse(error.message));
             return;
@@ -232,7 +228,6 @@ export class SessionGateway implements OnGatewayDisconnect {
             this.logger.error('Error leaving session:', error.message);
         }
     }
-
 
     handleDisconnect(socket: Socket): void {
         this.leaveSession(socket);

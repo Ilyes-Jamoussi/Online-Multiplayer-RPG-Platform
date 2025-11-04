@@ -151,13 +151,7 @@ export class GameMapService {
     }
 
     updateTileState(x: number, y: number, isOpen: boolean): void {
-        this._tiles.update(tiles =>
-            tiles.map(tile =>
-                tile.x === x && tile.y === y
-                    ? { ...tile, open: isOpen }
-                    : tile
-            )
-        );
+        this._tiles.update((tiles) => tiles.map((tile) => (tile.x === x && tile.y === y ? { ...tile, open: isOpen } : tile)));
     }
 
     getActiveTile(coords?: Vector2): GameEditorTileDto | null {

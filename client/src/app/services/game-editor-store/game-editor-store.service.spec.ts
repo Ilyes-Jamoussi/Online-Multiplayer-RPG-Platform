@@ -279,7 +279,6 @@ describe('GameEditorStoreService', () => {
             expect(service.tiles()).toEqual(mockEditorData.tiles);
 
             await service.saveGame(gridEl);
-
         });
 
         it('should create a new game if patchGameEditorById throws a not found error', async () => {

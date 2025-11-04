@@ -12,12 +12,7 @@ import { Player } from '@common/interfaces/player.interface';
 @Component({
     selector: 'app-waiting-room-page',
     standalone: true,
-    imports: [
-        UiPageLayoutComponent,
-        PlayerCardComponent,
-        WaitingRoomActionsComponent,
-        ChatComponent,
-    ],
+    imports: [UiPageLayoutComponent, PlayerCardComponent, WaitingRoomActionsComponent, ChatComponent],
     templateUrl: './waiting-room-page.component.html',
     styleUrls: ['./waiting-room-page.component.scss'],
 })

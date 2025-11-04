@@ -5,9 +5,7 @@ import { Avatar } from '@common/enums/avatar.enum';
 
 @Injectable()
 export class CharacterCreationCheckService {
-    constructor(
-        private readonly playerService: PlayerService,
-    ) {}
+    constructor(private readonly playerService: PlayerService) {}
 
     private readonly validationProblems = computed(() => {
         const player = this.playerService.player();

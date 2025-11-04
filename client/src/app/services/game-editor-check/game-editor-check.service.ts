@@ -236,11 +236,11 @@ export class GameEditorCheckService {
         const name = this.gameEditorStoreService.name.trim();
         return name.length < NAME_MIN_LENGTH || name.length > GAME_NAME_MAX_LENGTH || name.replace(WHITESPACE_PATTERN, '').length === 0
             ? {
-                hasIssue: true,
-                message:
-                    `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${GAME_NAME_MAX_LENGTH} caractères ` +
-                    `et ne pas être composé uniquement d'espaces.`,
-            }
+                  hasIssue: true,
+                  message:
+                      `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${GAME_NAME_MAX_LENGTH} caractères ` +
+                      `et ne pas être composé uniquement d'espaces.`,
+              }
             : { hasIssue: false };
     }
 
@@ -250,11 +250,11 @@ export class GameEditorCheckService {
             description.length > DESCRIPTION_MAX_LENGTH ||
             description.replace(WHITESPACE_PATTERN, '').length === 0
             ? {
-                hasIssue: true,
-                message:
-                    `La description doit contenir entre ${DESCRIPTION_MIN_LENGTH} et ${DESCRIPTION_MAX_LENGTH} caractères ` +
-                    `et ne pas être composée uniquement d'espaces.`,
-            }
+                  hasIssue: true,
+                  message:
+                      `La description doit contenir entre ${DESCRIPTION_MIN_LENGTH} et ${DESCRIPTION_MAX_LENGTH} caractères ` +
+                      `et ne pas être composée uniquement d'espaces.`,
+              }
             : { hasIssue: false };
     }
 }

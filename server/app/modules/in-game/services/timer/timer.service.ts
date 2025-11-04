@@ -81,7 +81,6 @@ export class TimerService {
         this.nextTurn(session);
     }
 
-
     getGameTimerState(sessionId: string): TurnTimerStates {
         return this.gameTimerStates.get(sessionId) || TurnTimerStates.PlayerTurn;
     }

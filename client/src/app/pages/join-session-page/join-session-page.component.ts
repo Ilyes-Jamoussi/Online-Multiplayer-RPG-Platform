@@ -16,7 +16,10 @@ export class JoinSessionPageComponent implements OnInit {
         return this.sessionService.availableSessions;
     }
 
-    constructor(private readonly sessionService: SessionService, private readonly playerService: PlayerService) {}
+    constructor(
+        private readonly sessionService: SessionService,
+        private readonly playerService: PlayerService,
+    ) {}
 
     ngOnInit(): void {
         this.playerService.setAsGuest();

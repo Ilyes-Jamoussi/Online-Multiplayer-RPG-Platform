@@ -221,6 +221,4 @@ export class InGameService {
         this.movementService.calculateReachableTiles(session, playerId);
         this.actionService.calculateAvailableActions(session, playerId);
     }
-
-
 }

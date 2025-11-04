@@ -107,7 +107,7 @@ describe('NotificationDisplayComponent', () => {
             type: 'error' as const,
             title: 'Error Title',
             message: 'Error Message',
-            redirectRoute: ROUTES.HomePage
+            redirectRoute: ROUTES.HomePage,
         };
 
         component.notification = signal(mockNotificationWithRedirect);

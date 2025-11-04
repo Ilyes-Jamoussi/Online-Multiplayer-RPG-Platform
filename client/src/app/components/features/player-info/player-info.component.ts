@@ -10,12 +10,12 @@ import { Avatar } from '@common/enums/avatar.enum';
     standalone: true,
     imports: [CommonModule],
     templateUrl: './player-info.component.html',
-    styleUrls: ['./player-info.component.scss']
+    styleUrls: ['./player-info.component.scss'],
 })
 export class PlayerInfoComponent {
     constructor(
         private readonly playerService: PlayerService,
-        private readonly assetsService: AssetsService
+        private readonly assetsService: AssetsService,
     ) {}
 
     get player() {
@@ -31,24 +31,24 @@ export class PlayerInfoComponent {
         return this.playerService.name();
     }
 
-    get currentHealth(): number { 
+    get currentHealth(): number {
         return this.playerService.health();
     }
-    
-    get maxHealth(): number { 
+
+    get maxHealth(): number {
         return this.playerService.maxHealth();
     }
-    
+
     get rapidityValue(): number {
         return this.playerService.speed();
     }
-    
-    get attackValue(): number { 
-        return this.playerService.attack(); 
+
+    get attackValue(): number {
+        return this.playerService.attack();
     }
-    
-    get defenseValue(): number { 
-        return this.playerService.defense(); 
+
+    get defenseValue(): number {
+        return this.playerService.defense();
     }
 
     get attackDiceType(): string {
@@ -64,15 +64,15 @@ export class PlayerInfoComponent {
         const bonusSpeed = this.playerService.speedBonus();
         return Math.max(0, totalSpeed - bonusSpeed);
     }
-    
-    get remainingBonusMovementPoints(): number { 
+
+    get remainingBonusMovementPoints(): number {
         const totalSpeed = this.playerService.speed();
         const bonusSpeed = this.playerService.speedBonus();
         return Math.min(bonusSpeed, totalSpeed);
     }
-    
-    get actionsRemaining(): number { 
-        return this.playerService.actionsRemaining(); 
+
+    get actionsRemaining(): number {
+        return this.playerService.actionsRemaining();
     }
 
     get hpPercentage(): number {

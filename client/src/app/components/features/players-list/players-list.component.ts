@@ -10,7 +10,7 @@ import { Player } from '@common/interfaces/player.interface';
     standalone: true,
     imports: [CommonModule],
     templateUrl: './players-list.component.html',
-    styleUrl: './players-list.component.scss'
+    styleUrl: './players-list.component.scss',
 })
 export class PlayersListComponent {
     constructor(
@@ -22,7 +22,7 @@ export class PlayersListComponent {
         const turnOrder = this.inGameService.turnOrder();
         const players = this.inGameService.inGamePlayers();
 
-        return turnOrder.map(playerId => players[playerId]);
+        return turnOrder.map((playerId) => players[playerId]);
     });
 
     isActivePlayer(player: Player): boolean {

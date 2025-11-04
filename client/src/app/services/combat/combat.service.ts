@@ -280,7 +280,8 @@ export class CombatService {
                 });
             }
 
-            this.notificationCoordinatorService.showInfoToast(`⚔️ Combat en cours : ${attackerPlayer.name} vs ${targetPlayer.name}`, COMBAT_TOAST_DURATION_MS);
+            const combatMessage = `⚔️ Combat en cours : ${attackerPlayer.name} vs ${targetPlayer.name}`;
+            this.notificationCoordinatorService.showInfoToast(combatMessage, COMBAT_TOAST_DURATION_MS);
         }
     }
 
@@ -340,7 +341,8 @@ export class CombatService {
             } else {
                 const loserName = winnerId === playerAId ? playerBName : playerAName;
                 if (abandon) {
-                    this.notificationCoordinatorService.showSuccessToast(`🏆 ${winnerName} a gagné par abandon contre ${loserName}`, COMBAT_TOAST_DURATION_MS);
+                    const abandonMessage = `🏆 ${winnerName} a gagné par abandon contre ${loserName}`;
+                    this.notificationCoordinatorService.showSuccessToast(abandonMessage, COMBAT_TOAST_DURATION_MS);
                 } else {
                     this.notificationCoordinatorService.showSuccessToast(`🏆 ${winnerName} a vaincu ${loserName}`, COMBAT_TOAST_DURATION_MS);
                 }

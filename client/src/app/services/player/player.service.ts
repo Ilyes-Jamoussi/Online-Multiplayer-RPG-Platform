@@ -76,7 +76,7 @@ export class PlayerService {
 
         const newDice = {
             attackDice: attr === 'attack' ? value : otherDiceValue,
-            defenseDice: attr === 'defense' ? value : otherDiceValue
+            defenseDice: attr === 'defense' ? value : otherDiceValue,
         };
 
         this.updatePlayer({
@@ -87,9 +87,10 @@ export class PlayerService {
 
     generateRandom(): void {
         const names = ['Aragorn', 'Legolas', 'Gimli', 'Gandalf', 'Frodo', 'Samwise', 'Boromir', 'Faramir', 'Eowyn', 'Arwen'];
-        const availableAvatars = this.sessionService.avatarAssignments()
-            .filter(assignment => assignment.chosenBy === null)
-            .map(assignment => assignment.avatar);
+        const availableAvatars = this.sessionService
+            .avatarAssignments()
+            .filter((assignment) => assignment.chosenBy === null)
+            .map((assignment) => assignment.avatar);
 
         const randomName = names[Math.floor(Math.random() * names.length)];
         const randomAvatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)];

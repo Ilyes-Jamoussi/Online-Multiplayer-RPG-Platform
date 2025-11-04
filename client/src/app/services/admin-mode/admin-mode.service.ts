@@ -32,8 +32,7 @@ export class AdminModeService {
     }
 
     teleportPlayer(x: number, y: number): void {
-        if (!this.inGameService.isMyTurn() || !this.inGameService.isGameStarted() || !this.isAdminModeActivated())
-            return;
+        if (!this.inGameService.isMyTurn() || !this.inGameService.isGameStarted() || !this.isAdminModeActivated()) return;
         this.inGameSocketService.playerTeleport(this.sessionService.id(), x, y);
     }
 

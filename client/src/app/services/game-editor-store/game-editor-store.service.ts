@@ -185,20 +185,14 @@ export class GameEditorStoreService {
         return this.pickChangedProperties(current, this._initial());
     }
 
-    private saveOrCreateGame(
-        patchDto: PatchGameEditorDto,
-        gridPreviewImage: string | undefined,
-    ) {
+    private saveOrCreateGame(patchDto: PatchGameEditorDto, gridPreviewImage: string | undefined) {
         return this.gameHttpService.patchGameEditorById(this._id(), patchDto).pipe(
             take(1),
             catchError((err) => this.handleSaveError(err, gridPreviewImage)),
         );
     }
 
-    private handleSaveError(
-        err: HttpErrorResponse,
-        gridPreviewImage: string | undefined,
-    ) {
+    private handleSaveError(err: HttpErrorResponse, gridPreviewImage: string | undefined) {
         if (err.statusText === 'Conflict') {
             return throwError(() => new Error('Un jeu avec ce nom existe déjà.'));
         }
@@ -210,9 +204,7 @@ export class GameEditorStoreService {
             mode: this._mode(),
         };
 
-        return this.gameHttpService.createGame(createDto).pipe(
-            switchMap((newGame) => this.updateNewGame(newGame.id, gridPreviewImage)),
-        );
+        return this.gameHttpService.createGame(createDto).pipe(switchMap((newGame) => this.updateNewGame(newGame.id, gridPreviewImage)));
     }
 
     private updateNewGame(newGameId: string, gridPreviewImage: string | undefined) {
@@ -250,9 +242,7 @@ export class GameEditorStoreService {
             const gridPreviewImage = await this.captureGridPreview(gridElement);
             const patchDto = this.buildPatchDto(gridPreviewImage);
 
-            await firstValueFrom(
-                this.saveOrCreateGame(patchDto, gridPreviewImage)
-            );
+            await firstValueFrom(this.saveOrCreateGame(patchDto, gridPreviewImage));
 
             this.notifySuccess();
         } catch (error) {

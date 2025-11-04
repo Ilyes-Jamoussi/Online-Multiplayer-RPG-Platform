@@ -8,12 +8,12 @@ import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-c
     standalone: true,
     imports: [CommonModule],
     templateUrl: './combat-timer.component.html',
-    styleUrl: './combat-timer.component.scss'
+    styleUrl: './combat-timer.component.scss',
 })
 export class CombatTimerComponent {
     constructor(
         private readonly combatService: CombatService,
-        private readonly timerCoordinatorService: TimerCoordinatorService
+        private readonly timerCoordinatorService: TimerCoordinatorService,
     ) {}
 
     get timeRemaining(): Signal<number> {

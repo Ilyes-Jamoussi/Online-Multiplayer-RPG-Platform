@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { UiButtonComponent} from './button.component';
+import { UiButtonComponent } from './button.component';
 
 describe('UiButtonComponent', () => {
     let component: UiButtonComponent;

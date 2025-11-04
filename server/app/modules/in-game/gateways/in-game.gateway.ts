@@ -131,10 +131,7 @@ export class InGameGateway {
     handlePlayerMoved(payload: { session: InGameSession; playerId: string; x: number; y: number; speed: number }) {
         this.server
             .to(payload.session.inGameId)
-            .emit(
-                InGameEvents.PlayerMoved,
-                successResponse({ playerId: payload.playerId, x: payload.x, y: payload.y, speed: payload.speed }),
-            );
+            .emit(InGameEvents.PlayerMoved, successResponse({ playerId: payload.playerId, x: payload.x, y: payload.y, speed: payload.speed }));
         this.logger.log(`Player ${payload.playerId} moved to ${payload.x}, ${payload.y} in session ${payload.session.id}`);
     }
 
@@ -160,10 +157,7 @@ export class InGameGateway {
             this.inGameService.teleportPlayer(payload.sessionId, socket.id, payload.x, payload.y);
             const session = this.inGameService.getSession(payload.sessionId);
             const player = session.inGamePlayers[socket.id];
-            this.server.to(session.inGameId).emit(
-                InGameEvents.PlayerTeleported,
-                successResponse({ playerId: socket.id, x: player.x, y: player.y })
-            );
+            this.server.to(session.inGameId).emit(InGameEvents.PlayerTeleported, successResponse({ playerId: socket.id, x: player.x, y: player.y }));
             this.inGameService.getReachableTiles(payload.sessionId, socket.id);
         } catch (error) {
             socket.emit(InGameEvents.PlayerTeleported, errorResponse(error.message));
