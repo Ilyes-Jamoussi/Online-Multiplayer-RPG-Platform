@@ -289,15 +289,11 @@ describe('TimerService', () => {
 
             service.endTurnManual(session);
 
-            const timeoutCallCountBefore = (eventEmitter.emit as jest.Mock).mock.calls.filter(
-                (call) => call[0] === 'turn.timeout',
-            ).length;
+            const timeoutCallCountBefore = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
 
             jest.advanceTimersByTime(CUSTOM_TIMEOUT_SHORT);
 
-            const timeoutCallCountAfter = (eventEmitter.emit as jest.Mock).mock.calls.filter(
-                (call) => call[0] === 'turn.timeout',
-            ).length;
+            const timeoutCallCountAfter = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
 
             expect(timeoutCallCountAfter).toBe(timeoutCallCountBefore);
         });
@@ -427,9 +423,7 @@ describe('TimerService', () => {
 
             jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
 
-            const timeoutCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter(
-                (call) => call[0] === 'turn.timeout',
-            ).length;
+            const timeoutCallCount = (eventEmitter.emit as jest.Mock).mock.calls.filter((call) => call[0] === 'turn.timeout').length;
             expect(timeoutCallCount).toBe(0);
         });
 
@@ -654,10 +648,7 @@ describe('TimerService', () => {
             };
 
             const emptyTurnOrderSession = { ...session, turnOrder: [] };
-            const result = (service as unknown as ServiceWithPrivateMethod).getNextActivePlayer(
-                emptyTurnOrderSession,
-                'player1',
-            );
+            const result = (service as unknown as ServiceWithPrivateMethod).getNextActivePlayer(emptyTurnOrderSession, 'player1');
 
             expect(result).toBeNull();
         });
@@ -738,30 +729,7 @@ describe('TimerService', () => {
             jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
             expect(session.currentTurn.activePlayerId).toBe('player3');
         });
-
-        // it('should clear timer when scheduling new timeout', () => {
-        //     const session = createMockSession();
-        //     service.startFirstTurnWithTransition(session, CUSTOM_TIMEOUT_SHORT);
-        //     jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
-
-        //     expect(jest.getTimerCount()).toBe(1);
-
-        //     const timeoutCallCountBeforeSecondCall = (eventEmitter.emit as jest.Mock).mock.calls.filter(
-        //         (call) => call[0] === 'turn.timeout',
-        //     ).length;
-
-        //     service.startFirstTurnWithTransition(session, CUSTOM_TIMEOUT_MEDIUM);
-        //     jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
-
-        //     jest.advanceTimersByTime(CUSTOM_TIMEOUT_SHORT);
-
-        //     const timeoutCallCountAfter = (eventEmitter.emit as jest.Mock).mock.calls.filter(
-        //         (call) => call[0] === 'turn.timeout',
-        //     ).length;
-
-        //     expect(timeoutCallCountAfter).toBe(timeoutCallCountBeforeSecondCall);
-        // });
-
+        
         it('should handle clearing non-existent timer', () => {
             const session = createMockSession();
 
