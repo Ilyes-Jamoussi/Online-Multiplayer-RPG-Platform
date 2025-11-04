@@ -72,6 +72,16 @@ export class InGameService {
         return session;
     }
 
+    startSessionWithTransition(sessionId: string): InGameSession {
+        const session = this.sessionRepository.findById(sessionId);
+        if (session.isGameStarted) throw new BadRequestException('Game already started');
+
+        session.isGameStarted = true;
+        session.currentTurn = this.timerService.startFirstTurnWithTransition(session, DEFAULT_TURN_DURATION);
+
+        return session;
+    }
+
     getSession(sessionId: string): InGameSession | undefined {
         return this.sessionRepository.findById(sessionId);
     }
@@ -92,6 +102,15 @@ export class InGameService {
         if (player.isInGame) throw new BadRequestException('Player already joined');
 
         this.sessionRepository.updatePlayer(sessionId, playerId, { isInGame: true });
+        const updatedSession = this.sessionRepository.findById(sessionId);
+
+        if (!updatedSession.isGameStarted) {
+            const allPlayersJoined = Object.values(updatedSession.inGamePlayers).every((p) => p.isInGame);
+            if (allPlayersJoined) {
+                this.startSessionWithTransition(sessionId);
+            }
+        }
+
         return this.sessionRepository.findById(sessionId);
     }
 

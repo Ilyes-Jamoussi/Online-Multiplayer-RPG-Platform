@@ -11,41 +11,31 @@ export interface CombatState {
     playerBTileEffect: TileCombatEffect | null;
 }
 
+export interface CombatAttack {
+    dice: Dice;
+    diceRoll: number;
+    baseAttack: number;
+    attackBonus: number;
+    totalAttack: number;
+    tileCombatEffect: TileCombatEffect;
+}
+
+export interface CombatDefense {
+    dice: Dice;
+    diceRoll: number;
+    baseDefense: number;
+    defenseBonus: number;
+    totalDefense: number;
+    tileCombatEffect: TileCombatEffect;
+}
+
 export interface CombatResult {
     playerAId: string;
     playerBId: string;
-    playerAAttack: {
-        dice: Dice;
-        diceRoll: number;
-        baseAttack: number;
-        attackBonus: number;
-        totalAttack: number;
-        tileCombatEffect: TileCombatEffect;
-    };
-    playerBAttack: {
-        dice: Dice;
-        diceRoll: number;
-        baseAttack: number;
-        attackBonus: number;
-        totalAttack: number;
-        tileCombatEffect: TileCombatEffect;
-    };
-    playerADefense: {
-        dice: Dice;
-        diceRoll: number;
-        baseDefense: number;
-        defenseBonus: number;
-        totalDefense: number;
-        tileCombatEffect: TileCombatEffect;
-    };
-    playerBDefense: {
-        dice: Dice;
-        diceRoll: number;
-        baseDefense: number;
-        defenseBonus: number;
-        totalDefense: number;
-        tileCombatEffect: TileCombatEffect;
-    };
+    playerAAttack: CombatAttack;
+    playerBAttack: CombatAttack;
+    playerADefense: CombatDefense;
+    playerBDefense: CombatDefense;
     playerADamage: number;
     playerBDamage: number;
 }
