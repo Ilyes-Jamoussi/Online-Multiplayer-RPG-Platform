@@ -4,6 +4,7 @@ import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { CombatResult, CombatAttack, CombatDefense } from '@common/interfaces/combat.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Dice } from '@common/enums/dice.enum';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { CombatGateway } from './combat.gateway';
@@ -163,24 +164,24 @@ describe('CombatGateway', () => {
 
     describe('combatChoice', () => {
         it('should call combatService.combatChoice successfully', () => {
-            const payload = { sessionId: SESSION_ID, choice: 'offensive' as const };
+            const payload = { sessionId: SESSION_ID, choice: CombatPosture.OFFENSIVE };
 
             gateway.combatChoice(mockSocket, payload);
 
-            expect(combatService.combatChoice).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID, 'offensive');
+            expect(combatService.combatChoice).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID, CombatPosture.OFFENSIVE);
             expect(mockSocket.emit).not.toHaveBeenCalled();
         });
 
         it('should call combatService.combatChoice with defensive choice', () => {
-            const payload = { sessionId: SESSION_ID, choice: 'defensive' as const };
+            const payload = { sessionId: SESSION_ID, choice: CombatPosture.DEFENSIVE };
 
             gateway.combatChoice(mockSocket, payload);
 
-            expect(combatService.combatChoice).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID, 'defensive');
+            expect(combatService.combatChoice).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID, CombatPosture.DEFENSIVE);
         });
 
         it('should emit error when combatService throws', () => {
-            const payload = { sessionId: SESSION_ID, choice: 'offensive' as const };
+            const payload = { sessionId: SESSION_ID, choice: CombatPosture.OFFENSIVE };
             const errorMessage = 'Combat not found';
             combatService.combatChoice.mockImplementation(() => {
                 throw new Error(errorMessage);
@@ -293,22 +294,19 @@ describe('CombatGateway', () => {
     });
 
     describe('handleCombatTimerRestart', () => {
-        it('should log and emit CombatTimerRestart when session exists', () => {
+        it('should emit CombatTimerRestart when session exists', () => {
             const session = createMockInGameSession();
             combatService.getSession.mockReturnValue(session);
-            const loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
             const payload = { sessionId: SESSION_ID };
 
             gateway.handleCombatTimerRestart(payload);
 
             expect(combatService.getSession).toHaveBeenCalledWith(SESSION_ID);
-            expect(loggerSpy).toHaveBeenCalledWith(`Combat timer restarted for session ${SESSION_ID}`);
             expect(mockServer.to).toHaveBeenCalledWith(IN_GAME_ID);
             expect(mockServer.emit).toHaveBeenCalledWith(InGameEvents.CombatTimerRestart, {
                 success: true,
                 data: {},
             });
-            loggerSpy.mockRestore();
         });
 
         it('should not emit when session does not exist', () => {
@@ -433,7 +431,7 @@ describe('CombatGateway', () => {
             const payload = {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_A_ID,
-                posture: 'offensive' as const,
+                posture: CombatPosture.OFFENSIVE,
             };
 
             gateway.handleCombatPostureSelected(payload);
@@ -446,7 +444,7 @@ describe('CombatGateway', () => {
                     success: true,
                     data: {
                         playerId: PLAYER_A_ID,
-                        posture: 'offensive',
+                        posture: CombatPosture.OFFENSIVE,
                     },
                 }),
             );
@@ -458,7 +456,7 @@ describe('CombatGateway', () => {
             const payload = {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_B_ID,
-                posture: 'defensive' as const,
+                posture: CombatPosture.DEFENSIVE,
             };
 
             gateway.handleCombatPostureSelected(payload);
@@ -469,7 +467,7 @@ describe('CombatGateway', () => {
                     success: true,
                     data: {
                         playerId: PLAYER_B_ID,
-                        posture: 'defensive',
+                        posture: CombatPosture.DEFENSIVE,
                     },
                 }),
             );
@@ -480,7 +478,7 @@ describe('CombatGateway', () => {
             const payload = {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_A_ID,
-                posture: 'offensive' as const,
+                posture: CombatPosture.OFFENSIVE,
             };
 
             gateway.handleCombatPostureSelected(payload);

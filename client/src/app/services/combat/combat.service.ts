@@ -19,8 +19,8 @@ export class CombatService {
     private readonly _combatData = signal<CombatData | null>(null);
     private readonly _combatResult = signal<CombatResult | null>(null);
     private readonly _damageDisplays = signal<DamageDisplay[]>([]);
-    private readonly _selectedPosture = signal<'offensive' | 'defensive' | null>(null);
-    private readonly _playerPostures = signal<Record<string, 'offensive' | 'defensive'>>({});
+    private readonly _selectedPosture = signal<CombatPosture | null>(null);
+    private readonly _playerPostures = signal<Record<string, CombatPosture>>({});
     private readonly _victoryData = signal<VictoryData | null>(null);
     private readonly _tileEffects = signal<Record<string, TileCombatEffect>>({});
     private readonly _minHealthDuringCombat = signal<Record<string, number>>({});
@@ -93,13 +93,13 @@ export class CombatService {
 
     chooseOffensive(): void {
         if (this._selectedPosture() !== null) return;
-        this._selectedPosture.set('offensive');
+        this._selectedPosture.set(CombatPosture.OFFENSIVE);
         this.combatSocketService.combatChoice({ sessionId: this.inGameService.sessionId(), choice: CombatPosture.OFFENSIVE });
     }
 
     chooseDefensive(): void {
         if (this._selectedPosture() !== null) return;
-        this._selectedPosture.set('defensive');
+        this._selectedPosture.set(CombatPosture.DEFENSIVE);
         this.combatSocketService.combatChoice({ sessionId: this.inGameService.sessionId(), choice: CombatPosture.DEFENSIVE });
     }
 
@@ -323,7 +323,7 @@ export class CombatService {
         this._playerPostures.set({});
     }
 
-    private handlePostureSelected(playerId: string, posture: 'offensive' | 'defensive'): void {
+    private handlePostureSelected(playerId: string, posture: CombatPosture): void {
         this._playerPostures.update((postures) => ({
             ...postures,
             [playerId]: posture,

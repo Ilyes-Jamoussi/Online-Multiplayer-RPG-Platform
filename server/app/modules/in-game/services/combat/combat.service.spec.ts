@@ -17,6 +17,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { CombatService } from './combat.service';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 
 type PlayerAttackResult = {
     dice: Dice;
@@ -385,7 +386,7 @@ describe('CombatService', () => {
             const session = createMockSession();
             sessionRepository.findById.mockReturnValue(session);
 
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, 'offensive')).not.toThrow();
+            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE)).not.toThrow();
             expect(eventEmitter.emit).not.toHaveBeenCalled();
         });
 
@@ -400,8 +401,8 @@ describe('CombatService', () => {
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
             servicePrivate.activeCombats.set(SESSION_ID, combat);
 
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_C_ID, 'offensive')).toThrow(BadRequestException);
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_C_ID, 'offensive')).toThrow('Player not in combat');
+            expect(() => service.combatChoice(SESSION_ID, PLAYER_C_ID, CombatPosture.OFFENSIVE)).toThrow(BadRequestException);
+            expect(() => service.combatChoice(SESSION_ID, PLAYER_C_ID, CombatPosture.OFFENSIVE)).toThrow('Player not in combat');
         });
 
         it('should throw BadRequestException when player not in combat (line 66 check)', () => {
@@ -417,8 +418,8 @@ describe('CombatService', () => {
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
             servicePrivate.activeCombats.set(SESSION_ID, combat);
 
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, 'offensive')).toThrow(BadRequestException);
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, 'offensive')).toThrow('Player not in combat');
+            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE)).toThrow(BadRequestException);
+            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE)).toThrow('Player not in combat');
         });
 
         it('should throw BadRequestException from else branch (line 72) when player matches neither A nor B', () => {
@@ -434,8 +435,8 @@ describe('CombatService', () => {
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
             servicePrivate.activeCombats.set(SESSION_ID, combat);
 
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, 'offensive')).toThrow(BadRequestException);
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, 'offensive')).toThrow('Player not in combat');
+            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE)).toThrow(BadRequestException);
+            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE)).toThrow('Player not in combat');
         });
 
         it('should set playerA posture and emit event', () => {
@@ -449,13 +450,13 @@ describe('CombatService', () => {
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
             servicePrivate.activeCombats.set(SESSION_ID, combat);
 
-            service.combatChoice(SESSION_ID, PLAYER_A_ID, 'offensive');
+            service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE);
 
-            expect(combat.playerAPosture).toBe('offensive');
+            expect(combat.playerAPosture).toBe(CombatPosture.OFFENSIVE);
             expect(eventEmitter.emit).toHaveBeenCalledWith('combat.postureSelected', {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_A_ID,
-                posture: 'offensive',
+                posture: CombatPosture.OFFENSIVE,
             });
         });
 
@@ -470,19 +471,19 @@ describe('CombatService', () => {
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
             servicePrivate.activeCombats.set(SESSION_ID, combat);
 
-            service.combatChoice(SESSION_ID, PLAYER_B_ID, 'defensive');
+            service.combatChoice(SESSION_ID, PLAYER_B_ID, CombatPosture.DEFENSIVE);
 
-            expect(combat.playerBPosture).toBe('defensive');
+            expect(combat.playerBPosture).toBe(CombatPosture.DEFENSIVE);
             expect(eventEmitter.emit).toHaveBeenCalledWith('combat.postureSelected', {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_B_ID,
-                posture: 'defensive',
+                posture: CombatPosture.DEFENSIVE,
             });
         });
 
         it('should force next loop when both postures are set', () => {
             const combat = createMockCombatState();
-            combat.playerAPosture = 'offensive';
+            combat.playerAPosture = CombatPosture.OFFENSIVE;
             const session = createMockSession();
             sessionRepository.findById.mockReturnValue(session);
 
@@ -492,7 +493,7 @@ describe('CombatService', () => {
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
             servicePrivate.activeCombats.set(SESSION_ID, combat);
 
-            service.combatChoice(SESSION_ID, PLAYER_B_ID, 'defensive');
+            service.combatChoice(SESSION_ID, PLAYER_B_ID, CombatPosture.DEFENSIVE);
 
             expect(combatTimerService.forceNextLoop).toHaveBeenCalledWith(session);
         });
@@ -508,7 +509,7 @@ describe('CombatService', () => {
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
             servicePrivate.activeCombats.set(SESSION_ID, combat);
 
-            service.combatChoice(SESSION_ID, PLAYER_A_ID, 'offensive');
+            service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE);
 
             expect(combatTimerService.forceNextLoop).not.toHaveBeenCalled();
         });
@@ -524,9 +525,9 @@ describe('CombatService', () => {
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
             servicePrivate.activeCombats.set(SESSION_ID, combat);
 
-            service.combatChoice(SESSION_ID, PLAYER_B_ID, 'offensive');
+            service.combatChoice(SESSION_ID, PLAYER_B_ID, CombatPosture.OFFENSIVE);
 
-            expect(combat.playerBPosture).toBe('offensive');
+            expect(combat.playerBPosture).toBe(CombatPosture.OFFENSIVE);
             expect(combat.playerAPosture).toBeNull();
         });
 
@@ -543,14 +544,14 @@ describe('CombatService', () => {
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
             servicePrivate.activeCombats.set(SESSION_ID, combat);
 
-            service.combatChoice(SESSION_ID, PLAYER_B_ID, 'defensive');
+            service.combatChoice(SESSION_ID, PLAYER_B_ID, CombatPosture.DEFENSIVE);
 
             expect(combat.playerAPosture).toBeNull();
-            expect(combat.playerBPosture).toBe('defensive');
+            expect(combat.playerBPosture).toBe(CombatPosture.DEFENSIVE);
             expect(eventEmitter.emit).toHaveBeenCalledWith('combat.postureSelected', {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_B_ID,
-                posture: 'defensive',
+                posture: CombatPosture.DEFENSIVE,
             });
         });
 
@@ -567,8 +568,8 @@ describe('CombatService', () => {
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
             servicePrivate.activeCombats.set(SESSION_ID, combat);
 
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, 'offensive')).toThrow(BadRequestException);
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, 'offensive')).toThrow('Player not in combat');
+            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE)).toThrow(BadRequestException);
+            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE)).toThrow('Player not in combat');
         });
     });
 
@@ -759,8 +760,8 @@ describe('CombatService', () => {
         it('should process combat round and emit events', () => {
             const session = createMockSession();
             const combat = createMockCombatState();
-            combat.playerAPosture = 'offensive';
-            combat.playerBPosture = 'defensive';
+            combat.playerAPosture = CombatPosture.OFFENSIVE;
+            combat.playerBPosture = CombatPosture.DEFENSIVE;
             sessionRepository.findById.mockReturnValue(session);
             sessionRepository.decreasePlayerHealth.mockReturnValueOnce(HEALTH_AFTER_DAMAGE_1).mockReturnValueOnce(HEALTH_AFTER_DAMAGE_2);
 
@@ -891,8 +892,8 @@ describe('CombatService', () => {
     describe('resetCombatPosture', () => {
         it('should reset postures when combat exists', () => {
             const combat = createMockCombatState();
-            combat.playerAPosture = 'offensive';
-            combat.playerBPosture = 'defensive';
+            combat.playerAPosture = CombatPosture.OFFENSIVE;
+            combat.playerBPosture = CombatPosture.DEFENSIVE;
 
             type ServiceWithPrivateMethod = {
                 activeCombats: Map<string, CombatState>;
@@ -925,13 +926,13 @@ describe('CombatService', () => {
                 getPlayerDefense: (
                     sessionId: string,
                     playerId: string,
-                    posture: 'offensive' | 'defensive',
+                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
                     tileCombatEffect: TileCombatEffect,
                 ) => PlayerDefenseResult;
             };
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
 
-            const result = servicePrivate.getPlayerDefense(SESSION_ID, PLAYER_A_ID, 'defensive', TileCombatEffect.BASE);
+            const result = servicePrivate.getPlayerDefense(SESSION_ID, PLAYER_A_ID, CombatPosture.DEFENSIVE, TileCombatEffect.BASE);
 
             expect(result).toEqual({
                 dice: Dice.D4,
@@ -952,13 +953,13 @@ describe('CombatService', () => {
                 getPlayerDefense: (
                     sessionId: string,
                     playerId: string,
-                    posture: 'offensive' | 'defensive',
+                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
                     tileCombatEffect: TileCombatEffect,
                 ) => PlayerDefenseResult;
             };
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
 
-            const result = servicePrivate.getPlayerDefense(SESSION_ID, PLAYER_A_ID, 'defensive', TileCombatEffect.BASE);
+            const result = servicePrivate.getPlayerDefense(SESSION_ID, PLAYER_A_ID, CombatPosture.DEFENSIVE, TileCombatEffect.BASE);
 
             expect(result).toEqual({
                 dice: Dice.D4,
@@ -978,13 +979,13 @@ describe('CombatService', () => {
                 getPlayerDefense: (
                     sessionId: string,
                     playerId: string,
-                    posture: 'offensive' | 'defensive',
+                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
                     tileCombatEffect: TileCombatEffect,
                 ) => PlayerDefenseResult;
             };
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
 
-            const result = servicePrivate.getPlayerDefense(SESSION_ID, PLAYER_A_ID, 'defensive', TileCombatEffect.BASE);
+            const result = servicePrivate.getPlayerDefense(SESSION_ID, PLAYER_A_ID, CombatPosture.DEFENSIVE, TileCombatEffect.BASE);
 
             expect(result.dice).toBe(Dice.D4);
             expect(result.baseDefense).toBe(BASE_DEFENSE_VALUE);
@@ -1000,13 +1001,13 @@ describe('CombatService', () => {
                 getPlayerDefense: (
                     sessionId: string,
                     playerId: string,
-                    posture: 'offensive' | 'defensive',
+                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
                     tileCombatEffect: TileCombatEffect,
                 ) => PlayerDefenseResult;
             };
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
 
-            const result = servicePrivate.getPlayerDefense(SESSION_ID, PLAYER_A_ID, 'offensive', TileCombatEffect.BASE);
+            const result = servicePrivate.getPlayerDefense(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE, TileCombatEffect.BASE);
 
             expect(result.defenseBonus).toBe(0);
         });
@@ -1020,13 +1021,13 @@ describe('CombatService', () => {
                 getPlayerAttack: (
                     sessionId: string,
                     playerId: string,
-                    posture: 'offensive' | 'defensive',
+                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
                     tileCombatEffect: TileCombatEffect,
                 ) => PlayerAttackResult;
             };
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
 
-            const result = servicePrivate.getPlayerAttack(SESSION_ID, PLAYER_A_ID, 'offensive', TileCombatEffect.BASE);
+            const result = servicePrivate.getPlayerAttack(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE, TileCombatEffect.BASE);
 
             expect(result).toEqual({
                 dice: Dice.D4,
@@ -1047,13 +1048,13 @@ describe('CombatService', () => {
                 getPlayerAttack: (
                     sessionId: string,
                     playerId: string,
-                    posture: 'offensive' | 'defensive',
+                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
                     tileCombatEffect: TileCombatEffect,
                 ) => PlayerAttackResult;
             };
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
 
-            const result = servicePrivate.getPlayerAttack(SESSION_ID, PLAYER_A_ID, 'offensive', TileCombatEffect.BASE);
+            const result = servicePrivate.getPlayerAttack(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE, TileCombatEffect.BASE);
 
             expect(result).toEqual({
                 dice: Dice.D4,
@@ -1073,13 +1074,13 @@ describe('CombatService', () => {
                 getPlayerAttack: (
                     sessionId: string,
                     playerId: string,
-                    posture: 'offensive' | 'defensive',
+                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
                     tileCombatEffect: TileCombatEffect,
                 ) => PlayerAttackResult;
             };
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
 
-            const result = servicePrivate.getPlayerAttack(SESSION_ID, PLAYER_A_ID, 'offensive', TileCombatEffect.BASE);
+            const result = servicePrivate.getPlayerAttack(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE, TileCombatEffect.BASE);
 
             expect(result.dice).toBe(Dice.D6);
             expect(result.baseAttack).toBe(BASE_ATTACK_VALUE);
@@ -1095,13 +1096,13 @@ describe('CombatService', () => {
                 getPlayerAttack: (
                     sessionId: string,
                     playerId: string,
-                    posture: 'offensive' | 'defensive',
+                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
                     tileCombatEffect: TileCombatEffect,
                 ) => PlayerAttackResult;
             };
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
 
-            const result = servicePrivate.getPlayerAttack(SESSION_ID, PLAYER_A_ID, 'defensive', TileCombatEffect.BASE);
+            const result = servicePrivate.getPlayerAttack(SESSION_ID, PLAYER_A_ID, CombatPosture.DEFENSIVE, TileCombatEffect.BASE);
 
             expect(result.attackBonus).toBe(0);
         });

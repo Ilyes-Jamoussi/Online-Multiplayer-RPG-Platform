@@ -178,7 +178,6 @@ describe('InGameGateway', () => {
     describe('playerJoinInGameSession', () => {
         it('should join session and emit PlayerJoinedInGameSession', () => {
             const session = createMockInGameSession();
-            const loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
             inGameService.joinInGameSession.mockReturnValue(session);
 
             gateway.playerJoinInGameSession(mockSocket, SESSION_ID);
@@ -192,13 +191,10 @@ describe('InGameGateway', () => {
                     data: session,
                 }),
             );
-            expect(loggerSpy).toHaveBeenCalledWith(`Player ${SOCKET_ID} joined session ${SESSION_ID}`);
-            loggerSpy.mockRestore();
         });
 
         it('should emit GameStarted when isGameStarted is true', () => {
             const session = createMockInGameSession({ isGameStarted: true });
-            const loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
             inGameService.joinInGameSession.mockReturnValue(session);
 
             gateway.playerJoinInGameSession(mockSocket, SESSION_ID);
@@ -211,8 +207,6 @@ describe('InGameGateway', () => {
                     data: session,
                 }),
             );
-            expect(loggerSpy).toHaveBeenCalledWith(`Game auto-started for session ${IN_GAME_ID}`);
-            loggerSpy.mockRestore();
         });
 
         it('should not emit GameStarted when isGameStarted is false', () => {
@@ -227,26 +221,22 @@ describe('InGameGateway', () => {
 
         it('should handle error and emit error response', () => {
             const errorMessage = 'Session not found';
-            const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
             inGameService.joinInGameSession.mockImplementation(() => {
                 throw new Error(errorMessage);
             });
 
             gateway.playerJoinInGameSession(mockSocket, SESSION_ID);
 
-            expect(loggerSpy).toHaveBeenCalledWith(`Error joining session ${SESSION_ID} for player ${SOCKET_ID}: ${errorMessage}`);
             expect(mockSocket.emit).toHaveBeenCalledWith(InGameEvents.PlayerJoinedInGameSession, {
                 success: false,
                 message: errorMessage,
             });
-            loggerSpy.mockRestore();
         });
     });
 
     describe('playerEndTurn', () => {
         it('should end turn and emit TurnEnded', () => {
             const session = createMockInGameSession();
-            const loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
             inGameService.endPlayerTurn.mockReturnValue(session);
 
             gateway.playerEndTurn(mockSocket, SESSION_ID);
@@ -260,8 +250,6 @@ describe('InGameGateway', () => {
                     data: session,
                 }),
             );
-            expect(loggerSpy).toHaveBeenCalledWith(`Player ${SOCKET_ID} ended turn in session ${SESSION_ID}`);
-            loggerSpy.mockRestore();
         });
 
         it('should handle error and emit error response', () => {
@@ -351,7 +339,6 @@ describe('InGameGateway', () => {
     describe('handleTurnStarted', () => {
         it('should emit TurnStarted and call getReachableTiles and getAvailableActions', () => {
             const session = createMockInGameSession();
-            const loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
             const payload = { session };
 
             gateway.handleTurnStarted(payload);
@@ -366,15 +353,12 @@ describe('InGameGateway', () => {
             );
             expect(inGameService.getReachableTiles).toHaveBeenCalledWith(SESSION_ID, PLAYER_ID);
             expect(inGameService.getAvailableActions).toHaveBeenCalledWith(SESSION_ID, PLAYER_ID);
-            expect(loggerSpy).toHaveBeenCalledWith(`Turn ${TURN_NUMBER} started for session ${SESSION_ID}`);
-            loggerSpy.mockRestore();
         });
     });
 
     describe('handleTurnEnded', () => {
-        it('should emit TurnEnded and log', () => {
+        it('should emit TurnEnded', () => {
             const session = createMockInGameSession();
-            const loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
             const payload = { session };
 
             gateway.handleTurnEnded(payload);
@@ -387,15 +371,12 @@ describe('InGameGateway', () => {
                     data: session,
                 }),
             );
-            expect(loggerSpy).toHaveBeenCalledWith(`Turn ${TURN_NUMBER - 1} ended for session ${SESSION_ID}`);
-            loggerSpy.mockRestore();
         });
     });
 
     describe('handleTurnTransition', () => {
-        it('should emit TurnTransitionEnded and log', () => {
+        it('should emit TurnTransitionEnded', () => {
             const session = createMockInGameSession();
-            const loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
             const payload = { session };
 
             gateway.handleTurnTransition(payload);
@@ -408,15 +389,12 @@ describe('InGameGateway', () => {
                     data: session,
                 }),
             );
-            expect(loggerSpy).toHaveBeenCalledWith(`Transition → Turn ${TURN_NUMBER} in session ${SESSION_ID}`);
-            loggerSpy.mockRestore();
         });
     });
 
     describe('handleTurnTimeout', () => {
-        it('should emit TurnTimeout and log warning', () => {
+        it('should emit TurnTimeout', () => {
             const session = createMockInGameSession();
-            const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
             const payload = { session };
 
             gateway.handleTurnTimeout(payload);
@@ -429,15 +407,12 @@ describe('InGameGateway', () => {
                     data: session,
                 }),
             );
-            expect(loggerSpy).toHaveBeenCalledWith(`Timeout for session ${SESSION_ID}`);
-            loggerSpy.mockRestore();
         });
     });
 
     describe('handleForcedEnd', () => {
-        it('should emit TurnForcedEnd and log warning', () => {
+        it('should emit TurnForcedEnd', () => {
             const session = createMockInGameSession();
-            const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
             const payload = { session };
 
             gateway.handleForcedEnd(payload);
@@ -450,8 +425,6 @@ describe('InGameGateway', () => {
                     data: session,
                 }),
             );
-            expect(loggerSpy).toHaveBeenCalledWith(`Forced end of turn for session ${SESSION_ID}`);
-            loggerSpy.mockRestore();
         });
     });
 
@@ -514,9 +487,8 @@ describe('InGameGateway', () => {
     });
 
     describe('handlePlayerMoved', () => {
-        it('should emit PlayerMoved and log', () => {
+        it('should emit PlayerMoved', () => {
             const session = createMockInGameSession();
-            const loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
             const payload = {
                 session,
                 playerId: PLAYER_ID,
@@ -540,8 +512,6 @@ describe('InGameGateway', () => {
                     },
                 }),
             );
-            expect(loggerSpy).toHaveBeenCalledWith(`Player ${PLAYER_ID} moved to ${TARGET_X}, ${TARGET_Y} in session ${SESSION_ID}`);
-            loggerSpy.mockRestore();
         });
     });
 
@@ -605,19 +575,16 @@ describe('InGameGateway', () => {
 
         it('should handle error and emit error response', () => {
             const errorMessage = 'Player not found';
-            const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
             inGameService.toggleAdminMode.mockImplementation(() => {
                 throw new Error(errorMessage);
             });
 
             gateway.handleToggleAdminMode(mockSocket, SESSION_ID);
 
-            expect(loggerSpy).toHaveBeenCalledWith('Error toggling admin mode:', errorMessage);
             expect(mockSocket.emit).toHaveBeenCalledWith(InGameEvents.AdminModeToggled, {
                 success: false,
                 message: errorMessage,
             });
-            loggerSpy.mockRestore();
         });
     });
 
@@ -663,10 +630,9 @@ describe('InGameGateway', () => {
     });
 
     describe('handlePlayerUpdated', () => {
-        it('should emit PlayerUpdated and log', () => {
+        it('should emit PlayerUpdated', () => {
             const session = createMockInGameSession();
             const player = createMockPlayer();
-            const loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
             inGameService.getSession.mockReturnValue(session);
             const payload = {
                 sessionId: SESSION_ID,
@@ -684,17 +650,13 @@ describe('InGameGateway', () => {
                     data: player,
                 }),
             );
-            expect(loggerSpy).toHaveBeenCalledWith('player updated sent to client', payload);
-            expect(loggerSpy).toHaveBeenCalledWith(`Player ${PLAYER_ID} updated in session ${SESSION_ID}`);
-            loggerSpy.mockRestore();
         });
     });
 
     describe('handlePlayerAvailableActions', () => {
-        it('should emit PlayerAvailableActions and log', () => {
+        it('should emit PlayerAvailableActions', () => {
             const session = createMockInGameSession();
             const actions = [createMockAvailableAction()];
-            const loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
             const payload = {
                 session,
                 playerId: PLAYER_ID,
@@ -711,15 +673,12 @@ describe('InGameGateway', () => {
                     data: actions,
                 }),
             );
-            expect(loggerSpy).toHaveBeenCalledWith(`Player ${PLAYER_ID} has ${actions.length} available actions in session ${SESSION_ID}`);
-            loggerSpy.mockRestore();
         });
     });
 
     describe('handleGameOver', () => {
         it('should emit GameOver and call socketsLeave', () => {
             const session = createMockInGameSession();
-            const loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
             inGameService.getSession.mockReturnValue(session);
             const payload = {
                 sessionId: SESSION_ID,
@@ -743,8 +702,6 @@ describe('InGameGateway', () => {
             );
             expect(mockServer.socketsLeave).toHaveBeenCalledWith(IN_GAME_ID);
             expect(mockServer.socketsLeave).toHaveBeenCalledWith(SESSION_ID);
-            expect(loggerSpy).toHaveBeenCalledWith(`Game over for session ${SESSION_ID}. Winner: ${WINNER_NAME} (${WINNER_ID})`);
-            loggerSpy.mockRestore();
         });
     });
 
@@ -820,7 +777,6 @@ describe('InGameGateway', () => {
                 playerName: PLAYER_NAME,
                 adminModeDeactivated: true,
             };
-            const loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
             inGameService.leaveInGameSession.mockReturnValue(result);
 
             type GatewayWithPrivateMethod = {
@@ -844,8 +800,6 @@ describe('InGameGateway', () => {
                     data: result,
                 }),
             );
-            expect(loggerSpy).toHaveBeenCalledWith(`Player ${PLAYER_NAME} left session ${SESSION_ID}`);
-            loggerSpy.mockRestore();
         });
 
         it('should emit PlayerLeftInGameSession when sessionEnded is false and adminModeDeactivated is false', () => {
@@ -857,7 +811,6 @@ describe('InGameGateway', () => {
                 playerName: PLAYER_NAME,
                 adminModeDeactivated: false,
             };
-            const loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
             inGameService.leaveInGameSession.mockReturnValue(result);
 
             type GatewayWithPrivateMethod = {
@@ -878,8 +831,6 @@ describe('InGameGateway', () => {
                     data: result,
                 }),
             );
-            expect(loggerSpy).toHaveBeenCalledWith(`Player ${PLAYER_NAME} left session ${SESSION_ID}`);
-            loggerSpy.mockRestore();
         });
 
         it('should handle error and emit error response', () => {

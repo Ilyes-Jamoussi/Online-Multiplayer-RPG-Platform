@@ -666,11 +666,9 @@ describe('SessionGateway', () => {
                 throw new Error(errorMessage);
             });
 
-            const loggerSpy = jest.spyOn(gateway['logger'], 'error').mockImplementation();
-
-            gateway.leaveSession(mockSocket);
-
-            expect(loggerSpy).toHaveBeenCalledWith('Error leaving session:', errorMessage);
+            expect(() => {
+                gateway.leaveSession(mockSocket);
+            }).toThrow(errorMessage);
         });
 
         it('should leave session as admin successfully', () => {
