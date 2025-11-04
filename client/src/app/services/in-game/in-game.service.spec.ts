@@ -142,7 +142,7 @@ describe('InGameService', () => {
     describe('Game Actions', () => {
         it('should toggle door action', () => {
             service.toggleDoorAction(5, 10);
-            expect(mockInGameSocketService.playerToggleDoorAction).toHaveBeenCalledWith('session1', 5, 10);
+            expect(mockInGameSocketService.playerToggleDoorAction).toHaveBeenCalledWith({ sessionId: 'session1', x: 5, y: 10 });
         });
 
         it('should handle player action used', () => {
@@ -194,7 +194,7 @@ describe('InGameService', () => {
                 isGameStarted: true
             });
             service.movePlayer(Orientation.N);
-            expect(mockInGameSocketService.playerMove).toHaveBeenCalledWith('session1', Orientation.N);
+            expect(mockInGameSocketService.playerMove).toHaveBeenCalledWith({ sessionId: 'session1', orientation: Orientation.N });
         });
 
         it('should not move player when not my turn', () => {

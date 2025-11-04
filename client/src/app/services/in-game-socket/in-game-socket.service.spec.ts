@@ -48,7 +48,7 @@ describe('InGameSocketService', () => {
         });
 
         it('should emit playerMove', () => {
-            service.playerMove('session1', Orientation.N);
+            service.playerMove({ sessionId: 'session1', orientation: Orientation.N });
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerMove, {
                 sessionId: 'session1',
                 orientation: Orientation.N
@@ -56,7 +56,7 @@ describe('InGameSocketService', () => {
         });
 
         it('should emit playerTeleport', () => {
-            service.playerTeleport('session1', 5, 10);
+            service.playerTeleport({ sessionId: 'session1', x: 5, y: 10 });
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerTeleport, {
                 sessionId: 'session1',
                 x: 5,
@@ -65,7 +65,7 @@ describe('InGameSocketService', () => {
         });
 
         it('should emit playerToggleDoorAction', () => {
-            service.playerToggleDoorAction('session1', 3, 7);
+            service.playerToggleDoorAction({ sessionId: 'session1', x: 3, y: 7 });
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.ToggleDoorAction, {
                 sessionId: 'session1',
                 x: 3,

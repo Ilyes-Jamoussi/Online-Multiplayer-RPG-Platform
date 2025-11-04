@@ -8,6 +8,7 @@ import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-c
 import { CombatResult } from '@common/interfaces/combat.interface';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 
@@ -271,7 +272,7 @@ describe('CombatService', () => {
 
             service.combatAbandon();
 
-            expect(mockCombatSocketService.combatAbandon).toHaveBeenCalledWith('session1');
+            expect(mockCombatSocketService.combatAbandon).toHaveBeenCalledWith({ sessionId: 'session1' });
         });
 
         it('should not call socket service when not in combat', () => {
@@ -305,7 +306,7 @@ describe('CombatService', () => {
             service.chooseOffensive();
 
             expect(service.selectedPosture()).toBe('offensive');
-            expect(mockCombatSocketService.combatChoice).toHaveBeenCalledWith('session1', 'offensive');
+            expect(mockCombatSocketService.combatChoice).toHaveBeenCalledWith({ sessionId: 'session1', choice: CombatPosture.OFFENSIVE });
         });
 
         it('should not change posture if already selected', () => {
@@ -325,7 +326,7 @@ describe('CombatService', () => {
             service.chooseDefensive();
 
             expect(service.selectedPosture()).toBe('defensive');
-            expect(mockCombatSocketService.combatChoice).toHaveBeenCalledWith('session1', 'defensive');
+            expect(mockCombatSocketService.combatChoice).toHaveBeenCalledWith({ sessionId: 'session1', choice: CombatPosture.DEFENSIVE });
         });
 
         it('should not change posture if already selected', () => {
@@ -342,7 +343,7 @@ describe('CombatService', () => {
         it('should call socket service with coordinates', () => {
             service.attackPlayer(2, 3);
 
-            expect(mockCombatSocketService.attackPlayerAction).toHaveBeenCalledWith('session1', 2, 3);
+            expect(mockCombatSocketService.attackPlayerAction).toHaveBeenCalledWith({ sessionId: 'session1', x: 2, y: 3 });
         });
     });
 

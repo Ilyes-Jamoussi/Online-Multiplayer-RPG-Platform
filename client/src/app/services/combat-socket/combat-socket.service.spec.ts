@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { SocketService } from '@app/services/socket/socket.service';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { CombatSocketService } from './combat-socket.service';
 
 describe('CombatSocketService', () => {
@@ -28,16 +29,16 @@ describe('CombatSocketService', () => {
             const x = 5;
             const y = 3;
 
-            service.attackPlayerAction(sessionId, x, y);
+            service.attackPlayerAction({ sessionId, x, y });
 
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.AttackPlayerAction, { sessionId, x, y });
         });
 
         it('should emit combatChoice', () => {
             const sessionId = 'session-1';
-            const choice = 'offensive';
+            const choice = CombatPosture.OFFENSIVE;
 
-            service.combatChoice(sessionId, choice);
+            service.combatChoice({ sessionId, choice });
 
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.CombatChoice, { sessionId, choice });
         });
@@ -45,7 +46,7 @@ describe('CombatSocketService', () => {
         it('should emit combatAbandon', () => {
             const sessionId = 'session-1';
 
-            service.combatAbandon(sessionId);
+            service.combatAbandon({ sessionId });
 
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.CombatAbandon, { sessionId });
         });

@@ -113,7 +113,7 @@ describe('AdminModeService', () => {
         it('should teleport player when all conditions are met', () => {
             service.teleportPlayer(5, 3);
 
-            expect(mockInGameSocketService.playerTeleport).toHaveBeenCalledWith('session1', 5, 3);
+            expect(mockInGameSocketService.playerTeleport).toHaveBeenCalledWith({ sessionId: 'session1', x: 5, y: 3 });
         });
 
         it('should not teleport when admin mode is not activated', () => {
