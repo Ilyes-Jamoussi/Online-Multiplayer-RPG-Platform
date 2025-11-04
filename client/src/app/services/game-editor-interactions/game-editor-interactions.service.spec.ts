@@ -5,6 +5,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ActiveTool, ExtendedGameEditorPlaceableDto, TileBrushTool, ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { MapSize } from '@common/enums/map-size.enum';
