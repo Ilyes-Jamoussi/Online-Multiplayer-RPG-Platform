@@ -1,11 +1,10 @@
-import { inject, Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
-import { NotificationService } from '@app/services/notification/notification.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
-import { ToastService } from '@app/services/toast/toast.service';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { Orientation } from '@common/enums/orientation.enum';
 import { ROUTES } from '@common/enums/routes.enum';
@@ -74,14 +73,12 @@ export class InGameService {
         this._availableActions.set([]);
     }
 
-    private readonly toastService = inject(ToastService);
-
     constructor(
         private readonly inGameSocketService: InGameSocketService,
         private readonly sessionService: SessionService,
         private readonly timerCoordinatorService: TimerCoordinatorService,
         private readonly playerService: PlayerService,
-        private readonly notificationService: NotificationService,
+        private readonly notificationCoordinatorService: NotificationCoordinatorService,
     ) {
         this.initListeners();
     }
@@ -107,7 +104,7 @@ export class InGameService {
             this.inGameSocketService.playerJoinInGameSession(this.sessionService.id());
         } else {
             this.reset();
-            this.notificationService.displayError({
+            this.notificationCoordinatorService.displayErrorPopup({
                 title: 'Session non trouvée',
                 message: `Vous n'êtes connecté à aucune session`,
                 redirectRoute: ROUTES.HomePage,
@@ -196,7 +193,7 @@ export class InGameService {
         this.inGameSocketService.onPlayerLeftInGameSession((data) => {
             this.updateInGameSession(data.session);
             if(this.playerService.id() !== data.playerId) {
-                this.toastService.info(`${data.playerName} a abandonné la partie`);
+                this.notificationCoordinatorService.showInfoToast(`${data.playerName} a abandonné la partie`);
             }
         });
 
@@ -230,7 +227,7 @@ export class InGameService {
 
         this.inGameSocketService.onLeftInGameSessionAck(() => {
             this.reset();
-            this.notificationService.displayInformation({
+            this.notificationCoordinatorService.displayInformationPopup({
                 title: 'Départ réussi',
                 message: `Tu as quitté la partie avec succès`,
                 redirectRoute: ROUTES.HomePage,
@@ -239,7 +236,7 @@ export class InGameService {
 
         this.inGameSocketService.onGameForceStopped(() => {
             this.reset();
-            this.notificationService.displayError({
+            this.notificationCoordinatorService.displayErrorPopup({
                 title: 'Partie terminée par défaut',
                 message: `Il n'y a plus assez de joueurs pour continuer la partie, la partie est terminée`,
                 redirectRoute: ROUTES.HomePage,

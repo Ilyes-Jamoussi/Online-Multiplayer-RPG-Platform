@@ -7,7 +7,7 @@ import { GameMapComponent } from '@app/components/features/game-map/game-map.com
 import { PlayerInfoComponent } from '@app/components/features/player-info/player-info.component';
 import { PlayersListComponent } from '@app/components/features/players-list/players-list.component';
 import { TurnTimerComponent } from '@app/components/features/turn-timer/turn-timer.component';
-import { ToastComponent } from '@app/components/features/toast/toast.component';
+import { ToastNotificationDisplayComponent } from '@app/components/features/toast-notification-display/toast-notification-display.component';
 import { CombatService } from '@app/services/combat/combat.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameKeyboardEventsService } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
@@ -25,7 +25,7 @@ import { MapSize } from '@common/enums/map-size.enum';
         TurnTimerComponent,
         CombatOverlayComponent,
         GameOverOverlayComponent,
-        ToastComponent,
+        ToastNotificationDisplayComponent,
         ChatComponent,
     ],
     templateUrl: './game-session-page.component.html',

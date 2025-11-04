@@ -3,7 +3,7 @@ import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-c
 import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { ToastService } from '@app/services/toast/toast.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { CombatResult } from '@common/interfaces/combat.interface';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile-kind.enum';
@@ -68,7 +68,7 @@ export class CombatService {
         private readonly combatSocketService: CombatSocketService,
         private readonly playerService: PlayerService,
         private readonly inGameService: InGameService,
-        private readonly toastService: ToastService,
+        private readonly notificationCoordinatorService: NotificationCoordinatorService,
     ) {
         this.initListeners();
     }
@@ -307,7 +307,7 @@ export class CombatService {
                 });
             }
 
-            this.toastService.info(`⚔️ Combat en cours : ${attackerPlayer.name} vs ${targetPlayer.name}`, TOAST_DURATION);
+            this.notificationCoordinatorService.showInfoToast(`⚔️ Combat en cours : ${attackerPlayer.name} vs ${targetPlayer.name}`, TOAST_DURATION);
         }
     }
 
@@ -363,13 +363,13 @@ export class CombatService {
             const playerBName = this.inGameService.getPlayerByPlayerId(playerBId).name;
 
             if (winnerId === null) {
-                this.toastService.info(`⚔️ Match nul entre ${playerAName} et ${playerBName}`, TOAST_DURATION);
+                this.notificationCoordinatorService.showInfoToast(`⚔️ Match nul entre ${playerAName} et ${playerBName}`, TOAST_DURATION);
             } else {
                 const loserName = winnerId === playerAId ? playerBName : playerAName;
                 if (abandon) {
-                    this.toastService.success(`🏆 ${winnerName} a gagné par abandon contre ${loserName}`, TOAST_DURATION);
+                    this.notificationCoordinatorService.showSuccessToast(`🏆 ${winnerName} a gagné par abandon contre ${loserName}`, TOAST_DURATION);
                 } else {
-                    this.toastService.success(`🏆 ${winnerName} a vaincu ${loserName}`, TOAST_DURATION);
+                    this.notificationCoordinatorService.showSuccessToast(`🏆 ${winnerName} a vaincu ${loserName}`, TOAST_DURATION);
                 }
             }
             this._combatData.set(null);

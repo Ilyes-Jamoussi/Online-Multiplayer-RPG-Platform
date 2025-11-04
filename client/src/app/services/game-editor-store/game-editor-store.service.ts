@@ -14,7 +14,7 @@ import { firstValueFrom, of, throwError } from 'rxjs';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CreateGameDto } from '@app/dto/create-game-dto';
 import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
-import { NotificationService } from '@app/services/notification/notification.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { ROUTES } from '@common/enums/routes.enum';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -24,7 +24,7 @@ export class GameEditorStoreService {
         private readonly gameHttpService: GameHttpService,
         private readonly screenshotService: ScreenshotService,
         private readonly assetsService: AssetsService,
-        private readonly notificationService: NotificationService,
+        private readonly notificationCoordinatorService: NotificationCoordinatorService,
     ) {}
 
     private readonly _initial = signal<GameEditorDto>({
@@ -217,14 +217,14 @@ export class GameEditorStoreService {
     //             ),
     //         );
 
-    //         this.notificationService.displaySuccess({
+    //         this.popupNotificationService.displaySuccess({
     //             title: 'Jeu sauvegardé',
     //             message: 'Votre jeu a été sauvegardé avec succès !',
     //             redirectRoute: ROUTES.managementPage,
     //         });
     //     } catch (error) {
     //         if (error instanceof Error) {
-    //             this.notificationService.displayError({
+    //             this.popupNotificationService.displayError({
     //                 title: 'Erreur lors de la sauvegarde',
     //                 message: error.message,
     //             });
@@ -294,7 +294,7 @@ export class GameEditorStoreService {
     }
 
     private notifySuccess(): void {
-        this.notificationService.displaySuccess({
+        this.notificationCoordinatorService.displaySuccessPopup({
             title: 'Jeu sauvegardé',
             message: 'Votre jeu a été sauvegardé avec succès !',
             redirectRoute: ROUTES.ManagementPage,
@@ -303,7 +303,7 @@ export class GameEditorStoreService {
 
     private notifyError(error: unknown): void {
         if (error instanceof Error) {
-            this.notificationService.displayError({
+            this.notificationCoordinatorService.displayErrorPopup({
                 title: 'Erreur lors de la sauvegarde',
                 message: error.message,
             });

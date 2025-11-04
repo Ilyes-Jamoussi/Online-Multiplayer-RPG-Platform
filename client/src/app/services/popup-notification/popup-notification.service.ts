@@ -4,26 +4,26 @@ import { NotificationMessage } from '@app/interfaces/notification-message.interf
 @Injectable({
     providedIn: 'root',
 })
-export class NotificationService {
-    private readonly _notification = signal<NotificationMessage | null>(null);
+export class PopupNotificationService {
+    private readonly popupNotification = signal<NotificationMessage | null>(null);
 
     get notification(): Signal<NotificationMessage | null> {
-        return this._notification.asReadonly();
+        return this.popupNotification.asReadonly();
     }
 
     displayError(error: Omit<NotificationMessage, 'type'>): void {
-        this._notification.set({ ...error, type: 'error' });
+        this.popupNotification.set({ ...error, type: 'error' });
     }
 
     displaySuccess(success: Omit<NotificationMessage, 'type'>): void {
-        this._notification.set({ ...success, type: 'success' });
+        this.popupNotification.set({ ...success, type: 'success' });
     }
 
     displayInformation(information: Omit<NotificationMessage, 'type'>): void {
-        this._notification.set({ ...information, type: 'information' });
+        this.popupNotification.set({ ...information, type: 'information' });
     }
 
     reset(): void {
-        this._notification.set(null);
+        this.popupNotification.set(null);
     }
 }
