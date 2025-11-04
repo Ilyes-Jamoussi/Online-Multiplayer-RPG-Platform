@@ -1,13 +1,13 @@
+import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
-import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
-import { Player } from '@common/models/player.interface';
-import { InGameSession, WaitingRoomSession } from '@common/models/session.interface';
-import { BadRequestException, Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { Player } from '@common/interfaces/player.interface';
+import { InGameSession, WaitingRoomSession } from '@common/interfaces/session.interface';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { GameCacheService } from 'app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameActionService } from 'app/modules/in-game/services/in-game-action/in-game-action.service';
 import { InGameInitializationService } from 'app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
@@ -143,14 +143,14 @@ export class InGameService {
     } {
         const player = this.sessionRepository.playerLeave(sessionId, playerId);
         const session = this.sessionRepository.findById(sessionId);
-        
+
         let adminModeDeactivated = false;
         if (player.isAdmin && session.isAdminModeActive) {
             session.isAdminModeActive = false;
             this.sessionRepository.update(session);
             adminModeDeactivated = true;
         }
-        
+
         const inGamePlayers = this.sessionRepository.inGamePlayersCount(sessionId);
         let sessionEnded = false;
         if (inGamePlayers < 2) {
@@ -188,15 +188,15 @@ export class InGameService {
     toggleAdminMode(sessionId: string, playerId: string): InGameSession {
         const session = this.sessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
-        
+
         if (!player) {
             throw new NotFoundException('Player not found');
         }
-        
+
         if (!player.isAdmin) {
             throw new BadRequestException('Only admin can toggle admin mode');
         }
-        
+
         session.isAdminModeActive = !session.isAdminModeActive;
         this.sessionRepository.update(session);
         return session;
@@ -204,19 +204,19 @@ export class InGameService {
 
     teleportPlayer(sessionId: string, playerId: string, x: number, y: number): void {
         const session = this.sessionRepository.findById(sessionId);
-        
+
         if (!session.isAdminModeActive) {
             throw new BadRequestException('Admin mode not active');
         }
-        
+
         if (session.currentTurn.activePlayerId !== playerId) {
             throw new BadRequestException('Not your turn');
         }
-        
+
         if (!this.gameCache.isTileFree(sessionId, x, y)) {
             throw new BadRequestException('Tile is not free');
         }
-        
+
         this.sessionRepository.movePlayerPosition(sessionId, playerId, x, y, 0);
         this.movementService.calculateReachableTiles(session, playerId);
         this.actionService.calculateAvailableActions(session, playerId);

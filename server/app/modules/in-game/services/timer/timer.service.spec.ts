@@ -5,7 +5,7 @@ import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { InGameSession } from '@common/models/session.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TimerService } from './timer.service';

@@ -6,7 +6,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlaceableKind, PlaceableLabel } from '@common/enums/placeable-kind.enum';
 import { TileKind, TileLabel } from '@common/enums/tile-kind.enum';
-import { Player } from '@common/models/player.interface';
+import { Player } from '@common/interfaces/player.interface';
 
 @Component({
     selector: 'app-game-map-tile-modal',

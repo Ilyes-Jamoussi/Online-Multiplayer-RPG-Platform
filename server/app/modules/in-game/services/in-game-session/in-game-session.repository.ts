@@ -1,9 +1,9 @@
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { Player } from '@common/interfaces/player.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
+import { StartPoint } from '@common/interfaces/start-point.interface';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { InGameSession } from '@common/models/session.interface';
-import { Player } from '@common/models/player.interface';
-import { StartPoint } from '@common/models/start-point.interface';
-import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 
 @Injectable()
 export class InGameSessionRepository {

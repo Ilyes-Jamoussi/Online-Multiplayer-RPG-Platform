@@ -1,15 +1,15 @@
 import { computed, Injectable, Signal, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { BASE_STAT_VALUE, BONUS_STAT_VALUE, DEFAULT_PLAYER } from '@app/constants/player.constants';
+import { BonusType } from '@app/enums/character-creation.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { SessionService } from '@app/services/session/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
-import { BonusType } from '@app/enums/character-creation.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { ROUTES } from '@app/enums/routes.enum';
-import { Player } from '@common/models/player.interface';
+import { Player } from '@common/interfaces/player.interface';
 
 @Injectable({
     providedIn: 'root',

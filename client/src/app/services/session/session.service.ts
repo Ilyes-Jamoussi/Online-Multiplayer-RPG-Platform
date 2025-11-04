@@ -1,16 +1,16 @@
 import { computed, Injectable, Signal, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { ROUTES } from '@app/enums/routes.enum';
 import { DEFAULT_SESSION, MIN_SESSION_PLAYERS } from '@app/constants/session.constants';
 import { CreateSessionDto } from '@app/dto/create-session-dto';
 import { JoinSessionDto } from '@app/dto/join-session-dto';
 import { SessionPreviewDto } from '@app/dto/session-preview-dto';
+import { ROUTES } from '@app/enums/routes.enum';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
-import { Player } from '@common/models/player.interface';
-import { AvatarAssignment, WaitingRoomSession } from '@common/models/session.interface';
+import { Player } from '@common/interfaces/player.interface';
+import { AvatarAssignment, WaitingRoomSession } from '@common/interfaces/session.interface';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -153,24 +153,24 @@ export class SessionService {
         });
 
         this.sessionSocketService.onSessionCreatedError((error) => {
-            this.notificationCoordinatorService.displayErrorPopup({ 
-                title: 'Erreur de création', 
+            this.notificationCoordinatorService.displayErrorPopup({
+                title: 'Erreur de création',
                 message: error,
                 redirectRoute: ROUTES.HomePage,
             });
         });
 
         this.sessionSocketService.onSessionJoinError((message) => {
-            this.notificationCoordinatorService.displayErrorPopup({ 
-                title: 'Erreur', 
+            this.notificationCoordinatorService.displayErrorPopup({
+                title: 'Erreur',
                 message,
                 redirectRoute: ROUTES.HomePage,
             });
         });
 
         this.sessionSocketService.onAvatarSelectionJoinError((message) => {
-            this.notificationCoordinatorService.displayErrorPopup({ 
-                title: 'Erreur de connexion', 
+            this.notificationCoordinatorService.displayErrorPopup({
+                title: 'Erreur de connexion',
                 message,
             });
         });
@@ -189,8 +189,8 @@ export class SessionService {
         });
 
         this.sessionSocketService.onStartGameSessionError((msg) => {
-            this.notificationCoordinatorService.displayErrorPopup({ 
-                title: 'Impossible de démarrer le jeu', 
+            this.notificationCoordinatorService.displayErrorPopup({
+                title: 'Impossible de démarrer le jeu',
                 message: msg,
             });
         });

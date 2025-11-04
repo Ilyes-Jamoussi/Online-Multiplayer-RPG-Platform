@@ -1,9 +1,9 @@
-import { Component, computed, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, computed, Signal } from '@angular/core';
+import { PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
-import { Player } from '@common/models/player.interface';
+import { Player } from '@common/interfaces/player.interface';
 
 @Component({
     selector: 'app-players-list',
@@ -21,7 +21,7 @@ export class PlayersListComponent {
     readonly orderedPlayers: Signal<Player[]> = computed(() => {
         const turnOrder = this.inGameService.turnOrder();
         const players = this.inGameService.inGamePlayers();
-        
+
         return turnOrder.map(playerId => players[playerId]);
     });
 

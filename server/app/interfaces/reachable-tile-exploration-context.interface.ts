@@ -1,5 +1,5 @@
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
-import { InGameSession } from '@common/models/session.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
 
 export interface ReachableTileExplorationContext {
     session: InGameSession;

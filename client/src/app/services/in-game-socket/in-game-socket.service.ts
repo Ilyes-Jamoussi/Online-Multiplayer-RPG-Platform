@@ -3,9 +3,9 @@ import { SocketService } from '@app/services/socket/socket.service';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
-import { Player } from '@common/models/player.interface';
-import { InGameSession } from '@common/models/session.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
 
 @Injectable({ providedIn: 'root' })
 export class InGameSocketService {

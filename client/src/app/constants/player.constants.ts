@@ -1,5 +1,5 @@
 import { Dice } from '@common/enums/dice.enum';
-import { Player } from '@common/models/player.interface';
+import { Player } from '@common/interfaces/player.interface';
 
 export const BASE_STAT_VALUE = 4;
 export const BONUS_STAT_VALUE = 2;

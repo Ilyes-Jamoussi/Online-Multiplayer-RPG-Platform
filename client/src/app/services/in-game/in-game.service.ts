@@ -1,5 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
+import { GAME_OVER_REDIRECT_DELAY_MS } from '@app/constants/game.constants';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
+import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -7,12 +9,10 @@ import { SessionService } from '@app/services/session/session.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { Orientation } from '@common/enums/orientation.enum';
-import { ROUTES } from '@app/enums/routes.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
-import { Player } from '@common/models/player.interface';
-import { InGameSession } from '@common/models/session.interface';
-import { GAME_OVER_REDIRECT_DELAY_MS } from '@app/constants/game.constants';
+import { InGameSession } from '@common/interfaces/session.interface';
 
 @Injectable({
     providedIn: 'root',

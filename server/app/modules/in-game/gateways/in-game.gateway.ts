@@ -3,9 +3,9 @@ import { errorResponse, successResponse } from '@app/utils/socket-response/socke
 import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
-import { Player } from '@common/models/player.interface';
-import { InGameSession } from '@common/models/session.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
 import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';

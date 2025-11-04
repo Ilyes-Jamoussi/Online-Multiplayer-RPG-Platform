@@ -1,15 +1,15 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { InGameSession } from '@common/models/session.interface';
-import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
-import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
-import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
-import { CombatState } from '@common/interfaces/combat.interface';
-import { Dice, DiceSides } from '@common/enums/dice.enum';
-import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
-import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { TileCombatEffect } from '@common/enums/tile-kind.enum';
 import { COMBAT_WINS_TO_WIN_GAME } from '@app/constants/game-config.constants';
+import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
+import { Dice, DiceSides } from '@common/enums/dice.enum';
+import { TileCombatEffect } from '@common/enums/tile-kind.enum';
+import { CombatState } from '@common/interfaces/combat.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class CombatService {
