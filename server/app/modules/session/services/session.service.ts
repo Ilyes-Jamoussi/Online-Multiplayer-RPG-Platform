@@ -5,12 +5,11 @@ import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { AvatarAssignment, WaitingRoomSession } from '@common/interfaces/session.interface';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 @Injectable()
 export class SessionService {
     private readonly sessions = new Map<string, WaitingRoomSession>();
-    private readonly logger = new Logger(SessionService.name);
 
     constructor(private readonly eventEmitter: EventEmitter2) {}
 
