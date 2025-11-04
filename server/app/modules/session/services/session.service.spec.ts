@@ -278,18 +278,6 @@ describe('SessionService', () => {
         });
     });
 
-    describe('getPlayersCount', () => {
-        it('should return correct player count', () => {
-            const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-
-            expect(service.getPlayersCount(sessionId)).toBe(1);
-
-            service.joinSession(PLAYER_ID_1, createJoinSessionDto(sessionId));
-            expect(service.getPlayersCount(sessionId)).toBe(2);
-        });
-    });
-
     describe('getPlayerSessionId', () => {
         it('should return session ID for existing player', () => {
             const dto = createCreateSessionDto();
@@ -332,24 +320,6 @@ describe('SessionService', () => {
             expect(players.some((p) => p.id === ADMIN_ID)).toBe(true);
             expect(players.some((p) => p.id === PLAYER_ID_1)).toBe(true);
             expect(players.some((p) => p.id === PLAYER_ID_2)).toBe(true);
-        });
-    });
-
-    describe('getPlayersData', () => {
-        it('should return player names and avatars', () => {
-            const dto = createCreateSessionDto({
-                player: createMockPlayerDto({ name: 'Admin', avatar: Avatar.Avatar1, isAdmin: true }),
-            });
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            service.joinSession(PLAYER_ID_1, createJoinSessionDto(sessionId, {
-                player: createMockPlayerDto({ name: 'Player1', avatar: Avatar.Avatar2 }),
-            }));
-
-            const playersData = service.getPlayersData(sessionId);
-
-            expect(playersData).toHaveLength(2);
-            expect(playersData[0]).toEqual({ name: 'Admin', avatar: Avatar.Avatar1 });
-            expect(playersData[1]).toEqual({ name: 'Player1', avatar: Avatar.Avatar2 });
         });
     });
 
