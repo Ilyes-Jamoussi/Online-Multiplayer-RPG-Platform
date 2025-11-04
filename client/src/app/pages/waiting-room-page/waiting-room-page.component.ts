@@ -3,7 +3,7 @@ import { ChatComponent } from '@app/components/features/chat/chat.component';
 import { PlayerCardComponent } from '@app/components/features/player-card/player-card.component';
 import { WaitingRoomActionsComponent } from '@app/components/features/waiting-room-actions/waiting-room-actions.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
-import { NotificationService } from '@app/services/notification/notification.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { ROUTES } from '@common/enums/routes.enum';
@@ -25,12 +25,12 @@ export class WaitingRoomPageComponent implements OnInit {
     constructor(
         private readonly playerService: PlayerService,
         private readonly sessionService: SessionService,
-        private readonly notificationService: NotificationService,
+        private readonly notificationCoordinatorService: NotificationCoordinatorService,
     ) {}
 
     ngOnInit(): void {
         if (!this.playerService.isConnected()) {
-            this.notificationService.displayError({ 
+            this.notificationCoordinatorService.displayErrorPopup({ 
                 title: 'Session expirée',
                 message: 'Veuillez rejoindre une session.',
                 redirectRoute: ROUTES.HomePage,

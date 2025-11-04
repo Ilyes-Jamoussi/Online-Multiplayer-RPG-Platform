@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
 import { DEFAULT_PLAYER } from '@app/constants/player.constants';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
-import { NotificationService } from '@app/services/notification/notification.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { SessionService } from '@app/services/session/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
@@ -46,7 +46,7 @@ export class PlayerService {
         private readonly sessionService: SessionService,
         private readonly sessionSocketService: SessionSocketService,
         private readonly inGameSocketService: InGameSocketService,
-        private readonly notificationService: NotificationService,
+        private readonly notificationCoordinatorService: NotificationCoordinatorService,
         private readonly router: Router,
     ) {
         this.initListeners();
@@ -164,7 +164,7 @@ export class PlayerService {
         });
 
         this.sessionSocketService.onSessionEnded((message) => {
-            this.notificationService.displayError({
+            this.notificationCoordinatorService.displayErrorPopup({
                 title: 'Session terminée',
                 message,
                 redirectRoute: ROUTES.HomePage,

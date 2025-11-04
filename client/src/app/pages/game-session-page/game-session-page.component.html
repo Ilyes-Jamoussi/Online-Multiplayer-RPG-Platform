@@ -7,7 +7,7 @@
     <main class="game-area">
         <div class="game-header">
             <app-turn-timer></app-turn-timer>
-            
+
             <div class="game-info-header">
                 <div class="info-item">
                     <span class="info-label">Carte</span>
@@ -22,7 +22,7 @@
                     <span class="info-value active">{{ activePlayer }}</span>
                 </div>
             </div>
-            
+
             <div class="header-actions">
                 @if (!isGameStarted && isMyTurn) {
                 <button class="action-btn start-game-btn" (click)="onStartGame()">
@@ -30,20 +30,15 @@
                     <span class="btn-text">Démarrer</span>
                 </button>
                 }
-                
+
                 <button class="action-btn primary" [disabled]="!isMyTurn || !isGameStarted" (click)="onEndTurn()">
                     <span class="btn-icon">✓</span>
                     <span class="btn-text">Terminer le tour</span>
                 </button>
-                
+
                 <button class="action-btn secondary" [disabled]="isActionDisabled()" (click)="onAction()">
                     <span class="btn-icon">⚡</span>
                     <span class="btn-text">Action</span>
-                </button>
-                
-                <button class="action-btn danger hide-on-overlay" (click)="onLeaveGame()">
-                    <span class="btn-icon">🚪</span>
-                    <span class="btn-text">Abandonner</span>
                 </button>
             </div>
         </div>
@@ -78,11 +73,7 @@
 </div>
 }
 
-@if (adminModeService.isAdminModeActivated()) {
-  <div class="admin-badge" aria-live="polite" title="Mode admin activé">
-    Mode Admin activé
-  </div>
-}
+<app-admin-badge></app-admin-badge>
 
 <app-combat-overlay></app-combat-overlay>
 

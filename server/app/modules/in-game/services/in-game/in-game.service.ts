@@ -104,7 +104,6 @@ export class InGameService {
         return session;
     }
 
-
     toggleDoorAction(sessionId: string, playerId: string, x: number, y: number): void {
         const session = this.sessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
@@ -114,7 +113,7 @@ export class InGameService {
         player.actionsRemaining--;
         session.currentTurn.hasUsedAction = true;
         this.movementService.calculateReachableTiles(session, playerId);
-        if(!player.actionsRemaining && !player.speed) {
+        if (!player.actionsRemaining && !player.speed) {
             this.timerService.endTurnManual(session);
         }
     }
@@ -123,11 +122,11 @@ export class InGameService {
         const session = this.sessionRepository.findById(sessionId);
         if (playerId !== session.currentTurn.activePlayerId) throw new BadRequestException('Not your turn');
         if (this.timerService.getGameTimerState(sessionId) !== TurnTimerStates.PlayerTurn) throw new BadRequestException('Not your turn');
-        
+
         const remainingSpeed = this.movementService.movePlayer(session, playerId, orientation);
         const availableActions = this.actionService.calculateAvailableActions(session, playerId);
-        
-        if(!remainingSpeed && !availableActions.length) {
+
+        if (!remainingSpeed && !availableActions.length) {
             this.timerService.endTurnManual(session);
         }
     }
@@ -157,6 +156,8 @@ export class InGameService {
         if (inGamePlayers < 2) {
             this.timerService.forceStopTimer(sessionId);
             sessionEnded = true;
+        } else if (playerId === session.currentTurn.activePlayerId) {
+            this.timerService.endTurnManual(session);
         }
 
         return { session, playerName: player.name, playerId, sessionEnded, adminModeDeactivated };
@@ -174,7 +175,7 @@ export class InGameService {
         const session = this.sessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
         const reachableTiles = this.movementService.calculateReachableTiles(session, playerId);
-        if(!reachableTiles.length && !player.actionsRemaining) {
+        if (!reachableTiles.length && !player.actionsRemaining) {
             this.timerService.endTurnManual(session);
         }
     }

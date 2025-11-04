@@ -4,13 +4,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { ROUTES } from '@common/enums/routes.enum';
-import { NotificationService } from '@app/services/notification/notification.service';
-import { NotificationDisplayComponent } from './notification-display.component';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { PopupNotificationDisplayComponent } from './popup-notification-display.component';
 
 describe('NotificationDisplayComponent', () => {
-    let component: NotificationDisplayComponent;
-    let fixture: ComponentFixture<NotificationDisplayComponent>;
-    let notificationService: jasmine.SpyObj<NotificationService>;
+    let component: PopupNotificationDisplayComponent;
+    let fixture: ComponentFixture<PopupNotificationDisplayComponent>;
+    let notificationCoordinatorService: jasmine.SpyObj<NotificationCoordinatorService>;
     let router: jasmine.SpyObj<Router>;
 
     const mockErrorNotification = {
@@ -33,20 +33,20 @@ describe('NotificationDisplayComponent', () => {
 
     beforeEach(async () => {
         const notificationSignal = signal(null);
-        notificationService = jasmine.createSpyObj('NotificationService', ['reset'], {
+        notificationCoordinatorService = jasmine.createSpyObj('NotificationCoordinatorService', ['resetPopup'], {
             notification: notificationSignal,
         });
         router = jasmine.createSpyObj('Router', ['navigate']);
 
         await TestBed.configureTestingModule({
-            imports: [NotificationDisplayComponent, MatIconModule],
+            imports: [PopupNotificationDisplayComponent, MatIconModule],
             providers: [
-                { provide: NotificationService, useValue: notificationService },
+                { provide: NotificationCoordinatorService, useValue: notificationCoordinatorService },
                 { provide: Router, useValue: router },
             ],
         }).compileComponents();
 
-        fixture = TestBed.createComponent(NotificationDisplayComponent);
+        fixture = TestBed.createComponent(PopupNotificationDisplayComponent);
         component = fixture.componentInstance;
     });
 
@@ -115,7 +115,7 @@ describe('NotificationDisplayComponent', () => {
 
         component.onAction();
 
-        expect(notificationService.reset).toHaveBeenCalled();
+        expect(notificationCoordinatorService.resetPopup).toHaveBeenCalled();
         expect(router.navigate).toHaveBeenCalledWith([ROUTES.HomePage]);
     });
 

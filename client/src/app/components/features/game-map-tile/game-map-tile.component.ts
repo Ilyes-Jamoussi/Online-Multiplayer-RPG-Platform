@@ -31,15 +31,11 @@ export class GameMapTileComponent {
     ) {}
 
     get objectOnTile(): GameEditorPlaceableDto | undefined {
-        return this.gameMapService
-            .objects()
-            .find((object) => object.placed && object.x === this.tile.x && object.y === this.tile.y);
+        return this.gameMapService.objects().find((object) => object.placed && object.x === this.tile.x && object.y === this.tile.y);
     }
 
     get playerOnTile(): Player | undefined {
-        return this.gameMapService.currentlyPlayers.find(
-            (player) => player.isInGame && player.x === this.tile.x && player.y === this.tile.y,
-        );
+        return this.gameMapService.currentlyPlayers.find((player) => player.isInGame && player.x === this.tile.x && player.y === this.tile.y);
     }
 
     get playerAvatarSrc(): string {
@@ -56,10 +52,10 @@ export class GameMapTileComponent {
     onRightClick(event: MouseEvent): void {
         event.preventDefault();
         event.stopPropagation();
-        
+
         if (this.adminModeService.isAdminModeActivated() && this.inGameService.isMyTurn() && this.inGameService.isGameStarted()) {
             if (!this.playerOnTile) {
-                this.inGameService.teleportPlayer(this.tile.x, this.tile.y);
+                this.adminModeService.teleportPlayer(this.tile.x, this.tile.y);
             }
             return;
         }
@@ -68,13 +64,13 @@ export class GameMapTileComponent {
 
     onTileClick(event: MouseEvent): void {
         event.preventDefault();
-        
+
         if (!this.gameMapService.isActionModeActive) {
             return;
         }
 
         const actionType = this.gameMapService.getActionTypeAt(this.tile.x, this.tile.y);
-        
+
         if (actionType === 'DOOR') {
             this.gameMapService.toggleDoor(this.tile.x, this.tile.y);
         } else if (actionType === 'ATTACK') {
@@ -95,5 +91,3 @@ export class GameMapTileComponent {
         return this.gameMapService.isTileModalOpen(this.tile);
     }
 }
-
-

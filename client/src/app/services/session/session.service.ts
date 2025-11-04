@@ -5,7 +5,7 @@ import { DEFAULT_SESSION, MIN_SESSION_PLAYERS } from '@app/constants/session.con
 import { CreateSessionDto } from '@app/dto/create-session-dto';
 import { JoinSessionDto } from '@app/dto/join-session-dto';
 import { SessionPreviewDto } from '@app/dto/session-preview-dto';
-import { NotificationService } from '@app/services/notification/notification.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
@@ -28,7 +28,7 @@ export class SessionService {
 
     constructor(
         private readonly sessionSocketService: SessionSocketService,
-        private readonly notificationService: NotificationService,
+        private readonly notificationCoordinatorService: NotificationCoordinatorService,
         private readonly router: Router,
     ) {
         this.initListeners();
@@ -153,7 +153,7 @@ export class SessionService {
         });
 
         this.sessionSocketService.onSessionCreatedError((error) => {
-            this.notificationService.displayError({ 
+            this.notificationCoordinatorService.displayErrorPopup({ 
                 title: 'Erreur de création', 
                 message: error,
                 redirectRoute: ROUTES.HomePage,
@@ -161,7 +161,7 @@ export class SessionService {
         });
 
         this.sessionSocketService.onSessionJoinError((message) => {
-            this.notificationService.displayError({ 
+            this.notificationCoordinatorService.displayErrorPopup({ 
                 title: 'Erreur', 
                 message,
                 redirectRoute: ROUTES.HomePage,
@@ -169,7 +169,7 @@ export class SessionService {
         });
 
         this.sessionSocketService.onAvatarSelectionJoinError((message) => {
-            this.notificationService.displayError({ 
+            this.notificationCoordinatorService.displayErrorPopup({ 
                 title: 'Erreur de connexion', 
                 message,
             });
@@ -189,7 +189,7 @@ export class SessionService {
         });
 
         this.sessionSocketService.onStartGameSessionError((msg) => {
-            this.notificationService.displayError({ 
+            this.notificationCoordinatorService.displayErrorPopup({ 
                 title: 'Impossible de démarrer le jeu', 
                 message: msg,
             });

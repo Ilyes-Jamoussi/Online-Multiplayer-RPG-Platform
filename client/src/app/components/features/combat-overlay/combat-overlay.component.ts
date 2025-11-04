@@ -4,7 +4,7 @@ import { CombatTimerComponent } from '@app/components/features/combat-timer/comb
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { AssetsService } from '@app/services/assets/assets.service';
-import { TimerService } from '@app/services/timer/timer.service';
+import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile-kind.enum';
 
@@ -22,7 +22,7 @@ export class CombatOverlayComponent {
         private readonly combatService: CombatService,
         private readonly inGameService: InGameService,
         private readonly assetsService: AssetsService,
-        private readonly timerService: TimerService,
+        private readonly timerCoordinatorService: TimerCoordinatorService,
     ) {}
 
     get combatData() {
@@ -53,9 +53,7 @@ export class CombatOverlayComponent {
         if (!this.combatData) return { current: 0, max: 0, percentage: 0 };
         const player = this.inGameService.getPlayerByPlayerId(this.combatData.attackerId);
         const minHealth = this.combatService.minHealthDuringCombat();
-        const displayedHealth = this.victoryData 
-            ? Math.max(0, minHealth[this.combatData.attackerId] ?? player.health)
-            : player.health;
+        const displayedHealth = this.victoryData ? Math.max(0, minHealth[this.combatData.attackerId] ?? player.health) : player.health;
         return {
             current: displayedHealth,
             max: player.maxHealth,
@@ -67,9 +65,7 @@ export class CombatOverlayComponent {
         if (!this.combatData) return { current: 0, max: 0, percentage: 0 };
         const player = this.inGameService.getPlayerByPlayerId(this.combatData.targetId);
         const minHealth = this.combatService.minHealthDuringCombat();
-        const displayedHealth = this.victoryData 
-            ? Math.max(0, minHealth[this.combatData.targetId] ?? player.health)
-            : player.health;
+        const displayedHealth = this.victoryData ? Math.max(0, minHealth[this.combatData.targetId] ?? player.health) : player.health;
         return {
             current: displayedHealth,
             max: player.maxHealth,
@@ -81,10 +77,7 @@ export class CombatOverlayComponent {
         return (
             this.combatService
                 .damageDisplays()
-                .find(
-                    (damageDisplay) =>
-                        damageDisplay.playerId === this.combatData?.attackerId && damageDisplay.visible,
-                ) || null
+                .find((damageDisplay) => damageDisplay.playerId === this.combatData?.attackerId && damageDisplay.visible) || null
         );
     }
 
@@ -92,10 +85,7 @@ export class CombatOverlayComponent {
         return (
             this.combatService
                 .damageDisplays()
-                .find(
-                    (damageDisplay) =>
-                        damageDisplay.playerId === this.combatData?.targetId && damageDisplay.visible,
-                ) || null
+                .find((damageDisplay) => damageDisplay.playerId === this.combatData?.targetId && damageDisplay.visible) || null
         );
     }
 
@@ -143,6 +133,14 @@ export class CombatOverlayComponent {
 
         const myId = this.combatData?.userRole === 'attacker' ? this.combatData.attackerId : this.combatData?.targetId;
 
+        if (this.victoryData.abandon) {
+            if (this.victoryData.winnerId === myId) {
+                return 'Victoire par abandon !';
+            } else {
+                return 'Défaite par abandon...';
+            }
+        }
+
         if (this.victoryData.winnerId === null) {
             return 'Les deux combattants sont tombés';
         }
@@ -180,8 +178,13 @@ export class CombatOverlayComponent {
 
         const winnerName = this.inGameService.getPlayerByPlayerId(this.victoryData.winnerId).name;
         const loserName = this.inGameService.getPlayerByPlayerId(
-            this.victoryData.winnerId === this.victoryData.playerAId ? this.victoryData.playerBId : this.victoryData.playerAId
+            this.victoryData.winnerId === this.victoryData.playerAId ? this.victoryData.playerBId : this.victoryData.playerAId,
         ).name;
+
+        if (this.victoryData.abandon) {
+            return `${winnerName} a gagné par abandon contre ${loserName}`;
+        }
+
         return `${winnerName} a vaincu ${loserName}`;
     }
 
@@ -222,7 +225,7 @@ export class CombatOverlayComponent {
     }
 
     get pausedTurnTime(): number {
-        return this.timerService.getPausedTurnTime();
+        return this.timerCoordinatorService.getPausedTurnTime();
     }
 
     get isVictoryNotificationVisible(): boolean {

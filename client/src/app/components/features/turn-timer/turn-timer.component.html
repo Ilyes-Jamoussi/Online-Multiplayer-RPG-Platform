@@ -3,10 +3,10 @@
     <div class="timer-content">
         <span class="timer-label">{{ timerLabel }}</span>
         <div class="timer-display">
-            <span class="time-value">{{ timeRemaining() }}</span>
+            <span class="time-value">{{ displayedTime }}</span>
             <span class="time-unit">s</span>
         </div>
     </div>
-    <div class="timer-progress" [style.width.%]="(timeRemaining() / 30) * 100"></div>
+    <div class="timer-progress" [style.width.%]="(displayedTime / 30) * 100"></div>
 </div>
 }

@@ -15,6 +15,10 @@ export class CombatSocketService {
         this.socket.emit(InGameEvents.CombatChoice, { sessionId, choice });
     }
 
+    combatAbandon(sessionId: string): void {
+        this.socket.emit(InGameEvents.CombatAbandon, { sessionId });
+    }
+
     onCombatStarted(callback: (data: { 
         attackerId: string; 
         targetId: string;
@@ -48,7 +52,7 @@ export class CombatSocketService {
         this.socket.onSuccessEvent(InGameEvents.CombatPostureSelected, callback);
     }
 
-    onCombatVictory(callback: (data: { playerAId: string; playerBId: string; winnerId: string | null }) => void): void {
+    onCombatVictory(callback: (data: { playerAId: string; playerBId: string; winnerId: string | null; abandon: boolean }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.CombatVictory, callback);
     }
 
@@ -67,5 +71,7 @@ export class CombatSocketService {
     onCombatDrawsChanged(callback: (data: { playerId: string; combatDraws: number }) => void): void {
         this.socket.onSuccessEvent(InGameEvents.CombatDrawsChanged, callback);
     }
+
+
 }
 
