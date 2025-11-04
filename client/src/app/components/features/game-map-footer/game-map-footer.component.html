@@ -1,9 +1,74 @@
 <div class="game-map-footer">
-    <div class="footer-item">
-        <span class="footer-label">Mouvements RESTANTS</span>
-        <span class="footer-value">{{ remainingMovements }}</span>
+    <div class="footer-left">
+        <div class="footer-item">
+            <span class="footer-label">Mouvements RESTANTS</span>
+            <span class="footer-value">{{ remainingMovements }}</span>
+        </div>
+        <div class="control-group">
+            <span class="control-label">Déplacement</span>
+            <div class="keys-container">
+                <div class="keyboard-row">
+                    <div
+                        class="key key-arrow"
+                        [class.pressed]="isKeyPressed('ArrowUp')"
+                        (click)="onMoveUp()"
+                        role="button"
+                        tabindex="0"
+                    >
+                        ↑
+                    </div>
+                </div>
+                <div class="keyboard-row">
+                    <div
+                        class="key key-arrow"
+                        [class.pressed]="isKeyPressed('ArrowLeft')"
+                        (click)="onMoveLeft()"
+                        role="button"
+                        tabindex="0"
+                    >
+                        ←
+                    </div>
+                    <div
+                        class="key key-arrow"
+                        [class.pressed]="isKeyPressed('ArrowDown')"
+                        (click)="onMoveDown()"
+                        role="button"
+                        tabindex="0"
+                    >
+                        ↓
+                    </div>
+                    <div
+                        class="key key-arrow"
+                        [class.pressed]="isKeyPressed('ArrowRight')"
+                        (click)="onMoveRight()"
+                        role="button"
+                        tabindex="0"
+                    >
+                        →
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="footer-actions">
+            @if (isAdmin) {
+            <div class="control-group debug-control">
+                <span class="control-label">Mode Debug</span>
+                <div class="keys-container">
+                    <div class="keyboard-row">
+                        <div
+                            class="key key-debug"
+                            [class.pressed]="isKeyPressed('d') || isKeyPressed('D')"
+                            (click)="onToggleDebug()"
+                            role="button"
+                            tabindex="0"
+                        >
+                            D
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
         <button
             class="action-btn"
             [disabled]="isActionDisabled()"
