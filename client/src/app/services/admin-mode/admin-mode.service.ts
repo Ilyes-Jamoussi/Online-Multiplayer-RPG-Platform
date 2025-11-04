@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
-import { InGameService } from '../in-game/in-game.service';
+import { InGameService } from '@app/services/in-game/in-game.service';
 
 @Injectable({
     providedIn: 'root',

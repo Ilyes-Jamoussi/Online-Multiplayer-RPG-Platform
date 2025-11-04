@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { Orientation } from '@common/enums/orientation.enum';
-import { AdminModeService } from '../admin-mode/admin-mode.service';
+import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 
 export enum GameKey {
     Up = 'ArrowUp',

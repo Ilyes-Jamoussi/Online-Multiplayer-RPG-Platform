@@ -53,8 +53,6 @@ export class GameMapTileComponent {
         event.preventDefault();
         event.stopPropagation();
 
-        console.log('onRightClick', this.adminModeService.isAdminModeActivated(), this.inGameService.isMyTurn(), this.inGameService.isGameStarted());
-
         if (this.adminModeService.isAdminModeActivated() && this.inGameService.isMyTurn() && this.inGameService.isGameStarted()) {
             if (!this.playerOnTile) {
                 this.adminModeService.teleportPlayer(this.tile.x, this.tile.y);

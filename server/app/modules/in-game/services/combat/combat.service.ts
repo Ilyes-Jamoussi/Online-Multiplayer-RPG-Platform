@@ -179,7 +179,10 @@ export class CombatService {
             const playerADead = playerAHealth <= 0;
             const playerBDead = playerBHealth <= 0;
             const isDraw = playerADead && playerBDead;
-            const winnerId = isDraw ? null : playerADead ? playerBId : playerAId;
+            let winnerId: string | null = null;
+            if (!isDraw) {
+                winnerId = playerADead ? playerBId : playerAId;
+            }
 
             if (playerADead) {
                 this.inGameMovementService.movePlayerToStartPosition(session, playerAId);
