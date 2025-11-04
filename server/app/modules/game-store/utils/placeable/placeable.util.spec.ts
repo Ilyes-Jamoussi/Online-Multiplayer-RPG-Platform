@@ -24,17 +24,17 @@ describe('placeable.factory', () => {
 
         const out = makeDefaultPlaceables(size, mode);
 
-        const totalExpected = Object.values(expected).reduce((s, v) => s + (v ?? 0), 0);
+        const totalExpected = Object.values(expected).reduce((total, n) => total + (n ?? 0), 0);
         expect(out.length).toBe(totalExpected);
 
         const counts: Partial<Record<PlaceableKind, number>> = {};
-        for (const p of out) {
-            expect(typeof p.kind).toBe('string');
-            expect(p.placed).toBe(false);
-            expect(p.x).toBe(-1);
-            expect(p.y).toBe(-1);
+        for (const placeable of out) {
+            expect(typeof placeable.kind).toBe('string');
+            expect(placeable.placed).toBe(false);
+            expect(placeable.x).toBe(-1);
+            expect(placeable.y).toBe(-1);
 
-            counts[p.kind] = (counts[p.kind] ?? 0) + 1;
+            counts[placeable.kind] = (counts[placeable.kind] ?? 0) + 1;
         }
 
         for (const k of Object.keys(expected) as PlaceableKind[]) {
@@ -54,14 +54,14 @@ describe('placeable.factory', () => {
         const expectedFlagClassic = baseClassic[PlaceableKind.FLAG] ?? 0;
         const expectedFlagCtf = (baseClassic[PlaceableKind.FLAG] ?? 0) + (flagExtra[PlaceableKind.FLAG] ?? 0);
 
-        const countFlags = (arr: Placeable[]): number => arr.filter((p) => p.kind === PlaceableKind.FLAG).length;
+        const countFlags = (arr: Placeable[]): number => arr.filter((placeable) => placeable.kind === PlaceableKind.FLAG).length;
 
         expect(countFlags(outClassic)).toBe(expectedFlagClassic);
         expect(countFlags(outCtf)).toBe(expectedFlagCtf);
     });
 
     it('works for all map sizes and both modes (no magic numbers)', () => {
-        const sizes = Object.values(MapSize).filter((v) => typeof v !== 'string') as unknown as MapSize[];
+        const sizes = Object.values(MapSize).filter((val) => typeof val !== 'string') as unknown as MapSize[];
         const modes = Object.values(GameMode) as unknown as GameMode[];
 
         for (const size of sizes) {
@@ -69,12 +69,12 @@ describe('placeable.factory', () => {
                 const expected = expectedCounts(size, mode);
                 const out = makeDefaultPlaceables(size, mode);
 
-                const totalExpected = Object.values(expected).reduce((s, v) => s + (v ?? 0), 0);
+                const totalExpected = Object.values(expected).reduce((total, n) => total + (n ?? 0), 0);
                 expect(out.length).toBe(totalExpected);
 
                 const expectedKinds = new Set(Object.keys(expected));
-                for (const p of out) {
-                    expect(expectedKinds.has(p.kind)).toBe(true);
+                for (const placeable of out) {
+                    expect(expectedKinds.has(placeable.kind)).toBe(true);
                 }
             }
         }
@@ -107,11 +107,11 @@ describe('placeable.factory', () => {
         try {
             const out = makeDefaultPlaceables(size, mode);
 
-            expect(out.some((p) => p.kind === kind)).toBeFalsy();
+            expect(out.some((placeable) => placeable.kind === kind)).toBeFalsy();
 
             const otherKinds = Object.keys(PLACEABLE_COUNTS[size]).filter((k) => k !== kind);
             for (const k of otherKinds) {
-                expect(out.some((p) => p.kind === (k as PlaceableKind))).toBeTruthy();
+                expect(out.some((placeable) => placeable.kind === (k as PlaceableKind))).toBeTruthy();
             }
         } finally {
             PLACEABLE_COUNTS[size][kind] = original;
@@ -126,7 +126,7 @@ describe('placeable.factory', () => {
         try {
             const out = makeDefaultPlaceables(size, GameMode.CTF);
             const base = PLACEABLE_COUNTS[size]?.[PlaceableKind.FLAG] ?? 0;
-            const flags = out.filter((p) => p.kind === PlaceableKind.FLAG).length;
+            const flags = out.filter((placeable) => placeable.kind === PlaceableKind.FLAG).length;
             expect(flags).toBe(base);
         } finally {
             FLAG_COUNTS[GameMode.CTF][size][PlaceableKind.FLAG] = original;

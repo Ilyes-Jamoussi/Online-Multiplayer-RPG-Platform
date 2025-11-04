@@ -114,7 +114,8 @@ export class GameEditorInteractionsService {
         const object = this.store.getPlacedObjectAt(x, y);
         if (
             object &&
-            ((object.kind === PlaceableKind.BOAT && tool.tileKind !== TileKind.WATER) ||
+            ((object.kind === PlaceableKind.BOAT &&
+                tool.tileKind !== TileKind.WATER) ||
                 tool.tileKind === TileKind.WALL ||
                 tool.tileKind === TileKind.DOOR ||
                 tool.tileKind === TileKind.TELEPORT)

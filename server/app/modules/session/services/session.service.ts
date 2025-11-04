@@ -120,7 +120,7 @@ export class SessionService {
 
     isAdmin(playerId: string): boolean {
         for (const session of this.sessions.values()) {
-            const player = session.players.find((p) => p.id === playerId);
+            const player = session.players.find((candidate) => candidate.id === playerId);
             if (player) {
                 return player.isAdmin || false;
             }

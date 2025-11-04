@@ -47,7 +47,7 @@ export class InGameService {
         const playerIdsOrder = this.initialization.makeTurnOrder(players);
         session.turnOrder = playerIdsOrder;
 
-        session.inGamePlayers = Object.fromEntries(players.map((p) => [p.id, { ...p, x: 0, y: 0, startPointId: '', joined: false }]));
+        session.inGamePlayers = Object.fromEntries(players.map((player) => [player.id, { ...player, x: 0, y: 0, startPointId: '', joined: false }]));
 
         const firstPlayerId = playerIdsOrder[0];
         session.currentTurn.activePlayerId = firstPlayerId;

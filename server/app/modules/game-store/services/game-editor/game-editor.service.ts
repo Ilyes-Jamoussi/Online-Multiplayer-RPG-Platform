@@ -55,8 +55,8 @@ export class GameEditorService {
             visibility: false,
         } as GameDocument;
 
-        const doc = await this.gameModel.findByIdAndUpdate(id, { $set: update }, { new: true, runValidators: true }).lean().exec();
-        return doc ? this.gameDtoMapper.toGamePreviewDto(doc) : null;
+        const updatedGame = await this.gameModel.findByIdAndUpdate(id, { $set: update }, { new: true, runValidators: true }).lean().exec();
+        return updatedGame ? this.gameDtoMapper.toGamePreviewDto(updatedGame) : null;
     }
 
     private buildBasicUpdate(dto: PatchGameEditorDto): Partial<GameDocument> {
@@ -81,24 +81,24 @@ export class GameEditorService {
 
     private mapTiles(tiles: GameEditorTileDto[]): Tile[] {
         if (!tiles) return [];
-        return tiles.map((t) => ({
-            kind: t.kind,
-            x: t.x,
-            y: t.y,
-            open: t.open,
-            teleportChannel: t.teleportChannel,
+        return tiles.map((tile) => ({
+            kind: tile.kind,
+            x: tile.x,
+            y: tile.y,
+            open: tile.open,
+            teleportChannel: tile.teleportChannel,
         }));
     }
 
     private mapObjects(objects: GameEditorPlaceableDto[]): Placeable[] {
         if (!objects) return [];
-        return objects.map((o) => ({
-            id: o.id,
-            kind: o.kind,
-            x: o.x,
-            y: o.y,
-            placed: o.placed,
-            orientation: o.orientation,
+        return objects.map((object) => ({
+            id: object.id,
+            kind: object.kind,
+            x: object.x,
+            y: object.y,
+            placed: object.placed,
+            orientation: object.orientation,
         }));
     }
 }
