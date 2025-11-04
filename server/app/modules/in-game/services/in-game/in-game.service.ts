@@ -62,17 +62,7 @@ export class InGameService {
         return session;
     }
 
-    startSession(sessionId: string): InGameSession {
-        const session = this.sessionRepository.findById(sessionId);
-        if (session.isGameStarted) throw new BadRequestException('Game already started');
-
-        session.isGameStarted = true;
-        session.currentTurn = this.timerService.startFirstTurn(session, DEFAULT_TURN_DURATION);
-
-        return session;
-    }
-
-    startSessionWithTransition(sessionId: string): InGameSession {
+    private startSessionWithTransition(sessionId: string): InGameSession {
         const session = this.sessionRepository.findById(sessionId);
         if (session.isGameStarted) throw new BadRequestException('Game already started');
 

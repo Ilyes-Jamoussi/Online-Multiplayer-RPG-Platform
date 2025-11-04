@@ -33,7 +33,7 @@ export class InGameGateway {
             const session = this.inGameService.joinInGameSession(sessionId, socket.id);
             this.server.to(session.inGameId).emit(InGameEvents.PlayerJoinedInGameSession, successResponse(session));
             this.logger.log(`Player ${socket.id} joined session ${session.id}`);
-            
+
             if (session.isGameStarted) {
                 this.server.to(session.inGameId).emit(InGameEvents.GameStarted, successResponse(session));
                 this.logger.log(`Game auto-started for session ${session.inGameId}`);
@@ -41,17 +41,6 @@ export class InGameGateway {
         } catch (error) {
             this.logger.error(`Error joining session ${sessionId} for player ${socket.id}: ${error.message}`);
             socket.emit(InGameEvents.PlayerJoinedInGameSession, errorResponse(error.message));
-        }
-    }
-
-    @SubscribeMessage(InGameEvents.GameStart)
-    startGame(socket: Socket, sessionId: string): void {
-        try {
-            const started = this.inGameService.startSession(sessionId);
-            this.server.to(started.inGameId).emit(InGameEvents.GameStarted, successResponse(started));
-            this.logger.log(`Game started for session ${started.inGameId}`);
-        } catch (error) {
-            socket.emit(InGameEvents.GameStarted, errorResponse(error.message));
         }
     }
 
