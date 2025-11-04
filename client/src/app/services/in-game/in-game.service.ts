@@ -7,7 +7,7 @@ import { SessionService } from '@app/services/session/session.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { Orientation } from '@common/enums/orientation.enum';
-import { ROUTES } from '@common/enums/routes.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { Player } from '@common/models/player.interface';

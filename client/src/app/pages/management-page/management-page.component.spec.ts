@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { GamePreviewCardComponent } from '@app/components/features/game-preview-card/game-preview-card.component';
-import { ROUTES } from '@common/enums/routes.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { GameMode } from '@common/enums/game-mode.enum';

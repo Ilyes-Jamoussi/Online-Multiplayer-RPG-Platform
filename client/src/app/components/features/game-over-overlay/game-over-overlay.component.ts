@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { ROUTES } from '@common/enums/routes.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 
 @Component({
     selector: 'app-game-over-overlay',

@@ -6,9 +6,9 @@ import { NotificationCoordinatorService } from '@app/services/notification-coord
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { SessionService } from '@app/services/session/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
-import { BonusType } from '@common/enums/character-creation.enum';
+import { BonusType } from '@app/enums/character-creation.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { ROUTES } from '@common/enums/routes.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 import { Player } from '@common/models/player.interface';
 
 @Injectable({

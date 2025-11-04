@@ -1,6 +1,6 @@
 import { computed, Injectable, Signal, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { ROUTES } from '@common/enums/routes.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 import { DEFAULT_SESSION, MIN_SESSION_PLAYERS } from '@app/constants/session.constants';
 import { CreateSessionDto } from '@app/dto/create-session-dto';
 import { JoinSessionDto } from '@app/dto/join-session-dto';

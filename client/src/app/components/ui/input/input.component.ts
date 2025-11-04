@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { NUMBER_ALLOWED_CHARS_PATTERN, TEXT_ALLOWED_CHARS_PATTERN } from '@app/constants/validation.constants';
-import { InputVariants } from '@common/enums/input-variants.enum';
+import { InputVariants } from '@app/enums/input-variants.enum';
 
 @Component({
     selector: 'app-ui-input',

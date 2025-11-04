@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UiPageLayoutComponent } from './page-layout.component';
-import { ROUTES } from '@common/enums/routes.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 
 describe('UiPageLayoutComponent', () => {
     let component: UiPageLayoutComponent;

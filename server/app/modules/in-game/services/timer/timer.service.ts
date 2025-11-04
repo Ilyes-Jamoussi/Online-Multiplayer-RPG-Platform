@@ -5,7 +5,7 @@ import { TurnTimerData } from '@app/interfaces/turn-timer-data.interface';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
-import { TurnTimerStates } from '@common/enums/turn-timer-states.enum';
+import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
 
 @Injectable()
 export class TimerService {

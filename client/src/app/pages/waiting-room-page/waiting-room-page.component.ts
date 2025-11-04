@@ -6,7 +6,7 @@ import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layou
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
-import { ROUTES } from '@common/enums/routes.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 import { Player } from '@common/models/player.interface';
 
 @Component({

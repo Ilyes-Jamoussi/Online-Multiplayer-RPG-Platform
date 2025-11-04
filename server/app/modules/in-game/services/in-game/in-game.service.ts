@@ -4,7 +4,7 @@ import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
-import { TurnTimerStates } from '@common/enums/turn-timer-states.enum';
+import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
 import { Player } from '@common/models/player.interface';
 import { InGameSession, WaitingRoomSession } from '@common/models/session.interface';
 import { BadRequestException, Injectable, NotFoundException, Inject } from '@nestjs/common';

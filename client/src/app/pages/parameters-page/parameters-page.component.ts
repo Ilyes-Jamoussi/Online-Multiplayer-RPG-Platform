@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiIconComponent } from '@app/components/ui/icon/icon.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
-import { ROUTES } from '@common/enums/routes.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 import { GameModeOption, MapSizeOption } from '@app/interfaces/game-parameters.interface';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
