@@ -14,11 +14,11 @@ export class InGameInitializationService {
     ) {}
     makeTurnOrder(players: Player[]): string[] {
         const sortedPlayers = [...players].sort((a, b) => b.speed - a.speed);
-        const uniqueSpeeds = Array.from(new Set(sortedPlayers.map((p) => p.speed)));
+        const uniqueSpeeds = Array.from(new Set(sortedPlayers.map((player) => player.speed)));
         const orderedPlayerIds: string[] = [];
 
         for (const speed of uniqueSpeeds) {
-            const playerIdsAtSpeed = sortedPlayers.filter((p) => p.speed === speed).map((p) => p.id);
+            const playerIdsAtSpeed = sortedPlayers.filter((player) => player.speed === speed).map((player) => player.id);
             orderedPlayerIds.push(...this.shuffleArray(playerIdsAtSpeed));
         }
 
@@ -26,7 +26,7 @@ export class InGameInitializationService {
     }
 
     assignStartPoints(session: InGameSession, game: Game): void {
-        const shuffledStartPoints = this.shuffleArray(game.objects.filter((o) => o.kind === PlaceableKind.START));
+        const shuffledStartPoints = this.shuffleArray(game.objects.filter((object) => object.kind === PlaceableKind.START));
 
         if (shuffledStartPoints.length < session.turnOrder.length) {
             throw new Error(`Pas assez de points de départ sur la carte :

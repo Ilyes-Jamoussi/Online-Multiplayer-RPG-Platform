@@ -8,7 +8,7 @@ export class TileSizeProbeDirective implements OnChanges, OnDestroy {
     private resizeObserver?: ResizeObserver;
 
     constructor(
-        private readonly el: ElementRef<HTMLElement>,
+        private readonly element: ElementRef<HTMLElement>,
         private readonly zone: NgZone,
     ) {}
 
@@ -16,7 +16,7 @@ export class TileSizeProbeDirective implements OnChanges, OnDestroy {
         this.teardown();
         if (!this.probeActive) return;
 
-        const node = this.el.nativeElement;
+        const node = this.element.nativeElement;
 
         const rect = node.getBoundingClientRect();
         this.sizeChange.emit(Math.min(rect.width, rect.height));

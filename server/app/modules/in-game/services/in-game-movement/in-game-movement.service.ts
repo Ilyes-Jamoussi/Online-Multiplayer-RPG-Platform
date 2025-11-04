@@ -193,7 +193,7 @@ export class InGameMovementService {
 
     private isPlayerOnBoat(sessionId: string, x: number, y: number): boolean {
         const placeables = this.gameCache.getPlaceablesAtPosition(sessionId, x, y);
-        return placeables.some((p) => p.kind === PlaceableKind.BOAT);
+        return placeables.some((placeable) => placeable.kind === PlaceableKind.BOAT);
     }
 
     private isPositionOccupied(session: InGameSession, x: number, y: number): boolean {

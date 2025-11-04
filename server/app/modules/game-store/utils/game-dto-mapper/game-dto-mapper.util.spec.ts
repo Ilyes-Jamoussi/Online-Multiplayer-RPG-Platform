@@ -72,20 +72,20 @@ describe('GameDtoMapper', () => {
     });
 
     it('should handle missing description', () => {
-        const doc = { ...mockGameDocument, description: undefined };
-        const dto = mapper.toGamePreviewDto(doc as GameDocument);
+        const gameDocument = { ...mockGameDocument, description: undefined };
+        const dto = mapper.toGamePreviewDto(gameDocument as GameDocument);
         expect(dto.description).toBe('');
     });
 
     it('should return empty string for default draft game name', () => {
-        const doc = { ...mockGameDocument, name: 'Nom...' };
-        const dto = mapper.toGameEditorDto(doc as GameDocument);
+        const gameDocument = { ...mockGameDocument, name: 'Nom...' };
+        const dto = mapper.toGameEditorDto(gameDocument as GameDocument);
         expect(dto.name).toBe('');
     });
 
     it('should return empty string for default draft game description', () => {
-        const doc = { ...mockGameDocument, description: 'Description du jeu...' };
-        const dto = mapper.toGameEditorDto(doc as GameDocument);
+        const gameDocument = { ...mockGameDocument, description: 'Description du jeu...' };
+        const dto = mapper.toGameEditorDto(gameDocument as GameDocument);
         expect(dto.description).toBe('');
     });
 });
