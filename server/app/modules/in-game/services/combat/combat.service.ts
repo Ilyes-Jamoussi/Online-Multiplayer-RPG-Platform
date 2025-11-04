@@ -81,7 +81,7 @@ export class CombatService {
         }
     }
 
-    startCombat(session: InGameSession, playerAId: string, playerBId: string): void {
+    private startCombat(session: InGameSession, playerAId: string, playerBId: string): void {
         const playerATile = this.gameCacheService.getTileByPlayerId(session.id, playerAId);
         const playerBTile = this.gameCacheService.getTileByPlayerId(session.id, playerBId);
 
@@ -132,7 +132,7 @@ export class CombatService {
         }
     }
 
-    combatRound(sessionId: string): void {
+    private combatRound(sessionId: string): void {
         const combat = this.activeCombats.get(sessionId);
         if (!combat) return;
 
