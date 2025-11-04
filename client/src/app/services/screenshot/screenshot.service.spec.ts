@@ -35,7 +35,14 @@ describe('ScreenshotService', () => {
         document.body.appendChild(testElement);
 
         try {
-            const result = await service.captureElementAsBase64(testElement);
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Test timeout')), 5000)
+            );
+            
+            const result = await Promise.race([
+                service.captureElementAsBase64(testElement),
+                timeoutPromise
+            ]) as string;
 
             expect(result).toMatch(/^data:image\/jpeg;base64,/);
             expect(typeof result).toBe('string');
@@ -45,5 +52,5 @@ describe('ScreenshotService', () => {
         } finally {
             document.body.removeChild(testElement);
         }
-    });
+    }, 10000);
 });
