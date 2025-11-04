@@ -11,8 +11,8 @@ import { Server, Socket } from 'socket.io';
 @UsePipes(
     new ValidationPipe({
         transform: true,
-        exceptionFactory: (errors): Error => {
-            throw new Error('Validation failed');
+        exceptionFactory: (): Error => {
+            throw new Error('Validation échouée');
         },
     }),
 )
