@@ -297,6 +297,16 @@ describe('CombatService', () => {
             expect(service.minHealthDuringCombat()).toEqual({});
             expect(service.isVictoryNotificationVisible()).toBe(false);
         });
+
+        it('should clear timeout when timeout exists', () => {
+            spyOn(window, 'clearTimeout');
+            (service as any).victoryNotificationTimeout = 123;
+
+            service.closeVictoryOverlay();
+
+            expect(clearTimeout).toHaveBeenCalledWith(123);
+            expect((service as any).victoryNotificationTimeout).toBeNull();
+        });
     });
 
     describe('chooseOffensive', () => {
@@ -418,6 +428,20 @@ describe('CombatService', () => {
                 expect(service.damageDisplays().length).toBe(2);
                 expect(service.selectedPosture()).toBeNull();
             });
+
+            it('should hide damage display after timeout', (done) => {
+                service.startCombat('player1', 'player2', 'attacker', TileCombatEffect.BASE, TileCombatEffect.BASE);
+                combatResultCallback(mockCombatResult);
+
+                const initialDisplays = service.damageDisplays();
+                expect(initialDisplays[0].visible).toBe(true);
+
+                setTimeout(() => {
+                    const updatedDisplays = service.damageDisplays();
+                    expect(updatedDisplays[0].visible).toBe(false);
+                    done();
+                }, 2100);
+            });
         });
 
         describe('onPlayerHealthChanged', () => {
@@ -501,6 +525,92 @@ describe('CombatService', () => {
                     abandon: false,
                 });
                 expect(service.isVictoryNotificationVisible()).toBe(true);
+            });
+
+            it('should handle draw victory', () => {
+                mockPlayerService.id.and.returnValue('player3');
+                service.startCombat('player1', 'player2', 'attacker');
+                (service as any)._combatData.set({ attackerId: 'player1', targetId: 'player2', userRole: 'spectator' });
+
+                victoryCallback({
+                    playerAId: 'player1',
+                    playerBId: 'player2',
+                    winnerId: null,
+                    abandon: false,
+                });
+
+                expect(mockNotificationService.showInfoToast).toHaveBeenCalledWith(
+                    '⚔️ Match nul entre Player 1 et Player 2',
+                    jasmine.any(Number)
+                );
+            });
+
+            it('should handle abandon victory', () => {
+                mockPlayerService.id.and.returnValue('player3');
+                service.startCombat('player1', 'player2', 'attacker');
+                (service as any)._combatData.set({ attackerId: 'player1', targetId: 'player2', userRole: 'spectator' });
+
+                victoryCallback({
+                    playerAId: 'player1',
+                    playerBId: 'player2',
+                    winnerId: 'player1',
+                    abandon: true,
+                });
+
+                expect(mockNotificationService.showSuccessToast).toHaveBeenCalledWith(
+                    '🏆 Player 1 a gagné par abandon contre Player 2',
+                    jasmine.any(Number)
+                );
+            });
+
+            it('should handle normal victory', () => {
+                mockPlayerService.id.and.returnValue('player3');
+                service.startCombat('player1', 'player2', 'attacker');
+                (service as any)._combatData.set({ attackerId: 'player1', targetId: 'player2', userRole: 'spectator' });
+
+                victoryCallback({
+                    playerAId: 'player1',
+                    playerBId: 'player2',
+                    winnerId: 'player1',
+                    abandon: false,
+                });
+
+                expect(mockNotificationService.showSuccessToast).toHaveBeenCalledWith(
+                    '🏆 Player 1 a vaincu Player 2',
+                    jasmine.any(Number)
+                );
+            });
+
+            it('should set victory notification timeout', () => {
+                spyOn(window, 'setTimeout').and.returnValue(456 as any);
+                service.startCombat('player1', 'player2', 'attacker');
+
+                victoryCallback({
+                    playerAId: 'player1',
+                    playerBId: 'player2',
+                    winnerId: 'player1',
+                    abandon: false,
+                });
+
+                expect(setTimeout).toHaveBeenCalled();
+                expect((service as any).victoryNotificationTimeout).toBe(456);
+            });
+
+            it('should clear existing timeout before setting new one', () => {
+                spyOn(window, 'clearTimeout');
+                spyOn(window, 'setTimeout').and.returnValue(789 as any);
+                (service as any).victoryNotificationTimeout = 123;
+                service.startCombat('player1', 'player2', 'attacker');
+
+                victoryCallback({
+                    playerAId: 'player1',
+                    playerBId: 'player2',
+                    winnerId: 'player1',
+                    abandon: false,
+                });
+
+                expect(clearTimeout).toHaveBeenCalledWith(123);
+                expect(setTimeout).toHaveBeenCalled();
             });
         });
 
