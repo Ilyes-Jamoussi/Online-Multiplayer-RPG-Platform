@@ -37,6 +37,6 @@ export class SessionCreationPageComponent implements OnInit {
     }
 
     onBack(): void {
-        this.router.navigate([ROUTES.HomePage]);
+        void this.router.navigate([ROUTES.HomePage]);
     }
 }

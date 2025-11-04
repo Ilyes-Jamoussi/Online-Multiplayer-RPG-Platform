@@ -2,12 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ChatComponent } from '@app/components/features/chat/chat.component';
 import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
-import { GameOverOverlayComponent } from '@app/components/features/game-over-overlay/game-over-overlay.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
+import { GameOverOverlayComponent } from '@app/components/features/game-over-overlay/game-over-overlay.component';
 import { PlayerInfoComponent } from '@app/components/features/player-info/player-info.component';
 import { PlayersListComponent } from '@app/components/features/players-list/players-list.component';
 import { TurnTimerComponent } from '@app/components/features/turn-timer/turn-timer.component';
 import { ToastNotificationDisplayComponent } from '@app/components/features/toast-notification-display/toast-notification-display.component';
+import { AdminBadgeComponent } from '@app/components/features/admin-badge/admin-badge.component';
 import { CombatService } from '@app/services/combat/combat.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameKeyboardEventsService } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
@@ -27,6 +28,7 @@ import { MapSize } from '@common/enums/map-size.enum';
         GameOverOverlayComponent,
         ToastNotificationDisplayComponent,
         ChatComponent,
+        AdminBadgeComponent,
     ],
     templateUrl: './game-session-page.component.html',
     styleUrl: './game-session-page.component.scss',
@@ -92,10 +94,7 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
     }
 
     isActionDisabled(): boolean {
-        return !this.isMyTurn ||
-            !this.isGameStarted ||
-            this.hasUsedAction ||
-            !this.hasAvailableActions();
+        return !this.isMyTurn || !this.isGameStarted || this.hasUsedAction || !this.hasAvailableActions();
     }
 
     get hasUsedAction(): boolean {
@@ -112,10 +111,14 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
 
     getMapSizeLabel(): string {
         switch (this.mapSizeValue) {
-            case MapSize.SMALL: return 'Petite';
-            case MapSize.MEDIUM: return 'Moyenne';
-            case MapSize.LARGE: return 'Grande';
-            default: return 'Inconnue';
+            case MapSize.SMALL:
+                return 'Petite';
+            case MapSize.MEDIUM:
+                return 'Moyenne';
+            case MapSize.LARGE:
+                return 'Grande';
+            default:
+                return 'Inconnue';
         }
     }
 
@@ -163,7 +166,7 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
     }
 
     onLeaveGame(): void {
-        this.combatService.combatAbandon(); 
+        this.combatService.combatAbandon();
         this.inGameService.leaveGame();
     }
 }

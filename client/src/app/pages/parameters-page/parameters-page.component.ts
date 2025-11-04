@@ -70,7 +70,7 @@ export class ParametersPageComponent {
             })
             .subscribe({
                 next: (gamePreview) => {
-                    this.router.navigate([ROUTES.EditorPage, gamePreview.id]);
+                    void this.router.navigate([ROUTES.EditorPage, gamePreview.id]);
                 },
                 error: (err) => {
                     this.notificationCoordinatorService.displayErrorPopup({

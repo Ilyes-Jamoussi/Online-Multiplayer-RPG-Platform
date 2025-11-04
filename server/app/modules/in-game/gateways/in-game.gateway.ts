@@ -66,7 +66,7 @@ export class InGameGateway {
         const session = this.inGameService.getSession(sessionId);
         this.playerLeaveSession(sessionId, socket.id);
         this.server.to(socket.id).emit(InGameEvents.LeftInGameSessionAck, successResponse({}));
-        socket.leave(session.inGameId);
+        void socket.leave(session.inGameId);
     }
 
     @SubscribeMessage(InGameEvents.ToggleDoorAction)
@@ -143,6 +143,33 @@ export class InGameGateway {
         this.server.to(payload.playerId).emit(InGameEvents.PlayerReachableTiles, successResponse(payload.reachable));
     }
 
+    @SubscribeMessage(InGameEvents.ToggleAdminMode)
+    handleToggleAdminMode(socket: Socket, sessionId: string): void {
+        try {
+            const session = this.inGameService.toggleAdminMode(sessionId, socket.id);
+            this.server.to(session.inGameId).emit(InGameEvents.AdminModeToggled, successResponse({ isAdminModeActive: session.isAdminModeActive }));
+        } catch (error) {
+            this.logger.error('Error toggling admin mode:', error.message);
+            socket.emit(InGameEvents.AdminModeToggled, errorResponse(error.message));
+        }
+    }
+
+    @SubscribeMessage(InGameEvents.PlayerTeleport)
+    playerTeleport(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
+        try {
+            this.inGameService.teleportPlayer(payload.sessionId, socket.id, payload.x, payload.y);
+            const session = this.inGameService.getSession(payload.sessionId);
+            const player = session.inGamePlayers[socket.id];
+            this.server.to(session.inGameId).emit(
+                InGameEvents.PlayerTeleported,
+                successResponse({ playerId: socket.id, x: player.x, y: player.y })
+            );
+            this.inGameService.getReachableTiles(payload.sessionId, socket.id);
+        } catch (error) {
+            socket.emit(InGameEvents.PlayerTeleported, errorResponse(error.message));
+        }
+    }
+
     @OnEvent('player.updated')
     handlePlayerUpdated(payload: { sessionId: string; player: Player }) {
         const session = this.inGameService.getSession(payload.sessionId);
@@ -181,6 +208,9 @@ export class InGameGateway {
                 this.server.to(result.session.inGameId).emit(InGameEvents.GameForceStopped, successResponse({}));
                 this.server.socketsLeave(sessionId);
             } else {
+                if (result.adminModeDeactivated) {
+                    this.server.to(result.session.inGameId).emit(InGameEvents.AdminModeToggled, successResponse({ isAdminModeActive: false }));
+                }
                 this.server.to(result.session.inGameId).emit(InGameEvents.PlayerLeftInGameSession, successResponse(result));
                 this.logger.log(`Player ${result.playerName} left session ${sessionId}`);
             }

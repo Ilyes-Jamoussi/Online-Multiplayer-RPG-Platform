@@ -15,7 +15,7 @@ import { COMBAT_WINS_TO_WIN_GAME } from '@app/constants/game-config.constants';
 export class CombatService {
     private readonly activeCombats = new Map<string, CombatState>();
 
-    // eslint-disable-next-line max-params
+    // eslint-disable-next-line max-params -- NestJS dependency injection requires multiple parameters
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly timerService: TimerService,
@@ -199,6 +199,8 @@ export class CombatService {
 
             if (winnerId) {
                 this.checkGameVictory(sessionId, winnerId, playerAId, playerBId);
+            } else {
+                this.endCombat(session, playerAId, playerBId, winnerId);
             }
         }
     }
@@ -231,7 +233,7 @@ export class CombatService {
         const player = session.inGamePlayers[playerId];
         if (!player) return { dice: Dice.D4, diceRoll: 0, baseDefense: 0, defenseBonus: 0, totalDefense: 0, tileCombatEffect: TileCombatEffect.BASE };
 
-        const defenseRoll = this.rollDice(player.defenseDice);
+        const defenseRoll = this.rollDice(player.defenseDice, sessionId, false);
         const baseDefense = player.baseDefense;
         const defenseBonus = posture === 'defensive' ? 2 : 0;
         const totalDefense = baseDefense + defenseRoll + defenseBonus + tileCombatEffect;
@@ -255,7 +257,7 @@ export class CombatService {
         if (!session) return { dice: Dice.D4, diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0, tileCombatEffect: TileCombatEffect.BASE };
         const player = session.inGamePlayers[playerId];
         if (!player) return { dice: Dice.D4, diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0, tileCombatEffect: TileCombatEffect.BASE };
-        const attackRoll = this.rollDice(player.attackDice);
+        const attackRoll = this.rollDice(player.attackDice, sessionId, true);
         const baseAttack = player.baseAttack;
         const attackBonus = posture === 'offensive' ? 2 : 0;
         const totalAttack = baseAttack + attackRoll + attackBonus + tileCombatEffect;
@@ -267,7 +269,11 @@ export class CombatService {
         return damage > 0 ? damage : 0;
     }
 
-    private rollDice(dice: Dice): number {
+    private rollDice(dice: Dice, sessionId: string, isAttack: boolean = true): number {
+        const session = this.sessionRepository.findById(sessionId);
+        if (session?.isAdminModeActive) {
+            return isAttack ? DiceSides[dice] : 1;
+        }
         return Math.floor(Math.random() * DiceSides[dice]) + 1;
     }
 

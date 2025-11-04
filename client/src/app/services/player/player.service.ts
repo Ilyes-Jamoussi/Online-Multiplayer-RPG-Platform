@@ -74,9 +74,11 @@ export class PlayerService {
     }
 
     setDice(attr: 'attack' | 'defense', value: Dice): void {
+        const otherDiceValue = value === Dice.D6 ? Dice.D4 : Dice.D6;
+        
         const newDice = {
-            attackDice: attr === 'attack' ? value : (value === Dice.D6 ? Dice.D4 : Dice.D6),
-            defenseDice: attr === 'defense' ? value : (value === Dice.D6 ? Dice.D4 : Dice.D6)
+            attackDice: attr === 'attack' ? value : otherDiceValue,
+            defenseDice: attr === 'defense' ? value : otherDiceValue
         };
 
         this.updatePlayer({
@@ -158,7 +160,7 @@ export class PlayerService {
         this.sessionSocketService.onSessionCreated((data) => {
             this.updatePlayer({ id: data.playerId });
             this.sessionService.updateSession({ id: data.sessionId });
-            this.router.navigate([ROUTES.WaitingRoomPage]);
+            void this.router.navigate([ROUTES.WaitingRoomPage]);
         });
 
         this.sessionSocketService.onSessionEnded((message) => {
@@ -172,7 +174,7 @@ export class PlayerService {
         this.sessionSocketService.onAvatarSelectionJoined((data) => {
             this.updatePlayer({ id: data.playerId });
             this.sessionService.updateSession({ id: data.sessionId });
-            this.router.navigate([ROUTES.CharacterCreationPage]);
+            void this.router.navigate([ROUTES.CharacterCreationPage]);
         });
 
         this.sessionSocketService.onSessionJoined((data) => {

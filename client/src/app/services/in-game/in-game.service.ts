@@ -192,7 +192,7 @@ export class InGameService {
 
         this.inGameSocketService.onPlayerLeftInGameSession((data) => {
             this.updateInGameSession(data.session);
-            if(this.playerService.id() !== data.playerId) {
+            if (this.playerService.id() !== data.playerId) {
                 this.notificationCoordinatorService.showInfoToast(`${data.playerName} a abandonné la partie`);
             }
         });
@@ -245,6 +245,25 @@ export class InGameService {
 
         this.inGameSocketService.onPlayerReachableTiles((data) => {
             this._reachableTiles.set(data);
+        });
+
+        this.inGameSocketService.onPlayerTeleported((data) => {
+            this.updateInGameSession({
+                inGamePlayers: {
+                    ...this.inGameSession().inGamePlayers,
+                    [data.playerId]: {
+                        ...this.inGameSession().inGamePlayers[data.playerId],
+                        x: data.x,
+                        y: data.y,
+                    },
+                },
+            });
+            if (this.playerService.id() === data.playerId) {
+                this.playerService.updatePlayer({
+                    x: data.x,
+                    y: data.y,
+                });
+            }
         });
 
         this.inGameSocketService.onPlayerActionUsed(() => {

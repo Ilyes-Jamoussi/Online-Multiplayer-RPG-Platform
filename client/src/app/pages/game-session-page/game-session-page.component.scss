@@ -307,98 +307,38 @@ $shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     }
 }
 
-@media (max-width: 1400px) {
-    .game-session-container {
-        grid-template-columns: minmax(180px, 240px) 1fr minmax(220px, 280px);
-        gap: 0.75rem;
-        padding: 0.75rem;
-    }
-}
-
-@media (max-width: 1200px) {
-    .game-session-container {
-        grid-template-columns: minmax(150px, 200px) 1fr minmax(200px, 250px);
-        gap: 0.5rem;
-        padding: 0.5rem;
-    }
-}
-
 .abandon-button-fixed {
     position: fixed;
-    top: 1rem;
-    right: 1rem;
-    z-index: 3000;
+    bottom: 20px;
+    left: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     padding: 0.75rem 1.25rem;
-    background: linear-gradient(135deg, $danger-color, $danger-dark);
-    border: 2px solid $danger-darker;
+    border: none;
     border-radius: 8px;
-    color: white;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba($danger-color, 0.4);
-    backdrop-filter: blur(10px);
-    
+    box-shadow: $shadow-md;
+    white-space: nowrap;
+    background: linear-gradient(135deg, $danger-color, $danger-dark);
+    color: white;
+    z-index: 1000;
+
     .btn-icon {
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
-    
+
     &:hover {
-        background: linear-gradient(135deg, $danger-dark, $danger-darker);
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba($danger-color, 0.5);
+        box-shadow: 0 6px 12px -1px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(135deg, $danger-dark, $danger-darker);
     }
-    
+
     &:active {
         transform: translateY(0);
-    }
-}
-
-@media (min-width: 1001px) {
-    .hide-on-overlay {
-        display: none;
-    }
-}
-
-@media (max-width: 1000px) {
-    .game-session-container {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr;
-        height: calc(100vh - 200px);
-        
-        .left-sidebar {
-            grid-row: 1;
-            flex-direction: row;
-            overflow-x: auto;
-            overflow-y: hidden;
-            height: auto;
-        }
-        
-        .game-area {
-            grid-row: 2;
-        }
-        
-        .right-sidebar {
-            display: none;
-        }
-        
-        .game-header {
-            flex-wrap: wrap;
-            
-            .header-actions {
-                flex-wrap: wrap;
-                width: 100%;
-                justify-content: center;
-            }
-        }
-    }
-    
-    .abandon-button-fixed {
-        display: none;
     }
 }

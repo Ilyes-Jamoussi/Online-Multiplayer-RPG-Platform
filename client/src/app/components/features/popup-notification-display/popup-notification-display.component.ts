@@ -24,7 +24,7 @@ export class PopupNotificationDisplayComponent {
         this.notificationCoordinatorService.resetPopup();
 
         if (currentNotification?.redirectRoute) {
-            this.router.navigate([currentNotification.redirectRoute]);
+            void this.router.navigate([currentNotification.redirectRoute]);
         }
     }
 }

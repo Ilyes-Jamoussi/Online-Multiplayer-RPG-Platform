@@ -1,4 +1,4 @@
-/* eslint-disable  @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/naming-convention -- Test file uses mock objects with underscores */
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { GameEditorCheckService } from './game-editor-check.service';
