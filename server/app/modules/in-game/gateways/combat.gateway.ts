@@ -3,7 +3,7 @@ import { errorResponse, successResponse } from '@app/utils/socket-response/socke
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
-import { Injectable, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -11,9 +11,8 @@ import { Server, Socket } from 'socket.io';
 @UsePipes(
     new ValidationPipe({
         transform: true,
-        exceptionFactory: (errors): Error => {
-            new Logger('ValidationPipe').error('Validation failed:', errors);
-            throw new Error('Validation failed');
+        exceptionFactory: (): Error => {
+            throw new Error('Validation échouée');
         },
     }),
 )
@@ -21,7 +20,6 @@ import { Server, Socket } from 'socket.io';
 @Injectable()
 export class CombatGateway {
     @WebSocketServer() private readonly server: Server;
-    private readonly logger = new Logger(CombatGateway.name);
 
     constructor(private readonly combatService: CombatService) {}
 
@@ -78,7 +76,6 @@ export class CombatGateway {
     handleCombatTimerRestart(payload: { sessionId: string }): void {
         const session = this.combatService.getSession(payload.sessionId);
         if (session) {
-            this.logger.log(`Combat timer restarted for session ${session.id}`);
             this.server.to(session.inGameId).emit(InGameEvents.CombatTimerRestart, successResponse({}));
         }
     }
