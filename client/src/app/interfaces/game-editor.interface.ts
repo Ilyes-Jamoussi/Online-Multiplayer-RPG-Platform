@@ -47,14 +47,6 @@ interface InventoryItem {
     image: string;
 }
 
-export const PLACEABLE_ORDER: PlaceableKind[] = [
-    PlaceableKind.START,
-    PlaceableKind.FLAG,
-    PlaceableKind.FIGHT,
-    PlaceableKind.HEAL,
-    PlaceableKind.BOAT,
-];
-
 export interface TileBrushTool {
     type: ToolType.TileBrushTool;
     tileKind: TileKind;

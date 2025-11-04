@@ -22,7 +22,6 @@ export class PlayerService {
     readonly isAdmin: Signal<boolean> = computed(() => this.player().isAdmin);
     readonly avatar: Signal<Avatar | null> = computed(() => this.player().avatar);
 
-    // Computed properties matching Player interface exactly
     readonly name = computed(() => this.player().name);
     readonly health = computed(() => this.player().health);
     readonly maxHealth = computed(() => this.player().maxHealth);
@@ -74,7 +73,7 @@ export class PlayerService {
 
     setDice(attr: 'attack' | 'defense', value: Dice): void {
         const otherDiceValue = value === Dice.D6 ? Dice.D4 : Dice.D6;
-        
+
         const newDice = {
             attackDice: attr === 'attack' ? value : otherDiceValue,
             defenseDice: attr === 'defense' ? value : otherDiceValue
@@ -91,7 +90,7 @@ export class PlayerService {
         const availableAvatars = this.sessionService.avatarAssignments()
             .filter(assignment => assignment.chosenBy === null)
             .map(assignment => assignment.avatar);
-        
+
         const randomName = names[Math.floor(Math.random() * names.length)];
         const randomAvatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
         const randomThreshold = 0.5;
