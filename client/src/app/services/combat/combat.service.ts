@@ -1,15 +1,16 @@
 import { Injectable, signal } from '@angular/core';
-import { TimerService } from '@app/services/timer/timer.service';
-import { CombatTimerService } from '@app/services/combat-timer/combat-timer.service';
+import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
 import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { CombatResult } from '@common/interfaces/combat.interface';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile-kind.enum';
 
 const DAMAGE_DISPLAY_DURATION = 2000;
 const VICTORY_NOTIFICATION_DURATION = 3000;
+const TOAST_DURATION = 5000;
 
 interface CombatData {
     attackerId: string;
@@ -21,6 +22,7 @@ interface VictoryData {
     playerAId: string;
     playerBId: string;
     winnerId: string | null;
+    abandon: boolean;
 }
 
 interface DamageDisplay {
@@ -62,11 +64,11 @@ export class CombatService {
     readonly isVictoryNotificationVisible = this._isVictoryNotificationVisible.asReadonly();
     readonly isCombatActive = this._isCombatActive.asReadonly();
     constructor(
-        private readonly timerService: TimerService,
-        private readonly combatTimerService: CombatTimerService,
+        private readonly timerCoordinatorService: TimerCoordinatorService,
         private readonly combatSocketService: CombatSocketService,
         private readonly playerService: PlayerService,
         private readonly inGameService: InGameService,
+        private readonly notificationCoordinatorService: NotificationCoordinatorService,
     ) {
         this.initListeners();
     }
@@ -92,6 +94,11 @@ export class CombatService {
             });
         } else {
             this._tileEffects.set({});
+        }
+    }
+    combatAbandon(): void {
+        if (this.isInCombat()) {
+            this.combatSocketService.combatAbandon(this.inGameService.sessionId());
         }
     }
 
@@ -126,6 +133,10 @@ export class CombatService {
         this.combatSocketService.attackPlayerAction(this.inGameService.sessionId(), x, y);
     }
 
+    private isInCombat(): boolean {
+        return this._isCombatActive() && this._combatData()?.userRole !== 'spectator';
+    }
+
     private initListeners(): void {
         this.combatSocketService.onCombatStarted((data) => {
             this.handleCombatStarted(data.attackerId, data.targetId, data.attackerTileEffect, data.targetTileEffect);
@@ -154,9 +165,9 @@ export class CombatService {
 
         this.combatSocketService.onCombatVictory((data) => {
             this._isCombatActive.set(false);
-            this.combatTimerService.stopCombatTimer();
-            this.timerService.resumeTurnTimer();
-            this.handleVictory(data.playerAId, data.playerBId, data.winnerId);
+            this.timerCoordinatorService.stopCombatTimer();
+            this.timerCoordinatorService.resumeTurnTimer();
+            this.handleVictory(data.playerAId, data.playerBId, data.winnerId, data.abandon);
         });
 
         this.combatSocketService.onCombatCountChanged((data) => {
@@ -267,9 +278,9 @@ export class CombatService {
     }
 
     private handleCombatStarted(attackerId: string, targetId: string, attackerTileEffect?: number, targetTileEffect?: number): void {
-        this.timerService.pauseTurnTimer();
-        if (!this.combatTimerService.isCombatActive()) {
-            this.combatTimerService.startCombatTimer();
+        this.timerCoordinatorService.pauseTurnTimer();
+        if (!this.timerCoordinatorService.isCombatActive()) {
+            this.timerCoordinatorService.startCombatTimer();
         }
 
         const myId = this.playerService.id();
@@ -280,6 +291,7 @@ export class CombatService {
             this.startCombat(attackerId, targetId, 'target', attackerTileEffect, targetTileEffect);
         } else {
             this._combatData.set({ attackerId, targetId, userRole: 'spectator' });
+            this._isCombatActive.set(true);
             const attackerPlayer = this.inGameService.getPlayerByPlayerId(attackerId);
             const targetPlayer = this.inGameService.getPlayerByPlayerId(targetId);
 
@@ -294,6 +306,8 @@ export class CombatService {
                     [targetId]: targetTileEffect,
                 });
             }
+
+            this.notificationCoordinatorService.showInfoToast(`⚔️ Combat en cours : ${attackerPlayer.name} vs ${targetPlayer.name}`, TOAST_DURATION);
         }
     }
 
@@ -320,16 +334,16 @@ export class CombatService {
     }
 
     private handleCombatTimerRestart(): void {
-        if (!this.combatTimerService.isCombatActive() && this._isCombatActive()) {
-            this.timerService.pauseTurnTimer();
-            this.combatTimerService.startCombatTimer();
+        if (!this.timerCoordinatorService.isCombatActive() && this._isCombatActive()) {
+            this.timerCoordinatorService.pauseTurnTimer();
+            this.timerCoordinatorService.startCombatTimer();
         } else {
-            this.combatTimerService.resetCombatTimer();
+            this.timerCoordinatorService.resetCombatTimer();
         }
     }
 
     private handleCombatNewRound(): void {
-        this.combatTimerService.resetCombatTimer();
+        this.timerCoordinatorService.resetCombatTimer();
         this._selectedPosture.set(null);
         this._playerPostures.set({});
     }
@@ -341,16 +355,36 @@ export class CombatService {
         }));
     }
 
-    private handleVictory(playerAId: string, playerBId: string, winnerId: string | null): void {
-        this._victoryData.set({ playerAId, playerBId, winnerId });
-        this._isVictoryNotificationVisible.set(true);
+    private handleVictory(playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean): void {
+        const combatData = this._combatData();
+        if (combatData?.userRole === 'spectator') {
+            const winnerName = winnerId ? this.inGameService.getPlayerByPlayerId(winnerId).name : null;
+            const playerAName = this.inGameService.getPlayerByPlayerId(playerAId).name;
+            const playerBName = this.inGameService.getPlayerByPlayerId(playerBId).name;
 
-        if (this.victoryNotificationTimeout) {
-            clearTimeout(this.victoryNotificationTimeout);
+            if (winnerId === null) {
+                this.notificationCoordinatorService.showInfoToast(`⚔️ Match nul entre ${playerAName} et ${playerBName}`, TOAST_DURATION);
+            } else {
+                const loserName = winnerId === playerAId ? playerBName : playerAName;
+                if (abandon) {
+                    this.notificationCoordinatorService.showSuccessToast(`🏆 ${winnerName} a gagné par abandon contre ${loserName}`, TOAST_DURATION);
+                } else {
+                    this.notificationCoordinatorService.showSuccessToast(`🏆 ${winnerName} a vaincu ${loserName}`, TOAST_DURATION);
+                }
+            }
+            this._combatData.set(null);
+            this._isCombatActive.set(false);
+        } else {
+            this._victoryData.set({ playerAId, playerBId, winnerId, abandon });
+            this._isVictoryNotificationVisible.set(true);
+
+            if (this.victoryNotificationTimeout) {
+                clearTimeout(this.victoryNotificationTimeout);
+            }
+
+            this.victoryNotificationTimeout = setTimeout(() => {
+                this.closeVictoryOverlay();
+            }, VICTORY_NOTIFICATION_DURATION);
         }
-
-        this.victoryNotificationTimeout = setTimeout(() => {
-            this.closeVictoryOverlay();
-        }, VICTORY_NOTIFICATION_DURATION);
     }
 }

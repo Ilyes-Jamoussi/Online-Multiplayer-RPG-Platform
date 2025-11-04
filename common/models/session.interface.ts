@@ -31,4 +31,5 @@ export interface InGameSession extends BaseSession {
     mapSize: MapSize;
     mode: GameMode;
     turnOrder: string[];
+    isAdminModeActive?: boolean;
 }

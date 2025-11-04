@@ -7,7 +7,7 @@ import { ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { NotificationService } from '@app/services/notification/notification.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { MapSize } from '@common/enums/map-size.enum';
 import { TileKind } from '@common/enums/tile-kind.enum';
 import { Subject } from 'rxjs';
@@ -22,7 +22,7 @@ describe('EditorPageComponent', () => {
     let mockActivatedRoute: jasmine.SpyObj<ActivatedRoute>;
     let mockGameEditorStoreService: jasmine.SpyObj<GameEditorStoreService>;
     let mockGameEditorCheckService: jasmine.SpyObj<GameEditorCheckService>;
-    let mockNotificationService: jasmine.SpyObj<NotificationService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
     let mockGameEditorInteractionsService: jasmine.SpyObj<GameEditorInteractionsService> & { activeTool: unknown };
     let paramMapSubject: Subject<ParamMap>;
 
@@ -62,7 +62,7 @@ describe('EditorPageComponent', () => {
         });
 
         mockGameEditorCheckService = jasmine.createSpyObj('GameEditorCheckService', ['canSave']);
-        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displaySuccess', 'displayError']);
+        mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', ['displaySuccessPopup', 'displayErrorPopup']);
 
         mockGameEditorInteractionsService = jasmine.createSpyObj('GameEditorInteractionsService', ['removeObject', 'dragEnd']);
         Object.defineProperty(mockGameEditorInteractionsService, 'activeTool', {
@@ -78,7 +78,7 @@ describe('EditorPageComponent', () => {
                 { provide: ActivatedRoute, useValue: mockActivatedRoute },
                 { provide: GameEditorStoreService, useValue: mockGameEditorStoreService },
                 { provide: GameEditorCheckService, useValue: mockGameEditorCheckService },
-                { provide: NotificationService, useValue: mockNotificationService },
+                { provide: NotificationCoordinatorService, useValue: mockNotificationService },
                 { provide: GameEditorInteractionsService, useValue: mockGameEditorInteractionsService },
             ],
         })

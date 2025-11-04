@@ -233,6 +233,7 @@ export class SessionGateway implements OnGatewayDisconnect {
         }
     }
 
+
     handleDisconnect(socket: Socket): void {
         this.leaveSession(socket);
     }

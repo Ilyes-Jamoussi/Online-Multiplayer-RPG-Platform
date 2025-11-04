@@ -25,6 +25,16 @@ export class CombatService {
         private readonly gameCacheService: GameCacheService,
     ) {}
 
+    combatAbandon(sessionId: string, playerId: string): void {
+        const combat = this.activeCombats.get(sessionId);
+        if (!combat) throw new NotFoundException('Combat not found');
+        if (combat.playerAId !== playerId && combat.playerBId !== playerId) throw new BadRequestException('Player not in combat');
+        const winnerId = combat.playerAId === playerId ? combat.playerBId : combat.playerAId;
+        const session = this.sessionRepository.findById(sessionId);
+        if (!session) throw new NotFoundException('Session not found');
+        this.endCombat(session, combat.playerAId, combat.playerBId, winnerId, true);
+    }
+
     getSession(sessionId: string): InGameSession {
         return this.sessionRepository.findById(sessionId);
     }
@@ -98,7 +108,7 @@ export class CombatService {
         }
     }
 
-    private endCombat(session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null): void {
+    private endCombat(session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean = false): void {
         this.activeCombats.delete(session.id);
         this.combatTimerService.stopCombatTimer(session);
 
@@ -107,12 +117,14 @@ export class CombatService {
             playerAId,
             playerBId,
             winnerId,
+            abandon,
         });
 
-        if (winnerId !== null && winnerId !== session.currentTurn.activePlayerId) {
+        if (winnerId && winnerId !== session.currentTurn.activePlayerId) {
             this.timerService.endTurnManual(session);
         } else {
             this.timerService.resumeTurnTimer(session.id);
+            this.inGameMovementService.calculateReachableTiles(session, session.currentTurn.activePlayerId);
         }
     }
 
@@ -164,34 +176,37 @@ export class CombatService {
         this.resetCombatPosture(sessionId);
 
         if (playerAHealth <= 0 || playerBHealth <= 0) {
+            const playerADead = playerAHealth <= 0;
+            const playerBDead = playerBHealth <= 0;
+            const isDraw = playerADead && playerBDead;
             let winnerId: string | null = null;
-
-            if (playerAHealth <= 0 && playerBHealth <= 0) {
-                winnerId = null;
-                this.sessionRepository.incrementPlayerCombatDraws(sessionId, playerAId);
-                this.sessionRepository.incrementPlayerCombatDraws(sessionId, playerBId);
-            } else if (playerAHealth <= 0) {
-                winnerId = playerBId;
-                this.sessionRepository.incrementPlayerCombatLosses(sessionId, playerAId);
-                this.sessionRepository.incrementPlayerCombatWins(sessionId, playerBId);
-            } else {
-                winnerId = playerAId;
-                this.sessionRepository.incrementPlayerCombatWins(sessionId, playerAId);
-                this.sessionRepository.incrementPlayerCombatLosses(sessionId, playerBId);
+            if (!isDraw) {
+                winnerId = playerADead ? playerBId : playerAId;
             }
 
-            if (playerAHealth <= 0) {
+            if (playerADead) {
                 this.inGameMovementService.movePlayerToStartPosition(session, playerAId);
                 this.sessionRepository.resetPlayerHealth(sessionId, playerAId);
             }
 
-            if (playerBHealth <= 0) {
+            if (playerBDead) {
                 this.inGameMovementService.movePlayerToStartPosition(session, playerBId);
                 this.sessionRepository.resetPlayerHealth(sessionId, playerBId);
             }
 
+            if (isDraw) {
+                this.sessionRepository.incrementPlayerCombatDraws(sessionId, playerAId);
+                this.sessionRepository.incrementPlayerCombatDraws(sessionId, playerBId);
+            } else {
+                const loserId = playerADead ? playerAId : playerBId;
+                this.sessionRepository.incrementPlayerCombatWins(sessionId, winnerId);
+                this.sessionRepository.incrementPlayerCombatLosses(sessionId, loserId);
+            }
+
             if (winnerId) {
                 this.checkGameVictory(sessionId, winnerId, playerAId, playerBId);
+            } else {
+                this.endCombat(session, playerAId, playerBId, winnerId);
             }
         }
     }
@@ -224,7 +239,7 @@ export class CombatService {
         const player = session.inGamePlayers[playerId];
         if (!player) return { dice: Dice.D4, diceRoll: 0, baseDefense: 0, defenseBonus: 0, totalDefense: 0, tileCombatEffect: TileCombatEffect.BASE };
 
-        const defenseRoll = this.rollDice(player.defenseDice);
+        const defenseRoll = this.rollDice(player.defenseDice, sessionId, false);
         const baseDefense = player.baseDefense;
         const defenseBonus = posture === 'defensive' ? 2 : 0;
         const totalDefense = baseDefense + defenseRoll + defenseBonus + tileCombatEffect;
@@ -248,7 +263,7 @@ export class CombatService {
         if (!session) return { dice: Dice.D4, diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0, tileCombatEffect: TileCombatEffect.BASE };
         const player = session.inGamePlayers[playerId];
         if (!player) return { dice: Dice.D4, diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0, tileCombatEffect: TileCombatEffect.BASE };
-        const attackRoll = this.rollDice(player.attackDice);
+        const attackRoll = this.rollDice(player.attackDice, sessionId, true);
         const baseAttack = player.baseAttack;
         const attackBonus = posture === 'offensive' ? 2 : 0;
         const totalAttack = baseAttack + attackRoll + attackBonus + tileCombatEffect;
@@ -260,7 +275,11 @@ export class CombatService {
         return damage > 0 ? damage : 0;
     }
 
-    private rollDice(dice: Dice): number {
+    private rollDice(dice: Dice, sessionId: string, isAttack: boolean = true): number {
+        const session = this.sessionRepository.findById(sessionId);
+        if (session?.isAdminModeActive) {
+            return isAttack ? DiceSides[dice] : 1;
+        }
         return Math.floor(Math.random() * DiceSides[dice]) + 1;
     }
 

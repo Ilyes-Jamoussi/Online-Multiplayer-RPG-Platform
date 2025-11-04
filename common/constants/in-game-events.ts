@@ -14,6 +14,8 @@ export enum InGameEvents {
     TurnManualEnd = 'turnManualEnd',
 
     PlayerEndTurn = 'playerEndTurn',
+    PlayerAbandonGame = 'playerAbandonGame',
+    PlayerAbandoned = 'playerAbandoned',
     PlayerJoinInGameSession = 'playerJoinInGameSession',
     PlayerJoinedInGameSession = 'playerJoinedInGameSession',
     PlayerLeaveInGameSession = 'playerLeaveInGameSession',
@@ -26,6 +28,12 @@ export enum InGameEvents {
     PlayerActionUsed = 'playerAvailableActionsUpdated',
     PlayerReachableTiles = 'playerReachableTiles',
     PlayerAvailableActions = 'playerAvailableActions',
+
+    ToggleAdminMode = 'toggleAdminMode',
+    AdminModeToggled = 'adminModeToggled',
+    PlayerTeleport = 'playerTeleport',
+    PlayerTeleported = 'playerTeleported',
+    
     ToggleDoorAction = 'toggleDoorAction',
     AttackPlayerAction = 'attackPlayerAction',
     CombatChoice = 'combatChoice',
@@ -37,6 +45,7 @@ export enum InGameEvents {
     CombatNewRoundStarted = 'combatNewRoundStarted',
     CombatVictory = 'combatVictory',
     CombatEnded = 'combatEnded',
+    CombatAbandon = 'combatAbandon',
     CombatCountChanged = 'combatCountChanged',
     CombatWinsChanged = 'combatWinsChanged',
     CombatLossesChanged = 'combatLossesChanged',

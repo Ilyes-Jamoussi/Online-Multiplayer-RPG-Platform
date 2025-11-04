@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { ROUTES } from '@common/enums/routes.enum';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
-import { NotificationService } from '@app/services/notification/notification.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
 import { of, throwError } from 'rxjs';
@@ -16,7 +16,7 @@ describe('ParametersPageComponent', () => {
     let fixture: ComponentFixture<ParametersPageComponent>;
     let mockRouter: jasmine.SpyObj<Router>;
     let mockGameStoreService: jasmine.SpyObj<GameStoreService>;
-    let mockNotificationService: jasmine.SpyObj<NotificationService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
 
     const mockGamePreview: GamePreviewDto = {
         id: 'test-game-id',
@@ -33,7 +33,7 @@ describe('ParametersPageComponent', () => {
     beforeEach(async () => {
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         mockGameStoreService = jasmine.createSpyObj('GameStoreService', ['createGame']);
-        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayError']);
+        mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', ['displayErrorPopup']);
 
         await TestBed.configureTestingModule({
             imports: [ParametersPageComponent],
@@ -42,7 +42,7 @@ describe('ParametersPageComponent', () => {
                 provideHttpClientTesting(),
                 { provide: Router, useValue: mockRouter },
                 { provide: GameStoreService, useValue: mockGameStoreService },
-                { provide: NotificationService, useValue: mockNotificationService },
+                { provide: NotificationCoordinatorService, useValue: mockNotificationService },
             ],
         }).compileComponents();
 
@@ -119,7 +119,7 @@ describe('ParametersPageComponent', () => {
         component.onCreate();
 
         expect(mockGameStoreService.createGame).toHaveBeenCalled();
-        expect(mockNotificationService.displayError).toHaveBeenCalledWith({
+        expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
             title: 'Erreur lors de la création de la partie',
             message: 'Custom error message',
         });
@@ -133,7 +133,7 @@ describe('ParametersPageComponent', () => {
         component.onCreate();
 
         expect(mockGameStoreService.createGame).toHaveBeenCalled();
-        expect(mockNotificationService.displayError).toHaveBeenCalledWith({
+        expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
             title: 'Erreur lors de la création de la partie',
             message: 'Une erreur est survenue',
         });
@@ -146,7 +146,7 @@ describe('ParametersPageComponent', () => {
         component.onCreate();
 
         expect(mockGameStoreService.createGame).toHaveBeenCalled();
-        expect(mockNotificationService.displayError).toHaveBeenCalledWith({
+        expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
             title: 'Erreur lors de la création de la partie',
             message: 'Une erreur est survenue',
         });

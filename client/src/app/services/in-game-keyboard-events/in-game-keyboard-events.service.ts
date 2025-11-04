@@ -1,12 +1,14 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { Orientation } from '@common/enums/orientation.enum';
+import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 
 export enum GameKey {
     Up = 'ArrowUp',
     Down = 'ArrowDown',
     Left = 'ArrowLeft',
     Right = 'ArrowRight',
+    AdminMode = 'd',
 }
 
 export interface KeyboardEventData {
@@ -23,17 +25,22 @@ export interface KeyboardEventData {
 })
 export class InGameKeyboardEventsService implements OnDestroy {
     private isListening = false;
-    private keyDownHandler?: (event: KeyboardEvent) => void;
+    private keyUpHandler?: (event: KeyboardEvent) => void;
+    private keyPressHandler?: (event: KeyboardEvent) => void;
 
-    constructor(private readonly inGameService: InGameService) {}
+    constructor(
+        private readonly inGameService: InGameService,
+        private readonly adminModeService: AdminModeService,
+    ) {}
 
     startListening(): void {
         if (this.isListening) return;
 
         this.isListening = true;
-        this.keyDownHandler = this.handleKeyUp.bind(this);
-
-        document.addEventListener('keyup', this.keyDownHandler);
+        this.keyUpHandler = this.handleKeyUp.bind(this);
+        this.keyPressHandler = this.handleKeyPress.bind(this);
+        document.addEventListener('keyup', this.keyUpHandler);
+        document.addEventListener('keypress', this.keyPressHandler);
     }
 
     stopListening(): void {
@@ -41,8 +48,11 @@ export class InGameKeyboardEventsService implements OnDestroy {
 
         this.isListening = false;
 
-        if (this.keyDownHandler) {
-            document.removeEventListener('keyup', this.keyDownHandler);
+        if (this.keyUpHandler) {
+            document.removeEventListener('keyup', this.keyUpHandler);
+        }
+        if (this.keyPressHandler) {
+            document.removeEventListener('keypress', this.keyPressHandler);
         }
     }
 
@@ -74,8 +84,19 @@ export class InGameKeyboardEventsService implements OnDestroy {
         }
     }
 
+    private handleKeyPress(event: KeyboardEvent): void {
+        if (event.key === GameKey.AdminMode) {
+            event.preventDefault();
+            this.handleAdminModeToggle();
+        }
+    }
+
     private handleMovement(orientation: Orientation): void {
         this.inGameService.movePlayer(orientation);
+    }
+
+    private handleAdminModeToggle(): void {
+        this.adminModeService.toggleAdminMode();
     }
 
     ngOnDestroy(): void {

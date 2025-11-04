@@ -161,7 +161,7 @@ describe('GameEditorInventoryComponent', () => {
     });
 
     it('should delegate to interactions on valid drag start', () => {
-        const kind: PlaceableKind = PlaceableKind.BOAT;
+        const kind: PlaceableKind = PlaceableKind.FLAG;
 
         const evt = makeDragEvent({
             dataTransfer: createDataTransferStub([], {}),

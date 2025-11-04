@@ -6,7 +6,7 @@ import { Vector2 } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { NotificationService } from '@app/services/notification/notification.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
@@ -45,7 +45,7 @@ export class GameMapService {
 
     constructor(
         private readonly gameHttpService: GameHttpService,
-        private readonly notificationService: NotificationService,
+        private readonly notificationCoordinatorService: NotificationCoordinatorService,
         private readonly inGameService: InGameService,
         private readonly assetsService: AssetsService,
         private readonly inGameSocketService: InGameSocketService,
@@ -217,7 +217,7 @@ export class GameMapService {
                     this.buildGameMap(gameData);
                 }),
                 catchError(() => {
-                    this.notificationService.displayError({ title: 'Erreur', message: 'Erreur lors du chargement de la carte' });
+                    this.notificationCoordinatorService.displayErrorPopup({ title: 'Erreur', message: 'Erreur lors du chargement de la carte' });
                     return of(null);
                 }),
             )

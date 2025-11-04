@@ -10,7 +10,7 @@ import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layou
 import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@app/constants/validation.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
-import { NotificationService } from '@app/services/notification/notification.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { BonusType } from '@common/enums/character-creation.enum';
 import { Dice } from '@common/enums/dice.enum';
@@ -35,12 +35,12 @@ export class CharacterCreationPageComponent implements OnInit {
         private readonly characterCreationCheckService: CharacterCreationCheckService,
         private readonly playerService: PlayerService,
         private readonly location: Location,
-        private readonly notificationService: NotificationService,
+        private readonly notificationCoordinatorService: NotificationCoordinatorService,
     ) {}
 
     ngOnInit(): void {
         if (!this.playerService.isConnected()) {
-            this.notificationService.displayError({ 
+            this.notificationCoordinatorService.displayErrorPopup({ 
                 title: 'Session expirée',
                 message: 'Veuillez rejoindre une session.',
                 redirectRoute: ROUTES.HomePage,

@@ -7,7 +7,7 @@ import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layou
 import { ROUTES } from '@common/enums/routes.enum';
 import { GameModeOption, MapSizeOption } from '@app/interfaces/game-parameters.interface';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
-import { NotificationService } from '@app/services/notification/notification.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MAP_SIZE_TO_MAX_PLAYERS, MapSize } from '@common/enums/map-size.enum';
 
@@ -24,7 +24,7 @@ export class ParametersPageComponent {
 
     constructor(
         private readonly router: Router,
-        private readonly notificationService: NotificationService,
+        private readonly notificationCoordinatorService: NotificationCoordinatorService,
         private readonly gameStoreService: GameStoreService,
     ) {}
 
@@ -73,7 +73,7 @@ export class ParametersPageComponent {
                     void this.router.navigate([ROUTES.EditorPage, gamePreview.id]);
                 },
                 error: (err) => {
-                    this.notificationService.displayError({
+                    this.notificationCoordinatorService.displayErrorPopup({
                         title: 'Erreur lors de la création de la partie',
                         message: err?.error?.message ?? 'Une erreur est survenue',
                     });

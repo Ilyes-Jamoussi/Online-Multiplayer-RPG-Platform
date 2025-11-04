@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NotificationDisplayComponent } from '@app/components/features/notification-display/notification-display.component';
+import { PopupNotificationDisplayComponent } from '@app/components/features/popup-notification-display/popup-notification-display.component';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
-    imports: [RouterOutlet, NotificationDisplayComponent],
+    imports: [RouterOutlet, PopupNotificationDisplayComponent],
 })
 export class AppComponent {}
