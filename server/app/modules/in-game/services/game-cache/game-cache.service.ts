@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Game, GameDocument } from '@app/modules/game-store/entities/game.entity';
+import { GameMap } from '@app/interfaces/game-map.interface';
 import { Model } from 'mongoose';
 import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
@@ -8,12 +9,6 @@ import { Orientation } from '@common/enums/orientation.enum';
 import { Player } from '@common/models/player.interface';
 import { MapSize } from '@common/enums/map-size.enum';
 import { TileCost, TileKind } from '@common/enums/tile-kind.enum';
-
-interface GameMap {
-    tiles: (Tile & { playerId: string | null })[];
-    objects: Placeable[];
-    size: MapSize;
-}
 @Injectable()
 export class GameCacheService {
     private readonly sessionsGames = new Map<string, Game>();

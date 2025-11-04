@@ -1,18 +1,11 @@
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { InGameSession } from '@common/models/session.interface';
 import { TurnState } from '@common/models/turn-state.interface';
+import { TurnTimerData } from '@app/interfaces/turn-timer-data.interface';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { TurnTimerStates } from '@common/enums/turn-timer-states.enum';
-
-interface TurnTimerData {
-    timeout: NodeJS.Timeout | null;
-    callback: () => void;
-    startTime: number;
-    duration: number;
-    remainingTime: number;
-}
 
 @Injectable()
 export class TimerService {
