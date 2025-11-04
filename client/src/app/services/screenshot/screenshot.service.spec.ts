@@ -53,4 +53,18 @@ describe('ScreenshotService', () => {
             document.body.removeChild(testElement);
         }
     }, 10000);
+
+    it('should call html2canvas with correct options and return JPEG data URL', async () => {
+        const mockCanvas = {
+            toDataURL: jasmine.createSpy('toDataURL').and.returnValue('data:image/jpeg;base64,mockdata')
+        };
+        
+        spyOn(await import('html2canvas'), 'default').and.returnValue(Promise.resolve(mockCanvas as any));
+        
+        const testElement = document.createElement('div');
+        const result = await service.captureElementAsBase64(testElement);
+        
+        expect(mockCanvas.toDataURL).toHaveBeenCalledWith('image/jpeg', SCREENSHOT_QUALITY);
+        expect(result).toBe('data:image/jpeg;base64,mockdata');
+    });
 });

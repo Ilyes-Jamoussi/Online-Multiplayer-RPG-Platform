@@ -48,11 +48,7 @@ describe('GameMapHeaderComponent', () => {
     });
 
     describe('actions', () => {
-        it('should call startGame on inGameService', () => {
-            component.onStartGame();
 
-            expect(mockInGameService.startGame).toHaveBeenCalled();
-        });
 
         it('should call endTurn on inGameService', () => {
             component.onEndTurn();
@@ -69,32 +65,7 @@ describe('GameMapHeaderComponent', () => {
             expect(turnElement.textContent.trim()).toBe('5');
         });
 
-        it('should show start game button when game not started and is my turn', () => {
-            mockInGameService.isGameStarted = signal(false);
-            mockInGameService.isMyTurn = signal(true);
-            fixture.detectChanges();
 
-            const startButton = fixture.nativeElement.querySelector('.start-game-btn');
-            expect(startButton).toBeTruthy();
-        });
-
-        it('should not show start game button when game is started', () => {
-            mockInGameService.isGameStarted = signal(true);
-            mockInGameService.isMyTurn = signal(true);
-            fixture.detectChanges();
-
-            const startButton = fixture.nativeElement.querySelector('.start-game-btn');
-            expect(startButton).toBeFalsy();
-        });
-
-        it('should not show start game button when not my turn', () => {
-            mockInGameService.isGameStarted = signal(false);
-            mockInGameService.isMyTurn = signal(false);
-            fixture.detectChanges();
-
-            const startButton = fixture.nativeElement.querySelector('.start-game-btn');
-            expect(startButton).toBeFalsy();
-        });
 
         it('should enable end turn button when game started and is my turn', () => {
             mockInGameService.isGameStarted = signal(true);
@@ -123,17 +94,7 @@ describe('GameMapHeaderComponent', () => {
             expect(endButton.disabled).toBe(true);
         });
 
-        it('should call onStartGame when start button is clicked', () => {
-            spyOn(component, 'onStartGame');
-            mockInGameService.isGameStarted = signal(false);
-            mockInGameService.isMyTurn = signal(true);
-            fixture.detectChanges();
 
-            const startButton = fixture.nativeElement.querySelector('.start-game-btn');
-            startButton.click();
-
-            expect(component.onStartGame).toHaveBeenCalled();
-        });
 
         it('should call onEndTurn when end turn button is clicked', () => {
             spyOn(component, 'onEndTurn');

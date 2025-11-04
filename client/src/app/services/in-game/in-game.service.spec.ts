@@ -186,10 +186,7 @@ describe('InGameService', () => {
             expect(mockInGameSocketService.playerLeaveInGameSession).toHaveBeenCalledWith('session1');
         });
 
-        it('should start game', () => {
-            service.startGame();
-            expect(mockInGameSocketService.playerStartGame).toHaveBeenCalledWith('session1');
-        });
+
 
         it('should move player when conditions are met', () => {
             service.updateInGameSession({

@@ -1,40 +1,41 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
-import { PlayerInfoComponent } from './player-info.component';
-import { PlayerService } from '@app/services/player/player.service';
 import { AssetsService } from '@app/services/assets/assets.service';
-import { Player } from '@common/interfaces/player.interface';
+import { InGameService } from '@app/services/in-game/in-game.service';
+import { PlayerService } from '@app/services/player/player.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { Player } from '@common/interfaces/player.interface';
+import { PlayerInfoComponent } from './player-info.component';
 
 describe('PlayerInfoComponent', () => {
     let component: PlayerInfoComponent;
     let fixture: ComponentFixture<PlayerInfoComponent>;
     let mockPlayerService: jasmine.SpyObj<PlayerService>;
     let mockAssetsService: jasmine.SpyObj<AssetsService>;
+    let mockInGameService: jasmine.SpyObj<InGameService>;
 
     const mockPlayer: Player = {
-        id: 'player1',
+        id: 'test-id',
         name: 'Test Player',
         avatar: Avatar.Avatar1,
         isAdmin: false,
-        baseHealth: 4,
-        healthBonus: 0,
-        health: 3,
-        maxHealth: 4,
-        baseSpeed: 3,
+        baseHealth: 10,
+        healthBonus: 2,
+        health: 8,
+        maxHealth: 12,
+        baseSpeed: 5,
         speedBonus: 1,
-        speed: 4,
+        speed: 6,
         baseAttack: 4,
-        attackBonus: 0,
-        attack: 4,
-        baseDefense: 4,
-        defenseBonus: 0,
-        defense: 4,
+        attackBonus: 1,
+        attack: 5,
+        baseDefense: 3,
+        defenseBonus: 2,
+        defense: 5,
         attackDice: Dice.D6,
         defenseDice: Dice.D4,
-        x: 1,
-        y: 1,
+        x: 0,
+        y: 0,
         isInGame: true,
         startPointId: 'start1',
         actionsRemaining: 2,
@@ -45,109 +46,162 @@ describe('PlayerInfoComponent', () => {
     };
 
     beforeEach(async () => {
-        mockPlayerService = jasmine.createSpyObj('PlayerService', [], {
-            player: signal(mockPlayer),
-            name: signal('Test Player'),
-            health: signal(3),
-            maxHealth: signal(4),
-            speed: signal(4),
-            attack: signal(4),
-            defense: signal(4),
-            attackDice: signal(Dice.D6),
-            defenseDice: signal(Dice.D4),
-            speedBonus: signal(1),
-            actionsRemaining: signal(2),
-            combatCount: signal(5),
-            combatWins: signal(3),
-            combatLosses: signal(1),
-            combatDraws: signal(1),
-        });
+        mockPlayerService = jasmine.createSpyObj('PlayerService', [
+            'player',
+            'name',
+            'health',
+            'maxHealth',
+            'speed',
+            'attack',
+            'attackDice',
+            'defense',
+            'defenseDice',
+            'speedBonus',
+            'actionsRemaining',
+            'combatCount',
+            'combatWins',
+            'combatLosses',
+            'combatDraws',
+        ]);
 
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getAvatarStaticImage']);
-        mockAssetsService.getAvatarStaticImage.and.returnValue('/assets/avatar1.png');
+
+        mockInGameService = jasmine.createSpyObj('InGameService', [
+            'isMyTurn',
+            'isGameStarted',
+            'hasUsedAction',
+            'availableActions',
+            'activateActionMode',
+        ]);
 
         await TestBed.configureTestingModule({
             imports: [PlayerInfoComponent],
             providers: [
                 { provide: PlayerService, useValue: mockPlayerService },
                 { provide: AssetsService, useValue: mockAssetsService },
+                { provide: InGameService, useValue: mockInGameService },
             ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(PlayerInfoComponent);
         component = fixture.componentInstance;
+
+        // Setup default return values
+        mockPlayerService.player.and.returnValue(mockPlayer);
+        mockPlayerService.name.and.returnValue(mockPlayer.name);
+        mockPlayerService.health.and.returnValue(mockPlayer.health);
+        mockPlayerService.maxHealth.and.returnValue(mockPlayer.maxHealth);
+        mockPlayerService.speed.and.returnValue(mockPlayer.speed);
+        mockPlayerService.attack.and.returnValue(mockPlayer.attack);
+        mockPlayerService.attackDice.and.returnValue(mockPlayer.attackDice);
+        mockPlayerService.defense.and.returnValue(mockPlayer.defense);
+        mockPlayerService.defenseDice.and.returnValue(mockPlayer.defenseDice);
+        mockPlayerService.speedBonus.and.returnValue(mockPlayer.speedBonus);
+        mockPlayerService.actionsRemaining.and.returnValue(mockPlayer.actionsRemaining);
+        mockPlayerService.combatCount.and.returnValue(mockPlayer.combatCount);
+        mockPlayerService.combatWins.and.returnValue(mockPlayer.combatWins);
+        mockPlayerService.combatLosses.and.returnValue(mockPlayer.combatLosses);
+        mockPlayerService.combatDraws.and.returnValue(mockPlayer.combatDraws);
+        mockAssetsService.getAvatarStaticImage.and.returnValue('avatar-image.png');
+        mockInGameService.isMyTurn.and.returnValue(true);
+        mockInGameService.isGameStarted.and.returnValue(true);
+        mockInGameService.hasUsedAction.and.returnValue(false);
+        mockInGameService.availableActions.and.returnValue([{ type: 'ATTACK', x: 1, y: 1 }]);
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should return player from service', () => {
+    it('should get player from service', () => {
         expect(component.player).toBe(mockPlayer);
+        expect(mockPlayerService.player).toHaveBeenCalled();
     });
 
-    it('should return avatar image', () => {
-        expect(component.avatarImage).toBe('/assets/avatar1.png');
+    it('should get avatar image with player avatar', () => {
+        expect(component.avatarImage).toBe('avatar-image.png');
         expect(mockAssetsService.getAvatarStaticImage).toHaveBeenCalledWith(Avatar.Avatar1);
     });
 
-    it('should use default avatar when player has no avatar', () => {
+    it('should get avatar image with default avatar when player has no avatar', () => {
         const playerWithoutAvatar = { ...mockPlayer, avatar: null };
-        Object.defineProperty(mockPlayerService, 'player', {
-            value: signal(playerWithoutAvatar),
-            configurable: true,
-        });
-        
-        component.avatarImage;
+        mockPlayerService.player.and.returnValue(playerWithoutAvatar);
+
+        expect(component.avatarImage).toBe('avatar-image.png');
         expect(mockAssetsService.getAvatarStaticImage).toHaveBeenCalledWith(Avatar.Avatar1);
     });
 
-    it('should return player name', () => {
+    it('should get player name', () => {
         expect(component.playerName).toBe('Test Player');
+        expect(mockPlayerService.name).toHaveBeenCalled();
     });
 
-    it('should return current health', () => {
-        expect(component.currentHealth).toBe(3);
+    it('should get current health', () => {
+        expect(component.currentHealth).toBe(8);
+        expect(mockPlayerService.health).toHaveBeenCalled();
     });
 
-    it('should return max health', () => {
-        expect(component.maxHealth).toBe(4);
+    it('should get max health', () => {
+        expect(component.maxHealth).toBe(12);
+        expect(mockPlayerService.maxHealth).toHaveBeenCalled();
     });
 
-    it('should return rapidity value', () => {
-        expect(component.rapidityValue).toBe(4);
+    it('should get rapidity value', () => {
+        expect(component.rapidityValue).toBe(6);
+        expect(mockPlayerService.speed).toHaveBeenCalled();
     });
 
-    it('should return attack value', () => {
-        expect(component.attackValue).toBe(4);
+    it('should get base attack', () => {
+        expect(component.baseAttack).toBe(4);
     });
 
-    it('should return defense value', () => {
-        expect(component.defenseValue).toBe(4);
+    it('should get attack value', () => {
+        expect(component.attackValue).toBe(5);
+        expect(mockPlayerService.attack).toHaveBeenCalled();
     });
 
-    it('should return attack dice type', () => {
+    it('should get attack dice type', () => {
         expect(component.attackDiceType).toBe(Dice.D6);
+        expect(mockPlayerService.attackDice).toHaveBeenCalled();
     });
 
-    it('should return defense dice type', () => {
+    it('should get base defense', () => {
+        expect(component.baseDefense).toBe(3);
+    });
+
+    it('should get defense value', () => {
+        expect(component.defenseValue).toBe(5);
+        expect(mockPlayerService.defense).toHaveBeenCalled();
+    });
+
+    it('should get defense dice type', () => {
         expect(component.defenseDiceType).toBe(Dice.D4);
+        expect(mockPlayerService.defenseDice).toHaveBeenCalled();
+    });
+
+    it('should get base speed', () => {
+        expect(component.baseSpeed).toBe(5);
+    });
+
+    it('should get speed bonus', () => {
+        expect(component.speedBonus).toBe(1);
+    });
+
+    it('should get base health', () => {
+        expect(component.baseHealth).toBe(10);
+    });
+
+    it('should get health bonus', () => {
+        expect(component.healthBonus).toBe(2);
     });
 
     it('should calculate remaining base movement points', () => {
-        expect(component.remainingBaseMovementPoints).toBe(3);
+        expect(component.remainingBaseMovementPoints).toBe(5);
     });
 
-    it('should return 0 base movement points when speed bonus exceeds total speed', () => {
-        Object.defineProperty(mockPlayerService, 'speed', {
-            value: signal(2),
-            configurable: true,
-        });
-        Object.defineProperty(mockPlayerService, 'speedBonus', {
-            value: signal(5),
-            configurable: true,
-        });
-        
+    it('should calculate remaining base movement points when negative', () => {
+        mockPlayerService.speed.and.returnValue(0);
+        mockPlayerService.speedBonus.and.returnValue(2);
         expect(component.remainingBaseMovementPoints).toBe(0);
     });
 
@@ -155,76 +209,99 @@ describe('PlayerInfoComponent', () => {
         expect(component.remainingBonusMovementPoints).toBe(1);
     });
 
-    it('should limit bonus movement points to total speed', () => {
-        Object.defineProperty(mockPlayerService, 'speed', {
-            value: signal(2),
-            configurable: true,
-        });
-        Object.defineProperty(mockPlayerService, 'speedBonus', {
-            value: signal(5),
-            configurable: true,
-        });
-        
-        expect(component.remainingBonusMovementPoints).toBe(2);
+    it('should calculate remaining bonus movement points when speed is less than bonus', () => {
+        mockPlayerService.speed.and.returnValue(0);
+        mockPlayerService.speedBonus.and.returnValue(2);
+        expect(component.remainingBonusMovementPoints).toBe(0);
     });
 
-    it('should return actions remaining', () => {
+    it('should get actions remaining', () => {
         expect(component.actionsRemaining).toBe(2);
+        expect(mockPlayerService.actionsRemaining).toHaveBeenCalled();
     });
 
     it('should calculate HP percentage', () => {
-        expect(component.hpPercentage).toBe(75);
+        expect(component.hpPercentage).toBeCloseTo(66.67, 2);
     });
 
-    it('should return 0 HP percentage when max health is 0', () => {
-        Object.defineProperty(mockPlayerService, 'maxHealth', {
-            value: signal(0),
-            configurable: true,
-        });
-        
+    it('should calculate HP percentage when max health is 0', () => {
+        mockPlayerService.maxHealth.and.returnValue(0);
         expect(component.hpPercentage).toBe(0);
     });
 
     it('should return hp-high class for high HP', () => {
-        Object.defineProperty(mockPlayerService, 'health', {
-            value: signal(4),
-            configurable: true,
-        });
-        
+        mockPlayerService.health.and.returnValue(10);
+        mockPlayerService.maxHealth.and.returnValue(12);
         expect(component.hpColorClass).toBe('hp-high');
     });
 
     it('should return hp-medium class for medium HP', () => {
-        Object.defineProperty(mockPlayerService, 'health', {
-            value: signal(2),
-            configurable: true,
-        });
-        
+        mockPlayerService.health.and.returnValue(5);
+        mockPlayerService.maxHealth.and.returnValue(12);
         expect(component.hpColorClass).toBe('hp-medium');
     });
 
     it('should return hp-critical class for low HP', () => {
-        Object.defineProperty(mockPlayerService, 'health', {
-            value: signal(1),
-            configurable: true,
-        });
-        
+        mockPlayerService.health.and.returnValue(2);
+        mockPlayerService.maxHealth.and.returnValue(12);
         expect(component.hpColorClass).toBe('hp-critical');
     });
 
-    it('should return total combats', () => {
+    it('should get total combats', () => {
         expect(component.totalCombats).toBe(5);
+        expect(mockPlayerService.combatCount).toHaveBeenCalled();
     });
 
-    it('should return combat wins', () => {
+    it('should get combat wins', () => {
         expect(component.combatWins).toBe(3);
+        expect(mockPlayerService.combatWins).toHaveBeenCalled();
     });
 
-    it('should return combat losses', () => {
+    it('should get combat losses', () => {
         expect(component.combatLosses).toBe(1);
+        expect(mockPlayerService.combatLosses).toHaveBeenCalled();
     });
 
-    it('should return combat draws', () => {
+    it('should get combat draws', () => {
         expect(component.combatDraws).toBe(1);
+        expect(mockPlayerService.combatDraws).toHaveBeenCalled();
+    });
+
+    it('should disable action when not my turn', () => {
+        mockInGameService.isMyTurn.and.returnValue(false);
+        expect(component.isActionDisabled()).toBe(true);
+    });
+
+    it('should disable action when game not started', () => {
+        mockInGameService.isGameStarted.and.returnValue(false);
+        expect(component.isActionDisabled()).toBe(true);
+    });
+
+    it('should disable action when already used action', () => {
+        mockInGameService.hasUsedAction.and.returnValue(true);
+        expect(component.isActionDisabled()).toBe(true);
+    });
+
+    it('should disable action when no available actions', () => {
+        mockInGameService.availableActions.and.returnValue([]);
+        expect(component.isActionDisabled()).toBe(true);
+    });
+
+    it('should enable action when all conditions are met', () => {
+        expect(component.isActionDisabled()).toBe(false);
+    });
+
+    it('should return true when has available actions', () => {
+        expect(component.hasAvailableActions()).toBe(true);
+    });
+
+    it('should return false when no available actions', () => {
+        mockInGameService.availableActions.and.returnValue([]);
+        expect(component.hasAvailableActions()).toBe(false);
+    });
+
+    it('should activate action mode on action', () => {
+        component.onAction();
+        expect(mockInGameService.activateActionMode).toHaveBeenCalled();
     });
 });

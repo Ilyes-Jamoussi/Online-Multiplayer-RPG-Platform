@@ -170,6 +170,50 @@ describe('TimerCoordinatorService', () => {
         });
     });
 
+    describe('Game Over Timer', () => {
+        it('should start game over timer with correct duration', () => {
+            const mockRouter = { navigate: jasmine.createSpy('navigate') };
+            service.startGameOverTimer(mockRouter as any);
+
+            expect(service.gameOverTimeRemaining()).toBe(10);
+            expect(service.isGameOverActive()).toBe(true);
+        });
+
+        it('should decrement game over timer every second', () => {
+            const mockRouter = { navigate: jasmine.createSpy('navigate') };
+            service.startGameOverTimer(mockRouter as any);
+
+            jasmine.clock().tick(MILLISECONDS_PER_SECOND);
+            expect(service.gameOverTimeRemaining()).toBe(9);
+
+            jasmine.clock().tick(MILLISECONDS_PER_SECOND);
+            expect(service.gameOverTimeRemaining()).toBe(8);
+        });
+
+        it('should navigate to home page when timer reaches 1 second', () => {
+            const mockRouter = { navigate: jasmine.createSpy('navigate') };
+            service.startGameOverTimer(mockRouter as any);
+
+            jasmine.clock().tick(9 * MILLISECONDS_PER_SECOND);
+            expect(service.gameOverTimeRemaining()).toBe(1);
+
+            jasmine.clock().tick(MILLISECONDS_PER_SECOND);
+            expect(mockRouter.navigate).toHaveBeenCalledWith(['home']);
+            expect(service.isGameOverActive()).toBe(false);
+            expect(service.gameOverTimeRemaining()).toBe(0);
+        });
+
+        it('should stop game over timer manually', () => {
+            const mockRouter = { navigate: jasmine.createSpy('navigate') };
+            service.startGameOverTimer(mockRouter as any);
+            expect(service.isGameOverActive()).toBe(true);
+
+            service.stopGameOverTimer();
+            expect(service.isGameOverActive()).toBe(false);
+            expect(service.gameOverTimeRemaining()).toBe(0);
+        });
+    });
+
     describe('Edge Cases', () => {
         it('should handle pause when timer is not active', () => {
             service.pauseTurnTimer();
