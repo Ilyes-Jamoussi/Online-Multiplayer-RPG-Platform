@@ -63,16 +63,34 @@ export class GameCacheService {
         if (currentX < 0 || currentX >= mapSize || currentY < 0 || currentY >= mapSize) {
             throw new BadRequestException('Invalid position');
         }
+
+        let nextX: number;
+        let nextY: number;
+
         switch (orientation) {
             case Orientation.N:
-                return { x: currentX, y: currentY - 1 };
+                nextX = currentX;
+                nextY = currentY - 1;
+                break;
             case Orientation.E:
-                return { x: currentX + 1, y: currentY };
+                nextX = currentX + 1;
+                nextY = currentY;
+                break;
             case Orientation.S:
-                return { x: currentX, y: currentY + 1 };
+                nextX = currentX;
+                nextY = currentY + 1;
+                break;
             case Orientation.W:
-                return { x: currentX - 1, y: currentY };
+                nextX = currentX - 1;
+                nextY = currentY;
+                break;
         }
+
+        if (nextX < 0 || nextX >= mapSize || nextY < 0 || nextY >= mapSize) {
+            throw new BadRequestException('Next position is out of bounds');
+        }
+
+        return { x: nextX, y: nextY };
     }
 
     getPlaceablesAtPosition(sessionId: string, x: number, y: number): Placeable[] {
