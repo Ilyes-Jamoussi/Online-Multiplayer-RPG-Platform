@@ -4,6 +4,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { Player } from '@common/interfaces/player.interface';
+import { PlayerCardClasses } from '@common/interfaces/player-card-classes.interface';
 
 @Component({
     selector: 'app-player-card',
@@ -28,8 +29,8 @@ export class PlayerCardComponent {
     get isAdmin(): boolean {
         return this.player.isAdmin;
     }
-    // todo: create interface
-    get cardClasses(): { [key: string]: boolean } {
+
+    get cardClasses(): PlayerCardClasses {
         return {
             'is-me': this.isMe,
             'admin': this.isAdmin,

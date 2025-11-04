@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, effect, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { ROUTES } from '@app/enums/routes.enum';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
-import { ROUTES } from '@app/enums/routes.enum';
+import { PlayerStat } from '@common/interfaces/player-stat.interface';
 
 @Component({
     selector: 'app-game-over-overlay',
@@ -45,8 +46,7 @@ export class GameOverOverlayComponent implements OnDestroy {
     get title(): string {
         return this.isWinner ? 'Tu as gagné la partie !' : `${this.gameOverData?.winnerName} a gagné la partie !`;
     }
-    // todo: create interface
-    get playerStats(): { name: string; wins: number; isWinner: boolean }[] {
+    get playerStats(): PlayerStat[] {
         if (!this.gameOverData) return [];
 
         const players = Object.values(this.inGameService.inGamePlayers());
