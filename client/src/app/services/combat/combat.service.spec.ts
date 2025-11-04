@@ -166,16 +166,16 @@ describe('CombatService', () => {
         combatSocketSpy.onCombatVictory.and.callFake((callback: any) => {
             victoryCallback = callback;
         });
-        combatSocketSpy.onCombatCountChanged.and.callFake((callback: any) => {
+        combatSocketSpy.onCombatCountChanged.and.callFake((callback: (data: any) => void) => {
             combatCountCallback = callback;
         });
-        combatSocketSpy.onCombatWinsChanged.and.callFake((callback: any) => {
+        combatSocketSpy.onCombatWinsChanged.and.callFake((callback: (data: any) => void) => {
             combatWinsCallback = callback;
         });
-        combatSocketSpy.onCombatLossesChanged.and.callFake((callback: any) => {
+        combatSocketSpy.onCombatLossesChanged.and.callFake((callback: (data: any) => void) => {
             combatLossesCallback = callback;
         });
-        combatSocketSpy.onCombatDrawsChanged.and.callFake((callback: any) => {
+        combatSocketSpy.onCombatDrawsChanged.and.callFake((callback: (data: any) => void) => {
             combatDrawsCallback = callback;
         });
 
