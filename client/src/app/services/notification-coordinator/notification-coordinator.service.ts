@@ -17,11 +17,11 @@ const DEFAULT_DURATION = 3000;
 })
 export class NotificationCoordinatorService {
     private readonly _popupNotification = signal<NotificationMessage | null>(null);
-    private readonly _toasts = signal<Toast[]>([]);
+    private readonly _toastNotifications = signal<Toast[]>([]);
     private toastIdCounter = 0;
 
     readonly notification = this._popupNotification.asReadonly();
-    readonly toasts = this._toasts.asReadonly();
+    readonly toasts = this._toastNotifications.asReadonly();
 
     displayErrorPopup(error: Omit<NotificationMessage, 'type'>): void {
         this._popupNotification.set({ ...error, type: 'error' });
@@ -43,7 +43,7 @@ export class NotificationCoordinatorService {
         const id = `toast-${this.toastIdCounter++}`;
         const toast: Toast = { id, message, type, duration };
 
-        this._toasts.update((toasts) => [...toasts, toast]);
+        this._toastNotifications.update((toasts) => [...toasts, toast]);
 
         if (duration > 0) {
             setTimeout(() => {
@@ -69,11 +69,11 @@ export class NotificationCoordinatorService {
     }
 
     removeToast(id: string): void {
-        this._toasts.update((toasts) => toasts.filter((toast) => toast.id !== id));
+        this._toastNotifications.update((toasts) => toasts.filter((toast) => toast.id !== id));
     }
 
     removeToasts(): void {
-        this._toasts.set([]);
+        this._toastNotifications.set([]);
     }
 
     resetNotifications(): void {
@@ -81,4 +81,3 @@ export class NotificationCoordinatorService {
         this.removeToasts();
     }
 }
-
