@@ -4,36 +4,12 @@ import { CombatSocketService } from '@app/services/combat-socket/combat-socket.s
 import { PlayerService } from '@app/services/player/player.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { CombatData } from '@app/interfaces/combat-data.interface';
+import { VictoryData } from '@app/interfaces/victory-data.interface';
+import { DamageDisplay } from '@app/interfaces/damage-display.interface';
 import { DAMAGE_DISPLAY_DURATION_MS, VICTORY_NOTIFICATION_DURATION_MS, COMBAT_TOAST_DURATION_MS } from '@app/constants/combat.constants';
 import { CombatResult } from '@common/interfaces/combat.interface';
-import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile-kind.enum';
-
-interface CombatData {
-    attackerId: string;
-    targetId: string;
-    userRole: 'attacker' | 'target' | 'spectator';
-}
-
-interface VictoryData {
-    playerAId: string;
-    playerBId: string;
-    winnerId: string | null;
-    abandon: boolean;
-}
-
-interface DamageDisplay {
-    playerId: string;
-    damage: number;
-    attackRoll: number;
-    attackDice: Dice;
-    totalAttack: number;
-    defenseRoll: number;
-    defenseDice: Dice;
-    totalDefense: number;
-    tileEffect: number;
-    visible: boolean;
-}
 
 @Injectable({
     providedIn: 'root',
