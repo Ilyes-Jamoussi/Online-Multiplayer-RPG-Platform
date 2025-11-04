@@ -5,6 +5,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotFoundException } from '@nestjs/common';
 import { Orientation } from '@common/enums/orientation.enum';
 import { TileKind } from '@common/enums/tile.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
@@ -161,7 +162,7 @@ describe('InGameActionService', () => {
             service.toggleDoor(session, PLAYER_A_ID, POS_X_2, POS_Y_3);
 
             expect(mockGameMap.tiles[0].open).toBe(true);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('door.toggled', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.DoorToggled, {
                 session,
                 playerId: PLAYER_A_ID,
                 x: POS_X_2,
@@ -189,7 +190,7 @@ describe('InGameActionService', () => {
             service.toggleDoor(session, PLAYER_A_ID, POS_X_2, POS_Y_3);
 
             expect(mockGameMap.tiles[0].open).toBe(false);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('door.toggled', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.DoorToggled, {
                 session,
                 playerId: PLAYER_A_ID,
                 x: POS_X_2,
@@ -267,7 +268,7 @@ describe('InGameActionService', () => {
             const result = service.calculateAvailableActions(session, PLAYER_A_ID);
 
             expect(result).toContainEqual({ type: 'ATTACK', x: POS_X_2, y: POS_Y_3 });
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.availableActions', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerAvailableActions, {
                 session,
                 playerId: PLAYER_A_ID,
                 actions: result,
@@ -436,7 +437,7 @@ describe('InGameActionService', () => {
 
             const result = service.calculateAvailableActions(session, PLAYER_A_ID);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.availableActions', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerAvailableActions, {
                 session,
                 playerId: PLAYER_A_ID,
                 actions: result,

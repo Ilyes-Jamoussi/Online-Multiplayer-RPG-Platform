@@ -8,6 +8,7 @@ import { InGameMovementService } from '@app/modules/in-game/services/in-game-mov
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { Dice } from '@common/enums/dice.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { TileCombatEffect, TileKind } from '@common/enums/tile.enum';
 import { CombatState } from '@common/interfaces/combat.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -453,7 +454,7 @@ describe('CombatService', () => {
             service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE);
 
             expect(combat.playerAPosture).toBe(CombatPosture.OFFENSIVE);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.postureSelected', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatPostureSelected, {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_A_ID,
                 posture: CombatPosture.OFFENSIVE,
@@ -474,7 +475,7 @@ describe('CombatService', () => {
             service.combatChoice(SESSION_ID, PLAYER_B_ID, CombatPosture.DEFENSIVE);
 
             expect(combat.playerBPosture).toBe(CombatPosture.DEFENSIVE);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.postureSelected', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatPostureSelected, {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_B_ID,
                 posture: CombatPosture.DEFENSIVE,
@@ -548,7 +549,7 @@ describe('CombatService', () => {
 
             expect(combat.playerAPosture).toBeNull();
             expect(combat.playerBPosture).toBe(CombatPosture.DEFENSIVE);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.postureSelected', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatPostureSelected, {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_B_ID,
                 posture: CombatPosture.DEFENSIVE,
@@ -680,7 +681,7 @@ describe('CombatService', () => {
 
             expect(servicePrivate.activeCombats.has(SESSION_ID)).toBe(false);
             expect(combatTimerService.stopCombatTimer).toHaveBeenCalledWith(session);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('combat.victory', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatVictory, {
                 sessionId: SESSION_ID,
                 playerAId: PLAYER_A_ID,
                 playerBId: PLAYER_B_ID,
@@ -774,17 +775,17 @@ describe('CombatService', () => {
 
             servicePrivate.combatRound(SESSION_ID);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.healthChanged', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerHealthChanged, {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_A_ID,
                 newHealth: HEALTH_AFTER_DAMAGE_1,
             });
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.healthChanged', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerHealthChanged, {
                 sessionId: SESSION_ID,
                 playerId: PLAYER_B_ID,
                 newHealth: HEALTH_AFTER_DAMAGE_2,
             });
-            expect(eventEmitter.emit).toHaveBeenCalledWith('player.combatResult', expect.objectContaining({
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatResult, expect.objectContaining({
                 sessionId: SESSION_ID,
                 playerAId: PLAYER_A_ID,
                 playerBId: PLAYER_B_ID,
@@ -1235,7 +1236,7 @@ describe('CombatService', () => {
 
             expect(timerService.forceStopTimer).toHaveBeenCalledWith(SESSION_ID);
             expect(combatTimerService.stopCombatTimer).toHaveBeenCalledWith(session);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('game.over', {
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.GameOver, {
                 sessionId: SESSION_ID,
                 winnerId: PLAYER_A_ID,
                 winnerName: 'Player A',

@@ -11,6 +11,7 @@ import { SessionService } from '@app/modules/session/services/session.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { SessionEvents } from '@common/enums/session-events.enum';
 import { SocketResponse } from '@common/types/socket-response.type';
 import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
@@ -247,13 +248,13 @@ export class SessionGateway implements OnGatewayDisconnect {
         socket.emit(SessionEvents.AvailableSessionsUpdated, successResponse<AvailableSessionsUpdatedDto>({ sessions }));
     }
 
-    @OnEvent('session.availabilityChanged')
+    @OnEvent(ServerEvents.SessionAvailabilityChanged)
     handleAvailabilityChange(): void {
         const sessions = this.sessionService.getAvailableSessions();
         this.server.emit(SessionEvents.AvailableSessionsUpdated, successResponse<AvailableSessionsUpdatedDto>({ sessions }));
     }
 
-    @OnEvent('session.autoLocked')
+    @OnEvent(ServerEvents.SessionAutoLocked)
     handleAutoLocked(sessionId: string): void {
         this.server.to(sessionId).emit(SessionEvents.SessionAutoLocked, successResponse({}));
     }

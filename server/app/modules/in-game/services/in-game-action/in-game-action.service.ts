@@ -1,5 +1,6 @@
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { Orientation } from '@common/enums/orientation.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -27,7 +28,7 @@ export class InGameActionService {
         if (tile && tile.kind === TileKind.DOOR) {
             tile.open = !tile.open;
 
-            this.eventEmitter.emit('door.toggled', {
+            this.eventEmitter.emit(ServerEvents.DoorToggled, {
                 session,
                 playerId,
                 x,
@@ -63,7 +64,7 @@ export class InGameActionService {
             }
         }
 
-        this.eventEmitter.emit('player.availableActions', {
+        this.eventEmitter.emit(ServerEvents.PlayerAvailableActions, {
             session,
             playerId,
             actions,

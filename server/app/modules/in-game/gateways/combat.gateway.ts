@@ -2,6 +2,7 @@ import { CombatService } from '@app/modules/in-game/services/combat/combat.servi
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
 import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -49,7 +50,7 @@ export class CombatGateway {
         }
     }
 
-    @OnEvent('combat.started')
+    @OnEvent(ServerEvents.CombatStarted)
     handleCombatStarted(payload: {
         sessionId: string;
         attackerId: string;
@@ -71,7 +72,7 @@ export class CombatGateway {
         }
     }
 
-    @OnEvent('combat.timerRestart')
+    @OnEvent(ServerEvents.CombatTimerRestart)
     handleCombatTimerRestart(payload: { sessionId: string }): void {
         const session = this.combatService.getSession(payload.sessionId);
         if (session) {
@@ -79,7 +80,7 @@ export class CombatGateway {
         }
     }
 
-    @OnEvent('combat.victory')
+    @OnEvent(ServerEvents.CombatVictory)
     handleCombatVictory(payload: { sessionId: string; playerAId: string; playerBId: string; winnerId: string | null; abandon: boolean }) {
         const session = this.combatService.getSession(payload.sessionId);
         if (session) {
@@ -95,7 +96,7 @@ export class CombatGateway {
         }
     }
 
-    @OnEvent('combat.newRound')
+    @OnEvent(ServerEvents.CombatNewRound)
     handleCombatNewRound(payload: { sessionId: string }) {
         const session = this.combatService.getSession(payload.sessionId);
         if (session) {
@@ -103,7 +104,7 @@ export class CombatGateway {
         }
     }
 
-    @OnEvent('combat.postureSelected')
+    @OnEvent(ServerEvents.CombatPostureSelected)
     handleCombatPostureSelected(payload: { sessionId: string; playerId: string; posture: CombatPosture }) {
         const session = this.combatService.getSession(payload.sessionId);
         if (session) {
@@ -117,7 +118,7 @@ export class CombatGateway {
         }
     }
 
-    @OnEvent('player.combatResult')
+    @OnEvent(ServerEvents.PlayerCombatResult)
     handlePlayerCombatResult(payload: { sessionId: string } & CombatResult) {
         const session = this.combatService.getSession(payload.sessionId);
         if (session) {
@@ -135,7 +136,7 @@ export class CombatGateway {
         }
     }
 
-    @OnEvent('player.healthChanged')
+    @OnEvent(ServerEvents.PlayerHealthChanged)
     handlePlayerHealthChanged(payload: { sessionId: string; playerId: string; newHealth: number }) {
         const session = this.combatService.getSession(payload.sessionId);
         this.server
@@ -143,7 +144,7 @@ export class CombatGateway {
             .emit(InGameEvents.PlayerHealthChanged, successResponse({ playerId: payload.playerId, newHealth: payload.newHealth }));
     }
 
-    @OnEvent('player.combatCountChanged')
+    @OnEvent(ServerEvents.PlayerCombatCountChanged)
     handlePlayerCombatCountChanged(payload: { sessionId: string; playerId: string; combatCount: number }) {
         const session = this.combatService.getSession(payload.sessionId);
         this.server
@@ -151,7 +152,7 @@ export class CombatGateway {
             .emit(InGameEvents.CombatCountChanged, successResponse({ playerId: payload.playerId, combatCount: payload.combatCount }));
     }
 
-    @OnEvent('player.combatWinsChanged')
+    @OnEvent(ServerEvents.PlayerCombatWinsChanged)
     handlePlayerCombatWinsChanged(payload: { sessionId: string; playerId: string; combatWins: number }) {
         const session = this.combatService.getSession(payload.sessionId);
         this.server
@@ -159,7 +160,7 @@ export class CombatGateway {
             .emit(InGameEvents.CombatWinsChanged, successResponse({ playerId: payload.playerId, combatWins: payload.combatWins }));
     }
 
-    @OnEvent('player.combatLossesChanged')
+    @OnEvent(ServerEvents.PlayerCombatLossesChanged)
     handlePlayerCombatLossesChanged(payload: { sessionId: string; playerId: string; combatLosses: number }) {
         const session = this.combatService.getSession(payload.sessionId);
         this.server
@@ -167,7 +168,7 @@ export class CombatGateway {
             .emit(InGameEvents.CombatLossesChanged, successResponse({ playerId: payload.playerId, combatLosses: payload.combatLosses }));
     }
 
-    @OnEvent('player.combatDrawsChanged')
+    @OnEvent(ServerEvents.PlayerCombatDrawsChanged)
     handlePlayerCombatDrawsChanged(payload: { sessionId: string; playerId: string; combatDraws: number }) {
         const session = this.combatService.getSession(payload.sessionId);
         this.server

@@ -1,4 +1,5 @@
 import { COMBAT_DURATION } from '@common/constants/in-game';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -13,7 +14,7 @@ export class CombatTimerService {
     startCombatTimer(session: InGameSession, attackerId: string, targetId: string, attackerTileEffect?: number, targetTileEffect?: number): void {
         this.activeCombats.add(session.id);
 
-        this.eventEmitter.emit('combat.started', {
+        this.eventEmitter.emit(ServerEvents.CombatStarted, {
             sessionId: session.id,
             attackerId,
             targetId,
@@ -22,7 +23,7 @@ export class CombatTimerService {
         });
 
         this.scheduleCombatLoop(session);
-        this.eventEmitter.emit('combat.timerRestart', { sessionId: session.id });
+        this.eventEmitter.emit(ServerEvents.CombatTimerRestart, { sessionId: session.id });
     }
 
     stopCombatTimer(session: InGameSession): void {
@@ -36,9 +37,9 @@ export class CombatTimerService {
 
     forceNextLoop(session: InGameSession): void {
         this.clearCombatTimer(session);
-        this.eventEmitter.emit('combat.newRound', { sessionId: session.id });
-        this.eventEmitter.emit('combat.timerLoop', { sessionId: session.id });
-        this.eventEmitter.emit('combat.timerRestart', { sessionId: session.id });
+        this.eventEmitter.emit(ServerEvents.CombatNewRound, { sessionId: session.id });
+        this.eventEmitter.emit(ServerEvents.CombatTimerLoop, { sessionId: session.id });
+        this.eventEmitter.emit(ServerEvents.CombatTimerRestart, { sessionId: session.id });
         this.scheduleCombatLoop(session);
     }
 
@@ -47,9 +48,9 @@ export class CombatTimerService {
         const sessionId = session.id;
         const timer = setTimeout(() => {
             if (this.activeCombats.has(sessionId)) {
-                this.eventEmitter.emit('combat.newRound', { sessionId });
-                this.eventEmitter.emit('combat.timerLoop', { sessionId });
-                this.eventEmitter.emit('combat.timerRestart', { sessionId });
+                this.eventEmitter.emit(ServerEvents.CombatNewRound, { sessionId });
+                this.eventEmitter.emit(ServerEvents.CombatTimerLoop, { sessionId });
+                this.eventEmitter.emit(ServerEvents.CombatTimerRestart, { sessionId });
                 this.scheduleCombatLoop(session);
             }
         }, COMBAT_DURATION);

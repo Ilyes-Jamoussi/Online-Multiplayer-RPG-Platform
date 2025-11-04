@@ -8,6 +8,7 @@ import { PlayerTeleportedDto } from '@app/modules/in-game/dto/player-teleported.
 import { ToggleDoorActionDto } from '@app/modules/in-game/dto/toggle-door-action.dto';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
@@ -81,34 +82,34 @@ export class InGameGateway {
         }
     }
 
-    @OnEvent('turn.started')
+    @OnEvent(ServerEvents.TurnStarted)
     handleTurnStarted(payload: { session: InGameSession }) {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnStarted, successResponse(payload.session));
         this.inGameService.getReachableTiles(payload.session.id, payload.session.currentTurn.activePlayerId);
         this.inGameService.getAvailableActions(payload.session.id, payload.session.currentTurn.activePlayerId);
     }
 
-    @OnEvent('turn.ended')
+    @OnEvent(ServerEvents.TurnEnded)
     handleTurnEnded(payload: { session: InGameSession }) {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnEnded, successResponse(payload.session));
     }
 
-    @OnEvent('turn.transition')
+    @OnEvent(ServerEvents.TurnTransition)
     handleTurnTransition(payload: { session: InGameSession }) {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnTransitionEnded, successResponse(payload.session));
     }
 
-    @OnEvent('turn.timeout')
+    @OnEvent(ServerEvents.TurnTimeout)
     handleTurnTimeout(payload: { session: InGameSession }) {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnTimeout, successResponse(payload.session));
     }
 
-    @OnEvent('turn.forcedEnd')
+    @OnEvent(ServerEvents.TurnForcedEnd)
     handleForcedEnd(payload: { session: InGameSession }) {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnForcedEnd, successResponse(payload.session));
     }
 
-    @OnEvent('door.toggled')
+    @OnEvent(ServerEvents.DoorToggled)
     handleDoorToggled(payload: { session: InGameSession; playerId: string; x: number; y: number; isOpen: boolean }) {
         this.server
             .to(payload.session.inGameId)
@@ -116,7 +117,7 @@ export class InGameGateway {
         this.server.to(payload.playerId).emit(InGameEvents.PlayerActionUsed, successResponse({}));
     }
 
-    @OnEvent('player.moved')
+    @OnEvent(ServerEvents.PlayerMoved)
     handlePlayerMoved(payload: { session: InGameSession; playerId: string; x: number; y: number; speed: number }) {
         this.server
             .to(payload.session.inGameId)
@@ -126,7 +127,7 @@ export class InGameGateway {
             );
     }
 
-    @OnEvent('player.reachableTiles')
+    @OnEvent(ServerEvents.PlayerReachableTiles)
     handlePlayerReachableTiles(payload: { playerId: string; reachable: ReachableTile[] }) {
         this.server.to(payload.playerId).emit(InGameEvents.PlayerReachableTiles, successResponse(payload.reachable));
     }
@@ -156,18 +157,18 @@ export class InGameGateway {
         }
     }
 
-    @OnEvent('player.updated')
+    @OnEvent(ServerEvents.PlayerUpdated)
     handlePlayerUpdated(payload: { sessionId: string; player: Player }) {
         const session = this.inGameService.getSession(payload.sessionId);
         this.server.to(session.inGameId).emit(InGameEvents.PlayerUpdated, successResponse(payload.player));
     }
 
-    @OnEvent('player.availableActions')
+    @OnEvent(ServerEvents.PlayerAvailableActions)
     handlePlayerAvailableActions(payload: { session: InGameSession; playerId: string; actions: AvailableAction[] }) {
         this.server.to(payload.playerId).emit(InGameEvents.PlayerAvailableActions, successResponse(payload.actions));
     }
 
-    @OnEvent('game.over')
+    @OnEvent(ServerEvents.GameOver)
     handleGameOver(payload: { sessionId: string; winnerId: string; winnerName: string }) {
         const session = this.inGameService.getSession(payload.sessionId);
         this.server

@@ -7,6 +7,7 @@ import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-s
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatState } from '@common/interfaces/combat.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -72,7 +73,7 @@ export class CombatService {
             throw new BadRequestException('Player not in combat');
         }
 
-        this.eventEmitter.emit('combat.postureSelected', { sessionId, playerId, posture: choice });
+        this.eventEmitter.emit(ServerEvents.CombatPostureSelected, { sessionId, playerId, posture: choice });
 
         if (combat.playerAPosture !== null && combat.playerBPosture !== null) {
             const session = this.sessionRepository.findById(sessionId);
@@ -103,7 +104,7 @@ export class CombatService {
         this.sessionRepository.incrementPlayerCombatCount(session.id, playerBId);
     }
 
-    @OnEvent('combat.timerLoop')
+    @OnEvent(ServerEvents.CombatTimerLoop)
     handleTimerLoop(payload: { sessionId: string }): void {
         const combat = this.activeCombats.get(payload.sessionId);
         if (combat) {
@@ -115,7 +116,7 @@ export class CombatService {
         this.activeCombats.delete(session.id);
         this.combatTimerService.stopCombatTimer(session);
 
-        this.eventEmitter.emit('combat.victory', {
+        this.eventEmitter.emit(ServerEvents.CombatVictory, {
             sessionId: session.id,
             playerAId,
             playerBId,
@@ -152,19 +153,19 @@ export class CombatService {
         const playerAHealth = this.sessionRepository.decreasePlayerHealth(sessionId, playerAId, playerADamage);
         const playerBHealth = this.sessionRepository.decreasePlayerHealth(sessionId, playerBId, playerBDamage);
 
-        this.eventEmitter.emit('player.healthChanged', {
+        this.eventEmitter.emit(ServerEvents.PlayerHealthChanged, {
             sessionId,
             playerId: playerAId,
             newHealth: playerAHealth,
         });
 
-        this.eventEmitter.emit('player.healthChanged', {
+        this.eventEmitter.emit(ServerEvents.PlayerHealthChanged, {
             sessionId,
             playerId: playerBId,
             newHealth: playerBHealth,
         });
 
-        this.eventEmitter.emit('player.combatResult', {
+        this.eventEmitter.emit(ServerEvents.PlayerCombatResult, {
             sessionId,
             playerAId,
             playerBId,
@@ -293,7 +294,7 @@ export class CombatService {
         if (winner && winner.combatWins >= COMBAT_WINS_TO_WIN_GAME) {
             this.timerService.forceStopTimer(sessionId);
             this.combatTimerService.stopCombatTimer(session);
-            this.eventEmitter.emit('game.over', {
+            this.eventEmitter.emit(ServerEvents.GameOver, {
                 sessionId,
                 winnerId,
                 winnerName: winner.name,
