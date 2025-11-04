@@ -5,10 +5,9 @@ import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile-kind.enum';
-
-const PERCENTAGE_MULTIPLIER = 100;
 
 @Component({
     selector: 'app-combat-overlay',

@@ -2,11 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { HP_HIGH_THRESHOLD_PERCENT, HP_MEDIUM_THRESHOLD_PERCENT, PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { Avatar } from '@common/enums/avatar.enum';
-
-const PERCENTAGE_MULTIPLIER = 100;
-const HP_HIGH_THRESHOLD = 70;
-const HP_MEDIUM_THRESHOLD = 30;
 
 @Component({
     selector: 'app-player-info',
@@ -84,8 +81,8 @@ export class PlayerInfoComponent {
 
     get hpColorClass(): string {
         const percentage = this.hpPercentage;
-        if (percentage > HP_HIGH_THRESHOLD) return 'hp-high';
-        if (percentage > HP_MEDIUM_THRESHOLD) return 'hp-medium';
+        if (percentage > HP_HIGH_THRESHOLD_PERCENT) return 'hp-high';
+        if (percentage > HP_MEDIUM_THRESHOLD_PERCENT) return 'hp-medium';
         return 'hp-critical';
     }
 

@@ -12,8 +12,7 @@ import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { Player } from '@common/models/player.interface';
 import { InGameSession } from '@common/models/session.interface';
-
-const GAME_OVER_REDIRECT_DELAY = 10000;
+import { GAME_OVER_REDIRECT_DELAY_MS } from '@app/constants/game.constants';
 
 @Injectable({
     providedIn: 'root',
@@ -278,7 +277,7 @@ export class InGameService {
             setTimeout(() => {
                 this.reset();
                 window.location.href = ROUTES.HomePage;
-            }, GAME_OVER_REDIRECT_DELAY);
+            }, GAME_OVER_REDIRECT_DELAY_MS);
         });
     }
 }

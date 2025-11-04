@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { NotificationMessage } from '@app/interfaces/notification-message.interface';
+import { DEFAULT_NOTIFICATION_DURATION_MS } from '@app/constants/notification.constants';
 
 export type ToastType = 'info' | 'success' | 'warning' | 'error';
 
@@ -9,8 +10,6 @@ export interface Toast {
     type: ToastType;
     duration?: number;
 }
-
-const DEFAULT_DURATION = 3000;
 
 @Injectable({
     providedIn: 'root',
@@ -39,7 +38,7 @@ export class NotificationCoordinatorService {
         this._popupNotification.set(null);
     }
 
-    showToast(message: string, type: ToastType = 'info', duration = DEFAULT_DURATION): void {
+    showToast(message: string, type: ToastType = 'info', duration = DEFAULT_NOTIFICATION_DURATION_MS): void {
         const id = `toast-${this.toastIdCounter++}`;
         const toast: Toast = { id, message, type, duration };
 

@@ -1,7 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { MILLISECONDS_PER_SECOND } from '@common/constants/in-game';
-
-const COMBAT_ROUND_DURATION = 5;
+import { COMBAT_ROUND_DURATION_SECONDS } from '@app/constants/combat.constants';
 
 @Injectable({
     providedIn: 'root',
@@ -89,13 +88,13 @@ export class TimerCoordinatorService {
             return;
         }
 
-        this._combatTimeRemaining.set(COMBAT_ROUND_DURATION);
+        this._combatTimeRemaining.set(COMBAT_ROUND_DURATION_SECONDS);
         this._isCombatActive.set(true);
 
         this.combatTimer = window.setInterval(() => {
             const currentTime = this._combatTimeRemaining();
             if (currentTime <= 1) {
-                this._combatTimeRemaining.set(COMBAT_ROUND_DURATION);
+                this._combatTimeRemaining.set(COMBAT_ROUND_DURATION_SECONDS);
             } else {
                 this._combatTimeRemaining.set(currentTime - 1);
             }
@@ -112,7 +111,7 @@ export class TimerCoordinatorService {
     }
 
     resetCombatTimer(): void {
-        this._combatTimeRemaining.set(COMBAT_ROUND_DURATION);
+        this._combatTimeRemaining.set(COMBAT_ROUND_DURATION_SECONDS);
     }
 
     resetAllTimers(): void {

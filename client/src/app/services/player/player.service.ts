@@ -1,7 +1,6 @@
 import { computed, Injectable, Signal, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
-import { CHARACTER_BASE, CHARACTER_PLUS } from '@app/constants/character.constants';
-import { DEFAULT_PLAYER } from '@app/constants/player.constants';
+import { BASE_STAT_VALUE, BONUS_STAT_VALUE, DEFAULT_PLAYER } from '@app/constants/player.constants';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
@@ -57,10 +56,10 @@ export class PlayerService {
     }
 
     setBonus(bonus: BonusType): void {
-        const baseHealth = CHARACTER_BASE;
-        const healthBonus = bonus === BonusType.Life ? CHARACTER_PLUS : 0;
-        const baseSpeed = CHARACTER_BASE;
-        const speedBonus = bonus === BonusType.Speed ? CHARACTER_PLUS : 0;
+        const baseHealth = BASE_STAT_VALUE;
+        const healthBonus = bonus === BonusType.Life ? BONUS_STAT_VALUE : 0;
+        const baseSpeed = BASE_STAT_VALUE;
+        const speedBonus = bonus === BonusType.Speed ? BONUS_STAT_VALUE : 0;
 
         this.updatePlayer({
             baseHealth,

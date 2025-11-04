@@ -2,9 +2,8 @@ import { Component, computed, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { Player } from '@common/models/player.interface';
-
-const PERCENTAGE_MULTIPLIER = 100;
 
 @Component({
     selector: 'app-players-list',
