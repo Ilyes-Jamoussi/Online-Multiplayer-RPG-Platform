@@ -58,6 +58,7 @@ export class SessionService {
     leaveSession(sessionId: string, playerId: string): void {
         const session = this.getSession(sessionId);
         session.players = session.players.filter((player) => player.id !== playerId);
+        this.releaseAvatar(sessionId, playerId);
     }
 
     isSessionFull(sessionId: string): boolean {
@@ -131,6 +132,7 @@ export class SessionService {
     kickPlayer(sessionId: string, playerId: string): void {
         const session = this.getSession(sessionId);
         session.players = session.players.filter((player) => player.id !== playerId);
+        this.releaseAvatar(sessionId, playerId);
     }
 
     getSession(sessionId: string): WaitingRoomSession {

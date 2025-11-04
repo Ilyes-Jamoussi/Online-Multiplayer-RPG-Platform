@@ -146,6 +146,14 @@ export class SessionGateway implements OnGatewayDisconnect {
 
             const players = this.sessionService.getPlayersSession(sessionId);
             this.server.to(sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
+            
+            // Notifier la mise à jour des avatars dans la sélection d'avatar
+            const avatarAssignments = this.sessionService.getChosenAvatars(sessionId);
+            const avatarRoomId = this.getAvatarSelectionRoomId(sessionId);
+            this.server
+                .to(avatarRoomId)
+                .emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
+            
             this.handleAvailabilityChange();
         } catch (error) {
             socket.emit(SessionEvents.SessionEnded, errorResponse(error.message));
@@ -211,6 +219,7 @@ export class SessionGateway implements OnGatewayDisconnect {
                     if (playerSocket) {
                         void playerSocket.leave(sessionId);
                     }
+                    this.sessionService.releaseAvatar(sessionId, player.id);
                 }
 
                 this.sessionService.endSession(sessionId);
@@ -223,6 +232,14 @@ export class SessionGateway implements OnGatewayDisconnect {
 
             const players = this.sessionService.getPlayersSession(sessionId);
             this.server.to(sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
+            
+            // Notifier la mise à jour des avatars dans la sélection d'avatar
+            const avatarAssignments = this.sessionService.getChosenAvatars(sessionId);
+            const avatarRoomId = this.getAvatarSelectionRoomId(sessionId);
+            this.server
+                .to(avatarRoomId)
+                .emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
+            
             this.handleAvailabilityChange();
         } catch (error) {
             this.logger.error('Error leaving session:', error.message);
