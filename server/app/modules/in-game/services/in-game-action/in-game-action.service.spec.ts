@@ -1,4 +1,4 @@
-/* eslint-disable max-lines -- Test file with comprehensive coverage */
+/* eslint-disable max-lines -- Test file */
 import { InGameActionService } from './in-game-action.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';

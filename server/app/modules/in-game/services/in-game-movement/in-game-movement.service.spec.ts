@@ -1,4 +1,4 @@
-/* eslint-disable max-lines -- Test file with comprehensive coverage */
+/* eslint-disable max-lines -- Test file */
 import { InGameMovementService } from './in-game-movement.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
