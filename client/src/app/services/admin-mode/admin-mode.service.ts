@@ -1,8 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
+import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
-import { InGameService } from '@app/services/in-game/in-game.service';
 
 @Injectable({
     providedIn: 'root',
@@ -33,11 +33,11 @@ export class AdminModeService {
 
     teleportPlayer(x: number, y: number): void {
         if (!this.inGameService.isMyTurn() || !this.inGameService.isGameStarted() || !this.isAdminModeActivated()) return;
-        this.inGameSocketService.playerTeleport(this.sessionService.id(), x, y);
+        this.inGameSocketService.playerTeleport({ sessionId: this.sessionService.id(), x, y });
     }
 
     private initListeners(): void {
-        this.inGameSocketService.onAdminModeToggled((data: { isAdminModeActive: boolean }) => {
+        this.inGameSocketService.onAdminModeToggled((data) => {
             this.isAdminModeActivated.set(data.isAdminModeActive);
         });
     }

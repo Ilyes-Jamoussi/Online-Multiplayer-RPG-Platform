@@ -8,6 +8,7 @@ import { InGameService } from '@app/services/in-game/in-game.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
 
@@ -71,7 +72,7 @@ export class CombatService {
     }
     combatAbandon(): void {
         if (this.isInCombat()) {
-            this.combatSocketService.combatAbandon(this.inGameService.sessionId());
+            this.combatSocketService.combatAbandon({ sessionId: this.inGameService.sessionId() });
         }
     }
 
@@ -93,17 +94,17 @@ export class CombatService {
     chooseOffensive(): void {
         if (this._selectedPosture() !== null) return;
         this._selectedPosture.set('offensive');
-        this.combatSocketService.combatChoice(this.inGameService.sessionId(), 'offensive');
+        this.combatSocketService.combatChoice({ sessionId: this.inGameService.sessionId(), choice: CombatPosture.OFFENSIVE });
     }
 
     chooseDefensive(): void {
         if (this._selectedPosture() !== null) return;
         this._selectedPosture.set('defensive');
-        this.combatSocketService.combatChoice(this.inGameService.sessionId(), 'defensive');
+        this.combatSocketService.combatChoice({ sessionId: this.inGameService.sessionId(), choice: CombatPosture.DEFENSIVE });
     }
 
     attackPlayer(x: number, y: number): void {
-        this.combatSocketService.attackPlayerAction(this.inGameService.sessionId(), x, y);
+        this.combatSocketService.attackPlayerAction({ sessionId: this.inGameService.sessionId(), x, y });
     }
 
     private isInCombat(): boolean {

@@ -57,6 +57,10 @@ export class SessionSocketService {
         this.socket.emit(SessionEvents.UpdateAvatarAssignments, data);
     }
 
+    loadAvailableSessions(): void {
+        this.socket.emit(SessionEvents.LoadAvailableSessions, {});
+    }
+
     onSessionCreated(callback: (data: SessionCreatedDto) => void): void {
         this.socket.onSuccessEvent(SessionEvents.SessionCreated, callback);
     }
@@ -82,7 +86,7 @@ export class SessionSocketService {
     }
 
     onSessionEnded(callback: (message: string) => void): void {
-        this.socket.onSuccessEvent(SessionEvents.SessionEnded, (data: { message: string }) => callback(data.message));
+        this.socket.onSuccessEvent(SessionEvents.SessionEnded, callback);
     }
 
     onAvatarAssignmentsUpdated(callback: (data: AvatarAssignmentsUpdatedDto) => void): void {
@@ -107,9 +111,5 @@ export class SessionSocketService {
 
     onSessionAutoLocked(callback: () => void): void {
         this.socket.onSuccessEvent(SessionEvents.SessionAutoLocked, callback);
-    }
-
-    loadAvailableSessions(): void {
-        this.socket.emit(SessionEvents.LoadAvailableSessions, {});
     }
 }

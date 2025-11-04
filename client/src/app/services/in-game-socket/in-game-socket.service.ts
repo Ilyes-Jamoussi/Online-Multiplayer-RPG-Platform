@@ -1,7 +1,15 @@
 import { Injectable } from '@angular/core';
+import { AdminModeToggledDto } from '@app/dto/admin-mode-toggled-dto';
+import { DoorToggledDto } from '@app/dto/door-toggled-dto';
+import { GameOverDto } from '@app/dto/game-over-dto';
+import { PlayerLeftSessionDto } from '@app/dto/player-left-session-dto';
+import { PlayerMoveDto } from '@app/dto/player-move-dto';
+import { PlayerMovedDto } from '@app/dto/player-moved-dto';
+import { PlayerTeleportDto } from '@app/dto/player-teleport-dto';
+import { PlayerTeleportedDto } from '@app/dto/player-teleported-dto';
+import { ToggleDoorActionDto } from '@app/dto/toggle-door-action-dto';
 import { SocketService } from '@app/services/socket/socket.service';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
-import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
@@ -15,12 +23,88 @@ export class InGameSocketService {
         this.socket.emit(InGameEvents.PlayerJoinInGameSession, sessionId);
     }
 
-    onPlayerJoinedInGameSession(callback: (data: InGameSession) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.PlayerJoinedInGameSession, callback);
-    }
-
     playerStartGame(sessionId: string): void {
         this.socket.emit(InGameEvents.GameStart, sessionId);
+    }
+
+    playerLeaveInGameSession(sessionId: string): void {
+        this.socket.emit(InGameEvents.PlayerLeaveInGameSession, sessionId);
+    }
+
+    playerEndTurn(sessionId: string): void {
+        this.socket.emit(InGameEvents.PlayerEndTurn, sessionId);
+    }
+
+    playerMove(data: PlayerMoveDto): void {
+        this.socket.emit(InGameEvents.PlayerMove, data);
+    }
+
+    playerTeleport(data: PlayerTeleportDto): void {
+        this.socket.emit(InGameEvents.PlayerTeleport, data);
+    }
+
+    playerToggleDoorAction(data: ToggleDoorActionDto): void {
+        this.socket.emit(InGameEvents.ToggleDoorAction, data);
+    }
+
+    toggleAdminMode(sessionId: string): void {
+        this.socket.emit(InGameEvents.ToggleAdminMode, sessionId);
+    }
+
+    onAdminModeToggled(callback: (data: AdminModeToggledDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.AdminModeToggled, callback);
+    }
+
+    onPlayerMoved(callback: (data: PlayerMovedDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerMoved, callback);
+    }
+
+    onLeftInGameSessionAck(callback: () => void): void {
+        this.socket.onSuccessEvent(InGameEvents.LeftInGameSessionAck, callback);
+    }
+
+    onGameForceStopped(callback: () => void): void {
+        this.socket.onSuccessEvent(InGameEvents.GameForceStopped, callback);
+    }
+
+    onPlayerReachableTiles(callback: (data: ReachableTile[]) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerReachableTiles, callback);
+    }
+
+    onPlayerTeleported(callback: (data: PlayerTeleportedDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerTeleported, callback);
+    }
+
+    onDoorToggled(callback: (data: DoorToggledDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.DoorToggled, callback);
+    }
+
+    onPlayerUpdated(callback: (data: Player) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerUpdated, callback);
+    }
+
+    onPlayerActionUsed(callback: () => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerActionUsed, callback);
+    }
+
+    onPlayerAvailableActions(callback: (data: AvailableAction[]) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerAvailableActions, callback);
+    }
+
+    onGameOver(callback: (data: GameOverDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.GameOver, callback);
+    }
+
+    onTurnTimeout(callback: (data: InGameSession) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.TurnTimeout, callback);
+    }
+
+    onTurnForcedEnd(callback: (data: InGameSession) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.TurnForcedEnd, callback);
+    }
+
+    onPlayerJoinedInGameSession(callback: (data: InGameSession) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerJoinedInGameSession, callback);
     }
 
     onGameStarted(callback: (data: InGameSession) => void): void {
@@ -39,83 +123,7 @@ export class InGameSocketService {
         this.socket.onSuccessEvent(InGameEvents.TurnTransitionEnded, callback);
     }
 
-    playerLeaveInGameSession(sessionId: string): void {
-        this.socket.emit(InGameEvents.PlayerLeaveInGameSession, sessionId);
-    }
-
-    onPlayerLeftInGameSession(callback: (data: { session: InGameSession; playerName: string; playerId: string }) => void): void {
+    onPlayerLeftInGameSession(callback: (data: PlayerLeftSessionDto) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerLeftInGameSession, callback);
-    }
-
-    playerEndTurn(sessionId: string): void {
-        this.socket.emit(InGameEvents.PlayerEndTurn, sessionId);
-    }
-
-    onTurnTimeout(callback: (data: InGameSession) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.TurnTimeout, callback);
-    }
-
-    onTurnForcedEnd(callback: (data: InGameSession) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.TurnForcedEnd, callback);
-    }
-
-    toggleAdminMode(sessionId: string): void {
-        this.socket.emit(InGameEvents.ToggleAdminMode, sessionId);
-    }
-
-    onAdminModeToggled(callback: (data: { isAdminModeActive: boolean }) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.AdminModeToggled, callback);
-    }
-
-    onPlayerMoved(callback: (data: { playerId: string; x: number; y: number; speed: number }) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.PlayerMoved, callback);
-    }
-
-    playerMove(sessionId: string, orientation: Orientation): void {
-        this.socket.emit(InGameEvents.PlayerMove, { sessionId, orientation });
-    }
-
-    onLeftInGameSessionAck(callback: () => void): void {
-        this.socket.onSuccessEvent(InGameEvents.LeftInGameSessionAck, callback);
-    }
-
-    onGameForceStopped(callback: () => void): void {
-        this.socket.onSuccessEvent(InGameEvents.GameForceStopped, callback);
-    }
-
-    onPlayerReachableTiles(callback: (data: ReachableTile[]) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.PlayerReachableTiles, callback);
-    }
-
-    playerTeleport(sessionId: string, x: number, y: number): void {
-        this.socket.emit(InGameEvents.PlayerTeleport, { sessionId, x, y });
-    }
-
-    onPlayerTeleported(callback: (data: { playerId: string; x: number; y: number }) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.PlayerTeleported, callback);
-    }
-
-    playerToggleDoorAction(sessionId: string, x: number, y: number): void {
-        this.socket.emit(InGameEvents.ToggleDoorAction, { sessionId, x, y });
-    }
-
-    onDoorToggled(callback: (data: { x: number; y: number; isOpen: boolean }) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.DoorToggled, callback);
-    }
-
-    onPlayerUpdated(callback: (data: Player) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.PlayerUpdated, callback);
-    }
-
-    onPlayerActionUsed(callback: () => void): void {
-        this.socket.onSuccessEvent(InGameEvents.PlayerActionUsed, callback);
-    }
-
-    onPlayerAvailableActions(callback: (data: AvailableAction[]) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.PlayerAvailableActions, callback);
-    }
-
-    onGameOver(callback: (data: { winnerId: string; winnerName: string }) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.GameOver, callback);
     }
 }
