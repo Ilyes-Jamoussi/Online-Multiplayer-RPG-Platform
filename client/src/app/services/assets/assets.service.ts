@@ -3,7 +3,7 @@ import { AVATAR_ANIMATED_PATH, AVATAR_STATIC_PATH, DICE_PATH, OBJECT_PATH, TILE_
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 
 @Injectable({ providedIn: 'root' })
 export class AssetsService {

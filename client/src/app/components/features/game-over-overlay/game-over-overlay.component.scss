@@ -51,7 +51,8 @@
 }
 
 @keyframes bounce {
-    0%, 100% {
+    0%,
+    100% {
         transform: translateY(0);
     }
     50% {
@@ -154,4 +155,3 @@
         transform: scale(0.98);
     }
 }
-

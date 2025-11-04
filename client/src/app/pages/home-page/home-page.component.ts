@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ROUTES } from '@common/enums/routes.enum';
+import { ROUTES } from '@app/enums/routes.enum';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { PlayerService } from '@app/services/player/player.service';

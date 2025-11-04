@@ -3,8 +3,8 @@ import { SessionPreviewDto } from '@app/modules/session/dto/available-sessions-u
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
 import { Avatar } from '@common/enums/avatar.enum';
-import { Player } from '@common/models/player.interface';
-import { AvatarAssignment, WaitingRoomSession } from '@common/models/session.interface';
+import { Player } from '@common/interfaces/player.interface';
+import { AvatarAssignment, WaitingRoomSession } from '@common/interfaces/session.interface';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 @Injectable()
@@ -120,7 +120,7 @@ export class SessionService {
 
     isAdmin(playerId: string): boolean {
         for (const session of this.sessions.values()) {
-            const player = session.players.find((p) => p.id === playerId);
+            const player = session.players.find((candidate) => candidate.id === playerId);
             if (player) {
                 return player.isAdmin || false;
             }

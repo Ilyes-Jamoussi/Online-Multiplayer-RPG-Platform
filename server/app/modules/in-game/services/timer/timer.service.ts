@@ -1,18 +1,11 @@
+import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
+import { TurnTimerData } from '@app/interfaces/turn-timer-data.interface';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
-import { InGameSession } from '@common/models/session.interface';
-import { TurnState } from '@common/models/turn-state.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
+import { TurnState } from '@common/interfaces/turn-state.interface';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
-import { TurnTimerStates } from '@common/enums/turn-timer-states.enum';
-
-interface TurnTimerData {
-    timeout: NodeJS.Timeout | null;
-    callback: () => void;
-    startTime: number;
-    duration: number;
-    remainingTime: number;
-}
 
 @Injectable()
 export class TimerService {
@@ -66,7 +59,7 @@ export class TimerService {
 
         session.currentTurn = newTurn;
         session.inGamePlayers[nextPlayerId].speed = session.inGamePlayers[nextPlayerId].baseSpeed + session.inGamePlayers[nextPlayerId].speedBonus;
-        
+
         this.eventEmitter.emit('turn.ended', { session });
         this.setGameTimerState(session.id, TurnTimerStates.TurnTransition);
 
@@ -87,7 +80,6 @@ export class TimerService {
         this.eventEmitter.emit('turn.manualEnd', { session });
         this.nextTurn(session);
     }
-
 
     getGameTimerState(sessionId: string): TurnTimerStates {
         return this.gameTimerStates.get(sessionId) || TurnTimerStates.PlayerTurn;
@@ -119,10 +111,10 @@ export class TimerService {
 
         const checkedIds = new Set<string>();
         let attempts = 0;
-        
+
         while (attempts < order.length) {
             const playerId = order[startIdx];
-            
+
             if (!checkedIds.has(playerId)) {
                 checkedIds.add(playerId);
                 const player = session.inGamePlayers[playerId];
@@ -137,7 +129,7 @@ export class TimerService {
 
         return null;
     }
-    
+
     pauseTurnTimer(sessionId: string): void {
         const timerData = this.turnTimers.get(sessionId);
         if (timerData && timerData.timeout) {

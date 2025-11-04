@@ -1,42 +1,15 @@
 import { Injectable, signal } from '@angular/core';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { COMBAT_TOAST_DURATION_MS, DAMAGE_DISPLAY_DURATION_MS, VICTORY_NOTIFICATION_DURATION_MS } from '@app/constants/combat.constants';
+import { CombatData } from '@app/interfaces/combat-data.interface';
+import { DamageDisplay } from '@app/interfaces/damage-display.interface';
+import { VictoryData } from '@app/interfaces/victory-data.interface';
 import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
-import { PlayerService } from '@app/services/player/player.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { PlayerService } from '@app/services/player/player.service';
+import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
-import { Dice } from '@common/enums/dice.enum';
-import { TileCombatEffect } from '@common/enums/tile-kind.enum';
-
-const DAMAGE_DISPLAY_DURATION = 2000;
-const VICTORY_NOTIFICATION_DURATION = 3000;
-const TOAST_DURATION = 5000;
-
-interface CombatData {
-    attackerId: string;
-    targetId: string;
-    userRole: 'attacker' | 'target' | 'spectator';
-}
-
-interface VictoryData {
-    playerAId: string;
-    playerBId: string;
-    winnerId: string | null;
-    abandon: boolean;
-}
-
-interface DamageDisplay {
-    playerId: string;
-    damage: number;
-    attackRoll: number;
-    attackDice: Dice;
-    totalAttack: number;
-    defenseRoll: number;
-    defenseDice: Dice;
-    totalDefense: number;
-    tileEffect: number;
-    visible: boolean;
-}
 
 @Injectable({
     providedIn: 'root',
@@ -274,7 +247,7 @@ export class CombatService {
             this._damageDisplays.update((displays) =>
                 displays.map((display) => (display.playerId === damageDisplay.playerId ? { ...display, visible: false } : display)),
             );
-        }, DAMAGE_DISPLAY_DURATION);
+        }, DAMAGE_DISPLAY_DURATION_MS);
     }
 
     private handleCombatStarted(attackerId: string, targetId: string, attackerTileEffect?: number, targetTileEffect?: number): void {
@@ -307,7 +280,8 @@ export class CombatService {
                 });
             }
 
-            this.notificationCoordinatorService.showInfoToast(`⚔️ Combat en cours : ${attackerPlayer.name} vs ${targetPlayer.name}`, TOAST_DURATION);
+            const combatMessage = `⚔️ Combat en cours : ${attackerPlayer.name} vs ${targetPlayer.name}`;
+            this.notificationCoordinatorService.showInfoToast(combatMessage, COMBAT_TOAST_DURATION_MS);
         }
     }
 
@@ -363,13 +337,14 @@ export class CombatService {
             const playerBName = this.inGameService.getPlayerByPlayerId(playerBId).name;
 
             if (winnerId === null) {
-                this.notificationCoordinatorService.showInfoToast(`⚔️ Match nul entre ${playerAName} et ${playerBName}`, TOAST_DURATION);
+                this.notificationCoordinatorService.showInfoToast(`⚔️ Match nul entre ${playerAName} et ${playerBName}`, COMBAT_TOAST_DURATION_MS);
             } else {
                 const loserName = winnerId === playerAId ? playerBName : playerAName;
                 if (abandon) {
-                    this.notificationCoordinatorService.showSuccessToast(`🏆 ${winnerName} a gagné par abandon contre ${loserName}`, TOAST_DURATION);
+                    const abandonMessage = `🏆 ${winnerName} a gagné par abandon contre ${loserName}`;
+                    this.notificationCoordinatorService.showSuccessToast(abandonMessage, COMBAT_TOAST_DURATION_MS);
                 } else {
-                    this.notificationCoordinatorService.showSuccessToast(`🏆 ${winnerName} a vaincu ${loserName}`, TOAST_DURATION);
+                    this.notificationCoordinatorService.showSuccessToast(`🏆 ${winnerName} a vaincu ${loserName}`, COMBAT_TOAST_DURATION_MS);
                 }
             }
             this._combatData.set(null);
@@ -384,7 +359,7 @@ export class CombatService {
 
             this.victoryNotificationTimeout = setTimeout(() => {
                 this.closeVictoryOverlay();
-            }, VICTORY_NOTIFICATION_DURATION);
+            }, VICTORY_NOTIFICATION_DURATION_MS);
         }
     }
 }

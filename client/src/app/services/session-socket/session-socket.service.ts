@@ -11,7 +11,7 @@ import { SessionJoinedDto } from '@app/dto/session-joined-dto';
 import { SessionPlayersUpdatedDto } from '@app/dto/session-players-updated-dto';
 import { UpdateAvatarAssignmentsDto } from '@app/dto/update-avatar-assignments-dto';
 import { SocketService } from '@app/services/socket/socket.service';
-import { SessionEvents } from '@common/constants/session-events';
+import { SessionEvents } from '@common/enums/session-events.enum';
 
 @Injectable({ providedIn: 'root' })
 export class SessionSocketService {

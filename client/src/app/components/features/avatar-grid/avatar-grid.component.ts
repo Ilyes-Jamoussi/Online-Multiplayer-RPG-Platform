@@ -5,7 +5,7 @@ import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 
 import { Avatar } from '@common/enums/avatar.enum';
-import { AvatarAssignment } from '@common/models/session.interface';
+import { AvatarAssignment } from '@common/interfaces/session.interface';
 
 @Component({
     selector: 'app-avatar-grid',

@@ -1,10 +1,11 @@
 import { Injectable, signal } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ActiveTool, ToolbarItem, ToolType, Vector2 } from '@app/interfaces/game-editor.interface';
-import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { PlaceableMime, PlaceableKind, PlaceableFootprint } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
 import { AssetsService } from '@app/services/assets/assets.service';
+import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
+import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 
 @Injectable()
 export class GameEditorInteractionsService {
@@ -113,7 +114,8 @@ export class GameEditorInteractionsService {
         const object = this.store.getPlacedObjectAt(x, y);
         if (
             object &&
-            ((object.kind === PlaceableKind.BOAT && tool.tileKind !== TileKind.WATER) ||
+            ((object.kind === PlaceableKind.BOAT &&
+                tool.tileKind !== TileKind.WATER) ||
                 tool.tileKind === TileKind.WALL ||
                 tool.tileKind === TileKind.DOOR ||
                 tool.tileKind === TileKind.TELEPORT)

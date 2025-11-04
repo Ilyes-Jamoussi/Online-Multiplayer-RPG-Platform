@@ -10,7 +10,7 @@
 // import { Dice } from '@common/enums/dice.enum';
 // import { GameMode } from '@common/enums/game-mode.enum';
 // import { MapSize } from '@common/enums/map-size.enum';
-// import { InGameSession, WaitingRoomSession } from '@common/models/session.interface';
+// import { InGameSession, WaitingRoomSession } from '@common/interfaces/ session.interface';
 // import { BadRequestException, NotFoundException } from '@nestjs/common';
 // import { Types } from 'mongoose';
 // import { InGameService } from './in-game.service';
@@ -508,4 +508,3 @@ describe('InGameService placeholder', () => {
 //         });
 //     });
 // });
-

@@ -9,7 +9,7 @@ import { AvatarAssignmentsUpdatedDto, UpdateAvatarAssignmentsDto } from '@app/mo
 import { SessionPlayersUpdatedDto } from '@app/modules/session/dto/update-session.dto';
 import { SessionService } from '@app/modules/session/services/session.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
-import { SessionEvents } from '@common/constants/session-events';
+import { SessionEvents } from '@common/enums/session-events.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { SocketResponse } from '@common/types/socket-response.type';
@@ -168,11 +168,7 @@ export class SessionGateway implements OnGatewayDisconnect {
 
         let inGameSession;
         try {
-            inGameSession = await this.inGameService.createInGameSession(
-                waitingSession,
-                GameMode.CLASSIC,
-                MapSize.SMALL,
-            );
+            inGameSession = await this.inGameService.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.SMALL);
         } catch (error) {
             socket.emit(SessionEvents.StartGameSession, errorResponse(error.message));
             return;
@@ -232,7 +228,6 @@ export class SessionGateway implements OnGatewayDisconnect {
             this.logger.error('Error leaving session:', error.message);
         }
     }
-
 
     handleDisconnect(socket: Socket): void {
         this.leaveSession(socket);

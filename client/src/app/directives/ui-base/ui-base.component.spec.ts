@@ -1,30 +1,30 @@
+import { UiAlignment, UiElevation, UiShapeVariant, UiSize, UiSpacing, UiVariant } from '@app/types/ui.types';
 import { UiBaseComponent } from './ui-base.component';
-import { UiVariant, UiSize, UiShapeVariant, UiAlignment, UiSpacing, UiElevation } from '@app/types/ui.types';
 
 class TestUiBaseComponent extends UiBaseComponent {}
 
 describe('UiBaseComponent', () => {
-    let comp: TestUiBaseComponent;
+    let component: TestUiBaseComponent;
 
     beforeEach(() => {
-        comp = new TestUiBaseComponent();
+        component = new TestUiBaseComponent();
     });
 
     it('should initialize with default inputs', () => {
-        expect(comp.variant).toBeUndefined();
-        expect(comp.size).toBe('md');
-        expect(comp.shape).toBeUndefined();
-        expect(comp.disabled).toBe(false);
-        expect(comp.fullWidth).toBeUndefined();
-        expect(comp.alignContent).toBe('center');
-        expect(comp.gap).toBe('md');
-        expect(comp.loading).toBe(false);
-        expect(comp.elevation).toBe('none');
-        expect(comp.popOut).toBe(true);
+        expect(component.variant).toBeUndefined();
+        expect(component.size).toBe('md');
+        expect(component.shape).toBeUndefined();
+        expect(component.disabled).toBe(false);
+        expect(component.fullWidth).toBeUndefined();
+        expect(component.alignContent).toBe('center');
+        expect(component.gap).toBe('md');
+        expect(component.loading).toBe(false);
+        expect(component.elevation).toBe('none');
+        expect(component.popOut).toBe(true);
     });
 
     it('classes should reflect defaults', () => {
-        const classes = comp.classes;
+        const classes = component.classes;
         expect(classes['c-primary']).toBeTrue();
         expect(classes['st-filled']).toBeTrue();
         expect(classes['s-md']).toBeTrue();
@@ -39,33 +39,33 @@ describe('UiBaseComponent', () => {
     });
 
     it('classes should reflect boolean flags', () => {
-        comp.disabled = true;
-        comp.fullWidth = true;
-        comp.popOut = false;
-        const classes = comp.classes;
+        component.disabled = true;
+        component.fullWidth = true;
+        component.popOut = false;
+        const classes = component.classes;
         expect(classes['isDisabled']).toBeTrue();
         expect(classes['isFull']).toBeTrue();
         expect(classes['popOut']).toBeFalse();
     });
 
     it('should return color when color input is set', () => {
-        comp.color = 'danger';
-        expect(comp.computedColor).toBe('danger');
+        component.color = 'danger';
+        expect(component.computedColor).toBe('danger');
     });
 
     it('should return computed color based on variant when color is not set', () => {
-        comp.variant = 'danger';
-        expect(comp.computedColor).toBe('danger');
+        component.variant = 'danger';
+        expect(component.computedColor).toBe('danger');
     });
 
     it('classes should use provided non-default values', () => {
-        comp.variant = 'secondary' as UiVariant;
-        comp.size = 'lg' as UiSize;
-        comp.shape = 'square' as UiShapeVariant;
-        comp.alignContent = 'start' as UiAlignment;
-        comp.gap = 'lg' as UiSpacing;
-        comp.elevation = 'md' as UiElevation;
-        const classes = comp.classes;
+        component.variant = 'secondary' as UiVariant;
+        component.size = 'lg' as UiSize;
+        component.shape = 'square' as UiShapeVariant;
+        component.alignContent = 'start' as UiAlignment;
+        component.gap = 'lg' as UiSpacing;
+        component.elevation = 'md' as UiElevation;
+        const classes = component.classes;
         expect(classes['v-secondary']).toBeTrue();
         expect(classes['s-lg']).toBeTrue();
         expect(classes['sh-square']).toBeTrue();
@@ -75,13 +75,13 @@ describe('UiBaseComponent', () => {
     });
 
     it('classes should fallback to defaults when string inputs are falsy', () => {
-        comp.variant = '' as unknown as UiVariant;
-        comp.size = '' as unknown as UiSize;
-        comp.shape = '' as unknown as UiShapeVariant;
-        comp.alignContent = '' as unknown as UiAlignment;
-        comp.gap = '' as unknown as UiSpacing;
-        comp.elevation = '' as unknown as UiElevation;
-        const classes = comp.classes;
+        component.variant = '' as unknown as UiVariant;
+        component.size = '' as unknown as UiSize;
+        component.shape = '' as unknown as UiShapeVariant;
+        component.alignContent = '' as unknown as UiAlignment;
+        component.gap = '' as unknown as UiSpacing;
+        component.elevation = '' as unknown as UiElevation;
+        const classes = component.classes;
         expect(classes['c-primary']).toBeTrue();
         expect(classes['st-filled']).toBeTrue();
         expect(classes['s-md']).toBeTrue();

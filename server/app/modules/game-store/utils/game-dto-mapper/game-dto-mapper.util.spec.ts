@@ -1,8 +1,8 @@
-import { GameDocument } from '@app/modules/game-store/entities/game.entity';
+import { GameDocument } from '@app/types/mongoose-documents.types';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { Types } from 'mongoose';
 import { GameDtoMapper } from './game-dto-mapper.util';
 
@@ -72,20 +72,20 @@ describe('GameDtoMapper', () => {
     });
 
     it('should handle missing description', () => {
-        const doc = { ...mockGameDocument, description: undefined };
-        const dto = mapper.toGamePreviewDto(doc as GameDocument);
+        const gameDocument = { ...mockGameDocument, description: undefined };
+        const dto = mapper.toGamePreviewDto(gameDocument as GameDocument);
         expect(dto.description).toBe('');
     });
 
     it('should return empty string for default draft game name', () => {
-        const doc = { ...mockGameDocument, name: 'Nom...' };
-        const dto = mapper.toGameEditorDto(doc as GameDocument);
+        const gameDocument = { ...mockGameDocument, name: 'Nom...' };
+        const dto = mapper.toGameEditorDto(gameDocument as GameDocument);
         expect(dto.name).toBe('');
     });
 
     it('should return empty string for default draft game description', () => {
-        const doc = { ...mockGameDocument, description: 'Description du jeu...' };
-        const dto = mapper.toGameEditorDto(doc as GameDocument);
+        const gameDocument = { ...mockGameDocument, description: 'Description du jeu...' };
+        const dto = mapper.toGameEditorDto(gameDocument as GameDocument);
         expect(dto.description).toBe('');
     });
 });

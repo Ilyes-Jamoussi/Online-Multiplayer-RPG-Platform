@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { GameStoreEvents } from '@common/constants/game-store-events';
+import { GameStoreEvents } from '@common/enums/game-store-events.enum';
 import { SocketResponse } from '@common/types/socket-response.type';
 import { of } from 'rxjs';
 import { Socket } from 'socket.io-client';

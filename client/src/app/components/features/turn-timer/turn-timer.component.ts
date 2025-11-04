@@ -9,7 +9,7 @@ import { CombatService } from '@app/services/combat/combat.service';
     standalone: true,
     imports: [CommonModule],
     templateUrl: './turn-timer.component.html',
-    styleUrl: './turn-timer.component.scss'
+    styleUrl: './turn-timer.component.scss',
 })
 export class TurnTimerComponent {
     constructor(

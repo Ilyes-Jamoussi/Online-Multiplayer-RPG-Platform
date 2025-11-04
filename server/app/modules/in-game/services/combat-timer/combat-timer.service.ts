@@ -1,5 +1,5 @@
 import { COMBAT_DURATION } from '@common/constants/in-game';
-import { InGameSession } from '@common/models/session.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 

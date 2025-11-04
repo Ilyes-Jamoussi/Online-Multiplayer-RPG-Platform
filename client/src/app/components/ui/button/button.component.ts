@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ButtonSize, ButtonVariant } from '@common/enums/button-variant.enum';
+import { ButtonSize, ButtonVariant } from '@app/enums/button-variant.enum';
 
 @Component({
     selector: 'app-ui-button',

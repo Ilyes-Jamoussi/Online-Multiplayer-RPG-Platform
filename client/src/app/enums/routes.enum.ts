@@ -8,4 +8,4 @@ export const enum ROUTES {
     WaitingRoomPage = 'waiting-room',
     JoinSessionPage = 'join-session',
     GameSessionPage = 'game-session',
-};
+}

@@ -1,4 +1,3 @@
- 
 import { ElementRef, EventEmitter, NgZone } from '@angular/core';
 import { TileSizeProbeDirective } from './tile-size-probe.directive';
 

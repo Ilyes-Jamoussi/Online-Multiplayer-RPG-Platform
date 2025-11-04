@@ -1,12 +1,12 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GameEditorTileComponent } from './game-editor-tile.component';
-import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
-import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { ActiveTool, GameEditorIssues, ToolType, Vector2 } from '@app/interfaces/game-editor.interface';
-import { TileKind } from '@common/enums/tile-kind.enum';
-import { signal } from '@angular/core';
+import { AssetsService } from '@app/services/assets/assets.service';
+import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
+import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { TileKind } from '@common/enums/tile.enum';
+import { GameEditorTileComponent } from './game-editor-tile.component';
 
 const NOOP = (): void => {
     /** no-op */
@@ -160,16 +160,16 @@ describe('GameEditorTileComponent', () => {
     });
 
     it('hasProblem should be true when tile is in terrainAccessibility tiles', () => {
-        const probs = checkSpy.editorProblems();
-        probs.terrainAccessibility.tiles.push({ x: tile.x, y: tile.y });
+        const problems = checkSpy.editorProblems();
+        problems.terrainAccessibility.tiles.push({ x: tile.x, y: tile.y });
         const res = component.isInvalid;
         expect(res).toBeTrue();
     });
 
     it('hasProblem should be true when tile is in doors tiles', () => {
-        const probs = checkSpy.editorProblems();
-        probs.terrainAccessibility.tiles = [];
-        probs.doors.tiles.push({ x: tile.x, y: tile.y });
+        const problems = checkSpy.editorProblems();
+        problems.terrainAccessibility.tiles = [];
+        problems.doors.tiles.push({ x: tile.x, y: tile.y });
         const res = component.isInvalid;
         expect(res).toBeTrue();
     });

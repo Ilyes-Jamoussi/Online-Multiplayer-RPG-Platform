@@ -39,19 +39,19 @@ $shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     max-height: 100%;
     min-width: 0;
     width: 100%;
-    
+
     &::-webkit-scrollbar {
         width: 6px;
     }
-    
+
     &::-webkit-scrollbar-track {
         background: transparent;
     }
-    
+
     &::-webkit-scrollbar-thumb {
         background: $border-color;
         border-radius: 3px;
-        
+
         &:hover {
             background: rgba(255, 255, 255, 0.2);
         }
@@ -62,7 +62,7 @@ $shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     app-player-info {
         flex-shrink: 0;
     }
-    
+
     app-chat {
         flex: 1;
         min-height: 0;
@@ -132,13 +132,12 @@ $shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    
+
     &.active {
         color: $success-color;
         text-shadow: 0 0 8px rgba($success-color, 0.4);
     }
 }
-
 
 .game-map-container {
     flex: 1;
@@ -158,20 +157,20 @@ $shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     padding: 3rem;
     text-align: center;
     color: $text-secondary;
-    
+
     .error-icon {
         font-size: 4rem;
         margin-bottom: 1rem;
         opacity: 0.5;
     }
-    
+
     h3 {
         margin: 0 0 0.5rem 0;
         color: $text-primary;
         font-size: 1.25rem;
         font-weight: 600;
     }
-    
+
     p {
         margin: 0;
         color: $text-secondary;
@@ -193,48 +192,48 @@ $shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     transition: all 0.2s ease;
     box-shadow: $shadow-sm;
     white-space: nowrap;
-    
+
     .btn-icon {
         font-size: 1rem;
     }
-    
+
     &:disabled {
         opacity: 0.4;
         cursor: not-allowed;
         transform: none !important;
     }
-    
+
     &:not(:disabled):hover {
         transform: translateY(-2px);
         box-shadow: $shadow-md;
     }
-    
+
     &:not(:disabled):active {
         transform: translateY(0);
     }
-    
+
     &.primary {
         background: linear-gradient(135deg, $primary-color, $primary-dark);
         color: white;
-        
+
         &:not(:disabled):hover {
             background: linear-gradient(135deg, $primary-dark, $primary-darker);
         }
     }
-    
+
     &.secondary {
         background: linear-gradient(135deg, $secondary-color, $secondary-dark);
         color: white;
-        
+
         &:not(:disabled):hover {
             background: linear-gradient(135deg, $secondary-dark, $secondary-darker);
         }
     }
-    
+
     &.danger {
         background: linear-gradient(135deg, $danger-color, $danger-dark);
         color: white;
-        
+
         &:not(:disabled):hover {
             background: linear-gradient(135deg, $danger-dark, $danger-darker);
         }
@@ -298,7 +297,7 @@ $shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     p {
         font-size: 1.5rem;
         font-weight: 700;
