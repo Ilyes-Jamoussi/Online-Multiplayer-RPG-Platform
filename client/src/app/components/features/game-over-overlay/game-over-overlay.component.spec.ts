@@ -4,6 +4,7 @@ import { signal } from '@angular/core';
 import { GameOverOverlayComponent } from './game-over-overlay.component';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
 import { ROUTES } from '@app/enums/routes.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { Avatar } from '@common/enums/avatar.enum';
@@ -15,6 +16,7 @@ describe('GameOverOverlayComponent', () => {
     let mockInGameService: jasmine.SpyObj<InGameService>;
     let mockPlayerService: jasmine.SpyObj<PlayerService>;
     let mockRouter: jasmine.SpyObj<Router>;
+    let mockTimerCoordinatorService: jasmine.SpyObj<TimerCoordinatorService>;
 
     const mockGameOverData = {
         winnerId: 'player1',
@@ -95,6 +97,11 @@ describe('GameOverOverlayComponent', () => {
         });
 
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+        mockTimerCoordinatorService = jasmine.createSpyObj('TimerCoordinatorService', [
+            'startGameOverTimer',
+            'stopGameOverTimer',
+            'gameOverTimeRemaining'
+        ]);
 
         await TestBed.configureTestingModule({
             imports: [GameOverOverlayComponent],
@@ -102,6 +109,7 @@ describe('GameOverOverlayComponent', () => {
                 { provide: InGameService, useValue: mockInGameService },
                 { provide: PlayerService, useValue: mockPlayerService },
                 { provide: Router, useValue: mockRouter },
+                { provide: TimerCoordinatorService, useValue: mockTimerCoordinatorService },
             ],
         }).compileComponents();
 
@@ -201,5 +209,34 @@ describe('GameOverOverlayComponent', () => {
             configurable: true,
         });
         expect(component.title).toBe('undefined a gagné la partie !');
+    });
+
+    it('should start game over timer when game over data exists', () => {
+        fixture.detectChanges();
+        expect(mockTimerCoordinatorService.startGameOverTimer).toHaveBeenCalledWith(mockRouter);
+    });
+
+    it('should stop game over timer when game over data is null', () => {
+        Object.defineProperty(mockInGameService, 'gameOverData', {
+            value: signal(null),
+            configurable: true,
+        });
+        fixture.detectChanges();
+        expect(mockTimerCoordinatorService.stopGameOverTimer).toHaveBeenCalled();
+    });
+
+    it('should return game over time remaining from timer service', () => {
+        mockTimerCoordinatorService.gameOverTimeRemaining.and.returnValue(5000);
+        expect(component.gameOverTimeRemaining).toBe(5000);
+    });
+
+    it('should stop timer on destroy', () => {
+        component.ngOnDestroy();
+        expect(mockTimerCoordinatorService.stopGameOverTimer).toHaveBeenCalled();
+    });
+
+    it('should stop timer on return to home', () => {
+        component.returnToHome();
+        expect(mockTimerCoordinatorService.stopGameOverTimer).toHaveBeenCalled();
     });
 });
