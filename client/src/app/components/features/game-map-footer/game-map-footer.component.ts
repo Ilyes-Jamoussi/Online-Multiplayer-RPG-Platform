@@ -4,7 +4,7 @@ import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 import { Orientation } from '@common/enums/orientation.enum';
-import { GameKey } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
+import { GameKey } from '@app/enums/game-key.enum';
 
 @Component({
     selector: 'app-game-map-footer',

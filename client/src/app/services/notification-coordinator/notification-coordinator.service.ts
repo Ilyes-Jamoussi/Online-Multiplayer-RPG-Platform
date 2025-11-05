@@ -1,15 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import { NotificationMessage } from '@app/interfaces/notification-message.interface';
 import { DEFAULT_NOTIFICATION_DURATION_MS } from '@app/constants/notification.constants';
-
-export type ToastType = 'info' | 'success' | 'warning' | 'error';
-
-export interface Toast {
-    id: string;
-    message: string;
-    type: ToastType;
-    duration?: number;
-}
+import { Toast } from '@app/interfaces/toast.interface';
+import { ToastType } from '@app/types/notifications.types';
 
 @Injectable({
     providedIn: 'root',

@@ -2,23 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
-
-export enum GameKey {
-    Up = 'ArrowUp',
-    Down = 'ArrowDown',
-    Left = 'ArrowLeft',
-    Right = 'ArrowRight',
-    AdminMode = 'd',
-}
-
-export interface KeyboardEventData {
-    key: string;
-    code: string;
-    ctrlKey: boolean;
-    shiftKey: boolean;
-    altKey: boolean;
-    metaKey: boolean;
-}
+import { GameKey } from '@app/enums/game-key.enum';
 
 @Injectable({
     providedIn: 'root',
