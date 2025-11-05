@@ -1,6 +1,15 @@
+/* eslint-disable max-lines -- Extensive tests needed for 100% code coverage */
 import { TestBed } from '@angular/core/testing';
 import { CombatService } from './combat.service';
 import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
+import { CombatStartedDto } from '@app/dto/combat-started-dto';
+import { CombatVictoryDto } from '@app/dto/combat-victory-dto';
+import { CombatPostureSelectedDto } from '@app/dto/combat-posture-selected-dto';
+import { PlayerHealthChangedDto } from '@app/dto/player-health-changed-dto';
+import { PlayerCombatStatsDto } from '@app/dto/player-combat-stats-dto';
+import { PlayerCombatWinsDto } from '@app/dto/player-combat-wins-dto';
+import { PlayerCombatLossesDto } from '@app/dto/player-combat-losses-dto';
+import { PlayerCombatDrawsDto } from '@app/dto/player-combat-draws-dto';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -11,6 +20,15 @@ import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
+import { MapSize } from '@common/enums/map-size.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+
+const TEST_TIMEOUT_ID_1 = 123;
+const TEST_TIMEOUT_ID_2 = 456;
+const TEST_TIMEOUT_ID_3 = 789;
+const TEST_ATTACK_COORDINATE = 3;
+const TEST_DAMAGE_DISPLAY_TIMEOUT = 2100;
+const TEST_HEALTH_VALUE = 5;
 
 describe('CombatService', () => {
     let service: CombatService;
@@ -73,8 +91,8 @@ describe('CombatService', () => {
         currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
         startPoints: [],
         turnOrder: ['player1', 'player2'],
-        mapSize: 'small' as any,
-        mode: 'classic' as any,
+        mapSize: MapSize.SMALL,
+        mode: GameMode.CLASSIC,
     } as InGameSession;
 
     const mockCombatResult: CombatResult = {
@@ -116,17 +134,17 @@ describe('CombatService', () => {
         playerBDamage: 0,
     };
 
-    let combatStartedCallback: (data: any) => void;
+    let combatStartedCallback: (data: CombatStartedDto) => void;
     let combatResultCallback: (data: CombatResult) => void;
-    let healthChangedCallback: (data: any) => void;
+    let healthChangedCallback: (data: PlayerHealthChangedDto) => void;
     let newRoundCallback: () => void;
     let timerRestartCallback: () => void;
-    let postureSelectedCallback: (data: any) => void;
-    let victoryCallback: (data: any) => void;
-    let combatCountCallback: (data: any) => void;
-    let combatWinsCallback: (data: any) => void;
-    let combatLossesCallback: (data: any) => void;
-    let combatDrawsCallback: (data: any) => void;
+    let postureSelectedCallback: (data: CombatPostureSelectedDto) => void;
+    let victoryCallback: (data: CombatVictoryDto) => void;
+    let combatCountCallback: (data: PlayerCombatStatsDto) => void;
+    let combatWinsCallback: (data: PlayerCombatWinsDto) => void;
+    let combatLossesCallback: (data: PlayerCombatLossesDto) => void;
+    let combatDrawsCallback: (data: PlayerCombatDrawsDto) => void;
 
     beforeEach(() => {
         const combatSocketSpy = jasmine.createSpyObj('CombatSocketService', [
@@ -146,37 +164,37 @@ describe('CombatService', () => {
             'onCombatDrawsChanged',
         ]);
 
-        combatSocketSpy.onCombatStarted.and.callFake((callback: any) => {
+        combatSocketSpy.onCombatStarted.and.callFake((callback: (data: CombatStartedDto) => void) => {
             combatStartedCallback = callback;
         });
-        combatSocketSpy.onPlayerCombatResult.and.callFake((callback: any) => {
+        combatSocketSpy.onPlayerCombatResult.and.callFake((callback: (data: CombatResult) => void) => {
             combatResultCallback = callback;
         });
-        combatSocketSpy.onPlayerHealthChanged.and.callFake((callback: any) => {
+        combatSocketSpy.onPlayerHealthChanged.and.callFake((callback: (data: PlayerHealthChangedDto) => void) => {
             healthChangedCallback = callback;
         });
-        combatSocketSpy.onCombatNewRoundStarted.and.callFake((callback: any) => {
+        combatSocketSpy.onCombatNewRoundStarted.and.callFake((callback: () => void) => {
             newRoundCallback = callback;
         });
-        combatSocketSpy.onCombatTimerRestart.and.callFake((callback: any) => {
+        combatSocketSpy.onCombatTimerRestart.and.callFake((callback: () => void) => {
             timerRestartCallback = callback;
         });
-        combatSocketSpy.onCombatPostureSelected.and.callFake((callback: any) => {
+        combatSocketSpy.onCombatPostureSelected.and.callFake((callback: (data: CombatPostureSelectedDto) => void) => {
             postureSelectedCallback = callback;
         });
-        combatSocketSpy.onCombatVictory.and.callFake((callback: any) => {
+        combatSocketSpy.onCombatVictory.and.callFake((callback: (data: CombatVictoryDto) => void) => {
             victoryCallback = callback;
         });
-        combatSocketSpy.onCombatCountChanged.and.callFake((callback: (data: any) => void) => {
+        combatSocketSpy.onCombatCountChanged.and.callFake((callback: (data: PlayerCombatStatsDto) => void) => {
             combatCountCallback = callback;
         });
-        combatSocketSpy.onCombatWinsChanged.and.callFake((callback: (data: any) => void) => {
+        combatSocketSpy.onCombatWinsChanged.and.callFake((callback: (data: PlayerCombatWinsDto) => void) => {
             combatWinsCallback = callback;
         });
-        combatSocketSpy.onCombatLossesChanged.and.callFake((callback: (data: any) => void) => {
+        combatSocketSpy.onCombatLossesChanged.and.callFake((callback: (data: PlayerCombatLossesDto) => void) => {
             combatLossesCallback = callback;
         });
-        combatSocketSpy.onCombatDrawsChanged.and.callFake((callback: (data: any) => void) => {
+        combatSocketSpy.onCombatDrawsChanged.and.callFake((callback: (data: PlayerCombatDrawsDto) => void) => {
             combatDrawsCallback = callback;
         });
 
@@ -300,12 +318,12 @@ describe('CombatService', () => {
 
         it('should clear timeout when timeout exists', () => {
             spyOn(window, 'clearTimeout');
-            (service as any).victoryNotificationTimeout = 123;
+            (service as unknown as { victoryNotificationTimeout: number }).victoryNotificationTimeout = TEST_TIMEOUT_ID_1;
 
             service.closeVictoryOverlay();
 
-            expect(clearTimeout).toHaveBeenCalledWith(123);
-            expect((service as any).victoryNotificationTimeout).toBeNull();
+            expect(clearTimeout).toHaveBeenCalledWith(TEST_TIMEOUT_ID_1);
+            expect((service as unknown as { victoryNotificationTimeout: number | null }).victoryNotificationTimeout).toBeNull();
         });
     });
 
@@ -351,7 +369,7 @@ describe('CombatService', () => {
 
     describe('attackPlayer', () => {
         it('should call socket service with coordinates', () => {
-            service.attackPlayer(2, 3);
+            service.attackPlayer(2, TEST_ATTACK_COORDINATE);
 
             expect(mockCombatSocketService.attackPlayerAction).toHaveBeenCalledWith({ sessionId: 'session1', x: 2, y: 3 });
         });
@@ -440,7 +458,7 @@ describe('CombatService', () => {
                     const updatedDisplays = service.damageDisplays();
                     expect(updatedDisplays[0].visible).toBe(false);
                     done();
-                }, 2100);
+                }, TEST_DAMAGE_DISPLAY_TIMEOUT);
             });
         });
 
@@ -457,9 +475,9 @@ describe('CombatService', () => {
             it('should update min health during combat', () => {
                 service.startCombat('player1', 'player2', 'attacker');
 
-                healthChangedCallback({ playerId: 'player1', newHealth: 5 });
+                healthChangedCallback({ playerId: 'player1', newHealth: TEST_HEALTH_VALUE });
 
-                expect(service.minHealthDuringCombat()['player1']).toBe(5);
+                expect(service.minHealthDuringCombat()['player1']).toBe(TEST_HEALTH_VALUE);
             });
         });
 
@@ -499,9 +517,9 @@ describe('CombatService', () => {
 
         describe('onCombatPostureSelected', () => {
             it('should update player postures', () => {
-                postureSelectedCallback({ playerId: 'player1', posture: 'offensive' });
+                postureSelectedCallback({ playerId: 'player1', posture: CombatPosture.OFFENSIVE });
 
-                expect(service.playerPostures()).toEqual({ player1: 'offensive' });
+                expect(service.playerPostures()).toEqual({ player1: CombatPosture.OFFENSIVE });
             });
         });
 
@@ -530,7 +548,11 @@ describe('CombatService', () => {
             it('should handle draw victory', () => {
                 mockPlayerService.id.and.returnValue('player3');
                 service.startCombat('player1', 'player2', 'attacker');
-                (service as any)._combatData.set({ attackerId: 'player1', targetId: 'player2', userRole: 'spectator' });
+                (service as unknown as { _combatData: { set: (data: unknown) => void } })._combatData.set({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                    userRole: 'spectator'
+                });
 
                 victoryCallback({
                     playerAId: 'player1',
@@ -548,7 +570,11 @@ describe('CombatService', () => {
             it('should handle abandon victory', () => {
                 mockPlayerService.id.and.returnValue('player3');
                 service.startCombat('player1', 'player2', 'attacker');
-                (service as any)._combatData.set({ attackerId: 'player1', targetId: 'player2', userRole: 'spectator' });
+                (service as unknown as { _combatData: { set: (data: unknown) => void } })._combatData.set({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                    userRole: 'spectator'
+                });
 
                 victoryCallback({
                     playerAId: 'player1',
@@ -566,7 +592,11 @@ describe('CombatService', () => {
             it('should handle normal victory', () => {
                 mockPlayerService.id.and.returnValue('player3');
                 service.startCombat('player1', 'player2', 'attacker');
-                (service as any)._combatData.set({ attackerId: 'player1', targetId: 'player2', userRole: 'spectator' });
+                (service as unknown as { _combatData: { set: (data: unknown) => void } })._combatData.set({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                    userRole: 'spectator'
+                });
 
                 victoryCallback({
                     playerAId: 'player1',
@@ -582,7 +612,7 @@ describe('CombatService', () => {
             });
 
             it('should set victory notification timeout', () => {
-                spyOn(window, 'setTimeout').and.returnValue(456 as any);
+                spyOn(window, 'setTimeout').and.returnValue(TEST_TIMEOUT_ID_2 as unknown as NodeJS.Timeout);
                 service.startCombat('player1', 'player2', 'attacker');
 
                 victoryCallback({
@@ -593,13 +623,13 @@ describe('CombatService', () => {
                 });
 
                 expect(setTimeout).toHaveBeenCalled();
-                expect((service as any).victoryNotificationTimeout).toBe(456);
+                expect((service as unknown as { victoryNotificationTimeout: number }).victoryNotificationTimeout).toBe(TEST_TIMEOUT_ID_2);
             });
 
             it('should clear existing timeout before setting new one', () => {
                 spyOn(window, 'clearTimeout');
-                spyOn(window, 'setTimeout').and.returnValue(789 as any);
-                (service as any).victoryNotificationTimeout = 123;
+                spyOn(window, 'setTimeout').and.returnValue(TEST_TIMEOUT_ID_3 as unknown as NodeJS.Timeout);
+                (service as unknown as { victoryNotificationTimeout: number }).victoryNotificationTimeout = TEST_TIMEOUT_ID_1;
                 service.startCombat('player1', 'player2', 'attacker');
 
                 victoryCallback({
@@ -609,7 +639,7 @@ describe('CombatService', () => {
                     abandon: false,
                 });
 
-                expect(clearTimeout).toHaveBeenCalledWith(123);
+                expect(clearTimeout).toHaveBeenCalledWith(TEST_TIMEOUT_ID_1);
                 expect(setTimeout).toHaveBeenCalled();
             });
         });

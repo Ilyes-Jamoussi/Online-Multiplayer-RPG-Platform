@@ -12,6 +12,12 @@ import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameSessionPageComponent } from './game-session-page.component';
 
+const TEST_MAP_SIZE = 10;
+const TEST_TIME_REMAINING = 30;
+const TEST_PLAYER_SPEED = 4;
+const TEST_BASE_HEALTH = 10;
+const TEST_MAX_HEALTH = 10;
+
 describe('GameSessionPageComponent', () => {
     let component: GameSessionPageComponent;
     let fixture: ComponentFixture<GameSessionPageComponent>;
@@ -36,13 +42,13 @@ describe('GameSessionPageComponent', () => {
                 name: 'Test Player',
                 avatar: Avatar.Avatar1,
                 isAdmin: false,
-                baseHealth: 10,
+                baseHealth: TEST_BASE_HEALTH,
                 healthBonus: 0,
-                health: 10,
-                maxHealth: 10,
-                baseSpeed: 4,
+                health: TEST_BASE_HEALTH,
+                maxHealth: TEST_MAX_HEALTH,
+                baseSpeed: TEST_PLAYER_SPEED,
                 speedBonus: 0,
-                speed: 4,
+                speed: TEST_PLAYER_SPEED,
                 baseAttack: 6,
                 attackBonus: 0,
                 attack: 6,
@@ -79,7 +85,7 @@ describe('GameSessionPageComponent', () => {
         });
 
         mockGameMapService = jasmine.createSpyObj('GameMapService', ['size']);
-        mockGameMapService.size.and.returnValue(10);
+        mockGameMapService.size.and.returnValue(TEST_MAP_SIZE);
 
         mockInGameService = jasmine.createSpyObj('InGameService', [
             'loadInGameSession',
@@ -101,7 +107,7 @@ describe('GameSessionPageComponent', () => {
             value: jasmine.createSpy().and.returnValue(GameMode.CLASSIC)
         });
         Object.defineProperty(mockInGameService, 'timeRemaining', {
-            value: jasmine.createSpy().and.returnValue(30)
+            value: jasmine.createSpy().and.returnValue(TEST_TIME_REMAINING)
         });
         Object.defineProperty(mockInGameService, 'isTransitioning', {
             value: jasmine.createSpy().and.returnValue(false)
@@ -155,7 +161,7 @@ describe('GameSessionPageComponent', () => {
         });
 
         it('should return mapSize from gameMapService', () => {
-            expect(component.mapSize).toBe(10);
+            expect(component.mapSize).toBe(TEST_MAP_SIZE);
             expect(mockGameMapService.size).toHaveBeenCalled();
         });
 
@@ -181,7 +187,7 @@ describe('GameSessionPageComponent', () => {
         });
 
         it('should return timeRemaining from inGameService', () => {
-            expect(component.timeRemaining).toBe(30);
+            expect(component.timeRemaining).toBe(TEST_TIME_REMAINING);
             expect(mockInGameService.timeRemaining).toHaveBeenCalled();
         });
 
@@ -230,7 +236,7 @@ describe('GameSessionPageComponent', () => {
 
     describe('getCurrentPlayerSpeed', () => {
         it('should return speed of active player', () => {
-            expect(component.getCurrentPlayerSpeed()).toBe(4);
+            expect(component.getCurrentPlayerSpeed()).toBe(TEST_PLAYER_SPEED);
         });
 
         it('should return 0 when player not found', () => {
@@ -257,7 +263,7 @@ describe('GameSessionPageComponent', () => {
     describe('getDebugInfo', () => {
         it('should return debug info for active player', () => {
             const result = component.getDebugInfo();
-            expect(result).toBe('Pos:(5,3) Vitesse:4');
+            expect(result).toBe(`Pos:(5,3) Vitesse:${TEST_PLAYER_SPEED}`);
         });
 
         it('should return error message when player not found', () => {

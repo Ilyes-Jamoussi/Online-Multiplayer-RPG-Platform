@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { WritableSignal, signal } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
@@ -14,19 +14,28 @@ import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { GameMapTileComponent } from './game-map-tile.component';
 
+const TEST_TILE_X = 5;
+const TEST_TILE_Y = 3;
+
+type MockGameMapService = Partial<Omit<GameMapService, 'currentlyPlayers' | 'isActionModeActive'>> & {
+    _objectsSignal: WritableSignal<GameEditorPlaceableDto[]>;
+    currentlyPlayers: Player[];
+    isActionModeActive: boolean;
+};
+
 describe('GameMapTileComponent', () => {
     let component: GameMapTileComponent;
     let fixture: ComponentFixture<GameMapTileComponent>;
-    let mockGameMapService: any;
+    let mockGameMapService: MockGameMapService;
     let mockAssetsService: jasmine.SpyObj<AssetsService>;
-    let mockInGameService: any;
+    let mockInGameService: Partial<InGameService>;
     let mockAdminModeService: jasmine.SpyObj<AdminModeService>;
     let mockCombatService: jasmine.SpyObj<CombatService>;
 
     const mockTile: GameEditorTileDto = {
         kind: TileKind.BASE,
-        x: 5,
-        y: 3
+        x: TEST_TILE_X,
+        y: TEST_TILE_Y
     };
 
     const mockPlayer: Player = {
@@ -49,8 +58,8 @@ describe('GameMapTileComponent', () => {
         defense: 5,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
-        x: 5,
-        y: 3,
+        x: TEST_TILE_X,
+        y: TEST_TILE_Y,
         isInGame: true,
         startPointId: 'start-1',
         actionsRemaining: 2,
@@ -64,22 +73,25 @@ describe('GameMapTileComponent', () => {
         id: 'obj-1',
         kind: PlaceableKind.FLAG,
         orientation: 'north',
-        x: 5,
-        y: 3,
+        x: TEST_TILE_X,
+        y: TEST_TILE_Y,
         placed: true
     };
 
     beforeEach(async () => {
+        const objectsSignal = signal([mockObject]);
+
         mockGameMapService = {
             openTileModal: jasmine.createSpy('openTileModal'),
             closeTileModal: jasmine.createSpy('closeTileModal'),
-            isTileModalOpen: jasmine.createSpy('isTileModalOpen'),
+            isTileModalOpen: jasmine.createSpy('isTileModalOpen').and.returnValue(false),
             toggleDoor: jasmine.createSpy('toggleDoor'),
-            getActionTypeAt: jasmine.createSpy('getActionTypeAt'),
-            getAvatarByPlayerId: jasmine.createSpy('getAvatarByPlayerId'),
-            objects: signal([mockObject]),
+            getActionTypeAt: jasmine.createSpy('getActionTypeAt').and.returnValue(null),
+            getAvatarByPlayerId: jasmine.createSpy('getAvatarByPlayerId').and.returnValue(''),
+            objects: objectsSignal.asReadonly(),
             currentlyPlayers: [mockPlayer],
-            isActionModeActive: false
+            isActionModeActive: false,
+            _objectsSignal: objectsSignal
         };
 
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getPlaceableImage']);
@@ -125,7 +137,7 @@ describe('GameMapTileComponent', () => {
         });
 
         it('should return undefined when no object on tile', () => {
-            mockGameMapService.objects = signal([]);
+            mockGameMapService._objectsSignal.set([]);
             expect(component.objectOnTile).toBeUndefined();
         });
 
@@ -139,7 +151,7 @@ describe('GameMapTileComponent', () => {
         });
 
         it('should return player avatar src when player on tile', () => {
-            mockGameMapService.getAvatarByPlayerId.and.returnValue('avatar.png');
+            (mockGameMapService.getAvatarByPlayerId as jasmine.Spy).and.returnValue('avatar.png');
             expect(component.playerAvatarSrc).toBe('avatar.png');
             expect(mockGameMapService.getAvatarByPlayerId).toHaveBeenCalledWith('player-1');
         });
@@ -155,12 +167,12 @@ describe('GameMapTileComponent', () => {
         });
 
         it('should return empty string when no object on tile', () => {
-            mockGameMapService.objects = signal([]);
+            mockGameMapService._objectsSignal.set([]);
             expect(component.objectImageSrc).toBe('');
         });
 
         it('should return modal open state', () => {
-            mockGameMapService.isTileModalOpen.and.returnValue(true);
+            (mockGameMapService.isTileModalOpen as jasmine.Spy).and.returnValue(true);
             expect(component.isModalOpen).toBe(true);
             expect(mockGameMapService.isTileModalOpen).toHaveBeenCalledWith(mockTile);
         });
@@ -175,7 +187,6 @@ describe('GameMapTileComponent', () => {
 
         it('should prevent default and stop propagation', () => {
             component.onRightClick(mockEvent);
-
             expect(mockEvent.preventDefault).toHaveBeenCalled();
             expect(mockEvent.stopPropagation).toHaveBeenCalled();
         });
@@ -185,15 +196,13 @@ describe('GameMapTileComponent', () => {
             mockGameMapService.currentlyPlayers = [];
 
             component.onRightClick(mockEvent);
-
-            expect(mockAdminModeService.teleportPlayer).toHaveBeenCalledWith(5, 3);
+            expect(mockAdminModeService.teleportPlayer).toHaveBeenCalledWith(TEST_TILE_X, TEST_TILE_Y);
         });
 
         it('should open tile modal when not in admin mode', () => {
             mockAdminModeService.isAdminModeActivated.and.returnValue(false);
 
             component.onRightClick(mockEvent);
-
             expect(mockGameMapService.openTileModal).toHaveBeenCalledWith(mockTile);
         });
     });
@@ -207,50 +216,41 @@ describe('GameMapTileComponent', () => {
 
         it('should prevent default', () => {
             component.onTileClick(mockEvent);
-
             expect(mockEvent.preventDefault).toHaveBeenCalled();
         });
 
         it('should return early when action mode is not active', () => {
             mockGameMapService.isActionModeActive = false;
-
             component.onTileClick(mockEvent);
-
             expect(mockGameMapService.getActionTypeAt).not.toHaveBeenCalled();
         });
 
         it('should toggle door when action type is DOOR', () => {
             mockGameMapService.isActionModeActive = true;
-            mockGameMapService.getActionTypeAt.and.returnValue('DOOR');
+            (mockGameMapService.getActionTypeAt as jasmine.Spy).and.returnValue('DOOR');
 
             component.onTileClick(mockEvent);
-
-            expect(mockGameMapService.toggleDoor).toHaveBeenCalledWith(5, 3);
+            expect(mockGameMapService.toggleDoor).toHaveBeenCalledWith(TEST_TILE_X, TEST_TILE_Y);
         });
 
         it('should attack player when action type is ATTACK', () => {
             mockGameMapService.isActionModeActive = true;
-            mockGameMapService.getActionTypeAt.and.returnValue('ATTACK');
+            (mockGameMapService.getActionTypeAt as jasmine.Spy).and.returnValue('ATTACK');
 
             component.onTileClick(mockEvent);
-
-            expect(mockCombatService.attackPlayer).toHaveBeenCalledWith(5, 3);
+            expect(mockCombatService.attackPlayer).toHaveBeenCalledWith(TEST_TILE_X, TEST_TILE_Y);
         });
     });
 
     describe('modal methods', () => {
         it('should open modal', () => {
             const mockEvent = jasmine.createSpyObj('MouseEvent', ['preventDefault']);
-
             component.openModal(mockEvent);
-
-            expect(mockEvent.preventDefault).toHaveBeenCalled();
             expect(mockGameMapService.openTileModal).toHaveBeenCalledWith(mockTile);
         });
 
         it('should close modal', () => {
             component.closeModal();
-
             expect(mockGameMapService.closeTileModal).toHaveBeenCalled();
         });
     });

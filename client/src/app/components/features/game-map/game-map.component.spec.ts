@@ -14,6 +14,8 @@ import { StartPoint } from '@common/interfaces/start-point.interface';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 
+const TEST_MAP_SIZE = 10;
+
 describe('GameMapComponent', () => {
     let component: GameMapComponent;
     let fixture: ComponentFixture<GameMapComponent>;
@@ -75,7 +77,7 @@ describe('GameMapComponent', () => {
             currentlyPlayers: [mockPlayer],
             tiles: signal([]),
             objects: signal([mockObject]),
-            size: signal(10),
+            size: signal(TEST_MAP_SIZE),
             visibleObjects: signal([mockObject])
         });
 
@@ -139,7 +141,7 @@ describe('GameMapComponent', () => {
         });
 
         it('should return size from game map service', () => {
-            expect(component.size).toBe(10);
+            expect(component.size).toBe(TEST_MAP_SIZE);
         });
 
         it('should return visible objects from game map service', () => {
@@ -152,8 +154,8 @@ describe('GameMapComponent', () => {
 
         it('should return grid style with correct columns and rows', () => {
             const style = component.gridStyle;
-            expect(style.gridTemplateColumns).toBe('repeat(10, 1fr)');
-            expect(style.gridTemplateRows).toBe('repeat(10, 1fr)');
+            expect(style.gridTemplateColumns).toBe(`repeat(${TEST_MAP_SIZE}, 1fr)`);
+            expect(style.gridTemplateRows).toBe(`repeat(${TEST_MAP_SIZE}, 1fr)`);
         });
     });
 

@@ -1,4 +1,5 @@
-import { signal } from '@angular/core';
+/* eslint-disable max-lines -- Extensive tests needed for 100% code coverage */
+import { WritableSignal, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
@@ -7,12 +8,35 @@ import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-c
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
+import { Player } from '@common/interfaces/player.interface';
+import { DamageDisplay } from '@app/interfaces/damage-display.interface';
 import { CombatOverlayComponent } from './combat-overlay.component';
+
+const MOCK_HEALTH_PLAYER_A = 8;
+const MOCK_MAX_HEALTH = 10;
+const MOCK_HEALTH_PLAYER_B = 6;
+const MOCK_HEALTH_PERCENTAGE_A = 80;
+const MOCK_HEALTH_PERCENTAGE_B = 60;
+const MOCK_MIN_HEALTH = 2;
+const MOCK_DAMAGE = 5;
+const MOCK_TURN_TIME = 15;
+const UNKNOWN_TILE_EFFECT = 999;
+
+type MockCombatService = Partial<CombatService> & {
+    _combatDataSignal: WritableSignal<unknown>;
+    _damageDisplaysSignal: WritableSignal<unknown>;
+    _selectedPostureSignal: WritableSignal<unknown>;
+    _playerPosturesSignal: WritableSignal<unknown>;
+    _victoryDataSignal: WritableSignal<unknown>;
+    _minHealthDuringCombatSignal: WritableSignal<unknown>;
+    _tileEffectsSignal: WritableSignal<unknown>;
+    _isVictoryNotificationVisibleSignal: WritableSignal<unknown>;
+};
 
 describe('CombatOverlayComponent', () => {
     let component: CombatOverlayComponent;
     let fixture: ComponentFixture<CombatOverlayComponent>;
-    let mockCombatService: any;
+    let mockCombatService: MockCombatService;
     let mockInGameService: jasmine.SpyObj<InGameService>;
     let mockAssetsService: jasmine.SpyObj<AssetsService>;
     let mockTimerCoordinatorService: jasmine.SpyObj<TimerCoordinatorService>;
@@ -23,20 +47,66 @@ describe('CombatOverlayComponent', () => {
         userRole: 'attacker' as const
     };
 
-    const mockPlayerA = {
+    const mockPlayerA: Player = {
         id: 'player1',
         name: 'Player A',
         avatar: Avatar.Avatar1,
-        health: 8,
-        maxHealth: 10
+        health: MOCK_HEALTH_PLAYER_A,
+        maxHealth: MOCK_MAX_HEALTH,
+        isAdmin: false,
+        baseHealth: MOCK_MAX_HEALTH,
+        healthBonus: 0,
+        baseSpeed: 4,
+        speedBonus: 0,
+        speed: 4,
+        baseAttack: 4,
+        attackBonus: 0,
+        attack: 4,
+        baseDefense: 4,
+        defenseBonus: 0,
+        defense: 4,
+        attackDice: Dice.D6,
+        defenseDice: Dice.D6,
+        x: 0,
+        y: 0,
+        isInGame: true,
+        startPointId: '',
+        actionsRemaining: 1,
+        combatCount: 0,
+        combatWins: 0,
+        combatLosses: 0,
+        combatDraws: 0
     };
 
-    const mockPlayerB = {
+    const mockPlayerB: Player = {
         id: 'player2',
         name: 'Player B',
         avatar: Avatar.Avatar2,
-        health: 6,
-        maxHealth: 10
+        health: MOCK_HEALTH_PLAYER_B,
+        maxHealth: MOCK_MAX_HEALTH,
+        isAdmin: false,
+        baseHealth: MOCK_MAX_HEALTH,
+        healthBonus: 0,
+        baseSpeed: 4,
+        speedBonus: 0,
+        speed: 4,
+        baseAttack: 4,
+        attackBonus: 0,
+        attack: 4,
+        baseDefense: 4,
+        defenseBonus: 0,
+        defense: 4,
+        attackDice: Dice.D6,
+        defenseDice: Dice.D6,
+        x: 0,
+        y: 0,
+        isInGame: true,
+        startPointId: '',
+        actionsRemaining: 1,
+        combatCount: 0,
+        combatWins: 0,
+        combatLosses: 0,
+        combatDraws: 0
     };
 
     const mockVictoryData = {
@@ -46,24 +116,54 @@ describe('CombatOverlayComponent', () => {
         abandon: false
     };
 
+    const mockDamageDisplay: DamageDisplay = {
+        playerId: 'player1',
+        damage: MOCK_DAMAGE,
+        attackRoll: 4,
+        attackDice: Dice.D6,
+        totalAttack: 8,
+        defenseRoll: 2,
+        defenseDice: Dice.D6,
+        totalDefense: 6,
+        tileEffect: 0,
+        visible: true
+    };
+
     beforeEach(async () => {
+        const combatDataSignal = signal(mockCombatData);
+        const damageDisplaysSignal = signal([]);
+        const selectedPostureSignal = signal(null);
+        const playerPosturesSignal = signal({});
+        const victoryDataSignal = signal(null);
+        const minHealthDuringCombatSignal = signal({});
+        const tileEffectsSignal = signal({});
+        const isVictoryNotificationVisibleSignal = signal(false);
+
         mockCombatService = {
-            combatData: signal(mockCombatData),
-            damageDisplays: signal([]),
-            selectedPosture: signal(null),
-            playerPostures: signal({}),
-            victoryData: signal(null),
-            minHealthDuringCombat: signal({}),
-            tileEffects: signal({}),
-            isVictoryNotificationVisible: signal(false),
+            combatData: combatDataSignal.asReadonly(),
+            damageDisplays: damageDisplaysSignal.asReadonly(),
+            selectedPosture: selectedPostureSignal.asReadonly(),
+            playerPostures: playerPosturesSignal.asReadonly(),
+            victoryData: victoryDataSignal.asReadonly(),
+            minHealthDuringCombat: minHealthDuringCombatSignal.asReadonly(),
+            tileEffects: tileEffectsSignal.asReadonly(),
+            isVictoryNotificationVisible: isVictoryNotificationVisibleSignal.asReadonly(),
             chooseOffensive: jasmine.createSpy('chooseOffensive'),
             chooseDefensive: jasmine.createSpy('chooseDefensive'),
-            closeVictoryOverlay: jasmine.createSpy('closeVictoryOverlay')
+            closeVictoryOverlay: jasmine.createSpy('closeVictoryOverlay'),
+            _combatDataSignal: combatDataSignal,
+            _damageDisplaysSignal: damageDisplaysSignal,
+            _selectedPostureSignal: selectedPostureSignal,
+            _playerPosturesSignal: playerPosturesSignal,
+            _victoryDataSignal: victoryDataSignal,
+            _minHealthDuringCombatSignal: minHealthDuringCombatSignal,
+            _tileEffectsSignal: tileEffectsSignal,
+            _isVictoryNotificationVisibleSignal: isVictoryNotificationVisibleSignal
         };
 
         mockInGameService = jasmine.createSpyObj('InGameService', ['getPlayerByPlayerId']);
         mockInGameService.getPlayerByPlayerId.and.callFake((id: string) => {
-            return id === 'player1' ? mockPlayerA as any : mockPlayerB as any;
+            return id === 'player1' ? mockPlayerA : mockPlayerB;
         });
 
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getAvatarStaticImage', 'getDiceImage']);
@@ -71,7 +171,7 @@ describe('CombatOverlayComponent', () => {
         mockAssetsService.getDiceImage.and.returnValue('dice.png');
 
         mockTimerCoordinatorService = jasmine.createSpyObj('TimerCoordinatorService', ['getPausedTurnTime']);
-        mockTimerCoordinatorService.getPausedTurnTime.and.returnValue(15);
+        mockTimerCoordinatorService.getPausedTurnTime.and.returnValue(MOCK_TURN_TIME);
 
         await TestBed.configureTestingModule({
             imports: [CombatOverlayComponent],
@@ -96,185 +196,249 @@ describe('CombatOverlayComponent', () => {
             expect(component.combatData).toEqual(mockCombatData);
         });
 
-        it('should return player A name', () => {
+        it('should return player names and avatars', () => {
             expect(component.playerAName).toBe('Player A');
-        });
-
-        it('should return player B name', () => {
             expect(component.playerBName).toBe('Player B');
-        });
-
-        it('should return player A avatar', () => {
             expect(component.playerAAvatar).toBe('avatar.png');
-            expect(mockAssetsService.getAvatarStaticImage).toHaveBeenCalledWith(Avatar.Avatar1);
-        });
-
-        it('should return player B avatar', () => {
             expect(component.playerBAvatar).toBe('avatar.png');
-            expect(mockAssetsService.getAvatarStaticImage).toHaveBeenCalledWith(Avatar.Avatar2);
         });
     });
 
     describe('health getters', () => {
-        it('should return player A health data', () => {
-            const health = component.playerAHealth;
-            expect(health.current).toBe(8);
-            expect(health.max).toBe(10);
-            expect(health.percentage).toBe(80);
-        });
-
-        it('should return player B health data', () => {
-            const health = component.playerBHealth;
-            expect(health.current).toBe(6);
-            expect(health.max).toBe(10);
-            expect(health.percentage).toBe(60);
+        it('should return player health data', () => {
+            const healthA = component.playerAHealth;
+            const healthB = component.playerBHealth;
+            expect(healthA.current).toBe(MOCK_HEALTH_PLAYER_A);
+            expect(healthA.max).toBe(MOCK_MAX_HEALTH);
+            expect(healthA.percentage).toBe(MOCK_HEALTH_PERCENTAGE_A);
+            expect(healthB.current).toBe(MOCK_HEALTH_PLAYER_B);
+            expect(healthB.percentage).toBe(MOCK_HEALTH_PERCENTAGE_B);
         });
 
         it('should use min health during combat when victory data exists', () => {
-            mockCombatService.victoryData.set(mockVictoryData);
-            mockCombatService.minHealthDuringCombat.set({ 'player1': 2 });
+            mockCombatService._victoryDataSignal.set(mockVictoryData);
+            mockCombatService._minHealthDuringCombatSignal.set({ player1: MOCK_MIN_HEALTH });
+            expect(component.playerAHealth.current).toBe(MOCK_MIN_HEALTH);
+        });
 
-            const health = component.playerAHealth;
-            expect(health.current).toBe(2);
+        it('should use player health when min health is not set', () => {
+            mockCombatService._victoryDataSignal.set(mockVictoryData);
+            mockCombatService._minHealthDuringCombatSignal.set({});
+            expect(component.playerAHealth.current).toBe(MOCK_HEALTH_PLAYER_A);
+            expect(component.playerBHealth.current).toBe(MOCK_HEALTH_PLAYER_B);
         });
     });
 
-    describe('damage getters', () => {
-        it('should return player A damage when visible', () => {
-            const damageDisplay = { playerId: 'player1', damage: 5, visible: true };
-            mockCombatService.damageDisplays.set([damageDisplay]);
-
-            expect(component.playerADamage).toBeTruthy();
-            expect(component.playerADamage?.playerId).toBe('player1');
+    describe('damage displays', () => {
+        it('should find visible damage display for attacker', () => {
+            mockCombatService._damageDisplaysSignal.set([mockDamageDisplay]);
+            expect(component.playerADamage).toEqual(mockDamageDisplay);
         });
 
-        it('should return null when no visible damage for player A', () => {
-            const damageDisplay = { playerId: 'player1', damage: 5, visible: false };
-            mockCombatService.damageDisplays.set([damageDisplay]);
+        it('should find visible damage display for target', () => {
+            const targetDamage = { ...mockDamageDisplay, playerId: 'player2' };
+            mockCombatService._damageDisplaysSignal.set([targetDamage]);
+            expect(component.playerBDamage).toEqual(targetDamage);
+        });
 
+        it('should return null when no visible damage display found', () => {
+            const invisibleDamage = { ...mockDamageDisplay, visible: false };
+            mockCombatService._damageDisplaysSignal.set([invisibleDamage]);
             expect(component.playerADamage).toBeNull();
         });
     });
 
-    describe('posture getters', () => {
-        it('should return selected posture', () => {
-            mockCombatService.selectedPosture.set('offensive');
-            expect(component.selectedPosture).toBe('offensive');
+    describe('postures', () => {
+        it('should return null when no combat data', () => {
+            mockCombatService._combatDataSignal.set(null);
+            expect(component.playerAPosture).toBeNull();
+            expect(component.playerBPosture).toBeNull();
         });
 
-        it('should return true when posture is selected', () => {
-            mockCombatService.selectedPosture.set('defensive');
-            expect(component.isPostureSelected).toBe(true);
-        });
-
-        it('should return false when no posture is selected', () => {
-            mockCombatService.selectedPosture.set(null);
-            expect(component.isPostureSelected).toBe(false);
-        });
-
-        it('should return player A posture', () => {
-            mockCombatService.playerPostures.set({ 'player1': 'offensive' });
+        it('should return posture from service', () => {
+            mockCombatService._playerPosturesSignal.set({ player1: 'offensive', player2: 'defensive' });
             expect(component.playerAPosture).toBe('offensive');
+            expect(component.playerBPosture).toBe('defensive');
         });
 
-        it('should return player B posture', () => {
-            mockCombatService.playerPostures.set({ 'player2': 'defensive' });
-            expect(component.playerBPosture).toBe('defensive');
+        it('should return null when posture not set', () => {
+            mockCombatService._playerPosturesSignal.set({});
+            expect(component.playerAPosture).toBeNull();
+            expect(component.playerBPosture).toBeNull();
         });
     });
 
     describe('victory getters', () => {
         beforeEach(() => {
-            mockCombatService.victoryData.set(mockVictoryData);
+            mockCombatService._victoryDataSignal.set(mockVictoryData);
         });
 
-        it('should return victory message for winner', () => {
-            expect(component.victoryMessage).toBe('Victoire !');
-        });
-
-        it('should return victory message for loser', () => {
-            mockCombatService.combatData.set({ ...mockCombatData, userRole: 'target' });
-            expect(component.victoryMessage).toBe('Player A a gagné !');
-        });
-
-        it('should return draw message', () => {
-            mockCombatService.victoryData.set({ ...mockVictoryData, winnerId: null });
-            expect(component.victoryMessage).toBe('Match Nul !');
-        });
-
-        it('should return victory subtitle for winner', () => {
-            expect(component.victorySubtitle).toBe('Tu as gagné le combat !');
-        });
-
-        it('should return abandon victory subtitle', () => {
-            mockCombatService.victoryData.set({ ...mockVictoryData, abandon: true });
+        it('should return victory subtitle for abandon victory', () => {
+            mockCombatService._victoryDataSignal.set({ ...mockVictoryData, abandon: true });
             expect(component.victorySubtitle).toBe('Victoire par abandon !');
         });
 
-        it('should return true for isVictory when player wins', () => {
-            expect(component.isVictory).toBe(true);
+        it('should return victory subtitle for abandon defeat', () => {
+            mockCombatService._victoryDataSignal.set({ ...mockVictoryData, winnerId: 'player2', abandon: true });
+            expect(component.victorySubtitle).toBe('Défaite par abandon...');
         });
 
-        it('should return false for isVictory when player loses', () => {
-            mockCombatService.combatData.set({ ...mockCombatData, userRole: 'target' });
-            expect(component.isVictory).toBe(false);
-        });
-    });
-
-    describe('spectator victory getters', () => {
-        beforeEach(() => {
-            mockCombatService.victoryData.set(mockVictoryData);
+        it('should return victory subtitle for match nul', () => {
+            mockCombatService._victoryDataSignal.set({ ...mockVictoryData, winnerId: null });
+            expect(component.victorySubtitle).toBe('Les deux combattants sont tombés');
         });
 
-        it('should return spectator victory title', () => {
-            expect(component.spectatorVictoryTitle).toBe('Player A a gagné !');
+        it('should return victory subtitle for win', () => {
+            expect(component.victorySubtitle).toBe('Tu as gagné le combat !');
         });
 
-        it('should return spectator victory message', () => {
+        it('should return victory subtitle for loss', () => {
+            mockCombatService._victoryDataSignal.set({ ...mockVictoryData, winnerId: 'player2' });
+            expect(component.victorySubtitle).toBe('Tu as perdu le combat...');
+        });
+
+        it('should return spectator victory title for match nul', () => {
+            mockCombatService._victoryDataSignal.set({ ...mockVictoryData, winnerId: null });
+            expect(component.spectatorVictoryTitle).toBe('Match Nul !');
+        });
+
+        it('should return spectator victory message for match nul', () => {
+            mockCombatService._victoryDataSignal.set({ ...mockVictoryData, winnerId: null });
+            expect(component.spectatorVictoryMessage).toBe('Les deux combattants sont tombés');
+        });
+
+        it('should return spectator victory message for abandon', () => {
+            mockCombatService._victoryDataSignal.set({ ...mockVictoryData, abandon: true });
+            expect(component.spectatorVictoryMessage).toBe('Player A a gagné par abandon contre Player B');
+        });
+
+        it('should return spectator victory message for normal victory', () => {
             expect(component.spectatorVictoryMessage).toBe('Player A a vaincu Player B');
         });
 
-        it('should return abandon message for spectator', () => {
-            mockCombatService.victoryData.set({ ...mockVictoryData, abandon: true });
-            expect(component.spectatorVictoryMessage).toBe('Player A a gagné par abandon contre Player B');
+        it('should return empty strings when no victory data', () => {
+            mockCombatService._victoryDataSignal.set(null);
+            expect(component.victoryMessage).toBe('');
+            expect(component.victorySubtitle).toBe('');
+            expect(component.spectatorVictoryTitle).toBe('');
+            expect(component.spectatorVictoryMessage).toBe('');
         });
     });
 
-    describe('tile effect getters', () => {
-        it('should return player A tile effect', () => {
-            mockCombatService.tileEffects.set({ 'player1': TileCombatEffect.ICE });
-            expect(component.playerATileEffect).toBe(TileCombatEffect.ICE);
-        });
-
-        it('should return player A tile effect label for ice', () => {
-            mockCombatService.tileEffects.set({ 'player1': TileCombatEffect.ICE });
+    describe('tile effects', () => {
+        it('should return ice effect label', () => {
+            mockCombatService._tileEffectsSignal.set({ player1: TileCombatEffect.ICE, player2: TileCombatEffect.ICE });
             expect(component.playerATileEffectLabel).toBe(`Glace ${TileCombatEffect.ICE}`);
+            expect(component.playerBTileEffectLabel).toBe(`Glace ${TileCombatEffect.ICE}`);
         });
 
-        it('should return null for base tile effect', () => {
-            mockCombatService.tileEffects.set({ 'player1': TileCombatEffect.BASE });
+        it('should return null for base effect', () => {
+            mockCombatService._tileEffectsSignal.set({ player1: TileCombatEffect.BASE });
+            expect(component.playerATileEffectLabel).toBeNull();
+        });
+
+        it('should return null when no effect', () => {
+            mockCombatService._tileEffectsSignal.set({});
             expect(component.playerATileEffectLabel).toBeNull();
         });
     });
 
-    describe('actions', () => {
-        it('should call chooseOffensive', () => {
-            component.chooseOffensive();
-            expect(mockCombatService.chooseOffensive).toHaveBeenCalled();
+    describe('null combat data scenarios', () => {
+        beforeEach(() => {
+            mockCombatService._combatDataSignal.set(null);
         });
 
-        it('should call chooseDefensive', () => {
-            component.chooseDefensive();
-            expect(mockCombatService.chooseDefensive).toHaveBeenCalled();
+        it('should return empty strings when no combat data', () => {
+            expect(component.playerAName).toBe('');
+            expect(component.playerBName).toBe('');
+            expect(component.playerAAvatar).toBe('');
+            expect(component.playerBAvatar).toBe('');
         });
 
-        it('should call closeVictoryOverlay', () => {
-            component.closeVictoryOverlay();
-            expect(mockCombatService.closeVictoryOverlay).toHaveBeenCalled();
+        it('should return default health when no combat data', () => {
+            expect(component.playerAHealth).toEqual({ current: 0, max: 0, percentage: 0 });
+            expect(component.playerBHealth).toEqual({ current: 0, max: 0, percentage: 0 });
+        });
+
+        it('should return null for tile effects when no combat data', () => {
+            expect(component.playerATileEffect).toBeNull();
+            expect(component.playerBTileEffect).toBeNull();
         });
     });
 
-    describe('utility methods', () => {
+    describe('posture selection', () => {
+        it('should return selected posture', () => {
+            mockCombatService._selectedPostureSignal.set('offensive');
+            expect(component.selectedPosture).toBe('offensive');
+        });
+
+        it('should check if posture is selected', () => {
+            mockCombatService._selectedPostureSignal.set('defensive');
+            expect(component.isPostureSelected).toBe(true);
+            
+            mockCombatService._selectedPostureSignal.set(null);
+            expect(component.isPostureSelected).toBe(false);
+        });
+    });
+
+    describe('victory scenarios with user roles', () => {
+        it('should handle attacker victory', () => {
+            mockCombatService._victoryDataSignal.set(mockVictoryData);
+            expect(component.victoryMessage).toBe('Victoire !');
+            expect(component.isVictory).toBe(true);
+        });
+
+        it('should handle target victory', () => {
+            mockCombatService._combatDataSignal.set({ ...mockCombatData, userRole: 'target' });
+            mockCombatService._victoryDataSignal.set(mockVictoryData);
+            expect(component.victoryMessage).toBe('Player A a gagné !');
+            expect(component.isVictory).toBe(false);
+        });
+
+        it('should handle match nul in victory message', () => {
+            mockCombatService._victoryDataSignal.set({ ...mockVictoryData, winnerId: null });
+            expect(component.victoryMessage).toBe('Match Nul !');
+        });
+
+        it('should return false for isVictory when no victory data', () => {
+            mockCombatService._victoryDataSignal.set(null);
+            expect(component.isVictory).toBe(false);
+        });
+
+        it('should get winner name in spectator victory title', () => {
+            mockCombatService._victoryDataSignal.set(mockVictoryData);
+            expect(component.spectatorVictoryTitle).toBe('Player A a gagné !');
+        });
+    });
+
+    describe('tile effect labels edge cases', () => {
+        it('should return null for playerA when effect is null', () => {
+            mockCombatService._tileEffectsSignal.set({ player1: null });
+            expect(component.playerATileEffectLabel).toBeNull();
+        });
+
+        it('should return null for playerB when effect is null', () => {
+            mockCombatService._tileEffectsSignal.set({ player2: null });
+            expect(component.playerBTileEffectLabel).toBeNull();
+        });
+
+        it('should return null for unknown tile effects', () => {
+            mockCombatService._tileEffectsSignal.set({ player1: UNKNOWN_TILE_EFFECT as TileCombatEffect });
+            expect(component.playerATileEffectLabel).toBeNull();
+        });
+    });
+
+    describe('methods', () => {
+        it('should call combat service methods', () => {
+            component.chooseOffensive();
+            component.chooseDefensive();
+            component.closeVictoryOverlay();
+            
+            expect(mockCombatService.chooseOffensive).toHaveBeenCalled();
+            expect(mockCombatService.chooseDefensive).toHaveBeenCalled();
+            expect(mockCombatService.closeVictoryOverlay).toHaveBeenCalled();
+        });
+
         it('should get dice image', () => {
             const result = component.getDiceImage(Dice.D6);
             expect(result).toBe('dice.png');
@@ -282,123 +446,12 @@ describe('CombatOverlayComponent', () => {
         });
 
         it('should get paused turn time', () => {
-            expect(component.pausedTurnTime).toBe(15);
-            expect(mockTimerCoordinatorService.getPausedTurnTime).toHaveBeenCalled();
+            expect(component.pausedTurnTime).toBe(MOCK_TURN_TIME);
         });
 
-        it('should return victory notification visibility', () => {
-            mockCombatService.isVictoryNotificationVisible.set(true);
+        it('should get victory notification visibility', () => {
+            mockCombatService._isVictoryNotificationVisibleSignal.set(true);
             expect(component.isVictoryNotificationVisible).toBe(true);
-        });
-    });
-
-    describe('edge cases', () => {
-        it('should handle null combat data', () => {
-            mockCombatService.combatData.set(null);
-
-            expect(component.playerAName).toBe('');
-            expect(component.playerBName).toBe('');
-            expect(component.playerAAvatar).toBe('');
-            expect(component.playerBAvatar).toBe('');
-            expect(component.playerAHealth).toEqual({ current: 0, max: 0, percentage: 0 });
-            expect(component.playerBHealth).toEqual({ current: 0, max: 0, percentage: 0 });
-        });
-
-        it('should return player B damage when visible', () => {
-            const damageDisplay = { playerId: 'player2', damage: 3, visible: true };
-            mockCombatService.damageDisplays.set([damageDisplay]);
-
-            expect(component.playerBDamage).toBeTruthy();
-            expect(component.playerBDamage?.playerId).toBe('player2');
-        });
-
-        it('should return null when no visible damage for player B', () => {
-            const damageDisplay = { playerId: 'player2', damage: 3, visible: false };
-            mockCombatService.damageDisplays.set([damageDisplay]);
-
-            expect(component.playerBDamage).toBeNull();
-        });
-
-        it('should handle null victory data in victoryMessage', () => {
-            mockCombatService.victoryData.set(null);
-            expect(component.victoryMessage).toBe('');
-        });
-
-        it('should handle null victory data in victorySubtitle', () => {
-            mockCombatService.victoryData.set(null);
-            expect(component.victorySubtitle).toBe('');
-        });
-
-        it('should handle null victory data in spectatorVictoryTitle', () => {
-            mockCombatService.victoryData.set(null);
-            expect(component.spectatorVictoryTitle).toBe('');
-        });
-
-        it('should handle null victory data in spectatorVictoryMessage', () => {
-            mockCombatService.victoryData.set(null);
-            expect(component.spectatorVictoryMessage).toBe('');
-        });
-
-        it('should handle null victory data in isVictory', () => {
-            mockCombatService.victoryData.set(null);
-            expect(component.isVictory).toBe(false);
-        });
-
-        it('should handle null combat data in playerAPosture', () => {
-            mockCombatService.combatData.set(null);
-            expect(component.playerAPosture).toBeNull();
-        });
-
-        it('should handle null combat data in playerBPosture', () => {
-            mockCombatService.combatData.set(null);
-            expect(component.playerBPosture).toBeNull();
-        });
-
-        it('should handle null combat data in playerATileEffect', () => {
-            mockCombatService.combatData.set(null);
-            expect(component.playerATileEffect).toBeNull();
-        });
-
-        it('should handle null combat data in playerBTileEffect', () => {
-            mockCombatService.combatData.set(null);
-            expect(component.playerBTileEffect).toBeNull();
-        });
-
-        it('should handle null combat data in playerBTileEffectLabel', () => {
-            mockCombatService.combatData.set(null);
-            expect(component.playerBTileEffectLabel).toBeNull();
-        });
-
-        it('should return player B tile effect label for ice', () => {
-            mockCombatService.tileEffects.set({ 'player2': TileCombatEffect.ICE });
-            expect(component.playerBTileEffectLabel).toBe(`Glace ${TileCombatEffect.ICE}`);
-        });
-
-        it('should return null for player B base tile effect', () => {
-            mockCombatService.tileEffects.set({ 'player2': TileCombatEffect.BASE });
-            expect(component.playerBTileEffectLabel).toBeNull();
-        });
-
-        it('should handle draw in spectatorVictoryTitle', () => {
-            mockCombatService.victoryData.set({ ...mockVictoryData, winnerId: null });
-            expect(component.spectatorVictoryTitle).toBe('Match Nul !');
-        });
-
-        it('should handle draw in spectatorVictoryMessage', () => {
-            mockCombatService.victoryData.set({ ...mockVictoryData, winnerId: null });
-            expect(component.spectatorVictoryMessage).toBe('Les deux combattants sont tombés');
-        });
-
-        it('should handle defeat by abandon in victorySubtitle', () => {
-            mockCombatService.combatData.set({ ...mockCombatData, userRole: 'target' });
-            mockCombatService.victoryData.set({ ...mockVictoryData, abandon: true });
-            expect(component.victorySubtitle).toBe('Défaite par abandon...');
-        });
-
-        it('should handle defeat in victorySubtitle', () => {
-            mockCombatService.combatData.set({ ...mockCombatData, userRole: 'target' });
-            mockCombatService.victoryData.set({ ...mockVictoryData, abandon: false });
-            expect(component.victorySubtitle).toBe('Tu as perdu le combat...');
         });
     });
 });

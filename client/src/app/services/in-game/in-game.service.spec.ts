@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Extensive tests needed for 100% code coverage */
 import { TestBed } from '@angular/core/testing';
 import { InGameService } from './in-game.service';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
@@ -11,6 +12,13 @@ import { signal } from '@angular/core';
 import { Player } from '@common/interfaces/player.interface';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { InGameSession } from '@common/interfaces/session.interface';
+import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+
+const TEST_TIMER_DURATION = 30;
+const TEST_X_COORDINATE = 5;
+const TEST_Y_COORDINATE = 10;
 
 describe('InGameService', () => {
     let service: InGameService;
@@ -68,7 +76,7 @@ describe('InGameService', () => {
         mockTimerCoordinatorService = jasmine.createSpyObj('TimerCoordinatorService', [
             'startTurnTimer', 'stopTurnTimer', 'resetAllTimers'
         ], {
-            turnTimeRemaining: signal(30)
+            turnTimeRemaining: signal(TEST_TIMER_DURATION)
         });
 
         mockPlayerService = jasmine.createSpyObj('PlayerService', ['updateActionsRemaining', 'updatePlayer'], {
@@ -141,8 +149,12 @@ describe('InGameService', () => {
 
     describe('Game Actions', () => {
         it('should toggle door action', () => {
-            service.toggleDoorAction(5, 10);
-            expect(mockInGameSocketService.playerToggleDoorAction).toHaveBeenCalledWith({ sessionId: 'session1', x: 5, y: 10 });
+            service.toggleDoorAction(TEST_X_COORDINATE, TEST_Y_COORDINATE);
+            expect(mockInGameSocketService.playerToggleDoorAction).toHaveBeenCalledWith({
+                sessionId: 'session1',
+                x: TEST_X_COORDINATE,
+                y: TEST_Y_COORDINATE
+            });
         });
 
         it('should handle player action used', () => {
@@ -176,7 +188,7 @@ describe('InGameService', () => {
             service.loadInGameSession();
             expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
                 title: 'Session non trouvée',
-                message: `Vous n'êtes connecté à aucune session`,
+                message: 'Vous n\'êtes connecté à aucune session',
                 redirectRoute: ROUTES.HomePage
             });
         });
@@ -185,8 +197,6 @@ describe('InGameService', () => {
             service.leaveGame();
             expect(mockInGameSocketService.playerLeaveInGameSession).toHaveBeenCalledWith('session1');
         });
-
-
 
         it('should move player when conditions are met', () => {
             service.updateInGameSession({
@@ -250,15 +260,15 @@ describe('InGameService', () => {
         });
 
         it('should handle turn end', () => {
-            const mockSession = { currentTurn: { turnNumber: 2, activePlayerId: 'player2', hasUsedAction: false } } as any;
-            service.turnEnd(mockSession);
+            const mockSession = { currentTurn: { turnNumber: 2, activePlayerId: 'player2', hasUsedAction: false } } as Partial<InGameSession>;
+            service.turnEnd(mockSession as InGameSession);
             expect(service.isTransitioning()).toBe(true);
             expect(mockTimerCoordinatorService.stopTurnTimer).toHaveBeenCalled();
             expect(mockTimerCoordinatorService.startTurnTimer).toHaveBeenCalled();
         });
 
         it('should handle turn transition ended', () => {
-            service.turnEnd({} as any);
+            service.turnEnd({} as InGameSession);
             service.turnTransitionEnded();
             expect(service.isTransitioning()).toBe(false);
         });
@@ -278,36 +288,36 @@ describe('InGameService', () => {
     describe('Socket Event Listeners', () => {
         it('should handle player joined in-game session', () => {
             const callback = mockInGameSocketService.onPlayerJoinedInGameSession.calls.mostRecent().args[0];
-            const mockData = { id: 'session1' } as any;
-            callback(mockData);
+            const mockData = { id: 'session1' } as Partial<InGameSession>;
+            callback(mockData as InGameSession);
             expect(service.inGameSession().id).toBe('session1');
         });
 
         it('should handle game started', () => {
             const callback = mockInGameSocketService.onGameStarted.calls.mostRecent().args[0];
-            const mockData = { isGameStarted: true } as any;
-            callback(mockData);
+            const mockData = { isGameStarted: true } as Partial<InGameSession>;
+            callback(mockData as InGameSession);
             expect(service.isGameStarted()).toBe(true);
             expect(mockTimerCoordinatorService.startTurnTimer).toHaveBeenCalled();
         });
 
         it('should handle turn started', () => {
             const callback = mockInGameSocketService.onTurnStarted.calls.mostRecent().args[0];
-            const mockData = { isGameStarted: true } as any;
-            callback(mockData);
+            const mockData = { isGameStarted: true } as Partial<InGameSession>;
+            callback(mockData as InGameSession);
             expect(service.isGameStarted()).toBe(true);
             expect(mockTimerCoordinatorService.startTurnTimer).toHaveBeenCalled();
         });
 
         it('should handle turn ended', () => {
             const callback = mockInGameSocketService.onTurnEnded.calls.mostRecent().args[0];
-            const mockData = { currentTurn: { turnNumber: 2, activePlayerId: 'player2', hasUsedAction: false } } as any;
-            callback(mockData);
+            const mockData = { currentTurn: { turnNumber: 2, activePlayerId: 'player2', hasUsedAction: false } } as Partial<InGameSession>;
+            callback(mockData as InGameSession);
             expect(service.isTransitioning()).toBe(true);
         });
 
         it('should handle turn transition ended', () => {
-            service.turnEnd({} as any);
+            service.turnEnd({} as InGameSession);
             const callback = mockInGameSocketService.onTurnTransitionEnded.calls.mostRecent().args[0];
             callback();
             expect(service.isTransitioning()).toBe(false);
@@ -315,14 +325,14 @@ describe('InGameService', () => {
 
         it('should handle player left for other player', () => {
             const callback = mockInGameSocketService.onPlayerLeftInGameSession.calls.mostRecent().args[0];
-            const mockData = { session: {} as any, playerName: 'Other Player', playerId: 'player2' };
+            const mockData = { session: {} as InGameSession, playerName: 'Other Player', playerId: 'player2' };
             callback(mockData);
             expect(mockNotificationService.showInfoToast).toHaveBeenCalledWith('Other Player a abandonné la partie');
         });
 
         it('should not show toast when current player left', () => {
             const callback = mockInGameSocketService.onPlayerLeftInGameSession.calls.mostRecent().args[0];
-            const mockData = { session: {} as any, playerName: 'Current Player', playerId: 'player1' };
+            const mockData = { session: {} as InGameSession, playerName: 'Current Player', playerId: 'player1' };
             callback(mockData);
             expect(mockNotificationService.showInfoToast).not.toHaveBeenCalled();
         });
@@ -330,15 +340,15 @@ describe('InGameService', () => {
         it('should handle player moved for current player', () => {
             service.updateInGameSession({ inGamePlayers: { player1: mockPlayer } });
             const callback = mockInGameSocketService.onPlayerMoved.calls.mostRecent().args[0];
-            const mockData = { playerId: 'player1', x: 5, y: 10, speed: 3 };
+            const mockData = { playerId: 'player1', x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3 };
             callback(mockData);
-            expect(mockPlayerService.updatePlayer).toHaveBeenCalledWith({ x: 5, y: 10, speed: 3 });
+            expect(mockPlayerService.updatePlayer).toHaveBeenCalledWith({ x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3 });
         });
 
         it('should handle player moved for other player', () => {
             service.updateInGameSession({ inGamePlayers: { player2: { ...mockPlayer, id: 'player2' } } });
             const callback = mockInGameSocketService.onPlayerMoved.calls.mostRecent().args[0];
-            const mockData = { playerId: 'player2', x: 5, y: 10, speed: 3 };
+            const mockData = { playerId: 'player2', x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3 };
             callback(mockData);
             expect(mockPlayerService.updatePlayer).not.toHaveBeenCalled();
         });
@@ -348,7 +358,7 @@ describe('InGameService', () => {
                 currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false }
             });
             const callback = mockInGameSocketService.onPlayerAvailableActions.calls.mostRecent().args[0];
-            const mockActions = [{ type: 'move' }] as any;
+            const mockActions = [{ type: 'ATTACK', x: 1, y: 1 }] as AvailableAction[];
             callback(mockActions);
             expect(service.availableActions()).toEqual(mockActions);
             expect(mockPlayerService.updateActionsRemaining).toHaveBeenCalledWith(1);
@@ -359,7 +369,7 @@ describe('InGameService', () => {
                 currentTurn: { turnNumber: 1, activePlayerId: 'player2', hasUsedAction: false }
             });
             const callback = mockInGameSocketService.onPlayerAvailableActions.calls.mostRecent().args[0];
-            const mockActions = [{ type: 'move' }] as any;
+            const mockActions = [{ type: 'ATTACK', x: 1, y: 1 }] as AvailableAction[];
             callback(mockActions);
             expect(service.availableActions()).toEqual(mockActions);
             expect(mockPlayerService.updateActionsRemaining).not.toHaveBeenCalled();
@@ -387,7 +397,7 @@ describe('InGameService', () => {
 
         it('should handle player reachable tiles', () => {
             const callback = mockInGameSocketService.onPlayerReachableTiles.calls.mostRecent().args[0];
-            const mockTiles = [{ x: 1, y: 1 }] as any;
+            const mockTiles = [{ x: 1, y: 1, cost: 1, remainingPoints: 2 }] as ReachableTile[];
             callback(mockTiles);
             expect(service.reachableTiles()).toEqual(mockTiles);
         });
@@ -395,9 +405,9 @@ describe('InGameService', () => {
         it('should handle player teleported for current player', () => {
             service.updateInGameSession({ inGamePlayers: { player1: mockPlayer } });
             const callback = mockInGameSocketService.onPlayerTeleported.calls.mostRecent().args[0];
-            const mockData = { playerId: 'player1', x: 5, y: 10 };
+            const mockData = { playerId: 'player1', x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE };
             callback(mockData);
-            expect(mockPlayerService.updatePlayer).toHaveBeenCalledWith({ x: 5, y: 10 });
+            expect(mockPlayerService.updatePlayer).toHaveBeenCalledWith({ x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE });
         });
 
         it('should handle player action used', () => {

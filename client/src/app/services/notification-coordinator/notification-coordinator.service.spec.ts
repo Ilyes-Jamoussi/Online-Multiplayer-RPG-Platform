@@ -2,6 +2,12 @@ import { TestBed } from '@angular/core/testing';
 import { NotificationCoordinatorService } from './notification-coordinator.service';
 import { ROUTES } from '@app/enums/routes.enum';
 
+const TEST_DURATION_1000 = 1000;
+const TEST_DURATION_2000 = 2000;
+const TEST_DURATION_3000 = 3000;
+const TEST_DURATION_4000 = 4000;
+const TEST_DURATION_5000 = 5000;
+
 describe('NotificationCoordinatorService', () => {
     let service: NotificationCoordinatorService;
 
@@ -73,11 +79,11 @@ describe('NotificationCoordinatorService', () => {
         });
 
         it('should show toast with custom type and duration', () => {
-            service.showToast('Test message', 'error', 5000);
+            service.showToast('Test message', 'error', TEST_DURATION_5000);
             
             const toasts = service.toasts();
             expect(toasts[0].type).toBe('error');
-            expect(toasts[0].duration).toBe(5000);
+            expect(toasts[0].duration).toBe(TEST_DURATION_5000);
         });
 
         it('should show info toast', () => {
@@ -110,10 +116,10 @@ describe('NotificationCoordinatorService', () => {
         });
 
         it('should auto-remove toast after duration', () => {
-            service.showToast('Test message', 'info', 1000);
+            service.showToast('Test message', 'info', TEST_DURATION_1000);
             expect(service.toasts().length).toBe(1);
             
-            jasmine.clock().tick(1000);
+            jasmine.clock().tick(TEST_DURATION_1000);
             expect(service.toasts().length).toBe(0);
         });
 
@@ -121,7 +127,7 @@ describe('NotificationCoordinatorService', () => {
             service.showToast('Test message', 'info', 0);
             expect(service.toasts().length).toBe(1);
             
-            jasmine.clock().tick(5000);
+            jasmine.clock().tick(TEST_DURATION_5000);
             expect(service.toasts().length).toBe(1);
         });
 
@@ -180,16 +186,16 @@ describe('NotificationCoordinatorService', () => {
 
     describe('Toast with Custom Duration', () => {
         it('should use custom duration for specific toast methods', () => {
-            service.showInfoToast('Info', 2000);
-            service.showSuccessToast('Success', 3000);
-            service.showWarningToast('Warning', 4000);
-            service.showErrorToast('Error', 5000);
+            service.showInfoToast('Info', TEST_DURATION_2000);
+            service.showSuccessToast('Success', TEST_DURATION_3000);
+            service.showWarningToast('Warning', TEST_DURATION_4000);
+            service.showErrorToast('Error', TEST_DURATION_5000);
             
             const toasts = service.toasts();
-            expect(toasts[0].duration).toBe(2000);
-            expect(toasts[1].duration).toBe(3000);
-            expect(toasts[2].duration).toBe(4000);
-            expect(toasts[3].duration).toBe(5000);
+            expect(toasts[0].duration).toBe(TEST_DURATION_2000);
+            expect(toasts[1].duration).toBe(TEST_DURATION_3000);
+            expect(toasts[2].duration).toBe(TEST_DURATION_4000);
+            expect(toasts[3].duration).toBe(TEST_DURATION_5000);
         });
     });
 });

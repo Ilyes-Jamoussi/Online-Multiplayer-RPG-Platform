@@ -1,9 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { AdminModeService } from './admin-mode.service';
+import { AdminModeToggledDto } from '@app/dto/admin-mode-toggled-dto';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
+
+const TEST_X_COORDINATE = 5;
+const TEST_Y_COORDINATE = 3;
 
 describe('AdminModeService', () => {
     let service: AdminModeService;
@@ -21,7 +25,7 @@ describe('AdminModeService', () => {
             'onAdminModeToggled',
         ]);
 
-        inGameSocketSpy.onAdminModeToggled.and.callFake((callback: any) => {
+        inGameSocketSpy.onAdminModeToggled.and.callFake((callback: (data: AdminModeToggledDto) => void) => {
             adminModeToggledCallback = callback;
         });
 
@@ -111,15 +115,19 @@ describe('AdminModeService', () => {
         });
 
         it('should teleport player when all conditions are met', () => {
-            service.teleportPlayer(5, 3);
+            service.teleportPlayer(TEST_X_COORDINATE, TEST_Y_COORDINATE);
 
-            expect(mockInGameSocketService.playerTeleport).toHaveBeenCalledWith({ sessionId: 'session1', x: 5, y: 3 });
+            expect(mockInGameSocketService.playerTeleport).toHaveBeenCalledWith({
+                sessionId: 'session1',
+                x: TEST_X_COORDINATE,
+                y: TEST_Y_COORDINATE
+            });
         });
 
         it('should not teleport when admin mode is not activated', () => {
             service.isAdminModeActivated.set(false);
 
-            service.teleportPlayer(5, 3);
+            service.teleportPlayer(TEST_X_COORDINATE, TEST_Y_COORDINATE);
 
             expect(mockInGameSocketService.playerTeleport).not.toHaveBeenCalled();
         });
@@ -127,7 +135,7 @@ describe('AdminModeService', () => {
         it('should not teleport when it is not player turn', () => {
             mockInGameService.isMyTurn.and.returnValue(false);
 
-            service.teleportPlayer(5, 3);
+            service.teleportPlayer(TEST_X_COORDINATE, TEST_Y_COORDINATE);
 
             expect(mockInGameSocketService.playerTeleport).not.toHaveBeenCalled();
         });
@@ -135,7 +143,7 @@ describe('AdminModeService', () => {
         it('should not teleport when game is not started', () => {
             mockInGameService.isGameStarted.and.returnValue(false);
 
-            service.teleportPlayer(5, 3);
+            service.teleportPlayer(TEST_X_COORDINATE, TEST_Y_COORDINATE);
 
             expect(mockInGameSocketService.playerTeleport).not.toHaveBeenCalled();
         });

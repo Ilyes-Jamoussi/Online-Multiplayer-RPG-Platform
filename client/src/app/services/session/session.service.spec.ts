@@ -9,6 +9,8 @@ import { MapSize } from '@common/enums/map-size.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
 
+const TEST_MAX_PLAYERS = 4;
+
 describe('SessionService', () => {
     let service: SessionService;
     let mockSessionSocketService: jasmine.SpyObj<SessionSocketService>;
@@ -108,7 +110,7 @@ describe('SessionService', () => {
         });
 
         it('should check if can be unlocked', () => {
-            service.updateSession({ isRoomLocked: true, maxPlayers: 4, players: [mockPlayer] });
+            service.updateSession({ isRoomLocked: true, maxPlayers: TEST_MAX_PLAYERS, players: [mockPlayer] });
             expect(service.canBeUnlocked()).toBe(true);
             
             service.updateSession({ isRoomLocked: false });
@@ -127,7 +129,7 @@ describe('SessionService', () => {
     describe('Avatar Management', () => {
         it('should update avatar assignment for admin', () => {
             service.updateAvatarAssignment('player1', Avatar.Avatar1, true);
-            expect(service.avatarAssignments().some(a => a.chosenBy === 'player1')).toBe(true);
+            expect(service.avatarAssignments().some(assignment => assignment.chosenBy === 'player1')).toBe(true);
         });
 
         it('should emit socket event for non-admin', () => {
@@ -162,11 +164,11 @@ describe('SessionService', () => {
         });
 
         it('should create session', () => {
-            service.updateSession({ gameId: 'game1', maxPlayers: 4 });
+            service.updateSession({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS });
             service.createSession(mockPlayer);
             expect(mockSessionSocketService.createSession).toHaveBeenCalledWith({
                 gameId: 'game1',
-                maxPlayers: 4,
+                maxPlayers: TEST_MAX_PLAYERS,
                 player: mockPlayer
             });
         });
@@ -204,9 +206,9 @@ describe('SessionService', () => {
 
     describe('Event Handlers', () => {
         it('should handle session joined', () => {
-            service.handleSessionJoined({ gameId: 'game1', maxPlayers: 4 });
+            service.handleSessionJoined({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS });
             expect(service.gameId()).toBe('game1');
-            expect(service.maxPlayers()).toBe(4);
+            expect(service.maxPlayers()).toBe(TEST_MAX_PLAYERS);
             expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.WaitingRoomPage]);
         });
     });
@@ -248,10 +250,10 @@ describe('SessionService', () => {
 
         it('should handle session joined event', () => {
             const callback = mockSessionSocketService.onSessionJoined.calls.mostRecent().args[0];
-            const mockData = { gameId: 'game1', maxPlayers: 4 };
+            const mockData = { gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS };
             callback(mockData);
             expect(service.gameId()).toBe('game1');
-            expect(service.maxPlayers()).toBe(4);
+            expect(service.maxPlayers()).toBe(TEST_MAX_PLAYERS);
             expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.WaitingRoomPage]);
         });
 
@@ -294,7 +296,7 @@ describe('SessionService', () => {
 
         it('should handle available sessions updated', () => {
             const callback = mockSessionSocketService.onAvailableSessionsUpdated.calls.mostRecent().args[0];
-            const mockData = { sessions: [{ id: 'session1', currentPlayers: 2, maxPlayers: 4 }] };
+            const mockData = { sessions: [{ id: 'session1', currentPlayers: 2, maxPlayers: TEST_MAX_PLAYERS }] };
             callback(mockData);
             expect(service.availableSessions()).toEqual(mockData.sessions);
         });
@@ -327,8 +329,8 @@ describe('SessionService', () => {
             service.updateAvatarAssignment('player1', Avatar.Avatar2, true);
             
             const assignments = service.avatarAssignments();
-            expect(assignments.find(a => a.avatar === Avatar.Avatar1)?.chosenBy).toBeNull();
-            expect(assignments.find(a => a.avatar === Avatar.Avatar2)?.chosenBy).toBe('player1');
+            expect(assignments.find(assignment => assignment.avatar === Avatar.Avatar1)?.chosenBy).toBeNull();
+            expect(assignments.find(assignment => assignment.avatar === Avatar.Avatar2)?.chosenBy).toBe('player1');
         });
     });
 });

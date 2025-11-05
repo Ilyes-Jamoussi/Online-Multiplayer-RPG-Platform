@@ -7,6 +7,10 @@ import { Player } from '@common/interfaces/player.interface';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 
+const TEST_COMBAT_WINS_PLAYER1 = 3;
+const TEST_HEALTH_PERCENTAGE_PLAYER1 = 75;
+const TEST_HEALTH_PERCENTAGE_PLAYER2 = 50;
+
 describe('PlayersListComponent', () => {
     let component: PlayersListComponent;
     let fixture: ComponentFixture<PlayersListComponent>;
@@ -143,13 +147,13 @@ describe('PlayersListComponent', () => {
     });
 
     it('should return combat wins for player', () => {
-        expect(component.getCombatWins(mockPlayers.player1)).toBe(3);
+        expect(component.getCombatWins(mockPlayers.player1)).toBe(TEST_COMBAT_WINS_PLAYER1);
         expect(component.getCombatWins(mockPlayers.player2)).toBe(1);
     });
 
     it('should calculate health percentage correctly', () => {
-        expect(component.getHealthPercentage(mockPlayers.player1)).toBe(75);
-        expect(component.getHealthPercentage(mockPlayers.player2)).toBe(50);
+        expect(component.getHealthPercentage(mockPlayers.player1)).toBe(TEST_HEALTH_PERCENTAGE_PLAYER1);
+        expect(component.getHealthPercentage(mockPlayers.player2)).toBe(TEST_HEALTH_PERCENTAGE_PLAYER2);
     });
 
     it('should return 0 health percentage when max health is 0', () => {

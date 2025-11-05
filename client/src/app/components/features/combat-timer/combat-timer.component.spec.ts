@@ -1,23 +1,29 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { WritableSignal, signal } from '@angular/core';
 import { CombatService } from '@app/services/combat/combat.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { CombatData } from '@app/interfaces/combat-data.interface';
 import { CombatTimerComponent } from './combat-timer.component';
+
+const MOCK_TIME_REMAINING = 3;
+const MOCK_MAX_TIME = 5;
+const EXPECTED_PROGRESS_PERCENTAGE = 40;
+const EXPECTED_PROGRESS_TWO_SECONDS = 2;
 
 describe('CombatTimerComponent', () => {
     let component: CombatTimerComponent;
     let fixture: ComponentFixture<CombatTimerComponent>;
-    let mockCombatService: any;
-    let mockTimerCoordinatorService: any;
-    let combatTimeRemainingSignal: any;
-    let combatDataSignal: any;
+    let mockCombatService: Partial<CombatService>;
+    let mockTimerCoordinatorService: Partial<TimerCoordinatorService>;
+    let combatTimeRemainingSignal: WritableSignal<number>;
+    let combatDataSignal: WritableSignal<CombatData | null>;
 
     beforeEach(async () => {
-        combatTimeRemainingSignal = signal(3);
+        combatTimeRemainingSignal = signal(MOCK_TIME_REMAINING);
         combatDataSignal = signal({ attackerId: 'player1', targetId: 'player2', userRole: 'attacker' });
 
         mockCombatService = {
-            combatData: combatDataSignal
+            combatData: combatDataSignal.asReadonly()
         };
 
         mockTimerCoordinatorService = {
@@ -42,7 +48,7 @@ describe('CombatTimerComponent', () => {
 
     describe('getters', () => {
         it('should return timeRemaining signal from timerCoordinatorService', () => {
-            expect(component.timeRemaining()).toBe(3);
+            expect(component.timeRemaining()).toBe(MOCK_TIME_REMAINING);
         });
 
         it('should return "Combat" as timer label', () => {
@@ -83,7 +89,7 @@ describe('CombatTimerComponent', () => {
             const timeElement = fixture.nativeElement.querySelector('.time-value');
 
             expect(labelElement.textContent).toBe('Combat');
-            expect(timeElement.textContent).toBe('3');
+            expect(timeElement.textContent).toBe(MOCK_TIME_REMAINING.toString());
         });
 
         it('should display time unit', () => {
@@ -94,15 +100,16 @@ describe('CombatTimerComponent', () => {
         });
 
         it('should update progress bar width based on time remaining', () => {
-            combatTimeRemainingSignal.set(2);
+            combatTimeRemainingSignal.set(EXPECTED_PROGRESS_TWO_SECONDS);
             fixture.detectChanges();
 
             const progressElement = fixture.nativeElement.querySelector('.timer-progress');
-            expect(progressElement.style.width).toBe('40%'); // (2/5) * 100
+            // Progress calculation: (2/5) * 100 = 40%
+            expect(progressElement.style.width).toBe(`${EXPECTED_PROGRESS_PERCENTAGE}%`);
         });
 
         it('should show full progress when time is 5', () => {
-            combatTimeRemainingSignal.set(5);
+            combatTimeRemainingSignal.set(MOCK_MAX_TIME);
             fixture.detectChanges();
 
             const progressElement = fixture.nativeElement.querySelector('.timer-progress');

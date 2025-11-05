@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { SessionSocketService } from './session-socket.service';
 import { SocketService } from '@app/services/socket/socket.service';
+import { PlayerDto } from '@app/dto/player-dto';
 import { SessionEvents } from '@common/enums/session-events.enum';
 
 describe('SessionSocketService', () => {
@@ -22,7 +23,7 @@ describe('SessionSocketService', () => {
 
     describe('Emit Events', () => {
         it('should emit createSession', () => {
-            const data = { gameId: 'game1', maxPlayers: 4, player: {} as any };
+            const data = { gameId: 'game1', maxPlayers: 4, player: {} as PlayerDto };
             service.createSession(data);
             expect(mockSocketService.emit).toHaveBeenCalledWith(SessionEvents.CreateSession, data);
         });
@@ -40,7 +41,7 @@ describe('SessionSocketService', () => {
         });
 
         it('should emit joinSession', () => {
-            const data = { sessionId: 'session1', player: {} as any };
+            const data = { sessionId: 'session1', player: {} as PlayerDto };
             service.joinSession(data);
             expect(mockSocketService.emit).toHaveBeenCalledWith(SessionEvents.JoinSession, data);
         });

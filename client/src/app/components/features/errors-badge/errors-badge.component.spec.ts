@@ -4,6 +4,8 @@ import { GameEditorCheckService } from '@app/services/game-editor-check/game-edi
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { GameEditorIssuesEnum } from '@app/interfaces/game-editor.interface';
 
+const EXPECTED_GAME_EDITOR_ERROR_COUNT = 3;
+
 describe('ErrorsBadgeComponent', () => {
     let component: ErrorsBadgeComponent;
     let fixture: ComponentFixture<ErrorsBadgeComponent>;
@@ -87,7 +89,7 @@ describe('ErrorsBadgeComponent', () => {
 
     it('should return correct error count for game editor', () => {
         component.validationType = 'game-editor';
-        expect(component.errorCount).toBe(3);
+        expect(component.errorCount).toBe(EXPECTED_GAME_EDITOR_ERROR_COUNT);
     });
 
     it('should return true for hasErrors when errors exist', () => {

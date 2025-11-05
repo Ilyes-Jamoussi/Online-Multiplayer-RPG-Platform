@@ -10,9 +10,14 @@ import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Avatar } from '@common/enums/avatar.enum';
+import { Dice } from '@common/enums/dice.enum';
+import { Player } from '@common/interfaces/player.interface';
 
 import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
+
+const TEST_COORDINATE_5 = 5;
+const TEST_COORDINATE_10 = 10;
 
 describe('GameMapService', () => {
     let service: GameMapService;
@@ -40,10 +45,10 @@ describe('GameMapService', () => {
         baseDefense: 4,
         defenseBonus: 0,
         defense: 4,
-        attackDice: 'D6' as any,
-        defenseDice: 'D6' as any,
-        x: 5,
-        y: 10,
+        attackDice: Dice.D6,
+        defenseDice: Dice.D6,
+        x: TEST_COORDINATE_5,
+        y: TEST_COORDINATE_10,
         isInGame: true,
         startPointId: '',
         actionsRemaining: 1,
@@ -170,7 +175,7 @@ describe('GameMapService', () => {
         });
 
         it('should return empty string for non-reachable tiles', () => {
-            const tileClass = service.getTileClass(5, 5);
+            const tileClass = service.getTileClass(TEST_COORDINATE_5, TEST_COORDINATE_5);
             expect(tileClass).toBe('');
         });
     });
@@ -188,7 +193,7 @@ describe('GameMapService', () => {
         });
 
         it('should return null when no action at coordinates', () => {
-            const actionType = service.getActionTypeAt(5, 5);
+            const actionType = service.getActionTypeAt(TEST_COORDINATE_5, TEST_COORDINATE_5);
             expect(actionType).toBeNull();
         });
 
@@ -223,7 +228,7 @@ describe('GameMapService', () => {
         it('should check if tile modal is open', () => {
             service.openTileModal(mockTile);
             expect(service.isTileModalOpen(mockTile)).toBe(true);
-            expect(service.isTileModalOpen({ ...mockTile, x: 2 })).toBe(false);
+            expect(service.isTileModalOpen({ ...mockTile, x: 2 } as typeof mockTile)).toBe(false);
         });
 
         it('should get active tile', () => {
@@ -247,7 +252,7 @@ describe('GameMapService', () => {
 
     describe('Players and Objects on Tiles', () => {
         it('should get player on tile', () => {
-            service.openTileModal({ x: 5, y: 10, kind: TileKind.BASE });
+            service.openTileModal({ x: TEST_COORDINATE_5, y: TEST_COORDINATE_10, kind: TileKind.BASE });
             const player = service.getPlayerOnTile();
             expect(player).toEqual(mockPlayer);
         });
@@ -264,7 +269,7 @@ describe('GameMapService', () => {
         });
 
         it('should get player on tile with custom coords', () => {
-            const player = service.getPlayerOnTile({ x: 5, y: 10 });
+            const player = service.getPlayerOnTile({ x: TEST_COORDINATE_5, y: TEST_COORDINATE_10 });
             expect(player).toEqual(mockPlayer);
         });
 
@@ -313,7 +318,7 @@ describe('GameMapService', () => {
 
     describe('Avatar', () => {
         it('should get avatar by player id', () => {
-            mockInGameService.getPlayerByPlayerId.and.returnValue({ ...mockPlayer, avatar: Avatar.Avatar1 } as any);
+            mockInGameService.getPlayerByPlayerId.and.returnValue({ ...mockPlayer, avatar: Avatar.Avatar1 } as Player);
             mockAssetsService.getAvatarStaticImage.and.returnValue('/avatar1.png');
             
             const avatar = service.getAvatarByPlayerId('player1');
@@ -324,7 +329,7 @@ describe('GameMapService', () => {
         });
 
         it('should return empty string when player has no avatar', () => {
-            mockInGameService.getPlayerByPlayerId.and.returnValue({ ...mockPlayer, avatar: null } as any);
+            mockInGameService.getPlayerByPlayerId.and.returnValue({ ...mockPlayer, avatar: null } as Player);
             
             const avatar = service.getAvatarByPlayerId('player1');
             
@@ -332,7 +337,7 @@ describe('GameMapService', () => {
         });
 
         it('should return empty string when player not found', () => {
-            mockInGameService.getPlayerByPlayerId.and.returnValue(null as any);
+            mockInGameService.getPlayerByPlayerId.and.returnValue(undefined as unknown as Player);
             
             const avatar = service.getAvatarByPlayerId('nonexistent');
             

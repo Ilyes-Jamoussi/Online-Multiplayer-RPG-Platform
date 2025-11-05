@@ -1,23 +1,33 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { WritableSignal, signal } from '@angular/core';
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
 import { TurnTimerComponent } from './turn-timer.component';
 
+const TEST_TIME_REMAINING = 25;
+const TEST_PAUSED_TIME = 15;
+
+type MockInGameService = Partial<InGameService> & {
+    timeRemaining: WritableSignal<number>;
+    isMyTurn: WritableSignal<boolean>;
+    isTransitioning: WritableSignal<boolean>;
+    isGameStarted: WritableSignal<boolean>;
+};
+
 describe('TurnTimerComponent', () => {
     let component: TurnTimerComponent;
     let fixture: ComponentFixture<TurnTimerComponent>;
-    let mockInGameService: any;
+    let mockInGameService: MockInGameService;
     let mockTimerCoordinatorService: jasmine.SpyObj<TimerCoordinatorService>;
     let mockCombatService: jasmine.SpyObj<CombatService>;
-    let timeRemainingSignal: any;
-    let isMyTurnSignal: any;
-    let isTransitioningSignal: any;
-    let isGameStartedSignal: any;
+    let timeRemainingSignal: WritableSignal<number>;
+    let isMyTurnSignal: WritableSignal<boolean>;
+    let isTransitioningSignal: WritableSignal<boolean>;
+    let isGameStartedSignal: WritableSignal<boolean>;
 
     beforeEach(async () => {
-        timeRemainingSignal = signal(25);
+        timeRemainingSignal = signal(TEST_TIME_REMAINING);
         isMyTurnSignal = signal(true);
         isTransitioningSignal = signal(false);
         isGameStartedSignal = signal(true);
@@ -33,7 +43,7 @@ describe('TurnTimerComponent', () => {
             'getPausedTurnTime',
             'isTurnActive'
         ]);
-        mockTimerCoordinatorService.getPausedTurnTime.and.returnValue(15);
+        mockTimerCoordinatorService.getPausedTurnTime.and.returnValue(TEST_PAUSED_TIME);
         mockTimerCoordinatorService.isTurnActive.and.returnValue(true);
 
         mockCombatService = jasmine.createSpyObj('CombatService', ['isCombatActive']);
@@ -58,7 +68,7 @@ describe('TurnTimerComponent', () => {
 
     describe('getters', () => {
         it('should return timeRemaining signal from inGameService', () => {
-            expect(component.timeRemaining()).toBe(25);
+            expect(component.timeRemaining()).toBe(TEST_TIME_REMAINING);
         });
 
         it('should return isMyTurn signal from inGameService', () => {
@@ -83,14 +93,14 @@ describe('TurnTimerComponent', () => {
         it('should return paused turn time when combat is active', () => {
             mockCombatService.isCombatActive.and.returnValue(true);
 
-            expect(component.displayedTime).toBe(15);
+            expect(component.displayedTime).toBe(TEST_PAUSED_TIME);
             expect(mockTimerCoordinatorService.getPausedTurnTime).toHaveBeenCalled();
         });
 
         it('should return timeRemaining when combat is not active', () => {
             mockCombatService.isCombatActive.and.returnValue(false);
 
-            expect(component.displayedTime).toBe(25);
+            expect(component.displayedTime).toBe(TEST_TIME_REMAINING);
         });
     });
 
@@ -222,7 +232,7 @@ describe('TurnTimerComponent', () => {
             const timeElement = fixture.nativeElement.querySelector('.time-value');
             
             expect(labelElement.textContent).toBe('Votre tour');
-            expect(timeElement.textContent).toBe('25');
+            expect(timeElement.textContent).toBe(TEST_TIME_REMAINING.toString());
         });
 
         it('should apply correct CSS class', () => {

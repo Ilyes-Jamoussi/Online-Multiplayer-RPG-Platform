@@ -1,7 +1,18 @@
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { TimerCoordinatorService } from './timer-coordinator.service';
 import { MILLISECONDS_PER_SECOND } from '@common/constants/in-game';
 import { COMBAT_ROUND_DURATION_SECONDS } from '@app/constants/combat.constants';
+
+const TEST_DURATION_1000 = 1000;
+const TEST_DURATION_2000 = 2000;
+const TEST_DURATION_3000 = 3000;
+const TEST_DURATION_5000 = 5000;
+const TEST_SECONDS_3 = 3;
+const TEST_SECONDS_5 = 5;
+const TEST_SECONDS_8 = 8;
+const TEST_SECONDS_9 = 9;
+const TEST_SECONDS_10 = 10;
 
 describe('TimerCoordinatorService', () => {
     let service: TimerCoordinatorService;
@@ -22,15 +33,16 @@ describe('TimerCoordinatorService', () => {
 
     describe('Turn Timer', () => {
         it('should start turn timer with correct duration', () => {
-            const duration = 5000; // 5 seconds
+            // 5 seconds duration
+            const duration = TEST_DURATION_5000;
             service.startTurnTimer(duration);
 
-            expect(service.turnTimeRemaining()).toBe(5);
+            expect(service.turnTimeRemaining()).toBe(TEST_SECONDS_5);
             expect(service.isTurnActive()).toBe(true);
         });
 
         it('should decrement turn timer every second', () => {
-            service.startTurnTimer(3000);
+            service.startTurnTimer(TEST_DURATION_3000);
 
             jasmine.clock().tick(MILLISECONDS_PER_SECOND);
             expect(service.turnTimeRemaining()).toBe(2);
@@ -40,7 +52,7 @@ describe('TimerCoordinatorService', () => {
         });
 
         it('should stop turn timer when reaching 1 second', () => {
-            service.startTurnTimer(2000);
+            service.startTurnTimer(TEST_DURATION_2000);
 
             jasmine.clock().tick(MILLISECONDS_PER_SECOND);
             expect(service.isTurnActive()).toBe(true);
@@ -51,7 +63,7 @@ describe('TimerCoordinatorService', () => {
         });
 
         it('should stop turn timer manually', () => {
-            service.startTurnTimer(5000);
+            service.startTurnTimer(TEST_DURATION_5000);
             expect(service.isTurnActive()).toBe(true);
 
             service.stopTurnTimer();
@@ -61,23 +73,23 @@ describe('TimerCoordinatorService', () => {
         });
 
         it('should pause turn timer and save remaining time', () => {
-            service.startTurnTimer(5000);
+            service.startTurnTimer(TEST_DURATION_5000);
             jasmine.clock().tick(MILLISECONDS_PER_SECOND);
 
             service.pauseTurnTimer();
             expect(service.isTurnActive()).toBe(false);
             expect(service.turnTimeRemaining()).toBe(0);
-            expect(service.getPausedTurnTime()).toBe(3);
+            expect(service.getPausedTurnTime()).toBe(TEST_SECONDS_3);
         });
 
         it('should resume turn timer from paused time', () => {
-            service.startTurnTimer(5000);
+            service.startTurnTimer(TEST_DURATION_5000);
             jasmine.clock().tick(MILLISECONDS_PER_SECOND);
             service.pauseTurnTimer();
 
             service.resumeTurnTimer();
             expect(service.isTurnActive()).toBe(true);
-            expect(service.turnTimeRemaining()).toBe(3);
+            expect(service.turnTimeRemaining()).toBe(TEST_SECONDS_3);
             expect(service.getPausedTurnTime()).toBe(0);
         });
 
@@ -88,11 +100,11 @@ describe('TimerCoordinatorService', () => {
         });
 
         it('should clear existing timer when starting new one', () => {
-            service.startTurnTimer(3000);
+            service.startTurnTimer(TEST_DURATION_3000);
             const firstTimer = service.turnTimeRemaining();
 
-            service.startTurnTimer(5000);
-            expect(service.turnTimeRemaining()).toBe(5);
+            service.startTurnTimer(TEST_DURATION_5000);
+            expect(service.turnTimeRemaining()).toBe(TEST_SECONDS_5);
             expect(service.turnTimeRemaining()).not.toBe(firstTimer);
         });
     });
@@ -155,7 +167,7 @@ describe('TimerCoordinatorService', () => {
 
     describe('Reset All Timers', () => {
         it('should reset both turn and combat timers', () => {
-            service.startTurnTimer(5000);
+            service.startTurnTimer(TEST_DURATION_5000);
             service.startCombatTimer();
 
             expect(service.isTurnActive()).toBe(true);
@@ -173,28 +185,28 @@ describe('TimerCoordinatorService', () => {
     describe('Game Over Timer', () => {
         it('should start game over timer with correct duration', () => {
             const mockRouter = { navigate: jasmine.createSpy('navigate') };
-            service.startGameOverTimer(mockRouter as any);
+            service.startGameOverTimer(mockRouter as unknown as Router);
 
-            expect(service.gameOverTimeRemaining()).toBe(10);
+            expect(service.gameOverTimeRemaining()).toBe(TEST_SECONDS_10);
             expect(service.isGameOverActive()).toBe(true);
         });
 
         it('should decrement game over timer every second', () => {
             const mockRouter = { navigate: jasmine.createSpy('navigate') };
-            service.startGameOverTimer(mockRouter as any);
+            service.startGameOverTimer(mockRouter as unknown as Router);
 
             jasmine.clock().tick(MILLISECONDS_PER_SECOND);
-            expect(service.gameOverTimeRemaining()).toBe(9);
+            expect(service.gameOverTimeRemaining()).toBe(TEST_SECONDS_9);
 
             jasmine.clock().tick(MILLISECONDS_PER_SECOND);
-            expect(service.gameOverTimeRemaining()).toBe(8);
+            expect(service.gameOverTimeRemaining()).toBe(TEST_SECONDS_8);
         });
 
         it('should navigate to home page when timer reaches 1 second', () => {
             const mockRouter = { navigate: jasmine.createSpy('navigate') };
-            service.startGameOverTimer(mockRouter as any);
+            service.startGameOverTimer(mockRouter as unknown as Router);
 
-            jasmine.clock().tick(9 * MILLISECONDS_PER_SECOND);
+            jasmine.clock().tick(TEST_SECONDS_9 * MILLISECONDS_PER_SECOND);
             expect(service.gameOverTimeRemaining()).toBe(1);
 
             jasmine.clock().tick(MILLISECONDS_PER_SECOND);
@@ -205,7 +217,7 @@ describe('TimerCoordinatorService', () => {
 
         it('should stop game over timer manually', () => {
             const mockRouter = { navigate: jasmine.createSpy('navigate') };
-            service.startGameOverTimer(mockRouter as any);
+            service.startGameOverTimer(mockRouter as unknown as Router);
             expect(service.isGameOverActive()).toBe(true);
 
             service.stopGameOverTimer();
@@ -221,7 +233,7 @@ describe('TimerCoordinatorService', () => {
         });
 
         it('should handle pause when time remaining is 0', () => {
-            service.startTurnTimer(1000);
+            service.startTurnTimer(TEST_DURATION_1000);
             jasmine.clock().tick(MILLISECONDS_PER_SECOND);
             
             service.pauseTurnTimer();
@@ -229,7 +241,7 @@ describe('TimerCoordinatorService', () => {
         });
 
         it('should handle multiple stop calls', () => {
-            service.startTurnTimer(3000);
+            service.startTurnTimer(TEST_DURATION_3000);
             service.stopTurnTimer();
             service.stopTurnTimer();
 

@@ -9,7 +9,17 @@ import { BonusType } from '@app/enums/character-creation.enum';
 import { ROUTES } from '@app/enums/routes.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { Player } from '@common/interfaces/player.interface';
 import { signal } from '@angular/core';
+
+const TEST_HEALTH_5 = 5;
+const TEST_HEALTH_6 = 6;
+const TEST_SPEED_4 = 4;
+const TEST_SPEED_6 = 6;
+const TEST_HEALTH_10 = 10;
+const TEST_ACTIONS_3 = 3;
+const TEST_MAX_PLAYERS_4 = 4;
+const TEST_RANDOM_VALUE = 0.1;
 
 describe('PlayerService', () => {
     let service: PlayerService;
@@ -57,9 +67,9 @@ describe('PlayerService', () => {
 
     describe('Player Properties', () => {
         it('should return player properties', () => {
-            service.updatePlayer({ name: 'Test Player', health: 5 });
+            service.updatePlayer({ name: 'Test Player', health: TEST_HEALTH_5 });
             expect(service.name()).toBe('Test Player');
-            expect(service.health()).toBe(5);
+            expect(service.health()).toBe(TEST_HEALTH_5);
         });
 
         it('should return bonus selections', () => {
@@ -81,15 +91,15 @@ describe('PlayerService', () => {
 
         it('should set life bonus', () => {
             service.setBonus(BonusType.Life);
-            expect(service.health()).toBe(6);
-            expect(service.maxHealth()).toBe(6);
-            expect(service.speed()).toBe(4);
+            expect(service.health()).toBe(TEST_HEALTH_6);
+            expect(service.maxHealth()).toBe(TEST_HEALTH_6);
+            expect(service.speed()).toBe(TEST_SPEED_4);
         });
 
         it('should set speed bonus', () => {
             service.setBonus(BonusType.Speed);
-            expect(service.health()).toBe(4);
-            expect(service.speed()).toBe(6);
+            expect(service.health()).toBe(TEST_SPEED_4);
+            expect(service.speed()).toBe(TEST_SPEED_6);
         });
 
         it('should set attack dice to D6 and defense to D4', () => {
@@ -107,7 +117,7 @@ describe('PlayerService', () => {
 
     describe('Random Generation', () => {
         it('should generate random character', () => {
-            spyOn(Math, 'random').and.returnValues(0.1, 0.1, 0.1, 0.1);
+            spyOn(Math, 'random').and.returnValues(TEST_RANDOM_VALUE, TEST_RANDOM_VALUE, TEST_RANDOM_VALUE, TEST_RANDOM_VALUE);
             service.generateRandom();
             
             expect(service.name()).toBeTruthy();
@@ -117,9 +127,9 @@ describe('PlayerService', () => {
 
     describe('Player State', () => {
         it('should update player', () => {
-            service.updatePlayer({ name: 'Updated', health: 10 });
+            service.updatePlayer({ name: 'Updated', health: TEST_HEALTH_10 });
             expect(service.name()).toBe('Updated');
-            expect(service.health()).toBe(10);
+            expect(service.health()).toBe(TEST_HEALTH_10);
         });
 
         it('should reset player and session', () => {
@@ -202,8 +212,8 @@ describe('PlayerService', () => {
 
     describe('Actions', () => {
         it('should update actions remaining', () => {
-            service.updateActionsRemaining(3);
-            expect(service.actionsRemaining()).toBe(3);
+            service.updateActionsRemaining(TEST_ACTIONS_3);
+            expect(service.actionsRemaining()).toBe(TEST_ACTIONS_3);
         });
     });
 
@@ -239,32 +249,32 @@ describe('PlayerService', () => {
 
         it('should handle session joined without modified name', () => {
             const callback = mockSessionSocketService.onSessionJoined.calls.mostRecent().args[0];
-            callback({ gameId: 'game1', maxPlayers: 4 });
+            callback({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4 });
             
-            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({ gameId: 'game1', maxPlayers: 4 });
+            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4 });
         });
 
         it('should handle session joined with modified name', () => {
             const callback = mockSessionSocketService.onSessionJoined.calls.mostRecent().args[0];
-            callback({ gameId: 'game1', maxPlayers: 4, modifiedPlayerName: 'Modified Name' });
+            callback({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4, modifiedPlayerName: 'Modified Name' });
             
             expect(service.name()).toBe('Modified Name');
-            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({ gameId: 'game1', maxPlayers: 4 });
+            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4 });
         });
 
         it('should handle player updated for current player', () => {
             service.updatePlayer({ id: 'player1' });
             const callback = mockInGameSocketService.onPlayerUpdated.calls.mostRecent().args[0];
-            callback({ id: 'player1', name: 'Updated Player', health: 10 } as any);
+            callback({ id: 'player1', name: 'Updated Player', health: TEST_HEALTH_10 } as unknown as Player);
             
             expect(service.name()).toBe('Updated Player');
-            expect(service.health()).toBe(10);
+            expect(service.health()).toBe(TEST_HEALTH_10);
         });
 
         it('should not handle player updated for other player', () => {
             service.updatePlayer({ id: 'player1', name: 'Original' });
             const callback = mockInGameSocketService.onPlayerUpdated.calls.mostRecent().args[0];
-            callback({ id: 'other-player', name: 'Other Player' } as any);
+            callback({ id: 'other-player', name: 'Other Player' } as unknown as Player);
             
             expect(service.name()).toBe('Original');
         });

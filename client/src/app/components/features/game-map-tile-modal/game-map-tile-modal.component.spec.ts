@@ -135,7 +135,7 @@ describe('GameMapTileModalComponent', () => {
     });
 
     it('should return empty string when tile is null', () => {
-        const result = component.getTileImage(null as any);
+        const result = component.getTileImage(null as unknown as GameEditorTileDto);
         expect(result).toBe('');
         expect(mockAssetsService.getTileImage).not.toHaveBeenCalled();
     });

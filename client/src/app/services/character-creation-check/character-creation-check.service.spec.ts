@@ -5,6 +5,8 @@ import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
 
+const TEST_ERROR_COUNT = 3;
+
 describe('CharacterCreationCheckService', () => {
     let service: CharacterCreationCheckService;
     let mockPlayerService: jasmine.SpyObj<PlayerService>;
@@ -202,7 +204,7 @@ describe('CharacterCreationCheckService', () => {
             expect(errors).toContain('Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d\'espaces.');
             expect(errors).toContain('Un avatar doit être sélectionné.');
             expect(errors).toContain('Un bonus doit être sélectionné.');
-            expect(errors.length).toBe(3);
+            expect(errors.length).toBe(TEST_ERROR_COUNT);
         });
     });
 

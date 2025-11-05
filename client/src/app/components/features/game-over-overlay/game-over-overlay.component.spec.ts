@@ -10,6 +10,8 @@ import { Player } from '@common/interfaces/player.interface';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 
+const TEST_TIMER_DURATION = 5000;
+
 describe('GameOverOverlayComponent', () => {
     let component: GameOverOverlayComponent;
     let fixture: ComponentFixture<GameOverOverlayComponent>;
@@ -185,7 +187,7 @@ describe('GameOverOverlayComponent', () => {
 
         const stats = component.playerStats;
         expect(stats.length).toBe(2);
-        expect(stats.find(s => s.name === 'Inactive Player')).toBeUndefined();
+        expect(stats.find(stat => stat.name === 'Inactive Player')).toBeUndefined();
     });
 
     it('should reset service and navigate to home on returnToHome', () => {
@@ -226,8 +228,8 @@ describe('GameOverOverlayComponent', () => {
     });
 
     it('should return game over time remaining from timer service', () => {
-        mockTimerCoordinatorService.gameOverTimeRemaining.and.returnValue(5000);
-        expect(component.gameOverTimeRemaining).toBe(5000);
+        mockTimerCoordinatorService.gameOverTimeRemaining.and.returnValue(TEST_TIMER_DURATION);
+        expect(component.gameOverTimeRemaining).toBe(TEST_TIMER_DURATION);
     });
 
     it('should stop timer on destroy', () => {

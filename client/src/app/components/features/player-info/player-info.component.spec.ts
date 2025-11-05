@@ -7,6 +7,27 @@ import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { PlayerInfoComponent } from './player-info.component';
 
+const TEST_BASE_HEALTH = 10;
+const TEST_HEALTH_BONUS = 2;
+const TEST_CURRENT_HEALTH = 8;
+const TEST_MAX_HEALTH = 12;
+const TEST_BASE_SPEED = 5;
+const TEST_SPEED_BONUS = 1;
+const TEST_CURRENT_SPEED = 6;
+const TEST_BASE_ATTACK = 4;
+const TEST_ATTACK_BONUS = 1;
+const TEST_CURRENT_ATTACK = 5;
+const TEST_BASE_DEFENSE = 3;
+const TEST_DEFENSE_BONUS = 2;
+const TEST_CURRENT_DEFENSE = 5;
+const TEST_ACTIONS_REMAINING = 2;
+const TEST_COMBAT_COUNT = 5;
+const TEST_COMBAT_WINS = 3;
+const TEST_COMBAT_LOSSES = 1;
+const TEST_COMBAT_DRAWS = 1;
+const TEST_HP_PERCENTAGE = 66.67;
+const TEST_PRECISION = 2;
+
 describe('PlayerInfoComponent', () => {
     let component: PlayerInfoComponent;
     let fixture: ComponentFixture<PlayerInfoComponent>;
@@ -19,30 +40,30 @@ describe('PlayerInfoComponent', () => {
         name: 'Test Player',
         avatar: Avatar.Avatar1,
         isAdmin: false,
-        baseHealth: 10,
-        healthBonus: 2,
-        health: 8,
-        maxHealth: 12,
-        baseSpeed: 5,
-        speedBonus: 1,
-        speed: 6,
-        baseAttack: 4,
-        attackBonus: 1,
-        attack: 5,
-        baseDefense: 3,
-        defenseBonus: 2,
-        defense: 5,
+        baseHealth: TEST_BASE_HEALTH,
+        healthBonus: TEST_HEALTH_BONUS,
+        health: TEST_CURRENT_HEALTH,
+        maxHealth: TEST_MAX_HEALTH,
+        baseSpeed: TEST_BASE_SPEED,
+        speedBonus: TEST_SPEED_BONUS,
+        speed: TEST_CURRENT_SPEED,
+        baseAttack: TEST_BASE_ATTACK,
+        attackBonus: TEST_ATTACK_BONUS,
+        attack: TEST_CURRENT_ATTACK,
+        baseDefense: TEST_BASE_DEFENSE,
+        defenseBonus: TEST_DEFENSE_BONUS,
+        defense: TEST_CURRENT_DEFENSE,
         attackDice: Dice.D6,
         defenseDice: Dice.D4,
         x: 0,
         y: 0,
         isInGame: true,
         startPointId: 'start1',
-        actionsRemaining: 2,
-        combatCount: 5,
-        combatWins: 3,
-        combatLosses: 1,
-        combatDraws: 1,
+        actionsRemaining: TEST_ACTIONS_REMAINING,
+        combatCount: TEST_COMBAT_COUNT,
+        combatWins: TEST_COMBAT_WINS,
+        combatLosses: TEST_COMBAT_LOSSES,
+        combatDraws: TEST_COMBAT_DRAWS,
     };
 
     beforeEach(async () => {
@@ -137,26 +158,26 @@ describe('PlayerInfoComponent', () => {
     });
 
     it('should get current health', () => {
-        expect(component.currentHealth).toBe(8);
+        expect(component.currentHealth).toBe(TEST_CURRENT_HEALTH);
         expect(mockPlayerService.health).toHaveBeenCalled();
     });
 
     it('should get max health', () => {
-        expect(component.maxHealth).toBe(12);
+        expect(component.maxHealth).toBe(TEST_MAX_HEALTH);
         expect(mockPlayerService.maxHealth).toHaveBeenCalled();
     });
 
     it('should get rapidity value', () => {
-        expect(component.rapidityValue).toBe(6);
+        expect(component.rapidityValue).toBe(TEST_CURRENT_SPEED);
         expect(mockPlayerService.speed).toHaveBeenCalled();
     });
 
     it('should get base attack', () => {
-        expect(component.baseAttack).toBe(4);
+        expect(component.baseAttack).toBe(TEST_BASE_ATTACK);
     });
 
     it('should get attack value', () => {
-        expect(component.attackValue).toBe(5);
+        expect(component.attackValue).toBe(TEST_CURRENT_ATTACK);
         expect(mockPlayerService.attack).toHaveBeenCalled();
     });
 
@@ -166,11 +187,11 @@ describe('PlayerInfoComponent', () => {
     });
 
     it('should get base defense', () => {
-        expect(component.baseDefense).toBe(3);
+        expect(component.baseDefense).toBe(TEST_BASE_DEFENSE);
     });
 
     it('should get defense value', () => {
-        expect(component.defenseValue).toBe(5);
+        expect(component.defenseValue).toBe(TEST_CURRENT_DEFENSE);
         expect(mockPlayerService.defense).toHaveBeenCalled();
     });
 
@@ -180,48 +201,48 @@ describe('PlayerInfoComponent', () => {
     });
 
     it('should get base speed', () => {
-        expect(component.baseSpeed).toBe(5);
+        expect(component.baseSpeed).toBe(TEST_BASE_SPEED);
     });
 
     it('should get speed bonus', () => {
-        expect(component.speedBonus).toBe(1);
+        expect(component.speedBonus).toBe(TEST_SPEED_BONUS);
     });
 
     it('should get base health', () => {
-        expect(component.baseHealth).toBe(10);
+        expect(component.baseHealth).toBe(TEST_BASE_HEALTH);
     });
 
     it('should get health bonus', () => {
-        expect(component.healthBonus).toBe(2);
+        expect(component.healthBonus).toBe(TEST_HEALTH_BONUS);
     });
 
     it('should calculate remaining base movement points', () => {
-        expect(component.remainingBaseMovementPoints).toBe(5);
+        expect(component.remainingBaseMovementPoints).toBe(TEST_BASE_SPEED);
     });
 
     it('should calculate remaining base movement points when negative', () => {
         mockPlayerService.speed.and.returnValue(0);
-        mockPlayerService.speedBonus.and.returnValue(2);
+        mockPlayerService.speedBonus.and.returnValue(TEST_HEALTH_BONUS);
         expect(component.remainingBaseMovementPoints).toBe(0);
     });
 
     it('should calculate remaining bonus movement points', () => {
-        expect(component.remainingBonusMovementPoints).toBe(1);
+        expect(component.remainingBonusMovementPoints).toBe(TEST_SPEED_BONUS);
     });
 
     it('should calculate remaining bonus movement points when speed is less than bonus', () => {
         mockPlayerService.speed.and.returnValue(0);
-        mockPlayerService.speedBonus.and.returnValue(2);
+        mockPlayerService.speedBonus.and.returnValue(TEST_HEALTH_BONUS);
         expect(component.remainingBonusMovementPoints).toBe(0);
     });
 
     it('should get actions remaining', () => {
-        expect(component.actionsRemaining).toBe(2);
+        expect(component.actionsRemaining).toBe(TEST_ACTIONS_REMAINING);
         expect(mockPlayerService.actionsRemaining).toHaveBeenCalled();
     });
 
     it('should calculate HP percentage', () => {
-        expect(component.hpPercentage).toBeCloseTo(66.67, 2);
+        expect(component.hpPercentage).toBeCloseTo(TEST_HP_PERCENTAGE, TEST_PRECISION);
     });
 
     it('should calculate HP percentage when max health is 0', () => {
@@ -230,40 +251,40 @@ describe('PlayerInfoComponent', () => {
     });
 
     it('should return hp-high class for high HP', () => {
-        mockPlayerService.health.and.returnValue(10);
-        mockPlayerService.maxHealth.and.returnValue(12);
+        mockPlayerService.health.and.returnValue(TEST_BASE_HEALTH);
+        mockPlayerService.maxHealth.and.returnValue(TEST_MAX_HEALTH);
         expect(component.hpColorClass).toBe('hp-high');
     });
 
     it('should return hp-medium class for medium HP', () => {
-        mockPlayerService.health.and.returnValue(5);
-        mockPlayerService.maxHealth.and.returnValue(12);
+        mockPlayerService.health.and.returnValue(TEST_BASE_SPEED);
+        mockPlayerService.maxHealth.and.returnValue(TEST_MAX_HEALTH);
         expect(component.hpColorClass).toBe('hp-medium');
     });
 
     it('should return hp-critical class for low HP', () => {
-        mockPlayerService.health.and.returnValue(2);
-        mockPlayerService.maxHealth.and.returnValue(12);
+        mockPlayerService.health.and.returnValue(TEST_HEALTH_BONUS);
+        mockPlayerService.maxHealth.and.returnValue(TEST_MAX_HEALTH);
         expect(component.hpColorClass).toBe('hp-critical');
     });
 
     it('should get total combats', () => {
-        expect(component.totalCombats).toBe(5);
+        expect(component.totalCombats).toBe(TEST_COMBAT_COUNT);
         expect(mockPlayerService.combatCount).toHaveBeenCalled();
     });
 
     it('should get combat wins', () => {
-        expect(component.combatWins).toBe(3);
+        expect(component.combatWins).toBe(TEST_COMBAT_WINS);
         expect(mockPlayerService.combatWins).toHaveBeenCalled();
     });
 
     it('should get combat losses', () => {
-        expect(component.combatLosses).toBe(1);
+        expect(component.combatLosses).toBe(TEST_COMBAT_LOSSES);
         expect(mockPlayerService.combatLosses).toHaveBeenCalled();
     });
 
     it('should get combat draws', () => {
-        expect(component.combatDraws).toBe(1);
+        expect(component.combatDraws).toBe(TEST_COMBAT_DRAWS);
         expect(mockPlayerService.combatDraws).toHaveBeenCalled();
     });
 
