@@ -8,6 +8,7 @@ import { GameEditorInteractionsService } from '@app/services/game-editor-interac
 import { TileKind } from '@common/enums/tile.enum';
 import { GameEditorTileComponent } from './game-editor-tile.component';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stubs
 const NOOP = (): void => {};
 
 function createDataTransferStub(types: readonly string[]): DataTransfer {

@@ -93,6 +93,7 @@ describe('GameEditorToolbarComponent', () => {
         const tool = { type: ToolType.TileBrushTool, leftDrag: false, rightDrag: false } as unknown as ActiveTool;
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => tool,
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty setter for test stub
             set: () => {},
             configurable: true,
         });

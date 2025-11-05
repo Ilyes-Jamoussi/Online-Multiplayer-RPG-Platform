@@ -102,6 +102,7 @@ function makeDragEvent(
         files: {},
         items: {},
         types,
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
         clearData: () => {},
         getData: (format: string) => dataByType[format] ?? '',
         setData: (format: string, data: string) => {
@@ -109,7 +110,9 @@ function makeDragEvent(
             (dataTransfer.types as string[]).push(format);
             return true;
         },
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
         setDragImage: () => {},
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
         addElement: () => {},
     } as unknown as DataTransfer;
 
@@ -136,7 +139,9 @@ function makeDragEventWithSpies(opts: { offsetX?: number; offsetY?: number } = {
         effectAllowed: 'all',
         setData,
         getData,
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
         clearData: () => {},
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
         setDragImage: () => {},
         dropEffect: 'none',
         files: {} as FileList,

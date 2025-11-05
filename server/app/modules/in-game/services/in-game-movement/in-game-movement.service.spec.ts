@@ -638,6 +638,7 @@ describe('InGameMovementService', () => {
                 configurable: true,
             });
 
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty mock implementation for test
             jest.spyOn(servicePrivate, 'exploreNeighbors' as keyof typeof servicePrivate).mockImplementation(() => {});
 
             jest.spyOn(servicePrivate, 'initializeQueue' as keyof typeof servicePrivate).mockReturnValue(mockQueue);

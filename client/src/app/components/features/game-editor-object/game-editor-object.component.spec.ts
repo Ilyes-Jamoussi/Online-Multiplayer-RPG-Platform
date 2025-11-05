@@ -8,6 +8,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { GameEditorObjectComponent } from './game-editor-object.component';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stubs
 const NOOP = (): void => {};
 
 function createDataTransferStub(types: readonly string[], data: Readonly<Record<string, string>>): DataTransfer {

@@ -18,6 +18,7 @@ class ResizeObserverStub implements ResizeObserver {
     observe(target: Element): void {
         this.observedNode = target;
     }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for test stub
     unobserve(): void {}
     disconnect(): void {
         this.disconnected = true;
