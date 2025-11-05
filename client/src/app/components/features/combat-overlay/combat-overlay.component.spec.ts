@@ -8,6 +8,7 @@ import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-c
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { DamageDisplay } from '@app/interfaces/damage-display.interface';
 import { CombatOverlayComponent } from './combat-overlay.component';
@@ -256,9 +257,9 @@ describe('CombatOverlayComponent', () => {
         });
 
         it('should return posture from service', () => {
-            mockCombatService._playerPosturesSignal.set({ player1: 'offensive', player2: 'defensive' });
-            expect(component.playerAPosture).toBe('offensive');
-            expect(component.playerBPosture).toBe('defensive');
+            mockCombatService._playerPosturesSignal.set({ player1: CombatPosture.OFFENSIVE, player2: CombatPosture.DEFENSIVE });
+            expect(component.playerAPosture).toBe(CombatPosture.OFFENSIVE);
+            expect(component.playerBPosture).toBe(CombatPosture.DEFENSIVE);
         });
 
         it('should return null when posture not set', () => {
@@ -368,12 +369,12 @@ describe('CombatOverlayComponent', () => {
 
     describe('posture selection', () => {
         it('should return selected posture', () => {
-            mockCombatService._selectedPostureSignal.set('offensive');
-            expect(component.selectedPosture).toBe('offensive');
+            mockCombatService._selectedPostureSignal.set(CombatPosture.OFFENSIVE);
+            expect(component.selectedPosture).toBe(CombatPosture.OFFENSIVE);
         });
 
         it('should check if posture is selected', () => {
-            mockCombatService._selectedPostureSignal.set('defensive');
+            mockCombatService._selectedPostureSignal.set(CombatPosture.DEFENSIVE);
             expect(component.isPostureSelected).toBe(true);
             
             mockCombatService._selectedPostureSignal.set(null);

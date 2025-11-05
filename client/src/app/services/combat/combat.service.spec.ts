@@ -333,7 +333,7 @@ describe('CombatService', () => {
 
             service.chooseOffensive();
 
-            expect(service.selectedPosture()).toBe('offensive');
+            expect(service.selectedPosture()).toBe(CombatPosture.OFFENSIVE);
             expect(mockCombatSocketService.combatChoice).toHaveBeenCalledWith({ sessionId: 'session1', choice: CombatPosture.OFFENSIVE });
         });
 
@@ -353,7 +353,7 @@ describe('CombatService', () => {
 
             service.chooseDefensive();
 
-            expect(service.selectedPosture()).toBe('defensive');
+            expect(service.selectedPosture()).toBe(CombatPosture.DEFENSIVE);
             expect(mockCombatSocketService.combatChoice).toHaveBeenCalledWith({ sessionId: 'session1', choice: CombatPosture.DEFENSIVE });
         });
 
