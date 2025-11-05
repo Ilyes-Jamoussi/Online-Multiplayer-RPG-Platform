@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal, signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CombatData } from '@app/interfaces/combat-data.interface';
 import { CombatService } from '@app/services/combat/combat.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
-import { CombatData } from '@app/interfaces/combat-data.interface';
 import { CombatTimerComponent } from './combat-timer.component';
 
 const MOCK_TIME_REMAINING = 3;
