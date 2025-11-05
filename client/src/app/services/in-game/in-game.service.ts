@@ -157,6 +157,8 @@ export class InGameService {
         this._reachableTiles.set([]);
         this._inGameSession.set(DEFAULT_IN_GAME_SESSION);
         this._gameOverData.set(null);
+        this._isActionModeActive.set(false);
+        this._availableActions.set([]);
     }
 
     private initListeners(): void {

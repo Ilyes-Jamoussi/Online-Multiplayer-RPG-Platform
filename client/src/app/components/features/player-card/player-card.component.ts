@@ -33,7 +33,7 @@ export class PlayerCardComponent {
     get cardClasses(): PlayerCardClasses {
         return {
             'is-me': this.isMe,
-            'admin': this.isAdmin,
+            'is-admin': this.isAdmin,
         };
     }
 

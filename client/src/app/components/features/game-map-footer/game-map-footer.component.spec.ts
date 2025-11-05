@@ -34,7 +34,7 @@ describe('GameMapFooterComponent', () => {
         const isAdminSignal = signal(false);
         const availableActionsSignal = signal([
             { type: 'ATTACK', x: 1, y: 1 },
-            { type: 'DOOR', x: 2, y: 2 }
+            { type: 'DOOR', x: 2, y: 2 },
         ] as AvailableAction[]);
         const isMyTurnSignal = signal(true);
         const isGameStartedSignal = signal(true);
@@ -44,7 +44,7 @@ describe('GameMapFooterComponent', () => {
             speed: speedSignal.asReadonly(),
             isAdmin: isAdminSignal.asReadonly(),
             _speedSignal: speedSignal,
-            _isAdminSignal: isAdminSignal
+            _isAdminSignal: isAdminSignal,
         };
 
         mockInGameService = {
@@ -57,7 +57,7 @@ describe('GameMapFooterComponent', () => {
             _availableActionsSignal: availableActionsSignal,
             _isMyTurnSignal: isMyTurnSignal,
             _isGameStartedSignal: isGameStartedSignal,
-            _hasUsedActionSignal: hasUsedActionSignal
+            _hasUsedActionSignal: hasUsedActionSignal,
         };
 
         mockAdminModeService = jasmine.createSpyObj('AdminModeService', ['toggleAdminMode']);
@@ -67,8 +67,8 @@ describe('GameMapFooterComponent', () => {
             providers: [
                 { provide: PlayerService, useValue: mockPlayerService },
                 { provide: InGameService, useValue: mockInGameService },
-                { provide: AdminModeService, useValue: mockAdminModeService }
-            ]
+                { provide: AdminModeService, useValue: mockAdminModeService },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GameMapFooterComponent);

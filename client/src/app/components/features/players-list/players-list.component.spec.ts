@@ -166,7 +166,7 @@ describe('PlayersListComponent', () => {
             value: signal([]),
             configurable: true,
         });
-        
+
         const orderedPlayers = component.orderedPlayers();
         expect(orderedPlayers).toEqual([]);
     });
@@ -176,7 +176,7 @@ describe('PlayersListComponent', () => {
             value: null,
             configurable: true,
         });
-        
+
         expect(component.isActivePlayer(mockPlayers.player1)).toBe(false);
     });
 });

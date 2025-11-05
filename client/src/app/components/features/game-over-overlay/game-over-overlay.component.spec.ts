@@ -102,7 +102,7 @@ describe('GameOverOverlayComponent', () => {
         mockTimerCoordinatorService = jasmine.createSpyObj('TimerCoordinatorService', [
             'startGameOverTimer',
             'stopGameOverTimer',
-            'gameOverTimeRemaining'
+            'gameOverTimeRemaining',
         ]);
 
         await TestBed.configureTestingModule({
@@ -161,7 +161,7 @@ describe('GameOverOverlayComponent', () => {
 
     it('should return sorted player stats with winner marked', () => {
         const stats = component.playerStats;
-        
+
         expect(stats).toEqual([
             { name: 'Winner Player', wins: 3, isWinner: true },
             { name: 'Second Player', wins: 1, isWinner: false },
@@ -187,12 +187,12 @@ describe('GameOverOverlayComponent', () => {
 
         const stats = component.playerStats;
         expect(stats.length).toBe(2);
-        expect(stats.find(stat => stat.name === 'Inactive Player')).toBeUndefined();
+        expect(stats.find((stat) => stat.name === 'Inactive Player')).toBeUndefined();
     });
 
     it('should reset service and navigate to home on returnToHome', () => {
         component.returnToHome();
-        
+
         expect(mockInGameService.reset).toHaveBeenCalled();
         expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.HomePage]);
     });

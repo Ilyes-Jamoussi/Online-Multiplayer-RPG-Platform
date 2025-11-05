@@ -29,14 +29,12 @@ describe('GameMapHeaderComponent', () => {
             endTurn: jasmine.createSpy('endTurn'),
             _turnNumberSignal: turnNumberSignal,
             _isMyTurnSignal: isMyTurnSignal,
-            _isGameStartedSignal: isGameStartedSignal
+            _isGameStartedSignal: isGameStartedSignal,
         };
 
         await TestBed.configureTestingModule({
             imports: [GameMapHeaderComponent, TurnTimerComponent],
-            providers: [
-                { provide: InGameService, useValue: mockInGameService }
-            ]
+            providers: [{ provide: InGameService, useValue: mockInGameService }],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GameMapHeaderComponent);

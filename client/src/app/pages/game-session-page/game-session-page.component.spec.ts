@@ -65,64 +65,60 @@ describe('GameSessionPageComponent', () => {
                 combatCount: 0,
                 combatWins: 0,
                 combatLosses: 0,
-                combatDraws: 0
-            }
+                combatDraws: 0,
+            },
         },
         currentTurn: {
             turnNumber: 1,
             activePlayerId: 'player-1',
-            hasUsedAction: false
+            hasUsedAction: false,
         },
         startPoints: [],
         turnOrder: ['player-1'],
         mapSize: MapSize.MEDIUM,
-        mode: GameMode.CLASSIC
+        mode: GameMode.CLASSIC,
     };
 
     beforeEach(async () => {
         mockSessionService = jasmine.createSpyObj('SessionService', [], {
-            gameId: jasmine.createSpy().and.returnValue('test-game-id')
+            gameId: jasmine.createSpy().and.returnValue('test-game-id'),
         });
 
         mockGameMapService = jasmine.createSpyObj('GameMapService', ['size']);
         mockGameMapService.size.and.returnValue(TEST_MAP_SIZE);
 
-        mockInGameService = jasmine.createSpyObj('InGameService', [
-            'loadInGameSession',
-            'reset',
-            'leaveGame'
-        ]);
-        
+        mockInGameService = jasmine.createSpyObj('InGameService', ['loadInGameSession', 'reset', 'leaveGame']);
+
         Object.defineProperty(mockInGameService, 'activePlayer', {
             value: { name: 'Active Player' },
-            writable: true
+            writable: true,
         });
         Object.defineProperty(mockInGameService, 'turnTransitionMessage', {
-            value: 'Transition message'
+            value: 'Transition message',
         });
         Object.defineProperty(mockInGameService, 'mapSize', {
-            value: jasmine.createSpy().and.returnValue(MapSize.MEDIUM)
+            value: jasmine.createSpy().and.returnValue(MapSize.MEDIUM),
         });
         Object.defineProperty(mockInGameService, 'mode', {
-            value: jasmine.createSpy().and.returnValue(GameMode.CLASSIC)
+            value: jasmine.createSpy().and.returnValue(GameMode.CLASSIC),
         });
         Object.defineProperty(mockInGameService, 'timeRemaining', {
-            value: jasmine.createSpy().and.returnValue(TEST_TIME_REMAINING)
+            value: jasmine.createSpy().and.returnValue(TEST_TIME_REMAINING),
         });
         Object.defineProperty(mockInGameService, 'isTransitioning', {
-            value: jasmine.createSpy().and.returnValue(false)
+            value: jasmine.createSpy().and.returnValue(false),
         });
         Object.defineProperty(mockInGameService, 'inGameSession', {
-            value: jasmine.createSpy().and.returnValue(mockInGameSession)
+            value: jasmine.createSpy().and.returnValue(mockInGameSession),
         });
         Object.defineProperty(mockInGameService, 'reachableTiles', {
-            value: jasmine.createSpy().and.returnValue([{ x: 1, y: 1 }, { x: 2, y: 2 }])
+            value: jasmine.createSpy().and.returnValue([
+                { x: 1, y: 1 },
+                { x: 2, y: 2 },
+            ]),
         });
 
-        mockKeyboardEventsService = jasmine.createSpyObj('InGameKeyboardEventsService', [
-            'startListening',
-            'stopListening'
-        ]);
+        mockKeyboardEventsService = jasmine.createSpyObj('InGameKeyboardEventsService', ['startListening', 'stopListening']);
 
         mockCombatService = jasmine.createSpyObj('CombatService', ['combatAbandon']);
 
@@ -134,17 +130,15 @@ describe('GameSessionPageComponent', () => {
                 { provide: SessionService, useValue: mockSessionService },
                 { provide: InGameService, useValue: mockInGameService },
                 { provide: InGameKeyboardEventsService, useValue: mockKeyboardEventsService },
-                { provide: CombatService, useValue: mockCombatService }
-            ]
+                { provide: CombatService, useValue: mockCombatService },
+            ],
         })
-        .overrideComponent(GameSessionPageComponent, {
-            set: {
-                providers: [
-                    { provide: GameMapService, useValue: mockGameMapService }
-                ]
-            }
-        })
-        .compileComponents();
+            .overrideComponent(GameSessionPageComponent, {
+                set: {
+                    providers: [{ provide: GameMapService, useValue: mockGameMapService }],
+                },
+            })
+            .compileComponents();
 
         fixture = TestBed.createComponent(GameSessionPageComponent);
         component = fixture.componentInstance;
@@ -206,7 +200,7 @@ describe('GameSessionPageComponent', () => {
         it('should return 0 when no players', () => {
             mockInGameService.inGameSession.and.returnValue({
                 ...mockInGameSession,
-                inGamePlayers: {}
+                inGamePlayers: {},
             });
             expect(component.getPlayersCount()).toBe(0);
         });
@@ -242,7 +236,7 @@ describe('GameSessionPageComponent', () => {
         it('should return 0 when player not found', () => {
             mockInGameService.inGameSession.and.returnValue({
                 ...mockInGameSession,
-                currentTurn: { ...mockInGameSession.currentTurn, activePlayerId: 'non-existent' }
+                currentTurn: { ...mockInGameSession.currentTurn, activePlayerId: 'non-existent' },
             });
             expect(component.getCurrentPlayerSpeed()).toBe(0);
         });
@@ -269,7 +263,7 @@ describe('GameSessionPageComponent', () => {
         it('should return error message when player not found', () => {
             mockInGameService.inGameSession.and.returnValue({
                 ...mockInGameSession,
-                currentTurn: { ...mockInGameSession.currentTurn, activePlayerId: 'non-existent' }
+                currentTurn: { ...mockInGameSession.currentTurn, activePlayerId: 'non-existent' },
             });
             expect(component.getDebugInfo()).toBe('Joueur non trouvé');
         });

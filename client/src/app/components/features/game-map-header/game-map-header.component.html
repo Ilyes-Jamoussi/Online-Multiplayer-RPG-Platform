@@ -7,15 +7,9 @@
         <app-turn-timer></app-turn-timer>
     </div>
     <div class="header-actions">
-        <button
-            class="end-turn-btn"
-            [disabled]="!isMyTurn || !isGameStarted"
-            (click)="onEndTurn()"
-            title="Terminer le tour"
-        >
+        <button class="end-turn-btn" [disabled]="!isMyTurn || !isGameStarted" (click)="onEndTurn()" title="Terminer le tour">
             <span class="btn-icon">✓</span>
             <span class="btn-text">Terminer le tour</span>
         </button>
     </div>
 </div>
-

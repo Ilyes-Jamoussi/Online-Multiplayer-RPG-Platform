@@ -39,7 +39,7 @@ export class CharacterCreationCheckService {
                 isValid: false,
                 errors: [
                     `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${CHARACTER_NAME_MAX_LENGTH} caractères ` +
-                    `et ne pas être composé uniquement d'espaces.`,
+                        `et ne pas être composé uniquement d'espaces.`,
                 ],
             };
         }

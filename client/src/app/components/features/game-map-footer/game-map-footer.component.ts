@@ -77,12 +77,7 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
     }
 
     isActionDisabled(): boolean {
-        return (
-            !this.isMyTurn ||
-            !this.isGameStarted ||
-            this.hasUsedAction ||
-            !this.hasAvailableActions()
-        );
+        return !this.isMyTurn || !this.isGameStarted || this.hasUsedAction || !this.hasAvailableActions();
     }
 
     hasAvailableActions(): boolean {
@@ -127,4 +122,3 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
         }
     }
 }
-

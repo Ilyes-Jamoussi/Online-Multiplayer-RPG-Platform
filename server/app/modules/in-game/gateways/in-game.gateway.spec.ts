@@ -135,6 +135,7 @@ describe('InGameGateway', () => {
             getReachableTiles: jest.fn(),
             getAvailableActions: jest.fn(),
             findSessionByPlayerId: jest.fn(),
+            removeSession: jest.fn(),
         };
 
         const module: TestingModule = await Test.createTestingModule({
@@ -702,6 +703,7 @@ describe('InGameGateway', () => {
             );
             expect(mockServer.socketsLeave).toHaveBeenCalledWith(IN_GAME_ID);
             expect(mockServer.socketsLeave).toHaveBeenCalledWith(SESSION_ID);
+            expect(inGameService.removeSession).toHaveBeenCalledWith(SESSION_ID);
         });
     });
 
@@ -820,9 +822,7 @@ describe('InGameGateway', () => {
 
             gatewayPrivate.playerLeaveSession(SESSION_ID, PLAYER_ID);
 
-            const adminModeCalls = mockServer.mockBroadcastOperator.emit.mock.calls.filter(
-                (call) => call[0] === InGameEvents.AdminModeToggled,
-            );
+            const adminModeCalls = mockServer.mockBroadcastOperator.emit.mock.calls.filter((call) => call[0] === InGameEvents.AdminModeToggled);
             expect(adminModeCalls).toHaveLength(0);
             expect(mockServer.mockBroadcastOperator.emit).toHaveBeenCalledWith(
                 InGameEvents.PlayerLeftInGameSession,
@@ -854,4 +854,3 @@ describe('InGameGateway', () => {
         });
     });
 });
-

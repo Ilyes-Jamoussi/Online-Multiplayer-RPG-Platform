@@ -35,7 +35,7 @@ describe('GameMapTileComponent', () => {
     const mockTile: GameEditorTileDto = {
         kind: TileKind.BASE,
         x: TEST_TILE_X,
-        y: TEST_TILE_Y
+        y: TEST_TILE_Y,
     };
 
     const mockPlayer: Player = {
@@ -66,7 +66,7 @@ describe('GameMapTileComponent', () => {
         combatCount: 0,
         combatWins: 0,
         combatLosses: 0,
-        combatDraws: 0
+        combatDraws: 0,
     };
 
     const mockObject: GameEditorPlaceableDto = {
@@ -75,7 +75,7 @@ describe('GameMapTileComponent', () => {
         orientation: 'north',
         x: TEST_TILE_X,
         y: TEST_TILE_Y,
-        placed: true
+        placed: true,
     };
 
     beforeEach(async () => {
@@ -91,7 +91,7 @@ describe('GameMapTileComponent', () => {
             objects: objectsSignal.asReadonly(),
             currentlyPlayers: [mockPlayer],
             isActionModeActive: false,
-            _objectsSignal: objectsSignal
+            _objectsSignal: objectsSignal,
         };
 
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getPlaceableImage']);
@@ -99,13 +99,10 @@ describe('GameMapTileComponent', () => {
 
         mockInGameService = {
             isMyTurn: signal(true),
-            isGameStarted: signal(true)
+            isGameStarted: signal(true),
         };
 
-        mockAdminModeService = jasmine.createSpyObj('AdminModeService', [
-            'isAdminModeActivated',
-            'teleportPlayer'
-        ]);
+        mockAdminModeService = jasmine.createSpyObj('AdminModeService', ['isAdminModeActivated', 'teleportPlayer']);
         mockAdminModeService.isAdminModeActivated.and.returnValue(false);
 
         mockCombatService = jasmine.createSpyObj('CombatService', ['attackPlayer']);
@@ -117,8 +114,8 @@ describe('GameMapTileComponent', () => {
                 { provide: AssetsService, useValue: mockAssetsService },
                 { provide: InGameService, useValue: mockInGameService },
                 { provide: AdminModeService, useValue: mockAdminModeService },
-                { provide: CombatService, useValue: mockCombatService }
-            ]
+                { provide: CombatService, useValue: mockCombatService },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GameMapTileComponent);

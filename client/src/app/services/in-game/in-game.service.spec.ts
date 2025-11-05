@@ -61,30 +61,44 @@ describe('InGameService', () => {
 
     beforeEach(() => {
         mockInGameSocketService = jasmine.createSpyObj('InGameSocketService', [
-            'playerJoinInGameSession', 'playerLeaveInGameSession', 'playerStartGame',
-            'playerMove', 'playerEndTurn', 'playerToggleDoorAction',
-            'onPlayerJoinedInGameSession', 'onGameStarted', 'onTurnStarted', 'onTurnEnded',
-            'onTurnTransitionEnded', 'onPlayerLeftInGameSession', 'onPlayerMoved',
-            'onPlayerAvailableActions', 'onLeftInGameSessionAck', 'onGameForceStopped',
-            'onPlayerReachableTiles', 'onPlayerTeleported', 'onPlayerActionUsed', 'onGameOver'
+            'playerJoinInGameSession',
+            'playerLeaveInGameSession',
+            'playerStartGame',
+            'playerMove',
+            'playerEndTurn',
+            'playerToggleDoorAction',
+            'onPlayerJoinedInGameSession',
+            'onGameStarted',
+            'onTurnStarted',
+            'onTurnEnded',
+            'onTurnTransitionEnded',
+            'onPlayerLeftInGameSession',
+            'onPlayerMoved',
+            'onPlayerAvailableActions',
+            'onLeftInGameSessionAck',
+            'onGameForceStopped',
+            'onPlayerReachableTiles',
+            'onPlayerTeleported',
+            'onPlayerActionUsed',
+            'onGameOver',
         ]);
 
         mockSessionService = jasmine.createSpyObj('SessionService', [], {
-            id: signal('session1')
+            id: signal('session1'),
         });
 
-        mockTimerCoordinatorService = jasmine.createSpyObj('TimerCoordinatorService', [
-            'startTurnTimer', 'stopTurnTimer', 'resetAllTimers'
-        ], {
-            turnTimeRemaining: signal(TEST_TIMER_DURATION)
+        mockTimerCoordinatorService = jasmine.createSpyObj('TimerCoordinatorService', ['startTurnTimer', 'stopTurnTimer', 'resetAllTimers'], {
+            turnTimeRemaining: signal(TEST_TIMER_DURATION),
         });
 
         mockPlayerService = jasmine.createSpyObj('PlayerService', ['updateActionsRemaining', 'updatePlayer'], {
-            id: signal('player1')
+            id: signal('player1'),
         });
 
         mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', [
-            'displayErrorPopup', 'displayInformationPopup', 'showInfoToast'
+            'displayErrorPopup',
+            'displayInformationPopup',
+            'showInfoToast',
         ]);
 
         TestBed.configureTestingModule({
@@ -110,7 +124,7 @@ describe('InGameService', () => {
 
         it('should check if is my turn', () => {
             service.updateInGameSession({
-                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false }
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
             });
             expect(service.isMyTurn()).toBe(true);
         });
@@ -118,7 +132,7 @@ describe('InGameService', () => {
         it('should get active player', () => {
             service.updateInGameSession({
                 currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
-                inGamePlayers: { player1: mockPlayer }
+                inGamePlayers: { player1: mockPlayer },
             });
             expect(service.activePlayer).toEqual(mockPlayer);
         });
@@ -126,14 +140,14 @@ describe('InGameService', () => {
         it('should get currently playing players', () => {
             const inactivePlayers = { ...mockPlayer, isInGame: false };
             service.updateInGameSession({
-                inGamePlayers: { player1: mockPlayer, player2: inactivePlayers }
+                inGamePlayers: { player1: mockPlayer, player2: inactivePlayers },
             });
             expect(service.currentlyPlayers).toEqual([mockPlayer]);
         });
 
         it('should get turn transition message for my turn', () => {
             service.updateInGameSession({
-                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false }
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
             });
             expect(service.turnTransitionMessage).toBe("C'est ton tour !");
         });
@@ -141,7 +155,7 @@ describe('InGameService', () => {
         it('should get turn transition message for other player turn', () => {
             service.updateInGameSession({
                 currentTurn: { turnNumber: 1, activePlayerId: 'player2', hasUsedAction: false },
-                inGamePlayers: { player2: { ...mockPlayer, id: 'player2', name: 'Other Player' } }
+                inGamePlayers: { player2: { ...mockPlayer, id: 'player2', name: 'Other Player' } },
             });
             expect(service.turnTransitionMessage).toBe("C'est le tour de Other Player !");
         });
@@ -153,7 +167,7 @@ describe('InGameService', () => {
             expect(mockInGameSocketService.playerToggleDoorAction).toHaveBeenCalledWith({
                 sessionId: 'session1',
                 x: TEST_X_COORDINATE,
-                y: TEST_Y_COORDINATE
+                y: TEST_Y_COORDINATE,
             });
         });
 
@@ -183,13 +197,13 @@ describe('InGameService', () => {
         it('should handle load in-game session when no session', () => {
             Object.defineProperty(mockSessionService, 'id', {
                 value: signal(''),
-                configurable: true
+                configurable: true,
             });
             service.loadInGameSession();
             expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
                 title: 'Session non trouvée',
-                message: 'Vous n\'êtes connecté à aucune session',
-                redirectRoute: ROUTES.HomePage
+                message: "Vous n'êtes connecté à aucune session",
+                redirectRoute: ROUTES.HomePage,
             });
         });
 
@@ -201,7 +215,7 @@ describe('InGameService', () => {
         it('should move player when conditions are met', () => {
             service.updateInGameSession({
                 currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
-                isGameStarted: true
+                isGameStarted: true,
             });
             service.movePlayer(Orientation.N);
             expect(mockInGameSocketService.playerMove).toHaveBeenCalledWith({ sessionId: 'session1', orientation: Orientation.N });
@@ -210,7 +224,7 @@ describe('InGameService', () => {
         it('should not move player when not my turn', () => {
             service.updateInGameSession({
                 currentTurn: { turnNumber: 1, activePlayerId: 'player2', hasUsedAction: false },
-                isGameStarted: true
+                isGameStarted: true,
             });
             service.movePlayer(Orientation.N);
             expect(mockInGameSocketService.playerMove).not.toHaveBeenCalled();
@@ -219,7 +233,7 @@ describe('InGameService', () => {
         it('should not move player when game not started', () => {
             service.updateInGameSession({
                 currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
-                isGameStarted: false
+                isGameStarted: false,
             });
             service.movePlayer(Orientation.N);
             expect(mockInGameSocketService.playerMove).not.toHaveBeenCalled();
@@ -232,7 +246,7 @@ describe('InGameService', () => {
 
         it('should get player by id', () => {
             service.updateInGameSession({
-                inGamePlayers: { player1: mockPlayer }
+                inGamePlayers: { player1: mockPlayer },
             });
             expect(service.getPlayerByPlayerId('player1')).toEqual(mockPlayer);
         });
@@ -355,7 +369,7 @@ describe('InGameService', () => {
 
         it('should handle available actions for current player turn', () => {
             service.updateInGameSession({
-                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false }
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
             });
             const callback = mockInGameSocketService.onPlayerAvailableActions.calls.mostRecent().args[0];
             const mockActions = [{ type: 'ATTACK', x: 1, y: 1 }] as AvailableAction[];
@@ -366,7 +380,7 @@ describe('InGameService', () => {
 
         it('should handle available actions for other player turn', () => {
             service.updateInGameSession({
-                currentTurn: { turnNumber: 1, activePlayerId: 'player2', hasUsedAction: false }
+                currentTurn: { turnNumber: 1, activePlayerId: 'player2', hasUsedAction: false },
             });
             const callback = mockInGameSocketService.onPlayerAvailableActions.calls.mostRecent().args[0];
             const mockActions = [{ type: 'ATTACK', x: 1, y: 1 }] as AvailableAction[];
@@ -381,7 +395,7 @@ describe('InGameService', () => {
             expect(mockNotificationService.displayInformationPopup).toHaveBeenCalledWith({
                 title: 'Départ réussi',
                 message: 'Tu as quitté la partie avec succès',
-                redirectRoute: ROUTES.HomePage
+                redirectRoute: ROUTES.HomePage,
             });
         });
 
@@ -390,8 +404,8 @@ describe('InGameService', () => {
             callback();
             expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
                 title: 'Partie terminée par défaut',
-                message: 'Il n\'y a plus assez de joueurs pour continuer la partie, la partie est terminée',
-                redirectRoute: ROUTES.HomePage
+                message: "Il n'y a plus assez de joueurs pour continuer la partie, la partie est terminée",
+                redirectRoute: ROUTES.HomePage,
             });
         });
 

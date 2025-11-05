@@ -20,11 +20,9 @@
                     </span>
                     @if (isCurrentUser(player)) {
                     <span class="badge-you">VOUS</span>
-                    }
-                    @if (isActivePlayer(player)) {
+                    } @if (isActivePlayer(player)) {
                     <span class="badge-active">ACTUEL</span>
-                    }
-                    @if (hasAbandoned(player)) {
+                    } @if (hasAbandoned(player)) {
                     <span class="badge-abandon">ABANDON</span>
                     }
                 </div>

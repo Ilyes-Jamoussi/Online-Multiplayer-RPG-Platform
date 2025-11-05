@@ -182,6 +182,10 @@ export class TimerService {
         const timerData = this.turnTimers.get(sessionId);
         if (timerData?.timeout) clearTimeout(timerData.timeout);
         this.turnTimers.delete(sessionId);
-        this.eventEmitter.emit(ServerEvents.TurnForceStopTimer, { sessionId });
+    }
+
+    clearTimerForSession(sessionId: string): void {
+        this.forceStopTimer(sessionId);
+        this.gameTimerStates.delete(sessionId);
     }
 }

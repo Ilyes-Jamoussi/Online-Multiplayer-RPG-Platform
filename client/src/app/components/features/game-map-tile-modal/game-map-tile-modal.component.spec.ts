@@ -72,10 +72,7 @@ describe('GameMapTileModalComponent', () => {
             'closeTileModal',
         ]);
 
-        mockAssetsService = jasmine.createSpyObj('AssetsService', [
-            'getTileImage',
-            'getPlaceableImage',
-        ]);
+        mockAssetsService = jasmine.createSpyObj('AssetsService', ['getTileImage', 'getPlaceableImage']);
 
         mockGameMapService.getObjectOnTile.and.returnValue(mockObject);
         mockGameMapService.getPlayerOnTile.and.returnValue(mockPlayer);

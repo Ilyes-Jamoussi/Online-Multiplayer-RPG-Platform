@@ -5,7 +5,7 @@ import { GameEditorInteractionsService } from '@app/services/game-editor-interac
 import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ActiveTool, Inventory, ToolType } from '@app/interfaces/game-editor.interface';
 import { Signal, signal } from '@angular/core';
-import { PlaceableKind} from '@common/enums/placeable-kind.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 const NOOP = (): void => {
     /** no-op */
 };
@@ -85,7 +85,6 @@ describe('GameEditorInventoryComponent', () => {
             },
             configurable: true,
         });
-
 
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => activeToolState,

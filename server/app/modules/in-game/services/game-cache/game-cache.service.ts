@@ -145,4 +145,9 @@ export class GameCacheService {
 
         return true;
     }
+
+    clearSessionGameCache(sessionId: string): void {
+        this.sessionsGames.delete(sessionId);
+        this.sessionsGameMaps.delete(sessionId);
+    }
 }
