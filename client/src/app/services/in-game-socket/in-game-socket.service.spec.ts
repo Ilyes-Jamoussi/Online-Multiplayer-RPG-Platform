@@ -27,11 +27,6 @@ describe('InGameSocketService', () => {
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerJoinInGameSession, 'session1');
         });
 
-        it('should emit playerStartGame', () => {
-            service.playerStartGame('session1');
-            expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.GameStart, 'session1');
-        });
-
         it('should emit playerLeaveInGameSession', () => {
             service.playerLeaveInGameSession('session1');
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerLeaveInGameSession, 'session1');
@@ -109,18 +104,6 @@ describe('InGameSocketService', () => {
             const callback = jasmine.createSpy();
             service.onPlayerLeftInGameSession(callback);
             expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.PlayerLeftInGameSession, callback);
-        });
-
-        it('should listen to onTurnTimeout', () => {
-            const callback = jasmine.createSpy();
-            service.onTurnTimeout(callback);
-            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.TurnTimeout, callback);
-        });
-
-        it('should listen to onTurnForcedEnd', () => {
-            const callback = jasmine.createSpy();
-            service.onTurnForcedEnd(callback);
-            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.TurnForcedEnd, callback);
         });
 
         it('should listen to onAdminModeToggled', () => {

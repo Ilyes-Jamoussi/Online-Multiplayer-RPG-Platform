@@ -75,6 +75,7 @@ describe('PlayerService', () => {
         service = TestBed.inject(PlayerService);
     });
 
+
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
@@ -127,6 +128,18 @@ describe('PlayerService', () => {
             expect(service.attackDice()).toBe(Dice.D4);
             expect(service.defenseDice()).toBe(Dice.D6);
         });
+
+        it('should set attack dice to D4 and defense to D6 when value is D4', () => {
+            service.setDice('attack', Dice.D4);
+            expect(service.attackDice()).toBe(Dice.D4);
+            expect(service.defenseDice()).toBe(Dice.D6);
+        });
+
+        it('should set defense dice to D4 and attack to D6 when value is D4', () => {
+            service.setDice('defense', Dice.D4);
+            expect(service.attackDice()).toBe(Dice.D6);
+            expect(service.defenseDice()).toBe(Dice.D4);
+        });
     });
 
     describe('Random Generation', () => {
@@ -136,6 +149,23 @@ describe('PlayerService', () => {
 
             expect(service.name()).toBeTruthy();
             expect(service.avatar()).toBe(Avatar.Avatar1);
+        });
+
+        it('should generate random character with Speed bonus when random >= 0.5', () => {
+            const highRandomValue = 0.6;
+            spyOn(Math, 'random').and.returnValues(TEST_RANDOM_VALUE, TEST_RANDOM_VALUE, highRandomValue, TEST_RANDOM_VALUE);
+            service.generateRandom();
+
+            expect(service.isSpeedBonusSelected()).toBe(true);
+            expect(service.isLifeBonusSelected()).toBe(false);
+        });
+
+        it('should generate random character with defense dice when random >= 0.5', () => {
+            const highRandomValue = 0.6;
+            spyOn(Math, 'random').and.returnValues(TEST_RANDOM_VALUE, TEST_RANDOM_VALUE, TEST_RANDOM_VALUE, highRandomValue);
+            service.generateRandom();
+
+            expect(service.defenseDice()).toBe(Dice.D6);
         });
     });
 
@@ -194,11 +224,6 @@ describe('PlayerService', () => {
         it('should create session', () => {
             service.createSession();
             expect(mockSessionService.createSession).toHaveBeenCalledWith(service.player());
-        });
-
-        it('should join avatar selection', () => {
-            service.joinAvatarSelection('session1');
-            expect(mockSessionService.joinAvatarSelection).toHaveBeenCalledWith('session1');
         });
 
         it('should join session', () => {

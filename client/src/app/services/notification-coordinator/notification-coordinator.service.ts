@@ -52,24 +52,7 @@ export class NotificationCoordinatorService {
         this.showToast(message, 'success', duration);
     }
 
-    showWarningToast(message: string, duration?: number): void {
-        this.showToast(message, 'warning', duration);
-    }
-
-    showErrorToast(message: string, duration?: number): void {
-        this.showToast(message, 'error', duration);
-    }
-
     removeToast(id: string): void {
         this._toastNotifications.update((toasts) => toasts.filter((toast) => toast.id !== id));
-    }
-
-    removeToasts(): void {
-        this._toastNotifications.set([]);
-    }
-
-    resetNotifications(): void {
-        this.resetPopup();
-        this.removeToasts();
     }
 }

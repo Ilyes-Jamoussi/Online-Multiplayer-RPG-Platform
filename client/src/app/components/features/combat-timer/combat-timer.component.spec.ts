@@ -104,7 +104,6 @@ describe('CombatTimerComponent', () => {
             fixture.detectChanges();
 
             const progressElement = fixture.nativeElement.querySelector('.timer-progress');
-            // Progress calculation: (2/5) * 100 = 40%
             expect(progressElement.style.width).toBe(`${EXPECTED_PROGRESS_PERCENTAGE}%`);
         });
 

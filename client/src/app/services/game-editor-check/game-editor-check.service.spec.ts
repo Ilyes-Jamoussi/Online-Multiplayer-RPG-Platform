@@ -339,5 +339,23 @@ describe('GameEditorCheckService', () => {
 
             expect(service.editorProblems().terrainAccessibility.hasIssue).toBeTrue();
         });
+
+        it('should handle undefined shift result in BFS queue', () => {
+            const originalShift = Array.prototype.shift;
+            let callCount = 0;
+            spyOn(Array.prototype, 'shift').and.callFake(function (this: unknown[]) {
+                callCount++;
+                if (callCount === 1) {
+                    return undefined;
+                }
+                return originalShift.call(this);
+            });
+
+            const tiles = makeBaseTiles(SIZE);
+            store.setTiles(tiles);
+            store.setSize(SIZE);
+
+            expect(service.editorProblems().terrainAccessibility.hasIssue).toBeFalse();
+        });
     });
 });

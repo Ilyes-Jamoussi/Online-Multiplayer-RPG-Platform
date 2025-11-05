@@ -34,10 +34,6 @@ export class CombatSocketService {
         this.socketService.onSuccessEvent(InGameEvents.CombatStarted, callback);
     }
 
-    onCombatEnded(callback: () => void): void {
-        this.socketService.onSuccessEvent(InGameEvents.CombatEnded, callback);
-    }
-
     onPlayerCombatResult(callback: (data: CombatResult) => void): void {
         this.socketService.onSuccessEvent(InGameEvents.PlayerCombatResult, callback);
     }

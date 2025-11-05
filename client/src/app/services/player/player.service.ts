@@ -25,7 +25,6 @@ export class PlayerService {
     readonly name = computed(() => this.player().name);
     readonly health = computed(() => this.player().health);
     readonly maxHealth = computed(() => this.player().maxHealth);
-    readonly baseSpeed = computed(() => this.player().baseSpeed);
     readonly speedBonus = computed(() => this.player().speedBonus);
     readonly speed = computed(() => this.player().speed);
     readonly attack = computed(() => this.player().attack);
@@ -131,10 +130,6 @@ export class PlayerService {
 
     createSession(): void {
         this.sessionService.createSession(this.player());
-    }
-
-    joinAvatarSelection(sessionId: string): void {
-        this.sessionService.joinAvatarSelection(sessionId);
     }
 
     joinSession(): void {
