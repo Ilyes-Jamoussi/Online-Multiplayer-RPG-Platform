@@ -92,6 +92,24 @@ describe('TimerCoordinatorService', () => {
             expect(service.getPausedTurnTime()).toBe(0);
         });
 
+        it('should decrement turn timer when resumed and running', () => {
+            service.startTurnTimer(TEST_DURATION_5000);
+            jasmine.clock().tick(2 * MILLISECONDS_PER_SECOND);
+            service.pauseTurnTimer();
+            expect(service.getPausedTurnTime()).toBe(2);
+
+            service.resumeTurnTimer();
+            expect(service.turnTimeRemaining()).toBe(2);
+
+            jasmine.clock().tick(MILLISECONDS_PER_SECOND);
+            expect(service.turnTimeRemaining()).toBe(1);
+            expect(service.isTurnActive()).toBe(true);
+
+            jasmine.clock().tick(MILLISECONDS_PER_SECOND);
+            expect(service.isTurnActive()).toBe(false);
+            expect(service.turnTimeRemaining()).toBe(0);
+        });
+
         it('should not resume if no paused time', () => {
             service.resumeTurnTimer();
             expect(service.isTurnActive()).toBe(false);

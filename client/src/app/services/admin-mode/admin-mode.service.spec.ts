@@ -74,35 +74,6 @@ describe('AdminModeService', () => {
         });
     });
 
-    describe('disableAdminModeOnAbandon', () => {
-        it('should disable admin mode when activated and player is admin', () => {
-            mockPlayerService.isAdmin.and.returnValue(true);
-            service.isAdminModeActivated.set(true);
-
-            service.disableAdminModeOnAbandon();
-
-            expect(mockInGameSocketService.toggleAdminMode).toHaveBeenCalledWith('session1');
-        });
-
-        it('should not disable admin mode when not activated', () => {
-            mockPlayerService.isAdmin.and.returnValue(true);
-            service.isAdminModeActivated.set(false);
-
-            service.disableAdminModeOnAbandon();
-
-            expect(mockInGameSocketService.toggleAdminMode).not.toHaveBeenCalled();
-        });
-
-        it('should not disable admin mode when player is not admin', () => {
-            mockPlayerService.isAdmin.and.returnValue(false);
-            service.isAdminModeActivated.set(true);
-
-            service.disableAdminModeOnAbandon();
-
-            expect(mockInGameSocketService.toggleAdminMode).not.toHaveBeenCalled();
-        });
-    });
-
     describe('teleportPlayer', () => {
         beforeEach(() => {
             service.isAdminModeActivated.set(true);

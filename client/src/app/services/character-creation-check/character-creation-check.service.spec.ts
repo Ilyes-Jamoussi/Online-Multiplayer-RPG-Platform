@@ -203,6 +203,87 @@ describe('CharacterCreationCheckService', () => {
             expect(errors).toContain('Un bonus doit être sélectionné.');
             expect(errors.length).toBe(TEST_ERROR_COUNT);
         });
+
+        it('should handle null nameValidation gracefully', () => {
+            const validPlayer = {
+                ...basePlayer,
+                name: 'ValidName',
+                avatar: Avatar.Avatar1,
+                healthBonus: 2,
+            };
+            mockPlayerService.player.and.returnValue(validPlayer);
+            spyOn(
+                service as unknown as {
+                    validationProblems: () => {
+                        nameValidation: null;
+                        avatarSelection: { isValid: boolean; errors: string[] };
+                        bonusSelection: { isValid: boolean; errors: string[] };
+                    };
+                },
+                'validationProblems',
+            ).and.returnValue({
+                nameValidation: null,
+                avatarSelection: { isValid: true, errors: [] },
+                bonusSelection: { isValid: true, errors: [] },
+            });
+
+            const errors = service.getErrorMessages();
+            expect(errors).toEqual([]);
+        });
+
+        it('should handle null bonusSelection gracefully', () => {
+            const validPlayer = {
+                ...basePlayer,
+                name: 'ValidName',
+                avatar: Avatar.Avatar1,
+                healthBonus: 2,
+            };
+            mockPlayerService.player.and.returnValue(validPlayer);
+            spyOn(
+                service as unknown as {
+                    validationProblems: () => {
+                        nameValidation: { isValid: boolean; errors: string[] };
+                        avatarSelection: { isValid: boolean; errors: string[] };
+                        bonusSelection: null;
+                    };
+                },
+                'validationProblems',
+            ).and.returnValue({
+                nameValidation: { isValid: true, errors: [] },
+                avatarSelection: { isValid: true, errors: [] },
+                bonusSelection: null,
+            });
+
+            const errors = service.getErrorMessages();
+            expect(errors).toEqual([]);
+        });
+
+        it('should handle null avatarSelection gracefully', () => {
+            const validPlayer = {
+                ...basePlayer,
+                name: 'ValidName',
+                avatar: Avatar.Avatar1,
+                healthBonus: 2,
+            };
+            mockPlayerService.player.and.returnValue(validPlayer);
+            spyOn(
+                service as unknown as {
+                    validationProblems: () => {
+                        nameValidation: { isValid: boolean; errors: string[] };
+                        avatarSelection: null;
+                        bonusSelection: { isValid: boolean; errors: string[] };
+                    };
+                },
+                'validationProblems',
+            ).and.returnValue({
+                nameValidation: { isValid: true, errors: [] },
+                avatarSelection: null,
+                bonusSelection: { isValid: true, errors: [] },
+            });
+
+            const errors = service.getErrorMessages();
+            expect(errors).toEqual([]);
+        });
     });
 
     describe('bonus validation', () => {

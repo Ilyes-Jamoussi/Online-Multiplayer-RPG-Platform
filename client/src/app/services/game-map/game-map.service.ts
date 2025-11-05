@@ -59,10 +59,6 @@ export class GameMapService {
         });
     }
 
-    get players() {
-        return this.inGameService.inGamePlayers();
-    }
-
     get tiles() {
         return this._tiles.asReadonly();
     }
@@ -75,35 +71,15 @@ export class GameMapService {
         return this._size.asReadonly();
     }
 
-    get name() {
-        return this._name.asReadonly();
-    }
-
-    get description() {
-        return this._description.asReadonly();
-    }
-
-    get mode() {
-        return this._mode.asReadonly();
-    }
-
-    get activeTileCoords() {
-        return this._activeTileCoords.asReadonly();
-    }
-
-    get reachableTiles() {
+    private get reachableTiles() {
         return this.inGameService.reachableTiles();
-    }
-
-    get isMyTurn() {
-        return this.inGameService.isMyTurn();
     }
 
     get isActionModeActive() {
         return this.inGameService.isActionModeActive();
     }
 
-    get availableActions() {
+    private get availableActions() {
         return this.inGameService.availableActions();
     }
 
@@ -142,15 +118,11 @@ export class GameMapService {
         return action?.type || null;
     }
 
-    deactivateActionMode(): void {
-        this.inGameService.deactivateActionMode();
-    }
-
     toggleDoor(x: number, y: number): void {
         this.inGameService.toggleDoorAction(x, y);
     }
 
-    updateTileState(x: number, y: number, isOpen: boolean): void {
+    private updateTileState(x: number, y: number, isOpen: boolean): void {
         this._tiles.update((tiles) => tiles.map((tile) => (tile.x === x && tile.y === y ? { ...tile, open: isOpen } : tile)));
     }
 

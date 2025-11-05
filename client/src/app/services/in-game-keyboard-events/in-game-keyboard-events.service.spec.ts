@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { InGameKeyboardEventsService, GameKey } from './in-game-keyboard-events.service';
+import { InGameKeyboardEventsService } from './in-game-keyboard-events.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 import { Orientation } from '@common/enums/orientation.enum';
+import { GameKey } from '@app/enums/game-key.enum';
 
 describe('InGameKeyboardEventsService', () => {
     let service: InGameKeyboardEventsService;

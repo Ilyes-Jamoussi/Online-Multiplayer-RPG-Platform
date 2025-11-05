@@ -26,7 +26,7 @@ export class InGameService {
     private readonly _gameOverData = signal<{ winnerId: string; winnerName: string } | null>(null);
 
     readonly isMyTurn = computed(() => this._inGameSession().currentTurn.activePlayerId === this.playerService.id());
-    readonly currentTurn = computed(() => this._inGameSession().currentTurn);
+    private readonly currentTurn = computed(() => this._inGameSession().currentTurn);
     readonly turnNumber = computed(() => this._inGameSession().currentTurn.turnNumber);
     readonly turnOrder = computed(() => this._inGameSession().turnOrder);
     readonly startPoints = computed(() => this._inGameSession().startPoints);
@@ -51,7 +51,7 @@ export class InGameService {
         this.inGameSocketService.playerToggleDoorAction({ sessionId: this.sessionService.id(), x, y });
     }
 
-    playerActionUsed(): void {
+    private playerActionUsed(): void {
         this._inGameSession.update((session) => ({
             ...session,
             currentTurn: {
@@ -127,26 +127,26 @@ export class InGameService {
         this._inGameSession.update((inGameSession) => ({ ...inGameSession, ...data }));
     }
 
-    startTurnTimer(): void {
+    private startTurnTimer(): void {
         this.timerCoordinatorService.startTurnTimer(DEFAULT_TURN_DURATION);
     }
 
-    stopTurnTimer(): void {
+    private stopTurnTimer(): void {
         this.timerCoordinatorService.stopTurnTimer();
     }
 
-    startTurnTransitionTimer(): void {
+    private startTurnTransitionTimer(): void {
         this.timerCoordinatorService.startTurnTimer(DEFAULT_TURN_TRANSITION_DURATION);
     }
 
-    turnEnd(data: InGameSession): void {
+    private turnEnd(data: InGameSession): void {
         this.updateInGameSession(data);
         this.stopTurnTimer();
         this.startTurnTransitionTimer();
         this._isTransitioning.set(true);
     }
 
-    turnTransitionEnded(): void {
+    private turnTransitionEnded(): void {
         this._isTransitioning.set(false);
     }
 

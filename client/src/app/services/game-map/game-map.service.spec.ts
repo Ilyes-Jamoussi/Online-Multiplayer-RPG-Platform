@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file */
 import { TestBed } from '@angular/core/testing';
 import { GameMapService } from './game-map.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
@@ -15,9 +16,13 @@ import { Player } from '@common/interfaces/player.interface';
 
 import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 
 const TEST_COORDINATE_5 = 5;
 const TEST_COORDINATE_10 = 10;
+const TEST_COORDINATE_10_OBJ = 10;
+const TEST_COORDINATE_11_TARGET = 11;
+const TEST_COORDINATE_20 = 20;
 
 describe('GameMapService', () => {
     let service: GameMapService;
@@ -121,19 +126,12 @@ describe('GameMapService', () => {
     describe('Properties', () => {
         it('should return initial state properties', () => {
             expect(service.size()).toBe(MapSize.MEDIUM);
-            expect(service.name()).toBe('');
-            expect(service.description()).toBe('');
-            expect(service.mode()).toBe(GameMode.CLASSIC);
             expect(service.tiles()).toEqual([]);
             expect(service.objects()).toEqual([]);
         });
 
         it('should return in-game service properties', () => {
-            expect(service.players).toEqual({ player1: mockPlayer });
-            expect(service.reachableTiles).toEqual([{ x: 1, y: 1, cost: 1, remainingPoints: 2 }]);
-            expect(service.isMyTurn).toBe(true);
             expect(service.isActionModeActive).toBe(false);
-            expect(service.availableActions).toEqual([]);
             expect(service.currentlyPlayers).toEqual([mockPlayer]);
         });
     });
@@ -195,32 +193,20 @@ describe('GameMapService', () => {
             expect(actionType).toBeNull();
         });
 
-        it('should deactivate action mode', () => {
-            service.deactivateActionMode();
-            expect(mockInGameService.deactivateActionMode).toHaveBeenCalled();
-        });
-
         it('should toggle door', () => {
             service.toggleDoor(1, 1);
             expect(mockInGameService.toggleDoorAction).toHaveBeenCalledWith(1, 1);
-        });
-
-        it('should update tile state', () => {
-            service.updateTileState(1, 1, false);
-            expect(service).toBeTruthy();
         });
     });
 
     describe('Tile Modal', () => {
         it('should open tile modal', () => {
             service.openTileModal(mockTile);
-            expect(service.activeTileCoords()).toEqual({ x: 1, y: 1 });
         });
 
         it('should close tile modal', () => {
             service.openTileModal(mockTile);
             service.closeTileModal();
-            expect(service.activeTileCoords()).toBeNull();
         });
 
         it('should check if tile modal is open', () => {
@@ -291,6 +277,58 @@ describe('GameMapService', () => {
             const obj = service.getObjectOnTile({ x: 2, y: 1 });
             expect(obj).toEqual(largeObject);
         });
+
+        it('should handle object with footprint 2 at position (targetX - 1, targetY) - covering line 163', () => {
+            const healObject = {
+                id: 'heal-unique',
+                x: TEST_COORDINATE_10_OBJ,
+                y: TEST_COORDINATE_20,
+                kind: PlaceableKind.HEAL,
+                orientation: 'north',
+                placed: true,
+            };
+            service['_objects'].set([healObject]);
+
+            const visibleObjs = service.visibleObjects();
+            expect(visibleObjs.length).toBeGreaterThan(0);
+            expect(visibleObjs.some((visibleObj) => visibleObj.id === 'heal-unique')).toBe(true);
+
+            const obj = service.getObjectOnTile({ x: TEST_COORDINATE_11_TARGET, y: TEST_COORDINATE_20 });
+            expect(obj).toBeDefined();
+            expect(obj?.id).toBe('heal-unique');
+            expect(obj?.x).toBe(TEST_COORDINATE_10_OBJ);
+            expect(obj?.y).toBe(TEST_COORDINATE_20);
+        });
+
+        it('should return undefined when object does not match and has footprint 1', () => {
+            const flagObject = { ...mockObject, kind: PlaceableKind.FLAG, x: 3, y: 3 };
+            service['_objects'].set([flagObject]);
+
+            const obj = service.getObjectOnTile({ x: 2, y: 2 });
+            expect(obj).toBeUndefined();
+        });
+
+        it('should return undefined when no coords provided and no active tile coords', () => {
+            service['_activeTileCoords'].set(null);
+            const obj = service.getObjectOnTile();
+            expect(obj).toBeUndefined();
+        });
+
+        it('should handle object with footprint 2 at position (targetX, targetY - 1)', () => {
+            const largeObject = { ...mockObject, kind: PlaceableKind.HEAL, x: 1, y: 0 };
+            service['_objects'].set([largeObject]);
+
+            const obj = service.getObjectOnTile({ x: 1, y: 1 });
+            expect(obj).toEqual(largeObject);
+        });
+
+        it('should handle object with footprint 2 at position (targetX - 1, targetY)', () => {
+            const largeObject = { ...mockObject, kind: PlaceableKind.HEAL, x: 0, y: 1 };
+            service['_objects'].set([largeObject]);
+
+            const obj = service.getObjectOnTile({ x: 1, y: 1 });
+            expect(obj).toEqual(largeObject);
+        });
     });
 
     describe('Game Map Loading', () => {
@@ -311,6 +349,20 @@ describe('GameMapService', () => {
                 title: 'Erreur',
                 message: 'Erreur lors du chargement de la carte',
             });
+        });
+
+        it('should set open to false when tile.open is undefined', () => {
+            const gameDataWithUndefinedOpen = {
+                ...mockGameData,
+                tiles: [{ x: 1, y: 1, kind: TileKind.DOOR } as GameEditorTileDto],
+            };
+            mockGameHttpService.getGameEditorById.and.returnValue(of(gameDataWithUndefinedOpen));
+
+            service.loadGameMap('game1');
+
+            const tiles = service.tiles();
+            const tile = tiles.find((tileItem) => tileItem.x === 1 && tileItem.y === 1);
+            expect(tile?.open).toBe(false);
         });
     });
 
@@ -349,23 +401,51 @@ describe('GameMapService', () => {
             service.reset();
 
             expect(service.size()).toBe(MapSize.MEDIUM);
-            expect(service.name()).toBe('');
-            expect(service.description()).toBe('');
-            expect(service.mode()).toBe(GameMode.CLASSIC);
             expect(service.tiles()).toEqual([]);
             expect(service.objects()).toEqual([]);
-            expect(service.activeTileCoords()).toBeNull();
         });
     });
 
     describe('Door Listener', () => {
         it('should handle door toggled event', () => {
+            const updateTileStateSpy = spyOn(
+                service as unknown as { updateTileState: (x: number, y: number, isOpen: boolean) => void },
+                'updateTileState',
+            );
             const callback = mockInGameSocketService.onDoorToggled.calls.mostRecent().args[0];
-            spyOn(service, 'updateTileState');
 
             callback({ x: 1, y: 1, isOpen: false });
 
-            expect(service.updateTileState).toHaveBeenCalledWith(1, 1, false);
+            expect(updateTileStateSpy).toHaveBeenCalledWith(1, 1, false);
+        });
+
+        it('should update tile state when door is toggled', () => {
+            const tiles = [{ x: 1, y: 1, kind: TileKind.DOOR, open: true }];
+            service['_tiles'].set(tiles);
+            const callback = mockInGameSocketService.onDoorToggled.calls.mostRecent().args[0];
+
+            callback({ x: 1, y: 1, isOpen: false });
+
+            const updatedTiles = service.tiles();
+            const updatedTile = updatedTiles.find((tile) => tile.x === 1 && tile.y === 1);
+            expect(updatedTile?.open).toBe(false);
+        });
+
+        it('should not update other tiles when updating a specific tile', () => {
+            const tiles = [
+                { x: 1, y: 1, kind: TileKind.DOOR, open: true },
+                { x: 2, y: 2, kind: TileKind.DOOR, open: true },
+            ];
+            service['_tiles'].set(tiles);
+            const callback = mockInGameSocketService.onDoorToggled.calls.mostRecent().args[0];
+
+            callback({ x: 1, y: 1, isOpen: false });
+
+            const updatedTiles = service.tiles();
+            const updatedTile1 = updatedTiles.find((tile) => tile.x === 1 && tile.y === 1);
+            const updatedTile2 = updatedTiles.find((tile) => tile.x === 2 && tile.y === 2);
+            expect(updatedTile1?.open).toBe(false);
+            expect(updatedTile2?.open).toBe(true);
         });
     });
 

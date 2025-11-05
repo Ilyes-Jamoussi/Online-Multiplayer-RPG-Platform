@@ -171,12 +171,6 @@ describe('InGameService', () => {
             });
         });
 
-        it('should handle player action used', () => {
-            service.playerActionUsed();
-            expect(service.hasUsedAction()).toBe(true);
-            expect(mockPlayerService.updateActionsRemaining).toHaveBeenCalledWith(0);
-        });
-
         it('should activate action mode', () => {
             service.activateActionMode();
             expect(service.isActionModeActive()).toBe(true);
@@ -257,37 +251,6 @@ describe('InGameService', () => {
         });
     });
 
-    describe('Timer Management', () => {
-        it('should start turn timer', () => {
-            service.startTurnTimer();
-            expect(mockTimerCoordinatorService.startTurnTimer).toHaveBeenCalled();
-        });
-
-        it('should stop turn timer', () => {
-            service.stopTurnTimer();
-            expect(mockTimerCoordinatorService.stopTurnTimer).toHaveBeenCalled();
-        });
-
-        it('should start turn transition timer', () => {
-            service.startTurnTransitionTimer();
-            expect(mockTimerCoordinatorService.startTurnTimer).toHaveBeenCalled();
-        });
-
-        it('should handle turn end', () => {
-            const mockSession = { currentTurn: { turnNumber: 2, activePlayerId: 'player2', hasUsedAction: false } } as Partial<InGameSession>;
-            service.turnEnd(mockSession as InGameSession);
-            expect(service.isTransitioning()).toBe(true);
-            expect(mockTimerCoordinatorService.stopTurnTimer).toHaveBeenCalled();
-            expect(mockTimerCoordinatorService.startTurnTimer).toHaveBeenCalled();
-        });
-
-        it('should handle turn transition ended', () => {
-            service.turnEnd({} as InGameSession);
-            service.turnTransitionEnded();
-            expect(service.isTransitioning()).toBe(false);
-        });
-    });
-
     describe('Reset', () => {
         it('should reset all state', () => {
             service.reset();
@@ -331,9 +294,15 @@ describe('InGameService', () => {
         });
 
         it('should handle turn transition ended', () => {
-            service.turnEnd({} as InGameSession);
+            service.updateInGameSession({
+                currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
+            });
+            service['_isTransitioning'].set(true);
             const callback = mockInGameSocketService.onTurnTransitionEnded.calls.mostRecent().args[0];
+
             callback();
+
+            expect(mockTimerCoordinatorService.stopTurnTimer).toHaveBeenCalled();
             expect(service.isTransitioning()).toBe(false);
         });
 

@@ -3,12 +3,6 @@ import { Player } from '@common/interfaces/player.interface';
 
 export const BASE_STAT_VALUE = 4;
 export const BONUS_STAT_VALUE = 2;
-export const CHARACTER_AVATARS_COUNT = 12;
-
-export const MAX_STAT_VALUE = 6;
-export const DEFAULT_BASE_SPEED = 3;
-export const DEFAULT_SPEED_BONUS = 1;
-export const DEFAULT_ACTIONS = 2;
 
 export const PERCENTAGE_MULTIPLIER = 100;
 export const HP_HIGH_THRESHOLD_PERCENT = 70;
