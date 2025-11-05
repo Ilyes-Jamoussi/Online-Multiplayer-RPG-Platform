@@ -1,16 +1,16 @@
 /* eslint-disable max-lines -- Test file */
 import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
-import { InGameEvents } from '@common/enums/in-game-events.enum';
-import { CombatResult, CombatAttack, CombatDefense } from '@common/interfaces/combat.interface';
-import { InGameSession } from '@common/interfaces/session.interface';
-import { Dice } from '@common/enums/dice.enum';
-import { CombatPosture } from '@common/enums/combat-posture.enum';
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
-import { CombatGateway } from './combat.gateway';
 import { validationExceptionFactory } from '@app/utils/validation/validation.util';
-import { Server, Socket } from 'socket.io';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
+import { Dice } from '@common/enums/dice.enum';
+import { InGameEvents } from '@common/enums/in-game-events.enum';
+import { CombatAttack, CombatDefense, CombatResult } from '@common/interfaces/combat.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
+import { Logger } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import 'reflect-metadata';
+import { Server, Socket } from 'socket.io';
+import { CombatGateway } from '../combat.gateway';
 
 describe('CombatGateway', () => {
     let gateway: CombatGateway;
