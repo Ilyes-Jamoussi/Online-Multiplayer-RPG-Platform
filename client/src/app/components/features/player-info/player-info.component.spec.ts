@@ -107,7 +107,6 @@ describe('PlayerInfoComponent', () => {
         fixture = TestBed.createComponent(PlayerInfoComponent);
         component = fixture.componentInstance;
 
-        // Setup default return values
         mockPlayerService.player.and.returnValue(mockPlayer);
         mockPlayerService.name.and.returnValue(mockPlayer.name);
         mockPlayerService.health.and.returnValue(mockPlayer.health);

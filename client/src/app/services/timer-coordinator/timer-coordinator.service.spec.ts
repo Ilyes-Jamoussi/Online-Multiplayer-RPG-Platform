@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { TimerCoordinatorService } from './timer-coordinator.service';
-import { MILLISECONDS_PER_SECOND } from '@common/constants/in-game';
 import { COMBAT_ROUND_DURATION_SECONDS } from '@app/constants/combat.constants';
+import { MILLISECONDS_PER_SECOND } from '@common/constants/in-game';
+import { TimerCoordinatorService } from './timer-coordinator.service';
 
 const TEST_DURATION_1000 = 1000;
 const TEST_DURATION_2000 = 2000;
@@ -33,7 +33,6 @@ describe('TimerCoordinatorService', () => {
 
     describe('Turn Timer', () => {
         it('should start turn timer with correct duration', () => {
-            // 5 seconds duration
             const duration = TEST_DURATION_5000;
             service.startTurnTimer(duration);
 

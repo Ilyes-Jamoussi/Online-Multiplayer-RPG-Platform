@@ -102,21 +102,18 @@ function makeDragEvent(
         files: {},
         items: {},
         types,
-        clearData: () => {
-            /** no-op */
-        },
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
+        clearData: () => {},
         getData: (format: string) => dataByType[format] ?? '',
         setData: (format: string, data: string) => {
             dataByType[format] = data;
             (dataTransfer.types as string[]).push(format);
             return true;
         },
-        setDragImage: () => {
-            /** no-op */
-        },
-        addElement: () => {
-            /** no-op */
-        },
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
+        setDragImage: () => {},
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
+        addElement: () => {},
     } as unknown as DataTransfer;
 
     return {
@@ -142,12 +139,10 @@ function makeDragEventWithSpies(opts: { offsetX?: number; offsetY?: number } = {
         effectAllowed: 'all',
         setData,
         getData,
-        clearData: () => {
-            /** no-op */
-        },
-        setDragImage: () => {
-            /** no-op */
-        },
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
+        clearData: () => {},
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
+        setDragImage: () => {},
         dropEffect: 'none',
         files: {} as FileList,
         items: {} as DataTransferItemList,
