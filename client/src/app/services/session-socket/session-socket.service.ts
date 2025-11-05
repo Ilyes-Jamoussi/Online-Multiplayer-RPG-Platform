@@ -86,7 +86,9 @@ export class SessionSocketService {
     }
 
     onSessionEnded(callback: (message: string) => void): void {
-        this.socket.onSuccessEvent(SessionEvents.SessionEnded, callback);
+        this.socket.onSuccessEvent(SessionEvents.SessionEnded, (data: { message: string }) => {
+            callback(data.message);
+        });
     }
 
     onAvatarAssignmentsUpdated(callback: (data: AvatarAssignmentsUpdatedDto) => void): void {

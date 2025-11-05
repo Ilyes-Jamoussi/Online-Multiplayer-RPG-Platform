@@ -2,6 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { ScreenshotService } from './screenshot.service';
 import { SCREENSHOT_SCALE, SCREENSHOT_QUALITY } from '@app/constants/screenshot.constants';
 
+const TEST_TIMEOUT_DURATION = 5000;
+const TEST_SPEC_TIMEOUT = 10000;
+
 describe('ScreenshotService', () => {
     let service: ScreenshotService;
 
@@ -35,7 +38,14 @@ describe('ScreenshotService', () => {
         document.body.appendChild(testElement);
 
         try {
-            const result = await service.captureElementAsBase64(testElement);
+            const timeoutPromise = new Promise((resolve, reject) => 
+                setTimeout(() => reject(new Error('Test timeout')), TEST_TIMEOUT_DURATION)
+            );
+            
+            const result = await Promise.race([
+                service.captureElementAsBase64(testElement),
+                timeoutPromise
+            ]) as string;
 
             expect(result).toMatch(/^data:image\/jpeg;base64,/);
             expect(typeof result).toBe('string');
@@ -45,5 +55,18 @@ describe('ScreenshotService', () => {
         } finally {
             document.body.removeChild(testElement);
         }
+    }, TEST_SPEC_TIMEOUT);
+
+    it('should call html2canvas with correct options and return JPEG data URL', async () => {
+        const mockToDataURL = jasmine.createSpy('toDataURL').and.returnValue('data:image/jpeg;base64,mockdata');
+        const mockCanvas = { toDataURL: mockToDataURL } as unknown as HTMLCanvasElement;
+        
+        spyOn(await import('html2canvas'), 'default').and.returnValue(Promise.resolve(mockCanvas));
+        
+        const testElement = document.createElement('div');
+        const result = await service.captureElementAsBase64(testElement);
+        
+        expect(mockToDataURL).toHaveBeenCalledWith('image/jpeg', SCREENSHOT_QUALITY);
+        expect(result).toBe('data:image/jpeg;base64,mockdata');
     });
 });
