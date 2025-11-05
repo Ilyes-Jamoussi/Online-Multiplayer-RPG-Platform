@@ -1,4 +1,4 @@
-/* eslint-disable max-lines */
+/* eslint-disable max-lines -- Test file */
 import { GameCacheService } from './game-cache.service';
 import { Game } from '@app/modules/game-store/entities/game.entity';
 import { GameDocument } from '@app/types/mongoose-documents.types';
@@ -197,17 +197,6 @@ describe('GameCacheService', () => {
             expect(() => service.getGameForSession('non-existent-session')).toThrow('Game not found');
         });
 
-        it('should throw NotFoundException after cache is cleared', async () => {
-            const mockGame = createMockGame();
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-            service.clearGameCache(mockSessionId);
-
-            expect(() => service.getGameForSession(mockSessionId)).toThrow(NotFoundException);
-        });
 
         it('should return correct game when multiple sessions are cached', async () => {
             const mockGame1 = createMockGame({ name: 'Game 1' });
@@ -228,77 +217,6 @@ describe('GameCacheService', () => {
         });
     });
 
-    describe('clearGameCache', () => {
-        it('should clear cached game for a session', async () => {
-            const mockGame = createMockGame();
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-
-            expect(() => service.getGameForSession(mockSessionId)).not.toThrow();
-
-            service.clearGameCache(mockSessionId);
-
-            expect(() => service.getGameForSession(mockSessionId)).toThrow(NotFoundException);
-        });
-
-        it('should not throw when clearing non-existent session', () => {
-            expect(() => service.clearGameCache('non-existent-session')).not.toThrow();
-        });
-
-        it('should only clear cache for specified session', async () => {
-            const mockGame1 = createMockGame({ name: 'Game 1' });
-            const mockGame2 = createMockGame({ name: 'Game 2' });
-
-            mockModel.findById = jest
-                .fn()
-                .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(mockGame1) })
-                .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(mockGame2) });
-
-            await service.fetchAndCacheGame('session-1', 'game-1');
-            await service.fetchAndCacheGame('session-2', 'game-2');
-
-            service.clearGameCache('session-1');
-
-            expect(() => service.getGameForSession('session-1')).toThrow(NotFoundException);
-            expect(() => service.getGameForSession('session-2')).not.toThrow();
-            expect(service.getGameForSession('session-2').name).toBe('Game 2');
-        });
-
-        it('should handle clearing cache multiple times', async () => {
-            const mockGame = createMockGame();
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-
-            service.clearGameCache(mockSessionId);
-            service.clearGameCache(mockSessionId);
-
-            expect(() => service.getGameForSession(mockSessionId)).toThrow(NotFoundException);
-        });
-
-        it('should allow re-caching after clearing', async () => {
-            const mockGame1 = createMockGame({ name: 'Game 1' });
-            const mockGame2 = createMockGame({ name: 'Game 2' });
-
-            mockModel.findById = jest
-                .fn()
-                .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(mockGame1) })
-                .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(mockGame2) });
-
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-            service.clearGameCache(mockSessionId);
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-
-            const cachedGame = service.getGameForSession(mockSessionId);
-            expect(cachedGame.name).toBe('Game 2');
-        });
-    });
-
     describe('integration', () => {
         it('should handle complete lifecycle', async () => {
             const mockGame = createMockGame();
@@ -311,10 +229,6 @@ describe('GameCacheService', () => {
 
             const cachedGame = service.getGameForSession(mockSessionId);
             expect(cachedGame).toEqual(mockGame);
-
-            service.clearGameCache(mockSessionId);
-
-            expect(() => service.getGameForSession(mockSessionId)).toThrow(NotFoundException);
         });
 
         it('should handle multiple sessions independently', async () => {
@@ -331,15 +245,6 @@ describe('GameCacheService', () => {
 
             expect(service.getGameForSession('session-1').name).toBe('Game 1');
             expect(service.getGameForSession('session-2').name).toBe('Game 2');
-
-            service.clearGameCache('session-1');
-
-            expect(() => service.getGameForSession('session-1')).toThrow(NotFoundException);
-            expect(service.getGameForSession('session-2').name).toBe('Game 2');
-
-            service.clearGameCache('session-2');
-
-            expect(() => service.getGameForSession('session-2')).toThrow(NotFoundException);
         });
     });
 
@@ -823,78 +728,6 @@ describe('GameCacheService', () => {
 
         it('should throw NotFoundException when game map not found', () => {
             expect(() => service.getTileOccupant('non-existent-session', POS_X_0, POS_Y_0)).toThrow(NotFoundException);
-        });
-    });
-
-    describe('toggleDoorAtPosition', () => {
-        const MAP_SIZE = MapSize.MEDIUM;
-        const MAP_SIZE_NUM = 15;
-
-        beforeEach(async () => {
-            const tiles: Tile[] = [];
-            for (let y = 0; y < MAP_SIZE_NUM; y++) {
-                for (let x = 0; x < MAP_SIZE_NUM; x++) {
-                    tiles.push({ x, y, kind: TileKind.BASE });
-                }
-            }
-            tiles[POS_Y_2 * MAP_SIZE_NUM + POS_X_2] = { x: POS_X_2, y: POS_Y_2, kind: TileKind.DOOR, open: false };
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-        });
-
-        it('should toggle door from closed to open', () => {
-            const tileBefore = service.getTileAtPosition(mockSessionId, POS_X_2, POS_Y_2);
-            expect(tileBefore?.open).toBe(false);
-
-            service.toggleDoorAtPosition(mockSessionId, POS_X_2, POS_Y_2);
-
-            const tileAfter = service.getTileAtPosition(mockSessionId, POS_X_2, POS_Y_2);
-            expect(tileAfter?.open).toBe(true);
-        });
-
-        it('should toggle door from open to closed', () => {
-            service.toggleDoorAtPosition(mockSessionId, POS_X_2, POS_Y_2);
-            expect(service.getTileAtPosition(mockSessionId, POS_X_2, POS_Y_2)?.open).toBe(true);
-
-            service.toggleDoorAtPosition(mockSessionId, POS_X_2, POS_Y_2);
-
-            expect(service.getTileAtPosition(mockSessionId, POS_X_2, POS_Y_2)?.open).toBe(false);
-        });
-
-        it('should throw NotFoundException when game map not found', () => {
-            expect(() => service.toggleDoorAtPosition('non-existent-session', POS_X_0, POS_Y_0)).toThrow(NotFoundException);
-        });
-
-        it('should throw NotFoundException when tile not found', async () => {
-            const tiles: Tile[] = [];
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-            await service.fetchAndCacheGame('session-2', mockGameId);
-
-            expect(() => service.toggleDoorAtPosition('session-2', POS_X_0, POS_Y_0)).toThrow(NotFoundException);
-            expect(() => service.toggleDoorAtPosition('session-2', POS_X_0, POS_Y_0)).toThrow('Tile not found');
-        });
-
-        it('should throw BadRequestException when tile is not a door', async () => {
-            const tiles: Tile[] = [];
-            for (let y = 0; y < MAP_SIZE_NUM; y++) {
-                for (let x = 0; x < MAP_SIZE_NUM; x++) {
-                    tiles.push({ x, y, kind: TileKind.BASE });
-                }
-            }
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-            await service.fetchAndCacheGame('session-3', mockGameId);
-
-            expect(() => service.toggleDoorAtPosition('session-3', POS_X_0, POS_Y_0)).toThrow(BadRequestException);
-            expect(() => service.toggleDoorAtPosition('session-3', POS_X_0, POS_Y_0)).toThrow('Tile is not a door');
         });
     });
 

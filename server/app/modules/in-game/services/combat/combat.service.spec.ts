@@ -581,10 +581,11 @@ describe('CombatService', () => {
 
             type ServiceWithPrivateMethod = {
                 activeCombats: Map<string, CombatState>;
+                startCombat: (session: InGameSession, playerAId: string, playerBId: string) => void;
             };
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
 
-            service.startCombat(session, PLAYER_A_ID, PLAYER_B_ID);
+            servicePrivate.startCombat(session, PLAYER_A_ID, PLAYER_B_ID);
 
             expect(servicePrivate.activeCombats.has(SESSION_ID)).toBe(true);
             const combat = servicePrivate.activeCombats.get(SESSION_ID);
@@ -606,7 +607,11 @@ describe('CombatService', () => {
             const session = createMockSession();
             gameCacheService.getTileByPlayerId.mockReturnValue(null);
 
-            service.startCombat(session, PLAYER_A_ID, PLAYER_B_ID);
+            type ServiceWithPrivateMethod = {
+                startCombat: (session: InGameSession, playerAId: string, playerBId: string) => void;
+            };
+            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+            servicePrivate.startCombat(session, PLAYER_A_ID, PLAYER_B_ID);
 
             expect(combatTimerService.startCombatTimer).toHaveBeenCalledWith(
                 session,
@@ -623,7 +628,11 @@ describe('CombatService', () => {
                 .mockReturnValueOnce({ kind: TileKind.ICE, x: 0, y: 0, playerId: null } as TileWithPlayerId)
                 .mockReturnValueOnce({ kind: TileKind.WATER, x: 0, y: 0, playerId: null } as TileWithPlayerId);
 
-            service.startCombat(session, PLAYER_A_ID, PLAYER_B_ID);
+            type ServiceWithPrivateMethod = {
+                startCombat: (session: InGameSession, playerAId: string, playerBId: string) => void;
+            };
+            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+            servicePrivate.startCombat(session, PLAYER_A_ID, PLAYER_B_ID);
 
             expect(combatTimerService.startCombatTimer).toHaveBeenCalledWith(
                 session,

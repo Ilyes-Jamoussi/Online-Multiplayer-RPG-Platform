@@ -2,7 +2,6 @@
 import { InGameActionService } from './in-game-action.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { NotFoundException } from '@nestjs/common';
 import { Orientation } from '@common/enums/orientation.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
@@ -111,33 +110,6 @@ describe('InGameActionService', () => {
 
     it('should be defined', () => {
         expect(service).toBeDefined();
-    });
-
-    describe('attackPlayer', () => {
-        it('should throw NotFoundException when target player not found', () => {
-            const session = createMockSession();
-            gameCache.getTileOccupant.mockReturnValue(null);
-
-            expect(() => service.attackPlayer(session, PLAYER_A_ID, POS_X_2, POS_Y_3)).toThrow(NotFoundException);
-            expect(() => service.attackPlayer(session, PLAYER_A_ID, POS_X_2, POS_Y_3)).toThrow('Target player not found');
-        });
-
-        it('should throw NotFoundException when player not found in session', () => {
-            const session = createMockSession();
-            gameCache.getTileOccupant.mockReturnValue(PLAYER_B_ID);
-            session.inGamePlayers = {};
-
-            expect(() => service.attackPlayer(session, PLAYER_A_ID, POS_X_2, POS_Y_3)).toThrow(NotFoundException);
-            expect(() => service.attackPlayer(session, PLAYER_A_ID, POS_X_2, POS_Y_3)).toThrow('Player not found');
-        });
-
-        it('should not throw when target and player are found', () => {
-            const session = createMockSession();
-            gameCache.getTileOccupant.mockReturnValue(PLAYER_B_ID);
-
-            expect(() => service.attackPlayer(session, PLAYER_A_ID, POS_X_2, POS_Y_3)).not.toThrow();
-            expect(gameCache.getTileOccupant).toHaveBeenCalledWith(SESSION_ID, POS_X_2, POS_Y_3);
-        });
     });
 
     type TileWithPlayerId = Tile & { playerId: string | null };

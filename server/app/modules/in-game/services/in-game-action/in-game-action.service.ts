@@ -4,7 +4,7 @@ import { ServerEvents } from '@app/enums/server-events.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -13,13 +13,6 @@ export class InGameActionService {
         private readonly gameCache: GameCacheService,
         private readonly eventEmitter: EventEmitter2,
     ) {}
-
-    attackPlayer(session: InGameSession, playerId: string, x: number, y: number): void {
-        const targetPlayerId = this.gameCache.getTileOccupant(session.id, x, y);
-        if (!targetPlayerId) throw new NotFoundException('Target player not found');
-        const player = session.inGamePlayers[playerId];
-        if (!player) throw new NotFoundException('Player not found');
-    }
 
     toggleDoor(session: InGameSession, playerId: string, x: number, y: number): void {
         const gameMap = this.gameCache.getGameMapForSession(session.id);

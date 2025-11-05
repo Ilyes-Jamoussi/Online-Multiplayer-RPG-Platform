@@ -66,10 +66,6 @@ export class SessionService {
         return session.players.length >= session.maxPlayers;
     }
 
-    getPlayersCount(sessionId: string): number {
-        return this.getSession(sessionId).players.length;
-    }
-
     getPlayerSessionId(playerId: string): string | null {
         for (const [sessionId, session] of this.sessions.entries()) {
             const found = [...session.players].some((player) => player.id === playerId);
@@ -82,12 +78,6 @@ export class SessionService {
 
     getPlayersSession(sessionId: string): Player[] {
         return this.getSession(sessionId).players;
-    }
-    getPlayersData(sessionId: string): { name: string; avatar: string }[] {
-        return this.sessions.get(sessionId).players.map((player) => ({
-            name: player.name,
-            avatar: player.avatar,
-        }));
     }
 
     chooseAvatar(sessionId: string, playerId: string, avatar: Avatar): void {

@@ -5,7 +5,6 @@ import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
-import { Player } from '@common/interfaces/player.interface';
 import { InGameSession, WaitingRoomSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
@@ -74,15 +73,6 @@ export class InGameService {
 
     getSession(sessionId: string): InGameSession | undefined {
         return this.sessionRepository.findById(sessionId);
-    }
-
-    removeSession(sessionId: string): void {
-        this.sessionRepository.delete(sessionId);
-        this.gameCache.clearGameCache(sessionId);
-    }
-
-    updateSession(session: InGameSession): void {
-        this.sessionRepository.update(session);
     }
 
     joinInGameSession(sessionId: string, playerId: string): InGameSession {
@@ -170,10 +160,6 @@ export class InGameService {
         }
 
         return { session, playerName: player.name, playerId, sessionEnded, adminModeDeactivated };
-    }
-
-    getPlayers(sessionId: string): Player[] {
-        return this.sessionRepository.getIngamePlayers(sessionId);
     }
 
     findSessionByPlayerId(playerId: string): InGameSession | null {

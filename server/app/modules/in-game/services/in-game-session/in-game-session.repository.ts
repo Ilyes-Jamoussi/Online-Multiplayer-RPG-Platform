@@ -127,10 +127,6 @@ export class InGameSessionRepository {
         this.sessions.delete(sessionId);
     }
 
-    deleteAll(): void {
-        this.sessions.clear();
-    }
-
     playerLeave(sessionId: string, playerId: string): Player {
         const session = this.findById(sessionId);
         const player = session.inGamePlayers[playerId];
@@ -148,14 +144,9 @@ export class InGameSessionRepository {
         return player;
     }
 
-    removeStartPoint(sessionId: string, startPointId: string): void {
+    private removeStartPoint(sessionId: string, startPointId: string): void {
         const session = this.findById(sessionId);
         session.startPoints = session.startPoints.filter((s) => s.id !== startPointId);
-    }
-
-    removePlayerFromTurnOrder(sessionId: string, playerId: string): void {
-        const session = this.findById(sessionId);
-        session.turnOrder = session.turnOrder.filter((id) => id !== playerId);
     }
 
     findSessionByPlayerId(playerId: string): InGameSession | null {

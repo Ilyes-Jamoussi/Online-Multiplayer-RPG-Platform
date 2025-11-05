@@ -136,7 +136,6 @@ describe('InGameService', () => {
 
         const mockGameCache = {
             fetchAndCacheGame: jest.fn(),
-            clearGameCache: jest.fn(),
             isTileFree: jest.fn(),
         };
 
@@ -149,11 +148,9 @@ describe('InGameService', () => {
             save: jest.fn(),
             findById: jest.fn(),
             update: jest.fn(),
-            delete: jest.fn(),
             updatePlayer: jest.fn(),
             playerLeave: jest.fn(),
             inGamePlayersCount: jest.fn(),
-            getIngamePlayers: jest.fn(),
             findSessionByPlayerId: jest.fn(),
             movePlayerPosition: jest.fn(),
         };
@@ -366,45 +363,6 @@ describe('InGameService', () => {
             const result = service.getSession('non-existent');
 
             expect(result).toBeUndefined();
-        });
-    });
-
-    describe('removeSession', () => {
-        it('should delete session from repository', () => {
-            service.removeSession(SESSION_ID);
-
-            expect(sessionRepository.delete).toHaveBeenCalledWith(SESSION_ID);
-        });
-
-        it('should clear game cache', () => {
-            service.removeSession(SESSION_ID);
-
-            expect(gameCache.clearGameCache).toHaveBeenCalledWith(SESSION_ID);
-        });
-
-        it('should call both delete and clearGameCache', () => {
-            service.removeSession(SESSION_ID);
-
-            expect(sessionRepository.delete).toHaveBeenCalled();
-            expect(gameCache.clearGameCache).toHaveBeenCalled();
-        });
-    });
-
-    describe('updateSession', () => {
-        it('should update session in repository', () => {
-            const session = createMockInGameSession();
-
-            service.updateSession(session);
-
-            expect(sessionRepository.update).toHaveBeenCalledWith(session);
-        });
-
-        it('should pass the exact session object', () => {
-            const session = createMockInGameSession({ isGameStarted: true });
-
-            service.updateSession(session);
-
-            expect(sessionRepository.update).toHaveBeenCalledWith(session);
         });
     });
 
@@ -779,18 +737,6 @@ describe('InGameService', () => {
             service.leaveInGameSession(SESSION_ID, PLAYER_A_ID);
 
             expect(timerService.endTurnManual).not.toHaveBeenCalled();
-        });
-    });
-
-    describe('getPlayers', () => {
-        it('should return players from repository', () => {
-            const players: Player[] = [createMockPlayer({ id: PLAYER_A_ID }), createMockPlayer({ id: PLAYER_B_ID })];
-            sessionRepository.getIngamePlayers.mockReturnValue(players);
-
-            const result = service.getPlayers(SESSION_ID);
-
-            expect(result).toBe(players);
-            expect(sessionRepository.getIngamePlayers).toHaveBeenCalledWith(SESSION_ID);
         });
     });
 

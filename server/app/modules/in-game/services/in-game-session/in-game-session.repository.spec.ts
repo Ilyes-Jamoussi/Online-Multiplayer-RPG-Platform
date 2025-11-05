@@ -30,7 +30,6 @@ describe('InGameSessionRepository', () => {
     const POS_X_1 = 1;
     const POS_Y_1 = 1;
     const POS_X_2 = 2;
-    const POS_Y_2 = 2;
     const POS_Y_3 = 3;
     const HEALTH_DAMAGE = 20;
     const HEALTH_AFTER_DAMAGE = 80;
@@ -174,20 +173,6 @@ describe('InGameSessionRepository', () => {
 
         it('should not throw when deleting non-existent session', () => {
             expect(() => service.delete('non-existent')).not.toThrow();
-        });
-    });
-
-    describe('deleteAll', () => {
-        it('should delete all sessions', () => {
-            const session1 = createMockSession({ id: 'session-1' });
-            const session2 = createMockSession({ id: 'session-2' });
-            service.save(session1);
-            service.save(session2);
-
-            service.deleteAll();
-
-            expect(() => service.findById('session-1')).toThrow(NotFoundException);
-            expect(() => service.findById('session-2')).toThrow(NotFoundException);
         });
     });
 
@@ -557,52 +542,6 @@ describe('InGameSessionRepository', () => {
             service.save(session);
 
             expect(() => service.playerLeave(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
-        });
-    });
-
-    describe('removeStartPoint', () => {
-        it('should remove start point', () => {
-            const session = createMockSession();
-            service.save(session);
-
-            service.removeStartPoint(SESSION_ID, START_POINT_ID);
-
-            expect(service.findById(SESSION_ID).startPoints.find((sp) => sp.id === START_POINT_ID)).toBeUndefined();
-        });
-
-        it('should not remove other start points', () => {
-            const session = createMockSession({
-                startPoints: [
-                    { id: START_POINT_ID, playerId: PLAYER_A_ID, x: POS_X_1, y: POS_Y_1 },
-                    { id: 'start-point-2', playerId: PLAYER_B_ID, x: POS_X_2, y: POS_Y_2 },
-                ],
-            });
-            service.save(session);
-
-            service.removeStartPoint(SESSION_ID, START_POINT_ID);
-
-            expect(service.findById(SESSION_ID).startPoints).toHaveLength(1);
-            expect(service.findById(SESSION_ID).startPoints[0].id).toBe('start-point-2');
-        });
-
-        it('should throw NotFoundException when session not found', () => {
-            expect(() => service.removeStartPoint('non-existent', START_POINT_ID)).toThrow(NotFoundException);
-        });
-    });
-
-    describe('removePlayerFromTurnOrder', () => {
-        it('should remove player from turn order', () => {
-            const session = createMockSession();
-            service.save(session);
-
-            service.removePlayerFromTurnOrder(SESSION_ID, PLAYER_A_ID);
-
-            expect(service.findById(SESSION_ID).turnOrder).not.toContain(PLAYER_A_ID);
-            expect(service.findById(SESSION_ID).turnOrder).toContain(PLAYER_B_ID);
-        });
-
-        it('should throw NotFoundException when session not found', () => {
-            expect(() => service.removePlayerFromTurnOrder('non-existent', PLAYER_A_ID)).toThrow(NotFoundException);
         });
     });
 
