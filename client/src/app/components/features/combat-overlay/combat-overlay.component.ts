@@ -6,6 +6,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 
@@ -96,12 +97,12 @@ export class CombatOverlayComponent {
         return this.selectedPosture !== null;
     }
 
-    get playerAPosture(): 'offensive' | 'defensive' | null {
+    get playerAPosture(): CombatPosture | null {
         if (!this.combatData) return null;
         return this.combatService.playerPostures()[this.combatData.attackerId] || null;
     }
 
-    get playerBPosture(): 'offensive' | 'defensive' | null {
+    get playerBPosture(): CombatPosture | null {
         if (!this.combatData) return null;
         return this.combatService.playerPostures()[this.combatData.targetId] || null;
     }

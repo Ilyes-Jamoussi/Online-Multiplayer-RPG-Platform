@@ -5,7 +5,9 @@ import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-
 import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatState } from '@common/interfaces/combat.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -59,18 +61,19 @@ export class CombatService {
         this.startCombat(session, playerId, targetPlayer.id);
     }
 
-    combatChoice(sessionId: string, playerId: string, choice: 'offensive' | 'defensive'): void {
+    combatChoice(sessionId: string, playerId: string, choice: CombatPosture): void {
         const combat = this.activeCombats.get(sessionId);
         if (!combat) return;
 
-        if (combat.playerAId !== playerId && combat.playerBId !== playerId) throw new BadRequestException('Player not in combat');
         if (combat.playerAId === playerId) {
             combat.playerAPosture = choice;
         } else if (combat.playerBId === playerId) {
             combat.playerBPosture = choice;
+        } else {
+            throw new BadRequestException('Player not in combat');
         }
 
-        this.eventEmitter.emit('combat.postureSelected', { sessionId, playerId, posture: choice });
+        this.eventEmitter.emit(ServerEvents.CombatPostureSelected, { sessionId, playerId, posture: choice });
 
         if (combat.playerAPosture !== null && combat.playerBPosture !== null) {
             const session = this.sessionRepository.findById(sessionId);
@@ -78,7 +81,7 @@ export class CombatService {
         }
     }
 
-    startCombat(session: InGameSession, playerAId: string, playerBId: string): void {
+    private startCombat(session: InGameSession, playerAId: string, playerBId: string): void {
         const playerATile = this.gameCacheService.getTileByPlayerId(session.id, playerAId);
         const playerBTile = this.gameCacheService.getTileByPlayerId(session.id, playerBId);
 
@@ -101,7 +104,7 @@ export class CombatService {
         this.sessionRepository.incrementPlayerCombatCount(session.id, playerBId);
     }
 
-    @OnEvent('combat.timerLoop')
+    @OnEvent(ServerEvents.CombatTimerLoop)
     handleTimerLoop(payload: { sessionId: string }): void {
         const combat = this.activeCombats.get(payload.sessionId);
         if (combat) {
@@ -113,7 +116,7 @@ export class CombatService {
         this.activeCombats.delete(session.id);
         this.combatTimerService.stopCombatTimer(session);
 
-        this.eventEmitter.emit('combat.victory', {
+        this.eventEmitter.emit(ServerEvents.CombatVictory, {
             sessionId: session.id,
             playerAId,
             playerBId,
@@ -129,7 +132,7 @@ export class CombatService {
         }
     }
 
-    combatRound(sessionId: string): void {
+    private combatRound(sessionId: string): void {
         const combat = this.activeCombats.get(sessionId);
         if (!combat) return;
 
@@ -150,19 +153,19 @@ export class CombatService {
         const playerAHealth = this.sessionRepository.decreasePlayerHealth(sessionId, playerAId, playerADamage);
         const playerBHealth = this.sessionRepository.decreasePlayerHealth(sessionId, playerBId, playerBDamage);
 
-        this.eventEmitter.emit('player.healthChanged', {
+        this.eventEmitter.emit(ServerEvents.PlayerHealthChanged, {
             sessionId,
             playerId: playerAId,
             newHealth: playerAHealth,
         });
 
-        this.eventEmitter.emit('player.healthChanged', {
+        this.eventEmitter.emit(ServerEvents.PlayerHealthChanged, {
             sessionId,
             playerId: playerBId,
             newHealth: playerBHealth,
         });
 
-        this.eventEmitter.emit('player.combatResult', {
+        this.eventEmitter.emit(ServerEvents.PlayerCombatResult, {
             sessionId,
             playerAId,
             playerBId,
@@ -223,7 +226,7 @@ export class CombatService {
     private getPlayerDefense(
         sessionId: string,
         playerId: string,
-        posture: 'offensive' | 'defensive',
+        posture: CombatPosture,
         tileCombatEffect: TileCombatEffect,
     ): {
         dice: Dice;
@@ -242,7 +245,7 @@ export class CombatService {
 
         const defenseRoll = this.rollDice(player.defenseDice, sessionId, false);
         const baseDefense = player.baseDefense;
-        const defenseBonus = posture === 'defensive' ? 2 : 0;
+        const defenseBonus = posture === CombatPosture.DEFENSIVE ? 2 : 0;
         const totalDefense = baseDefense + defenseRoll + defenseBonus + tileCombatEffect;
         return { dice: player.defenseDice, diceRoll: defenseRoll, baseDefense, defenseBonus, totalDefense, tileCombatEffect };
     }
@@ -250,7 +253,7 @@ export class CombatService {
     private getPlayerAttack(
         sessionId: string,
         playerId: string,
-        posture: 'offensive' | 'defensive',
+        posture: CombatPosture,
         tileCombatEffect: TileCombatEffect,
     ): {
         dice: Dice;
@@ -266,7 +269,7 @@ export class CombatService {
         if (!player) return { dice: Dice.D4, diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0, tileCombatEffect: TileCombatEffect.BASE };
         const attackRoll = this.rollDice(player.attackDice, sessionId, true);
         const baseAttack = player.baseAttack;
-        const attackBonus = posture === 'offensive' ? 2 : 0;
+        const attackBonus = posture === CombatPosture.OFFENSIVE ? 2 : 0;
         const totalAttack = baseAttack + attackRoll + attackBonus + tileCombatEffect;
         return { dice: player.attackDice, diceRoll: attackRoll, baseAttack, attackBonus, totalAttack, tileCombatEffect };
     }
@@ -291,7 +294,7 @@ export class CombatService {
         if (winner && winner.combatWins >= COMBAT_WINS_TO_WIN_GAME) {
             this.timerService.forceStopTimer(sessionId);
             this.combatTimerService.stopCombatTimer(session);
-            this.eventEmitter.emit('game.over', {
+            this.eventEmitter.emit(ServerEvents.GameOver, {
                 sessionId,
                 winnerId,
                 winnerName: winner.name,

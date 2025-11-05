@@ -46,10 +46,6 @@ export class GameCacheService {
         return gameMap;
     }
 
-    clearGameCache(sessionId: string): void {
-        this.sessionsGames.delete(sessionId);
-    }
-
     getTileAtPosition(sessionId: string, x: number, y: number): (Tile & { playerId: string | null }) | undefined {
         const game = this.getGameMapForSession(sessionId);
         const { tiles, size: mapSize } = game;
@@ -128,16 +124,6 @@ export class GameCacheService {
         return gameMap.tiles[y * gameMap.size + x].playerId;
     }
 
-    toggleDoorAtPosition(sessionId: string, x: number, y: number): void {
-        const gameMap = this.sessionsGameMaps.get(sessionId);
-        if (!gameMap) throw new NotFoundException('Game map not found');
-        const tile = this.getTileAtPosition(sessionId, x, y);
-        if (!tile) throw new NotFoundException('Tile not found');
-        if (tile.kind !== TileKind.DOOR) throw new BadRequestException('Tile is not a door');
-        tile.open = !tile.open;
-        gameMap.tiles[y * gameMap.size + x] = tile;
-    }
-
     isTileFree(sessionId: string, x: number, y: number): boolean {
         if (this.getTileOccupant(sessionId, x, y)) {
             return false;
@@ -148,12 +134,12 @@ export class GameCacheService {
             return false;
         }
 
-        const tileCost = TileCost[tile.kind];
-        if (tileCost === -1) {
-            return false;
+        let tileCost = TileCost[tile.kind];
+        if (tile.kind === TileKind.DOOR) {
+            tileCost = tile.open ? TileCost.DOOR_OPEN : -1;
         }
 
-        if (tile.kind === TileKind.DOOR && !tile.open) {
+        if (tileCost === -1) {
             return false;
         }
 

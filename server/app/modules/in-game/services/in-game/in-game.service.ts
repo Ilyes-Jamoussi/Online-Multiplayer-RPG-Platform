@@ -5,13 +5,12 @@ import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
-import { Player } from '@common/interfaces/player.interface';
 import { InGameSession, WaitingRoomSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { GameCacheService } from 'app/modules/in-game/services/game-cache/game-cache.service';
-import { InGameActionService } from 'app/modules/in-game/services/in-game-action/in-game-action.service';
-import { InGameInitializationService } from 'app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
-import { InGameMovementService } from 'app/modules/in-game/services/in-game-movement/in-game-movement.service';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { InGameActionService } from '@app/modules/in-game/services/in-game-action/in-game-action.service';
+import { InGameInitializationService } from '@app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
+import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
 
 @Injectable()
 export class InGameService {
@@ -62,17 +61,7 @@ export class InGameService {
         return session;
     }
 
-    startSession(sessionId: string): InGameSession {
-        const session = this.sessionRepository.findById(sessionId);
-        if (session.isGameStarted) throw new BadRequestException('Game already started');
-
-        session.isGameStarted = true;
-        session.currentTurn = this.timerService.startFirstTurn(session, DEFAULT_TURN_DURATION);
-
-        return session;
-    }
-
-    startSessionWithTransition(sessionId: string): InGameSession {
+    private startSessionWithTransition(sessionId: string): InGameSession {
         const session = this.sessionRepository.findById(sessionId);
         if (session.isGameStarted) throw new BadRequestException('Game already started');
 
@@ -84,15 +73,6 @@ export class InGameService {
 
     getSession(sessionId: string): InGameSession | undefined {
         return this.sessionRepository.findById(sessionId);
-    }
-
-    removeSession(sessionId: string): void {
-        this.sessionRepository.delete(sessionId);
-        this.gameCache.clearGameCache(sessionId);
-    }
-
-    updateSession(session: InGameSession): void {
-        this.sessionRepository.update(session);
     }
 
     joinInGameSession(sessionId: string, playerId: string): InGameSession {
@@ -180,10 +160,6 @@ export class InGameService {
         }
 
         return { session, playerName: player.name, playerId, sessionEnded, adminModeDeactivated };
-    }
-
-    getPlayers(sessionId: string): Player[] {
-        return this.sessionRepository.getIngamePlayers(sessionId);
     }
 
     findSessionByPlayerId(playerId: string): InGameSession | null {

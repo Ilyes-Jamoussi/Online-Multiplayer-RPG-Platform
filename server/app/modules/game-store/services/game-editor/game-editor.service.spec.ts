@@ -222,5 +222,154 @@ describe('GameEditorService', () => {
             expect(mockModel.findOne).not.toHaveBeenCalled();
             expect(mockModel.findByIdAndUpdate).toHaveBeenCalled();
         });
+
+        it('should not delete image when existingGame.gridPreviewUrl is falsy', async () => {
+            const id = 'gameid';
+            (mockImageService.saveImage as jest.Mock).mockResolvedValue('game-gameid-preview.png');
+            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
+            mockModel.findById = jest.fn().mockReturnValue({ lean: () => Promise.resolve({ gridPreviewUrl: null }) });
+
+            const returnedDoc = {
+                _id: { toString: () => id },
+                name: 'n',
+            } as const;
+
+            mockModel.findByIdAndUpdate = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(returnedDoc) }) });
+
+            const body = { gridPreviewUrl: 'data' };
+
+            await service.patchEditByGameId(id, body);
+
+            expect(mockImageService.deleteImage).not.toHaveBeenCalled();
+            expect(mockImageService.saveImage).toHaveBeenCalled();
+        });
+
+        it('should not delete image when existingGame.gridPreviewUrl is undefined', async () => {
+            const id = 'gameid';
+            (mockImageService.saveImage as jest.Mock).mockResolvedValue('game-gameid-preview.png');
+            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
+            mockModel.findById = jest.fn().mockReturnValue({ lean: () => Promise.resolve({ gridPreviewUrl: undefined }) });
+
+            const returnedDoc = {
+                _id: { toString: () => id },
+                name: 'n',
+            } as const;
+
+            mockModel.findByIdAndUpdate = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(returnedDoc) }) });
+
+            const body = { gridPreviewUrl: 'data' };
+
+            await service.patchEditByGameId(id, body);
+
+            expect(mockImageService.deleteImage).not.toHaveBeenCalled();
+            expect(mockImageService.saveImage).toHaveBeenCalled();
+        });
+
+        it('should not delete image when existingGame.gridPreviewUrl is empty string', async () => {
+            const id = 'gameid';
+            (mockImageService.saveImage as jest.Mock).mockResolvedValue('game-gameid-preview.png');
+            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
+            mockModel.findById = jest.fn().mockReturnValue({ lean: () => Promise.resolve({ gridPreviewUrl: '' }) });
+
+            const returnedDoc = {
+                _id: { toString: () => id },
+                name: 'n',
+            } as const;
+
+            mockModel.findByIdAndUpdate = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(returnedDoc) }) });
+
+            const body = { gridPreviewUrl: 'data' };
+
+            await service.patchEditByGameId(id, body);
+
+            expect(mockImageService.deleteImage).not.toHaveBeenCalled();
+            expect(mockImageService.saveImage).toHaveBeenCalled();
+        });
+
+        it('should handle empty array tiles in mapTiles', async () => {
+            const id = 'gameid';
+            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
+            mockModel.findById = jest.fn().mockReturnValue({ lean: () => Promise.resolve({ gridPreviewUrl: null }) });
+
+            const returnedDoc = {
+                _id: { toString: () => id },
+                name: 'n',
+            } as const;
+
+            let capturedSet: unknown = null;
+            mockModel.findByIdAndUpdate = jest.fn().mockImplementation((passedId: string, setArg: unknown) => {
+                capturedSet = setArg;
+                return { lean: (): { exec: jest.Mock } => ({ exec: jest.fn().mockResolvedValue(returnedDoc) }) };
+            });
+
+            const body = { tiles: [] };
+
+            await service.patchEditByGameId(id, body);
+
+            const setObj = (capturedSet as { $set?: PatchSet }).$set ?? (capturedSet as PatchSet);
+            expect(setObj.tiles).toEqual([]);
+        });
+
+        it('should call mapTiles with empty array and return empty array', async () => {
+            const id = 'gameid';
+            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
+            mockModel.findById = jest.fn().mockReturnValue({ lean: () => Promise.resolve({ gridPreviewUrl: null }) });
+
+            const returnedDoc = {
+                _id: { toString: () => id },
+                name: 'n',
+            } as const;
+
+            mockModel.findByIdAndUpdate = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(returnedDoc) }) });
+
+            type ServiceWithPrivateMethod = {
+                mapTiles: (tiles: unknown) => unknown[];
+            };
+            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+            const mapTilesSpy = jest.spyOn(servicePrivate, 'mapTiles');
+
+            const body = { tiles: [] };
+
+            await service.patchEditByGameId(id, body);
+
+            expect(mapTilesSpy).toHaveBeenCalledWith([]);
+            const result = servicePrivate.mapTiles(null as unknown);
+            expect(result).toEqual([]);
+            const result2 = servicePrivate.mapTiles(undefined as unknown);
+            expect(result2).toEqual([]);
+
+            mapTilesSpy.mockRestore();
+        });
+
+        it('should call mapObjects with empty array and return empty array', async () => {
+            const id = 'gameid';
+            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
+            mockModel.findById = jest.fn().mockReturnValue({ lean: () => Promise.resolve({ gridPreviewUrl: null }) });
+
+            const returnedDoc = {
+                _id: { toString: () => id },
+                name: 'n',
+            } as const;
+
+            mockModel.findByIdAndUpdate = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(returnedDoc) }) });
+
+            type ServiceWithPrivateMethod = {
+                mapObjects: (objects: unknown) => unknown[];
+            };
+            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+            const mapObjectsSpy = jest.spyOn(servicePrivate, 'mapObjects');
+
+            const body = { objects: [] };
+
+            await service.patchEditByGameId(id, body);
+
+            expect(mapObjectsSpy).toHaveBeenCalledWith([]);
+            const result = servicePrivate.mapObjects(null as unknown);
+            expect(result).toEqual([]);
+            const result2 = servicePrivate.mapObjects(undefined as unknown);
+            expect(result2).toEqual([]);
+
+            mapObjectsSpy.mockRestore();
+        });
     });
 });

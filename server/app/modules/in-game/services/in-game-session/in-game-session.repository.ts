@@ -1,4 +1,5 @@
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { StartPoint } from '@common/interfaces/start-point.interface';
@@ -22,7 +23,7 @@ export class InGameSessionRepository {
         Object.assign(player, updates);
         this.update(session);
 
-        this.eventEmitter.emit('player.updated', {
+        this.eventEmitter.emit(ServerEvents.PlayerUpdated, {
             sessionId,
             player,
         });
@@ -44,7 +45,7 @@ export class InGameSessionRepository {
         if (!player) throw new NotFoundException('Player not found');
         player.health = player.maxHealth;
 
-        this.eventEmitter.emit('player.healthChanged', {
+        this.eventEmitter.emit(ServerEvents.PlayerHealthChanged, {
             sessionId,
             playerId,
             newHealth: player.health,
@@ -56,7 +57,7 @@ export class InGameSessionRepository {
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
         player.combatCount++;
-        this.eventEmitter.emit('player.combatCountChanged', {
+        this.eventEmitter.emit(ServerEvents.PlayerCombatCountChanged, {
             sessionId,
             playerId,
             combatCount: player.combatCount,
@@ -68,7 +69,7 @@ export class InGameSessionRepository {
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
         player.combatWins++;
-        this.eventEmitter.emit('player.combatWinsChanged', {
+        this.eventEmitter.emit(ServerEvents.PlayerCombatWinsChanged, {
             sessionId,
             playerId,
             combatWins: player.combatWins,
@@ -80,7 +81,7 @@ export class InGameSessionRepository {
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
         player.combatLosses++;
-        this.eventEmitter.emit('player.combatLossesChanged', {
+        this.eventEmitter.emit(ServerEvents.PlayerCombatLossesChanged, {
             sessionId,
             playerId,
             combatLosses: player.combatLosses,
@@ -92,7 +93,7 @@ export class InGameSessionRepository {
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
         player.combatDraws++;
-        this.eventEmitter.emit('player.combatDrawsChanged', {
+        this.eventEmitter.emit(ServerEvents.PlayerCombatDrawsChanged, {
             sessionId,
             playerId,
             combatDraws: player.combatDraws,
@@ -126,10 +127,6 @@ export class InGameSessionRepository {
         this.sessions.delete(sessionId);
     }
 
-    deleteAll(): void {
-        this.sessions.clear();
-    }
-
     playerLeave(sessionId: string, playerId: string): Player {
         const session = this.findById(sessionId);
         const player = session.inGamePlayers[playerId];
@@ -147,14 +144,9 @@ export class InGameSessionRepository {
         return player;
     }
 
-    removeStartPoint(sessionId: string, startPointId: string): void {
+    private removeStartPoint(sessionId: string, startPointId: string): void {
         const session = this.findById(sessionId);
         session.startPoints = session.startPoints.filter((s) => s.id !== startPointId);
-    }
-
-    removePlayerFromTurnOrder(sessionId: string, playerId: string): void {
-        const session = this.findById(sessionId);
-        session.turnOrder = session.turnOrder.filter((id) => id !== playerId);
     }
 
     findSessionByPlayerId(playerId: string): InGameSession | null {
@@ -191,7 +183,7 @@ export class InGameSessionRepository {
         player.y = newY;
         player.speed = player.speed - cost;
 
-        this.eventEmitter.emit('player.moved', {
+        this.eventEmitter.emit(ServerEvents.PlayerMoved, {
             session,
             playerId,
             x: newX,

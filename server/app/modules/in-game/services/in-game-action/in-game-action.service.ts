@@ -1,9 +1,10 @@
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { Orientation } from '@common/enums/orientation.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -13,13 +14,6 @@ export class InGameActionService {
         private readonly eventEmitter: EventEmitter2,
     ) {}
 
-    attackPlayer(session: InGameSession, playerId: string, x: number, y: number): void {
-        const targetPlayerId = this.gameCache.getTileOccupant(session.id, x, y);
-        if (!targetPlayerId) throw new NotFoundException('Target player not found');
-        const player = session.inGamePlayers[playerId];
-        if (!player) throw new NotFoundException('Player not found');
-    }
-
     toggleDoor(session: InGameSession, playerId: string, x: number, y: number): void {
         const gameMap = this.gameCache.getGameMapForSession(session.id);
         const tile = gameMap.tiles.find((t) => t.x === x && t.y === y);
@@ -27,7 +21,7 @@ export class InGameActionService {
         if (tile && tile.kind === TileKind.DOOR) {
             tile.open = !tile.open;
 
-            this.eventEmitter.emit('door.toggled', {
+            this.eventEmitter.emit(ServerEvents.DoorToggled, {
                 session,
                 playerId,
                 x,
@@ -63,7 +57,7 @@ export class InGameActionService {
             }
         }
 
-        this.eventEmitter.emit('player.availableActions', {
+        this.eventEmitter.emit(ServerEvents.PlayerAvailableActions, {
             session,
             playerId,
             actions,

@@ -2,6 +2,7 @@ import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
 import { TurnTimerData } from '@app/interfaces/turn-timer-data.interface';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { TurnState } from '@common/interfaces/turn-state.interface';
 import { Injectable } from '@nestjs/common';
@@ -16,29 +17,6 @@ export class TimerService {
         private readonly eventEmitter: EventEmitter2,
         private readonly sessionRepository: InGameSessionRepository,
     ) {}
-
-    startFirstTurn(session: InGameSession, timeoutMs = DEFAULT_TURN_DURATION): TurnState {
-        if (!session.turnOrder?.length) throw new Error('TURN_ORDER_NOT_DEFINED');
-
-        const firstPlayer = this.getNextActivePlayer(session, null);
-        if (!firstPlayer) throw new Error('NO_ACTIVE_PLAYER');
-
-        session.inGamePlayers[firstPlayer].speed = session.inGamePlayers[firstPlayer].speed;
-        const newTurn: TurnState = {
-            turnNumber: 1,
-            activePlayerId: firstPlayer,
-            hasUsedAction: false,
-        };
-
-        session.currentTurn = newTurn;
-        this.scheduleTurnTimeout(session.id, timeoutMs, () => this.autoEndTurn(session));
-
-        this.eventEmitter.emit('turn.started', { session });
-
-        this.setGameTimerState(session.id, TurnTimerStates.PlayerTurn);
-
-        return newTurn;
-    }
 
     startFirstTurnWithTransition(session: InGameSession, timeoutMs = DEFAULT_TURN_DURATION): TurnState {
         if (!session.turnOrder?.length) throw new Error('TURN_ORDER_NOT_DEFINED');
@@ -61,20 +39,20 @@ export class TimerService {
             this.sessionRepository.updatePlayer(session.id, newTurn.activePlayerId, { actionsRemaining: 1 });
             this.scheduleTurnTimeout(session.id, timeoutMs, () => this.autoEndTurn(session));
 
-            this.eventEmitter.emit('turn.transition', { session });
-            this.eventEmitter.emit('turn.started', { session });
+            this.eventEmitter.emit(ServerEvents.TurnTransition, { session });
+            this.eventEmitter.emit(ServerEvents.TurnStarted, { session });
             this.setGameTimerState(session.id, TurnTimerStates.PlayerTurn);
         }, DEFAULT_TURN_TRANSITION_DURATION);
 
         return newTurn;
     }
 
-    nextTurn(session: InGameSession, timeoutMs = DEFAULT_TURN_DURATION): TurnState {
+    private nextTurn(session: InGameSession, timeoutMs = DEFAULT_TURN_DURATION): TurnState {
         const prev = session.currentTurn;
 
         this.clearTurnTimer(session.id);
         session.inGamePlayers[prev.activePlayerId].speed = 0;
-        this.eventEmitter.emit('player.reachableTiles', {
+        this.eventEmitter.emit(ServerEvents.PlayerReachableTiles, {
             playerId: prev.activePlayerId,
             reachable: [],
         });
@@ -89,15 +67,15 @@ export class TimerService {
         session.currentTurn = newTurn;
         session.inGamePlayers[nextPlayerId].speed = session.inGamePlayers[nextPlayerId].baseSpeed + session.inGamePlayers[nextPlayerId].speedBonus;
 
-        this.eventEmitter.emit('turn.ended', { session });
+        this.eventEmitter.emit(ServerEvents.TurnEnded, { session });
         this.setGameTimerState(session.id, TurnTimerStates.TurnTransition);
 
         setTimeout(() => {
             this.sessionRepository.updatePlayer(session.id, newTurn.activePlayerId, { actionsRemaining: 1 });
             this.scheduleTurnTimeout(session.id, timeoutMs, () => this.autoEndTurn(session));
 
-            this.eventEmitter.emit('turn.transition', { session });
-            this.eventEmitter.emit('turn.started', { session });
+            this.eventEmitter.emit(ServerEvents.TurnTransition, { session });
+            this.eventEmitter.emit(ServerEvents.TurnStarted, { session });
             this.setGameTimerState(session.id, TurnTimerStates.PlayerTurn);
         }, DEFAULT_TURN_TRANSITION_DURATION);
 
@@ -106,7 +84,7 @@ export class TimerService {
 
     endTurnManual(session: InGameSession): void {
         this.clearTurnTimer(session.id);
-        this.eventEmitter.emit('turn.manualEnd', { session });
+        this.eventEmitter.emit(ServerEvents.TurnManualEnd, { session });
         this.nextTurn(session);
     }
 
@@ -114,12 +92,12 @@ export class TimerService {
         return this.gameTimerStates.get(sessionId) || TurnTimerStates.PlayerTurn;
     }
 
-    setGameTimerState(sessionId: string, state: TurnTimerStates): void {
+    private setGameTimerState(sessionId: string, state: TurnTimerStates): void {
         this.gameTimerStates.set(sessionId, state);
     }
 
     private autoEndTurn(session: InGameSession): void {
-        this.eventEmitter.emit('turn.timeout', { session });
+        this.eventEmitter.emit(ServerEvents.TurnTimeout, { session });
         this.nextTurn(session);
     }
 
@@ -204,6 +182,6 @@ export class TimerService {
         const timerData = this.turnTimers.get(sessionId);
         if (timerData?.timeout) clearTimeout(timerData.timeout);
         this.turnTimers.delete(sessionId);
-        this.eventEmitter.emit('turn.forceStopTimer', { sessionId });
+        this.eventEmitter.emit(ServerEvents.TurnForceStopTimer, { sessionId });
     }
 }

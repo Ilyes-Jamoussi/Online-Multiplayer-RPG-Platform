@@ -3,6 +3,7 @@ import { SessionPreviewDto } from '@app/modules/session/dto/available-sessions-u
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
 import { Avatar } from '@common/enums/avatar.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { AvatarAssignment, WaitingRoomSession } from '@common/interfaces/session.interface';
 import { Injectable } from '@nestjs/common';
@@ -17,13 +18,13 @@ export class SessionService {
         const sessionId = this.getUniqueAccessCode();
         const session = this.buildSession(sessionId, adminId, data);
         this.sessions.set(sessionId, session);
-        this.eventEmitter.emit('session.availabilityChanged');
+        this.eventEmitter.emit(ServerEvents.SessionAvailabilityChanged);
         return sessionId;
     }
 
     endSession(sessionId: string): void {
         this.sessions.delete(sessionId);
-        this.eventEmitter.emit('session.availabilityChanged');
+        this.eventEmitter.emit(ServerEvents.SessionAvailabilityChanged);
     }
 
     joinSession(playerId: string, data: JoinSessionDto): string {
@@ -48,7 +49,7 @@ export class SessionService {
 
         if (session.players.length >= session.maxPlayers) {
             this.lock(data.sessionId);
-            this.eventEmitter.emit('session.autoLocked', data.sessionId);
+            this.eventEmitter.emit(ServerEvents.SessionAutoLocked, data.sessionId);
         }
 
         return uniqueName;
@@ -65,10 +66,6 @@ export class SessionService {
         return session.players.length >= session.maxPlayers;
     }
 
-    getPlayersCount(sessionId: string): number {
-        return this.getSession(sessionId).players.length;
-    }
-
     getPlayerSessionId(playerId: string): string | null {
         for (const [sessionId, session] of this.sessions.entries()) {
             const found = [...session.players].some((player) => player.id === playerId);
@@ -81,12 +78,6 @@ export class SessionService {
 
     getPlayersSession(sessionId: string): Player[] {
         return this.getSession(sessionId).players;
-    }
-    getPlayersData(sessionId: string): { name: string; avatar: string }[] {
-        return this.sessions.get(sessionId).players.map((player) => ({
-            name: player.name,
-            avatar: player.avatar,
-        }));
     }
 
     chooseAvatar(sessionId: string, playerId: string, avatar: Avatar): void {
@@ -105,13 +96,13 @@ export class SessionService {
             throw new Error(`Session ${sessionId} introuvable`);
         }
         session.isRoomLocked = true;
-        this.eventEmitter.emit('session.availabilityChanged');
+        this.eventEmitter.emit(ServerEvents.SessionAvailabilityChanged);
     }
 
     unlock(sessionId: string): void {
         const session = this.getSession(sessionId);
         session.isRoomLocked = false;
-        this.eventEmitter.emit('session.availabilityChanged');
+        this.eventEmitter.emit(ServerEvents.SessionAvailabilityChanged);
     }
 
     isRoomLocked(sessionId: string): boolean {
