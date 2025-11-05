@@ -46,10 +46,7 @@ describe('CharacterCreationCheckService', () => {
         const playerSpy = jasmine.createSpyObj('PlayerService', ['player']);
 
         TestBed.configureTestingModule({
-            providers: [
-                CharacterCreationCheckService,
-                { provide: PlayerService, useValue: playerSpy },
-            ],
+            providers: [CharacterCreationCheckService, { provide: PlayerService, useValue: playerSpy }],
         });
 
         service = TestBed.inject(CharacterCreationCheckService);
@@ -134,7 +131,7 @@ describe('CharacterCreationCheckService', () => {
             mockPlayerService.player.and.returnValue(invalidPlayer);
 
             const errors = service.getErrorMessages();
-            expect(errors).toContain('Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d\'espaces.');
+            expect(errors).toContain("Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d'espaces.");
         });
 
         it('should return name validation error for long name', () => {
@@ -147,7 +144,7 @@ describe('CharacterCreationCheckService', () => {
             mockPlayerService.player.and.returnValue(invalidPlayer);
 
             const errors = service.getErrorMessages();
-            expect(errors).toContain('Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d\'espaces.');
+            expect(errors).toContain("Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d'espaces.");
         });
 
         it('should return name validation error for whitespace-only name', () => {
@@ -160,7 +157,7 @@ describe('CharacterCreationCheckService', () => {
             mockPlayerService.player.and.returnValue(invalidPlayer);
 
             const errors = service.getErrorMessages();
-            expect(errors).toContain('Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d\'espaces.');
+            expect(errors).toContain("Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d'espaces.");
         });
 
         it('should return avatar selection error', () => {
@@ -201,7 +198,7 @@ describe('CharacterCreationCheckService', () => {
             mockPlayerService.player.and.returnValue(invalidPlayer);
 
             const errors = service.getErrorMessages();
-            expect(errors).toContain('Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d\'espaces.');
+            expect(errors).toContain("Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d'espaces.");
             expect(errors).toContain('Un avatar doit être sélectionné.');
             expect(errors).toContain('Un bonus doit être sélectionné.');
             expect(errors.length).toBe(TEST_ERROR_COUNT);

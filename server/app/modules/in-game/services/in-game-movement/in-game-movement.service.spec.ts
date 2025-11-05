@@ -363,7 +363,7 @@ describe('InGameMovementService', () => {
             expect(() => service.calculateReachableTiles(session, PLAYER_A_ID)).toThrow(NotFoundException);
         });
 
-        it('should return empty array when player has no speed', () => {
+        it('should return array with current tile when player has no speed', () => {
             const session = createMockSession();
             session.inGamePlayers[PLAYER_A_ID].speed = NO_SPEED;
             gameCache.getMapSize.mockReturnValue(MapSize.MEDIUM);
@@ -371,8 +371,11 @@ describe('InGameMovementService', () => {
 
             const result = service.calculateReachableTiles(session, PLAYER_A_ID);
 
-            expect(result).toEqual([]);
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerReachableTiles, { playerId: PLAYER_A_ID, reachable: [] });
+            expect(result).toEqual([{ x: POS_X_1, y: POS_Y_1, cost: 0, remainingPoints: 0 }]);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerReachableTiles, {
+                playerId: PLAYER_A_ID,
+                reachable: [{ x: POS_X_1, y: POS_Y_1, cost: 0, remainingPoints: 0 }],
+            });
         });
 
         it('should calculate reachable tiles for base tiles', () => {
@@ -394,7 +397,7 @@ describe('InGameMovementService', () => {
             expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerReachableTiles, { playerId: PLAYER_A_ID, reachable: result });
         });
 
-        it('should not include start position in reachable tiles', () => {
+        it('should include start position in reachable tiles', () => {
             const session = createMockSession();
             const mockTile: TileWithPlayerId = {
                 x: POS_X_2,
@@ -409,7 +412,13 @@ describe('InGameMovementService', () => {
 
             const result = service.calculateReachableTiles(session, PLAYER_A_ID);
 
-            expect(result.find((t) => t.x === POS_X_1 && t.y === POS_Y_1)).toBeUndefined();
+            expect(result.find((t) => t.x === POS_X_1 && t.y === POS_Y_1)).toBeDefined();
+            expect(result.find((t) => t.x === POS_X_1 && t.y === POS_Y_1)).toEqual({
+                x: POS_X_1,
+                y: POS_Y_1,
+                cost: 0,
+                remainingPoints: expect.any(Number),
+            });
         });
 
         it('should skip occupied tiles', () => {

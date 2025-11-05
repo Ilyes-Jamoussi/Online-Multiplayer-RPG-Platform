@@ -50,13 +50,28 @@ describe('SessionService', () => {
 
     beforeEach(() => {
         mockSessionSocketService = jasmine.createSpyObj('SessionSocketService', [
-            'lockSession', 'unlockSession', 'updateAvatarsAssignment', 'kickPlayer',
-            'leaveSession', 'createSession', 'joinSession', 'startGameSession',
-            'joinAvatarSelection', 'leaveAvatarSelection', 'loadAvailableSessions',
-            'onAvatarAssignmentsUpdated', 'onSessionPlayersUpdated', 'onGameSessionStarted',
-            'onSessionJoined', 'onSessionCreatedError', 'onSessionJoinError',
-            'onAvatarSelectionJoinError', 'onAvatarSelectionJoined', 'onAvailableSessionsUpdated',
-            'onSessionAutoLocked', 'onStartGameSessionError'
+            'lockSession',
+            'unlockSession',
+            'updateAvatarsAssignment',
+            'kickPlayer',
+            'leaveSession',
+            'createSession',
+            'joinSession',
+            'startGameSession',
+            'joinAvatarSelection',
+            'leaveAvatarSelection',
+            'loadAvailableSessions',
+            'onAvatarAssignmentsUpdated',
+            'onSessionPlayersUpdated',
+            'onGameSessionStarted',
+            'onSessionJoined',
+            'onSessionCreatedError',
+            'onSessionJoinError',
+            'onAvatarSelectionJoinError',
+            'onAvatarSelectionJoined',
+            'onAvailableSessionsUpdated',
+            'onSessionAutoLocked',
+            'onStartGameSessionError',
         ]);
 
         mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', ['displayErrorPopup']);
@@ -112,7 +127,7 @@ describe('SessionService', () => {
         it('should check if can be unlocked', () => {
             service.updateSession({ isRoomLocked: true, maxPlayers: TEST_MAX_PLAYERS, players: [mockPlayer] });
             expect(service.canBeUnlocked()).toBe(true);
-            
+
             service.updateSession({ isRoomLocked: false });
             expect(service.canBeUnlocked()).toBe(false);
         });
@@ -120,7 +135,7 @@ describe('SessionService', () => {
         it('should check if can start game', () => {
             service.updateSession({ isRoomLocked: true, players: [mockPlayer, mockPlayer] });
             expect(service.canStartGame()).toBe(true);
-            
+
             service.updateSession({ isRoomLocked: false });
             expect(service.canStartGame()).toBe(false);
         });
@@ -129,7 +144,7 @@ describe('SessionService', () => {
     describe('Avatar Management', () => {
         it('should update avatar assignment for admin', () => {
             service.updateAvatarAssignment('player1', Avatar.Avatar1, true);
-            expect(service.avatarAssignments().some(assignment => assignment.chosenBy === 'player1')).toBe(true);
+            expect(service.avatarAssignments().some((assignment) => assignment.chosenBy === 'player1')).toBe(true);
         });
 
         it('should emit socket event for non-admin', () => {
@@ -137,7 +152,7 @@ describe('SessionService', () => {
             service.updateAvatarAssignment('player1', Avatar.Avatar1, false);
             expect(mockSessionSocketService.updateAvatarsAssignment).toHaveBeenCalledWith({
                 sessionId: 'session1',
-                avatar: Avatar.Avatar1
+                avatar: Avatar.Avatar1,
             });
         });
     });
@@ -169,7 +184,7 @@ describe('SessionService', () => {
             expect(mockSessionSocketService.createSession).toHaveBeenCalledWith({
                 gameId: 'game1',
                 maxPlayers: TEST_MAX_PLAYERS,
-                player: mockPlayer
+                player: mockPlayer,
             });
         });
 
@@ -178,7 +193,7 @@ describe('SessionService', () => {
             service.joinSession(mockPlayer);
             expect(mockSessionSocketService.joinSession).toHaveBeenCalledWith({
                 sessionId: 'session1',
-                player: mockPlayer
+                player: mockPlayer,
             });
         });
 
@@ -263,7 +278,7 @@ describe('SessionService', () => {
             expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
                 title: 'Erreur de création',
                 message: 'Creation error',
-                redirectRoute: ROUTES.HomePage
+                redirectRoute: ROUTES.HomePage,
             });
         });
 
@@ -273,7 +288,7 @@ describe('SessionService', () => {
             expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
                 title: 'Erreur',
                 message: 'Join error',
-                redirectRoute: ROUTES.HomePage
+                redirectRoute: ROUTES.HomePage,
             });
         });
 
@@ -282,7 +297,7 @@ describe('SessionService', () => {
             callback('Avatar selection error');
             expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
                 title: 'Erreur de connexion',
-                message: 'Avatar selection error'
+                message: 'Avatar selection error',
             });
         });
 
@@ -312,7 +327,7 @@ describe('SessionService', () => {
             callback('Start game error');
             expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
                 title: 'Impossible de démarrer le jeu',
-                message: 'Start game error'
+                message: 'Start game error',
             });
         });
     });
@@ -322,15 +337,15 @@ describe('SessionService', () => {
             service.updateSession({
                 avatarAssignments: [
                     { avatar: Avatar.Avatar1, chosenBy: 'player1' },
-                    { avatar: Avatar.Avatar2, chosenBy: null }
-                ]
+                    { avatar: Avatar.Avatar2, chosenBy: null },
+                ],
             });
-            
+
             service.updateAvatarAssignment('player1', Avatar.Avatar2, true);
-            
+
             const assignments = service.avatarAssignments();
-            expect(assignments.find(assignment => assignment.avatar === Avatar.Avatar1)?.chosenBy).toBeNull();
-            expect(assignments.find(assignment => assignment.avatar === Avatar.Avatar2)?.chosenBy).toBe('player1');
+            expect(assignments.find((assignment) => assignment.avatar === Avatar.Avatar1)?.chosenBy).toBeNull();
+            expect(assignments.find((assignment) => assignment.avatar === Avatar.Avatar2)?.chosenBy).toBe('player1');
         });
     });
 });

@@ -314,11 +314,7 @@ describe('InGameActionService', () => {
                 .mockReturnValueOnce({ x: POS_X_1, y: POS_Y_1 })
                 .mockReturnValueOnce({ x: POS_X_0, y: POS_Y_0 })
                 .mockReturnValueOnce({ x: POS_X_3, y: POS_Y_3 });
-            gameCache.getTileOccupant
-                .mockReturnValueOnce(PLAYER_B_ID)
-                .mockReturnValueOnce(null)
-                .mockReturnValueOnce(null)
-                .mockReturnValueOnce(null);
+            gameCache.getTileOccupant.mockReturnValueOnce(PLAYER_B_ID).mockReturnValueOnce(null).mockReturnValueOnce(null).mockReturnValueOnce(null);
             gameCache.getTileAtPosition
                 .mockReturnValueOnce(mockTile1)
                 .mockReturnValueOnce(mockTile2)
@@ -358,14 +354,8 @@ describe('InGameActionService', () => {
                 })
                 .mockReturnValueOnce({ x: POS_X_0, y: POS_Y_0 })
                 .mockReturnValueOnce({ x: POS_X_3, y: POS_Y_3 });
-            gameCache.getTileOccupant
-                .mockReturnValueOnce(PLAYER_B_ID)
-                .mockReturnValueOnce(null)
-                .mockReturnValueOnce(null);
-            gameCache.getTileAtPosition
-                .mockReturnValueOnce(mockTile1)
-                .mockReturnValueOnce(mockTile2)
-                .mockReturnValueOnce(mockTile3);
+            gameCache.getTileOccupant.mockReturnValueOnce(PLAYER_B_ID).mockReturnValueOnce(null).mockReturnValueOnce(null);
+            gameCache.getTileAtPosition.mockReturnValueOnce(mockTile1).mockReturnValueOnce(mockTile2).mockReturnValueOnce(mockTile3);
 
             const result = service.calculateAvailableActions(session, PLAYER_A_ID);
 
@@ -381,8 +371,7 @@ describe('InGameActionService', () => {
                 kind: TileKind.BASE,
                 playerId: null,
             };
-            gameCache.getNextPosition
-                .mockReturnValue({ x: POS_X_2, y: POS_Y_3 });
+            gameCache.getNextPosition.mockReturnValue({ x: POS_X_2, y: POS_Y_3 });
             gameCache.getTileOccupant.mockReturnValue(null);
             gameCache.getTileAtPosition.mockReturnValue(mockTile);
 
@@ -417,4 +406,3 @@ describe('InGameActionService', () => {
         });
     });
 });
-

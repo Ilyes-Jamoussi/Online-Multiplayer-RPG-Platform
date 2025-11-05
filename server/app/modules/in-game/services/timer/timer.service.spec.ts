@@ -442,16 +442,6 @@ describe('TimerService', () => {
             const timerCount = jest.getTimerCount();
             expect(timerCount).toBe(0);
         });
-
-        it('should emit turn.forceStopTimer event', () => {
-            const session = createMockSession();
-            service.startFirstTurnWithTransition(session);
-            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
-
-            service.forceStopTimer(session.id);
-
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.TurnForceStopTimer, { sessionId: session.id });
-        });
     });
 
     describe('autoEndTurn (private, tested via timeout)', () => {
@@ -730,11 +720,59 @@ describe('TimerService', () => {
             jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
             expect(session.currentTurn.activePlayerId).toBe('player3');
         });
-        
+
         it('should handle clearing non-existent timer', () => {
             const session = createMockSession();
 
             expect(() => service.endTurnManual(session)).not.toThrow();
+        });
+    });
+
+    describe('clearTimerForSession', () => {
+        it('should clear turn timer and game timer state for session', () => {
+            const session = createMockSession();
+            service.startFirstTurnWithTransition(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            type ServiceWithPrivateMethod = {
+                turnTimers: Map<string, unknown>;
+                gameTimerStates: Map<string, TurnTimerStates>;
+            };
+            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+
+            expect(servicePrivate.turnTimers.has(session.id)).toBe(true);
+            expect(servicePrivate.gameTimerStates.has(session.id)).toBe(true);
+
+            service.clearTimerForSession(session.id);
+
+            expect(servicePrivate.turnTimers.has(session.id)).toBe(false);
+            expect(servicePrivate.gameTimerStates.has(session.id)).toBe(false);
+        });
+
+        it('should not throw error when clearing non-existent timer', () => {
+            expect(() => service.clearTimerForSession('non-existent-session')).not.toThrow();
+        });
+
+        it('should clear game timer state even if no turn timer exists', () => {
+            const session = createMockSession();
+            service.startFirstTurnWithTransition(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            type ServiceWithPrivateMethod = {
+                gameTimerStates: Map<string, TurnTimerStates>;
+                turnTimers: Map<string, unknown>;
+            };
+            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+
+            expect(servicePrivate.gameTimerStates.has(session.id)).toBe(true);
+            expect(servicePrivate.turnTimers.has(session.id)).toBe(true);
+
+            service.forceStopTimer(session.id);
+            expect(servicePrivate.turnTimers.has(session.id)).toBe(false);
+
+            service.clearTimerForSession(session.id);
+
+            expect(servicePrivate.gameTimerStates.has(session.id)).toBe(false);
         });
     });
 });

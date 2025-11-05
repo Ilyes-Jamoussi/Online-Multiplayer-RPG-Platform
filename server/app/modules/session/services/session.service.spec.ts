@@ -1,4 +1,3 @@
-
 /* eslint-disable max-lines -- Test file */
 import { ACCESS_CODE_LENGTH } from '@app/constants/session.constants';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';

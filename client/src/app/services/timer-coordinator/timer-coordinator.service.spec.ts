@@ -235,7 +235,7 @@ describe('TimerCoordinatorService', () => {
         it('should handle pause when time remaining is 0', () => {
             service.startTurnTimer(TEST_DURATION_1000);
             jasmine.clock().tick(MILLISECONDS_PER_SECOND);
-            
+
             service.pauseTurnTimer();
             expect(service.getPausedTurnTime()).toBe(0);
         });

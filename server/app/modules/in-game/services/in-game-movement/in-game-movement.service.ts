@@ -83,13 +83,12 @@ export class InGameMovementService {
         const queue: ReachableTile[] = this.initializeQueue(player);
         const isOnBoat = this.isPlayerOnBoat(session.id, player.x, player.y);
         const mapSize = this.gameCache.getMapSize(session.id);
-        const startPosition = { x: player.x, y: player.y };
 
         while (queue.length > 0) {
             const current = queue.shift();
             if (!current) continue;
 
-            if (!this.processCurrentTile(current, visited, reachable, startPosition)) continue;
+            if (!this.processCurrentTile(current, visited, reachable)) continue;
 
             const context: ReachableTileExplorationContext = { session, playerId, visited, queue, mapSize, isOnBoat };
             this.exploreNeighbors(current, context);
@@ -110,21 +109,13 @@ export class InGameMovementService {
         ];
     }
 
-    private processCurrentTile(
-        current: ReachableTile,
-        visited: Set<string>,
-        reachable: ReachableTile[],
-        startPosition: { x: number; y: number },
-    ): boolean {
+    private processCurrentTile(current: ReachableTile, visited: Set<string>, reachable: ReachableTile[]): boolean {
         const key = `${current.x},${current.y}`;
 
         if (visited.has(key)) return false;
         visited.add(key);
 
-        const isStartPosition = current.x === startPosition.x && current.y === startPosition.y;
-        if (!isStartPosition) {
-            reachable.push(current);
-        }
+        reachable.push(current);
 
         return true;
     }

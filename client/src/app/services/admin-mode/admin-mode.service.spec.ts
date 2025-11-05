@@ -19,11 +19,7 @@ describe('AdminModeService', () => {
     let adminModeToggledCallback: (data: { isAdminModeActive: boolean }) => void;
 
     beforeEach(() => {
-        const inGameSocketSpy = jasmine.createSpyObj('InGameSocketService', [
-            'toggleAdminMode',
-            'playerTeleport',
-            'onAdminModeToggled',
-        ]);
+        const inGameSocketSpy = jasmine.createSpyObj('InGameSocketService', ['toggleAdminMode', 'playerTeleport', 'onAdminModeToggled']);
 
         inGameSocketSpy.onAdminModeToggled.and.callFake((callback: (data: AdminModeToggledDto) => void) => {
             adminModeToggledCallback = callback;
@@ -120,7 +116,7 @@ describe('AdminModeService', () => {
             expect(mockInGameSocketService.playerTeleport).toHaveBeenCalledWith({
                 sessionId: 'session1',
                 x: TEST_X_COORDINATE,
-                y: TEST_Y_COORDINATE
+                y: TEST_Y_COORDINATE,
             });
         });
 

@@ -23,19 +23,19 @@ describe('CombatTimerComponent', () => {
         combatDataSignal = signal({ attackerId: 'player1', targetId: 'player2', userRole: 'attacker' });
 
         mockCombatService = {
-            combatData: combatDataSignal.asReadonly()
+            combatData: combatDataSignal.asReadonly(),
         };
 
         mockTimerCoordinatorService = {
-            combatTimeRemaining: combatTimeRemainingSignal
+            combatTimeRemaining: combatTimeRemainingSignal,
         };
 
         await TestBed.configureTestingModule({
             imports: [CombatTimerComponent],
             providers: [
                 { provide: CombatService, useValue: mockCombatService },
-                { provide: TimerCoordinatorService, useValue: mockTimerCoordinatorService }
-            ]
+                { provide: TimerCoordinatorService, useValue: mockTimerCoordinatorService },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(CombatTimerComponent);

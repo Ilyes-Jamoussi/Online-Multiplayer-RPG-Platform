@@ -130,10 +130,7 @@ export class PlayerInfoComponent {
 
     isActionDisabled(): boolean {
         return (
-            !this.inGameService.isMyTurn() ||
-            !this.inGameService.isGameStarted() ||
-            this.inGameService.hasUsedAction() ||
-            !this.hasAvailableActions()
+            !this.inGameService.isMyTurn() || !this.inGameService.isGameStarted() || this.inGameService.hasUsedAction() || !this.hasAvailableActions()
         );
     }
 

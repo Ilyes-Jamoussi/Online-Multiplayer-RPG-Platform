@@ -45,7 +45,7 @@ describe('CombatOverlayComponent', () => {
     const mockCombatData = {
         attackerId: 'player1',
         targetId: 'player2',
-        userRole: 'attacker' as const
+        userRole: 'attacker' as const,
     };
 
     const mockPlayerA: Player = {
@@ -76,7 +76,7 @@ describe('CombatOverlayComponent', () => {
         combatCount: 0,
         combatWins: 0,
         combatLosses: 0,
-        combatDraws: 0
+        combatDraws: 0,
     };
 
     const mockPlayerB: Player = {
@@ -107,14 +107,14 @@ describe('CombatOverlayComponent', () => {
         combatCount: 0,
         combatWins: 0,
         combatLosses: 0,
-        combatDraws: 0
+        combatDraws: 0,
     };
 
     const mockVictoryData = {
         playerAId: 'player1',
         playerBId: 'player2',
         winnerId: 'player1',
-        abandon: false
+        abandon: false,
     };
 
     const mockDamageDisplay: DamageDisplay = {
@@ -127,7 +127,7 @@ describe('CombatOverlayComponent', () => {
         defenseDice: Dice.D6,
         totalDefense: 6,
         tileEffect: 0,
-        visible: true
+        visible: true,
     };
 
     beforeEach(async () => {
@@ -159,7 +159,7 @@ describe('CombatOverlayComponent', () => {
             _victoryDataSignal: victoryDataSignal,
             _minHealthDuringCombatSignal: minHealthDuringCombatSignal,
             _tileEffectsSignal: tileEffectsSignal,
-            _isVictoryNotificationVisibleSignal: isVictoryNotificationVisibleSignal
+            _isVictoryNotificationVisibleSignal: isVictoryNotificationVisibleSignal,
         };
 
         mockInGameService = jasmine.createSpyObj('InGameService', ['getPlayerByPlayerId']);
@@ -180,8 +180,8 @@ describe('CombatOverlayComponent', () => {
                 { provide: CombatService, useValue: mockCombatService },
                 { provide: InGameService, useValue: mockInGameService },
                 { provide: AssetsService, useValue: mockAssetsService },
-                { provide: TimerCoordinatorService, useValue: mockTimerCoordinatorService }
-            ]
+                { provide: TimerCoordinatorService, useValue: mockTimerCoordinatorService },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(CombatOverlayComponent);
@@ -376,7 +376,7 @@ describe('CombatOverlayComponent', () => {
         it('should check if posture is selected', () => {
             mockCombatService._selectedPostureSignal.set(CombatPosture.DEFENSIVE);
             expect(component.isPostureSelected).toBe(true);
-            
+
             mockCombatService._selectedPostureSignal.set(null);
             expect(component.isPostureSelected).toBe(false);
         });
@@ -434,7 +434,7 @@ describe('CombatOverlayComponent', () => {
             component.chooseOffensive();
             component.chooseDefensive();
             component.closeVictoryOverlay();
-            
+
             expect(mockCombatService.chooseOffensive).toHaveBeenCalled();
             expect(mockCombatService.chooseDefensive).toHaveBeenCalled();
             expect(mockCombatService.closeVictoryOverlay).toHaveBeenCalled();

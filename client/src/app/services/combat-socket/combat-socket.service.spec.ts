@@ -12,9 +12,7 @@ describe('CombatSocketService', () => {
         mockSocketService = jasmine.createSpyObj('SocketService', ['emit', 'onSuccessEvent']);
 
         TestBed.configureTestingModule({
-            providers: [
-                { provide: SocketService, useValue: mockSocketService }
-            ]
+            providers: [{ provide: SocketService, useValue: mockSocketService }],
         });
         service = TestBed.inject(CombatSocketService);
     });

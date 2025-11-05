@@ -197,7 +197,6 @@ describe('GameCacheService', () => {
             expect(() => service.getGameForSession('non-existent-session')).toThrow('Game not found');
         });
 
-
         it('should return correct game when multiple sessions are cached', async () => {
             const mockGame1 = createMockGame({ name: 'Game 1' });
             const mockGame2 = createMockGame({ name: 'Game 2' });
@@ -842,6 +841,31 @@ describe('GameCacheService', () => {
             const result = service.isTileFree('session-ice', POS_X_0, POS_Y_0);
 
             expect(result).toBe(true);
+        });
+    });
+
+    describe('clearSessionGameCache', () => {
+        beforeEach(() => {
+            const mockGame = createMockGame();
+            mockModel.findById = jest.fn().mockReturnValue({
+                lean: jest.fn().mockResolvedValue(mockGame),
+            });
+        });
+
+        it('should clear both sessionsGames and sessionsGameMaps for a session', async () => {
+            await service.fetchAndCacheGame(mockSessionId, mockGameId);
+
+            expect(service.getGameForSession(mockSessionId)).toBeDefined();
+            expect(service.getGameMapForSession(mockSessionId)).toBeDefined();
+
+            service.clearSessionGameCache(mockSessionId);
+
+            expect(() => service.getGameForSession(mockSessionId)).toThrow(NotFoundException);
+            expect(() => service.getGameMapForSession(mockSessionId)).toThrow(NotFoundException);
+        });
+
+        it('should not throw error when clearing non-existent session cache', () => {
+            expect(() => service.clearSessionGameCache('non-existent-session')).not.toThrow();
         });
     });
 });

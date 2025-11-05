@@ -10,19 +10,17 @@ describe('ToastNotificationDisplayComponent', () => {
 
     const mockToasts: Toast[] = [
         { id: '1', message: 'Test toast 1', type: 'info' },
-        { id: '2', message: 'Test toast 2', type: 'success' }
+        { id: '2', message: 'Test toast 2', type: 'success' },
     ];
 
     beforeEach(async () => {
         mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', ['removeToast'], {
-            toasts: signal(mockToasts)
+            toasts: signal(mockToasts),
         });
 
         await TestBed.configureTestingModule({
             imports: [ToastNotificationDisplayComponent],
-            providers: [
-                { provide: NotificationCoordinatorService, useValue: mockNotificationService }
-            ]
+            providers: [{ provide: NotificationCoordinatorService, useValue: mockNotificationService }],
         }).compileComponents();
 
         fixture = TestBed.createComponent(ToastNotificationDisplayComponent);

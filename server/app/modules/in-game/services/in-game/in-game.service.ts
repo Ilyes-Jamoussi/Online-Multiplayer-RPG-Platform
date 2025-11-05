@@ -6,23 +6,28 @@ import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { InGameSession, WaitingRoomSession } from '@common/interfaces/session.interface';
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameActionService } from '@app/modules/in-game/services/in-game-action/in-game-action.service';
 import { InGameInitializationService } from '@app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
 import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
+import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
+import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
 
 @Injectable()
 export class InGameService {
+    // eslint-disable-next-line max-params -- NestJS dependency injection requires multiple parameters, more than 5 is required for this service
     constructor(
         private readonly timerService: TimerService,
         private readonly gameCache: GameCacheService,
         private readonly initialization: InGameInitializationService,
         private readonly sessionRepository: InGameSessionRepository,
         private readonly movementService: InGameMovementService,
+        private readonly combatService: CombatService,
+        private readonly actionService: InGameActionService,
+        private readonly combatTimerService: CombatTimerService,
     ) {}
 
-    @Inject(InGameActionService) private readonly actionService: InGameActionService;
     async createInGameSession(waiting: WaitingRoomSession, mode: GameMode, mapSize: MapSize): Promise<InGameSession> {
         const { id, gameId, maxPlayers, players } = waiting;
 
@@ -215,5 +220,14 @@ export class InGameService {
         this.sessionRepository.movePlayerPosition(sessionId, playerId, x, y, 0);
         this.movementService.calculateReachableTiles(session, playerId);
         this.actionService.calculateAvailableActions(session, playerId);
+    }
+
+    removeSession(sessionId: string): void {
+        const session = this.sessionRepository.findById(sessionId);
+        this.sessionRepository.delete(sessionId);
+        this.gameCache.clearSessionGameCache(sessionId);
+        this.combatService.clearActiveCombatForSession(sessionId);
+        this.combatTimerService.stopCombatTimer(session);
+        this.timerService.clearTimerForSession(sessionId);
     }
 }

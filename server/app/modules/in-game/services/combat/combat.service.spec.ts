@@ -347,9 +347,7 @@ describe('CombatService', () => {
             const session = createMockSession();
             sessionRepository.findById.mockReturnValue(session);
 
-            expect(() => service.attackPlayerAction(SESSION_ID, PLAYER_A_ID, INVALID_POSITION, INVALID_POSITION)).toThrow(
-                BadRequestException,
-            );
+            expect(() => service.attackPlayerAction(SESSION_ID, PLAYER_A_ID, INVALID_POSITION, INVALID_POSITION)).toThrow(BadRequestException);
             expect(() => service.attackPlayerAction(SESSION_ID, PLAYER_A_ID, INVALID_POSITION, INVALID_POSITION)).toThrow(
                 'No opponent at this position',
             );
@@ -613,13 +611,7 @@ describe('CombatService', () => {
             const servicePrivate = service as unknown as ServiceWithPrivateMethod;
             servicePrivate.startCombat(session, PLAYER_A_ID, PLAYER_B_ID);
 
-            expect(combatTimerService.startCombatTimer).toHaveBeenCalledWith(
-                session,
-                PLAYER_A_ID,
-                PLAYER_B_ID,
-                0,
-                0,
-            );
+            expect(combatTimerService.startCombatTimer).toHaveBeenCalledWith(session, PLAYER_A_ID, PLAYER_B_ID, 0, 0);
         });
 
         it('should use tile combat effect from tile kind', () => {
@@ -794,11 +786,14 @@ describe('CombatService', () => {
                 playerId: PLAYER_B_ID,
                 newHealth: HEALTH_AFTER_DAMAGE_2,
             });
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatResult, expect.objectContaining({
-                sessionId: SESSION_ID,
-                playerAId: PLAYER_A_ID,
-                playerBId: PLAYER_B_ID,
-            }));
+            expect(eventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.PlayerCombatResult,
+                expect.objectContaining({
+                    sessionId: SESSION_ID,
+                    playerAId: PLAYER_A_ID,
+                    playerBId: PLAYER_B_ID,
+                }),
+            );
             expect(combat.playerAPosture).toBeNull();
             expect(combat.playerBPosture).toBeNull();
         });
@@ -1288,5 +1283,34 @@ describe('CombatService', () => {
             expect(endCombatSpy).toHaveBeenCalledWith(session, PLAYER_A_ID, PLAYER_B_ID, PLAYER_A_ID);
         });
     });
-});
 
+    describe('clearActiveCombatForSession', () => {
+        it('should remove active combat for session', () => {
+            const combatState: CombatState = {
+                sessionId: SESSION_ID,
+                playerAId: PLAYER_A_ID,
+                playerBId: PLAYER_B_ID,
+                playerAPosture: null,
+                playerBPosture: null,
+                playerATileEffect: 0,
+                playerBTileEffect: 0,
+            };
+
+            type ServiceWithPrivateMethod = {
+                activeCombats: Map<string, CombatState>;
+            };
+            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+            servicePrivate.activeCombats.set(SESSION_ID, combatState);
+
+            expect(servicePrivate.activeCombats.has(SESSION_ID)).toBe(true);
+
+            service.clearActiveCombatForSession(SESSION_ID);
+
+            expect(servicePrivate.activeCombats.has(SESSION_ID)).toBe(false);
+        });
+
+        it('should not throw error when clearing non-existent combat', () => {
+            expect(() => service.clearActiveCombatForSession('non-existent-session')).not.toThrow();
+        });
+    });
+});

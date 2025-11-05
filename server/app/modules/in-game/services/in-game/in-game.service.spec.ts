@@ -19,6 +19,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Types } from 'mongoose';
 import { InGameService } from './in-game.service';
 import { Game } from '@app/modules/game-store/entities/game.entity';
+import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
+import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
 
 describe('InGameService', () => {
     let service: InGameService;
@@ -28,6 +30,8 @@ describe('InGameService', () => {
     let sessionRepository: jest.Mocked<InGameSessionRepository>;
     let movementService: jest.Mocked<InGameMovementService>;
     let actionService: jest.Mocked<InGameActionService>;
+    let combatService: jest.Mocked<CombatService>;
+    let combatTimerService: jest.Mocked<CombatTimerService>;
 
     const SESSION_ID = 'session-123';
     const GAME_ID = 'game-456';
@@ -132,11 +136,13 @@ describe('InGameService', () => {
             endTurnManual: jest.fn(),
             forceStopTimer: jest.fn(),
             getGameTimerState: jest.fn(),
+            clearTimerForSession: jest.fn(),
         };
 
         const mockGameCache = {
             fetchAndCacheGame: jest.fn(),
             isTileFree: jest.fn(),
+            clearSessionGameCache: jest.fn(),
         };
 
         const mockInitialization = {
@@ -153,6 +159,7 @@ describe('InGameService', () => {
             inGamePlayersCount: jest.fn(),
             findSessionByPlayerId: jest.fn(),
             movePlayerPosition: jest.fn(),
+            delete: jest.fn(),
         };
 
         const mockMovementService = {
@@ -163,6 +170,14 @@ describe('InGameService', () => {
         const mockActionService = {
             toggleDoor: jest.fn(),
             calculateAvailableActions: jest.fn(),
+        };
+
+        const mockCombatService = {
+            clearActiveCombatForSession: jest.fn(),
+        };
+
+        const mockCombatTimerService = {
+            stopCombatTimer: jest.fn(),
         };
 
         const module: TestingModule = await Test.createTestingModule({
@@ -192,6 +207,14 @@ describe('InGameService', () => {
                     provide: InGameActionService,
                     useValue: mockActionService,
                 },
+                {
+                    provide: CombatService,
+                    useValue: mockCombatService,
+                },
+                {
+                    provide: CombatTimerService,
+                    useValue: mockCombatTimerService,
+                },
             ],
         }).compile();
 
@@ -202,6 +225,8 @@ describe('InGameService', () => {
         sessionRepository = module.get(InGameSessionRepository);
         movementService = module.get(InGameMovementService);
         actionService = module.get(InGameActionService);
+        combatService = module.get(CombatService);
+        combatTimerService = module.get(CombatTimerService);
     });
 
     afterEach(() => {
@@ -411,10 +436,7 @@ describe('InGameService', () => {
             updatedSession.inGamePlayers[PLAYER_A_ID].isInGame = true;
             updatedSession.inGamePlayers[PLAYER_B_ID].isInGame = true;
 
-            sessionRepository.findById
-                .mockReturnValueOnce(initialSession)
-                .mockReturnValueOnce(updatedSession)
-                .mockReturnValueOnce(updatedSession);
+            sessionRepository.findById.mockReturnValueOnce(initialSession).mockReturnValueOnce(updatedSession).mockReturnValueOnce(updatedSession);
 
             service.joinInGameSession(SESSION_ID, PLAYER_A_ID);
 
@@ -480,8 +502,8 @@ describe('InGameService', () => {
 
             expect(() => service.endPlayerTurn(SESSION_ID, PLAYER_A_ID)).toThrow(BadRequestException);
             expect(() => service.endPlayerTurn(SESSION_ID, PLAYER_A_ID)).toThrow('Not your turn');
+        });
     });
-});
 
     describe('toggleDoorAction', () => {
         it('should toggle door and decrement actions', () => {
@@ -925,6 +947,30 @@ describe('InGameService', () => {
 
             expect(() => servicePrivate.startSessionWithTransition(SESSION_ID)).toThrow(BadRequestException);
             expect(() => servicePrivate.startSessionWithTransition(SESSION_ID)).toThrow('Game already started');
+        });
+    });
+
+    describe('removeSession', () => {
+        it('should remove session and clear all related caches', () => {
+            const session = createMockInGameSession();
+            sessionRepository.findById.mockReturnValue(session);
+
+            service.removeSession(SESSION_ID);
+
+            expect(sessionRepository.findById).toHaveBeenCalledWith(SESSION_ID);
+            expect(sessionRepository.delete).toHaveBeenCalledWith(SESSION_ID);
+            expect(gameCache.clearSessionGameCache).toHaveBeenCalledWith(SESSION_ID);
+            expect(combatService.clearActiveCombatForSession).toHaveBeenCalledWith(SESSION_ID);
+            expect(combatTimerService.stopCombatTimer).toHaveBeenCalledWith(session);
+            expect(timerService.clearTimerForSession).toHaveBeenCalledWith(SESSION_ID);
+        });
+
+        it('should throw NotFoundException when session not found', () => {
+            sessionRepository.findById.mockImplementation(() => {
+                throw new NotFoundException('Session not found');
+            });
+
+            expect(() => service.removeSession(SESSION_ID)).toThrow(NotFoundException);
         });
     });
 });

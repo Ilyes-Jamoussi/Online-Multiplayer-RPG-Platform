@@ -30,7 +30,7 @@ describe('InGameKeyboardEventsService', () => {
         it('should start listening to keyboard events', () => {
             spyOn(document, 'addEventListener');
             service.startListening();
-            
+
             expect(document.addEventListener).toHaveBeenCalledWith('keyup', jasmine.any(Function));
             expect(document.addEventListener).toHaveBeenCalledWith('keypress', jasmine.any(Function));
         });
@@ -39,7 +39,7 @@ describe('InGameKeyboardEventsService', () => {
             spyOn(document, 'addEventListener');
             service.startListening();
             service.startListening();
-            
+
             expect(document.addEventListener).toHaveBeenCalledTimes(2);
         });
 
@@ -47,7 +47,7 @@ describe('InGameKeyboardEventsService', () => {
             spyOn(document, 'removeEventListener');
             service.startListening();
             service.stopListening();
-            
+
             expect(document.removeEventListener).toHaveBeenCalledWith('keyup', jasmine.any(Function));
             expect(document.removeEventListener).toHaveBeenCalledWith('keypress', jasmine.any(Function));
         });
@@ -55,7 +55,7 @@ describe('InGameKeyboardEventsService', () => {
         it('should not remove listeners if not listening', () => {
             spyOn(document, 'removeEventListener');
             service.stopListening();
-            
+
             expect(document.removeEventListener).not.toHaveBeenCalled();
         });
     });
@@ -71,7 +71,7 @@ describe('InGameKeyboardEventsService', () => {
             const event = new KeyboardEvent('keyup', { key: GameKey.Up });
             spyOn(event, 'preventDefault');
             document.dispatchEvent(event);
-            
+
             expect(event.preventDefault).toHaveBeenCalled();
             expect(mockInGameService.movePlayer).toHaveBeenCalledWith(Orientation.N);
         });
@@ -80,7 +80,7 @@ describe('InGameKeyboardEventsService', () => {
             const event = new KeyboardEvent('keyup', { key: GameKey.Down });
             spyOn(event, 'preventDefault');
             document.dispatchEvent(event);
-            
+
             expect(event.preventDefault).toHaveBeenCalled();
             expect(mockInGameService.movePlayer).toHaveBeenCalledWith(Orientation.S);
         });
@@ -89,7 +89,7 @@ describe('InGameKeyboardEventsService', () => {
             const event = new KeyboardEvent('keyup', { key: GameKey.Left });
             spyOn(event, 'preventDefault');
             document.dispatchEvent(event);
-            
+
             expect(event.preventDefault).toHaveBeenCalled();
             expect(mockInGameService.movePlayer).toHaveBeenCalledWith(Orientation.W);
         });
@@ -98,7 +98,7 @@ describe('InGameKeyboardEventsService', () => {
             const event = new KeyboardEvent('keyup', { key: GameKey.Right });
             spyOn(event, 'preventDefault');
             document.dispatchEvent(event);
-            
+
             expect(event.preventDefault).toHaveBeenCalled();
             expect(mockInGameService.movePlayer).toHaveBeenCalledWith(Orientation.E);
         });
@@ -107,7 +107,7 @@ describe('InGameKeyboardEventsService', () => {
             const event = new KeyboardEvent('keyup', { key: 'a' });
             spyOn(event, 'preventDefault');
             document.dispatchEvent(event);
-            
+
             expect(event.preventDefault).not.toHaveBeenCalled();
             expect(mockInGameService.movePlayer).not.toHaveBeenCalled();
         });
@@ -122,7 +122,7 @@ describe('InGameKeyboardEventsService', () => {
             const event = new KeyboardEvent('keypress', { key: GameKey.AdminMode });
             spyOn(event, 'preventDefault');
             document.dispatchEvent(event);
-            
+
             expect(event.preventDefault).toHaveBeenCalled();
             expect(mockAdminModeService.toggleAdminMode).toHaveBeenCalled();
         });
@@ -131,7 +131,7 @@ describe('InGameKeyboardEventsService', () => {
             const event = new KeyboardEvent('keypress', { key: 'a' });
             spyOn(event, 'preventDefault');
             document.dispatchEvent(event);
-            
+
             expect(event.preventDefault).not.toHaveBeenCalled();
             expect(mockAdminModeService.toggleAdminMode).not.toHaveBeenCalled();
         });
@@ -145,30 +145,30 @@ describe('InGameKeyboardEventsService', () => {
         it('should not handle movement when not my turn', () => {
             mockInGameService.isMyTurn.and.returnValue(false);
             mockInGameService.isGameStarted.and.returnValue(true);
-            
+
             const event = new KeyboardEvent('keyup', { key: GameKey.Up });
             document.dispatchEvent(event);
-            
+
             expect(mockInGameService.movePlayer).not.toHaveBeenCalled();
         });
 
         it('should not handle movement when game not started', () => {
             mockInGameService.isMyTurn.and.returnValue(true);
             mockInGameService.isGameStarted.and.returnValue(false);
-            
+
             const event = new KeyboardEvent('keyup', { key: GameKey.Up });
             document.dispatchEvent(event);
-            
+
             expect(mockInGameService.movePlayer).not.toHaveBeenCalled();
         });
 
         it('should not handle movement when neither my turn nor game started', () => {
             mockInGameService.isMyTurn.and.returnValue(false);
             mockInGameService.isGameStarted.and.returnValue(false);
-            
+
             const event = new KeyboardEvent('keyup', { key: GameKey.Up });
             document.dispatchEvent(event);
-            
+
             expect(mockInGameService.movePlayer).not.toHaveBeenCalled();
         });
     });
@@ -177,7 +177,7 @@ describe('InGameKeyboardEventsService', () => {
         it('should stop listening on destroy', () => {
             spyOn(service, 'stopListening');
             service.ngOnDestroy();
-            
+
             expect(service.stopListening).toHaveBeenCalled();
         });
 
@@ -185,7 +185,7 @@ describe('InGameKeyboardEventsService', () => {
             spyOn(document, 'removeEventListener');
             service.startListening();
             service.ngOnDestroy();
-            
+
             expect(document.removeEventListener).toHaveBeenCalledWith('keyup', jasmine.any(Function));
             expect(document.removeEventListener).toHaveBeenCalledWith('keypress', jasmine.any(Function));
         });

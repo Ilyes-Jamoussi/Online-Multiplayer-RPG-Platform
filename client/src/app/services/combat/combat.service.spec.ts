@@ -198,17 +198,9 @@ describe('CombatService', () => {
             combatDrawsCallback = callback;
         });
 
-        const inGameSpy = jasmine.createSpyObj('InGameService', [
-            'getPlayerByPlayerId',
-            'updateInGameSession',
-            'sessionId',
-            'inGameSession',
-        ]);
+        const inGameSpy = jasmine.createSpyObj('InGameService', ['getPlayerByPlayerId', 'updateInGameSession', 'sessionId', 'inGameSession']);
 
-        const notificationSpy = jasmine.createSpyObj('NotificationCoordinatorService', [
-            'showInfoToast',
-            'showSuccessToast',
-        ]);
+        const notificationSpy = jasmine.createSpyObj('NotificationCoordinatorService', ['showInfoToast', 'showSuccessToast']);
 
         const playerSpy = jasmine.createSpyObj('PlayerService', ['id', 'updatePlayer']);
 
@@ -430,10 +422,7 @@ describe('CombatService', () => {
                     targetId: 'player2',
                     userRole: 'spectator',
                 });
-                expect(mockNotificationService.showInfoToast).toHaveBeenCalledWith(
-                    '⚔️ Combat en cours : Player 1 vs Player 2',
-                    jasmine.any(Number),
-                );
+                expect(mockNotificationService.showInfoToast).toHaveBeenCalledWith('⚔️ Combat en cours : Player 1 vs Player 2', jasmine.any(Number));
             });
         });
 
@@ -551,7 +540,7 @@ describe('CombatService', () => {
                 (service as unknown as { _combatData: { set: (data: unknown) => void } })._combatData.set({
                     attackerId: 'player1',
                     targetId: 'player2',
-                    userRole: 'spectator'
+                    userRole: 'spectator',
                 });
 
                 victoryCallback({
@@ -561,10 +550,7 @@ describe('CombatService', () => {
                     abandon: false,
                 });
 
-                expect(mockNotificationService.showInfoToast).toHaveBeenCalledWith(
-                    '⚔️ Match nul entre Player 1 et Player 2',
-                    jasmine.any(Number)
-                );
+                expect(mockNotificationService.showInfoToast).toHaveBeenCalledWith('⚔️ Match nul entre Player 1 et Player 2', jasmine.any(Number));
             });
 
             it('should handle abandon victory', () => {
@@ -573,7 +559,7 @@ describe('CombatService', () => {
                 (service as unknown as { _combatData: { set: (data: unknown) => void } })._combatData.set({
                     attackerId: 'player1',
                     targetId: 'player2',
-                    userRole: 'spectator'
+                    userRole: 'spectator',
                 });
 
                 victoryCallback({
@@ -585,7 +571,7 @@ describe('CombatService', () => {
 
                 expect(mockNotificationService.showSuccessToast).toHaveBeenCalledWith(
                     '🏆 Player 1 a gagné par abandon contre Player 2',
-                    jasmine.any(Number)
+                    jasmine.any(Number),
                 );
             });
 
@@ -595,7 +581,7 @@ describe('CombatService', () => {
                 (service as unknown as { _combatData: { set: (data: unknown) => void } })._combatData.set({
                     attackerId: 'player1',
                     targetId: 'player2',
-                    userRole: 'spectator'
+                    userRole: 'spectator',
                 });
 
                 victoryCallback({
@@ -605,10 +591,7 @@ describe('CombatService', () => {
                     abandon: false,
                 });
 
-                expect(mockNotificationService.showSuccessToast).toHaveBeenCalledWith(
-                    '🏆 Player 1 a vaincu Player 2',
-                    jasmine.any(Number)
-                );
+                expect(mockNotificationService.showSuccessToast).toHaveBeenCalledWith('🏆 Player 1 a vaincu Player 2', jasmine.any(Number));
             });
 
             it('should set victory notification timeout', () => {

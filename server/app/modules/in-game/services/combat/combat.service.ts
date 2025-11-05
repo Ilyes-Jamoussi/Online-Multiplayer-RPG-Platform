@@ -18,7 +18,7 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 export class CombatService {
     private readonly activeCombats = new Map<string, CombatState>();
 
-    // eslint-disable-next-line max-params -- NestJS dependency injection requires multiple parameters
+    // eslint-disable-next-line max-params -- NestJS dependency injection requires multiple parameters, more than 6 is required for this service
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly timerService: TimerService,
@@ -35,11 +35,16 @@ export class CombatService {
         const winnerId = combat.playerAId === playerId ? combat.playerBId : combat.playerAId;
         const session = this.sessionRepository.findById(sessionId);
         if (!session) throw new NotFoundException('Session not found');
+        this.sessionRepository.incrementPlayerCombatWins(sessionId, winnerId);
         this.endCombat(session, combat.playerAId, combat.playerBId, winnerId, true);
     }
 
-    getSession(sessionId: string): InGameSession {
-        return this.sessionRepository.findById(sessionId);
+    getSession(sessionId: string): InGameSession | null {
+        try {
+            return this.sessionRepository.findById(sessionId);
+        } catch {
+            return null;
+        }
     }
 
     attackPlayerAction(sessionId: string, playerId: string, x: number, y: number): void {
@@ -110,6 +115,10 @@ export class CombatService {
         if (combat) {
             this.combatRound(payload.sessionId);
         }
+    }
+
+    clearActiveCombatForSession(sessionId: string): void {
+        this.activeCombats.delete(sessionId);
     }
 
     private endCombat(session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean = false): void {

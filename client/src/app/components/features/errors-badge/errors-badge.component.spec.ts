@@ -76,7 +76,7 @@ describe('ErrorsBadgeComponent', () => {
             [GameEditorIssuesEnum.DescriptionValidation]: { hasIssue: false, message: '' },
         };
         mockGameEditorCheckService.editorProblems.and.returnValue(noErrorsProblems);
-        
+
         component.validationType = 'game-editor';
         const errors = component.errorList;
         expect(errors).toEqual([]);
@@ -114,7 +114,7 @@ describe('ErrorsBadgeComponent', () => {
             [GameEditorIssuesEnum.DescriptionValidation]: { hasIssue: false, message: '' },
         };
         mockGameEditorCheckService.editorProblems.and.returnValue(problemsWithNoMessage);
-        
+
         component.validationType = 'game-editor';
         const errors = component.errorList;
         expect(errors).toEqual([]);

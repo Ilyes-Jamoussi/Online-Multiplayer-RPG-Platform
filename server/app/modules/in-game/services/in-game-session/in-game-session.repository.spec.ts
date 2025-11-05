@@ -83,9 +83,7 @@ describe('InGameSessionRepository', () => {
             [PLAYER_B_ID]: createMockPlayer({ id: PLAYER_B_ID }),
         },
         currentTurn: { turnNumber: 1, activePlayerId: PLAYER_A_ID, hasUsedAction: false },
-        startPoints: [
-            { id: START_POINT_ID, playerId: PLAYER_A_ID, x: POS_X_1, y: POS_Y_1 },
-        ],
+        startPoints: [{ id: START_POINT_ID, playerId: PLAYER_A_ID, x: POS_X_1, y: POS_Y_1 }],
         mapSize: MapSize.MEDIUM,
         mode: GameMode.CLASSIC,
         turnOrder: [PLAYER_A_ID, PLAYER_B_ID],

@@ -18,7 +18,7 @@
         border-color: #90caf9;
     }
 
-    &.admin {
+    &.is-admin {
         border-color: #ffd700;
         background-color: #fff8e1;
     }
@@ -37,7 +37,7 @@
         border-color: #90caf9;
     }
 
-    .admin & {
+    .is-admin & {
         border-color: #ffd700;
     }
 }
@@ -72,7 +72,7 @@
         color: #1976d2;
     }
 
-    .admin & {
+    .is-admin & {
         color: #f57c00;
     }
 }

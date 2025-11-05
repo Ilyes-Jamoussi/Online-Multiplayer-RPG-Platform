@@ -36,13 +36,10 @@ describe('TurnTimerComponent', () => {
             timeRemaining: timeRemainingSignal,
             isMyTurn: isMyTurnSignal,
             isTransitioning: isTransitioningSignal,
-            isGameStarted: isGameStartedSignal
+            isGameStarted: isGameStartedSignal,
         };
 
-        mockTimerCoordinatorService = jasmine.createSpyObj('TimerCoordinatorService', [
-            'getPausedTurnTime',
-            'isTurnActive'
-        ]);
+        mockTimerCoordinatorService = jasmine.createSpyObj('TimerCoordinatorService', ['getPausedTurnTime', 'isTurnActive']);
         mockTimerCoordinatorService.getPausedTurnTime.and.returnValue(TEST_PAUSED_TIME);
         mockTimerCoordinatorService.isTurnActive.and.returnValue(true);
 
@@ -54,8 +51,8 @@ describe('TurnTimerComponent', () => {
             providers: [
                 { provide: InGameService, useValue: mockInGameService },
                 { provide: TimerCoordinatorService, useValue: mockTimerCoordinatorService },
-                { provide: CombatService, useValue: mockCombatService }
-            ]
+                { provide: CombatService, useValue: mockCombatService },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(TurnTimerComponent);
@@ -204,7 +201,7 @@ describe('TurnTimerComponent', () => {
         it('should display timer when shouldShowTimer is true', () => {
             isGameStartedSignal.set(true);
             mockTimerCoordinatorService.isTurnActive.and.returnValue(true);
-            
+
             fixture.detectChanges();
 
             const timerElement = fixture.nativeElement.querySelector('.turn-timer');
@@ -214,7 +211,7 @@ describe('TurnTimerComponent', () => {
         it('should not display timer when shouldShowTimer is false', () => {
             isGameStartedSignal.set(false);
             mockTimerCoordinatorService.isTurnActive.and.returnValue(false);
-            
+
             fixture.detectChanges();
 
             const timerElement = fixture.nativeElement.querySelector('.turn-timer');
@@ -225,12 +222,12 @@ describe('TurnTimerComponent', () => {
             isGameStartedSignal.set(true);
             mockTimerCoordinatorService.isTurnActive.and.returnValue(true);
             isMyTurnSignal.set(true);
-            
+
             fixture.detectChanges();
 
             const labelElement = fixture.nativeElement.querySelector('.timer-label');
             const timeElement = fixture.nativeElement.querySelector('.time-value');
-            
+
             expect(labelElement.textContent).toBe('Votre tour');
             expect(timeElement.textContent).toBe(TEST_TIME_REMAINING.toString());
         });
@@ -239,7 +236,7 @@ describe('TurnTimerComponent', () => {
             isGameStartedSignal.set(true);
             mockTimerCoordinatorService.isTurnActive.and.returnValue(true);
             isMyTurnSignal.set(true);
-            
+
             fixture.detectChanges();
 
             const timerElement = fixture.nativeElement.querySelector('.turn-timer');

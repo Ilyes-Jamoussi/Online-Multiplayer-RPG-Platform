@@ -89,16 +89,14 @@ describe('GameMapService', () => {
     beforeEach(() => {
         mockGameHttpService = jasmine.createSpyObj('GameHttpService', ['getGameEditorById']);
         mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', ['displayErrorPopup']);
-        mockInGameService = jasmine.createSpyObj('InGameService', [
-            'deactivateActionMode', 'toggleDoorAction', 'getPlayerByPlayerId'
-        ], {
+        mockInGameService = jasmine.createSpyObj('InGameService', ['deactivateActionMode', 'toggleDoorAction', 'getPlayerByPlayerId'], {
             inGamePlayers: signal({ player1: mockPlayer }),
             startPoints: signal([{ id: 'start1', x: 0, y: 0 }]),
             reachableTiles: signal([{ x: 1, y: 1, cost: 1, remainingPoints: 2 }]),
             isMyTurn: signal(true),
             isActionModeActive: signal(false),
             availableActions: signal([]),
-            currentlyPlayers: [mockPlayer]
+            currentlyPlayers: [mockPlayer],
         });
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getAvatarStaticImage']);
         mockInGameSocketService = jasmine.createSpyObj('InGameSocketService', ['onDoorToggled']);
@@ -149,11 +147,11 @@ describe('GameMapService', () => {
         it('should return action class when action mode is active', () => {
             Object.defineProperty(mockInGameService, 'isActionModeActive', {
                 value: signal(true),
-                configurable: true
+                configurable: true,
             });
             Object.defineProperty(mockInGameService, 'availableActions', {
                 value: signal([{ x: 1, y: 1, type: 'ATTACK' }]),
-                configurable: true
+                configurable: true,
             });
 
             const tileClass = service.getTileClass(1, 1);
@@ -163,11 +161,11 @@ describe('GameMapService', () => {
         it('should return door action class', () => {
             Object.defineProperty(mockInGameService, 'isActionModeActive', {
                 value: signal(true),
-                configurable: true
+                configurable: true,
             });
             Object.defineProperty(mockInGameService, 'availableActions', {
                 value: signal([{ x: 1, y: 1, type: 'DOOR' }]),
-                configurable: true
+                configurable: true,
             });
 
             const tileClass = service.getTileClass(1, 1);
@@ -184,7 +182,7 @@ describe('GameMapService', () => {
         it('should get action type and deactivate action mode', () => {
             Object.defineProperty(mockInGameService, 'availableActions', {
                 value: signal([{ x: 1, y: 1, type: 'ATTACK' }]),
-                configurable: true
+                configurable: true,
             });
 
             const actionType = service.getActionTypeAt(1, 1);
@@ -235,7 +233,7 @@ describe('GameMapService', () => {
             mockGameHttpService.getGameEditorById.and.returnValue(of(mockGameData));
             service.loadGameMap('game1');
             service.openTileModal(mockTile);
-            
+
             expect(service.getActiveTile()).toBeDefined();
         });
 
@@ -289,7 +287,7 @@ describe('GameMapService', () => {
         it('should handle objects with footprint 2', () => {
             const largeObject = { ...mockObject, kind: PlaceableKind.HEAL, x: 1, y: 1 };
             service['_objects'].set([largeObject]);
-            
+
             const obj = service.getObjectOnTile({ x: 2, y: 1 });
             expect(obj).toEqual(largeObject);
         });
@@ -298,20 +296,20 @@ describe('GameMapService', () => {
     describe('Game Map Loading', () => {
         it('should load game map successfully', () => {
             mockGameHttpService.getGameEditorById.and.returnValue(of(mockGameData));
-            
+
             service.loadGameMap('game1');
-            
+
             expect(mockGameHttpService.getGameEditorById).toHaveBeenCalledWith('game1');
         });
 
         it('should handle load game map error', () => {
             mockGameHttpService.getGameEditorById.and.returnValue(throwError('Error'));
-            
+
             service.loadGameMap('game1');
-            
+
             expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
                 title: 'Erreur',
-                message: 'Erreur lors du chargement de la carte'
+                message: 'Erreur lors du chargement de la carte',
             });
         });
     });
@@ -320,9 +318,9 @@ describe('GameMapService', () => {
         it('should get avatar by player id', () => {
             mockInGameService.getPlayerByPlayerId.and.returnValue({ ...mockPlayer, avatar: Avatar.Avatar1 } as Player);
             mockAssetsService.getAvatarStaticImage.and.returnValue('/avatar1.png');
-            
+
             const avatar = service.getAvatarByPlayerId('player1');
-            
+
             expect(avatar).toBe('/avatar1.png');
             expect(mockInGameService.getPlayerByPlayerId).toHaveBeenCalledWith('player1');
             expect(mockAssetsService.getAvatarStaticImage).toHaveBeenCalledWith(Avatar.Avatar1);
@@ -330,17 +328,17 @@ describe('GameMapService', () => {
 
         it('should return empty string when player has no avatar', () => {
             mockInGameService.getPlayerByPlayerId.and.returnValue({ ...mockPlayer, avatar: null } as Player);
-            
+
             const avatar = service.getAvatarByPlayerId('player1');
-            
+
             expect(avatar).toBe('');
         });
 
         it('should return empty string when player not found', () => {
             mockInGameService.getPlayerByPlayerId.and.returnValue(undefined as unknown as Player);
-            
+
             const avatar = service.getAvatarByPlayerId('nonexistent');
-            
+
             expect(avatar).toBe('');
         });
     });
@@ -349,7 +347,7 @@ describe('GameMapService', () => {
         it('should reset to initial state', () => {
             service.openTileModal(mockTile);
             service.reset();
-            
+
             expect(service.size()).toBe(MapSize.MEDIUM);
             expect(service.name()).toBe('');
             expect(service.description()).toBe('');
@@ -364,9 +362,9 @@ describe('GameMapService', () => {
         it('should handle door toggled event', () => {
             const callback = mockInGameSocketService.onDoorToggled.calls.mostRecent().args[0];
             spyOn(service, 'updateTileState');
-            
+
             callback({ x: 1, y: 1, isOpen: false });
-            
+
             expect(service.updateTileState).toHaveBeenCalledWith(1, 1, false);
         });
     });
@@ -375,11 +373,11 @@ describe('GameMapService', () => {
         it('should filter visible objects correctly', () => {
             const startObject = { ...mockObject, kind: PlaceableKind.START, id: 'start1' };
             const hiddenStartObject = { ...mockObject, kind: PlaceableKind.START, id: 'start2' };
-            
+
             service['_objects'].set([mockObject, startObject, hiddenStartObject]);
-            
+
             const visibleObjects = service.visibleObjects();
-            
+
             expect(visibleObjects).toContain(mockObject);
             expect(visibleObjects).toContain(startObject);
             expect(visibleObjects).not.toContain(hiddenStartObject);

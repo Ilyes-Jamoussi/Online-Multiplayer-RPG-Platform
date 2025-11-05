@@ -37,7 +37,7 @@ export class InGameGateway {
         try {
             const session = this.inGameService.joinInGameSession(sessionId, socket.id);
             this.server.to(session.inGameId).emit(InGameEvents.PlayerJoinedInGameSession, successResponse(session));
-            
+
             if (session.isGameStarted) {
                 this.server.to(session.inGameId).emit(InGameEvents.GameStarted, successResponse(session));
             }
@@ -177,6 +177,7 @@ export class InGameGateway {
 
         this.server.socketsLeave(session.inGameId);
         this.server.socketsLeave(session.id);
+        this.inGameService.removeSession(session.id);
     }
 
     handleDisconnect(socket: Socket) {
@@ -192,6 +193,7 @@ export class InGameGateway {
             if (result.sessionEnded) {
                 this.server.to(result.session.inGameId).emit(InGameEvents.GameForceStopped, successResponse({}));
                 this.server.socketsLeave(sessionId);
+                this.inGameService.removeSession(sessionId);
             } else {
                 if (result.adminModeDeactivated) {
                     this.server.to(result.session.inGameId).emit(InGameEvents.AdminModeToggled, successResponse({ isAdminModeActive: false }));

@@ -9,4 +9,3 @@ import { CommonModule } from '@angular/common';
     styleUrls: ['./in-game-chat.component.scss'],
 })
 export class InGameChatComponent {}
-

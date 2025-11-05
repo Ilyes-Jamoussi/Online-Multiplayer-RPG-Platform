@@ -29,4 +29,3 @@ export class GameMapHeaderComponent {
         this.inGameService.endTurn();
     }
 }
-

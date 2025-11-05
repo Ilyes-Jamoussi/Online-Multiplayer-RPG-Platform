@@ -29,43 +29,42 @@ describe('ScreenshotService', () => {
         expect(typeof SCREENSHOT_QUALITY).toBe('number');
     });
 
-    it('should capture element as base64 - integration test', async () => {
-        const testElement = document.createElement('div');
-        testElement.style.width = '100px';
-        testElement.style.height = '100px';
-        testElement.style.backgroundColor = 'red';
-        testElement.textContent = 'Test';
-        document.body.appendChild(testElement);
+    it(
+        'should capture element as base64 - integration test',
+        async () => {
+            const testElement = document.createElement('div');
+            testElement.style.width = '100px';
+            testElement.style.height = '100px';
+            testElement.style.backgroundColor = 'red';
+            testElement.textContent = 'Test';
+            document.body.appendChild(testElement);
 
-        try {
-            const timeoutPromise = new Promise((resolve, reject) => 
-                setTimeout(() => reject(new Error('Test timeout')), TEST_TIMEOUT_DURATION)
-            );
-            
-            const result = await Promise.race([
-                service.captureElementAsBase64(testElement),
-                timeoutPromise
-            ]) as string;
+            try {
+                const timeoutPromise = new Promise((resolve, reject) => setTimeout(() => reject(new Error('Test timeout')), TEST_TIMEOUT_DURATION));
 
-            expect(result).toMatch(/^data:image\/jpeg;base64,/);
-            expect(typeof result).toBe('string');
-            expect(result.length).toBeGreaterThan(0);
-        } catch (error) {
-            expect(error).toBeDefined();
-        } finally {
-            document.body.removeChild(testElement);
-        }
-    }, TEST_SPEC_TIMEOUT);
+                const result = (await Promise.race([service.captureElementAsBase64(testElement), timeoutPromise])) as string;
+
+                expect(result).toMatch(/^data:image\/jpeg;base64,/);
+                expect(typeof result).toBe('string');
+                expect(result.length).toBeGreaterThan(0);
+            } catch (error) {
+                expect(error).toBeDefined();
+            } finally {
+                document.body.removeChild(testElement);
+            }
+        },
+        TEST_SPEC_TIMEOUT,
+    );
 
     it('should call html2canvas with correct options and return JPEG data URL', async () => {
         const mockToDataURL = jasmine.createSpy('toDataURL').and.returnValue('data:image/jpeg;base64,mockdata');
         const mockCanvas = { toDataURL: mockToDataURL } as unknown as HTMLCanvasElement;
-        
+
         spyOn(await import('html2canvas'), 'default').and.returnValue(Promise.resolve(mockCanvas));
-        
+
         const testElement = document.createElement('div');
         const result = await service.captureElementAsBase64(testElement);
-        
+
         expect(mockToDataURL).toHaveBeenCalledWith('image/jpeg', SCREENSHOT_QUALITY);
         expect(result).toBe('data:image/jpeg;base64,mockdata');
     });

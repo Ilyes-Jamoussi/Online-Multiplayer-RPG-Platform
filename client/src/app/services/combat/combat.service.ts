@@ -82,13 +82,19 @@ export class CombatService {
             this.victoryNotificationTimeout = null;
         }
 
-        this._isVictoryNotificationVisible.set(false);
+        this.reset();
+    }
+
+    reset(): void {
         this._combatData.set(null);
+        this._combatResult.set(null);
+        this._damageDisplays.set([]);
         this._selectedPosture.set(null);
         this._playerPostures.set({});
         this._victoryData.set(null);
         this._tileEffects.set({});
         this._minHealthDuringCombat.set({});
+        this._isCombatActive.set(false);
     }
 
     chooseOffensive(): void {

@@ -51,7 +51,7 @@ describe('InGameSocketService', () => {
             service.playerMove({ sessionId: 'session1', orientation: Orientation.N });
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerMove, {
                 sessionId: 'session1',
-                orientation: Orientation.N
+                orientation: Orientation.N,
             });
         });
 
@@ -60,7 +60,7 @@ describe('InGameSocketService', () => {
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerTeleport, {
                 sessionId: 'session1',
                 x: 5,
-                y: 10
+                y: 10,
             });
         });
 
@@ -69,7 +69,7 @@ describe('InGameSocketService', () => {
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.ToggleDoorAction, {
                 sessionId: 'session1',
                 x: 3,
-                y: 7
+                y: 7,
             });
         });
     });
