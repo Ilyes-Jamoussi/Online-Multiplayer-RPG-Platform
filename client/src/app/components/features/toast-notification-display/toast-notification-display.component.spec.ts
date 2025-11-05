@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { NotificationCoordinatorService, Toast } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { ToastNotificationDisplayComponent } from './toast-notification-display.component';
+import { Toast } from '@app/interfaces/toast.interface';
 
 describe('ToastNotificationDisplayComponent', () => {
     let component: ToastNotificationDisplayComponent;
