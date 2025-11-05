@@ -10,7 +10,7 @@ import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import 'reflect-metadata';
 import { Server, Socket } from 'socket.io';
-import { CombatGateway } from '../combat.gateway';
+import { CombatGateway } from './combat.gateway';
 
 describe('CombatGateway', () => {
     let gateway: CombatGateway;

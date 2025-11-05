@@ -1,6 +1,6 @@
 import { Game, gameSchema } from '@app/modules/game-store/entities/game.entity';
 import { CombatGateway } from '@app/modules/in-game/gateways/combat/combat.gateway';
-import { InGameGateway } from '@app/modules/in-game/gateways/in-game.gateway';
+import { InGameGateway } from '@app/modules/in-game/gateways/in-game/in-game.gateway';
 import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
 import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
