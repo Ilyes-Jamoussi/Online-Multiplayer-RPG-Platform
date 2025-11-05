@@ -8,18 +8,18 @@ export class TileSizeProbeDirective implements OnChanges, OnDestroy {
     private resizeObserver?: ResizeObserver;
 
     constructor(
-        private el: ElementRef<HTMLElement>,
-        private zone: NgZone,
+        private readonly element: ElementRef<HTMLElement>,
+        private readonly zone: NgZone,
     ) {}
 
     ngOnChanges(): void {
         this.teardown();
         if (!this.probeActive) return;
 
-        const node = this.el.nativeElement;
+        const node = this.element.nativeElement;
 
-        const r = node.getBoundingClientRect();
-        this.sizeChange.emit(Math.min(r.width, r.height));
+        const rect = node.getBoundingClientRect();
+        this.sizeChange.emit(Math.min(rect.width, rect.height));
 
         this.zone.runOutsideAngular(() => {
             this.resizeObserver = new ResizeObserver((entries) => {
@@ -33,7 +33,7 @@ export class TileSizeProbeDirective implements OnChanges, OnDestroy {
     ngOnDestroy(): void {
         this.teardown();
     }
-    private teardown() {
+    private teardown(): void {
         this.resizeObserver?.disconnect();
         this.resizeObserver = undefined;
     }

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@app/enums/routes.enum';
 import { UiSidebarComponent } from './sidebar.component';
 
 describe('UiSidebarComponent', () => {
@@ -17,7 +17,7 @@ describe('UiSidebarComponent', () => {
     });
 
     it('should emit menuItemClick with ROUTES.home when onMenuItemClick is called', (done) => {
-        const expected = ROUTES.home;
+        const expected = ROUTES.HomePage;
         component.menuItemClick.subscribe((value: string) => {
             expect(value).toBe(expected);
             done();

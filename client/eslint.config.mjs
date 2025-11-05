@@ -3,17 +3,24 @@ import angularTemplate from '@angular-eslint/eslint-plugin-template';
 import templateParser from '@angular-eslint/template-parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+import eslintComments from 'eslint-plugin-eslint-comments';
 import baseConfig from '../eslint.config.basic.mjs';
 
 export default [
-    ...baseConfig(tsParser, tsPlugin),
+    ...baseConfig(tsParser, tsPlugin, eslintComments),
     {
         files: ['**/*.ts'],
+        languageOptions: {
+            parser: tsParser,
+            parserOptions: {
+                project: './tsconfig.json',
+                sourceType: 'module',
+            },
+        },
         plugins: {
             '@angular-eslint': angular,
         },
         rules: {
-            // Angular rules
             '@angular-eslint/directive-selector': [
                 'error',
                 {
@@ -31,6 +38,48 @@ export default [
                 },
             ],
             '@angular-eslint/use-lifecycle-interface': 'error',
+
+            '@typescript-eslint/naming-convention': [
+                'error',
+                {
+                    selector: 'variableLike',
+                    format: ['camelCase'],
+                    leadingUnderscore: 'allow',
+                },
+                {
+                    selector: 'function',
+                    format: ['camelCase'],
+                },
+                {
+                    selector: 'method',
+                    format: ['camelCase'],
+                },
+                {
+                    selector: 'typeLike',
+                    format: ['PascalCase'],
+                },
+                {
+                    selector: 'variable',
+                    modifiers: ['const', 'global'],
+                    format: ['UPPER_CASE'],
+                },
+            ],
+
+            'id-length': [
+                'warn',
+                {
+                    min: 3,
+                    exceptions: ['io', 'i', 'j', 'k', 'x', 'y', 'id', 'db', 'ng', '', 'to', 'of', 'on'],
+                },
+            ],
+
+            'no-restricted-syntax': [
+                'warn',
+                {
+                    selector: 'TSParenthesizedType > TSObjectKeyword',
+                    message: "-0,5 [citer l'extrait de code] une interface devrait être utilisée ici",
+                },
+            ],
         },
     },
     {
@@ -42,7 +91,7 @@ export default [
             '@angular-eslint/template': angularTemplate,
         },
         rules: {
-            // Angular template rules can be added here
+            '@angular-eslint/template/no-call-expression': 'warn',
         },
     },
     {

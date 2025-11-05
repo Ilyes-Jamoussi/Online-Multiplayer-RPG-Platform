@@ -1,0 +1,52 @@
+@if (activeTile) {
+<div class="tile-modal-backdrop" (click)="close()"></div>
+<div class="tile-modal" role="dialog" aria-modal="true">
+    <header class="tile-modal__header">
+        <h3>Tuile: {{ tileLabel[activeTile.kind] }} ({{ activeTile.kind }})</h3>
+        <button class="tile-modal__close" (click)="close()" aria-label="Fermer">×</button>
+    </header>
+
+    <section class="tile-modal__section">
+        <h4>Caractéristiques</h4>
+        <ul>
+            <li>Position: ({{ activeTile.x }}, {{ activeTile.y }})</li>
+            @if(activeTile.kind === tileKind.DOOR){
+            <li>Ouverte: {{ activeTile.open ? 'Oui' : 'Non' }}</li>
+            } @if (activeTile.teleportChannel !== undefined) {
+            <li>Canal de téléportation: {{ activeTile.teleportChannel }}</li>
+            }
+        </ul>
+    </section>
+
+    @if (objectOnTile) {
+    <section class="tile-modal__section">
+        <h4>Objet sur la tuile</h4>
+        <div class="tile-modal__object">
+            <img [src]="getObjectImage(objectOnTile.kind)" [alt]="objectOnTile.kind" />
+            <div class="tile-modal__object-info">
+                <div>Type: {{ objectOnTile.kind }}</div>
+                <div>Label: {{ placeableLabel[objectOnTile.kind] }}</div>
+            </div>
+        </div>
+    </section>
+    } @if (playerOnTile) {
+    <section class="tile-modal__section">
+        <h4>Joueur sur la tuile</h4>
+        <div class="tile-modal__player">
+            <img class="avatar" [src]="getPlayerAvatar(playerOnTile.id)" [alt]="playerOnTile.name" />
+            <div class="tile-modal__player-info">
+                <div>Nom: {{ playerOnTile.name }}</div>
+            </div>
+        </div>
+    </section>
+    } @if (!objectOnTile && !playerOnTile) {
+    <section class="tile-modal__section">
+        <em>Aucun objet ni joueur sur cette tuile.</em>
+    </section>
+    }
+
+    <footer class="tile-modal__footer">
+        <button (click)="close()">Fermer</button>
+    </footer>
+</div>
+}

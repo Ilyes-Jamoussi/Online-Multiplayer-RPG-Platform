@@ -1,0 +1,48 @@
+<div class="players-list">
+    <div class="players-header">
+        <h3>Joueurs dans la partie</h3>
+    </div>
+    <div class="players-container">
+        @for (player of orderedPlayers(); track player.id) {
+        <div
+            class="player-row"
+            [class.active]="isActivePlayer(player)"
+            [class.current-user]="isCurrentUser(player)"
+            [class.abandoned]="hasAbandoned(player)"
+        >
+            <div class="player-main-info">
+                <div class="player-name-section">
+                    @if (isAdmin(player)) {
+                    <span class="crown">👑</span>
+                    }
+                    <span class="player-name" [class.strikethrough]="hasAbandoned(player)">
+                        {{ player.name }}
+                    </span>
+                    @if (isCurrentUser(player)) {
+                    <span class="badge-you">VOUS</span>
+                    } @if (isActivePlayer(player)) {
+                    <span class="badge-active">ACTUEL</span>
+                    } @if (hasAbandoned(player)) {
+                    <span class="badge-abandon">ABANDON</span>
+                    }
+                </div>
+                <div class="player-stats">
+                    <span class="combat-wins">⚔️ Victoires : {{ getCombatWins(player) }}</span>
+                </div>
+            </div>
+            <div class="hp-section">
+                <div class="hp-bar">
+                    <div
+                        class="hp-fill"
+                        [style.width.%]="getHealthPercentage(player)"
+                        [class.hp-high]="getHealthPercentage(player) > 70"
+                        [class.hp-medium]="getHealthPercentage(player) > 30 && getHealthPercentage(player) <= 70"
+                        [class.hp-critical]="getHealthPercentage(player) <= 30"
+                    ></div>
+                    <span class="hp-text">{{ player.health }}/{{ player.maxHealth }}</span>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</div>

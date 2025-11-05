@@ -7,15 +7,18 @@
         (input)="onInput($event)"
         (keydown)="onKeyDown($event)"
         [attr.maxlength]="maxLength"
+        [attr.minlength]="minLength"
     ></textarea>
     } @else {
     <input
+        [disabled]="disabled"
         [class.full-width]="fullWidth"
         [placeholder]="placeholder"
         [value]="value"
         (input)="onInput($event)"
         (keydown)="onKeyDown($event)"
         [attr.maxlength]="maxLength"
+        [attr.minlength]="minLength"
     />
     }
 </div>

@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GameEditorToolbarComponent } from './game-editor-toolbar.component';
-import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { ActiveTool, ToolbarItem, ToolType } from '@app/interfaces/game-editor.interface';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { TileKind } from '@common/enums/tile.enum';
+import { GameEditorToolbarComponent } from './game-editor-toolbar.component';
 
 describe('GameEditorToolbarComponent', () => {
     let fixture: ComponentFixture<GameEditorToolbarComponent>;
@@ -20,8 +20,8 @@ describe('GameEditorToolbarComponent', () => {
 
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => activeToolState,
-            set: (t: ActiveTool | null) => {
-                activeToolState = t;
+            set: (activeTool: ActiveTool | null) => {
+                activeToolState = activeTool;
             },
             configurable: true,
         });
@@ -93,9 +93,8 @@ describe('GameEditorToolbarComponent', () => {
         const tool = { type: ToolType.TileBrushTool, leftDrag: false, rightDrag: false } as unknown as ActiveTool;
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => tool,
-            set: () => {
-                /** no-op */
-            },
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty setter for test stub
+            set: () => {},
             configurable: true,
         });
         expect(component.isBrushSelected(brush)).toBeFalse();

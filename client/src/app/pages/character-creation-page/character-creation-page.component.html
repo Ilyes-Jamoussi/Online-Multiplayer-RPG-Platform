@@ -1,31 +1,8 @@
-<app-ui-page-layout [hasHeader]="true" [hasFooter]="true" headerTitle="Création de personnage" [showBackButton]="true">
+<app-ui-page-layout [hasHeader]="true" [hasFooter]="true" headerTitle="Création de personnage" [showBackButton]="true" (backClick)="onBack()">
     <div class="layout">
         <section class="card" aria-label="Sélection d'avatar">
             <div class="card-body">
-                <div class="selected">
-                    @if (showAvatarPlaceholder) {
-                    <div class="selected-empty">👤</div>
-                    } @else {
-                    <img class="selected-img" [src]="selectedAvatarImage" [alt]="selectedAvatarAltText" />
-                    }
-                </div>
-
-                <div class="grid" role="grid" aria-label="Avatars">
-                    @for (avatar of avatars; track avatar) {
-                    <button
-                        type="button"
-                        class="cell"
-                        [class.active]="getIsAvatarSelected(avatar)"
-                        (click)="selectAvatar(avatar)"
-                        role="gridcell"
-                        [attr.aria-label]="'Avatar ' + (avatar + 1)"
-                        [attr.aria-pressed]="getIsAvatarSelected(avatar)"
-                    >
-                        <img class="cell-img" [src]="getAvatarImage(avatar)" [alt]="'Avatar ' + (avatar + 1)" />
-                        <span class="cell-num">{{ avatar + 1 }}</span>
-                    </button>
-                    }
-                </div>
+                <app-avatar-grid />
             </div>
         </section>
 
@@ -35,10 +12,11 @@
                     <h3>Nom *</h3>
                     <app-ui-input
                         type="text"
-                        placeholder="Nom du héros"
-                        [value]="character.name"
+                        placeholder="Nom du personnage"
+                        [value]="playerName"
                         (valueChange)="onNameChange($event)"
                         [maxLength]="characterNameMaxLength"
+                        [minLength]="characterNameMinLength"
                     ></app-ui-input>
                 </div>
 
@@ -46,7 +24,7 @@
                     <h3>Vie</h3>
                     <app-stats-bar
                         label="Nombre de points de vie du personnage"
-                        [value]="character.attributes.life"
+                        [value]="playerHealth"
                         [maxValue]="6"
                         color="#e74c3c"
                     ></app-stats-bar>
@@ -54,7 +32,7 @@
 
                 <div class="field">
                     <h3>Vitesse</h3>
-                    <app-stats-bar label="Rapidité du personnage" [value]="character.attributes.speed" [maxValue]="6" color="#2ecc71"></app-stats-bar>
+                    <app-stats-bar label="Rapidité du personnage" [value]="playerSpeed" [maxValue]="6" color="#2ecc71"></app-stats-bar>
                 </div>
 
                 <div class="field">
@@ -83,25 +61,25 @@
 
                     <div class="dice-rows">
                         <div class="dice-card">
-                            <span>Attaque</span>
+                            <span> Attaque: @if (isAttackD4Selected) { D4 } @else if (isAttackD6Selected) { D6 } @else { (Aucun) } </span>
                             <div class="dice-row">
-                                <button type="button" class="dice-btn" [class.sel]="isAttackD4Selected" (click)="onAttackDiceChange(diceType.D4)">
-                                    <img [src]="getDiceImage(diceType.D4)" [alt]="diceType.D4" />
+                                <button type="button" class="dice-btn" [class.sel]="isAttackD4Selected" (click)="onAttackDiceChange(dice.D4)">
+                                    <img [src]="getDiceImage(dice.D4)" [alt]="dice.D4" />
                                 </button>
-                                <button type="button" class="dice-btn" [class.sel]="isAttackD6Selected" (click)="onAttackDiceChange(diceType.D6)">
-                                    <img [src]="getDiceImage(diceType.D6)" [alt]="diceType.D6" />
+                                <button type="button" class="dice-btn" [class.sel]="isAttackD6Selected" (click)="onAttackDiceChange(dice.D6)">
+                                    <img [src]="getDiceImage(dice.D6)" [alt]="dice.D6" />
                                 </button>
                             </div>
                         </div>
 
                         <div class="dice-card">
-                            <span>Défense</span>
+                            <span> Défense: @if (isDefenseD4Selected) { D4 } @else if (isDefenseD6Selected) { D6 } @else { (Aucun) } </span>
                             <div class="dice-row">
-                                <button type="button" class="dice-btn" [class.sel]="isDefenseD4Selected" (click)="onDefenseDiceChange(diceType.D4)">
-                                    <img [src]="getDiceImage(diceType.D4)" [alt]="diceType.D4" />
+                                <button type="button" class="dice-btn" [class.sel]="isDefenseD4Selected" (click)="onDefenseDiceChange(dice.D4)">
+                                    <img [src]="getDiceImage(dice.D4)" [alt]="dice.D4" />
                                 </button>
-                                <button type="button" class="dice-btn" [class.sel]="isDefenseD6Selected" (click)="onDefenseDiceChange(diceType.D6)">
-                                    <img [src]="getDiceImage(diceType.D6)" [alt]="diceType.D6" />
+                                <button type="button" class="dice-btn" [class.sel]="isDefenseD6Selected" (click)="onDefenseDiceChange(dice.D6)">
+                                    <img [src]="getDiceImage(dice.D6)" [alt]="dice.D6" />
                                 </button>
                             </div>
                         </div>

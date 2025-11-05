@@ -3,10 +3,10 @@ import { CreateGameDto } from '@app/dto/create-game-dto';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { of } from 'rxjs';
 import { GameStoreService } from './game-store.service';
-import { GameMode } from '@common/enums/game-mode.enum';
 
 describe('GameStoreService', () => {
     let service: GameStoreService;
@@ -103,7 +103,7 @@ describe('GameStoreService', () => {
             service.loadGames().subscribe();
 
             const management = service.managementGames();
-            expect(management.every((g) => !g.draft)).toBeTrue();
+            expect(management.every((game) => !game.draft)).toBeTrue();
             expect(management).toEqual([mixed[0]]);
         });
     });
@@ -212,7 +212,7 @@ describe('GameStoreService', () => {
 
             callback(newGame);
 
-            expect(service['_gameDisplays']().some((g) => g.id === newGame.id)).toBeTrue();
+            expect(service['_gameDisplays']().some((game) => game.id === newGame.id)).toBeTrue();
         });
 
         it('should handle game deleted event', () => {
@@ -220,7 +220,7 @@ describe('GameStoreService', () => {
 
             callback({ id: '1' });
 
-            expect(service['_gameDisplays']().find((g) => g.id === '1')).toBeUndefined();
+            expect(service['_gameDisplays']().find((game) => game.id === '1')).toBeUndefined();
         });
 
         it('should handle game visibility toggled event', () => {

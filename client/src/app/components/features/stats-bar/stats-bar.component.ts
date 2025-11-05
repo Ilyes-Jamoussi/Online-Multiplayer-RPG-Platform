@@ -1,9 +1,7 @@
-import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
 @Component({
     selector: 'app-stats-bar',
-    imports: [CommonModule],
     templateUrl: './stats-bar.component.html',
     styleUrl: './stats-bar.component.scss',
 })
@@ -13,9 +11,9 @@ export class StatsBarComponent {
     @Input() maxValue: number = 10;
     @Input() color: string = '#4a90e2';
     @Input() showDice: boolean = false;
-    @Input() diceType: string = '';
+    @Input() dice: string = '';
 
     get segments(): boolean[] {
-        return Array.from({ length: this.maxValue }, (_, i) => i < this.value);
+        return Array.from({ length: this.maxValue }, (_unused, index) => index < this.value);
     }
 }

@@ -7,7 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 
 export interface GameEditorTileDto {
     kind: TileKind;

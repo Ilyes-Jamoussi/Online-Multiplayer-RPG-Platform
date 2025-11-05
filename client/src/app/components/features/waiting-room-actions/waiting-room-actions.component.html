@@ -1,0 +1,28 @@
+<ng-container [ngTemplateOutlet]="isAdmin ? adminActions : playerMessage"></ng-container>
+
+<ng-template #adminActions>
+    <div class="session-control-container">
+        <button
+            class="lock-toggle-button"
+            (click)="toggleLock()"
+            [disabled]="!canToggleLock"
+            [attr.aria-label]="isLocked ? 'Déverrouiller la salle' : 'Verrouiller la salle'"
+        >
+            <i class="material-icons">
+                {{ isLocked ? 'lock' : 'lock_open' }}
+            </i>
+        </button>
+
+        <button class="start-button" [disabled]="!canStartGame" (click)="startGame()">
+            <i class="material-icons">play_arrow</i>
+            Démarrer la partie
+        </button>
+    </div>
+</ng-template>
+
+<ng-template #playerMessage>
+    <div class="waiting-message">
+        <i class="material-icons">hourglass_empty</i>
+        En attente du démarrage de la partie...
+    </div>
+</ng-template>

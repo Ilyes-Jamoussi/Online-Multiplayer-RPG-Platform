@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UiSize } from '@app/types/ui.types';
-import { FaIcons } from '@common/enums/fa-icons.enum';
+import { FaIcons } from '@app/enums/fa-icons.enum';
 import { IconSizes, UiIconComponent } from './icon.component';
 
 describe('UiIconComponent', () => {

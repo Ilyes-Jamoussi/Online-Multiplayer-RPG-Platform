@@ -51,6 +51,11 @@
         box-shadow: 0 8px 22px rgba(0, 102, 255, 0.18);
     }
 
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
     &.selected {
         outline-color: #14b8a6;
         border-color: #14b8a6;

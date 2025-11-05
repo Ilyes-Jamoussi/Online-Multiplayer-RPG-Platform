@@ -1,0 +1,50 @@
+<div class="game-session-grid">
+    <aside class="players-list-container">
+        <app-players-list></app-players-list>
+        <app-in-game-chat></app-in-game-chat>
+    </aside>
+
+    <div class="game-map-container">
+        <app-game-map-header></app-game-map-header>
+        <div class="game-map-content">
+            @if (gameId) {
+            <app-game-map [gameId]="gameId"></app-game-map>
+            } @else {
+            <div class="error-state">
+                <div class="error-icon">⚠️</div>
+                <h3>Aucune carte de jeu disponible</h3>
+                <p>Retourne à la salle d'attente et redémarre le jeu</p>
+            </div>
+            }
+        </div>
+        <app-game-map-footer></app-game-map-footer>
+    </div>
+
+    <aside class="player-info-container">
+        <app-player-info></app-player-info>
+    </aside>
+</div>
+
+@if (isTransitioning) {
+<div class="transition-overlay" (click)="$event.stopPropagation()">
+    <div class="transition-modal">
+        <h2>{{ transitionMessage }}</h2>
+        <div class="loading-spinner">
+            <p>{{ timeRemaining }}</p>
+        </div>
+    </div>
+</div>
+}
+
+<app-admin-badge></app-admin-badge>
+
+<app-combat-overlay></app-combat-overlay>
+
+<app-game-over-overlay></app-game-over-overlay>
+
+<button class="abandon-button-fixed" (click)="onLeaveGame()" title="Abandonner la partie">
+    <span class="btn-icon">🚪</span>
+    <span class="btn-text">Abandonner</span>
+</button>
+
+<app-toast></app-toast>

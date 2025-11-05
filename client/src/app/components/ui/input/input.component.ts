@@ -1,5 +1,6 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { NUMBER_ALLOWED_CHARS_PATTERN, TEXT_ALLOWED_CHARS_PATTERN } from '@app/constants/validation.constants';
+import { InputVariants } from '@app/enums/input-variants.enum';
 
 @Component({
     selector: 'app-ui-input',
@@ -8,14 +9,14 @@ import { NUMBER_ALLOWED_CHARS_PATTERN, TEXT_ALLOWED_CHARS_PATTERN } from '@app/c
     standalone: true,
 })
 export class UiInputComponent {
+    @Input() disabled: boolean = false;
     @Input() placeholder: string = '';
-    @Input() type: 'text' | 'number' | 'textarea' = 'text';
+    @Input() type: InputVariants | string = InputVariants.TEXT;
     @Input() maxLength?: number;
+    @Input() minLength?: number;
     @Input() fullWidth: boolean = false;
     @Input() set value(val: string) {
-        if (val !== undefined) {
-            this._value = val;
-        }
+        this._value = val;
     }
 
     @Output() valueChange = new EventEmitter<string>();
@@ -23,7 +24,7 @@ export class UiInputComponent {
     private _value: string = '';
 
     @HostBinding('class.full-width')
-    get isFullWidth() {
+    get isFullWidth(): boolean {
         return this.fullWidth;
     }
 
@@ -48,11 +49,11 @@ export class UiInputComponent {
 
     onInput(event: Event): void {
         const input = event.target as HTMLInputElement | HTMLTextAreaElement;
-        const SPACE_DOT_LENGTH = 2;
+        const spaceDotLength = 2;
         let value = input.value;
 
         if (value.endsWith('. ')) {
-            value = value.slice(0, -SPACE_DOT_LENGTH) + ' ';
+            value = value.slice(0, -spaceDotLength) + ' ';
             input.value = value;
         }
         value = this.filterInvalidChars(value);
@@ -62,16 +63,16 @@ export class UiInputComponent {
     }
 
     private isValidChar(char: string): boolean {
-        const pattern = this.type === 'number' ? NUMBER_ALLOWED_CHARS_PATTERN : TEXT_ALLOWED_CHARS_PATTERN;
+        const pattern = this.type === InputVariants.NUMBER ? NUMBER_ALLOWED_CHARS_PATTERN : TEXT_ALLOWED_CHARS_PATTERN;
         return pattern.test(char);
     }
 
     private isSpaceInvalid(value: string, hasSelection: boolean, selectionStart: number): boolean {
-        return this.type === 'number' || (!hasSelection && (value.length === 0 || value.endsWith(' '))) || (hasSelection && selectionStart === 0);
+        return (!hasSelection && (value.length === 0 || value.endsWith(' '))) || (hasSelection && selectionStart === 0);
     }
 
     private filterInvalidChars(value: string): string {
-        const pattern = this.type === 'number' ? NUMBER_ALLOWED_CHARS_PATTERN : TEXT_ALLOWED_CHARS_PATTERN;
-        return [...value].filter((c) => pattern.test(c) || c === ' ').join('');
+        const pattern = this.type === InputVariants.NUMBER ? NUMBER_ALLOWED_CHARS_PATTERN : TEXT_ALLOWED_CHARS_PATTERN;
+        return [...value].filter((char) => pattern.test(char) || char === ' ').join('');
     }
 }

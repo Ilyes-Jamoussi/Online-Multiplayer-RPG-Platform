@@ -1,10 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { AVATAR_ANIMATED_PATH, AVATAR_STATIC_PATH, DICE_PATH, OBJECT_PATH, TILE_PATH } from '@app/constants/assets-paths.constants';
-import { Avatar } from '@common/enums/avatar.enum';
-import { DiceType } from '@common/enums/character-creation.enum';
 import { AssetsService } from './assets.service';
+import { Avatar } from '@common/enums/avatar.enum';
+import { Dice } from '@common/enums/dice.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 
 describe('AssetsService', () => {
     let service: AssetsService;
@@ -18,93 +17,78 @@ describe('AssetsService', () => {
         expect(service).toBeTruthy();
     });
 
-    describe('avatar paths using enum values', () => {
-        it('should return static avatar image path using Avatar enum', () => {
-            const avatar = Avatar.Avatar1;
-            const result = service.getAvatarStaticImage(avatar);
-            expect(result).toContain(AVATAR_STATIC_PATH);
-            expect(result).toContain(avatar.toLowerCase());
-            expect(result.endsWith('.png')).toBeTrue();
+    describe('getAvatarStaticImage', () => {
+        it('should return correct path for valid avatar', () => {
+            const result = service.getAvatarStaticImage(Avatar.Avatar1);
+            expect(result).toBe('./assets/images/avatars/static/avatar1.png');
         });
 
-        it('should return animated avatar image path using Avatar enum', () => {
-            const avatar = Avatar.Avatar2;
-            const result = service.getAvatarAnimatedImage(avatar);
-            expect(result).toContain(AVATAR_ANIMATED_PATH);
-            expect(result).toContain(avatar.toLowerCase());
-            expect(result.endsWith('.gif')).toBeTrue();
-        });
-
-        it('should return empty string when avatar is null for static', () => {
+        it('should return empty string for null avatar', () => {
             const result = service.getAvatarStaticImage(null);
             expect(result).toBe('');
         });
+    });
 
-        it('should return empty string when avatar is null for animated', () => {
+    describe('getAvatarAnimatedImage', () => {
+        it('should return correct path for valid avatar', () => {
+            const result = service.getAvatarAnimatedImage(Avatar.Avatar2);
+            expect(result).toBe('./assets/images/avatars/animated/avatar2.gif');
+        });
+
+        it('should return empty string for null avatar', () => {
             const result = service.getAvatarAnimatedImage(null);
             expect(result).toBe('');
         });
     });
 
-    describe('avatar paths by number', () => {
-        it('should return static avatar image path by number using a variable', () => {
-            const avatarNumber = 3;
-            const result = service.getAvatarStaticByNumber(avatarNumber);
-            expect(result).toContain(AVATAR_STATIC_PATH);
-            expect(result).toContain(`avatarS${avatarNumber}.png`);
+    describe('getDiceImage', () => {
+        it('should return correct path for D4', () => {
+            const result = service.getDiceImage(Dice.D4);
+            expect(result).toBe('./assets/images/dice/d4.svg');
         });
 
-        it('should return animated avatar image path by number using a variable', () => {
-            const avatarNumber = 4;
-            const result = service.getAvatarAnimatedByNumber(avatarNumber);
-            expect(result).toContain(AVATAR_ANIMATED_PATH);
-            expect(result).toContain(`avatar${avatarNumber}.gif`);
+        it('should return correct path for D6', () => {
+            const result = service.getDiceImage(Dice.D6);
+            expect(result).toBe('./assets/images/dice/d6.svg');
         });
     });
 
-    describe('dice images', () => {
-        it('should return dice image path using DiceType enum', () => {
-            const dice = DiceType.D4;
-            const result = service.getDiceImage(dice);
-            expect(result).toContain(DICE_PATH);
-            expect(result).toContain(dice.toLowerCase());
-            expect(result.endsWith('.svg')).toBeTrue();
+    describe('getTileImage', () => {
+        it('should return correct path for base tile', () => {
+            const result = service.getTileImage(TileKind.BASE);
+            expect(result).toBe('./assets/images/tiles/base.png');
+        });
+
+        it('should return correct path for closed door', () => {
+            const result = service.getTileImage(TileKind.DOOR, false);
+            expect(result).toBe('./assets/images/tiles/closed-door.png');
+        });
+
+        it('should return correct path for opened door', () => {
+            const result = service.getTileImage(TileKind.DOOR, true);
+            expect(result).toBe('./assets/images/tiles/opened-door.png');
+        });
+
+        it('should return correct path for door with default opened parameter', () => {
+            const result = service.getTileImage(TileKind.DOOR);
+            expect(result).toBe('./assets/images/tiles/closed-door.png');
+        });
+
+        it('should return correct path for water tile', () => {
+            const result = service.getTileImage(TileKind.WATER);
+            expect(result).toBe('./assets/images/tiles/water.png');
         });
     });
 
-    describe('tile images', () => {
-        it('should return tile image path using a variable', () => {
-            const tileKind = TileKind.BASE;
-            const result = service.getTileImage(tileKind);
-            expect(result).toContain(TILE_PATH);
-            expect(result).toContain(tileKind.toLowerCase());
-            expect(result.endsWith('.png')).toBeTrue();
+    describe('getPlaceableImage', () => {
+        it('should return correct path for start placeable', () => {
+            const result = service.getPlaceableImage(PlaceableKind.START);
+            expect(result).toBe('./assets/images/objects/start.png');
         });
 
-        it('should return closed door image path when tile kind is DOOR and opened is false', () => {
-            const tileKind = TileKind.DOOR;
-            const result = service.getTileImage(tileKind, false);
-            expect(result).toContain(TILE_PATH);
-            expect(result).toContain('closed-door');
-            expect(result.endsWith('.png')).toBeTrue();
-        });
-
-        it('should return open door image path when tile kind is DOOR and opened is true', () => {
-            const tileKind = TileKind.DOOR;
-            const result = service.getTileImage(tileKind, true);
-            expect(result).toContain(TILE_PATH);
-            expect(result).toContain('opened-door');
-            expect(result.endsWith('.png')).toBeTrue();
-        });
-    });
-
-    describe('object images', () => {
-        it('should return object image path using a variable', () => {
-            const objectKind = PlaceableKind.START;
-            const result = service.getPlaceableImage(objectKind);
-            expect(result).toContain(OBJECT_PATH);
-            expect(result).toContain(PlaceableKind.START.toLowerCase());
-            expect(result.endsWith('.png')).toBeTrue();
+        it('should return correct path for flag placeable', () => {
+            const result = service.getPlaceableImage(PlaceableKind.FLAG);
+            expect(result).toBe('./assets/images/objects/flag.png');
         });
     });
 });

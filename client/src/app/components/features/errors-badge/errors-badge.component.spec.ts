@@ -1,95 +1,122 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AccesibilityIssue, GameEditorIssue, GameEditorIssuesEnum } from '@app/interfaces/game-editor.interface';
-import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
-import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { ErrorsBadgeComponent } from './errors-badge.component';
+import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
+import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
+import { GameEditorIssuesEnum } from '@app/interfaces/game-editor.interface';
 
-class StubCharacterCreationCheckService {
-    private readonly messages = ['err1', 'err2'];
-    getErrorMessages(): string[] {
-        return [...this.messages];
-    }
-}
-
-class StubGameEditorCheckService {
-    private problems: Record<string, GameEditorIssue | AccesibilityIssue> = {};
-
-    constructor() {
-        for (const k of Object.values(GameEditorIssuesEnum)) {
-            if (k === GameEditorIssuesEnum.Doors || k === GameEditorIssuesEnum.TerrainAccessibility) {
-                this.problems[k as GameEditorIssuesEnum] = { hasIssue: false, tiles: [] } as AccesibilityIssue;
-            } else {
-                this.problems[k as GameEditorIssuesEnum] = { hasIssue: false } as GameEditorIssue;
-            }
-        }
-    }
-
-    setProblem(issue: GameEditorIssuesEnum, message?: string) {
-        if (issue === GameEditorIssuesEnum.Doors || issue === GameEditorIssuesEnum.TerrainAccessibility) {
-            this.problems[issue] = { hasIssue: !!message, message, tiles: [] } as AccesibilityIssue;
-        } else {
-            this.problems[issue] = { hasIssue: !!message, message } as GameEditorIssue;
-        }
-    }
-
-    editorProblems(): Record<string, GameEditorIssue | AccesibilityIssue> {
-        return this.problems;
-    }
-}
+const EXPECTED_GAME_EDITOR_ERROR_COUNT = 3;
 
 describe('ErrorsBadgeComponent', () => {
-    let fixture: ComponentFixture<ErrorsBadgeComponent>;
     let component: ErrorsBadgeComponent;
+    let fixture: ComponentFixture<ErrorsBadgeComponent>;
+    let mockGameEditorCheckService: jasmine.SpyObj<GameEditorCheckService>;
+    let mockCharacterCreationCheckService: jasmine.SpyObj<CharacterCreationCheckService>;
+
+    const mockGameEditorProblems = {
+        [GameEditorIssuesEnum.TerrainCoverage]: { hasIssue: true, message: 'Terrain coverage error' },
+        [GameEditorIssuesEnum.Doors]: { hasIssue: false, message: '', tiles: [] },
+        [GameEditorIssuesEnum.TerrainAccessibility]: { hasIssue: true, message: 'Accessibility error', tiles: [] },
+        [GameEditorIssuesEnum.StartPlacement]: { hasIssue: false, message: '' },
+        [GameEditorIssuesEnum.FlagPlacement]: { hasIssue: true, message: 'Flag placement error' },
+        [GameEditorIssuesEnum.NameValidation]: { hasIssue: false, message: '' },
+        [GameEditorIssuesEnum.DescriptionValidation]: { hasIssue: false, message: '' },
+    };
 
     beforeEach(async () => {
+        const gameEditorCheckServiceSpy = jasmine.createSpyObj('GameEditorCheckService', ['editorProblems']);
+        const characterCreationCheckServiceSpy = jasmine.createSpyObj('CharacterCreationCheckService', ['getErrorMessages']);
+
+        gameEditorCheckServiceSpy.editorProblems.and.returnValue(mockGameEditorProblems);
+        characterCreationCheckServiceSpy.getErrorMessages.and.returnValue(['Character error 1', 'Character error 2']);
+
         await TestBed.configureTestingModule({
             imports: [ErrorsBadgeComponent],
-        });
-    });
+            providers: [
+                { provide: GameEditorCheckService, useValue: gameEditorCheckServiceSpy },
+                { provide: CharacterCreationCheckService, useValue: characterCreationCheckServiceSpy },
+            ],
+        }).compileComponents();
 
-    it('should create and have no errors by default', async () => {
-        await TestBed.compileComponents();
         fixture = TestBed.createComponent(ErrorsBadgeComponent);
         component = fixture.componentInstance;
+        mockGameEditorCheckService = TestBed.inject(GameEditorCheckService) as jasmine.SpyObj<GameEditorCheckService>;
+        mockCharacterCreationCheckService = TestBed.inject(CharacterCreationCheckService) as jasmine.SpyObj<CharacterCreationCheckService>;
+    });
 
+    it('should create', () => {
         expect(component).toBeTruthy();
-        expect(component.errorList).toEqual([]);
-        expect(component.errorCount).toBe(0);
-        expect(component.hasErrors).toBeFalse();
     });
 
-    it('should return character creation errors when validationType is character-creation and service provided', async () => {
-        const charService = new StubCharacterCreationCheckService();
-        TestBed.overrideProvider(CharacterCreationCheckService, { useValue: charService });
-        await TestBed.compileComponents();
-        fixture = TestBed.createComponent(ErrorsBadgeComponent);
-        component = fixture.componentInstance;
+    it('should have default validation type as game-editor', () => {
+        expect(component.validationType).toBe('game-editor');
+    });
+
+    it('should return character creation errors when validation type is character-creation', () => {
         component.validationType = 'character-creation';
-
-        expect(component.errorList).toEqual(charService.getErrorMessages());
-        expect(component.errorCount).toBe(charService.getErrorMessages().length);
-        expect(component.hasErrors).toBeTrue();
+        const errors = component.errorList;
+        expect(errors).toEqual(['Character error 1', 'Character error 2']);
+        expect(mockCharacterCreationCheckService.getErrorMessages).toHaveBeenCalled();
     });
 
-    it('should return game-editor error messages when provided by GameEditorCheckService', async () => {
-        const editorStub = new StubGameEditorCheckService();
-        const issues = Object.values(GameEditorIssuesEnum) as GameEditorIssuesEnum[];
-        editorStub.setProblem(issues[0], 'first-message');
-        editorStub.setProblem(issues[1], 'second-message');
-
-        TestBed.overrideProvider(GameEditorCheckService, { useValue: editorStub });
-        await TestBed.compileComponents();
-        fixture = TestBed.createComponent(ErrorsBadgeComponent);
-        component = fixture.componentInstance;
+    it('should return game editor errors when validation type is game-editor', () => {
         component.validationType = 'game-editor';
+        const errors = component.errorList;
+        expect(errors).toEqual(['Terrain coverage error', 'Accessibility error', 'Flag placement error']);
+        expect(mockGameEditorCheckService.editorProblems).toHaveBeenCalled();
+    });
 
-        const expected = Object.values(GameEditorIssuesEnum)
-            .map((k) => editorStub.editorProblems()[k] as GameEditorIssue | AccesibilityIssue | undefined)
-            .filter((p): p is GameEditorIssue | AccesibilityIssue => !!p && p.hasIssue && !!p.message)
-            .map((p) => p.message as string);
+    it('should return empty array when no game editor errors exist', () => {
+        const noErrorsProblems = {
+            [GameEditorIssuesEnum.TerrainCoverage]: { hasIssue: false, message: '' },
+            [GameEditorIssuesEnum.Doors]: { hasIssue: false, message: '', tiles: [] },
+            [GameEditorIssuesEnum.TerrainAccessibility]: { hasIssue: false, message: '', tiles: [] },
+            [GameEditorIssuesEnum.StartPlacement]: { hasIssue: false, message: '' },
+            [GameEditorIssuesEnum.FlagPlacement]: { hasIssue: false, message: '' },
+            [GameEditorIssuesEnum.NameValidation]: { hasIssue: false, message: '' },
+            [GameEditorIssuesEnum.DescriptionValidation]: { hasIssue: false, message: '' },
+        };
+        mockGameEditorCheckService.editorProblems.and.returnValue(noErrorsProblems);
 
-        expect(component.errorList).toEqual(expected);
-        expect(component.errorCount).toBe(expected.length);
-        expect(component.hasErrors).toBeTrue();
+        component.validationType = 'game-editor';
+        const errors = component.errorList;
+        expect(errors).toEqual([]);
+    });
+
+    it('should return correct error count for character creation', () => {
+        component.validationType = 'character-creation';
+        expect(component.errorCount).toBe(2);
+    });
+
+    it('should return correct error count for game editor', () => {
+        component.validationType = 'game-editor';
+        expect(component.errorCount).toBe(EXPECTED_GAME_EDITOR_ERROR_COUNT);
+    });
+
+    it('should return true for hasErrors when errors exist', () => {
+        component.validationType = 'character-creation';
+        expect(component.hasErrors).toBe(true);
+    });
+
+    it('should return false for hasErrors when no errors exist', () => {
+        mockCharacterCreationCheckService.getErrorMessages.and.returnValue([]);
+        component.validationType = 'character-creation';
+        expect(component.hasErrors).toBe(false);
+    });
+
+    it('should handle problems with hasIssue true but no message', () => {
+        const problemsWithNoMessage = {
+            [GameEditorIssuesEnum.TerrainCoverage]: { hasIssue: true, message: '' },
+            [GameEditorIssuesEnum.Doors]: { hasIssue: false, message: '', tiles: [] },
+            [GameEditorIssuesEnum.TerrainAccessibility]: { hasIssue: false, message: '', tiles: [] },
+            [GameEditorIssuesEnum.StartPlacement]: { hasIssue: false, message: '' },
+            [GameEditorIssuesEnum.FlagPlacement]: { hasIssue: false, message: '' },
+            [GameEditorIssuesEnum.NameValidation]: { hasIssue: false, message: '' },
+            [GameEditorIssuesEnum.DescriptionValidation]: { hasIssue: false, message: '' },
+        };
+        mockGameEditorCheckService.editorProblems.and.returnValue(problemsWithNoMessage);
+
+        component.validationType = 'game-editor';
+        const errors = component.errorList;
+        expect(errors).toEqual([]);
     });
 });

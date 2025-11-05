@@ -6,7 +6,7 @@ import { ToolType } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 
 @Component({
     selector: 'app-editor-tile',
@@ -18,31 +18,32 @@ import { TileKind } from '@common/enums/tile-kind.enum';
 export class GameEditorTileComponent extends TileSizeProbeDirective {
     @Input({ required: true }) tile: GameEditorTileDto;
 
-    readonly tileKinds = TileKind;
-
     constructor(
         private readonly gameEditorInteractionsService: GameEditorInteractionsService,
         private readonly gameEditorCheckService: GameEditorCheckService,
         private readonly assetService: AssetsService,
-        el: ElementRef<HTMLElement>,
+        elementRef: ElementRef<HTMLElement>,
         zone: NgZone,
     ) {
-        super(el, zone);
+        super(elementRef, zone);
     }
 
-    get tileImage() {
+    get tileImage(): string {
         return this.assetService.getTileImage(TileKind[this.tile.kind], this.tile.open);
     }
 
     get isInvalid(): boolean {
         return (
-            this.gameEditorCheckService.editorProblems().terrainAccessibility.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y) ||
-            this.gameEditorCheckService.editorProblems().doors.tiles.some((p) => p.x === this.tile.x && p.y === this.tile.y)
+            this.gameEditorCheckService
+                .editorProblems()
+                .terrainAccessibility.tiles.some((position) => position.x === this.tile.x && position.y === this.tile.y) ||
+            this.gameEditorCheckService.editorProblems().doors.tiles.some((position) => position.x === this.tile.x && position.y === this.tile.y)
         );
     }
 
     get isDropHovered(): boolean {
-        return this.gameEditorInteractionsService.hoveredTiles()?.some((t) => t.x === this.tile.x && t.y === this.tile.y) ?? false;
+        const hoveredTiles = this.gameEditorInteractionsService.hoveredTiles();
+        return hoveredTiles?.some((tile) => tile.x === this.tile.x && tile.y === this.tile.y) ?? false;
     }
 
     get isBrushHovered(): boolean {
@@ -50,11 +51,11 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         return tool?.type === ToolType.TileBrushTool;
     }
 
-    onRightClick(event: MouseEvent) {
+    onRightClick(event: MouseEvent): void {
         event.preventDefault();
     }
 
-    onMouseDown(event: MouseEvent) {
+    onMouseDown(event: MouseEvent): void {
         event.preventDefault();
         if (event.button === 0) {
             this.gameEditorInteractionsService.dragStart(this.tile.x, this.tile.y, 'left');
@@ -69,7 +70,7 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         }
     }
 
-    onMouseUp(event: MouseEvent) {
+    onMouseUp(event: MouseEvent): void {
         event.preventDefault();
         this.gameEditorInteractionsService.dragEnd();
         if (event.button === 2) {
@@ -77,12 +78,12 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         }
     }
 
-    onMouseOver(event: MouseEvent) {
+    onMouseOver(event: MouseEvent): void {
         event.preventDefault();
         this.gameEditorInteractionsService.tilePaint(this.tile.x, this.tile.y);
     }
 
-    onTileDragOver(evt: DragEvent) {
+    onTileDragOver(evt: DragEvent): void {
         if (!this.gameEditorInteractionsService.hasMime(evt)) return;
         if (!evt.dataTransfer) return;
         evt.preventDefault();
@@ -90,11 +91,11 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         this.gameEditorInteractionsService.resolveHoveredTiles(evt, this.tile.x, this.tile.y);
     }
 
-    onTileDragEnter(evt: DragEvent) {
+    onTileDragEnter(evt: DragEvent): void {
         if (!this.gameEditorInteractionsService.hasMime(evt)) return;
     }
 
-    onTileDrop(evt: DragEvent) {
+    onTileDrop(evt: DragEvent): void {
         if (!this.gameEditorInteractionsService.hasMime(evt)) return;
         if (!evt.dataTransfer) return;
         evt.preventDefault();

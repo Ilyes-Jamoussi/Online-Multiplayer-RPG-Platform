@@ -7,7 +7,7 @@ import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { PatchGameEditorDto } from '@app/dto/patch-game-editor-dto';
 import { ToggleVisibilityDto } from '@app/dto/toggle-visibility-dto';
 import { API_PATHS } from '@common/constants/api-paths';
-import { environment } from 'src/environments/environment';
+import { ENVIRONMENT } from 'src/environments/environment';
 import { GameHttpService } from './game-http.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 
@@ -15,7 +15,7 @@ describe('GameHttpService', () => {
     let service: GameHttpService;
     let httpMock: HttpTestingController;
 
-    const baseUrl = environment.serverUrl;
+    const baseUrl = ENVIRONMENT.serverUrl;
     const gamesEndpoint = `${baseUrl}${API_PATHS.games.base}`;
 
     beforeEach(() => {
@@ -95,7 +95,7 @@ describe('GameHttpService', () => {
                 expect(editor).toEqual(mockEditor);
             });
 
-            const req = httpMock.expectOne(`${gamesEndpoint}/${id}/editor/`);
+            const req = httpMock.expectOne(`${gamesEndpoint}/${id}/editor`);
             expect(req.request.method).toBe('GET');
             req.flush(mockEditor);
         });

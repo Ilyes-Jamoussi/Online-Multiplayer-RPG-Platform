@@ -3,14 +3,22 @@
     "importMappings": {
         "GameMode": "@common/enums/game-mode.enum",
         "MapSize": "@common/enums/map-size.enum",
-        "TileKind": "@common/enums/tile-kind.enum",
-        "PlaceableKind": "@common/enums/placeable-kind.enum"
+        "TileKind": "@common/enums/tile.enum",
+        "PlaceableKind": "@common/enums/placeable-kind.enum",
+        "Avatar": "@common/enums/avatar.enum",
+        "Dice": "@common/enums/dice.enum",
+        "Orientation": "@common/enums/orientation.enum",
+        "CombatPosture": "@common/enums/combat-posture.enum"
     },
     "typeMappings": {
         "GameMode": "GameMode",
         "MapSize": "MapSize",
         "TileKind": "TileKind",
-        "PlaceableKind": "PlaceableKind"
+        "PlaceableKind": "PlaceableKind",
+        "Avatar": "Avatar",
+        "Dice": "Dice",
+        "Orientation": "Orientation",
+        "CombatPosture": "CombatPosture"
     },
     "templateDir": "openapi-templates/ts-angular"
 }

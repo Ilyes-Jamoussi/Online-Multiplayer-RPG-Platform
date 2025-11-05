@@ -1,17 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GameEditorObjectComponent } from './game-editor-object.component';
-import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { PlaceableLabel } from '@app/enums/placeable-label.enum';
+import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ActiveTool, ToolType } from '@app/interfaces/game-editor.interface';
-import { PlaceableKind, PlaceableLabel, PlaceableMime } from '@common/enums/placeable-kind.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { AssetsService } from '@app/services/assets/assets.service';
+import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { GameEditorObjectComponent } from './game-editor-object.component';
 
-const NOOP = (): void => {
-    /** no-op */
-};
+// eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stubs
+const NOOP = (): void => {};
 
 function createDataTransferStub(types: readonly string[], data: Readonly<Record<string, string>>): DataTransfer {
-    const dt: DataTransfer = {
+    const dataTransfer: DataTransfer = {
         dropEffect: 'none',
         effectAllowed: 'none',
         files: {} as FileList,
@@ -23,7 +24,7 @@ function createDataTransferStub(types: readonly string[], data: Readonly<Record<
         setDragImage: NOOP,
     } as unknown as DataTransfer;
 
-    return dt;
+    return dataTransfer;
 }
 
 type DragEvtInit = Partial<
@@ -41,7 +42,7 @@ function makeDragEvent(init?: DragEvtInit): DragEvent {
         dataTransfer: init?.dataTransfer ?? null,
         offsetX: init?.offsetX ?? 0,
         offsetY: init?.offsetY ?? 0,
-        button: (init?.button ?? 0) as number,
+        button: init?.button ?? 0,
     } as unknown as DragEvent;
     return evt;
 }
@@ -56,7 +57,7 @@ function makeMouseEvent(init?: MouseEvtInit): MouseEvent {
     const evt = {
         preventDefault: init?.preventDefault ?? NOOP,
         stopPropagation: init?.stopPropagation ?? NOOP,
-        button: (init?.button ?? 0) as number,
+        button: init?.button ?? 0,
     } as unknown as MouseEvent;
     return evt;
 }
@@ -69,7 +70,7 @@ describe('GameEditorObjectComponent', () => {
     let assetsSpy: jasmine.SpyObj<AssetsService>;
 
     let activeToolState: ActiveTool | null = null;
-    const OBJ: GameEditorPlaceableDto = {
+    const mockObject: GameEditorPlaceableDto = {
         id: 'obj-1',
 
         kind: PlaceableKind.BOAT,
@@ -91,8 +92,8 @@ describe('GameEditorObjectComponent', () => {
 
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => activeToolState,
-            set: (t: ActiveTool | null) => {
-                activeToolState = t;
+            set: (activeTool: ActiveTool | null) => {
+                activeToolState = activeTool;
             },
             configurable: true,
         });
@@ -108,7 +109,7 @@ describe('GameEditorObjectComponent', () => {
         fixture = TestBed.createComponent(GameEditorObjectComponent);
         component = fixture.componentInstance;
 
-        component.object = { ...OBJ };
+        component.object = { ...mockObject };
         component.tileSize = 64;
 
         interactionsSpy.getFootprintOf.and.returnValue(2);
@@ -139,13 +140,13 @@ describe('GameEditorObjectComponent', () => {
     it('should set grid-column based on footprint and x', () => {
         fixture.detectChanges();
         const host = fixture.nativeElement as HTMLElement;
-        expect((host.style as CSSStyleDeclaration).gridColumn).toBe('4 / span 2');
+        expect(host.style.gridColumn).toBe('4 / span 2');
     });
 
     it('should set grid-row based on footprint and y', () => {
         fixture.detectChanges();
         const host = fixture.nativeElement as HTMLElement;
-        expect((host.style as CSSStyleDeclaration).gridRow).toBe('5 / span 2');
+        expect(host.style.gridRow).toBe('5 / span 2');
     });
 
     it('should reflect CSS variable --tile-px from tileSize input', () => {
@@ -170,9 +171,9 @@ describe('GameEditorObjectComponent', () => {
     });
 
     it('onDragStart should delegate to interactions and set isDragging when dataTransfer exists', () => {
-        const dt = createDataTransferStub([PlaceableMime.BOAT], {});
+        const dataTransfer = createDataTransferStub([PlaceableMime.BOAT], {});
         const evt = makeDragEvent({
-            dataTransfer: dt,
+            dataTransfer,
             preventDefault: NOOP,
         });
 

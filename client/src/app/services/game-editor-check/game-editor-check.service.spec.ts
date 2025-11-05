@@ -1,44 +1,44 @@
-/* eslint-disable  @typescript-eslint/naming-convention */
-import { TestBed } from '@angular/core/testing';
+/* eslint-disable @typescript-eslint/naming-convention -- Test file uses mock objects with underscores */
 import { signal } from '@angular/core';
-import { GameEditorCheckService } from './game-editor-check.service';
-import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
+import { TestBed } from '@angular/core/testing';
+import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { Inventory } from '@app/interfaces/game-editor.interface';
+import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
-import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
+import { GameEditorCheckService } from './game-editor-check.service';
 
 export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
     private _name = 'Test Game';
     private _description = 'Test Description';
     private _tileSizePx = 32;
 
-    private tilesSig = signal<GameEditorTileDto[]>([]);
-    private objectsSig = signal<GameEditorPlaceableDto[]>([]);
-    private sizeSig = signal<MapSize>(MapSize.MEDIUM);
-    private modeSig = signal<GameMode>(GameMode.CLASSIC);
-    private inventorySig = signal<Inventory>({} as Inventory);
+    private readonly tilesSig = signal<GameEditorTileDto[]>([]);
+    private readonly objectsSig = signal<GameEditorPlaceableDto[]>([]);
+    private readonly sizeSig = signal<MapSize>(MapSize.MEDIUM);
+    private readonly modeSig = signal<GameMode>(GameMode.CLASSIC);
+    private readonly inventorySig = signal<Inventory>({} as Inventory);
 
     get name() {
         return this._name;
     }
-    set name(v: string) {
-        this._name = v;
+    set name(value: string) {
+        this._name = value;
     }
     get description() {
         return this._description;
     }
-    set description(v: string) {
-        this._description = v;
+    set description(value: string) {
+        this._description = value;
     }
     get tileSizePx() {
         return this._tileSizePx;
     }
-    set tileSizePx(v: number) {
-        this._tileSizePx = v;
+    set tileSizePx(value: number) {
+        this._tileSizePx = value;
     }
 
     get tiles() {
@@ -57,27 +57,27 @@ export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
         return this.inventorySig.asReadonly();
     }
 
-    setTiles(v: GameEditorTileDto[]) {
-        this.tilesSig.set(v);
+    setTiles(value: GameEditorTileDto[]) {
+        this.tilesSig.set(value);
     }
-    setObjects(v: GameEditorPlaceableDto[]) {
-        this.objectsSig.set(v);
+    setObjects(value: GameEditorPlaceableDto[]) {
+        this.objectsSig.set(value);
     }
-    setSize(v: MapSize) {
-        this.sizeSig.set(v);
+    setSize(value: MapSize) {
+        this.sizeSig.set(value);
     }
-    setMode(v: GameMode) {
-        this.modeSig.set(v);
+    setMode(value: GameMode) {
+        this.modeSig.set(value);
     }
-    setInventory(v: Inventory) {
-        this.inventorySig.set(v);
+    setInventory(value: Inventory) {
+        this.inventorySig.set(value);
     }
 
     getTileAt(x: number, y: number) {
-        const n = this.sizeSig();
-        const arr = this.tilesSig();
-        if (x < 0 || y < 0 || x >= n || y >= n) return undefined;
-        return arr[y * n + x];
+        const size = this.sizeSig();
+        const tilesArray = this.tilesSig();
+        if (x < 0 || y < 0 || x >= size || y >= size) return undefined;
+        return tilesArray[y * size + x];
     }
 }
 
@@ -178,7 +178,7 @@ describe('GameEditorCheckService', () => {
         });
 
         it('should detect missing terrain coverage', () => {
-            const variability = 3; // 3 = mod base pour variabilité
+            const variability = 3;
             const tiles: GameEditorTileDto[] = [];
             for (let y = 0; y < SIZE; y++) {
                 for (let x = 0; x < SIZE; x++) {
@@ -287,11 +287,11 @@ describe('GameEditorCheckService', () => {
         });
 
         it('should detect terrain accessibility issues (cross wall)', () => {
-            const m = mid(SIZE);
+            const middle = mid(SIZE);
             const tiles: GameEditorTileDto[] = [];
             for (let y = 0; y < SIZE; y++) {
                 for (let x = 0; x < SIZE; x++) {
-                    const isCrossWall = (x === m && y !== m) || (y === m && x !== m);
+                    const isCrossWall = (x === middle && y !== middle) || (y === middle && x !== middle);
                     tiles.push({ x, y, kind: isCrossWall ? TileKind.WALL : TileKind.BASE });
                 }
             }
@@ -315,11 +315,11 @@ describe('GameEditorCheckService', () => {
         });
 
         it('should be able to detect multiple terrain accessibility issues', () => {
-            const m = mid(SIZE);
+            const middle = mid(SIZE);
             const tiles: GameEditorTileDto[] = [];
             for (let y = 0; y < SIZE; y++) {
                 for (let x = 0; x < SIZE; x++) {
-                    const isCrossWall = (x === m && y !== m) || (y === m && x !== m);
+                    const isCrossWall = (x === middle && y !== middle) || (y === middle && x !== middle);
                     tiles.push({ x, y, kind: isCrossWall ? TileKind.WALL : TileKind.BASE });
                 }
             }
@@ -338,6 +338,24 @@ describe('GameEditorCheckService', () => {
             store.setSize(SIZE);
 
             expect(service.editorProblems().terrainAccessibility.hasIssue).toBeTrue();
+        });
+
+        it('should handle undefined shift result in BFS queue', () => {
+            const originalShift = Array.prototype.shift;
+            let callCount = 0;
+            spyOn(Array.prototype, 'shift').and.callFake(function (this: unknown[]) {
+                callCount++;
+                if (callCount === 1) {
+                    return undefined;
+                }
+                return originalShift.call(this);
+            });
+
+            const tiles = makeBaseTiles(SIZE);
+            store.setTiles(tiles);
+            store.setSize(SIZE);
+
+            expect(service.editorProblems().terrainAccessibility.hasIssue).toBeFalse();
         });
     });
 });

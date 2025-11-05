@@ -1,9 +1,12 @@
 import { NgStyle } from '@angular/common';
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { PLACEABLE_DISABLED } from '@app/constants/placeable.constants';
+import { PlaceableLabel } from '@app/enums/placeable-label.enum';
+import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { PlaceableFootprint, PlaceableKind, PlaceableLabel, PlaceableMime } from '@common/enums/placeable-kind.enum';
+import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 
 @Component({
     selector: 'app-editor-inventory',
@@ -29,18 +32,18 @@ export class GameEditorInventoryComponent {
         return this.gameEditorStoreService.inventory();
     }
 
-    get tileSizePx() {
+    get tileSizePx(): number {
         return this.gameEditorStoreService.tileSizePx;
     }
 
     @HostBinding('style.--tile-px')
-    get tileVar() {
+    get tileVar(): number {
         return this.gameEditorStoreService.tileSizePx;
     }
 
     onDragStart(evt: DragEvent, kind: PlaceableKind, disabled: boolean): void {
-        if (disabled || !evt.dataTransfer) {
-            evt?.preventDefault();
+        if (disabled || this.isDisabled(kind) || !evt.dataTransfer) {
+            evt.preventDefault();
             return;
         }
 
@@ -57,28 +60,32 @@ export class GameEditorInventoryComponent {
         );
     }
 
-    onDragEnd() {
+    onDragEnd(): void {
         this.gameEditorInteractionsService.revertToPreviousTool();
     }
 
-    onSlotDragOver(evt: DragEvent, kind: PlaceableKind) {
+    isDisabled(kind: PlaceableKind): boolean {
+        return PLACEABLE_DISABLED[kind];
+    }
+
+    onSlotDragOver(evt: DragEvent, kind: PlaceableKind): void {
         evt.preventDefault();
         evt.stopPropagation();
         if (!evt.dataTransfer) return;
         if (!this.slotAccepts(evt, kind)) return;
         evt.dataTransfer.dropEffect = 'move';
     }
-    onSlotDragEnter(evt: DragEvent, kind: PlaceableKind) {
+    onSlotDragEnter(evt: DragEvent, kind: PlaceableKind): void {
         evt.preventDefault();
         evt.stopPropagation();
         if (!this.slotAccepts(evt, kind)) return;
         this.dragOver = kind;
     }
-    onSlotDragLeave() {
+    onSlotDragLeave(): void {
         this.dragOver = '';
     }
 
-    onSlotDrop(evt: DragEvent, kind: PlaceableKind) {
+    onSlotDrop(evt: DragEvent, kind: PlaceableKind): void {
         evt.preventDefault();
         evt.stopPropagation();
         if (!evt.dataTransfer) return;
@@ -92,7 +99,7 @@ export class GameEditorInventoryComponent {
     }
 
     private slotAccepts(evt: DragEvent, kind: PlaceableKind): boolean {
-        const t = Array.from(evt.dataTransfer?.types ?? []);
-        return t.includes(this.dndMime[kind]);
+        const transferTypes = Array.from(evt.dataTransfer?.types ?? []);
+        return transferTypes.includes(this.dndMime[kind]);
     }
 }

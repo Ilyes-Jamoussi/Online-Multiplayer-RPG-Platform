@@ -1,4 +1,6 @@
-import { GameStoreModule } from '@app/game-store/module/game-store.module';
+import { GameStoreModule } from '@app/modules/game-store/game-store.module';
+import { SessionModule } from '@app/modules/session/session.module';
+
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -9,11 +11,13 @@ import { MongooseModule } from '@nestjs/mongoose';
         MongooseModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
+            // eslint-disable-next-line @typescript-eslint/require-await -- NestJS useFactory requires async signature
             useFactory: async (config: ConfigService) => ({
                 uri: config.get<string>('DATABASE_CONNECTION_STRING'),
             }),
         }),
         GameStoreModule,
+        SessionModule,
     ],
     providers: [Logger],
 })

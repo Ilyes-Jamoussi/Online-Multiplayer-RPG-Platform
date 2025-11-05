@@ -1,0 +1,13 @@
+<div class="avatar-animated">
+    @if (selectedAvatar && animatedAvatar) {
+    <img [src]="animatedAvatar" [alt]="'Avatar sélectionné ' + selectedAvatar" />
+    } @else {
+    <div class="selected-empty">👤</div>
+    }
+</div>
+
+<div class="avatar-grid">
+    @for (assignment of assignments; track $index) {
+    <app-avatar-card [assignment]="assignment" />
+    }
+</div>

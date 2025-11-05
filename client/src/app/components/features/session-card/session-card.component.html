@@ -1,0 +1,5 @@
+<div class="session-card">
+    <h3 class="session-title">Partie {{ session.id }}</h3>
+    <p class="session-players">{{ session.currentPlayers }} / {{ session.maxPlayers }} joueurs</p>
+    <app-ui-button [fullWidth]="true" (buttonClick)="onJoinClick()"> Rejoindre </app-ui-button>
+</div>

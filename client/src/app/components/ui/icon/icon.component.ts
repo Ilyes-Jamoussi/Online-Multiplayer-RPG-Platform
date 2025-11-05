@@ -1,7 +1,7 @@
 import { NgClass } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { UiBaseComponent } from '@app/directives/ui-base/ui-base.component';
-import { FaIcons } from '@common/enums/fa-icons.enum';
+import { FaIcons } from '@app/enums/fa-icons.enum';
 import { FaIconLibrary, FontAwesomeModule, SizeProp } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 

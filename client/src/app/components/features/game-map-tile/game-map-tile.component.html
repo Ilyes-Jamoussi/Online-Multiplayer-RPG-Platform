@@ -1,0 +1,6 @@
+<div class="map-tile" [class]="cssClass" (click)="onTileClick($event)" role="button" tabindex="0">
+    <img [src]="imageSrc" [alt]="tile.kind" class="tile-image" draggable="false" />
+    @if (playerOnTile) {
+    <span class="player-tooltip">{{ playerOnTile.name }}</span>
+    }
+</div>

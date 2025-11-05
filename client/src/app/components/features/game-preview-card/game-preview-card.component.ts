@@ -1,29 +1,28 @@
-import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiIconComponent } from '@app/components/ui/icon/icon.component';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { MAP_SIZE_LABELS } from '@common/constants/game.constants';
-import { environment } from '@src/environments/environment';
+import { ENVIRONMENT } from '@src/environments/environment';
 
 @Component({
     selector: 'app-game-preview-card',
     templateUrl: './game-preview-card.component.html',
     styleUrls: ['./game-preview-card.component.scss'],
     standalone: true,
-    imports: [CommonModule, UiIconComponent, UiButtonComponent],
+    imports: [UiIconComponent, UiButtonComponent],
 })
 export class GamePreviewCardComponent {
-    @Input() game!: GamePreviewDto;
+    @Input({ required: true }) game: GamePreviewDto;
     @Input() isAdmin = false;
 
-    @Output() startGame = new EventEmitter<string>();
+    @Output() startGame = new EventEmitter<GamePreviewDto>();
     @Output() editGame = new EventEmitter<string>();
     @Output() deleteGame = new EventEmitter<string>();
     @Output() toggleVisibility = new EventEmitter<string>();
 
     get imageUrl(): string {
-        const baseUrl = environment.socketUrl;
+        const baseUrl = ENVIRONMENT.socketUrl;
         return `${baseUrl}${this.game.gridPreviewUrl}`;
     }
 
@@ -32,7 +31,7 @@ export class GamePreviewCardComponent {
     }
 
     onStartGame(): void {
-        this.startGame.emit(this.game.id);
+        this.startGame.emit(this.game);
     }
 
     onEditGame(): void {

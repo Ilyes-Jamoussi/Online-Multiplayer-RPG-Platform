@@ -1,0 +1,33 @@
+<div class="game-map-wrapper">
+    @if (tiles.length > 0) {
+    <div class="map-container">
+        <div class="map-grid" [ngStyle]="gridStyle">
+            @for (tile of tiles; track tile.x + '-' + tile.y) {
+            <app-game-map-tile [tile]="tile" [imageSrc]="getTileImage(tile.kind, tile.open)" [cssClass]="getTileClass(tile.x, tile.y)" />
+            }
+        </div>
+
+        <app-game-map-tile-modal />
+
+        <div class="objects-overlay" [ngStyle]="gridStyle">
+            @for (obj of visibleObjects; track obj.id) { @if (obj.placed) {
+            <div class="map-object" [ngStyle]="getObjectStyle(obj)">
+                <img [src]="getPlaceableImage(obj.kind)" [alt]="obj.kind" class="object-image" draggable="false" />
+            </div>
+            } }
+        </div>
+
+        <div class="players-overlay" [ngStyle]="gridStyle">
+            @for (player of players; track player.id) {
+            <div class="map-player" [class.current-user]="isCurrentUser(player)" [ngStyle]="getPlayerStyle(player)">
+                <img [src]="getPlayerAvatarImage(player.id)" [alt]="player.name" class="player-avatar" draggable="false" />
+            </div>
+            }
+        </div>
+    </div>
+    } @else {
+    <div class="empty">
+        <p>Aucune donnée de carte disponible</p>
+    </div>
+    }
+</div>

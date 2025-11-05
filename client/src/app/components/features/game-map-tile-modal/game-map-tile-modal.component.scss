@@ -1,0 +1,81 @@
+.tile-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+}
+
+.tile-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    color: #111827;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    width: min(520px, 92vw);
+    max-height: 85vh;
+    overflow: auto;
+    z-index: 1001;
+}
+
+.tile-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.tile-modal__close {
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: #374151;
+}
+
+.tile-modal__section {
+    padding: 1rem 1.25rem;
+}
+
+.tile-modal__object,
+.tile-modal__player {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.tile-modal__object img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+}
+
+.tile-modal__player .avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.tile-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.75rem 1.25rem 1.25rem;
+}
+
+.tile-modal__footer button {
+    background: #111827;
+    color: #fff;
+    border: 1px solid #111827;
+    border-radius: 8px;
+    padding: 0.5rem 0.85rem;
+    cursor: pointer;
+}
+
+.tile-modal__footer button:hover {
+    background: #0b1220;
+}

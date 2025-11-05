@@ -1,19 +1,18 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GameEditorTileComponent } from './game-editor-tile.component';
-import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
-import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
-import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { ActiveTool, GameEditorIssues, ToolType, Vector2 } from '@app/interfaces/game-editor.interface';
-import { TileKind } from '@common/enums/tile-kind.enum';
-import { signal } from '@angular/core';
+import { AssetsService } from '@app/services/assets/assets.service';
+import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
+import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { TileKind } from '@common/enums/tile.enum';
+import { GameEditorTileComponent } from './game-editor-tile.component';
 
-const NOOP = (): void => {
-    /** no-op */
-};
+// eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stubs
+const NOOP = (): void => {};
 
 function createDataTransferStub(types: readonly string[]): DataTransfer {
-    const dt: DataTransfer = {
+    const dataTransfer: DataTransfer = {
         dropEffect: 'none',
         effectAllowed: 'none',
         files: {} as FileList,
@@ -24,7 +23,7 @@ function createDataTransferStub(types: readonly string[]): DataTransfer {
         clearData: NOOP,
         setDragImage: NOOP,
     } as DataTransfer;
-    return dt;
+    return dataTransfer;
 }
 
 type DragEvtInit = Partial<
@@ -57,7 +56,7 @@ function makeMouseEvent(init?: MouseEvtInit): MouseEvent {
     const evt = {
         preventDefault: init?.preventDefault ?? NOOP,
         stopPropagation: init?.stopPropagation ?? NOOP,
-        button: (init?.button ?? 0) as number,
+        button: init?.button ?? 0,
     } as unknown as MouseEvent;
     return evt;
 }
@@ -111,8 +110,8 @@ describe('GameEditorTileComponent', () => {
 
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => activeToolState,
-            set: (t: ActiveTool | null) => {
-                activeToolState = t;
+            set: (activeTool: ActiveTool | null) => {
+                activeToolState = activeTool;
             },
             configurable: true,
         });
@@ -160,16 +159,16 @@ describe('GameEditorTileComponent', () => {
     });
 
     it('hasProblem should be true when tile is in terrainAccessibility tiles', () => {
-        const probs = checkSpy.editorProblems();
-        probs.terrainAccessibility.tiles.push({ x: tile.x, y: tile.y });
+        const problems = checkSpy.editorProblems();
+        problems.terrainAccessibility.tiles.push({ x: tile.x, y: tile.y });
         const res = component.isInvalid;
         expect(res).toBeTrue();
     });
 
     it('hasProblem should be true when tile is in doors tiles', () => {
-        const probs = checkSpy.editorProblems();
-        probs.terrainAccessibility.tiles = [];
-        probs.doors.tiles.push({ x: tile.x, y: tile.y });
+        const problems = checkSpy.editorProblems();
+        problems.terrainAccessibility.tiles = [];
+        problems.doors.tiles.push({ x: tile.x, y: tile.y });
         const res = component.isInvalid;
         expect(res).toBeTrue();
     });
@@ -242,9 +241,9 @@ describe('GameEditorTileComponent', () => {
 
     it('onTileDragOver should ignore when hasMime is false', () => {
         interactionsSpy.hasMime.and.returnValue(false);
-        const dt = createDataTransferStub([]);
+        const dataTransfer = createDataTransferStub([]);
         let prevented = false;
-        const evt = makeDragEvent({ dataTransfer: dt, preventDefault: () => (prevented = true) });
+        const evt = makeDragEvent({ dataTransfer, preventDefault: () => (prevented = true) });
         component.onTileDragOver(evt);
         expect(prevented).toBeFalse();
         expect(interactionsSpy.resolveHoveredTiles).not.toHaveBeenCalled();
@@ -261,12 +260,12 @@ describe('GameEditorTileComponent', () => {
 
     it('onTileDragOver should set dropEffect move and resolveHoveredTiles when accepted', () => {
         interactionsSpy.hasMime.and.returnValue(true);
-        const dt = createDataTransferStub([]);
+        const dataTransfer = createDataTransferStub([]);
         let prevented = false;
-        const evt = makeDragEvent({ dataTransfer: dt, preventDefault: () => (prevented = true) });
+        const evt = makeDragEvent({ dataTransfer, preventDefault: () => (prevented = true) });
         component.onTileDragOver(evt);
         expect(prevented).toBeTrue();
-        expect(dt.dropEffect).toBe('move');
+        expect(dataTransfer.dropEffect).toBe('move');
         expect(interactionsSpy.resolveHoveredTiles).toHaveBeenCalled();
     });
 

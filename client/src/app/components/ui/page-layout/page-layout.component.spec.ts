@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UiPageLayoutComponent } from './page-layout.component';
-import { ROUTES } from '@app/constants/routes.constants';
+import { ROUTES } from '@app/enums/routes.enum';
 
 describe('UiPageLayoutComponent', () => {
     let component: UiPageLayoutComponent;
@@ -40,9 +40,9 @@ describe('UiPageLayoutComponent', () => {
     it('should emit menuItemClick with ROUTES value when onMenuItemClick is called', () => {
         spyOn(component.menuItemClick, 'emit');
 
-        component.onMenuItemClick(ROUTES.home);
+        component.onMenuItemClick(ROUTES.HomePage);
 
-        expect(component.menuItemClick.emit).toHaveBeenCalledWith(ROUTES.home);
+        expect(component.menuItemClick.emit).toHaveBeenCalledWith(ROUTES.HomePage);
     });
 
     it('classes getter should include uiPageLayout and reflect hasSidebar input', () => {

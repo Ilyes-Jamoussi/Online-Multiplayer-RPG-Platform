@@ -1,4 +1,4 @@
-export default (tsParser, tsPlugin) => [
+export default (tsParser, tsPlugin, eslintComments) => [
     {
         files: ['**/*.js', '**/*.ts'],
         languageOptions: {
@@ -52,6 +52,7 @@ export default (tsParser, tsPlugin) => [
             'radix': 'error',
             'use-isnan': 'error',
             'guard-for-in': 'error',
+            'no-inline-comments': 'warn',
         },
     },
     {
@@ -68,6 +69,18 @@ export default (tsParser, tsPlugin) => [
             '@typescript-eslint/no-unused-vars': 'error',
             '@typescript-eslint/dot-notation': 'error',
             '@typescript-eslint/no-unused-expressions': 'error',
+            
+            // Expressions booléennes
+            'no-nested-ternary': 'warn',
+            // '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'warn', // Disabled: requires strictNullChecks
+            // '@typescript-eslint/no-unnecessary-condition': 'warn', // Disabled: too many false positives
+            
+            // Code asynchrone
+            '@typescript-eslint/no-floating-promises': 'warn',
+            '@typescript-eslint/require-await': 'warn',
+            
+            // Messages d'erreur
+            '@typescript-eslint/only-throw-error': 'warn',
             '@typescript-eslint/no-magic-numbers': [
                 'error',
                 {
@@ -80,6 +93,7 @@ export default (tsParser, tsPlugin) => [
             ],
             '@typescript-eslint/array-type': ['error', { default: 'array' }],
             '@typescript-eslint/explicit-member-accessibility': ['error', { accessibility: 'no-public' }],
+            '@typescript-eslint/prefer-readonly': 'warn',
             '@typescript-eslint/no-explicit-any': ['error', { fixToUnknown: true }],
             '@typescript-eslint/no-inferrable-types': [
                 'error',
@@ -118,7 +132,17 @@ export default (tsParser, tsPlugin) => [
                     "format": ["PascalCase"],
                     "selector": "enumMember"
                 }
-            ]
+            ],
+            // '@typescript-eslint/explicit-function-return-type': 'warn',
+            '@typescript-eslint/no-unnecessary-type-assertion': 'warn'
+        },
+    },
+    {
+        files: ['**/*.js', '**/*.ts'],
+        plugins: { 'eslint-comments': eslintComments },
+        rules: {
+            'eslint-comments/no-unlimited-disable': 'warn',
+            'eslint-comments/require-description': 'warn',
         },
     },
     {

@@ -1,0 +1,193 @@
+@if (combatData && combatData.userRole !== 'spectator') {
+<div class="combat-overlay" [class.victory-mode]="isVictoryNotificationVisible">
+    <div class="combat-modal">
+        @if (!isVictoryNotificationVisible) {
+        <app-combat-timer></app-combat-timer>
+        } @if (victoryData && isVictoryNotificationVisible) {
+        <div
+            class="victory-screen"
+            [class.victory]="isVictory"
+            [class.defeat]="!isVictory && victoryData.winnerId !== null"
+            (click)="closeVictoryOverlay()"
+        >
+            <div class="victory-icon">@if (victoryData.winnerId === null) { ⚔️ } @else if (isVictory) { 🏆 } @else { 💀 }</div>
+            <h1 class="victory-title">{{ victoryMessage }}</h1>
+            <p class="victory-subtitle">{{ victorySubtitle }}</p>
+            <button class="close-victory-btn" (click)="$event.stopPropagation(); closeVictoryOverlay()">✕</button>
+        </div>
+        } @else {
+        <div class="combat-header">
+            <h2>Combat en cours</h2>
+        </div>
+        }
+
+        <div class="combat-arena">
+            <!-- Player A -->
+            <div class="fighter player-a" [class.is-me]="combatData.userRole === 'attacker'">
+                <div class="fighter-container">
+                    @if (playerADamage) {
+                    <div class="damage-display">
+                        @if (playerADamage.damage > 0) {
+                        <span class="damage-value">-{{ playerADamage.damage }}</span>
+                        }
+                        <div class="combat-details" [class.no-damage]="playerADamage.damage === 0">
+                            <div class="stat-line attack-line">
+                                <span class="stat-icon">⚔️</span>
+                                <span class="stat-value">{{ playerADamage.totalAttack }}</span>
+                                <div class="dice-info">
+                                    <img [src]="getDiceImage(playerADamage.attackDice)" class="dice-image" />
+                                    <span class="dice-roll">{{ playerADamage.attackRoll }}</span>
+                                </div>
+                            </div>
+                            <div class="stat-line defense-line">
+                                <span class="stat-icon">🛡️</span>
+                                <span class="stat-value">{{ playerADamage.totalDefense }}</span>
+                                <div class="dice-info">
+                                    <img [src]="getDiceImage(playerADamage.defenseDice)" class="dice-image" />
+                                    <span class="dice-roll">{{ playerADamage.defenseRoll }}</span>
+                                </div>
+                            </div>
+                            @if (playerADamage.tileEffect !== 0) {
+                            <div class="stat-line tile-effect-line">
+                                <span class="stat-icon">❄️</span>
+                                <span class="stat-label">Glace</span>
+                                <span class="stat-value tile-effect">{{ playerADamage.tileEffect }}</span>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                    }
+                    <div class="fighter-name">
+                        {{ playerAName }}
+                        @if (playerAPosture) {
+                        <span
+                            class="posture-badge"
+                            [class.offensive]="playerAPosture === 'offensive'"
+                            [class.defensive]="playerAPosture === 'defensive'"
+                        >
+                            {{ playerAPosture === 'offensive' ? '⚔️' : '🛡️' }}
+                        </span>
+                        } @if (playerATileEffectLabel) {
+                        <span class="tile-effect-badge"> ❄️ {{ playerATileEffectLabel }} </span>
+                        }
+                    </div>
+                    <div class="fighter-avatar">
+                        <img [src]="playerAAvatar" [alt]="playerAName" />
+                    </div>
+                    <div class="health-bar-container">
+                        <div class="health-bar">
+                            <div
+                                class="health-bar-fill"
+                                [style.width.%]="playerAHealth.percentage"
+                                [class.low-health]="playerAHealth.percentage <= 25"
+                                [class.medium-health]="playerAHealth.percentage > 25 && playerAHealth.percentage <= 50"
+                            ></div>
+                        </div>
+                        <div class="health-text">{{ playerAHealth.current }} / {{ playerAHealth.max }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VS -->
+            <div class="vs-section">
+                <div class="vs-text">VS</div>
+                <div class="combat-swords">⚔️</div>
+            </div>
+
+            <!-- Player B -->
+            <div class="fighter player-b" [class.is-me]="combatData.userRole === 'target'">
+                <div class="fighter-container">
+                    @if (playerBDamage) {
+                    <div class="damage-display">
+                        @if (playerBDamage.damage > 0) {
+                        <span class="damage-value">-{{ playerBDamage.damage }}</span>
+                        }
+                        <div class="combat-details" [class.no-damage]="playerBDamage.damage === 0">
+                            <div class="stat-line attack-line">
+                                <span class="stat-icon">⚔️</span>
+                                <span class="stat-value">{{ playerBDamage.totalAttack }}</span>
+                                <div class="dice-info">
+                                    <img [src]="getDiceImage(playerBDamage.attackDice)" class="dice-image" />
+                                    <span class="dice-roll">{{ playerBDamage.attackRoll }}</span>
+                                </div>
+                            </div>
+                            <div class="stat-line defense-line">
+                                <span class="stat-icon">🛡️</span>
+                                <span class="stat-value">{{ playerBDamage.totalDefense }}</span>
+                                <div class="dice-info">
+                                    <img [src]="getDiceImage(playerBDamage.defenseDice)" class="dice-image" />
+                                    <span class="dice-roll">{{ playerBDamage.defenseRoll }}</span>
+                                </div>
+                            </div>
+                            @if (playerBDamage.tileEffect !== 0) {
+                            <div class="stat-line tile-effect-line">
+                                <span class="stat-icon">❄️</span>
+                                <span class="stat-label">Glace</span>
+                                <span class="stat-value tile-effect">{{ playerBDamage.tileEffect }}</span>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                    }
+                    <div class="fighter-name">
+                        {{ playerBName }}
+                        @if (playerBPosture) {
+                        <span
+                            class="posture-badge"
+                            [class.offensive]="playerBPosture === 'offensive'"
+                            [class.defensive]="playerBPosture === 'defensive'"
+                        >
+                            {{ playerBPosture === 'offensive' ? '⚔️' : '🛡️' }}
+                        </span>
+                        } @if (playerBTileEffectLabel) {
+                        <span class="tile-effect-badge"> ❄️ {{ playerBTileEffectLabel }} </span>
+                        }
+                    </div>
+                    <div class="fighter-avatar">
+                        <img [src]="playerBAvatar" [alt]="playerBName" />
+                    </div>
+                    <div class="health-bar-container">
+                        <div class="health-bar">
+                            <div
+                                class="health-bar-fill"
+                                [style.width.%]="playerBHealth.percentage"
+                                [class.low-health]="playerBHealth.percentage <= 25"
+                                [class.medium-health]="playerBHealth.percentage > 25 && playerBHealth.percentage <= 50"
+                            ></div>
+                        </div>
+                        <div class="health-text">{{ playerBHealth.current }} / {{ playerBHealth.max }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (!victoryData) {
+        <div class="combat-actions">
+            <p class="stance-instruction">
+                @if (isPostureSelected) { Posture sélectionnée : {{ selectedPosture === 'offensive' ? '⚔️ Offensive' : '🛡️ Défensive' }}
+                } @else { Choisissez votre posture : }
+            </p>
+
+            <div class="action-buttons">
+                <button
+                    class="combat-btn offensive"
+                    [class.selected]="selectedPosture === 'offensive'"
+                    [disabled]="isPostureSelected"
+                    (click)="chooseOffensive()"
+                >
+                    ⚔️ Offensive (+2 Attaque)
+                </button>
+                <button
+                    class="combat-btn defensive"
+                    [class.selected]="selectedPosture === 'defensive'"
+                    [disabled]="isPostureSelected"
+                    (click)="chooseDefensive()"
+                >
+                    🛡️ Défensive (+2 Défense)
+                </button>
+            </div>
+        </div>
+        }
+    </div>
+</div>
+}

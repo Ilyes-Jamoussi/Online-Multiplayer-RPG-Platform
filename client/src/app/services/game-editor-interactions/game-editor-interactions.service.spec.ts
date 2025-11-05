@@ -1,29 +1,30 @@
-/* eslint-disable max-lines */
-/* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-import { TestBed } from '@angular/core/testing';
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
+/* eslint-disable @typescript-eslint/naming-convention -- Test file uses mock objects with underscores */
+/* eslint-disable @typescript-eslint/no-magic-numbers -- Test file uses literal values for assertions */
 import { signal } from '@angular/core';
-import { GameEditorInteractionsService } from './game-editor-interactions.service';
-import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { TestBed } from '@angular/core/testing';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ActiveTool, ExtendedGameEditorPlaceableDto, TileBrushTool, ToolType } from '@app/interfaces/game-editor.interface';
-import { PlaceableKind, PlaceableFootprint, PlaceableMime } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile-kind.enum';
+import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { MapSize } from '@common/enums/map-size.enum';
+import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
+import { GameEditorInteractionsService } from './game-editor-interactions.service';
 
 class StoreStub implements Partial<GameEditorStoreService> {
     private _tileSizePx = 32;
     private _size = MapSize.MEDIUM;
 
-    private tilesSig = signal<GameEditorTileDto[]>([]);
-    private placedObjectsSig = signal<GameEditorPlaceableDto[]>([]);
+    private readonly tilesSig = signal<GameEditorTileDto[]>([]);
+    private readonly placedObjectsSig = signal<GameEditorPlaceableDto[]>([]);
 
     get tileSizePx() {
         return this._tileSizePx;
     }
-    set tileSizePx(v: number) {
-        this._tileSizePx = v;
+    set tileSizePx(value: number) {
+        this._tileSizePx = value;
     }
 
     get tiles() {
@@ -39,8 +40,8 @@ class StoreStub implements Partial<GameEditorStoreService> {
     setPlacedObjects(list: GameEditorPlaceableDto[]) {
         this.placedObjectsSig.set(list);
     }
-    setSize(n: number) {
-        this._size = n;
+    setSize(size: number) {
+        this._size = size;
     }
 
     getTileAt(x: number, y: number) {
@@ -59,22 +60,22 @@ class StoreStub implements Partial<GameEditorStoreService> {
     });
 
     getPlacedObjectAt = jasmine.createSpy('getPlacedObjectAt').and.callFake((x: number, y: number) => {
-        return this.placedObjectsSig().find((o) => o.x === x && o.y === y);
+        return this.placedObjectsSig().find((object) => object.x === x && object.y === y);
     });
 
     placeObjectFromInventory = jasmine.createSpy('placeObjectFromInventory').and.callFake((kind: PlaceableKind, x: number, y: number) => {
-        const k = PlaceableKind[kind] as unknown as PlaceableKind;
+        const placeableKind = PlaceableKind[kind] as unknown as PlaceableKind;
         const id = `${kind}-${x}-${y}`;
-        this.setPlacedObjects([...this.placedObjectsSig(), { id, kind: k, x, y, placed: true, orientation: 'N' }]);
+        this.setPlacedObjects([...this.placedObjectsSig(), { id, kind: placeableKind, x, y, placed: true, orientation: 'N' }]);
     });
 
     movePlacedObject = jasmine.createSpy('movePlacedObject').and.callFake((id: string, x: number, y: number) => {
-        const list = this.placedObjectsSig().map((o) => (o.id === id ? { ...o, x, y } : o));
+        const list = this.placedObjectsSig().map((object) => (object.id === id ? { ...object, x, y } : object));
         this.setPlacedObjects(list);
     });
 
     removeObject = jasmine.createSpy('removeObject').and.callFake((id: string) => {
-        this.setPlacedObjects(this.placedObjectsSig().filter((o) => o.id !== id));
+        this.setPlacedObjects(this.placedObjectsSig().filter((object) => object.id !== id));
     });
 }
 
@@ -95,31 +96,28 @@ function makeDragEvent(
 ): DragEvent {
     const types = opts.types;
     const dataByType = opts.dataByType ?? {};
-    const dt: DataTransfer = {
+    const dataTransfer: DataTransfer = {
         dropEffect: 'none',
         effectAllowed: (opts.effectAllowed ?? 'all') as DataTransfer['effectAllowed'],
         files: {},
         items: {},
         types,
-        clearData: () => {
-            /** no-op */
-        },
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
+        clearData: () => {},
         getData: (format: string) => dataByType[format] ?? '',
         setData: (format: string, data: string) => {
             dataByType[format] = data;
-            (dt.types as string[]).push(format);
+            (dataTransfer.types as string[]).push(format);
             return true;
         },
-        setDragImage: () => {
-            /** no-op */
-        },
-        addElement: () => {
-            /** no-op */
-        },
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
+        setDragImage: () => {},
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
+        addElement: () => {},
     } as unknown as DataTransfer;
 
     return {
-        dataTransfer: dt,
+        dataTransfer,
         offsetX: opts.offsetX ?? 0,
         offsetY: opts.offsetY ?? 0,
     } as DragEvent;
@@ -129,31 +127,29 @@ function makeDragEventWithSpies(opts: { offsetX?: number; offsetY?: number } = {
     _spies: { setData: jasmine.Spy; getData: jasmine.Spy };
 } {
     const store: Record<string, string> = {};
-    const setData = jasmine.createSpy('setData').and.callFake((fmt: string, data: string) => {
-        store[fmt] = data;
-        dt.types.push(fmt);
+    const setData = jasmine.createSpy('setData').and.callFake((format: string, data: string) => {
+        store[format] = data;
+        dataTransfer.types.push(format);
         return true;
     });
-    const getData = jasmine.createSpy('getData').and.callFake((fmt: string) => store[fmt] ?? '');
+    const getData = jasmine.createSpy('getData').and.callFake((format: string) => store[format] ?? '');
 
-    const dt: Partial<DataTransfer> & { types: string[] } = {
+    const dataTransfer: Partial<DataTransfer> & { types: string[] } = {
         types: [],
         effectAllowed: 'all',
         setData,
         getData,
-        clearData: () => {
-            /** no-op */
-        },
-        setDragImage: () => {
-            /** no-op */
-        },
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
+        clearData: () => {},
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty method for DataTransfer stub
+        setDragImage: () => {},
         dropEffect: 'none',
         files: {} as FileList,
         items: {} as DataTransferItemList,
     };
 
     const evt = {
-        dataTransfer: dt as DataTransfer,
+        dataTransfer: dataTransfer as DataTransfer,
         offsetX: opts.offsetX ?? 0,
         offsetY: opts.offsetY ?? 0,
         _spies: { setData, getData },
@@ -189,10 +185,10 @@ describe('GameEditorInteractionsService', () => {
         it('returns one ToolbarItem per TileKind with correct image and class', () => {
             const brushes = service.getToolbarBrushes();
             expect(brushes.length).toBe(Object.keys(TileKind).length - 1);
-            brushes.forEach((b) => {
-                expect(b.image).toBeTruthy();
-                expect(b.class).toBe(b.tileKind.toLowerCase());
-                expect(b.tileKind).toBe(TileKind[b.tileKind]);
+            brushes.forEach((brush) => {
+                expect(brush.image).toBeTruthy();
+                expect(brush.class).toBe(brush.tileKind.toLowerCase());
+                expect(brush.tileKind).toBe(TileKind[brush.tileKind]);
             });
         });
     });
@@ -435,7 +431,7 @@ describe('GameEditorInteractionsService', () => {
             expect(hovered.length).toBe(4);
 
             const origin = service['objectDropVec2'];
-            const includesOrigin = hovered.some((v) => v.x === origin.x && v.y === origin.y);
+            const includesOrigin = hovered.some((tile) => tile.x === origin.x && tile.y === origin.y);
             expect(includesOrigin).toBeTrue();
         });
 

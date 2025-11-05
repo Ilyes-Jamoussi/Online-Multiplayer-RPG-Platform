@@ -1,19 +1,23 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { computed, Injectable, signal } from '@angular/core';
+import { PLACEABLE_ORDER } from '@app/constants/game-editor.constants';
+import { CreateGameDto } from '@app/dto/create-game-dto';
 import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { PatchGameEditorDto } from '@app/dto/patch-game-editor-dto';
+import { ROUTES } from '@app/enums/routes.enum';
+import { ExtendedGameEditorPlaceableDto, Inventory } from '@app/interfaces/game-editor.interface';
+import { AssetsService } from '@app/services/assets/assets.service';
+import { GameHttpService } from '@app/services/game-http/game-http.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { catchError, switchMap, take, tap } from 'rxjs/operators';
-import { TileKind } from '@common/enums/tile-kind.enum';
-import { PatchGameEditorDto } from '@app/dto/patch-game-editor-dto';
-import { ExtendedGameEditorPlaceableDto, Inventory, PLACEABLE_ORDER } from '@app/interfaces/game-editor.interface';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { firstValueFrom, of, throwError } from 'rxjs';
-import { AssetsService } from '@app/services/assets/assets.service';
-import { CreateGameDto } from '@app/dto/create-game-dto';
-import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
+import { catchError, switchMap, take, tap } from 'rxjs/operators';
 
 @Injectable()
 export class GameEditorStoreService {
@@ -21,6 +25,7 @@ export class GameEditorStoreService {
         private readonly gameHttpService: GameHttpService,
         private readonly screenshotService: ScreenshotService,
         private readonly assetsService: AssetsService,
+        private readonly notificationCoordinatorService: NotificationCoordinatorService,
     ) {}
 
     private readonly _initial = signal<GameEditorDto>({
@@ -47,59 +52,59 @@ export class GameEditorStoreService {
     private readonly _tileSizePx = signal<number>(0);
 
     get placedObjects(): ExtendedGameEditorPlaceableDto[] {
-        const objs = this._objects();
-        const placed = objs.filter((o) => o.placed);
-        const acc: ExtendedGameEditorPlaceableDto[] = [];
+        const objects = this._objects();
+        const placed = objects.filter((object) => object.placed);
+        const accumulator: ExtendedGameEditorPlaceableDto[] = [];
 
-        for (const o of placed) {
-            const footprint = PlaceableFootprint[PlaceableKind[o.kind]];
-            const xs: number[] = [];
-            const ys: number[] = [];
-            for (let dx = 0; dx < footprint; dx++) {
-                for (let dy = 0; dy < footprint; dy++) {
-                    xs.push(o.x + dx);
-                    ys.push(o.y + dy);
+        for (const object of placed) {
+            const footprint = PlaceableFootprint[PlaceableKind[object.kind]];
+            const xPositions: number[] = [];
+            const yPositions: number[] = [];
+            for (let deltaX = 0; deltaX < footprint; deltaX++) {
+                for (let deltaY = 0; deltaY < footprint; deltaY++) {
+                    xPositions.push(object.x + deltaX);
+                    yPositions.push(object.y + deltaY);
                 }
             }
-            acc.push({
-                id: o.id,
-                kind: o.kind,
-                orientation: o.orientation,
-                placed: o.placed,
-                x: o.x,
-                y: o.y,
-                xs,
-                ys,
+            accumulator.push({
+                id: object.id,
+                kind: object.kind,
+                orientation: object.orientation,
+                placed: object.placed,
+                x: object.x,
+                y: object.y,
+                xPositions,
+                yPositions,
             });
         }
 
-        return acc;
+        return accumulator;
     }
 
     readonly inventory = computed<Inventory>(() => {
-        const objs = this._objects();
-        const inv: Inventory = {} as Inventory;
+        const objects = this._objects();
+        const inventory: Inventory = {} as Inventory;
 
-        for (const o of objs) {
-            const kind = PlaceableKind[o.kind];
-            if (!inv[kind]) {
-                inv[kind] = { kind, total: 0, remaining: 0, disabled: false, image: this.assetsService.getPlaceableImage(kind) };
+        for (const object of objects) {
+            const kind = PlaceableKind[object.kind];
+            if (!(kind in inventory)) {
+                inventory[kind] = { kind, total: 0, remaining: 0, disabled: false, image: this.assetsService.getPlaceableImage(kind) };
             }
-            inv[kind].total += 1;
-            if (!o.placed) {
-                inv[kind].remaining += 1;
+            inventory[kind].total += 1;
+            if (!object.placed) {
+                inventory[kind].remaining += 1;
             }
         }
 
-        for (const k of PLACEABLE_ORDER) {
-            if (!inv[k]) {
-                inv[k] = { total: 0, remaining: 0, kind: k, disabled: true, image: this.assetsService.getPlaceableImage(k) };
+        for (const kind of PLACEABLE_ORDER) {
+            if (!(kind in inventory)) {
+                inventory[kind] = { total: 0, remaining: 0, kind, disabled: true, image: this.assetsService.getPlaceableImage(kind) };
             } else {
-                inv[k].disabled = inv[k].remaining === 0;
+                inventory[kind].disabled = inventory[kind].remaining === 0;
             }
         }
 
-        return inv;
+        return inventory;
     });
 
     get name() {
@@ -122,16 +127,8 @@ export class GameEditorStoreService {
         return this._tiles.asReadonly();
     }
 
-    get objects() {
-        return this._objects.asReadonly();
-    }
-
     get size() {
         return this._size.asReadonly();
-    }
-
-    get gridPreviewUrl() {
-        return this._gridPreviewUrl.asReadonly();
     }
 
     get mode() {
@@ -163,7 +160,7 @@ export class GameEditorStoreService {
                     this._objects.set(game.objects);
                     this._size.set(game.size);
                     this._gridPreviewUrl.set(game.gridPreviewUrl);
-                    this._mode.set(game.mode as GameMode);
+                    this._mode.set(game.mode);
                 }),
                 catchError(() => {
                     return of(null);
@@ -172,9 +169,11 @@ export class GameEditorStoreService {
             .subscribe();
     }
 
-    async saveGame(gridElement: HTMLElement): Promise<void> {
-        const gridPreviewImage = await this.screenshotService.captureElementAsBase64(gridElement);
+    private async captureGridPreview(gridElement: HTMLElement): Promise<string | undefined> {
+        return await this.screenshotService.captureElementAsBase64(gridElement);
+    }
 
+    private buildPatchDto(gridPreviewImage: string | undefined): PatchGameEditorDto {
         const current = {
             name: this._name(),
             description: this._description(),
@@ -182,35 +181,74 @@ export class GameEditorStoreService {
             objects: this._objects(),
             gridPreviewUrl: gridPreviewImage ?? this._gridPreviewUrl(),
         };
-        const game: PatchGameEditorDto = this.pickChangedProperties(current, this._initial());
 
-        await firstValueFrom(
-            this.gameHttpService.patchGameEditorById(this._id(), game).pipe(
-                take(1),
-                catchError((err) => {
-                    if (err.statusText === 'Conflict') {
-                        return throwError(() => new Error('Un jeu avec ce nom existe déjà.'));
-                    }
-                    const createDto: CreateGameDto = {
-                        name: this._name(),
-                        description: this._description(),
-                        size: this._size(),
-                        mode: this._mode(),
-                    };
-                    return this.gameHttpService.createGame(createDto).pipe(
-                        switchMap((newGame) => {
-                            this._id.set(newGame.id);
-                            const updateGame: PatchGameEditorDto = {
-                                tiles: this._tiles(),
-                                objects: this._objects(),
-                                gridPreviewUrl: gridPreviewImage,
-                            };
-                            return this.gameHttpService.patchGameEditorById(newGame.id, updateGame);
-                        }),
-                    );
-                }),
-            ),
+        return this.pickChangedProperties(current, this._initial());
+    }
+
+    private saveOrCreateGame(patchDto: PatchGameEditorDto, gridPreviewImage: string | undefined) {
+        return this.gameHttpService.patchGameEditorById(this._id(), patchDto).pipe(
+            take(1),
+            catchError((err) => this.handleSaveError(err, gridPreviewImage)),
         );
+    }
+
+    private handleSaveError(err: HttpErrorResponse, gridPreviewImage: string | undefined) {
+        if (err.statusText === 'Conflict') {
+            return throwError(() => new Error('Un jeu avec ce nom existe déjà.'));
+        }
+
+        const createDto: CreateGameDto = {
+            name: this._name(),
+            description: this._description(),
+            size: this._size(),
+            mode: this._mode(),
+        };
+
+        return this.gameHttpService.createGame(createDto).pipe(switchMap((newGame) => this.updateNewGame(newGame.id, gridPreviewImage)));
+    }
+
+    private updateNewGame(newGameId: string, gridPreviewImage: string | undefined) {
+        this._id.set(newGameId);
+
+        const updateGame: PatchGameEditorDto = {
+            tiles: this._tiles(),
+            objects: this._objects(),
+            gridPreviewUrl: gridPreviewImage,
+        };
+
+        return this.gameHttpService.patchGameEditorById(newGameId, updateGame).pipe(take(1));
+    }
+
+    private notifySuccess(): void {
+        this.notificationCoordinatorService.displaySuccessPopup({
+            title: 'Jeu sauvegardé',
+            message: 'Votre jeu a été sauvegardé avec succès !',
+            redirectRoute: ROUTES.ManagementPage,
+        });
+    }
+
+    private notifyError(error: unknown): void {
+        if (error instanceof Error) {
+            this.notificationCoordinatorService.displayErrorPopup({
+                title: 'Erreur lors de la sauvegarde',
+                message: error.message,
+            });
+        }
+    }
+    //}
+
+    async saveGame(gridElement: HTMLElement): Promise<void> {
+        try {
+            const gridPreviewImage = await this.captureGridPreview(gridElement);
+            const patchDto = this.buildPatchDto(gridPreviewImage);
+
+            await firstValueFrom(this.saveOrCreateGame(patchDto, gridPreviewImage));
+
+            this.notifySuccess();
+        } catch (error) {
+            this.notifyError(error);
+            throw error;
+        }
     }
 
     getTileAt(x: number, y: number): GameEditorTileDto | undefined {
@@ -250,13 +288,13 @@ export class GameEditorStoreService {
         this._size.set(initial.size);
         this._name.set(initial.name);
         this._description.set(initial.description);
-        this._mode.set(initial.mode as GameMode);
+        this._mode.set(initial.mode);
         this._gridPreviewUrl.set(initial.gridPreviewUrl);
     }
 
     getPlacedObjectAt(x: number, y: number): GameEditorPlaceableDto | undefined {
         if (!this.inBounds(x, y)) return undefined;
-        return this.placedObjects.find((o) => o.xs.includes(x) && o.ys.includes(y));
+        return this.placedObjects.find((object) => object.xPositions.includes(x) && object.yPositions.includes(y));
     }
 
     placeObjectFromInventory(kind: PlaceableKind, x: number, y: number): void {
@@ -297,13 +335,13 @@ export class GameEditorStoreService {
     }
 
     private inBounds(x: number, y: number): boolean {
-        const n = this.size();
-        return x >= 0 && y >= 0 && x < n && y < n;
+        const size = this.size();
+        return x >= 0 && y >= 0 && x < size && y < size;
     }
 
-    private withBounds<T>(x: number, y: number, fn: () => T): T | undefined {
+    private withBounds<T>(x: number, y: number, functionToRun: () => T): T | undefined {
         if (!this.inBounds(x, y)) return undefined;
-        return fn();
+        return functionToRun();
     }
 
     private updateTiles(mutator: (draft: GameEditorTileDto[]) => void): void {
@@ -323,11 +361,11 @@ export class GameEditorStoreService {
     }
 
     private findObjectIndexById(draft: GameEditorPlaceableDto[], id: string): number {
-        return draft.findIndex((o) => o.id === id);
+        return draft.findIndex((object) => object.id === id);
     }
 
     private findFirstUnplacedIndexByKind(draft: GameEditorPlaceableDto[], kind: PlaceableKind): number {
-        return draft.findIndex((o) => o.kind === PlaceableKind[kind] && !o.placed);
+        return draft.findIndex((object) => object.kind === PlaceableKind[kind] && !object.placed);
     }
 
     private isOccupiedByOther(id: string | null, x: number, y: number): boolean {

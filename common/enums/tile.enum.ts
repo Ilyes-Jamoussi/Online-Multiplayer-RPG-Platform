@@ -1,0 +1,28 @@
+export enum TileKind {
+    WATER = 'WATER',
+    WALL = 'WALL',
+    ICE = 'ICE',
+    DOOR = 'DOOR',
+    BASE = 'BASE',
+    TELEPORT = 'TELEPORT',
+}
+
+export enum TileCost {
+    WALL = -1,
+    DOOR = -1,
+    ICE = 0,
+    BASE = 1,
+    DOOR_OPEN = 1,
+    WATER = 2,
+    TELEPORT = 0,
+}
+
+export enum TileCombatEffect {
+    ICE = -2,
+    BASE = 0,
+    TELEPORT = 0,
+    WATER = 0,
+    WALL = 0,
+    DOOR = 0,
+    DOOR_OPEN = 0,
+}

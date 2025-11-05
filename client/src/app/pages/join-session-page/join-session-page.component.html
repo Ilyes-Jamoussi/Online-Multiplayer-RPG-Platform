@@ -1,0 +1,16 @@
+<app-ui-page-layout [hasHeader]="true" headerTitle="Rejoindre une partie" [showBackButton]="true">
+    <div class="sessions-section">
+        @if (availableSessions() && availableSessions().length > 0) {
+        <div class="sessions-grid">
+            @for (session of availableSessions(); track session.id) {
+            <app-session-card [session]="session" (joinSession)="onJoinSession($event)"> </app-session-card>
+            }
+        </div>
+        } @else {
+        <div class="no-sessions-message">
+            <h2>Aucune partie disponible</h2>
+            <p>Il n'y a actuellement aucune partie que vous pouvez rejoindre.</p>
+        </div>
+        }
+    </div>
+</app-ui-page-layout>

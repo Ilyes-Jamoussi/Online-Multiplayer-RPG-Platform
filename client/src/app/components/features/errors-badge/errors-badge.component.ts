@@ -18,23 +18,19 @@ export class ErrorsBadgeComponent {
     ) {}
 
     get errorList(): string[] {
-        if (this.validationType === 'character-creation' && this.characterCreationCheckService) {
+        if (this.validationType === 'character-creation') {
             return this.characterCreationCheckService.getErrorMessages();
         }
 
-        if (this.validationType === 'game-editor' && this.gameEditorCheckService) {
-            const problems = this.gameEditorCheckService.editorProblems();
-            const messages: string[] = [];
-            for (const issue of Object.values(GameEditorIssuesEnum)) {
-                const problem = problems[issue];
-                if (problem?.hasIssue && problem?.message) {
-                    messages.push(problem.message);
-                }
+        const problems = this.gameEditorCheckService.editorProblems();
+        const messages: string[] = [];
+        for (const issue of Object.values(GameEditorIssuesEnum)) {
+            const problem = problems[issue];
+            if (problem.hasIssue && problem.message) {
+                messages.push(problem.message);
             }
-            return messages;
         }
-
-        return [];
+        return messages;
     }
 
     get errorCount(): number {

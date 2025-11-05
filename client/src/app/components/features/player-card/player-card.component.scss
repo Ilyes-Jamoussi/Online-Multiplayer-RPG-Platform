@@ -1,0 +1,116 @@
+.player-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+
+    &:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &.me {
+        background-color: #e3f2fd;
+        border-color: #90caf9;
+    }
+
+    &.is-admin {
+        border-color: #ffd700;
+        background-color: #fff8e1;
+    }
+}
+
+.avatar-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid #e9ecef;
+    transition: border-color 0.2s ease;
+
+    .me & {
+        border-color: #90caf9;
+    }
+
+    .is-admin & {
+        border-color: #ffd700;
+    }
+}
+
+.avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.player-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.player-name {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    .me & {
+        color: #1976d2;
+    }
+
+    .is-admin & {
+        color: #f57c00;
+    }
+}
+
+.badge {
+    font-size: 1.2rem;
+    line-height: 1;
+    color: #f57c00;
+}
+
+.kick-button {
+    padding: 0.25rem 0.75rem;
+    border: none;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 1px 4px rgba(239, 68, 68, 0.3);
+    margin-left: auto;
+
+    &:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+    }
+
+    &:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 3px rgba(239, 68, 68, 0.3);
+    }
+
+    &:focus-visible {
+        outline: 2px solid #fca5a5;
+        outline-offset: 2px;
+    }
+}
