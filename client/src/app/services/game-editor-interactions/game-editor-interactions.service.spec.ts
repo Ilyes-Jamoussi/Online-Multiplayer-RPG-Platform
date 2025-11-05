@@ -102,21 +102,15 @@ function makeDragEvent(
         files: {},
         items: {},
         types,
-        clearData: () => {
-            /** no-op */
-        },
+        clearData: () => {},
         getData: (format: string) => dataByType[format] ?? '',
         setData: (format: string, data: string) => {
             dataByType[format] = data;
             (dataTransfer.types as string[]).push(format);
             return true;
         },
-        setDragImage: () => {
-            /** no-op */
-        },
-        addElement: () => {
-            /** no-op */
-        },
+        setDragImage: () => {},
+        addElement: () => {},
     } as unknown as DataTransfer;
 
     return {
@@ -142,12 +136,8 @@ function makeDragEventWithSpies(opts: { offsetX?: number; offsetY?: number } = {
         effectAllowed: 'all',
         setData,
         getData,
-        clearData: () => {
-            /** no-op */
-        },
-        setDragImage: () => {
-            /** no-op */
-        },
+        clearData: () => {},
+        setDragImage: () => {},
         dropEffect: 'none',
         files: {} as FileList,
         items: {} as DataTransferItemList,

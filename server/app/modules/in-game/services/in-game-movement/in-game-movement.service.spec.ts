@@ -1,21 +1,21 @@
 /* eslint-disable max-lines -- Test file */
-import { InGameMovementService } from './in-game-movement.service';
+import { ServerEvents } from '@app/enums/server-events.enum';
+import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
+import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { Orientation } from '@common/enums/orientation.enum';
-import { TileKind } from '@common/enums/tile.enum';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { ServerEvents } from '@app/enums/server-events.enum';
-import { Tile } from '@app/modules/game-store/entities/tile.entity';
-import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
-import { InGameSession } from '@common/interfaces/session.interface';
-import { Player } from '@common/interfaces/player.interface';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
+import { Player } from '@common/interfaces/player.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InGameMovementService } from './in-game-movement.service';
 
 describe('InGameMovementService', () => {
     let service: InGameMovementService;
@@ -619,7 +619,6 @@ describe('InGameMovementService', () => {
             const queueItem = { x: POS_X_1, y: POS_Y_1, cost: 0, remainingPoints: BASE_SPEED };
             let shiftCallCount = 0;
 
-            // Créer un tableau personnalisé avec une méthode shift qui retourne undefined au deuxième appel
             const mockQueue = Object.create(Array.prototype);
             mockQueue.length = 1;
             mockQueue[0] = queueItem;
@@ -627,15 +626,11 @@ describe('InGameMovementService', () => {
                 value: jest.fn(function (this: typeof mockQueue) {
                     shiftCallCount++;
                     if (shiftCallCount === 1) {
-                        // Premier appel : retourner l'élément mais garder length > 0 pour continuer la boucle
                         const item = this[0];
                         delete this[0];
-                        // Garder length à 1 pour que la boucle continue et appelle shift() à nouveau
                         this.length = 1;
                         return item;
                     }
-                    // Deuxième appel : retourner undefined pour forcer la branche if (!current) continue;
-                    // Maintenant vider la queue pour arrêter la boucle
                     this.length = 0;
                     return undefined;
                 }),
@@ -643,12 +638,8 @@ describe('InGameMovementService', () => {
                 configurable: true,
             });
 
-            // Mocker exploreNeighbors pour qu'il n'ajoute pas d'éléments à la queue
-            jest.spyOn(servicePrivate, 'exploreNeighbors' as keyof typeof servicePrivate).mockImplementation(() => {
-                // Ne rien faire pour éviter d'ajouter des éléments à la queue
-            });
+            jest.spyOn(servicePrivate, 'exploreNeighbors' as keyof typeof servicePrivate).mockImplementation(() => {});
 
-            // Mocker initializeQueue pour retourner notre queue personnalisée
             jest.spyOn(servicePrivate, 'initializeQueue' as keyof typeof servicePrivate).mockReturnValue(mockQueue);
 
             const result = servicePrivate.calculateReachableTiles(session, PLAYER_A_ID);

@@ -445,7 +445,6 @@ describe('GameEditorStoreService', () => {
         it('should reset the store to initial state', () => {
             expect(service['_initial']().id).toBe('1');
             expect(service.tiles().length).toBe(mockEditorData.tiles.length);
-            // expect(service.objects().length).toBe(mockEditorData.objects.length);
 
             service.setTileAt(0, 0, TileKind.WATER);
             expect(service.getTileAt(0, 0)?.kind).toBe(TileKind.WATER);
@@ -462,7 +461,6 @@ describe('GameEditorStoreService', () => {
             expect(service.name).toBe('Test Game');
             expect(service.description).toBe('A game for testing');
             expect(service.tiles().length).toBe(mockEditorData.tiles.length);
-            // expect(service.objects().length).toBe(mockEditorData.objects.length);
             expect(service.getTileAt(0, 0)?.kind).toBe(TileKind.BASE);
             expect(service.getTileAt(1, 1)?.kind).toBe(TileKind.BASE);
         });

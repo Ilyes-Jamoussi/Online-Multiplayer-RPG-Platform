@@ -1,7 +1,7 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal, signal } from '@angular/core';
-import { InGameService } from '@app/services/in-game/in-game.service';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TurnTimerComponent } from '@app/components/features/turn-timer/turn-timer.component';
+import { InGameService } from '@app/services/in-game/in-game.service';
 import { GameMapHeaderComponent } from './game-map-header.component';
 
 const MOCK_TURN_NUMBER = 5;
@@ -69,7 +69,6 @@ describe('GameMapHeaderComponent', () => {
         });
 
         it('should handle end turn button states correctly', () => {
-            // Test enabled state
             mockInGameService._isGameStartedSignal.set(true);
             mockInGameService._isMyTurnSignal.set(true);
             fixture.detectChanges();
@@ -77,12 +76,10 @@ describe('GameMapHeaderComponent', () => {
             const endButton = fixture.nativeElement.querySelector('.end-turn-btn');
             expect(endButton.disabled).toBe(false);
 
-            // Test disabled when game not started
             mockInGameService._isGameStartedSignal.set(false);
             fixture.detectChanges();
             expect(endButton.disabled).toBe(true);
 
-            // Test disabled when not my turn
             mockInGameService._isGameStartedSignal.set(true);
             mockInGameService._isMyTurnSignal.set(false);
             fixture.detectChanges();

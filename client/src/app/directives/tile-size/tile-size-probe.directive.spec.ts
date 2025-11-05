@@ -18,9 +18,7 @@ class ResizeObserverStub implements ResizeObserver {
     observe(target: Element): void {
         this.observedNode = target;
     }
-    unobserve(): void {
-        /** no-op */
-    }
+    unobserve(): void {}
     disconnect(): void {
         this.disconnected = true;
     }

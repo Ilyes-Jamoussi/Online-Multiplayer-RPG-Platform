@@ -60,7 +60,7 @@ describe('HomePageComponent', () => {
 
     it('should call reset methods on ngOnInit', () => {
         component.ngOnInit();
-        
+
         expect(playerServiceStub.reset).toHaveBeenCalledTimes(1);
         expect(inGameServiceStub.reset).toHaveBeenCalledTimes(1);
         expect(combatServiceStub.reset).toHaveBeenCalledTimes(1);
