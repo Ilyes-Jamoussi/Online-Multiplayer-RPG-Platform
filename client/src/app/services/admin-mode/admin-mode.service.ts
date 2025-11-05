@@ -36,6 +36,10 @@ export class AdminModeService {
         this.inGameSocketService.playerTeleport({ sessionId: this.sessionService.id(), x, y });
     }
 
+    reset(): void {
+        this.isAdminModeActivated.set(false);
+    }
+
     private initListeners(): void {
         this.inGameSocketService.onAdminModeToggled((data) => {
             this.isAdminModeActivated.set(data.isAdminModeActive);
