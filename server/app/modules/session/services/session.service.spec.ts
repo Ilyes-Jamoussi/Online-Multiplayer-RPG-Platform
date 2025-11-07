@@ -1,6 +1,7 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { ACCESS_CODE_LENGTH } from '@app/constants/session.constants';
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { ChatService } from '@app/modules/chat/services/chat.service';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
 import { SessionService } from '@app/modules/session/services/session.service';
@@ -68,7 +69,7 @@ describe('SessionService', () => {
             clearSession: jest.fn(),
         };
 
-        service = new SessionService(mockEventEmitter, mockChatService as ChatService);
+        service = new SessionService(mockEventEmitter, mockChatService as unknown as ChatService);
     });
 
     afterEach(() => {
