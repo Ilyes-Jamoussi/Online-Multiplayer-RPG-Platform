@@ -68,7 +68,7 @@ describe('SessionService', () => {
             clearSession: jest.fn(),
         };
 
-        service = new SessionService(mockEventEmitter, mockChatService as any);
+        service = new SessionService(mockEventEmitter, mockChatService as ChatService);
     });
 
     afterEach(() => {
