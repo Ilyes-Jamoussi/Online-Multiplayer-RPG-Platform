@@ -284,13 +284,4 @@ describe('GameSessionPageComponent', () => {
             expect(mockInGameService.reset).toHaveBeenCalled();
         });
     });
-
-    describe('onLeaveGame', () => {
-        it('should abandon combat and leave game', () => {
-            component.onLeaveGame();
-
-            expect(mockCombatService.combatAbandon).toHaveBeenCalled();
-            expect(mockInGameService.leaveGame).toHaveBeenCalled();
-        });
-    });
 });

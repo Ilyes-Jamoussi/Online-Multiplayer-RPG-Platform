@@ -1,24 +1,25 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function -- OpenAPI DTO generation placeholders */
 import { Controller, Post, Body } from '@nestjs/common';
-import { PlayerMoveDto } from '../dto/player-move.dto';
-import { PlayerMovedDto } from '../dto/player-moved.dto';
-import { CombatChoiceDto } from '../dto/combat-choice.dto';
-import { CombatPostureSelectedDto } from '../dto/combat-posture-selected.dto';
-import { PlayerCombatWinsDto } from '../dto/player-combat-wins.dto';
-import { CombatStartedDto } from '../dto/combat-started.dto';
-import { PlayerCombatLossesDto } from '../dto/player-combat-losses.dto';
-import { PlayerLeftSessionDto } from '../dto/player-left-session.dto';
-import { ToggleDoorActionDto } from '../dto/toggle-door-action.dto';
-import { CombatAbandonDto } from '../dto/combat-abandon.dto';
-import { PlayerCombatDrawsDto } from '../dto/player-combat-draws.dto';
-import { CombatVictoryDto } from '../dto/combat-victory.dto';
-import { PlayerCombatStatsDto } from '../dto/player-combat-stats.dto';
-import { GameOverDto } from '../dto/game-over.dto';
-import { PlayerTeleportedDto } from '../dto/player-teleported.dto';
-import { DoorToggledDto } from '../dto/door-toggled.dto';
-import { PlayerTeleportDto } from '../dto/player-teleport.dto';
-import { AdminModeToggledDto } from '../dto/admin-mode-toggled.dto';
-import { PlayerHealthChangedDto } from '../dto/player-health-changed.dto';
-import { AttackPlayerActionDto } from '../dto/attack-player-action.dto';
+import { PlayerMoveDto } from '@app/modules/in-game/dto/player-move.dto';
+import { PlayerMovedDto } from '@app/modules/in-game/dto/player-moved.dto';
+import { CombatChoiceDto } from '@app/modules/in-game/dto/combat-choice.dto';
+import { CombatPostureSelectedDto } from '@app/modules/in-game/dto/combat-posture-selected.dto';
+import { PlayerCombatWinsDto } from '@app/modules/in-game/dto/player-combat-wins.dto';
+import { CombatStartedDto } from '@app/modules/in-game/dto/combat-started.dto';
+import { PlayerCombatLossesDto } from '@app/modules/in-game/dto/player-combat-losses.dto';
+import { PlayerLeftSessionDto } from '@app/modules/in-game/dto/player-left-session.dto';
+import { ToggleDoorActionDto } from '@app/modules/in-game/dto/toggle-door-action.dto';
+import { CombatAbandonDto } from '@app/modules/in-game/dto/combat-abandon.dto';
+import { PlayerCombatDrawsDto } from '@app/modules/in-game/dto/player-combat-draws.dto';
+import { CombatVictoryDto } from '@app/modules/in-game/dto/combat-victory.dto';
+import { PlayerCombatStatsDto } from '@app/modules/in-game/dto/player-combat-stats.dto';
+import { GameOverDto } from '@app/modules/in-game/dto/game-over.dto';
+import { PlayerTeleportedDto } from '@app/modules/in-game/dto/player-teleported.dto';
+import { DoorToggledDto } from '@app/modules/in-game/dto/door-toggled.dto';
+import { PlayerTeleportDto } from '@app/modules/in-game/dto/player-teleport.dto';
+import { AdminModeToggledDto } from '@app/modules/in-game/dto/admin-mode-toggled.dto';
+import { PlayerHealthChangedDto } from '@app/modules/in-game/dto/player-health-changed.dto';
+import { AttackPlayerActionDto } from '@app/modules/in-game/dto/attack-player-action.dto';
 
 @Controller('in-game')
 export class InGameController {

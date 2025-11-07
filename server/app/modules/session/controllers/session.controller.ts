@@ -1,16 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function -- OpenAPI DTO generation placeholders */
 import { Controller, Post, Body } from '@nestjs/common';
-import { PlayerNameUpdatedDto } from '../dto/player-name-updated.dto';
-import { SessionPlayersUpdatedDto } from '../dto/update-session.dto';
-import { KickPlayerDto } from '../dto/kick-player.dto';
-import { LeaveSessionDto } from '../dto/leave-session.dto';
-import { AvailableSessionsUpdatedDto } from '../dto/available-sessions-updated.dto';
-import { JoinSessionDto, SessionJoinedDto } from '../dto/join-session.dto';
-import { AvatarAssignmentDto } from '../dto/avatar-assignment.dto';
-import { UpdateAvatarAssignmentsDto, AvatarAssignmentsUpdatedDto } from '../dto/update-avatar-assignments.dto';
-import { SessionEndedDto } from '../dto/session-ended.dto';
-import { CreateSessionDto, SessionCreatedDto } from '../dto/create-session.dto';
-import { PlayerDto } from '../dto/player.dto';
-import { JoinAvatarSelectionDto, AvatarSelectionJoinedDto } from '../dto/join-avatar-selection';
+import { PlayerNameUpdatedDto } from '@app/modules/session/dto/player-name-updated.dto';
+import { SessionPlayersUpdatedDto } from '@app/modules/session/dto/update-session.dto';
+import { KickPlayerDto } from '@app/modules/session/dto/kick-player.dto';
+import { LeaveSessionDto } from '@app/modules/session/dto/leave-session.dto';
+import { AvailableSessionsUpdatedDto } from '@app/modules/session/dto/available-sessions-updated.dto';
+import { JoinSessionDto, SessionJoinedDto } from '@app/modules/session/dto/join-session.dto';
+import { AvatarAssignmentDto } from '@app/modules/session/dto/avatar-assignment.dto';
+import { UpdateAvatarAssignmentsDto, AvatarAssignmentsUpdatedDto } from '@app/modules/session/dto/update-avatar-assignments.dto';
+import { SessionEndedDto } from '@app/modules/session/dto/session-ended.dto';
+import { CreateSessionDto, SessionCreatedDto } from '@app/modules/session/dto/create-session.dto';
+import { PlayerDto } from '@app/modules/session/dto/player.dto';
+import { JoinAvatarSelectionDto, AvatarSelectionJoinedDto } from '@app/modules/session/dto/join-avatar-selection';
 
 @Controller('session')
 export class SessionController {

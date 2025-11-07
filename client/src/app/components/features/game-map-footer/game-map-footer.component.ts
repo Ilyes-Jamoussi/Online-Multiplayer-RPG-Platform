@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
+import { CombatService } from '@app/services/combat/combat.service';
 import { Orientation } from '@common/enums/orientation.enum';
 import { GameKey } from '@app/enums/game-key.enum';
 
@@ -22,6 +23,7 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
         private readonly playerService: PlayerService,
         private readonly inGameService: InGameService,
         private readonly adminModeService: AdminModeService,
+        private readonly combatService: CombatService,
     ) {}
 
     ngOnInit(): void {
@@ -120,5 +122,10 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
         if (this.isAdmin) {
             this.adminModeService.toggleAdminMode();
         }
+    }
+
+    onLeaveGame(): void {
+        this.combatService.combatAbandon();
+        this.inGameService.leaveGame();
     }
 }

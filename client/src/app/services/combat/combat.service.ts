@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { COMBAT_TOAST_DURATION_MS, DAMAGE_DISPLAY_DURATION_MS, VICTORY_NOTIFICATION_DURATION_MS } from '@app/constants/combat.constants';
 import { CombatData } from '@app/interfaces/combat-data.interface';
 import { DamageDisplay } from '@app/interfaces/damage-display.interface';
@@ -8,6 +8,7 @@ import { InGameService } from '@app/services/in-game/in-game.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { ResetService } from '@app/services/reset/reset.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
@@ -45,6 +46,7 @@ export class CombatService {
         private readonly notificationCoordinatorService: NotificationCoordinatorService,
     ) {
         this.initListeners();
+        inject(ResetService).reset$.subscribe(() => this.reset());
     }
 
     private startCombat(

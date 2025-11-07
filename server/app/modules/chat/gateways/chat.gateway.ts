@@ -4,9 +4,9 @@ import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/web
 import { Server, Socket } from 'socket.io';
 import { ChatEvents } from '@common/enums/chat-events.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
-import { ChatService } from '../services/chat.service';
-import { SendMessageDto } from '../dto/send-message.dto';
-import { LoadMessagesDto, ChatMessageDto } from '../dto/load-messages.dto';
+import { ChatService } from '@app/modules/chat/services/chat.service';
+import { SendMessageDto } from '@app/modules/chat/dto/send-message.dto';
+import { LoadMessagesDto, ChatMessageDto } from '@app/modules/chat/dto/load-messages.dto';
 import { validationExceptionFactory } from '@app/utils/validation/validation.util';
 import { successResponse } from '@app/utils/socket-response/socket-response.util';
 
@@ -27,34 +27,13 @@ export class ChatGateway {
 
     @SubscribeMessage(ChatEvents.SendMessage)
     sendMessage(socket: Socket, data: SendMessageDto): void {
-        console.log('ChatGateway.sendMessage received:', data);
-        console.log('Socket ID:', socket.id);
+        const message = this.chatService.sendMessage(data, socket.id);
         
-        // Check if socket is in the session room
-        const rooms = Array.from(socket.rooms);
-        console.log('Socket rooms:', rooms);
-        console.log('Target session:', data.sessionId);
-        console.log('Is socket in session room?', socket.rooms.has(data.sessionId));
-        
-        try {
-            const message = this.chatService.sendMessage(data, socket.id);
-            console.log('Message created:', message);
-            
-            // Ensure socket is in the session room for chat
-            if (!socket.rooms.has(data.sessionId)) {
-                console.log('Socket not in session room, joining...');
-                socket.join(data.sessionId);
-            }
-            
-            this.server.to(data.sessionId).emit(ChatEvents.MessageReceived, successResponse<ChatMessageDto>(message));
-            console.log('Message emitted to session:', data.sessionId);
-            
-            // Also check how many sockets are in the room
-            const roomSize = this.server.sockets.adapter.rooms.get(data.sessionId)?.size || 0;
-            console.log('Room size for session', data.sessionId, ':', roomSize);
-        } catch (error) {
-            console.error('Error in sendMessage:', error);
+        if (!socket.rooms.has(data.sessionId)) {
+            void socket.join(data.sessionId);
         }
+        
+        this.server.to(data.sessionId).emit(ChatEvents.MessageReceived, successResponse<ChatMessageDto>(message));
     }
 
     @OnEvent(ServerEvents.LoadMessages)

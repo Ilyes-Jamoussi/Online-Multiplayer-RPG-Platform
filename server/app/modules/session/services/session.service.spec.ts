@@ -63,7 +63,12 @@ describe('SessionService', () => {
             emit: jest.fn(),
         } as unknown as jest.Mocked<EventEmitter2>;
 
-        service = new SessionService(mockEventEmitter);
+        const mockChatService = {
+            createSessionChat: jest.fn(),
+            clearSession: jest.fn(),
+        };
+
+        service = new SessionService(mockEventEmitter, mockChatService as any);
     });
 
     afterEach(() => {

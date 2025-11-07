@@ -24,7 +24,7 @@
             (keydown.enter)="sendMessage()"
             type="text" 
             placeholder="Tapez votre message..."
-            [maxLength]="200">
+            [maxLength]="maxMessageLength">
         </app-ui-input>
         <app-ui-button 
             (click)="sendMessage()">

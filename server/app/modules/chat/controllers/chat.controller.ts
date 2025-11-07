@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function -- OpenAPI DTO generation placeholders */
 import { Controller, Post, Body } from '@nestjs/common';
-import { SendMessageDto } from '../dto/send-message.dto';
-import { LoadMessagesDto } from '../dto/load-messages.dto';
+import { SendMessageDto } from '@app/modules/chat/dto/send-message.dto';
+import { LoadMessagesDto } from '@app/modules/chat/dto/load-messages.dto';
 
 @Controller('chat')
 export class ChatController {

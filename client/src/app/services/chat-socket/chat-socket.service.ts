@@ -16,17 +16,13 @@ export class ChatSocketService {
     }
 
     onMessageReceived(callback: (data: ChatMessage) => void): void {
-        console.log('ChatSocketService: Setting up listener for MessageReceived');
         this.socketService.onSuccessEvent(ChatEvents.MessageReceived, (data: ChatMessage) => {
-            console.log('ChatSocketService: MessageReceived event received:', data);
             callback(data);
         });
     }
 
     onLoadMessages(callback: (data: LoadMessagesDto) => void): void {
-        console.log('ChatSocketService: Setting up listener for LoadMessages');
         this.socketService.onSuccessEvent(ChatEvents.LoadMessages, (data: LoadMessagesDto) => {
-            console.log('ChatSocketService: LoadMessages event received:', data);
             callback(data);
         });
     }
