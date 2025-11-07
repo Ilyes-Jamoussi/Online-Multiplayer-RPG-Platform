@@ -2,6 +2,7 @@ import { ACCESS_CODE_LENGTH, ACCESS_CODE_PADDING, ACCESS_CODE_RANGE } from '@app
 import { SessionPreviewDto } from '@app/modules/session/dto/available-sessions-updated.dto';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
+import { ChatService } from '@app/modules/chat/services/chat.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { Player } from '@common/interfaces/player.interface';
@@ -12,13 +13,18 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 export class SessionService {
     private readonly sessions = new Map<string, WaitingRoomSession>();
 
-    constructor(private readonly eventEmitter: EventEmitter2) {}
+    constructor(
+        private readonly eventEmitter: EventEmitter2,
+        private readonly chatService: ChatService,
+    ) {}
 
     createSession(adminId: string, data: CreateSessionDto): string {
         const sessionId = this.getUniqueAccessCode();
         const session = this.buildSession(sessionId, adminId, data);
         this.sessions.set(sessionId, session);
+        this.chatService.createSessionChat(sessionId);
         this.eventEmitter.emit(ServerEvents.SessionAvailabilityChanged);
+        this.eventEmitter.emit(ServerEvents.LoadMessages, sessionId, adminId);
         return sessionId;
     }
 
@@ -52,6 +58,7 @@ export class SessionService {
             this.eventEmitter.emit(ServerEvents.SessionAutoLocked, data.sessionId);
         }
 
+        this.eventEmitter.emit(ServerEvents.LoadMessages, data.sessionId, playerId);
         return uniqueName;
     }
 

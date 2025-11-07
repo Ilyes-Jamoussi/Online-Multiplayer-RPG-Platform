@@ -1,19 +1,19 @@
-/* eslint-disable max-lines -- Test file */
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
+import { validationExceptionFactory } from '@app/utils/validation/validation.util';
+import { Avatar } from '@common/enums/avatar.enum';
+import { Dice } from '@common/enums/dice.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
-import { InGameGateway } from './in-game.gateway';
-import { validationExceptionFactory } from '@app/utils/validation/validation.util';
-import { Server, Socket } from 'socket.io';
-import { Dice } from '@common/enums/dice.enum';
-import { Avatar } from '@common/enums/avatar.enum';
+import { Test, TestingModule } from '@nestjs/testing';
 import 'reflect-metadata';
+import { Server, Socket } from 'socket.io';
+import { InGameGateway } from './in-game.gateway';
 
 describe('InGameGateway', () => {
     let gateway: InGameGateway;

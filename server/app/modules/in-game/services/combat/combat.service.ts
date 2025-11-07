@@ -1,5 +1,6 @@
 import { COMBAT_WINS_TO_WIN_GAME } from '@app/constants/game-config.constants';
 import { DiceSides } from '@app/enums/dice-sides.enum';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
@@ -7,7 +8,6 @@ import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-s
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { ServerEvents } from '@app/enums/server-events.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatState } from '@common/interfaces/combat.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -18,7 +18,7 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 export class CombatService {
     private readonly activeCombats = new Map<string, CombatState>();
 
-    // eslint-disable-next-line max-params -- NestJS dependency injection requires multiple parameters, more than 6 is required for this service
+    // eslint-disable-next-line max-params -- NestJS dependency injection requires multiple parameters, more than 5 is required for this service
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly timerService: TimerService,

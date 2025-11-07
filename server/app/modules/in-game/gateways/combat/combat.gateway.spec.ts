@@ -1,4 +1,4 @@
-/* eslint-disable max-lines -- Test file */
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { validationExceptionFactory } from '@app/utils/validation/validation.util';
 import { CombatPosture } from '@common/enums/combat-posture.enum';

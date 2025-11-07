@@ -1,3 +1,4 @@
+import { ChatModule } from '@app/modules/chat/chat.module';
 import { GameStoreModule } from '@app/modules/game-store/game-store.module';
 import { SessionModule } from '@app/modules/session/session.module';
 
@@ -16,6 +17,7 @@ import { MongooseModule } from '@nestjs/mongoose';
                 uri: config.get<string>('DATABASE_CONNECTION_STRING'),
             }),
         }),
+        ChatModule,
         GameStoreModule,
         SessionModule,
     ],

@@ -1,11 +1,11 @@
-/* eslint-disable max-lines -- Test file */
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { ACCESS_CODE_LENGTH } from '@app/constants/session.constants';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
 import { SessionService } from '@app/modules/session/services/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { ServerEvents } from '@app/enums/server-events.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('SessionService', () => {

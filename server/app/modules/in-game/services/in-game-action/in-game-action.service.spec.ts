@@ -1,18 +1,18 @@
-/* eslint-disable max-lines -- Test file */
-import { InGameActionService } from './in-game-action.service';
-import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Orientation } from '@common/enums/orientation.enum';
-import { TileKind } from '@common/enums/tile.enum';
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { ServerEvents } from '@app/enums/server-events.enum';
-import { InGameSession } from '@common/interfaces/session.interface';
+import { GameMap } from '@app/interfaces/game-map.interface';
+import { Tile } from '@app/modules/game-store/entities/tile.entity';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { Orientation } from '@common/enums/orientation.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
-import { GameMap } from '@app/interfaces/game-map.interface';
-import { Tile } from '@app/modules/game-store/entities/tile.entity';
+import { InGameSession } from '@common/interfaces/session.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InGameActionService } from './in-game-action.service';
 
 describe('InGameActionService', () => {
     let service: InGameActionService;

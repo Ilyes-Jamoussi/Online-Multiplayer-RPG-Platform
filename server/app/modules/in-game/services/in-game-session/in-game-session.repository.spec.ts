@@ -1,15 +1,15 @@
-/* eslint-disable max-lines -- Test file */
-import { InGameSessionRepository } from './in-game-session.repository';
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { NotFoundException } from '@nestjs/common';
-import { InGameSession } from '@common/interfaces/session.interface';
-import { Player } from '@common/interfaces/player.interface';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { ServerEvents } from '@app/enums/server-events.enum';
+import { Player } from '@common/interfaces/player.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
+import { NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InGameSessionRepository } from './in-game-session.repository';
 
 describe('InGameSessionRepository', () => {
     let service: InGameSessionRepository;
