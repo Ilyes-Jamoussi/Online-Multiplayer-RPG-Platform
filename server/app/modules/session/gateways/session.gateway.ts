@@ -1,5 +1,6 @@
 import { AVATAR_SELECTION_ROOM_PREFIX } from '@app/constants/session.constants';
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
+import { AddVirtualPlayerDto } from '@app/modules/session/dto/add-virtual-player.dto';
 import { AvailableSessionsUpdatedDto } from '@app/modules/session/dto/available-sessions-updated.dto';
 import { CreateSessionDto, SessionCreatedDto } from '@app/modules/session/dto/create-session.dto';
 import { AvatarSelectionJoinedDto, JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection';
@@ -155,6 +156,13 @@ export class SessionGateway implements OnGatewayDisconnect {
         } catch (error) {
             socket.emit(SessionEvents.SessionEnded, errorResponse(error.message));
         }
+    }
+
+    @SubscribeMessage(SessionEvents.AddVirtualPlayer)
+    addVirtualPlayer(socket: Socket, data: AddVirtualPlayerDto): void {
+        const players = this.sessionService.addVirtualPlayer(data.sessionId, data.virtualPlayerType);
+        this.server.to(data.sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
+        this.handleAvailabilityChange();
     }
 
     @SubscribeMessage(SessionEvents.StartGameSession)

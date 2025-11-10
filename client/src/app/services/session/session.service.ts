@@ -11,6 +11,7 @@ import { NotificationCoordinatorService } from '@app/services/notification-coord
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { AvatarAssignment, WaitingRoomSession } from '@common/interfaces/session.interface';
 
@@ -73,6 +74,11 @@ export class SessionService {
 
     kickPlayer(playerId: string): void {
         this.sessionSocketService.kickPlayer({ playerId });
+    }
+
+    addVirtualPlayer(virtualPlayerType: VirtualPlayerType): void {
+        const sessionId = this.id();
+        this.sessionSocketService.addVirtualPlayer({ sessionId, virtualPlayerType });
     }
 
     leaveSession(): void {

@@ -8,7 +8,11 @@
                 </div>
                 <div class="players-list">
                     @for (player of players(); track player.id) {
-                    <app-player-card [player]="player" />
+                        @if (isVirtualPlayer(player)) {
+                            <app-virtual-player-card [player]="player" />
+                        } @else {
+                            <app-player-card [player]="player" />
+                        }
                     }
                 </div>
                 @if (isRoomLocked()) {

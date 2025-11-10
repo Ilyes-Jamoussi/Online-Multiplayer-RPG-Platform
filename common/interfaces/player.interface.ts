@@ -1,4 +1,5 @@
 import { Dice } from '@common/enums/dice.enum';
+import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Avatar } from '../enums/avatar.enum';
 
 export interface Player {
@@ -30,4 +31,5 @@ export interface Player {
     combatWins: number;
     combatLosses: number;
     combatDraws: number;
+    virtualPlayerType?: VirtualPlayerType;
 }

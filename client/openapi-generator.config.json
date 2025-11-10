@@ -8,7 +8,8 @@
         "Avatar": "@common/enums/avatar.enum",
         "Dice": "@common/enums/dice.enum",
         "Orientation": "@common/enums/orientation.enum",
-        "CombatPosture": "@common/enums/combat-posture.enum"
+        "CombatPosture": "@common/enums/combat-posture.enum",
+        "VirtualPlayerType": "@common/enums/virtual-player-type.enum"
     },
     "typeMappings": {
         "GameMode": "GameMode",
@@ -18,7 +19,8 @@
         "Avatar": "Avatar",
         "Dice": "Dice",
         "Orientation": "Orientation",
-        "CombatPosture": "CombatPosture"
+        "CombatPosture": "CombatPosture",
+        "VirtualPlayerType": "VirtualPlayerType"
     },
     "templateDir": "openapi-templates/ts-angular"
 }

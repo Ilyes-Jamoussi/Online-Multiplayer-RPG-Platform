@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function -- OpenAPI DTO generation placeholders */
 import { Controller, Post, Body } from '@nestjs/common';
+import { AddVirtualPlayerDto } from '@app/modules/session/dto/add-virtual-player.dto';
 import { PlayerNameUpdatedDto } from '@app/modules/session/dto/player-name-updated.dto';
 import { SessionPlayersUpdatedDto } from '@app/modules/session/dto/update-session.dto';
 import { KickPlayerDto } from '@app/modules/session/dto/kick-player.dto';
@@ -15,6 +16,9 @@ import { JoinAvatarSelectionDto, AvatarSelectionJoinedDto } from '@app/modules/s
 
 @Controller('session')
 export class SessionController {
+    @Post('add-virtual-player')
+    addVirtualPlayer(@Body() data: AddVirtualPlayerDto): void {}
+
     @Post('player-name-updated')
     playerNameUpdated(@Body() data: PlayerNameUpdatedDto): void {}
 

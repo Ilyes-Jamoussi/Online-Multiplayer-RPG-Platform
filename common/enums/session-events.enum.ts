@@ -30,6 +30,8 @@ export enum SessionEvents {
     KickPlayer = 'kickPlayer',
     SessionEnded = 'sessionEnded',
 
+    AddVirtualPlayer = 'addVirtualPlayer',
+
     AvailableSessionsUpdated = 'availableSessionsUpdated',
     LoadAvailableSessions = 'loadAvailableSessions',
 }
