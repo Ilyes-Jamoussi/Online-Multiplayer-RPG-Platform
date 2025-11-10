@@ -117,6 +117,11 @@ export class CombatService {
         this.activeCombats.delete(sessionId);
     }
 
+    getActiveCombat(sessionId: string): { playerAId: string; playerBId: string } | null {
+        const combat = this.activeCombats.get(sessionId);
+        return combat ? { playerAId: combat.playerAId, playerBId: combat.playerBId } : null;
+    }
+
     private endCombat(session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean = false): void {
         this.activeCombats.delete(session.id);
         this.timerService.endCombat(session, winnerId);

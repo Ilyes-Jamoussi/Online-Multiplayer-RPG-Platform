@@ -2,6 +2,8 @@ import { ServerEvents } from '@app/enums/server-events.enum';
 import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
+import { Game } from '@app/modules/game-store/entities/game.entity';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
@@ -71,7 +73,6 @@ export class ActionService {
         return actions;
     }
 
-    // Movement delegation
     movePlayer(session: InGameSession, playerId: string, orientation: Orientation): number {
         return this.movementService.movePlayer(session, playerId, orientation);
     }
@@ -80,8 +81,7 @@ export class ActionService {
         return this.movementService.calculateReachableTiles(session, playerId);
     }
 
-    // GameCache delegation
-    async fetchAndCacheGame(sessionId: string, gameId: string): Promise<any> {
+    async fetchAndCacheGame(sessionId: string, gameId: string): Promise<Game> {
         return await this.gameCache.fetchAndCacheGame(sessionId, gameId);
     }
 
@@ -95,5 +95,28 @@ export class ActionService {
 
     clearActiveCombatForSession(sessionId: string): void {
         this.combatService.clearActiveCombatForSession(sessionId);
+    }
+
+    selectCombatPosture(sessionId: string, playerId: string, posture: CombatPosture): void {
+        this.combatService.combatChoice(sessionId, playerId, posture);
+    }
+
+    getActiveCombat(sessionId: string): { playerAId: string; playerBId: string } | null {
+        return this.combatService.getActiveCombat(sessionId);
+    }
+
+    calculateDirectionToTarget(currentPlayer: { x: number; y: number }, targetPlayer: { x: number; y: number }): Orientation {
+        const dx = targetPlayer.x - currentPlayer.x;
+        const dy = targetPlayer.y - currentPlayer.y;
+        
+        if (Math.abs(dx) > Math.abs(dy)) {
+            return dx > 0 ? Orientation.E : Orientation.W;
+        } else {
+            return dy > 0 ? Orientation.S : Orientation.N;
+        }
+    }
+
+    attackPlayer(sessionId: string, playerId: string, targetX: number, targetY: number): void {
+        this.combatService.attackPlayerAction(sessionId, playerId, targetX, targetY);
     }
 }

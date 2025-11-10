@@ -1,6 +1,5 @@
 import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
 import { ActionService } from '@app/modules/in-game/services/action/action.service';
-import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { Game } from '@app/modules/game-store/entities/game.entity';
@@ -16,7 +15,6 @@ export class GameplayService {
         private readonly sessionRepository: InGameSessionRepository,
         private readonly actionService: ActionService,
         private readonly timerService: TimerService,
-        private readonly combatService: CombatService,
     ) {}
 
     endPlayerTurn(sessionId: string, playerId: string): InGameSession {
@@ -112,96 +110,80 @@ export class GameplayService {
         return await this.actionService.fetchAndCacheGame(sessionId, gameId);
     }
 
-    handleCombatForVirtualPlayers(sessionId: string, playerAId: string, playerBId: string): void {
-        const session = this.sessionRepository.findById(sessionId);
-        
-        [playerAId, playerBId].forEach(playerId => {
-            const player = session.inGamePlayers[playerId];
-            if (player?.virtualPlayerType) {
-                const posture = player.virtualPlayerType === VirtualPlayerType.Offensive 
-                    ? CombatPosture.OFFENSIVE 
-                    : CombatPosture.DEFENSIVE;
-                
-                setTimeout(() => {
-                    this.combatService.combatChoice(sessionId, playerId, posture);
-                }, Math.random() * 5000);
-            }
-        });
-    }
-
-    // API pour VirtualPlayerService
     getSessionData(sessionId: string): InGameSession {
         return this.sessionRepository.findById(sessionId);
     }
 
-    getPlayerReachableTiles(sessionId: string, playerId: string): any[] {
-        const session = this.sessionRepository.findById(sessionId);
-        return this.actionService.calculateReachableTiles(session, playerId);
+    clearSessionResources(sessionId: string): void {
+        this.actionService.clearSessionGameCache(sessionId);
+        this.actionService.clearActiveCombatForSession(sessionId);
     }
 
-    getPlayerAvailableActions(sessionId: string, playerId: string): any[] {
+    selectVPPosture(sessionId: string, playerId: string): void {
         const session = this.sessionRepository.findById(sessionId);
-        return this.actionService.calculateAvailableActions(session, playerId);
-    }
-
-    attackPlayer(sessionId: string, playerId: string, targetX: number, targetY: number): void {
-        this.combatService.attackPlayerAction(sessionId, playerId, targetX, targetY);
-    }
-
-    // IA Strategies
-    playOffensiveTurn(sessionId: string, playerId: string): void {
-        const session = this.sessionRepository.findById(sessionId);
-        const reachableTiles = this.actionService.calculateReachableTiles(session, playerId);
-        const availableActions = this.actionService.calculateAvailableActions(session, playerId);
+        const player = session.inGamePlayers[playerId];
         
-        // Chercher cibles attaquables
-        const attackableTargets = this.findAttackableTargets(session, playerId, reachableTiles);
+        if (!player?.virtualPlayerType) return;
         
-        if (attackableTargets.length > 0) {
-            const target = attackableTargets[Math.floor(Math.random() * attackableTargets.length)];
-            this.executeAttackSequence(sessionId, playerId, target);
-        } else {
-            this.moveTowardsNearestEnemy(sessionId, playerId, session, reachableTiles);
+        const posture = player.virtualPlayerType === VirtualPlayerType.Offensive 
+            ? CombatPosture.OFFENSIVE 
+            : CombatPosture.DEFENSIVE;
+            
+        // Déléguer à ActionService qui utilise CombatService
+        this.actionService.selectCombatPosture(sessionId, playerId, posture);
+    }
+
+    handleVPCombat(sessionId: string, playerAId?: string, playerBId?: string): void {
+        // Si les IDs ne sont pas fournis, récupérer le combat actif
+        if (!playerAId || !playerBId) {
+            const activeCombat = this.actionService.getActiveCombat(sessionId);
+            if (!activeCombat) return;
+            playerAId = activeCombat.playerAId;
+            playerBId = activeCombat.playerBId;
         }
+        
+        // Sélectionner les postures pour tous les joueurs virtuels
+        this.selectVPPosture(sessionId, playerAId);
+        this.selectVPPosture(sessionId, playerBId);
     }
 
-    playDefensiveTurn(sessionId: string, playerId: string): void {
+    executeOffensiveTurn(sessionId: string, playerId: string): void {
+        this.executeOffensiveLoop(sessionId, playerId);
+    }
+
+    private executeOffensiveLoop(sessionId: string, playerId: string): void {
+        if (!this.isPlayerAlive(sessionId, playerId)) return;
+        
+        this.moveToNearestPlayer(sessionId, playerId, () => {
+            this.waitAndAttemptAttack(sessionId, playerId);
+        });
+    }
+
+    private isPlayerAlive(sessionId: string, playerId: string): boolean {
         const session = this.sessionRepository.findById(sessionId);
-        const reachableTiles = this.actionService.calculateReachableTiles(session, playerId);
-        
-        const safestPosition = this.findSafestPosition(session, playerId, reachableTiles);
-        if (safestPosition) {
-            this.moveToPosition(sessionId, playerId, safestPosition);
+        const player = session.inGamePlayers[playerId];
+        return player.health > 0;
+    }
+
+    private moveToNearestPlayer(sessionId: string, playerId: string, onComplete: () => void): void {
+        const nearestPlayer = this.findNearestPlayer(sessionId, playerId);
+        if (!nearestPlayer) {
+            onComplete();
+            return;
         }
-    }
-
-    private findAttackableTargets(session: InGameSession, playerId: string, reachableTiles: any[]): any[] {
-        const targets = [];
-        const otherPlayers = Object.entries(session.inGamePlayers).filter(([id]) => id !== playerId);
         
-        for (const tile of reachableTiles) {
-            for (const [targetId, targetPlayer] of otherPlayers) {
-                if (Math.abs(tile.x - targetPlayer.x) + Math.abs(tile.y - targetPlayer.y) === 1) {
-                    targets.push({ targetId, targetPlayer, fromTile: tile });
-                }
-            }
-        }
-        return targets;
+        this.moveProgressively(sessionId, playerId, nearestPlayer, onComplete);
     }
 
-    private executeAttackSequence(sessionId: string, playerId: string, target: any): void {
-        this.moveToPosition(sessionId, playerId, target.fromTile);
-        this.combatService.attackPlayerAction(sessionId, playerId, target.targetPlayer.x, target.targetPlayer.y);
-    }
-
-    private moveTowardsNearestEnemy(sessionId: string, playerId: string, session: InGameSession, reachableTiles: any[]): void {
+    private findNearestPlayer(sessionId: string, playerId: string): { x: number; y: number } | null {
+        const session = this.sessionRepository.findById(sessionId);
         const currentPlayer = session.inGamePlayers[playerId];
         const otherPlayers = Object.values(session.inGamePlayers).filter(p => p.id !== playerId);
         
-        if (otherPlayers.length === 0) return;
+        if (otherPlayers.length === 0) return null;
         
-        let nearestPlayer = null;
-        let minDistance = Infinity;
+        let nearestPlayer = otherPlayers[0];
+        let minDistance = Math.abs(currentPlayer.x - nearestPlayer.x) + Math.abs(currentPlayer.y - nearestPlayer.y);
         
         for (const player of otherPlayers) {
             const distance = Math.abs(currentPlayer.x - player.x) + Math.abs(currentPlayer.y - player.y);
@@ -211,49 +193,169 @@ export class GameplayService {
             }
         }
         
-        if (!nearestPlayer) return;
-        
-        const bestTile = reachableTiles.reduce((best, tile) => {
-            const distance = Math.abs(tile.x - nearestPlayer.x) + Math.abs(tile.y - nearestPlayer.y);
-            return !best || distance < best.distance ? { tile, distance } : best;
-        }, null);
-        
-        if (bestTile) {
-            this.moveToPosition(sessionId, playerId, bestTile.tile);
-        }
+        return nearestPlayer;
     }
 
-    private findSafestPosition(session: InGameSession, playerId: string, reachableTiles: any[]): any {
-        const otherPlayers = Object.values(session.inGamePlayers).filter(p => p.id !== playerId);
-        
-        return reachableTiles.reduce((safest, tile) => {
-            const avgDistance = otherPlayers.reduce((sum, player) => 
-                sum + Math.abs(tile.x - player.x) + Math.abs(tile.y - player.y), 0) / otherPlayers.length;
-            
-            return !safest || avgDistance > safest.avgDistance ? { tile, avgDistance } : safest;
-        }, null)?.tile;
-    }
-
-    private moveToPosition(sessionId: string, playerId: string, targetPosition: any): void {
+    private moveProgressively(sessionId: string, playerId: string, target: { x: number; y: number }, onComplete: () => void): void {
         const session = this.sessionRepository.findById(sessionId);
         const currentPlayer = session.inGamePlayers[playerId];
         
-        const dx = targetPosition.x - currentPlayer.x;
-        const dy = targetPosition.y - currentPlayer.y;
+        if (currentPlayer.speed === 0 || this.isAdjacentTo(currentPlayer, target)) {
+            onComplete();
+            return;
+        }
         
-        const direction = Math.abs(dx) > Math.abs(dy) 
-            ? (dx > 0 ? Orientation.E : Orientation.W)
-            : (dy > 0 ? Orientation.S : Orientation.N);
+        const direction = this.actionService.calculateDirectionToTarget(currentPlayer, target);
         
         try {
             this.movePlayer(sessionId, playerId, direction);
+            
+            setTimeout(() => {
+                this.moveProgressively(sessionId, playerId, target, onComplete);
+            }, 500);
+            
         } catch {
-            // Mouvement impossible
+            onComplete();
         }
     }
 
-    clearSessionResources(sessionId: string): void {
-        this.actionService.clearSessionGameCache(sessionId);
-        this.actionService.clearActiveCombatForSession(sessionId);
+    private isAdjacentTo(player1: { x: number; y: number }, player2: { x: number; y: number }): boolean {
+        const distance = Math.abs(player1.x - player2.x) + Math.abs(player1.y - player2.y);
+        return distance <= 1;
+    }
+
+    private waitAndAttemptAttack(sessionId: string, playerId: string): void {
+        setTimeout(() => {
+            this.attemptAttack(sessionId, playerId);
+        }, 1000);
+    }
+
+    private attemptAttack(sessionId: string, playerId: string): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const currentPlayer = session.inGamePlayers[playerId];
+        
+        if (currentPlayer.actionsRemaining === 0) return;
+        
+        const availableActions = this.actionService.calculateAvailableActions(session, playerId);
+        if (availableActions.length === 0) return;
+        
+        const action = availableActions[0];
+        
+        try {
+            if (action.type === 'ATTACK') {
+                this.actionService.attackPlayer(sessionId, playerId, action.x, action.y);
+            }
+            this.waitAndContinueIfPossible(sessionId, playerId);
+        } catch {
+            // Action impossible
+        }
+    }
+
+    private waitAndContinueIfPossible(sessionId: string, playerId: string): void {
+        setTimeout(() => {
+            if (this.canContinueOffensive(sessionId, playerId)) {
+                this.executeOffensiveLoop(sessionId, playerId);
+            }
+        }, 1000);
+    }
+
+    private canContinueOffensive(sessionId: string, playerId: string): boolean {
+        const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        return player.health > 0 && (player.speed > 0 || player.actionsRemaining > 0);
+    }
+
+    executeDefensiveTurn(sessionId: string, playerId: string): void {
+        this.executeDefensiveLoop(sessionId, playerId);
+    }
+
+    private executeDefensiveLoop(sessionId: string, playerId: string): void {
+        if (!this.isPlayerAlive(sessionId, playerId)) return;
+        
+        this.moveAwayFromPlayers(sessionId, playerId, () => {
+            this.waitAndContinueDefensive(sessionId, playerId);
+        });
+    }
+
+    private moveAwayFromPlayers(sessionId: string, playerId: string, onComplete: () => void): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const currentPlayer = session.inGamePlayers[playerId];
+        
+        if (currentPlayer.speed === 0) {
+            onComplete();
+            return;
+        }
+        
+        const safestDirection = this.findSafestDirection(sessionId, playerId);
+        if (!safestDirection) {
+            onComplete();
+            return;
+        }
+        
+        try {
+            this.movePlayer(sessionId, playerId, safestDirection);
+            
+            setTimeout(() => {
+                this.moveAwayFromPlayers(sessionId, playerId, onComplete);
+            }, 500);
+            
+        } catch {
+            onComplete();
+        }
+    }
+
+    private findSafestDirection(sessionId: string, playerId: string): Orientation | null {
+        const session = this.sessionRepository.findById(sessionId);
+        const currentPlayer = session.inGamePlayers[playerId];
+        const otherPlayers = Object.values(session.inGamePlayers).filter(p => p.id !== playerId);
+        
+        if (otherPlayers.length === 0) return null;
+        
+        const directions = [Orientation.N, Orientation.E, Orientation.S, Orientation.W];
+        let bestDirection = null;
+        let maxMinDistance = -1;
+        
+        for (const direction of directions) {
+            const nextPosition = this.getNextPosition(currentPlayer, direction);
+            
+            // Calculer la distance minimale aux autres joueurs depuis cette position
+            let minDistanceToPlayers = Infinity;
+            for (const player of otherPlayers) {
+                const distance = Math.abs(nextPosition.x - player.x) + Math.abs(nextPosition.y - player.y);
+                minDistanceToPlayers = Math.min(minDistanceToPlayers, distance);
+            }
+            
+            // Choisir la direction qui maximise la distance minimale
+            if (minDistanceToPlayers > maxMinDistance) {
+                maxMinDistance = minDistanceToPlayers;
+                bestDirection = direction;
+            }
+        }
+        
+        return bestDirection;
+    }
+
+    private getNextPosition(player: { x: number; y: number }, direction: Orientation): { x: number; y: number } {
+        switch (direction) {
+            case Orientation.N: return { x: player.x, y: player.y - 1 };
+            case Orientation.E: return { x: player.x + 1, y: player.y };
+            case Orientation.S: return { x: player.x, y: player.y + 1 };
+            case Orientation.W: return { x: player.x - 1, y: player.y };
+            default: return player;
+        }
+    }
+
+    private waitAndContinueDefensive(sessionId: string, playerId: string): void {
+        setTimeout(() => {
+            if (this.canContinueDefensive(sessionId, playerId)) {
+                this.executeDefensiveLoop(sessionId, playerId);
+            }
+        }, 1000);
+    }
+
+    private canContinueDefensive(sessionId: string, playerId: string): boolean {
+        const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        return player.health > 0 && player.speed > 0;
     }
 }
