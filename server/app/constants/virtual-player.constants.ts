@@ -11,3 +11,4 @@ export const VIRTUAL_PLAYER_NAMES = [
 
 export const BASE_STAT_VALUE = 4;
 export const BONUS_VALUE = 2;
+export const RANDOM_THRESHOLD = 0.5;
