@@ -161,7 +161,6 @@ export class InGameService {
     }
 
     removeSession(sessionId: string): void {
-        const session = this.sessionRepository.findById(sessionId);
         this.sessionRepository.delete(sessionId);
         this.gameplayService.clearSessionResources(sessionId);
         this.timerService.clearTimerForSession(sessionId);

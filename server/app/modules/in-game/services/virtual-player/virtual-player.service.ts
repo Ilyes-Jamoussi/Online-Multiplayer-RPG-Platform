@@ -3,6 +3,7 @@ import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+import { VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS, VIRTUAL_PLAYER_THINKING_DELAY_MAX_MS } from '@app/constants/virtual-player.constants';
 
 @Injectable()
 export class VirtualPlayerService {
@@ -27,10 +28,8 @@ export class VirtualPlayerService {
     }
 
     private async simulateThinkingTime(): Promise<void> {
-        // Délai aléatoire entre 1.5 et 4 secondes pour simuler la réflexion
-        const minDelay = 1500;
-        const maxDelay = 4000;
-        const randomDelay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
+        const randomDelay = Math.floor(Math.random() * (VIRTUAL_PLAYER_THINKING_DELAY_MAX_MS - VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS + 1)) 
+            + VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS;
         
         return new Promise(resolve => setTimeout(resolve, randomDelay));
     }

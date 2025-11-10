@@ -8,6 +8,7 @@ import { Orientation } from '@common/enums/orientation.enum';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { VIRTUAL_PLAYER_MOVEMENT_DELAY_MS, VIRTUAL_PLAYER_ACTION_DELAY_MS } from '@app/constants/virtual-player.constants';
 
 @Injectable()
 export class GameplayService {
@@ -212,7 +213,7 @@ export class GameplayService {
             
             setTimeout(() => {
                 this.moveProgressively(sessionId, playerId, target, onComplete);
-            }, 500);
+            }, VIRTUAL_PLAYER_MOVEMENT_DELAY_MS);
             
         } catch {
             onComplete();
@@ -227,7 +228,7 @@ export class GameplayService {
     private waitAndAttemptAttack(sessionId: string, playerId: string): void {
         setTimeout(() => {
             this.attemptAttack(sessionId, playerId);
-        }, 1000);
+        }, VIRTUAL_PLAYER_ACTION_DELAY_MS);
     }
 
     private attemptAttack(sessionId: string, playerId: string): void {
@@ -256,7 +257,7 @@ export class GameplayService {
             if (this.canContinueOffensive(sessionId, playerId)) {
                 this.executeOffensiveLoop(sessionId, playerId);
             }
-        }, 1000);
+        }, VIRTUAL_PLAYER_ACTION_DELAY_MS);
     }
 
     private canContinueOffensive(sessionId: string, playerId: string): boolean {
@@ -297,7 +298,7 @@ export class GameplayService {
             
             setTimeout(() => {
                 this.moveAwayFromPlayers(sessionId, playerId, onComplete);
-            }, 500);
+            }, VIRTUAL_PLAYER_MOVEMENT_DELAY_MS);
             
         } catch {
             onComplete();
@@ -350,7 +351,7 @@ export class GameplayService {
             if (this.canContinueDefensive(sessionId, playerId)) {
                 this.executeDefensiveLoop(sessionId, playerId);
             }
-        }, 1000);
+        }, VIRTUAL_PLAYER_ACTION_DELAY_MS);
     }
 
     private canContinueDefensive(sessionId: string, playerId: string): boolean {
