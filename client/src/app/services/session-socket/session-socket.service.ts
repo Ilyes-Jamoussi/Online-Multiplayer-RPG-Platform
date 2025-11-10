@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { AddVirtualPlayerDto } from '@app/dto/add-virtual-player-dto';
 import { AvailableSessionsUpdatedDto } from '@app/dto/available-sessions-updated-dto';
 import { AvatarAssignmentsUpdatedDto } from '@app/dto/avatar-assignments-updated-dto';
 import { AvatarSelectionJoinedDto } from '@app/dto/avatar-selection-joined-dto';
@@ -51,6 +52,10 @@ export class SessionSocketService {
 
     kickPlayer(data: KickPlayerDto): void {
         this.socket.emit(SessionEvents.KickPlayer, data);
+    }
+
+    addVirtualPlayer(data: AddVirtualPlayerDto): void {
+        this.socket.emit(SessionEvents.AddVirtualPlayer, data);
     }
 
     updateAvatarsAssignment(data: UpdateAvatarAssignmentsDto): void {

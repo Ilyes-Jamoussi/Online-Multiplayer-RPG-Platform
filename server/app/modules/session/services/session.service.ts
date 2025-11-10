@@ -1,9 +1,12 @@
 import { ACCESS_CODE_LENGTH, ACCESS_CODE_PADDING, ACCESS_CODE_RANGE } from '@app/constants/session.constants';
+import { BASE_STAT_VALUE, BONUS_VALUE, VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-player.constants';
 import { SessionPreviewDto } from '@app/modules/session/dto/available-sessions-updated.dto';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
 import { ChatService } from '@app/modules/chat/services/chat.service';
 import { Avatar } from '@common/enums/avatar.enum';
+import { Dice } from '@common/enums/dice.enum';
+import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { AvatarAssignment, WaitingRoomSession } from '@common/interfaces/session.interface';
@@ -130,6 +133,64 @@ export class SessionService {
         const session = this.getSession(sessionId);
         session.players = session.players.filter((player) => player.id !== playerId);
         this.releaseAvatar(sessionId, playerId);
+    }
+
+    addVirtualPlayer(sessionId: string, virtualPlayerType: VirtualPlayerType): Player[] {
+        const session = this.getSession(sessionId);
+        const virtualPlayer = this.createVirtualPlayer(virtualPlayerType, session.players);
+        session.players.push(virtualPlayer);
+        return session.players;
+    }
+
+    private createVirtualPlayer(virtualPlayerType: VirtualPlayerType, existingPlayers: Player[]): Player {
+        const availableNames = VIRTUAL_PLAYER_NAMES.filter(name => 
+            !existingPlayers.some(player => player.name === name)
+        );
+        const name = availableNames[Math.floor(Math.random() * availableNames.length)] || `Bot-${Date.now()}`;
+        
+        const avatars = Object.values(Avatar);
+        const availableAvatars = avatars.filter(avatar => 
+            !existingPlayers.some(player => player.avatar === avatar)
+        );
+        const avatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)] || avatars[0];
+
+        const attackDice = Math.random() > 0.5 ? Dice.D4 : Dice.D6;
+        const defenseDice = attackDice === Dice.D4 ? Dice.D6 : Dice.D4;
+
+        const healthBonus = Math.random() > 0.5 ? BONUS_VALUE : 0;
+        const speedBonus = healthBonus === BONUS_VALUE ? 0 : BONUS_VALUE;
+
+        return {
+            id: `virtual-${Date.now()}-${Math.random()}`,
+            name,
+            avatar,
+            isAdmin: false,
+            baseHealth: BASE_STAT_VALUE,
+            healthBonus,
+            health: BASE_STAT_VALUE + healthBonus,
+            maxHealth: BASE_STAT_VALUE + healthBonus,
+            baseSpeed: BASE_STAT_VALUE,
+            speedBonus,
+            speed: BASE_STAT_VALUE + speedBonus,
+            baseAttack: BASE_STAT_VALUE,
+            attackBonus: 0,
+            attack: BASE_STAT_VALUE,
+            baseDefense: BASE_STAT_VALUE,
+            defenseBonus: 0,
+            defense: BASE_STAT_VALUE,
+            attackDice,
+            defenseDice,
+            x: 0,
+            y: 0,
+            isInGame: false,
+            startPointId: '',
+            actionsRemaining: 1,
+            combatCount: 0,
+            combatWins: 0,
+            combatLosses: 0,
+            combatDraws: 0,
+            virtualPlayerType,
+        };
     }
 
     getSession(sessionId: string): WaitingRoomSession {
