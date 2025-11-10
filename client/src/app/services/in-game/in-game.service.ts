@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, signal, inject } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
@@ -6,6 +6,7 @@ import { NotificationCoordinatorService } from '@app/services/notification-coord
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { ResetService } from '@app/services/reset/reset.service';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
@@ -79,6 +80,7 @@ export class InGameService {
         private readonly notificationCoordinatorService: NotificationCoordinatorService,
     ) {
         this.initListeners();
+        inject(ResetService).reset$.subscribe(() => this.reset());
     }
 
     get activePlayer(): Player | undefined {

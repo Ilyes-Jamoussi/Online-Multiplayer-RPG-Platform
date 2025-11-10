@@ -1,18 +1,18 @@
-/* eslint-disable max-lines -- Test file */
-import { GameCacheService } from './game-cache.service';
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { Game } from '@app/modules/game-store/entities/game.entity';
-import { GameDocument } from '@app/types/mongoose-documents.types';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { Tile } from '@app/modules/game-store/entities/tile.entity';
-import { Model, Types } from 'mongoose';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { MapSize } from '@common/enums/map-size.enum';
+import { GameDocument } from '@app/types/mongoose-documents.types';
+import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
-import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { Model, Types } from 'mongoose';
+import { GameCacheService } from './game-cache.service';
 
 describe('GameCacheService', () => {
     let service: GameCacheService;

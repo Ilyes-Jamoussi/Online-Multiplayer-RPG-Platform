@@ -1,27 +1,27 @@
-/* eslint-disable max-lines -- Test file */
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { AVATAR_SELECTION_ROOM_PREFIX } from '@app/constants/session.constants';
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
 import { JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
 import { KickPlayerDto } from '@app/modules/session/dto/kick-player.dto';
+import { PlayerDto } from '@app/modules/session/dto/player.dto';
 import { UpdateAvatarAssignmentsDto } from '@app/modules/session/dto/update-avatar-assignments.dto';
 import { SessionService } from '@app/modules/session/services/session.service';
-import { SessionEvents } from '@common/enums/session-events.enum';
+import { validationExceptionFactory } from '@app/utils/validation/validation.util';
+import { Avatar } from '@common/enums/avatar.enum';
+import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { Avatar } from '@common/enums/avatar.enum';
-import { Test, TestingModule } from '@nestjs/testing';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { SessionGateway } from './session.gateway';
-import { validationExceptionFactory } from '@app/utils/validation/validation.util';
-import { Server, Socket } from 'socket.io';
-import { WaitingRoomSession } from '@common/interfaces/session.interface';
+import { SessionEvents } from '@common/enums/session-events.enum';
 import { Player } from '@common/interfaces/player.interface';
-import { Dice } from '@common/enums/dice.enum';
-import { PlayerDto } from '@app/modules/session/dto/player.dto';
+import { WaitingRoomSession } from '@common/interfaces/session.interface';
 import { Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Test, TestingModule } from '@nestjs/testing';
 import 'reflect-metadata';
+import { Server, Socket } from 'socket.io';
+import { SessionGateway } from './session.gateway';
 
 describe('SessionGateway', () => {
     let gateway: SessionGateway;

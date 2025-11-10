@@ -2,9 +2,33 @@
     <div class="header">
         <h2><i class="material-icons">chat</i> Chat</h2>
     </div>
-    <div class="messages"></div>
+    <div class="messages" #messagesContainer>
+        @for (message of messages(); track message.timestamp) {
+            <div class="message" 
+                 [class.my-message]="isMyMessage(message.authorId)"
+                 [class.other-message]="!isMyMessage(message.authorId)">
+                <div class="message-bubble">
+                    <div class="message-header">
+                        <span class="author">{{ message.authorName }}</span>
+                        <span class="time">{{ formatTime(message.timestamp) }}</span>
+                    </div>
+                    <div class="content">{{ message.content }}</div>
+                </div>
+            </div>
+        }
+    </div>
     <div class="chat-input">
-        <app-ui-input [disabled]="true" type="text" placeholder="Tapez votre message..."></app-ui-input>
-        <app-ui-button [disabled]="true">Envoyer</app-ui-button>
+        <app-ui-input 
+            [value]="messageInput"
+            (valueChange)="messageInput = $event"
+            (keydown.enter)="sendMessage()"
+            type="text" 
+            placeholder="Tapez votre message..."
+            [maxLength]="maxMessageLength">
+        </app-ui-input>
+        <app-ui-button 
+            (click)="sendMessage()">
+            <i class="material-icons">send</i>
+        </app-ui-button>
     </div>
 </div>
