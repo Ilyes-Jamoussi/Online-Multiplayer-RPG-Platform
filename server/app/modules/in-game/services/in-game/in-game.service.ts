@@ -1,5 +1,6 @@
-import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
+import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { InitializationService } from '@app/modules/in-game/services/initialization/initialization.service';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { GameMode } from '@common/enums/game-mode.enum';
@@ -7,25 +8,14 @@ import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { InGameSession, WaitingRoomSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { InGameActionService } from '@app/modules/in-game/services/in-game-action/in-game-action.service';
-import { InGameInitializationService } from '@app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
-import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
-import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
-import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
 
 @Injectable()
 export class InGameService {
-    // eslint-disable-next-line max-params -- NestJS dependency injection requires multiple parameters, more than 5 is required for this service
     constructor(
         private readonly timerService: TimerService,
-        private readonly gameCache: GameCacheService,
-        private readonly initialization: InGameInitializationService,
+        private readonly initialization: InitializationService,
         private readonly sessionRepository: InGameSessionRepository,
-        private readonly movementService: InGameMovementService,
-        private readonly combatService: CombatService,
-        private readonly actionService: InGameActionService,
-        private readonly combatTimerService: CombatTimerService,
+        private readonly gameplayService: GameplayService,
     ) {}
 
     async createInGameSession(waiting: WaitingRoomSession, mode: GameMode, mapSize: MapSize): Promise<InGameSession> {
@@ -46,7 +36,7 @@ export class InGameService {
             isAdminModeActive: false,
         };
 
-        const game = await this.gameCache.fetchAndCacheGame(id, gameId);
+        const game = await this.gameplayService.fetchAndCacheGame(id, gameId);
 
         const playerIdsOrder = this.initialization.makeTurnOrder(players);
         session.turnOrder = playerIdsOrder;
@@ -63,6 +53,13 @@ export class InGameService {
 
         this.initialization.assignStartPoints(session, game);
         this.sessionRepository.save(session);
+
+        // Auto-join virtual players
+        const virtualPlayers = players.filter(player => player.virtualPlayerType);
+        for (const virtualPlayer of virtualPlayers) {
+            this.joinInGameSession(session.id, virtualPlayer.id);
+        }
+
         return session;
     }
 
@@ -100,39 +97,15 @@ export class InGameService {
     }
 
     endPlayerTurn(sessionId: string, playerId: string): InGameSession {
-        const session = this.sessionRepository.findById(sessionId);
-        if (session.currentTurn.activePlayerId !== playerId) {
-            throw new BadRequestException('Not your turn');
-        }
-        this.timerService.endTurnManual(session);
-        return session;
+        return this.gameplayService.endPlayerTurn(sessionId, playerId);
     }
 
     toggleDoorAction(sessionId: string, playerId: string, x: number, y: number): void {
-        const session = this.sessionRepository.findById(sessionId);
-        const player = session.inGamePlayers[playerId];
-        if (!player) throw new NotFoundException('Player not found');
-        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
-        this.actionService.toggleDoor(session, playerId, x, y);
-        player.actionsRemaining--;
-        session.currentTurn.hasUsedAction = true;
-        this.movementService.calculateReachableTiles(session, playerId);
-        if (!player.actionsRemaining && !player.speed) {
-            this.timerService.endTurnManual(session);
-        }
+        this.gameplayService.toggleDoorAction(sessionId, playerId, x, y);
     }
 
     movePlayer(sessionId: string, playerId: string, orientation: Orientation): void {
-        const session = this.sessionRepository.findById(sessionId);
-        if (playerId !== session.currentTurn.activePlayerId) throw new BadRequestException('Not your turn');
-        if (this.timerService.getGameTimerState(sessionId) !== TurnTimerStates.PlayerTurn) throw new BadRequestException('Not your turn');
-
-        const remainingSpeed = this.movementService.movePlayer(session, playerId, orientation);
-        const availableActions = this.actionService.calculateAvailableActions(session, playerId);
-
-        if (!remainingSpeed && !availableActions.length) {
-            this.timerService.endTurnManual(session);
-        }
+        this.gameplayService.movePlayer(sessionId, playerId, orientation);
     }
 
     leaveInGameSession(
@@ -172,62 +145,25 @@ export class InGameService {
     }
 
     getReachableTiles(sessionId: string, playerId: string): void {
-        const session = this.sessionRepository.findById(sessionId);
-        const player = session.inGamePlayers[playerId];
-        const reachableTiles = this.movementService.calculateReachableTiles(session, playerId);
-        if (!reachableTiles.length && !player.actionsRemaining) {
-            this.timerService.endTurnManual(session);
-        }
+        this.gameplayService.getReachableTiles(sessionId, playerId);
     }
 
     getAvailableActions(sessionId: string, playerId: string) {
-        const session = this.sessionRepository.findById(sessionId);
-        this.actionService.calculateAvailableActions(session, playerId);
+        return this.gameplayService.getAvailableActions(sessionId, playerId);
     }
 
     toggleAdminMode(sessionId: string, playerId: string): InGameSession {
-        const session = this.sessionRepository.findById(sessionId);
-        const player = session.inGamePlayers[playerId];
-
-        if (!player) {
-            throw new NotFoundException('Player not found');
-        }
-
-        if (!player.isAdmin) {
-            throw new BadRequestException('Only admin can toggle admin mode');
-        }
-
-        session.isAdminModeActive = !session.isAdminModeActive;
-        this.sessionRepository.update(session);
-        return session;
+        return this.gameplayService.toggleAdminMode(sessionId, playerId);
     }
 
     teleportPlayer(sessionId: string, playerId: string, x: number, y: number): void {
-        const session = this.sessionRepository.findById(sessionId);
-
-        if (!session.isAdminModeActive) {
-            throw new BadRequestException('Admin mode not active');
-        }
-
-        if (session.currentTurn.activePlayerId !== playerId) {
-            throw new BadRequestException('Not your turn');
-        }
-
-        if (!this.gameCache.isTileFree(sessionId, x, y)) {
-            throw new BadRequestException('Tile is not free');
-        }
-
-        this.sessionRepository.movePlayerPosition(sessionId, playerId, x, y, 0);
-        this.movementService.calculateReachableTiles(session, playerId);
-        this.actionService.calculateAvailableActions(session, playerId);
+        this.gameplayService.teleportPlayer(sessionId, playerId, x, y);
     }
 
     removeSession(sessionId: string): void {
         const session = this.sessionRepository.findById(sessionId);
         this.sessionRepository.delete(sessionId);
-        this.gameCache.clearSessionGameCache(sessionId);
-        this.combatService.clearActiveCombatForSession(sessionId);
-        this.combatTimerService.stopCombatTimer(session);
+        this.gameplayService.clearSessionResources(sessionId);
         this.timerService.clearTimerForSession(sessionId);
     }
 }

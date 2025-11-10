@@ -190,18 +190,22 @@ export class SessionGateway implements OnGatewayDisconnect {
         const players = this.sessionService.getPlayersSession(sessionId);
 
         for (const player of players) {
-            const playerSocket = this.server.sockets.sockets.get(player.id);
-            if (playerSocket) {
-                void playerSocket.join(inGameSession.inGameId);
+            if (!player.virtualPlayerType) {
+                const playerSocket = this.server.sockets.sockets.get(player.id);
+                if (playerSocket) {
+                    void playerSocket.join(inGameSession.inGameId);
+                }
             }
         }
 
         this.server.to(sessionId).emit(SessionEvents.GameSessionStarted, successResponse({}));
 
         for (const player of players) {
-            const playerSocket = this.server.sockets.sockets.get(player.id);
-            if (playerSocket) {
-                void playerSocket.leave(sessionId);
+            if (!player.virtualPlayerType) {
+                const playerSocket = this.server.sockets.sockets.get(player.id);
+                if (playerSocket) {
+                    void playerSocket.leave(sessionId);
+                }
             }
         }
         this.sessionService.endSession(sessionId);

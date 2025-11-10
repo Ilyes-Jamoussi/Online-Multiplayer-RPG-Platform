@@ -7,7 +7,7 @@ import { InGameSession } from '@common/interfaces/session.interface';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class InGameInitializationService {
+export class InitializationService {
     constructor(
         private readonly sessionRepository: InGameSessionRepository,
         private readonly gameCache: GameCacheService,

@@ -11,7 +11,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
-export class InGameMovementService {
+export class MovementService {
     constructor(
         private readonly gameCache: GameCacheService,
         private readonly sessionRepository: InGameSessionRepository,

@@ -1,16 +1,21 @@
-import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { Orientation } from '@common/enums/orientation.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
+import { Orientation } from '@common/enums/orientation.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
-export class InGameActionService {
+export class ActionService {
     constructor(
         private readonly gameCache: GameCacheService,
+        private readonly movementService: MovementService,
+        private readonly combatService: CombatService,
         private readonly eventEmitter: EventEmitter2,
     ) {}
 
@@ -64,5 +69,31 @@ export class InGameActionService {
         });
 
         return actions;
+    }
+
+    // Movement delegation
+    movePlayer(session: InGameSession, playerId: string, orientation: Orientation): number {
+        return this.movementService.movePlayer(session, playerId, orientation);
+    }
+
+    calculateReachableTiles(session: InGameSession, playerId: string): ReachableTile[] {
+        return this.movementService.calculateReachableTiles(session, playerId);
+    }
+
+    // GameCache delegation
+    async fetchAndCacheGame(sessionId: string, gameId: string): Promise<any> {
+        return await this.gameCache.fetchAndCacheGame(sessionId, gameId);
+    }
+
+    isTileFree(sessionId: string, x: number, y: number): boolean {
+        return this.gameCache.isTileFree(sessionId, x, y);
+    }
+
+    clearSessionGameCache(sessionId: string): void {
+        this.gameCache.clearSessionGameCache(sessionId);
+    }
+
+    clearActiveCombatForSession(sessionId: string): void {
+        this.combatService.clearActiveCombatForSession(sessionId);
     }
 }
