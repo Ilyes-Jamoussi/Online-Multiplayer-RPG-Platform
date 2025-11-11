@@ -4,6 +4,7 @@ import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { GameDocument } from '@app/types/mongoose-documents.types';
 import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableFootprint } from '@common/enums/placeable-kind.enum';
 import { TileCost, TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -20,9 +21,29 @@ export class GameCacheService {
         const game = await this.gameModel.findById(gameId).lean();
         if (!game) throw new NotFoundException('Game not found');
         this.sessionsGames.set(sessionId, game);
+
+        const expandedObjects: Placeable[] = [];
+        for (const obj of game.objects) {
+            if (!obj.placed) {
+                expandedObjects.push(obj);
+                continue;
+            }
+
+            const footprint = PlaceableFootprint[obj.kind];
+            for (let offsetY = 0; offsetY < footprint; offsetY++) {
+                for (let offsetX = 0; offsetX < footprint; offsetX++) {
+                    expandedObjects.push({
+                        ...obj,
+                        x: obj.x + offsetX,
+                        y: obj.y + offsetY,
+                    });
+                }
+            }
+        }
+
         this.sessionsGameMaps.set(sessionId, {
             tiles: game.tiles.map((tile) => ({ ...tile, playerId: null })),
-            objects: game.objects,
+            objects: expandedObjects,
             size: game.size,
         });
         return game;
@@ -93,6 +114,12 @@ export class GameCacheService {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
         return gameMap.objects.filter((obj) => obj.placed && obj.x === x && obj.y === y);
+    }
+
+    getPlaceableAtPosition(sessionId: string, x: number, y: number): Placeable | undefined {
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        return gameMap.objects.find((obj) => obj.placed && obj.x === x && obj.y === y);
     }
 
     getMapSize(sessionId: string): number {

@@ -1,8 +1,8 @@
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { Game } from '@app/modules/game-store/entities/game.entity';
 import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
-import { Game } from '@app/modules/game-store/entities/game.entity';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { TileKind } from '@common/enums/tile.enum';
@@ -58,6 +58,15 @@ export class ActionService {
                     if (tile && tile.kind === 'DOOR') {
                         actions.push({ type: 'DOOR', x: pos.x, y: pos.y });
                     }
+
+                    const object = this.gameCache.getPlaceableAtPosition(session.id, pos.x, pos.y);
+                    if (object && object.kind === 'HEAL') {
+                        actions.push({ type: 'HEAL', x: pos.x, y: pos.y });
+                    }
+
+                    if (object && object.kind === 'FIGHT') {
+                        actions.push({ type: 'FIGHT', x: pos.x, y: pos.y });
+                    }
                 } catch {
                     continue;
                 }
@@ -108,7 +117,7 @@ export class ActionService {
     calculateDirectionToTarget(currentPlayer: { x: number; y: number }, targetPlayer: { x: number; y: number }): Orientation {
         const dx = targetPlayer.x - currentPlayer.x;
         const dy = targetPlayer.y - currentPlayer.y;
-        
+
         if (Math.abs(dx) > Math.abs(dy)) {
             return dx > 0 ? Orientation.E : Orientation.W;
         } else {
