@@ -6,6 +6,7 @@ import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { InGameSession, WaitingRoomSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 
@@ -55,7 +56,7 @@ export class InGameService {
         this.sessionRepository.save(session);
 
         // Auto-join virtual players
-        const virtualPlayers = players.filter(player => player.virtualPlayerType);
+        const virtualPlayers = players.filter((player) => player.virtualPlayerType);
         for (const virtualPlayer of virtualPlayers) {
             this.joinInGameSession(session.id, virtualPlayer.id);
         }
@@ -102,6 +103,10 @@ export class InGameService {
 
     toggleDoorAction(sessionId: string, playerId: string, x: number, y: number): void {
         this.gameplayService.toggleDoorAction(sessionId, playerId, x, y);
+    }
+
+    sanctuaryRequest(sessionId: string, playerId: string, x: number, y: number, kind: PlaceableKind.HEAL | PlaceableKind.FIGHT): void {
+        this.gameplayService.sanctuaryRequest(sessionId, playerId, x, y, kind);
     }
 
     movePlayer(sessionId: string, playerId: string, orientation: Orientation): void {
@@ -164,5 +169,9 @@ export class InGameService {
         this.sessionRepository.delete(sessionId);
         this.gameplayService.clearSessionResources(sessionId);
         this.timerService.clearTimerForSession(sessionId);
+    }
+
+    performSanctuaryAction(sessionId: string, playerId: string, x: number, y: number, double: boolean = false): void {
+        this.gameplayService.performSanctuaryAction(sessionId, playerId, x, y, double);
     }
 }

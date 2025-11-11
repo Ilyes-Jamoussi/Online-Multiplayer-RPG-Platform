@@ -6,6 +6,7 @@ import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-s
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -41,6 +42,23 @@ export class GameplayService {
         if (!player.actionsRemaining && !player.speed) {
             this.timerService.endTurnManual(session);
         }
+    }
+
+    sanctuaryRequest(sessionId: string, playerId: string, x: number, y: number, kind: PlaceableKind.HEAL | PlaceableKind.FIGHT): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
+        this.actionService.sanctuaryRequest(session, playerId, x, y, kind);
+    }
+
+    performSanctuaryAction(sessionId: string, playerId: string, x: number, y: number, double: boolean = false): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
+        this.actionService.performSanctuaryAction(session, playerId, x, y, double);
+        player.actionsRemaining--;
     }
 
     movePlayer(sessionId: string, playerId: string, orientation: Orientation): void {
@@ -126,9 +144,7 @@ export class GameplayService {
 
         if (!player?.virtualPlayerType) return;
 
-        const posture = player.virtualPlayerType === VirtualPlayerType.Offensive
-            ? CombatPosture.OFFENSIVE
-            : CombatPosture.DEFENSIVE;
+        const posture = player.virtualPlayerType === VirtualPlayerType.Offensive ? CombatPosture.OFFENSIVE : CombatPosture.DEFENSIVE;
 
         // Déléguer à ActionService qui utilise CombatService
         this.actionService.selectCombatPosture(sessionId, playerId, posture);
@@ -179,7 +195,7 @@ export class GameplayService {
     private findNearestPlayer(sessionId: string, playerId: string): { x: number; y: number } | null {
         const session = this.sessionRepository.findById(sessionId);
         const currentPlayer = session.inGamePlayers[playerId];
-        const otherPlayers = Object.values(session.inGamePlayers).filter(p => p.id !== playerId);
+        const otherPlayers = Object.values(session.inGamePlayers).filter((p) => p.id !== playerId);
 
         if (otherPlayers.length === 0) return null;
 
@@ -214,7 +230,6 @@ export class GameplayService {
             setTimeout(() => {
                 this.moveProgressively(sessionId, playerId, target, onComplete);
             }, VIRTUAL_PLAYER_MOVEMENT_DELAY_MS);
-
         } catch {
             onComplete();
         }
@@ -299,7 +314,6 @@ export class GameplayService {
             setTimeout(() => {
                 this.moveAwayFromPlayers(sessionId, playerId, onComplete);
             }, VIRTUAL_PLAYER_MOVEMENT_DELAY_MS);
-
         } catch {
             onComplete();
         }
@@ -308,7 +322,7 @@ export class GameplayService {
     private findSafestDirection(sessionId: string, playerId: string): Orientation | null {
         const session = this.sessionRepository.findById(sessionId);
         const currentPlayer = session.inGamePlayers[playerId];
-        const otherPlayers = Object.values(session.inGamePlayers).filter(p => p.id !== playerId);
+        const otherPlayers = Object.values(session.inGamePlayers).filter((p) => p.id !== playerId);
 
         if (otherPlayers.length === 0) return null;
 
@@ -338,11 +352,16 @@ export class GameplayService {
 
     private getNextPosition(player: { x: number; y: number }, direction: Orientation): { x: number; y: number } {
         switch (direction) {
-            case Orientation.N: return { x: player.x, y: player.y - 1 };
-            case Orientation.E: return { x: player.x + 1, y: player.y };
-            case Orientation.S: return { x: player.x, y: player.y + 1 };
-            case Orientation.W: return { x: player.x - 1, y: player.y };
-            default: return player;
+            case Orientation.N:
+                return { x: player.x, y: player.y - 1 };
+            case Orientation.E:
+                return { x: player.x + 1, y: player.y };
+            case Orientation.S:
+                return { x: player.x, y: player.y + 1 };
+            case Orientation.W:
+                return { x: player.x - 1, y: player.y };
+            default:
+                return player;
         }
     }
 

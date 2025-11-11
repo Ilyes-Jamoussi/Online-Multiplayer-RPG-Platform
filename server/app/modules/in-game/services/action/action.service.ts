@@ -2,14 +2,16 @@ import { ServerEvents } from '@app/enums/server-events.enum';
 import { Game } from '@app/modules/game-store/entities/game.entity';
 import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -19,6 +21,7 @@ export class ActionService {
         private readonly movementService: MovementService,
         private readonly combatService: CombatService,
         private readonly eventEmitter: EventEmitter2,
+        private readonly sessionRepository: InGameSessionRepository,
     ) {}
 
     toggleDoor(session: InGameSession, playerId: string, x: number, y: number): void {
@@ -36,6 +39,84 @@ export class ActionService {
                 isOpen: tile.open,
             });
         }
+    }
+
+    sanctuaryRequest(session: InGameSession, playerId: string, x: number, y: number, kind: PlaceableKind.HEAL | PlaceableKind.FIGHT): void {
+        const object = this.gameCache.getPlaceableAtPosition(session.id, x, y);
+
+        if (object && object.kind === kind) {
+            this.eventEmitter.emit(ServerEvents.OpenSanctuary, {
+                session,
+                playerId,
+                kind: object.kind,
+                x,
+                y,
+            });
+        }
+    }
+
+    performSanctuaryAction(session: InGameSession, playerId: string, x: number, y: number, double: boolean = false): void {
+        const object = this.gameCache.getPlaceableAtPosition(session.id, x, y);
+        if (!object) throw new NotFoundException('Object not found');
+        if (object.kind !== PlaceableKind.HEAL && object.kind !== PlaceableKind.FIGHT) throw new BadRequestException('Invalid object');
+
+        if (object.kind === PlaceableKind.HEAL) {
+            this.heal(session, playerId, object.kind, { x, y }, double);
+        } else if (object.kind === PlaceableKind.FIGHT) {
+            this.fight(session, playerId, object.kind, { x, y }, double);
+        }
+    }
+
+    private heal(session: InGameSession, playerId: string, kind: PlaceableKind, pos: { x: number; y: number }, double: boolean = false): void {
+        const { x, y } = pos;
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
+        if (double && Math.random() > 1 / 2) {
+            this.eventEmitter.emit(ServerEvents.SanctuaryActionFailed, {
+                session,
+                playerId,
+            });
+            return;
+        }
+        const addedHealth = double ? 2 * 2 : 2;
+        this.eventEmitter.emit(ServerEvents.SanctuaryActionSuccess, {
+            session,
+            playerId,
+            kind,
+            x,
+            y,
+            addedHealth,
+            addedDefense: undefined,
+            addedAttack: undefined,
+        });
+        this.sessionRepository.increasePlayerHealth(session.id, playerId, addedHealth);
+    }
+
+    private fight(session: InGameSession, playerId: string, kind: PlaceableKind, pos: { x: number; y: number }, double: boolean = false): void {
+        const { x, y } = pos;
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
+        if (double && Math.random() > 1 / 2) {
+            this.eventEmitter.emit(ServerEvents.SanctuaryActionFailed, {
+                session,
+                playerId,
+            });
+            return;
+        }
+        const addedAttack = double ? 2 : 1;
+        const addedDefense = double ? 2 : 1;
+        this.eventEmitter.emit(ServerEvents.SanctuaryActionSuccess, {
+            session,
+            playerId,
+            kind,
+            x,
+            y,
+            addedHealth: undefined,
+            addedDefense,
+            addedAttack,
+        });
     }
 
     calculateAvailableActions(session: InGameSession, playerId: string): AvailableAction[] {

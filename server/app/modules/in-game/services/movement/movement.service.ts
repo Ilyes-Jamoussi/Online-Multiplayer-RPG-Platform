@@ -1,9 +1,9 @@
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { ReachableTileExplorationContext } from '@app/interfaces/reachable-tile-exploration-context.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { ServerEvents } from '@app/enums/server-events.enum';
 import { TileCost, TileKind } from '@common/enums/tile.enum';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -83,12 +83,14 @@ export class MovementService {
         const queue: ReachableTile[] = this.initializeQueue(player);
         const isOnBoat = this.isPlayerOnBoat(session.id, player.x, player.y);
         const mapSize = this.gameCache.getMapSize(session.id);
+        const startPosition = { x: player.x, y: player.y };
 
         while (queue.length > 0) {
             const current = queue.shift();
             if (!current) continue;
 
-            if (!this.processCurrentTile(current, visited, reachable)) continue;
+            const shouldExplore = this.processCurrentTile(current, visited, reachable, session.id, startPosition);
+            if (!shouldExplore) continue;
 
             const context: ReachableTileExplorationContext = { session, playerId, visited, queue, mapSize, isOnBoat };
             this.exploreNeighbors(current, context);
@@ -109,13 +111,29 @@ export class MovementService {
         ];
     }
 
-    private processCurrentTile(current: ReachableTile, visited: Set<string>, reachable: ReachableTile[]): boolean {
+    private processCurrentTile(
+        current: ReachableTile,
+        visited: Set<string>,
+        reachable: ReachableTile[],
+        sessionId: string,
+        startPosition: { x: number; y: number },
+    ): boolean {
         const key = `${current.x},${current.y}`;
 
         if (visited.has(key)) return false;
         visited.add(key);
 
-        reachable.push(current);
+        const placeable = this.gameCache.getPlaceableAtPosition(sessionId, current.x, current.y);
+        const isStartPosition = current.x === startPosition.x && current.y === startPosition.y;
+        const hasHealOrFight = placeable && (placeable.kind === PlaceableKind.HEAL || placeable.kind === PlaceableKind.FIGHT);
+
+        if (hasHealOrFight && !isStartPosition) {
+            return false;
+        }
+
+        if (!hasHealOrFight) {
+            reachable.push(current);
+        }
 
         return true;
     }

@@ -1,14 +1,15 @@
-import { Injectable, computed, signal, inject } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { ResetService } from '@app/services/reset/reset.service';
 import { SessionService } from '@app/services/session/session.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
-import { ResetService } from '@app/services/reset/reset.service';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
@@ -25,6 +26,15 @@ export class InGameService {
     private readonly _availableActions = signal<AvailableAction[]>([]);
     private readonly _isActionModeActive = signal<boolean>(false);
     private readonly _gameOverData = signal<{ winnerId: string; winnerName: string } | null>(null);
+    private readonly _openedSanctuary = signal<{
+        kind: PlaceableKind.HEAL | PlaceableKind.FIGHT;
+        x: number;
+        y: number;
+        success: boolean;
+        addedHealth?: number;
+        addedDefense?: number;
+        addedAttack?: number;
+    } | null>(null);
 
     readonly isMyTurn = computed(() => this._inGameSession().currentTurn.activePlayerId === this.playerService.id());
     private readonly currentTurn = computed(() => this._inGameSession().currentTurn);
@@ -43,6 +53,7 @@ export class InGameService {
     readonly availableActions = this._availableActions.asReadonly();
     readonly isActionModeActive = this._isActionModeActive.asReadonly();
     readonly gameOverData = this._gameOverData.asReadonly();
+    readonly openedSanctuary = this._openedSanctuary.asReadonly();
 
     sessionId(): string {
         return this.sessionService.id();
@@ -127,6 +138,22 @@ export class InGameService {
 
     updateInGameSession(data: Partial<InGameSession>): void {
         this._inGameSession.update((inGameSession) => ({ ...inGameSession, ...data }));
+    }
+
+    healPlayer(x: number, y: number): void {
+        this.inGameSocketService.playerSanctuaryRequest({ sessionId: this.sessionService.id(), x, y, kind: PlaceableKind.HEAL });
+    }
+
+    fightPlayer(x: number, y: number): void {
+        this.inGameSocketService.playerSanctuaryRequest({ sessionId: this.sessionService.id(), x, y, kind: PlaceableKind.FIGHT });
+    }
+
+    closeSanctuary(): void {
+        this._openedSanctuary.set(null);
+    }
+
+    performSanctuaryAction(x: number, y: number, kind: PlaceableKind.HEAL | PlaceableKind.FIGHT, double: boolean = false): void {
+        this.inGameSocketService.playerSanctuaryAction({ sessionId: this.sessionService.id(), x, y, kind, double });
     }
 
     private startTurnTimer(): void {
@@ -274,6 +301,22 @@ export class InGameService {
         this.inGameSocketService.onGameOver((data) => {
             this._gameOverData.set(data);
             this.stopTurnTimer();
+        });
+
+        this.inGameSocketService.onOpenSanctuary((data) => {
+            this._openedSanctuary.set({ kind: data.kind, x: data.x, y: data.y, success: false });
+        });
+
+        this.inGameSocketService.onSanctuaryActionFailed(() => {
+            this.notificationCoordinatorService.displayErrorPopup({
+                title: 'Action de sanctuaire échouée',
+                message: `L'action de sanctuaire a échouée`,
+            });
+            this._openedSanctuary.set(null);
+        });
+
+        this.inGameSocketService.onSanctuaryActionSuccess((data) => {
+            this._openedSanctuary.set(data);
         });
     }
 }

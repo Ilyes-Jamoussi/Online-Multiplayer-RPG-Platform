@@ -10,6 +10,7 @@ import { PlayerTeleportedDto } from '@app/dto/player-teleported-dto';
 import { ToggleDoorActionDto } from '@app/dto/toggle-door-action-dto';
 import { SocketService } from '@app/services/socket/socket.service';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
@@ -43,6 +44,14 @@ export class InGameSocketService {
         this.socket.emit(InGameEvents.ToggleDoorAction, data);
     }
 
+    playerSanctuaryRequest(data: { sessionId: string; x: number; y: number; kind: PlaceableKind }): void {
+        this.socket.emit(InGameEvents.PlayerSanctuaryRequest, data);
+    }
+
+    playerSanctuaryAction(data: { sessionId: string; x: number; y: number; kind: PlaceableKind; double?: boolean }): void {
+        this.socket.emit(InGameEvents.PlayerSanctuaryAction, data);
+    }
+
     toggleAdminMode(sessionId: string): void {
         this.socket.emit(InGameEvents.ToggleAdminMode, sessionId);
     }
@@ -73,6 +82,28 @@ export class InGameSocketService {
 
     onDoorToggled(callback: (data: DoorToggledDto) => void): void {
         this.socket.onSuccessEvent(InGameEvents.DoorToggled, callback);
+    }
+
+    onOpenSanctuary(callback: (data: { kind: PlaceableKind.HEAL | PlaceableKind.FIGHT; x: number; y: number }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.OpenSanctuary, callback);
+    }
+
+    onSanctuaryActionFailed(callback: () => void): void {
+        this.socket.onSuccessEvent(InGameEvents.SanctuaryActionFailed, callback);
+    }
+
+    onSanctuaryActionSuccess(
+        callback: (data: {
+            kind: PlaceableKind.HEAL | PlaceableKind.FIGHT;
+            x: number;
+            y: number;
+            success: boolean;
+            addedHealth?: number;
+            addedDefense?: number;
+            addedAttack?: number;
+        }) => void,
+    ): void {
+        this.socket.onSuccessEvent(InGameEvents.SanctuaryActionSuccess, callback);
     }
 
     onPlayerUpdated(callback: (data: Player) => void): void {

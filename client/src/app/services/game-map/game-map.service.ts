@@ -122,6 +122,14 @@ export class GameMapService {
         this.inGameService.toggleDoorAction(x, y);
     }
 
+    healPlayer(x: number, y: number): void {
+        this.inGameService.healPlayer(x, y);
+    }
+
+    fightPlayer(x: number, y: number): void {
+        this.inGameService.fightPlayer(x, y);
+    }
+
     private updateTileState(x: number, y: number, isOpen: boolean): void {
         this._tiles.update((tiles) => tiles.map((tile) => (tile.x === x && tile.y === y ? { ...tile, open: isOpen } : tile)));
     }

@@ -75,6 +75,10 @@ export class GameMapTileComponent {
             this.gameMapService.toggleDoor(this.tile.x, this.tile.y);
         } else if (actionType === 'ATTACK') {
             this.combatService.attackPlayer(this.tile.x, this.tile.y);
+        } else if (actionType === 'HEAL') {
+            this.gameMapService.healPlayer(this.tile.x, this.tile.y);
+        } else if (actionType === 'FIGHT') {
+            this.gameMapService.fightPlayer(this.tile.x, this.tile.y);
         }
     }
 

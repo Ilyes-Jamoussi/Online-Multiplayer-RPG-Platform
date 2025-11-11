@@ -34,4 +34,8 @@ export enum ServerEvents {
     DoorToggled = 'door.toggled',
 
     GameOver = 'game.over',
+
+    OpenSanctuary = 'openSanctuary',
+    SanctuaryActionFailed = 'sanctuaryActionFailed',
+    SanctuaryActionSuccess = 'sanctuaryActionSuccess',
 }

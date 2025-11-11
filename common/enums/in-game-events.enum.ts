@@ -28,12 +28,18 @@ export enum InGameEvents {
     PlayerActionUsed = 'playerAvailableActionsUpdated',
     PlayerReachableTiles = 'playerReachableTiles',
     PlayerAvailableActions = 'playerAvailableActions',
+    PlayerSanctuaryRequest = 'playerSanctuaryRequest',
+    PlayerSanctuaryAction = 'playerSanctuaryAction',
+
+    OpenSanctuary = 'openSanctuary',
+    SanctuaryActionFailed = 'sanctuaryActionFailed',
+    SanctuaryActionSuccess = 'sanctuaryActionSuccess',
 
     ToggleAdminMode = 'toggleAdminMode',
     AdminModeToggled = 'adminModeToggled',
     PlayerTeleport = 'playerTeleport',
     PlayerTeleported = 'playerTeleported',
-    
+
     ToggleDoorAction = 'toggleDoorAction',
     AttackPlayerAction = 'attackPlayerAction',
     CombatChoice = 'combatChoice',

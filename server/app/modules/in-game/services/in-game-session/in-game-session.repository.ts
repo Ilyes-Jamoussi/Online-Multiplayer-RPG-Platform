@@ -1,5 +1,5 @@
-import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { Player } from '@common/interfaces/player.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { StartPoint } from '@common/interfaces/start-point.interface';
@@ -39,6 +39,19 @@ export class InGameSessionRepository {
         return player.health;
     }
 
+    increasePlayerHealth(sessionId: string, playerId: string, health: number): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.health += health;
+        if (player.health > player.maxHealth) player.health = player.maxHealth;
+        this.eventEmitter.emit(ServerEvents.PlayerHealthChanged, {
+            sessionId,
+            playerId,
+            newHealth: player.health,
+        });
+    }
+
     resetPlayerHealth(sessionId: string, playerId: string): void {
         const session = this.findById(sessionId);
         const player = session.inGamePlayers[playerId];
@@ -50,6 +63,16 @@ export class InGameSessionRepository {
             playerId,
             newHealth: player.health,
         });
+    }
+
+    resetPlayerAttackAndDefense(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.attackBonus = 0;
+        player.defenseBonus = 0;
+        player.attack = player.baseAttack;
+        player.defense = player.baseDefense;
     }
 
     incrementPlayerCombatCount(sessionId: string, playerId: string): void {

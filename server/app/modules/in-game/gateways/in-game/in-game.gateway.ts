@@ -1,4 +1,4 @@
-import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { DoorToggledDto } from '@app/modules/in-game/dto/door-toggled.dto';
 import { GameOverDto } from '@app/modules/in-game/dto/game-over.dto';
 import { PlayerMoveDto } from '@app/modules/in-game/dto/player-move.dto';
@@ -6,18 +6,19 @@ import { PlayerMovedDto } from '@app/modules/in-game/dto/player-moved.dto';
 import { PlayerTeleportDto } from '@app/modules/in-game/dto/player-teleport.dto';
 import { PlayerTeleportedDto } from '@app/modules/in-game/dto/player-teleported.dto';
 import { ToggleDoorActionDto } from '@app/modules/in-game/dto/toggle-door-action.dto';
+import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
+import { validationExceptionFactory } from '@app/utils/validation/validation.util';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
-import { ServerEvents } from '@app/enums/server-events.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { validationExceptionFactory } from '@app/utils/validation/validation.util';
 
 @UsePipes(
     new ValidationPipe({
@@ -82,12 +83,67 @@ export class InGameGateway {
         }
     }
 
+    @SubscribeMessage(InGameEvents.PlayerSanctuaryRequest)
+    playerSanctuaryRequest(socket: Socket, payload: { sessionId: string; x: number; y: number; kind: PlaceableKind }): void {
+        try {
+            if (payload.kind !== PlaceableKind.HEAL && payload.kind !== PlaceableKind.FIGHT) {
+                throw new BadRequestException('Invalid sanctuary kind');
+            }
+            this.inGameService.sanctuaryRequest(payload.sessionId, socket.id, payload.x, payload.y, payload.kind);
+        } catch (error) {
+            socket.emit(InGameEvents.PlayerSanctuaryRequest, errorResponse(error.message));
+        }
+    }
+
+    @SubscribeMessage(InGameEvents.PlayerSanctuaryAction)
+    playerSanctuaryAction(socket: Socket, payload: { sessionId: string; x: number; y: number; kind: PlaceableKind; double?: boolean }): void {
+        try {
+            this.inGameService.performSanctuaryAction(payload.sessionId, socket.id, payload.x, payload.y, payload.double);
+        } catch (error) {
+            socket.emit(InGameEvents.PlayerSanctuaryAction, errorResponse(error.message));
+        }
+    }
+    @OnEvent(ServerEvents.OpenSanctuary)
+    handleOpenSanctuary(payload: { session: InGameSession; playerId: string; kind: PlaceableKind; x: number; y: number }): void {
+        const response = successResponse({ kind: payload.kind, x: payload.x, y: payload.y });
+        this.server.to(payload.playerId).emit(InGameEvents.OpenSanctuary, response);
+    }
+
+    @OnEvent(ServerEvents.SanctuaryActionFailed)
+    handleSanctuaryActionFailed(payload: { session: InGameSession; playerId: string }): void {
+        const response = successResponse('Sanctuary action failed');
+        this.server.to(payload.playerId).emit(InGameEvents.SanctuaryActionFailed, response);
+    }
+
+    @OnEvent(ServerEvents.SanctuaryActionSuccess)
+    handleSanctuaryActionSuccess(payload: {
+        session: InGameSession;
+        playerId: string;
+        kind: PlaceableKind;
+        x: number;
+        y: number;
+        addedHealth?: number;
+        addedDefense?: number;
+        addedAttack?: number;
+    }): void {
+        const response = successResponse({
+            kind: payload.kind,
+            x: payload.x,
+            y: payload.y,
+            success: true,
+            addedHealth: payload.addedHealth,
+            addedDefense: payload.addedDefense,
+            addedAttack: payload.addedAttack,
+        });
+        this.server.to(payload.playerId).emit(InGameEvents.SanctuaryActionSuccess, response);
+    }
+
     @OnEvent(ServerEvents.TurnStarted)
     handleTurnStarted(payload: { session: InGameSession }) {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnStarted, successResponse(payload.session));
         this.inGameService.getReachableTiles(payload.session.id, payload.session.currentTurn.activePlayerId);
         this.inGameService.getAvailableActions(payload.session.id, payload.session.currentTurn.activePlayerId);
-        
+
         // Check if current player is virtual and make them play - commented out for now
         // const currentPlayer = payload.session.inGamePlayers[payload.session.currentTurn.activePlayerId];
         // if (currentPlayer && this.inGameService.isVirtualPlayer(currentPlayer)) {
