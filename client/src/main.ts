@@ -9,6 +9,7 @@ import { AppComponent } from '@app/pages/app/app.component';
 import { CharacterCreationPageComponent } from '@app/pages/character-creation-page/character-creation-page.component';
 import { EditorPageComponent } from '@app/pages/editor-page/editor-page.component';
 import { GameSessionPageComponent } from '@app/pages/game-session-page/game-session-page.component';
+import { GameStatisticsPageComponent } from '@app/pages/game-statistics-page/game-statistics-page.component';
 import { HomePageComponent } from '@app/pages/home-page/home-page.component';
 import { JoinSessionPageComponent } from '@app/pages/join-session-page/join-session-page.component';
 import { ManagementPageComponent } from '@app/pages/management-page/management-page.component';
@@ -57,6 +58,10 @@ const APP_ROUTES: Routes = [
     {
         path: removeLeadingSlash(ROUTES.JoinSessionPage),
         component: JoinSessionPageComponent,
+    },
+    {
+        path: removeLeadingSlash(ROUTES.GameStatisticsPage),
+        component: GameStatisticsPageComponent,
     },
     { path: '**', redirectTo: removeLeadingSlash(ROUTES.HomePage) },
 ];

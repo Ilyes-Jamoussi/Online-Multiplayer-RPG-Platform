@@ -21,7 +21,10 @@
 
         <div class="redirect-message">Redirection vers la page d'accueil dans {{ gameOverTimeRemaining }} secondes...</div>
 
-        <button class="return-button" (click)="returnToHome()">Retourner à la page d'accueil</button>
+        <div class="action-buttons">
+            <button class="statistics-button" (click)="viewStatistics()">Voir les statistiques</button>
+            <button class="return-button" (click)="returnToHome()">Retourner à l'accueil</button>
+        </div>
     </div>
 </div>
 }
