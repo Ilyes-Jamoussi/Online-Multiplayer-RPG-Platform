@@ -87,6 +87,12 @@ export class InGameGateway {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnStarted, successResponse(payload.session));
         this.inGameService.getReachableTiles(payload.session.id, payload.session.currentTurn.activePlayerId);
         this.inGameService.getAvailableActions(payload.session.id, payload.session.currentTurn.activePlayerId);
+        
+        // Check if current player is virtual and make them play - commented out for now
+        // const currentPlayer = payload.session.inGamePlayers[payload.session.currentTurn.activePlayerId];
+        // if (currentPlayer && this.inGameService.isVirtualPlayer(currentPlayer)) {
+        //     this.inGameService.playVirtualPlayerTurn(payload.session.id, payload.session.currentTurn.activePlayerId);
+        // }
     }
 
     @OnEvent(ServerEvents.TurnEnded)

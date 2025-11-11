@@ -162,6 +162,11 @@ export class SessionGateway implements OnGatewayDisconnect {
     addVirtualPlayer(socket: Socket, data: AddVirtualPlayerDto): void {
         const players = this.sessionService.addVirtualPlayer(data.sessionId, data.virtualPlayerType);
         this.server.to(data.sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
+        
+        const roomId = this.getAvatarSelectionRoomId(data.sessionId);
+        const avatarAssignments = this.sessionService.getChosenAvatars(data.sessionId);
+        this.server.to(roomId).emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
+        
         this.handleAvailabilityChange();
     }
 
@@ -190,18 +195,22 @@ export class SessionGateway implements OnGatewayDisconnect {
         const players = this.sessionService.getPlayersSession(sessionId);
 
         for (const player of players) {
-            const playerSocket = this.server.sockets.sockets.get(player.id);
-            if (playerSocket) {
-                void playerSocket.join(inGameSession.inGameId);
+            if (!player.virtualPlayerType) {
+                const playerSocket = this.server.sockets.sockets.get(player.id);
+                if (playerSocket) {
+                    void playerSocket.join(inGameSession.inGameId);
+                }
             }
         }
 
         this.server.to(sessionId).emit(SessionEvents.GameSessionStarted, successResponse({}));
 
         for (const player of players) {
-            const playerSocket = this.server.sockets.sockets.get(player.id);
-            if (playerSocket) {
-                void playerSocket.leave(sessionId);
+            if (!player.virtualPlayerType) {
+                const playerSocket = this.server.sockets.sockets.get(player.id);
+                if (playerSocket) {
+                    void playerSocket.leave(sessionId);
+                }
             }
         }
         this.sessionService.endSession(sessionId);
