@@ -139,6 +139,7 @@ export class SessionService {
         const session = this.getSession(sessionId);
         const virtualPlayer = this.createVirtualPlayer(virtualPlayerType, session.players);
         session.players.push(virtualPlayer);
+        this.selectAvatar(sessionId, virtualPlayer.id, virtualPlayer.avatar);
         return session.players;
     }
 
