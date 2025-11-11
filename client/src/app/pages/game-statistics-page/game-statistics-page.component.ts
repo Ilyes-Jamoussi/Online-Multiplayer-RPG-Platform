@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ChatComponent } from '@app/components/features/chat/chat.component';
-import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { ROUTES } from '@app/enums/routes.enum';
 import { GlobalStatistics, PlayerStatistics, SortColumn, SortDirection } from '@app/interfaces/game-statistics.interface';
@@ -10,7 +9,7 @@ import { GlobalStatistics, PlayerStatistics, SortColumn, SortDirection } from '@
 @Component({
     selector: 'app-game-statistics-page',
     standalone: true,
-    imports: [CommonModule, UiPageLayoutComponent, UiButtonComponent, ChatComponent],
+    imports: [CommonModule, UiPageLayoutComponent, ChatComponent],
     templateUrl: './game-statistics-page.component.html',
     styleUrl: './game-statistics-page.component.scss',
 })

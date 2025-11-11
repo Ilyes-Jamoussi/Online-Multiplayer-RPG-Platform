@@ -36,7 +36,7 @@ import { MongooseModule } from '@nestjs/mongoose';
         CombatService,
         VirtualPlayerService,
     ],
-    exports: [InGameService],
+    exports: [InGameService, InGameSessionRepository],
     imports: [MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }]), EventEmitterModule.forRoot()],
 })
 export class InGameModule {}
