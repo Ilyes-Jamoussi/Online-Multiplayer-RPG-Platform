@@ -25,6 +25,8 @@ export enum ServerEvents {
     TurnManualEnd = 'turn.manualEnd',
     TurnForceStopTimer = 'turn.forceStopTimer',
 
+    VirtualPlayerTurn = 'virtualPlayer.turn',
+
     PlayerMoved = 'player.moved',
     PlayerReachableTiles = 'player.reachableTiles',
     PlayerUpdated = 'player.updated',

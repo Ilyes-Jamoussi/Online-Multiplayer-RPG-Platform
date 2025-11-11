@@ -1,9 +1,8 @@
 import { COMBAT_WINS_TO_WIN_GAME } from '@app/constants/game-config.constants';
 import { DiceSides } from '@app/enums/dice-sides.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
-import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
+import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
@@ -18,13 +17,11 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 export class CombatService {
     private readonly activeCombats = new Map<string, CombatState>();
 
-    // eslint-disable-next-line max-params -- NestJS dependency injection requires multiple parameters, more than 5 is required for this service
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly timerService: TimerService,
-        private readonly combatTimerService: CombatTimerService,
         private readonly sessionRepository: InGameSessionRepository,
-        private readonly inGameMovementService: InGameMovementService,
+        private readonly inGameMovementService: MovementService,
         private readonly gameCacheService: GameCacheService,
     ) {}
 
@@ -82,7 +79,7 @@ export class CombatService {
 
         if (combat.playerAPosture !== null && combat.playerBPosture !== null) {
             const session = this.sessionRepository.findById(sessionId);
-            this.combatTimerService.forceNextLoop(session);
+            this.timerService.forceNextLoop(session);
         }
     }
 
@@ -102,8 +99,7 @@ export class CombatService {
 
         this.activeCombats.set(session.id, combatState);
 
-        this.timerService.pauseTurnTimer(session.id);
-        this.combatTimerService.startCombatTimer(session, playerAId, playerBId, combatState.playerATileEffect, combatState.playerBTileEffect);
+        this.timerService.startCombat(session, playerAId, playerBId, combatState.playerATileEffect, combatState.playerBTileEffect);
 
         this.sessionRepository.incrementPlayerCombatCount(session.id, playerAId);
         this.sessionRepository.incrementPlayerCombatCount(session.id, playerBId);
@@ -121,9 +117,14 @@ export class CombatService {
         this.activeCombats.delete(sessionId);
     }
 
+    getActiveCombat(sessionId: string): { playerAId: string; playerBId: string } | null {
+        const combat = this.activeCombats.get(sessionId);
+        return combat ? { playerAId: combat.playerAId, playerBId: combat.playerBId } : null;
+    }
+
     private endCombat(session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean = false): void {
         this.activeCombats.delete(session.id);
-        this.combatTimerService.stopCombatTimer(session);
+        this.timerService.endCombat(session, winnerId);
 
         this.eventEmitter.emit(ServerEvents.CombatVictory, {
             sessionId: session.id,
@@ -133,12 +134,7 @@ export class CombatService {
             abandon,
         });
 
-        if (!winnerId || (winnerId && winnerId !== session.currentTurn.activePlayerId)) {
-            this.timerService.endTurnManual(session);
-        } else {
-            this.timerService.resumeTurnTimer(session.id);
-            this.inGameMovementService.calculateReachableTiles(session, session.currentTurn.activePlayerId);
-        }
+        this.inGameMovementService.calculateReachableTiles(session, session.currentTurn.activePlayerId);
     }
 
     private combatRound(sessionId: string): void {
@@ -301,8 +297,7 @@ export class CombatService {
         const winner = session.inGamePlayers[winnerId];
 
         if (winner && winner.combatWins >= COMBAT_WINS_TO_WIN_GAME) {
-            this.timerService.forceStopTimer(sessionId);
-            this.combatTimerService.stopCombatTimer(session);
+            this.timerService.clearTimerForSession(sessionId);
             this.eventEmitter.emit(ServerEvents.GameOver, {
                 sessionId,
                 winnerId,
