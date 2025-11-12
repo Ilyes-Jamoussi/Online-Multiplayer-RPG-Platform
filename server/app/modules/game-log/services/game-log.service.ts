@@ -1,7 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { GameLogEventType } from '@common/enums/game-log-event-type.enum';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
-import { InGameSession } from '@common/interfaces/session.interface';
+import { GameLogEventType } from '@common/enums/game-log-event-type.enum';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GameLogService {
