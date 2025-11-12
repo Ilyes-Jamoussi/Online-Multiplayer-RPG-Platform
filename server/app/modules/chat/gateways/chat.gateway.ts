@@ -40,7 +40,6 @@ export class ChatGateway {
                 const inGameSession = this.inGameSessionRepository.findById(data.sessionId);
                 targetRoom = inGameSession.inGameId;
             } catch {
-                // Fallback vers sessionId si session in-game non trouvée
                 targetRoom = data.sessionId;
             }
         }

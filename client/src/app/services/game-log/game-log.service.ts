@@ -1,4 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core';
+import { GameLogSocketService } from '@app/services/game-log-socket/game-log-socket.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { ResetService } from '@app/services/reset/reset.service';
 import { GameLogEntry } from '@common/interfaces/game-log-entry.interface';
@@ -13,8 +14,18 @@ export class GameLogService {
     readonly entries = this._entries.asReadonly();
     readonly filterByMe = this._filterByMe.asReadonly();
 
-    constructor(private readonly playerService: PlayerService) {
+    constructor(
+        private readonly playerService: PlayerService,
+        private readonly gameLogSocketService: GameLogSocketService,
+    ) {
         inject(ResetService).reset$.subscribe(() => this.reset());
+        this.initListeners();
+    }
+
+    private initListeners(): void {
+        this.gameLogSocketService.onLogEntry((entry) => {
+            this._entries.update((entries) => [...entries, entry]);
+        });
     }
 
     addEntry(entry: Omit<GameLogEntry, 'id' | 'timestamp'>): void {

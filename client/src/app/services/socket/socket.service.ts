@@ -1,6 +1,7 @@
 import { DestroyRef, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ChatEvents } from '@common/enums/chat-events.enum';
+import { GameLogEvents } from '@common/enums/game-log-events.enum';
 import { GameStoreEvents } from '@common/enums/game-store-events.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { SessionEvents } from '@common/enums/session-events.enum';
@@ -17,15 +18,15 @@ export class SocketService {
         this.socket = io(ENVIRONMENT.socketUrl);
     }
 
-    emit<T>(event: SessionEvents | GameStoreEvents | InGameEvents | ChatEvents, data: T): void {
+    emit<T>(event: SessionEvents | GameStoreEvents | InGameEvents | ChatEvents | GameLogEvents, data: T): void {
         this.socket.emit(event, data);
     }
 
-    onEvent<T>(event: SessionEvents | GameStoreEvents | InGameEvents | ChatEvents): Observable<SocketResponse<T>> {
+    onEvent<T>(event: SessionEvents | GameStoreEvents | InGameEvents | ChatEvents | GameLogEvents): Observable<SocketResponse<T>> {
         return fromEvent<SocketResponse<T>>(this.socket, event);
     }
 
-    onSuccessEvent<T>(event: SessionEvents | GameStoreEvents | InGameEvents | ChatEvents, next: (data: T) => void): void {
+    onSuccessEvent<T>(event: SessionEvents | GameStoreEvents | InGameEvents | ChatEvents | GameLogEvents, next: (data: T) => void): void {
         this.onEvent<T>(event)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((res) => {
@@ -35,7 +36,7 @@ export class SocketService {
             });
     }
 
-    onErrorEvent(event: SessionEvents | GameStoreEvents | InGameEvents | ChatEvents, next: (message: string) => void): void {
+    onErrorEvent(event: SessionEvents | GameStoreEvents | InGameEvents | ChatEvents | GameLogEvents, next: (message: string) => void): void {
         this.onEvent<never>(event)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((res) => {
