@@ -1,7 +1,4 @@
 <div class="chat-section">
-    <div class="header">
-        <h2><i class="material-icons">chat</i> Chat</h2>
-    </div>
     <div class="messages" #messagesContainer>
         @for (message of messages(); track message.timestamp) {
             <div class="message" 
