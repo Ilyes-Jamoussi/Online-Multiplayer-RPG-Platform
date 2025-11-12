@@ -115,5 +115,45 @@ export class GameLogService {
             },
         };
     }
+
+    createDoorToggleEntry(sessionId: string, playerId: string, x: number, y: number, isOpen: boolean): {
+        type: GameLogEventType;
+        message: string;
+        involvedPlayerIds: string[];
+        involvedPlayerNames: string[];
+        icon: string;
+    } {
+        const session = this.inGameSessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+
+        const action = isOpen ? 'ouverte' : 'fermée';
+        return {
+            type: GameLogEventType.DoorToggle,
+            message: `Porte ${action} à (${x}, ${y}) par ${player.name}`,
+            involvedPlayerIds: [playerId],
+            involvedPlayerNames: [player.name],
+            icon: 'Lock',
+        };
+    }
+
+    createDebugModeToggleEntry(sessionId: string, playerId: string, isActive: boolean): {
+        type: GameLogEventType;
+        message: string;
+        involvedPlayerIds: string[];
+        involvedPlayerNames: string[];
+        icon: string;
+    } {
+        const session = this.inGameSessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+
+        const action = isActive ? 'activé' : 'désactivé';
+        return {
+            type: GameLogEventType.DebugModeToggle,
+            message: `Mode débogage: ${action}`,
+            involvedPlayerIds: [playerId],
+            involvedPlayerNames: [player.name],
+            icon: 'Gear',
+        };
+    }
 }
 

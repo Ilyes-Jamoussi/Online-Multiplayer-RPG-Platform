@@ -80,6 +80,31 @@ export class GameLogGateway {
         this.emitLogEntryToPlayers(session.inGameId, entryA, [payload.playerAId, payload.playerBId]);
     }
 
+    @OnEvent(ServerEvents.DoorToggled)
+    handleDoorToggled(payload: { session: InGameSession; playerId: string; x: number; y: number; isOpen: boolean }): void {
+        const entry = this.gameLogService.createDoorToggleEntry(
+            payload.session.id,
+            payload.playerId,
+            payload.x,
+            payload.y,
+            payload.isOpen,
+        );
+        this.emitLogEntry(payload.session.inGameId, entry);
+    }
+
+    @OnEvent(ServerEvents.AdminModeToggled)
+    handleAdminModeToggled(payload: { sessionId: string; playerId: string; isAdminModeActive: boolean }): void {
+        const session = this.inGameSessionRepository.findById(payload.sessionId);
+        if (!session) return;
+
+        const entry = this.gameLogService.createDebugModeToggleEntry(
+            payload.sessionId,
+            payload.playerId,
+            payload.isAdminModeActive,
+        );
+        this.emitLogEntry(session.inGameId, entry);
+    }
+
     private emitLogEntry(inGameId: string, entry: Omit<GameLogEntryDto, 'id' | 'timestamp'>): void {
         const logEntry: GameLogEntryDto = {
             ...entry,

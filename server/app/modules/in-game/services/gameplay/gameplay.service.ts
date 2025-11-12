@@ -9,6 +9,8 @@ import { Orientation } from '@common/enums/orientation.enum';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ServerEvents } from '@app/enums/server-events.enum';
 
 @Injectable()
 export class GameplayService {
@@ -16,6 +18,7 @@ export class GameplayService {
         private readonly sessionRepository: InGameSessionRepository,
         private readonly actionService: ActionService,
         private readonly timerService: TimerService,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     endPlayerTurn(sessionId: string, playerId: string): InGameSession {
@@ -84,6 +87,13 @@ export class GameplayService {
 
         session.isAdminModeActive = !session.isAdminModeActive;
         this.sessionRepository.update(session);
+        
+        this.eventEmitter.emit(ServerEvents.AdminModeToggled, {
+            sessionId: session.id,
+            playerId,
+            isAdminModeActive: session.isAdminModeActive,
+        });
+        
         return session;
     }
 
