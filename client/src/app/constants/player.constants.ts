@@ -24,10 +24,8 @@ export const DEFAULT_PLAYER: Player = {
     speed: BASE_STAT_VALUE,
     baseAttack: BASE_STAT_VALUE,
     attackBonus: 0,
-    attack: BASE_STAT_VALUE,
     baseDefense: BASE_STAT_VALUE,
     defenseBonus: 0,
-    defense: BASE_STAT_VALUE,
     attackDice: Dice.D6,
     defenseDice: Dice.D6,
     x: 0,
@@ -39,4 +37,5 @@ export const DEFAULT_PLAYER: Player = {
     combatWins: 0,
     combatLosses: 0,
     combatDraws: 0,
+    hasCombatBonus: false,
 };

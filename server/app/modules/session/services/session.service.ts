@@ -1,13 +1,13 @@
 import { ACCESS_CODE_LENGTH, ACCESS_CODE_PADDING, ACCESS_CODE_RANGE } from '@app/constants/session.constants';
 import { BASE_STAT_VALUE, BONUS_VALUE, RANDOM_THRESHOLD, VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-player.constants';
+import { ServerEvents } from '@app/enums/server-events.enum';
+import { ChatService } from '@app/modules/chat/services/chat.service';
 import { SessionPreviewDto } from '@app/modules/session/dto/available-sessions-updated.dto';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
-import { ChatService } from '@app/modules/chat/services/chat.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
-import { ServerEvents } from '@app/enums/server-events.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { AvatarAssignment, WaitingRoomSession } from '@common/interfaces/session.interface';
 import { Injectable } from '@nestjs/common';
@@ -52,6 +52,7 @@ export class SessionService {
             combatWins: 0,
             combatLosses: 0,
             combatDraws: 0,
+            hasCombatBonus: false,
             actionsRemaining: 1,
         };
         session.players.push(player);
@@ -144,15 +145,11 @@ export class SessionService {
     }
 
     private createVirtualPlayer(virtualPlayerType: VirtualPlayerType, existingPlayers: Player[]): Player {
-        const availableNames = VIRTUAL_PLAYER_NAMES.filter(botName => 
-            !existingPlayers.some(player => player.name === botName)
-        );
+        const availableNames = VIRTUAL_PLAYER_NAMES.filter((botName) => !existingPlayers.some((player) => player.name === botName));
         const name = availableNames[Math.floor(Math.random() * availableNames.length)] || `Bot-${Date.now()}`;
-        
+
         const avatars = Object.values(Avatar);
-        const availableAvatars = avatars.filter(botAvatar => 
-            !existingPlayers.some(player => player.avatar === botAvatar)
-        );
+        const availableAvatars = avatars.filter((botAvatar) => !existingPlayers.some((player) => player.avatar === botAvatar));
         const avatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)] || avatars[0];
 
         const attackDice = Math.random() > RANDOM_THRESHOLD ? Dice.D4 : Dice.D6;
@@ -175,10 +172,8 @@ export class SessionService {
             speed: BASE_STAT_VALUE + speedBonus,
             baseAttack: BASE_STAT_VALUE,
             attackBonus: 0,
-            attack: BASE_STAT_VALUE,
             baseDefense: BASE_STAT_VALUE,
             defenseBonus: 0,
-            defense: BASE_STAT_VALUE,
             attackDice,
             defenseDice,
             x: 0,
@@ -190,6 +185,7 @@ export class SessionService {
             combatWins: 0,
             combatLosses: 0,
             combatDraws: 0,
+            hasCombatBonus: false,
             virtualPlayerType,
         };
     }
@@ -288,6 +284,7 @@ export class SessionService {
             combatWins: 0,
             combatLosses: 0,
             combatDraws: 0,
+            hasCombatBonus: false,
             actionsRemaining: 1,
         };
         return {

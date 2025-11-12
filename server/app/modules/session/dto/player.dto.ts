@@ -54,19 +54,11 @@ export class PlayerDto {
 
     @ApiProperty()
     @IsNumber()
-    readonly attack: number;
-
-    @ApiProperty()
-    @IsNumber()
     readonly baseDefense: number;
 
     @ApiProperty()
     @IsNumber()
     readonly defenseBonus: number;
-
-    @ApiProperty()
-    @IsNumber()
-    readonly defense: number;
 
     @ApiProperty()
     @IsNumber()
@@ -83,4 +75,8 @@ export class PlayerDto {
     @ApiProperty()
     @IsNumber()
     readonly actionsRemaining: number;
+
+    @ApiProperty()
+    @IsBoolean()
+    readonly hasCombatBonus: boolean;
 }

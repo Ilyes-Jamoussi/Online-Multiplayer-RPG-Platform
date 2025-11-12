@@ -30,6 +30,7 @@ export enum InGameEvents {
     PlayerAvailableActions = 'playerAvailableActions',
     PlayerSanctuaryRequest = 'playerSanctuaryRequest',
     PlayerSanctuaryAction = 'playerSanctuaryAction',
+    PlayerBonusesChanged = 'playerBonusesChanged',
 
     OpenSanctuary = 'openSanctuary',
     SanctuaryActionFailed = 'sanctuaryActionFailed',

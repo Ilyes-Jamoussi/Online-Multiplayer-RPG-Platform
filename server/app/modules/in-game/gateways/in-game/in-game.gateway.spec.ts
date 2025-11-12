@@ -68,10 +68,8 @@ describe('InGameGateway', () => {
         speed: 3,
         baseAttack: 10,
         attackBonus: 0,
-        attack: 10,
         baseDefense: 5,
         defenseBonus: 0,
-        defense: 5,
         attackDice: Dice.D6,
         defenseDice: Dice.D4,
         x: 0,
@@ -83,6 +81,7 @@ describe('InGameGateway', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
         ...overrides,
     });
 

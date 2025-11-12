@@ -16,10 +16,8 @@ export interface Player {
     speed: number;
     baseAttack: number;
     attackBonus: number;
-    attack: number;
     baseDefense: number;
     defenseBonus: number;
-    defense: number;
     attackDice: Dice;
     defenseDice: Dice;
     x: number;
@@ -31,5 +29,6 @@ export interface Player {
     combatWins: number;
     combatLosses: number;
     combatDraws: number;
+    hasCombatBonus: boolean;
     virtualPlayerType?: VirtualPlayerType;
 }

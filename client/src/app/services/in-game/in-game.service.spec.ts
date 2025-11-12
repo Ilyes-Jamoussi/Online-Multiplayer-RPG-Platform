@@ -1,20 +1,20 @@
 /* eslint-disable max-lines -- Extensive tests needed for 100% code coverage */
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { InGameService } from './in-game.service';
+import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
-import { PlayerService } from '@app/services/player/player.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
-import { ROUTES } from '@app/enums/routes.enum';
-import { Orientation } from '@common/enums/orientation.enum';
-import { signal } from '@angular/core';
-import { Player } from '@common/interfaces/player.interface';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { InGameSession } from '@common/interfaces/session.interface';
+import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
+import { InGameService } from './in-game.service';
 
 const TEST_TIMER_DURATION = 30;
 const TEST_X_COORDINATE = 5;
@@ -42,10 +42,8 @@ describe('InGameService', () => {
         speed: 3,
         baseAttack: 4,
         attackBonus: 0,
-        attack: 4,
         baseDefense: 4,
         defenseBonus: 0,
-        defense: 4,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
         x: 0,
@@ -57,6 +55,7 @@ describe('InGameService', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
     };
 
     beforeEach(() => {

@@ -16,10 +16,8 @@ const TEST_SPEED_BONUS = 1;
 const TEST_CURRENT_SPEED = 6;
 const TEST_BASE_ATTACK = 4;
 const TEST_ATTACK_BONUS = 1;
-const TEST_CURRENT_ATTACK = 5;
 const TEST_BASE_DEFENSE = 3;
 const TEST_DEFENSE_BONUS = 2;
-const TEST_CURRENT_DEFENSE = 5;
 const TEST_ACTIONS_REMAINING = 2;
 const TEST_COMBAT_COUNT = 5;
 const TEST_COMBAT_WINS = 3;
@@ -49,10 +47,8 @@ describe('PlayerInfoComponent', () => {
         speed: TEST_CURRENT_SPEED,
         baseAttack: TEST_BASE_ATTACK,
         attackBonus: TEST_ATTACK_BONUS,
-        attack: TEST_CURRENT_ATTACK,
         baseDefense: TEST_BASE_DEFENSE,
         defenseBonus: TEST_DEFENSE_BONUS,
-        defense: TEST_CURRENT_DEFENSE,
         attackDice: Dice.D6,
         defenseDice: Dice.D4,
         x: 0,
@@ -64,6 +60,7 @@ describe('PlayerInfoComponent', () => {
         combatWins: TEST_COMBAT_WINS,
         combatLosses: TEST_COMBAT_LOSSES,
         combatDraws: TEST_COMBAT_DRAWS,
+        hasCombatBonus: false,
     };
 
     beforeEach(async () => {
@@ -73,9 +70,7 @@ describe('PlayerInfoComponent', () => {
             'health',
             'maxHealth',
             'speed',
-            'attack',
             'attackDice',
-            'defense',
             'defenseDice',
             'speedBonus',
             'actionsRemaining',
@@ -112,9 +107,7 @@ describe('PlayerInfoComponent', () => {
         mockPlayerService.health.and.returnValue(mockPlayer.health);
         mockPlayerService.maxHealth.and.returnValue(mockPlayer.maxHealth);
         mockPlayerService.speed.and.returnValue(mockPlayer.speed);
-        mockPlayerService.attack.and.returnValue(mockPlayer.attack);
         mockPlayerService.attackDice.and.returnValue(mockPlayer.attackDice);
-        mockPlayerService.defense.and.returnValue(mockPlayer.defense);
         mockPlayerService.defenseDice.and.returnValue(mockPlayer.defenseDice);
         mockPlayerService.speedBonus.and.returnValue(mockPlayer.speedBonus);
         mockPlayerService.actionsRemaining.and.returnValue(mockPlayer.actionsRemaining);
@@ -175,11 +168,6 @@ describe('PlayerInfoComponent', () => {
         expect(component.baseAttack).toBe(TEST_BASE_ATTACK);
     });
 
-    it('should get attack value', () => {
-        expect(component.attackValue).toBe(TEST_CURRENT_ATTACK);
-        expect(mockPlayerService.attack).toHaveBeenCalled();
-    });
-
     it('should get attack dice type', () => {
         expect(component.attackDiceType).toBe(Dice.D6);
         expect(mockPlayerService.attackDice).toHaveBeenCalled();
@@ -187,11 +175,6 @@ describe('PlayerInfoComponent', () => {
 
     it('should get base defense', () => {
         expect(component.baseDefense).toBe(TEST_BASE_DEFENSE);
-    });
-
-    it('should get defense value', () => {
-        expect(component.defenseValue).toBe(TEST_CURRENT_DEFENSE);
-        expect(mockPlayerService.defense).toHaveBeenCalled();
     });
 
     it('should get defense dice type', () => {

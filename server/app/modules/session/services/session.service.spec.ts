@@ -35,14 +35,13 @@ describe('SessionService', () => {
         maxHealth: 100,
         baseAttack: 10,
         attackBonus: 0,
-        attack: 10,
         baseDefense: 5,
         defenseBonus: 0,
-        defense: 5,
         baseSpeed: 5,
         speedBonus: 0,
         speed: 5,
         actionsRemaining: 1,
+        hasCombatBonus: false,
         ...overrides,
     });
 

@@ -4,7 +4,7 @@ import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { GameDocument } from '@app/types/mongoose-documents.types';
 import { Orientation } from '@common/enums/orientation.enum';
-import { PlaceableFootprint } from '@common/enums/placeable-kind.enum';
+import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileCost, TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -14,6 +14,7 @@ import { Model } from 'mongoose';
 export class GameCacheService {
     private readonly sessionsGames = new Map<string, Game>();
     private readonly sessionsGameMaps = new Map<string, GameMap>();
+    private readonly disabledPlaceables = new Map<string, Map<string, { playerId: string; turnCount: number }>>();
 
     constructor(@InjectModel(Game.name) private readonly gameModel: Model<GameDocument>) {}
 
@@ -25,7 +26,6 @@ export class GameCacheService {
         const expandedObjects: Placeable[] = [];
         for (const obj of game.objects) {
             if (!obj.placed) {
-                expandedObjects.push(obj);
                 continue;
             }
 
@@ -40,6 +40,8 @@ export class GameCacheService {
                 }
             }
         }
+
+        this.disabledPlaceables.set(sessionId, new Map());
 
         this.sessionsGameMaps.set(sessionId, {
             tiles: game.tiles.map((tile) => ({ ...tile, playerId: null })),
@@ -110,6 +112,12 @@ export class GameCacheService {
         return { x: nextX, y: nextY };
     }
 
+    private getPlaceablesById(sessionId: string, id: string): Placeable[] {
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        return gameMap.objects.filter((obj) => obj.placed && obj._id?.toString() === id);
+    }
+
     getPlaceablesAtPosition(sessionId: string, x: number, y: number): Placeable[] {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
@@ -120,6 +128,10 @@ export class GameCacheService {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
         return gameMap.objects.find((obj) => obj.placed && obj.x === x && obj.y === y);
+    }
+
+    private getPlaceableKey(placeable: Placeable): string {
+        return `${placeable._id?.toString()}-${placeable.x}-${placeable.y}`;
     }
 
     getMapSize(sessionId: string): number {
@@ -151,6 +163,58 @@ export class GameCacheService {
         return gameMap.tiles[y * gameMap.size + x].playerId;
     }
 
+    disablePlaceable(sessionId: string, x: number, y: number, playerId: string): void {
+        const object = this.getPlaceableAtPosition(sessionId, x, y);
+        if (!object) throw new NotFoundException('Object not found');
+        const placeables = this.getPlaceablesById(sessionId, object._id?.toString() || '');
+
+        if (!this.disabledPlaceables.has(sessionId)) {
+            this.disabledPlaceables.set(sessionId, new Map());
+        }
+        const sessionDisabled = this.disabledPlaceables.get(sessionId);
+        if (!sessionDisabled) throw new NotFoundException('Session disabled map not found');
+
+        for (const placeable of placeables) {
+            const key = this.getPlaceableKey(placeable);
+            sessionDisabled.set(key, { playerId, turnCount: 2 });
+        }
+    }
+
+    isPlaceableDisabled(sessionId: string, x: number, y: number): boolean {
+        const object = this.getPlaceableAtPosition(sessionId, x, y);
+        if (!object) return false;
+
+        const sessionDisabled = this.disabledPlaceables.get(sessionId);
+        if (!sessionDisabled) return false;
+
+        const key = this.getPlaceableKey(object);
+        const disabledInfo = sessionDisabled.get(key);
+        return disabledInfo !== undefined && disabledInfo.turnCount > 0;
+    }
+
+    decrementDisabledPlaceablesTurnCount(sessionId: string): void {
+        const sessionDisabled = this.disabledPlaceables.get(sessionId);
+        if (!sessionDisabled) return;
+
+        for (const [key, disabledInfo] of sessionDisabled.entries()) {
+            disabledInfo.turnCount--;
+            if (!disabledInfo.turnCount) {
+                sessionDisabled.delete(key);
+            }
+        }
+    }
+
+    reenablePlaceablesForPlayer(sessionId: string, playerId: string): void {
+        const sessionDisabled = this.disabledPlaceables.get(sessionId);
+        if (!sessionDisabled) return;
+
+        for (const [key, disabledInfo] of sessionDisabled.entries()) {
+            if (disabledInfo.playerId === playerId) {
+                sessionDisabled.delete(key);
+            }
+        }
+    }
+
     isTileFree(sessionId: string, x: number, y: number): boolean {
         if (this.getTileOccupant(sessionId, x, y)) {
             return false;
@@ -170,11 +234,19 @@ export class GameCacheService {
             return false;
         }
 
+        const placeables = this.getPlaceablesAtPosition(sessionId, x, y);
+        for (const placeable of placeables) {
+            if (placeable.kind === PlaceableKind.FIGHT || placeable.kind === PlaceableKind.HEAL) {
+                return false;
+            }
+        }
+
         return true;
     }
 
     clearSessionGameCache(sessionId: string): void {
         this.sessionsGames.delete(sessionId);
         this.sessionsGameMaps.delete(sessionId);
+        this.disabledPlaceables.delete(sessionId);
     }
 }

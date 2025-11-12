@@ -1,5 +1,5 @@
-import { Dice } from '@common/enums/dice.enum';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
+import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 
 export interface CombatState {
@@ -17,6 +17,7 @@ export interface CombatAttack {
     diceRoll: number;
     baseAttack: number;
     attackBonus: number;
+    postureBonus: number;
     totalAttack: number;
     tileCombatEffect: TileCombatEffect;
 }
@@ -26,6 +27,7 @@ export interface CombatDefense {
     diceRoll: number;
     baseDefense: number;
     defenseBonus: number;
+    postureBonus: number;
     totalDefense: number;
     tileCombatEffect: TileCombatEffect;
 }

@@ -54,10 +54,8 @@ describe('InGameSessionRepository', () => {
         speed: BASE_SPEED,
         baseAttack: BASE_ATTACK,
         attackBonus: NO_BONUS,
-        attack: BASE_ATTACK,
         baseDefense: BASE_DEFENSE,
         defenseBonus: NO_BONUS,
-        defense: BASE_DEFENSE,
         attackDice: Dice.D6,
         defenseDice: Dice.D4,
         x: POS_X_1,
@@ -69,6 +67,7 @@ describe('InGameSessionRepository', () => {
         combatWins: NO_COMBAT_STATS,
         combatLosses: NO_COMBAT_STATS,
         combatDraws: NO_COMBAT_STATS,
+        hasCombatBonus: false,
         ...overrides,
     });
 

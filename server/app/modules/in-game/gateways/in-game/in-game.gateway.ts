@@ -103,6 +103,13 @@ export class InGameGateway {
             socket.emit(InGameEvents.PlayerSanctuaryAction, errorResponse(error.message));
         }
     }
+
+    @OnEvent(ServerEvents.OpenSanctuaryDenied)
+    handleOpenSanctuaryDenied(payload: { session: InGameSession; playerId: string; message: string }): void {
+        const response = errorResponse(payload.message);
+        this.server.to(payload.playerId).emit(InGameEvents.OpenSanctuary, response);
+    }
+
     @OnEvent(ServerEvents.OpenSanctuary)
     handleOpenSanctuary(payload: { session: InGameSession; playerId: string; kind: PlaceableKind; x: number; y: number }): void {
         const response = successResponse({ kind: payload.kind, x: payload.x, y: payload.y });
@@ -136,6 +143,13 @@ export class InGameGateway {
             addedAttack: payload.addedAttack,
         });
         this.server.to(payload.playerId).emit(InGameEvents.SanctuaryActionSuccess, response);
+    }
+
+    @OnEvent(ServerEvents.PlayerBonusesChanged)
+    handlePlayerBonusesChanged(payload: { session: InGameSession; playerId: string; attackBonus: number; defenseBonus: number }) {
+        this.server
+            .to(payload.playerId)
+            .emit(InGameEvents.PlayerBonusesChanged, successResponse({ attackBonus: payload.attackBonus, defenseBonus: payload.defenseBonus }));
     }
 
     @OnEvent(ServerEvents.TurnStarted)

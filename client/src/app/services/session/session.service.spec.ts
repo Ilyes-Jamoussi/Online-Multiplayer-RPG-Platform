@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { SessionService } from './session.service';
-import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { ROUTES } from '@app/enums/routes.enum';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
-import { MapSize } from '@common/enums/map-size.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { SessionService } from './session.service';
 
 const TEST_MAX_PLAYERS = 4;
 
@@ -31,10 +31,8 @@ describe('SessionService', () => {
         speed: 3,
         baseAttack: 4,
         attackBonus: 0,
-        attack: 4,
         baseDefense: 4,
         defenseBonus: 0,
-        defense: 4,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
         x: 0,
@@ -46,6 +44,7 @@ describe('SessionService', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
     };
 
     beforeEach(() => {

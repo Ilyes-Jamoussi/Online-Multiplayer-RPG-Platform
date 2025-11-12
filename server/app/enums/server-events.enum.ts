@@ -12,6 +12,7 @@ export enum ServerEvents {
 
     PlayerCombatResult = 'player.combatResult',
     PlayerHealthChanged = 'player.healthChanged',
+    PlayerBonusesChanged = 'player.bonusesChanged',
     PlayerCombatCountChanged = 'player.combatCountChanged',
     PlayerCombatWinsChanged = 'player.combatWinsChanged',
     PlayerCombatLossesChanged = 'player.combatLossesChanged',
@@ -36,6 +37,7 @@ export enum ServerEvents {
     GameOver = 'game.over',
 
     OpenSanctuary = 'openSanctuary',
+    OpenSanctuaryDenied = 'openSanctuaryDenied',
     SanctuaryActionFailed = 'sanctuaryActionFailed',
     SanctuaryActionSuccess = 'sanctuaryActionSuccess',
 }

@@ -1,11 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { PlayersListComponent } from './players-list.component';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { Player } from '@common/interfaces/player.interface';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { Player } from '@common/interfaces/player.interface';
+import { PlayersListComponent } from './players-list.component';
 
 const TEST_COMBAT_WINS_PLAYER1 = 3;
 const TEST_HEALTH_PERCENTAGE_PLAYER1 = 75;
@@ -32,10 +32,8 @@ describe('PlayersListComponent', () => {
             speed: 3,
             baseAttack: 4,
             attackBonus: 0,
-            attack: 4,
             baseDefense: 4,
             defenseBonus: 0,
-            defense: 4,
             attackDice: Dice.D6,
             defenseDice: Dice.D6,
             x: 1,
@@ -47,6 +45,7 @@ describe('PlayersListComponent', () => {
             combatWins: 3,
             combatLosses: 1,
             combatDraws: 1,
+            hasCombatBonus: false,
         },
         player2: {
             id: 'player2',
@@ -62,10 +61,8 @@ describe('PlayersListComponent', () => {
             speed: 3,
             baseAttack: 4,
             attackBonus: 0,
-            attack: 4,
             baseDefense: 4,
             defenseBonus: 0,
-            defense: 4,
             attackDice: Dice.D6,
             defenseDice: Dice.D6,
             x: 2,
@@ -77,6 +74,7 @@ describe('PlayersListComponent', () => {
             combatWins: 1,
             combatLosses: 2,
             combatDraws: 0,
+            hasCombatBonus: false,
         },
     };
 

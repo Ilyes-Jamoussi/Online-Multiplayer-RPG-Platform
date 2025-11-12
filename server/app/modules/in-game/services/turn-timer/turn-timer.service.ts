@@ -1,8 +1,9 @@
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
 import { TurnTimerData } from '@app/interfaces/turn-timer-data.interface';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
-import { ServerEvents } from '@app/enums/server-events.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { TurnState } from '@common/interfaces/turn-state.interface';
 import { Injectable } from '@nestjs/common';
@@ -16,6 +17,7 @@ export class TurnTimerService {
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly sessionRepository: InGameSessionRepository,
+        private readonly gameCache: GameCacheService,
     ) {}
 
     startFirstTurnWithTransition(session: InGameSession, timeoutMs = DEFAULT_TURN_DURATION): TurnState {
@@ -36,13 +38,18 @@ export class TurnTimerService {
         this.setGameTimerState(session.id, TurnTimerStates.TurnTransition);
 
         setTimeout(() => {
+            const activePlayer = session.inGamePlayers[newTurn.activePlayerId];
+            if (activePlayer) {
+                activePlayer.hasCombatBonus = activePlayer.attackBonus > 0 || activePlayer.defenseBonus > 0;
+            }
+
             this.sessionRepository.updatePlayer(session.id, newTurn.activePlayerId, { actionsRemaining: 1 });
             this.scheduleTurnTimeout(session.id, timeoutMs, () => this.autoEndTurn(session));
 
             this.eventEmitter.emit(ServerEvents.TurnTransition, { session });
             this.eventEmitter.emit(ServerEvents.TurnStarted, { session });
             this.setGameTimerState(session.id, TurnTimerStates.PlayerTurn);
-            
+
             this.triggerVirtualPlayerTurn(session, newTurn.activePlayerId);
         }, DEFAULT_TURN_TRANSITION_DURATION);
 
@@ -54,6 +61,10 @@ export class TurnTimerService {
 
         this.clearTurnTimer(session.id);
         session.inGamePlayers[prev.activePlayerId].speed = 0;
+        if (session.inGamePlayers[prev.activePlayerId].hasCombatBonus) {
+            this.sessionRepository.resetPlayerBonuses(session.id, prev.activePlayerId);
+        }
+        this.gameCache.decrementDisabledPlaceablesTurnCount(session.id);
         this.eventEmitter.emit(ServerEvents.PlayerReachableTiles, {
             playerId: prev.activePlayerId,
             reachable: [],
@@ -73,13 +84,18 @@ export class TurnTimerService {
         this.setGameTimerState(session.id, TurnTimerStates.TurnTransition);
 
         setTimeout(() => {
+            const activePlayer = session.inGamePlayers[newTurn.activePlayerId];
+            if (activePlayer) {
+                activePlayer.hasCombatBonus = activePlayer.attackBonus > 0 || activePlayer.defenseBonus > 0;
+            }
+
             this.sessionRepository.updatePlayer(session.id, newTurn.activePlayerId, { actionsRemaining: 1 });
             this.scheduleTurnTimeout(session.id, timeoutMs, () => this.autoEndTurn(session));
 
             this.eventEmitter.emit(ServerEvents.TurnTransition, { session });
             this.eventEmitter.emit(ServerEvents.TurnStarted, { session });
             this.setGameTimerState(session.id, TurnTimerStates.PlayerTurn);
-            
+
             this.triggerVirtualPlayerTurn(session, newTurn.activePlayerId);
         }, DEFAULT_TURN_TRANSITION_DURATION);
 
@@ -199,7 +215,7 @@ export class TurnTimerService {
             this.eventEmitter.emit(ServerEvents.VirtualPlayerTurn, {
                 sessionId: session.id,
                 playerId: activePlayerId,
-                playerType: activePlayer.virtualPlayerType
+                playerType: activePlayer.virtualPlayerType,
             });
         }
     }

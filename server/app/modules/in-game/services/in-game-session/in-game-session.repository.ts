@@ -65,14 +65,35 @@ export class InGameSessionRepository {
         });
     }
 
-    resetPlayerAttackAndDefense(sessionId: string, playerId: string): void {
+    applyPlayerBonus(sessionId: string, playerId: string, value: 1 | 2): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.attackBonus += value;
+        player.defenseBonus += value;
+
+        this.eventEmitter.emit(ServerEvents.PlayerBonusesChanged, {
+            sessionId,
+            playerId,
+            attackBonus: player.attackBonus,
+            defenseBonus: player.defenseBonus,
+        });
+    }
+
+    resetPlayerBonuses(sessionId: string, playerId: string): void {
         const session = this.findById(sessionId);
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
         player.attackBonus = 0;
         player.defenseBonus = 0;
-        player.attack = player.baseAttack;
-        player.defense = player.baseDefense;
+        player.hasCombatBonus = false;
+
+        this.eventEmitter.emit(ServerEvents.PlayerBonusesChanged, {
+            sessionId,
+            playerId,
+            attackBonus: player.attackBonus,
+            defenseBonus: player.defenseBonus,
+        });
     }
 
     incrementPlayerCombatCount(sessionId: string, playerId: string): void {
@@ -160,6 +181,8 @@ export class InGameSessionRepository {
         if (player.x >= 0 && player.y >= 0) {
             this.gameCache.clearTileOccupant(sessionId, player.x, player.y);
         }
+
+        this.gameCache.reenablePlaceablesForPlayer(sessionId, playerId);
 
         player.x = -1;
         player.y = -1;

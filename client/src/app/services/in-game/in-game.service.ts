@@ -318,5 +318,19 @@ export class InGameService {
         this.inGameSocketService.onSanctuaryActionSuccess((data) => {
             this._openedSanctuary.set(data);
         });
+
+        this.inGameSocketService.onPlayerBonusesChanged((data) => {
+            this.playerService.updatePlayer({
+                attackBonus: data.attackBonus,
+                defenseBonus: data.defenseBonus,
+            });
+        });
+
+        this.inGameSocketService.onOpenSanctuaryError((message) => {
+            this.notificationCoordinatorService.displayErrorPopup({
+                title: 'Action impossible',
+                message,
+            });
+        });
     }
 }

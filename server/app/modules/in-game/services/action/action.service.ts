@@ -43,8 +43,29 @@ export class ActionService {
 
     sanctuaryRequest(session: InGameSession, playerId: string, x: number, y: number, kind: PlaceableKind.HEAL | PlaceableKind.FIGHT): void {
         const object = this.gameCache.getPlaceableAtPosition(session.id, x, y);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
 
-        if (object && object.kind === kind) {
+        if (kind === PlaceableKind.FIGHT && player.attackBonus && player.defenseBonus) {
+            this.eventEmitter.emit(ServerEvents.OpenSanctuaryDenied, {
+                session,
+                playerId,
+                message: 'Vous ne pouvez pas utiliser cette action car vous avez des bonus de combat',
+            });
+        } else if (kind === PlaceableKind.HEAL && player.health === player.maxHealth) {
+            this.eventEmitter.emit(ServerEvents.OpenSanctuaryDenied, {
+                session,
+                playerId,
+                message: 'Vous ne pouvez pas utiliser cette action car vous avez atteint votre santé maximale',
+            });
+        } else if (object && this.gameCache.isPlaceableDisabled(session.id, x, y)) {
+            this.eventEmitter.emit(ServerEvents.OpenSanctuaryDenied, {
+                session,
+                playerId,
+                message: 'Vous ne pouvez pas utiliser cette action car ce sanctuaire a été utilisé récemment',
+            });
+        } else if (object && object.kind === kind) {
             this.eventEmitter.emit(ServerEvents.OpenSanctuary, {
                 session,
                 playerId,
@@ -57,17 +78,26 @@ export class ActionService {
 
     performSanctuaryAction(session: InGameSession, playerId: string, x: number, y: number, double: boolean = false): void {
         const object = this.gameCache.getPlaceableAtPosition(session.id, x, y);
-        if (!object) throw new NotFoundException('Object not found');
+        if (!object) throw new NotFoundException('Object not fou1nd');
         if (object.kind !== PlaceableKind.HEAL && object.kind !== PlaceableKind.FIGHT) throw new BadRequestException('Invalid object');
 
-        if (object.kind === PlaceableKind.HEAL) {
-            this.heal(session, playerId, object.kind, { x, y }, double);
-        } else if (object.kind === PlaceableKind.FIGHT) {
-            this.fight(session, playerId, object.kind, { x, y }, double);
+        switch (object.kind) {
+            case PlaceableKind.HEAL:
+                this.healSanctuary(session, playerId, object.kind, { x, y }, double);
+                break;
+            case PlaceableKind.FIGHT:
+                this.fightSanctuary(session, playerId, object.kind, { x, y }, double);
+                break;
         }
     }
 
-    private heal(session: InGameSession, playerId: string, kind: PlaceableKind, pos: { x: number; y: number }, double: boolean = false): void {
+    private healSanctuary(
+        session: InGameSession,
+        playerId: string,
+        kind: PlaceableKind,
+        pos: { x: number; y: number },
+        double: boolean = false,
+    ): void {
         const { x, y } = pos;
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
@@ -91,9 +121,16 @@ export class ActionService {
             addedAttack: undefined,
         });
         this.sessionRepository.increasePlayerHealth(session.id, playerId, addedHealth);
+        this.gameCache.disablePlaceable(session.id, x, y, playerId);
     }
 
-    private fight(session: InGameSession, playerId: string, kind: PlaceableKind, pos: { x: number; y: number }, double: boolean = false): void {
+    private fightSanctuary(
+        session: InGameSession,
+        playerId: string,
+        kind: PlaceableKind,
+        pos: { x: number; y: number },
+        double: boolean = false,
+    ): void {
         const { x, y } = pos;
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
@@ -105,8 +142,7 @@ export class ActionService {
             });
             return;
         }
-        const addedAttack = double ? 2 : 1;
-        const addedDefense = double ? 2 : 1;
+        const bonus = double ? 2 : 1;
         this.eventEmitter.emit(ServerEvents.SanctuaryActionSuccess, {
             session,
             playerId,
@@ -114,9 +150,12 @@ export class ActionService {
             x,
             y,
             addedHealth: undefined,
-            addedDefense,
-            addedAttack,
+            addedDefense: bonus,
+            addedAttack: bonus,
         });
+
+        this.sessionRepository.applyPlayerBonus(session.id, playerId, bonus);
+        this.gameCache.disablePlaceable(session.id, x, y, playerId);
     }
 
     calculateAvailableActions(session: InGameSession, playerId: string): AvailableAction[] {

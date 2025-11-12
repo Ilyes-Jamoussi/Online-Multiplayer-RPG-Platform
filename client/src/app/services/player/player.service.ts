@@ -1,13 +1,13 @@
-import { computed, Injectable, Signal, signal, WritableSignal, inject } from '@angular/core';
+import { Injectable, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { BASE_STAT_VALUE, BONUS_STAT_VALUE, DEFAULT_PLAYER } from '@app/constants/player.constants';
 import { BonusType } from '@app/enums/character-creation.enum';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { ResetService } from '@app/services/reset/reset.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { SessionService } from '@app/services/session/session.service';
-import { ResetService } from '@app/services/reset/reset.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
@@ -28,8 +28,8 @@ export class PlayerService {
     readonly maxHealth = computed(() => this.player().maxHealth);
     readonly speedBonus = computed(() => this.player().speedBonus);
     readonly speed = computed(() => this.player().speed);
-    readonly attack = computed(() => this.player().attack);
-    readonly defense = computed(() => this.player().defense);
+    readonly attackBonus = computed(() => this.player().attackBonus);
+    readonly defenseBonus = computed(() => this.player().defenseBonus);
     readonly attackDice = computed(() => this.player().attackDice);
     readonly defenseDice = computed(() => this.player().defenseDice);
     readonly actionsRemaining = computed(() => this.player().actionsRemaining);

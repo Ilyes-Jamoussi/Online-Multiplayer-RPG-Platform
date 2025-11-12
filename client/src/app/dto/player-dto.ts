@@ -24,10 +24,8 @@ export interface PlayerDto {
     maxHealth: number;
     baseAttack: number;
     attackBonus: number;
-    attack: number;
     baseDefense: number;
     defenseBonus: number;
-    defense: number;
     baseSpeed: number;
     speedBonus: number;
     speed: number;

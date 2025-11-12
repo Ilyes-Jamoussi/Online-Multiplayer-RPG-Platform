@@ -88,6 +88,10 @@ export class InGameSocketService {
         this.socket.onSuccessEvent(InGameEvents.OpenSanctuary, callback);
     }
 
+    onOpenSanctuaryError(callback: (message: string) => void): void {
+        this.socket.onErrorEvent(InGameEvents.OpenSanctuary, callback);
+    }
+
     onSanctuaryActionFailed(callback: () => void): void {
         this.socket.onSuccessEvent(InGameEvents.SanctuaryActionFailed, callback);
     }
@@ -144,5 +148,9 @@ export class InGameSocketService {
 
     onPlayerLeftInGameSession(callback: (data: PlayerLeftSessionDto) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerLeftInGameSession, callback);
+    }
+
+    onPlayerBonusesChanged(callback: (data: { attackBonus: number; defenseBonus: number }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerBonusesChanged, callback);
     }
 }

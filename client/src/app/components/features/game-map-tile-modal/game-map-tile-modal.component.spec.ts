@@ -1,14 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GameMapTileModalComponent } from './game-map-tile-modal.component';
-import { GameMapService } from '@app/services/game-map/game-map.service';
-import { AssetsService } from '@app/services/assets/assets.service';
-import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
-import { Player } from '@common/interfaces/player.interface';
-import { TileKind } from '@common/enums/tile.enum';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { AssetsService } from '@app/services/assets/assets.service';
+import { GameMapService } from '@app/services/game-map/game-map.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
+import { Player } from '@common/interfaces/player.interface';
+import { GameMapTileModalComponent } from './game-map-tile-modal.component';
 
 describe('GameMapTileModalComponent', () => {
     let component: GameMapTileModalComponent;
@@ -46,10 +46,8 @@ describe('GameMapTileModalComponent', () => {
         speed: 3,
         baseAttack: 4,
         attackBonus: 0,
-        attack: 4,
         baseDefense: 4,
         defenseBonus: 0,
-        defense: 4,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
         x: 1,
@@ -61,6 +59,7 @@ describe('GameMapTileModalComponent', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
     };
 
     beforeEach(async () => {
