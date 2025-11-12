@@ -155,5 +155,46 @@ export class GameLogService {
             icon: 'Gear',
         };
     }
+
+    createPlayerAbandonEntry(sessionId: string, playerId: string): {
+        type: GameLogEventType;
+        message: string;
+        involvedPlayerIds: string[];
+        involvedPlayerNames: string[];
+        icon: string;
+    } {
+        const session = this.inGameSessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+
+        return {
+            type: GameLogEventType.GameAbandon,
+            message: `${player.name} a abandonné la partie`,
+            involvedPlayerIds: [playerId],
+            involvedPlayerNames: [player.name],
+            icon: 'UserMinus',
+        };
+    }
+
+    createGameOverEntry(sessionId: string): {
+        type: GameLogEventType;
+        message: string;
+        involvedPlayerIds: string[];
+        involvedPlayerNames: string[];
+        icon: string;
+    } {
+        const session = this.inGameSessionRepository.findById(sessionId);
+        const activePlayers = Object.values(session.inGamePlayers).filter((p) => p.isInGame);
+        const activePlayerNames = activePlayers.map((p) => p.name);
+        const activePlayerIds = activePlayers.map((p) => p.id);
+
+        const playersList = activePlayerNames.join(', ');
+        return {
+            type: GameLogEventType.GameOver,
+            message: `Fin de partie. Joueurs actifs: ${playersList}`,
+            involvedPlayerIds: activePlayerIds,
+            involvedPlayerNames: activePlayerNames,
+            icon: 'Check',
+        };
+    }
 }
 

@@ -105,6 +105,24 @@ export class GameLogGateway {
         this.emitLogEntry(session.inGameId, entry);
     }
 
+    @OnEvent(ServerEvents.PlayerAbandon)
+    handlePlayerAbandon(payload: { sessionId: string; playerId: string; playerName: string }): void {
+        const session = this.inGameSessionRepository.findById(payload.sessionId);
+        if (!session) return;
+
+        const entry = this.gameLogService.createPlayerAbandonEntry(payload.sessionId, payload.playerId);
+        this.emitLogEntry(session.inGameId, entry);
+    }
+
+    @OnEvent(ServerEvents.GameOver)
+    handleGameOver(payload: { sessionId: string; winnerId: string; winnerName: string }): void {
+        const session = this.inGameSessionRepository.findById(payload.sessionId);
+        if (!session) return;
+
+        const entry = this.gameLogService.createGameOverEntry(payload.sessionId);
+        this.emitLogEntry(session.inGameId, entry);
+    }
+
     private emitLogEntry(inGameId: string, entry: Omit<GameLogEntryDto, 'id' | 'timestamp'>): void {
         const logEntry: GameLogEntryDto = {
             ...entry,

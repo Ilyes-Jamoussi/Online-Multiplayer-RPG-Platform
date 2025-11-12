@@ -14,7 +14,7 @@ import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { validationExceptionFactory } from '@app/utils/validation/validation.util';
@@ -30,7 +30,10 @@ import { validationExceptionFactory } from '@app/utils/validation/validation.uti
 export class InGameGateway {
     @WebSocketServer() private readonly server: Server;
 
-    constructor(private readonly inGameService: InGameService) {}
+    constructor(
+        private readonly inGameService: InGameService,
+        private readonly eventEmitter: EventEmitter2,
+    ) {}
 
     @SubscribeMessage(InGameEvents.PlayerJoinInGameSession)
     playerJoinInGameSession(socket: Socket, sessionId: string): void {
@@ -204,6 +207,11 @@ export class InGameGateway {
                 if (result.adminModeDeactivated) {
                     this.server.to(result.session.inGameId).emit(InGameEvents.AdminModeToggled, successResponse({ isAdminModeActive: false }));
                 }
+                this.eventEmitter.emit(ServerEvents.PlayerAbandon, {
+                    sessionId: result.session.id,
+                    playerId: result.playerId,
+                    playerName: result.playerName,
+                });
                 this.server.to(result.session.inGameId).emit(InGameEvents.PlayerLeftInGameSession, successResponse(result));
             }
         } catch (error) {
