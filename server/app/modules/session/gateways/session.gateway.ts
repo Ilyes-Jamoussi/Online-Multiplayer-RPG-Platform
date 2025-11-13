@@ -12,6 +12,7 @@ import { SessionService } from '@app/modules/session/services/session.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { SessionEvents } from '@common/enums/session-events.enum';
 import { SocketResponse } from '@common/types/socket-response.type';
@@ -51,7 +52,7 @@ export class SessionGateway implements OnGatewayDisconnect {
             socket.emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
             this.handleAvailabilityChange();
         } catch (error) {
-            socket.emit(SessionEvents.SessionCreated, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, successResponse(error.message));
         }
     }
 
