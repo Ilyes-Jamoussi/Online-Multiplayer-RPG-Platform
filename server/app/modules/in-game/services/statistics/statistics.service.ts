@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { STATISTICS_DELETE_DELAY_MS } from '@app/constants/statistics.constants';
+import {
+    DEFAULT_HEALTH_DEALT_MULTIPLIER,
+    MILLISECONDS_PER_SECOND,
+    SECONDS_PER_MINUTE,
+    STATISTICS_DELETE_DELAY_MS,
+} from '@app/constants/statistics.constants';
 import { GameStatisticsDto, PlayerStatisticsDto, GlobalStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Player } from '@common/interfaces/player.interface';
@@ -45,7 +50,7 @@ export class StatisticsService {
 
     private calculatePlayerStatistics(player: Player): PlayerStatisticsDto {
         const healthLost = player.maxHealth - player.health;
-        const healthDealt = player.combatWins * 10;
+        const healthDealt = player.combatWins * DEFAULT_HEALTH_DEALT_MULTIPLIER;
 
         return {
             name: player.name,
@@ -73,9 +78,9 @@ export class StatisticsService {
     }
 
     private formatDuration(milliseconds: number): string {
-        const totalSeconds = Math.floor(milliseconds / 1000);
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
+        const totalSeconds = Math.floor(milliseconds / MILLISECONDS_PER_SECOND);
+        const minutes = Math.floor(totalSeconds / SECONDS_PER_MINUTE);
+        const seconds = totalSeconds % SECONDS_PER_MINUTE;
         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
 }
