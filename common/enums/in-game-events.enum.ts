@@ -3,6 +3,7 @@ export enum InGameEvents {
     GameStarted = 'gameStarted',
     GameOver = 'gameOver',
     GameForceStopped = 'gameForceStopped',
+    LoadGameStatistics = 'loadGameStatistics',
 
     TurnStart = 'turnStart',
     TurnStarted = 'turnStarted',

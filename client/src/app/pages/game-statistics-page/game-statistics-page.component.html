@@ -11,38 +11,38 @@
             <div class="stats-grid">
                 <div class="stat-item">
                     <span class="stat-label">Durée de la partie</span>
-                    <span class="stat-value">{{ globalStatistics.gameDuration }}</span>
+                    <span class="stat-value">{{ globalStatistics().gameDuration }}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Nombre de tours de jeu</span>
-                    <span class="stat-value">{{ globalStatistics.totalTurns }}</span>
+                    <span class="stat-value">{{ globalStatistics().totalTurns }}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Tuiles visitées</span>
-                    <span class="stat-value">{{ globalStatistics.tilesVisitedPercentage }}%</span>
+                    <span class="stat-value">{{ globalStatistics().tilesVisitedPercentage }}%</span>
                 </div>
-                @if (globalStatistics.totalTeleportations !== undefined) {
+                @if (globalStatistics().totalTeleportations !== undefined) {
                 <div class="stat-item">
                     <span class="stat-label">Total téléportations</span>
-                    <span class="stat-value">{{ globalStatistics.totalTeleportations }}</span>
+                    <span class="stat-value">{{ globalStatistics().totalTeleportations }}</span>
                 </div>
                 }
-                @if (globalStatistics.doorsManipulatedPercentage !== undefined) {
+                @if (globalStatistics().doorsManipulatedPercentage !== undefined) {
                 <div class="stat-item">
                     <span class="stat-label">Portes manipulées</span>
-                    <span class="stat-value">{{ globalStatistics.doorsManipulatedPercentage }}%</span>
+                    <span class="stat-value">{{ globalStatistics().doorsManipulatedPercentage }}%</span>
                 </div>
                 }
-                @if (globalStatistics.sanctuariesUsedPercentage !== undefined) {
+                @if (globalStatistics().sanctuariesUsedPercentage !== undefined) {
                 <div class="stat-item">
                     <span class="stat-label">Sanctuaires utilisés</span>
-                    <span class="stat-value">{{ globalStatistics.sanctuariesUsedPercentage }}%</span>
+                    <span class="stat-value">{{ globalStatistics().sanctuariesUsedPercentage }}%</span>
                 </div>
                 }
-                @if (globalStatistics.flagHoldersCount !== undefined) {
+                @if (globalStatistics().flagHoldersCount !== undefined) {
                 <div class="stat-item">
                     <span class="stat-label">Joueurs ayant détenu le drapeau</span>
-                    <span class="stat-value">{{ globalStatistics.flagHoldersCount }}</span>
+                    <span class="stat-value">{{ globalStatistics().flagHoldersCount }}</span>
                 </div>
                 }
             </div>
@@ -97,7 +97,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @for (player of playersStatistics; track player.name) {
+                        @for (player of playersStatistics(); track player.name) {
                         <tr>
                             <td class="player-name">{{ player.name }}</td>
                             <td class="stat-number">{{ player.combatCount }}</td>
