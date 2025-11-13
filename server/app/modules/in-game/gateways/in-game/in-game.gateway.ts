@@ -148,6 +148,16 @@ export class InGameGateway {
         }
     }
 
+    @SubscribeMessage(InGameEvents.LoadGameStatistics)
+    handleLoadGameStatistics(socket: Socket, sessionId: string): void {
+        try {
+            const gameStatistics = this.inGameService.getGameStatistics(sessionId);
+            socket.emit(InGameEvents.LoadGameStatistics, successResponse(gameStatistics));
+        } catch (error) {
+            socket.emit(InGameEvents.LoadGameStatistics, errorResponse('Impossible de charger les statistiques de la partie'));
+        }
+    }
+
     @SubscribeMessage(InGameEvents.PlayerTeleport)
     playerTeleport(socket: Socket, payload: PlayerTeleportDto): void {
         try {
@@ -177,6 +187,10 @@ export class InGameGateway {
     @OnEvent(ServerEvents.GameOver)
     handleGameOver(payload: { sessionId: string; winnerId: string; winnerName: string }) {
         const session = this.inGameService.getSession(payload.sessionId);
+        
+        // Stocker les statistiques avant de supprimer la session
+        this.inGameService.storeGameStatistics(payload.sessionId, payload.winnerId, payload.winnerName);
+        
         this.server
             .to(session.inGameId)
             .emit(InGameEvents.GameOver, successResponse<GameOverDto>({ winnerId: payload.winnerId, winnerName: payload.winnerName }));
@@ -197,6 +211,9 @@ export class InGameGateway {
         try {
             const result = this.inGameService.leaveInGameSession(sessionId, playerId);
             if (result.sessionEnded) {
+                // Stocker les statistiques avant de supprimer la session
+                this.inGameService.storeGameStatistics(sessionId, '', 'Partie abandonnée');
+                
                 this.server.to(result.session.inGameId).emit(InGameEvents.GameForceStopped, successResponse({}));
                 this.server.socketsLeave(sessionId);
                 this.inGameService.removeSession(sessionId);

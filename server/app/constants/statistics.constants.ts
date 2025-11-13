@@ -1,0 +1,1 @@
+export const STATISTICS_DELETE_DELAY_MS = 60000;
