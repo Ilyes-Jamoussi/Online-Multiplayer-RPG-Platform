@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
 import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ActiveTool, ToolType, ToolbarItem, Vector2 } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
@@ -41,8 +42,12 @@ export class GameEditorInteractionsService {
         return this._activeTool();
     }
 
-    set activeTool(tool: ActiveTool) {
-        this._previousActiveTool.set(this._activeTool());
+    set activeTool(tool: ActiveTool | null) {
+        const currentTool = this._activeTool();
+        if (currentTool && currentTool.type === ToolType.TeleportTileTool && tool?.type !== ToolType.TeleportTileTool) {
+            this.cancelTeleportPlacement();
+        }
+        this._previousActiveTool.set(currentTool);
         this._activeTool.set(tool);
     }
 
@@ -85,7 +90,18 @@ export class GameEditorInteractionsService {
 
     dragStart(x: number, y: number, click: 'left' | 'right'): void {
         const tool = this._activeTool();
-        if (!tool || tool.type !== ToolType.TileBrushTool) return;
+        if (!tool) return;
+
+        if (tool.type === ToolType.TeleportTileTool) {
+            if (click === 'left') {
+                this.handleTeleportTileClick(x, y);
+            } else if (click === 'right') {
+                this.handleTeleportTileRightClick(x, y);
+            }
+            return;
+        }
+
+        if (tool.type !== ToolType.TileBrushTool) return;
         this._activeTool.set({
             ...tool,
             leftDrag: click === 'left' ? true : tool.leftDrag,
@@ -177,6 +193,77 @@ export class GameEditorInteractionsService {
     hasMime(evt: DragEvent): boolean {
         const types = Array.from(evt.dataTransfer?.types ?? []);
         return Object.values(PlaceableMime).some((mime) => types.includes(mime));
+    }
+
+    getAvailableTeleportChannels(): TeleportChannelDto[] {
+        return this.store.availableTeleportChannels();
+    }
+
+    getNextAvailableTeleportChannel(): TeleportChannelDto | undefined {
+        return this.store.availableTeleportChannels().find((channel) => !channel.tiles?.a && !channel.tiles?.b);
+    }
+
+    isTeleportDisabled(): boolean {
+        return this.store.isTeleportDisabled();
+    }
+
+    selectTeleportTool(): void {
+        const channel = this.getNextAvailableTeleportChannel();
+        if (!channel) return;
+
+        this.activeTool = {
+            type: ToolType.TeleportTileTool,
+            channelNumber: channel.channelNumber,
+            teleportChannel: channel,
+        };
+    }
+
+    handleTeleportTileClick(x: number, y: number): void {
+        const tool = this._activeTool();
+        if (!tool || tool.type !== ToolType.TeleportTileTool) return;
+
+        if (!tool.firstTilePlaced) {
+            this.store.placeTeleportTile(x, y, tool.channelNumber, true);
+            this._activeTool.set({
+                ...tool,
+                firstTilePlaced: { x, y },
+            });
+        } else {
+            this.store.placeTeleportTile(x, y, tool.channelNumber, false);
+            const nextChannel = this.getNextAvailableTeleportChannel();
+            if (nextChannel) {
+                this.activeTool = {
+                    type: ToolType.TeleportTileTool,
+                    channelNumber: nextChannel.channelNumber,
+                    teleportChannel: nextChannel,
+                };
+            } else {
+                this._activeTool.set(null);
+            }
+        }
+    }
+
+    cancelTeleportPlacement(): void {
+        const tool = this._activeTool();
+        if (!tool || tool.type !== ToolType.TeleportTileTool) return;
+
+        if (tool.firstTilePlaced) {
+            this.store.cancelTeleportPlacement(tool.channelNumber);
+        }
+        this._activeTool.set(null);
+    }
+
+    handleTeleportTileRightClick(x: number, y: number): void {
+        const tool = this._activeTool();
+        if (tool && tool.type === ToolType.TeleportTileTool && tool.firstTilePlaced) {
+            this.cancelTeleportPlacement();
+            return;
+        }
+
+        const tile = this.store.getTileAt(x, y);
+        if (tile && tile.kind === TileKind.TELEPORT && tile.teleportChannel) {
+            this.store.removeTeleportPair(x, y);
+        }
     }
 
     private canPlaceObject(x: number, y: number, kind: PlaceableKind, excludeId?: string): boolean {

@@ -28,6 +28,8 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         super(elementRef, zone);
     }
 
+    readonly tileKind = TileKind;
+
     get tileImage(): string {
         return this.assetService.getTileImage(TileKind[this.tile.kind], this.tile.open);
     }
@@ -51,6 +53,26 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         return tool?.type === ToolType.TileBrushTool;
     }
 
+    get teleportChannelNumber(): number | null {
+        if (this.tile.kind === TileKind.TELEPORT && this.tile.teleportChannel) {
+            return this.tile.teleportChannel;
+        }
+        return null;
+    }
+
+    get activeTeleportChannelNumber(): number | null {
+        const tool = this.gameEditorInteractionsService.activeTool;
+        if (tool?.type === ToolType.TeleportTileTool) {
+            return tool.channelNumber;
+        }
+        return null;
+    }
+
+    get isTeleportToolActive(): boolean {
+        const tool = this.gameEditorInteractionsService.activeTool;
+        return tool?.type === ToolType.TeleportTileTool;
+    }
+
     onRightClick(event: MouseEvent): void {
         event.preventDefault();
     }
@@ -60,13 +82,18 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         if (event.button === 0) {
             this.gameEditorInteractionsService.dragStart(this.tile.x, this.tile.y, 'left');
         } else if (event.button === 2) {
-            this.gameEditorInteractionsService.activeTool = {
-                type: ToolType.TileBrushTool,
-                tileKind: TileKind.BASE,
-                leftDrag: false,
-                rightDrag: false,
-            };
-            this.gameEditorInteractionsService.dragStart(this.tile.x, this.tile.y, 'right');
+            const tool = this.gameEditorInteractionsService.activeTool;
+            if (tool?.type === ToolType.TeleportTileTool) {
+                this.gameEditorInteractionsService.handleTeleportTileRightClick(this.tile.x, this.tile.y);
+            } else {
+                this.gameEditorInteractionsService.activeTool = {
+                    type: ToolType.TileBrushTool,
+                    tileKind: TileKind.BASE,
+                    leftDrag: false,
+                    rightDrag: false,
+                };
+                this.gameEditorInteractionsService.dragStart(this.tile.x, this.tile.y, 'right');
+            }
         }
     }
 

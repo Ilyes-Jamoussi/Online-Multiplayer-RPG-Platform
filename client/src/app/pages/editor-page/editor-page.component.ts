@@ -145,6 +145,13 @@ export class EditorPageComponent implements OnInit, OnDestroy {
         }
     }
 
+    @HostListener('keydown', ['$event'])
+    onKeyDown(evt: KeyboardEvent): void {
+        if (evt.key === 'Escape') {
+            this.gameEditorInteractionsService.cancelTeleportPlacement();
+        }
+    }
+
     async onSave(): Promise<void> {
         if (this.gameEditorCheckService.canSave()) {
             await this.gameEditorStoreService.saveGame(this.gridWrapper.nativeElement);

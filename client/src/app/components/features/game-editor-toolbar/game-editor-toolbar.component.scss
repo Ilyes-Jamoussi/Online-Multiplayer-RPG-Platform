@@ -84,4 +84,23 @@
     &:hover::after {
         opacity: 1;
     }
+
+    .teleport-channel-number {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(20, 184, 166, 0.9);
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
 }

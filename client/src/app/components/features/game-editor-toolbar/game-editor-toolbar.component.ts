@@ -12,6 +12,7 @@ import { TileKind } from '@common/enums/tile.enum';
 })
 export class GameEditorToolbarComponent {
     readonly tileLabel = TileLabel;
+    readonly tileKind = TileKind;
 
     constructor(private readonly gameEditorInteractionsService: GameEditorInteractionsService) {}
 
@@ -20,12 +21,25 @@ export class GameEditorToolbarComponent {
     }
 
     selectTileBrush(tileKind: TileKind): void {
-        this.gameEditorInteractionsService.activeTool = {
-            type: ToolType.TileBrushTool,
-            tileKind,
-            leftDrag: false,
-            rightDrag: false,
-        };
+        if (tileKind === TileKind.TELEPORT) {
+            this.gameEditorInteractionsService.selectTeleportTool();
+        } else {
+            this.gameEditorInteractionsService.activeTool = {
+                type: ToolType.TileBrushTool,
+                tileKind,
+                leftDrag: false,
+                rightDrag: false,
+            };
+        }
+    }
+
+    isTeleportDisabled(): boolean {
+        return this.gameEditorInteractionsService.isTeleportDisabled();
+    }
+
+    isTeleportSelected(): boolean {
+        const tool = this.gameEditorInteractionsService.activeTool;
+        return tool?.type === ToolType.TeleportTileTool;
     }
 
     isBrushSelected(brush: ToolbarItem): boolean {
@@ -36,5 +50,13 @@ export class GameEditorToolbarComponent {
             return (activeTool as { tileKind: TileKind }).tileKind === brush.tileKind;
         }
         return false;
+    }
+
+    getActiveTeleportChannelNumber(): number | null {
+        const tool = this.gameEditorInteractionsService.activeTool;
+        if (tool?.type === ToolType.TeleportTileTool) {
+            return tool.channelNumber;
+        }
+        return null;
     }
 }

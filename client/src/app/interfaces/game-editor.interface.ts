@@ -1,4 +1,5 @@
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 
@@ -6,6 +7,7 @@ export enum ToolType {
     TileBrushTool = 'tile-brush-tool',
     PlaceableTool = 'placeable-tool',
     PlaceableEraserTool = 'placeable-eraser-tool',
+    TeleportTileTool = 'teleport-tile-tool',
 }
 
 export enum GameEditorIssuesEnum {
@@ -54,6 +56,13 @@ export interface TileBrushTool {
     rightDrag: boolean;
 }
 
+export interface TeleportTileTool {
+    type: ToolType.TeleportTileTool;
+    channelNumber: number;
+    teleportChannel: TeleportChannelDto;
+    firstTilePlaced?: Vector2;
+}
+
 interface PlaceableTool {
     type: ToolType.PlaceableTool;
     placeableKind: PlaceableKind;
@@ -63,7 +72,7 @@ interface PlaceableEraserTool {
     type: ToolType.PlaceableEraserTool;
 }
 
-export type ActiveTool = TileBrushTool | PlaceableTool | PlaceableEraserTool;
+export type ActiveTool = TileBrushTool | TeleportTileTool | PlaceableTool | PlaceableEraserTool;
 
 export interface Vector2 {
     x: number;
@@ -80,3 +89,11 @@ export type ToolbarItem = {
     tileKind: TileKind;
     class: string;
 };
+
+export interface TeleportChannel {
+    channelNumber: number;
+    tiles: {
+        a: Vector2;
+        b: Vector2;
+    };
+}
