@@ -20,6 +20,7 @@ import { PlayerTeleportDto } from '@app/modules/in-game/dto/player-teleport.dto'
 import { AdminModeToggledDto } from '@app/modules/in-game/dto/admin-mode-toggled.dto';
 import { PlayerHealthChangedDto } from '@app/modules/in-game/dto/player-health-changed.dto';
 import { AttackPlayerActionDto } from '@app/modules/in-game/dto/attack-player-action.dto';
+import { GameStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
 
 @Controller('in-game')
 export class InGameController {
@@ -82,4 +83,7 @@ export class InGameController {
 
     @Post('attack-player-action')
     attackPlayerAction(@Body() data: AttackPlayerActionDto): void {}
+
+    @Post('game-statistics')
+    gameStatistics(@Body() data: GameStatisticsDto): void {}
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { AdminModeToggledDto } from '@app/dto/admin-mode-toggled-dto';
 import { DoorToggledDto } from '@app/dto/door-toggled-dto';
 import { GameOverDto } from '@app/dto/game-over-dto';
+import { GameStatisticsDto } from '@app/dto/game-statistics-dto';
 import { PlayerLeftSessionDto } from '@app/dto/player-left-session-dto';
 import { PlayerMoveDto } from '@app/dto/player-move-dto';
 import { PlayerMovedDto } from '@app/dto/player-moved-dto';
@@ -45,6 +46,10 @@ export class InGameSocketService {
 
     toggleAdminMode(sessionId: string): void {
         this.socket.emit(InGameEvents.ToggleAdminMode, sessionId);
+    }
+
+    loadGameStatistics(sessionId: string): void {
+        this.socket.emit(InGameEvents.LoadGameStatistics, sessionId);
     }
 
     onAdminModeToggled(callback: (data: AdminModeToggledDto) => void): void {
@@ -113,5 +118,13 @@ export class InGameSocketService {
 
     onPlayerLeftInGameSession(callback: (data: PlayerLeftSessionDto) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerLeftInGameSession, callback);
+    }
+
+    onLoadGameStatistics(callback: (data: GameStatisticsDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.LoadGameStatistics, callback);
+    }
+
+    onLoadGameStatisticsError(callback: (message: string) => void): void {
+        this.socket.onErrorEvent(InGameEvents.LoadGameStatistics, callback);
     }
 }

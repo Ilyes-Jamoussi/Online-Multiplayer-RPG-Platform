@@ -18,5 +18,12 @@ export interface GlobalStatistics {
     flagHoldersCount?: number;
 }
 
+export interface GameStatistics {
+    winnerId: string;
+    winnerName: string;
+    playersStatistics: PlayerStatistics[];
+    globalStatistics: GlobalStatistics;
+}
+
 export type SortColumn = keyof PlayerStatistics;
 export type SortDirection = 'asc' | 'desc';

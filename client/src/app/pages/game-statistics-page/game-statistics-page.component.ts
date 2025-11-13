@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { ChatComponent } from '@app/components/features/chat/chat.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { ROUTES } from '@app/enums/routes.enum';
-import { GlobalStatistics, PlayerStatistics, SortColumn, SortDirection } from '@app/interfaces/game-statistics.interface';
+import { GlobalStatistics, SortColumn, SortDirection } from '@app/interfaces/game-statistics.interface';
+import { SessionService } from '@app/services/session/session.service';
+import { StatisticsService } from '@app/services/statistics/statistics.service';
 
 @Component({
     selector: 'app-game-statistics-page',
@@ -13,61 +15,28 @@ import { GlobalStatistics, PlayerStatistics, SortColumn, SortDirection } from '@
     templateUrl: './game-statistics-page.component.html',
     styleUrl: './game-statistics-page.component.scss',
 })
-export class GameStatisticsPageComponent {
+export class GameStatisticsPageComponent implements OnInit {
     sortColumn: SortColumn = 'name';
     sortDirection: SortDirection = 'asc';
 
-    // Mock data - à remplacer par les vraies données
-    playersStatistics: PlayerStatistics[] = [
-        {
-            name: 'Alice',
-            combatCount: 8,
-            combatWins: 5,
-            combatLosses: 3,
-            healthLost: 45,
-            healthDealt: 78,
-            tilesVisitedPercentage: 23.5,
-        },
-        {
-            name: 'Bob',
-            combatCount: 6,
-            combatWins: 3,
-            combatLosses: 3,
-            healthLost: 32,
-            healthDealt: 56,
-            tilesVisitedPercentage: 18.2,
-        },
-        {
-            name: 'Charlie',
-            combatCount: 10,
-            combatWins: 7,
-            combatLosses: 3,
-            healthLost: 28,
-            healthDealt: 92,
-            tilesVisitedPercentage: 31.8,
-        },
-        {
-            name: 'Diana',
-            combatCount: 4,
-            combatWins: 1,
-            combatLosses: 3,
-            healthLost: 67,
-            healthDealt: 34,
-            tilesVisitedPercentage: 15.7,
-        },
-    ];
+    readonly gameStatistics = computed(() => this.statisticsService.gameStatistics());
+    readonly playersStatistics = computed(() => this.gameStatistics()?.playersStatistics || []);
+    readonly globalStatistics = computed(() => this.gameStatistics()?.globalStatistics || this.getDefaultGlobalStatistics());
 
-    globalStatistics: GlobalStatistics = {
-        gameDuration: '45:32',
-        totalTurns: 127,
-        tilesVisitedPercentage: 67.3,
-        totalTeleportations: 12,
-        doorsManipulatedPercentage: 78.5,
-        sanctuariesUsedPercentage: 45.2,
-        flagHoldersCount: 3,
-    };
+    constructor(
+        private readonly router: Router,
+        private readonly statisticsService: StatisticsService,
+        private readonly sessionService: SessionService,
+    ) {}
 
-    constructor(private readonly router: Router) {}
+    ngOnInit(): void {
+        const sessionId = this.sessionService.id();
+        if (sessionId) {
+            this.statisticsService.loadGameStatistics(sessionId);
+        } else {
+            void this.router.navigate([ROUTES.HomePage]);
+        }
+    }
 
     onBackClick(): void {
         void this.router.navigate([ROUTES.HomePage]);
@@ -81,7 +50,8 @@ export class GameStatisticsPageComponent {
             this.sortDirection = 'asc';
         }
 
-        this.playersStatistics.sort((playerA, playerB) => {
+        const currentStats = this.playersStatistics();
+        const sortedStats = [...currentStats].sort((playerA, playerB) => {
             const aValue = playerA[column];
             const bValue = playerB[column];
             
@@ -94,6 +64,15 @@ export class GameStatisticsPageComponent {
             
             return this.sortDirection === 'asc' ? comparison : -comparison;
         });
+
+        // Update the statistics with sorted data
+        const currentGameStats = this.gameStatistics();
+        if (currentGameStats) {
+            this.statisticsService.setGameStatistics({
+                ...currentGameStats,
+                playersStatistics: sortedStats,
+            });
+        }
     }
 
     getSortIcon(column: SortColumn): string {
@@ -103,5 +82,17 @@ export class GameStatisticsPageComponent {
 
     isSortActive(column: SortColumn): boolean {
         return this.sortColumn === column;
+    }
+
+    private getDefaultGlobalStatistics(): GlobalStatistics {
+        return {
+            gameDuration: '0:00',
+            totalTurns: 0,
+            tilesVisitedPercentage: 0,
+            totalTeleportations: 0,
+            doorsManipulatedPercentage: 0,
+            sanctuariesUsedPercentage: 0,
+            flagHoldersCount: 0,
+        };
     }
 }
