@@ -57,11 +57,7 @@ export class MovementService {
 
         this.sessionRepository.movePlayerPosition(session.id, playerId, nextX, nextY, moveCost);
 
-        if (player.speed > 0) {
-            this.calculateReachableTiles(session, playerId);
-        } else {
-            this.eventEmitter.emit(ServerEvents.PlayerReachableTiles, { playerId, reachable: [] });
-        }
+        this.calculateReachableTiles(session, playerId);
 
         return player.speed;
     }
