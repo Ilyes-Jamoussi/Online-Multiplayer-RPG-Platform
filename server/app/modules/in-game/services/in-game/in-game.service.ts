@@ -1,6 +1,7 @@
 import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { InitializationService } from '@app/modules/in-game/services/initialization/initialization.service';
+import { StatisticsService } from '@app/modules/in-game/services/statistics/statistics.service';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { GameMode } from '@common/enums/game-mode.enum';
@@ -16,6 +17,7 @@ export class InGameService {
         private readonly initialization: InitializationService,
         private readonly sessionRepository: InGameSessionRepository,
         private readonly gameplayService: GameplayService,
+        private readonly statisticsService: StatisticsService,
     ) {}
 
     async createInGameSession(waiting: WaitingRoomSession, mode: GameMode, mapSize: MapSize): Promise<InGameSession> {
@@ -68,6 +70,7 @@ export class InGameService {
         if (session.isGameStarted) throw new BadRequestException('Game already started');
 
         session.isGameStarted = true;
+        session.gameStartTime = new Date();
         session.currentTurn = this.timerService.startFirstTurnWithTransition(session, DEFAULT_TURN_DURATION);
 
         return session;
@@ -164,5 +167,15 @@ export class InGameService {
         this.sessionRepository.delete(sessionId);
         this.gameplayService.clearSessionResources(sessionId);
         this.timerService.clearTimerForSession(sessionId);
+    }
+
+    getGameStatistics(sessionId: string) {
+        return this.statisticsService.getStoredGameStatistics(sessionId);
+    }
+
+    storeGameStatistics(sessionId: string, winnerId: string, winnerName: string): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const gameStartTime = session.gameStartTime || new Date();
+        this.statisticsService.calculateAndStoreGameStatistics(session, winnerId, winnerName, gameStartTime);
     }
 }

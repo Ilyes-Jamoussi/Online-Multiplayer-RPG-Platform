@@ -32,4 +32,5 @@ export interface InGameSession extends BaseSession {
     mode: GameMode;
     turnOrder: string[];
     isAdminModeActive?: boolean;
+    gameStartTime?: Date;
 }

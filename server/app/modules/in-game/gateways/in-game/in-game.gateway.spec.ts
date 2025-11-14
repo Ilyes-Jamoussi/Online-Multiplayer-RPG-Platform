@@ -137,6 +137,7 @@ describe('InGameGateway', () => {
             getAvailableActions: jest.fn(),
             findSessionByPlayerId: jest.fn(),
             removeSession: jest.fn(),
+            storeGameStatistics: jest.fn(),
         };
 
         const module: TestingModule = await Test.createTestingModule({
@@ -655,6 +656,7 @@ describe('InGameGateway', () => {
             gateway.handleGameOver(payload);
 
             expect(inGameService.getSession).toHaveBeenCalledWith(SESSION_ID);
+            expect(inGameService.storeGameStatistics).toHaveBeenCalledWith(SESSION_ID, WINNER_ID, WINNER_NAME);
             expect(mockServer.to).toHaveBeenCalledWith(IN_GAME_ID);
             expect(mockServer.mockBroadcastOperator.emit).toHaveBeenCalledWith(
                 InGameEvents.GameOver,
@@ -727,6 +729,7 @@ describe('InGameGateway', () => {
             gatewayPrivate.playerLeaveSession(SESSION_ID, PLAYER_ID);
 
             expect(inGameService.leaveInGameSession).toHaveBeenCalledWith(SESSION_ID, PLAYER_ID);
+            expect(inGameService.storeGameStatistics).toHaveBeenCalledWith(SESSION_ID, '', 'Partie abandonnée');
             expect(mockServer.to).toHaveBeenCalledWith(IN_GAME_ID);
             expect(mockServer.mockBroadcastOperator.emit).toHaveBeenCalledWith(InGameEvents.GameForceStopped, {
                 success: true,
