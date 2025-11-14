@@ -1,4 +1,5 @@
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { DoorToggledDto } from '@app/modules/in-game/dto/door-toggled.dto';
 import { GameOverDto } from '@app/modules/in-game/dto/game-over.dto';
 import { PlayerMoveDto } from '@app/modules/in-game/dto/player-move.dto';
@@ -102,6 +103,30 @@ export class InGameGateway {
         } catch (error) {
             socket.emit(InGameEvents.PlayerSanctuaryAction, errorResponse(error.message));
         }
+    }
+
+    @SubscribeMessage(InGameEvents.PlayerBoardBoat)
+    playerBoardBoat(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
+        try {
+            this.inGameService.boardBoat(payload.sessionId, socket.id, payload.x, payload.y);
+        } catch (error) {
+            socket.emit(InGameEvents.PlayerBoardBoat, errorResponse(error.message));
+        }
+    }
+
+    @SubscribeMessage(InGameEvents.PlayerDisembarkBoat)
+    playerDisembarkBoat(socket: Socket, payload: { sessionId: string }): void {
+        try {
+            this.inGameService.disembarkBoat(payload.sessionId, socket.id);
+        } catch (error) {
+            socket.emit(InGameEvents.PlayerDisembarkBoat, errorResponse(error.message));
+        }
+    }
+
+    @OnEvent(ServerEvents.PlaceablePositionUpdated)
+    handlePlaceablePositionUpdated(payload: { sessionId: string; placeable: Placeable }): void {
+        const session = this.inGameService.getSession(payload.sessionId);
+        this.server.to(session.inGameId).emit(InGameEvents.PlaceablePositionUpdated, successResponse(payload.placeable));
     }
 
     @OnEvent(ServerEvents.OpenSanctuaryDenied)
@@ -257,10 +282,10 @@ export class InGameGateway {
     @OnEvent(ServerEvents.GameOver)
     handleGameOver(payload: { sessionId: string; winnerId: string; winnerName: string }) {
         const session = this.inGameService.getSession(payload.sessionId);
-        
+
         // Stocker les statistiques avant de supprimer la session
         this.inGameService.storeGameStatistics(payload.sessionId, payload.winnerId, payload.winnerName);
-        
+
         this.server
             .to(session.inGameId)
             .emit(InGameEvents.GameOver, successResponse<GameOverDto>({ winnerId: payload.winnerId, winnerName: payload.winnerName }));
@@ -283,7 +308,7 @@ export class InGameGateway {
             if (result.sessionEnded) {
                 // Stocker les statistiques avant de supprimer la session
                 this.inGameService.storeGameStatistics(sessionId, '', 'Partie abandonnée');
-                
+
                 this.server.to(result.session.inGameId).emit(InGameEvents.GameForceStopped, successResponse({}));
                 this.server.socketsLeave(sessionId);
                 this.inGameService.removeSession(sessionId);
@@ -296,5 +321,17 @@ export class InGameGateway {
         } catch (error) {
             this.server.to(playerId).emit(InGameEvents.PlayerLeftInGameSession, errorResponse(error.message));
         }
+    }
+
+    @OnEvent(ServerEvents.PlayerBoardedBoat)
+    handlePlayerBoardedBoat(payload: { session: InGameSession; playerId: string; boatId: string }) {
+        this.server
+            .to(payload.session.inGameId)
+            .emit(InGameEvents.PlayerBoardedBoat, successResponse({ playerId: payload.playerId, boatId: payload.boatId }));
+    }
+
+    @OnEvent(ServerEvents.PlayerDisembarkedBoat)
+    handlePlayerDisembarkedBoat(payload: { session: InGameSession; playerId: string }) {
+        this.server.to(payload.session.inGameId).emit(InGameEvents.PlayerDisembarkedBoat, successResponse({ playerId: payload.playerId }));
     }
 }

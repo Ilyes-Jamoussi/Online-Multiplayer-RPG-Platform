@@ -138,6 +138,24 @@ export class GameplayService {
         this.actionService.clearActiveCombatForSession(sessionId);
     }
 
+    boardBoat(sessionId: string, playerId: string, x: number, y: number): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
+        if (player.onBoatId) throw new BadRequestException('Player is already on a boat');
+        this.actionService.boardBoat(session, playerId, x, y);
+    }
+
+    disembarkBoat(sessionId: string, playerId: string): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
+        if (!player.onBoatId) throw new BadRequestException('Player is not on a boat');
+        this.actionService.disembarkBoat(session, playerId);
+    }
+
     selectVPPosture(sessionId: string, playerId: string): void {
         const session = this.sessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];

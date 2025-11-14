@@ -1,3 +1,4 @@
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { GameMap } from '@app/interfaces/game-map.interface';
 import { Game } from '@app/modules/game-store/entities/game.entity';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
@@ -8,6 +9,7 @@ import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.
 import { TileCost, TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 @Injectable()
@@ -16,7 +18,10 @@ export class GameCacheService {
     private readonly sessionsGameMaps = new Map<string, GameMap>();
     private readonly disabledPlaceables = new Map<string, Map<string, { playerId: string; turnCount: number }>>();
 
-    constructor(@InjectModel(Game.name) private readonly gameModel: Model<GameDocument>) {}
+    constructor(
+        @InjectModel(Game.name) private readonly gameModel: Model<GameDocument>,
+        private readonly eventEmitter: EventEmitter2,
+    ) {}
 
     async fetchAndCacheGame(sessionId: string, gameId: string): Promise<Game> {
         const game = await this.gameModel.findById(gameId).lean();
@@ -286,5 +291,22 @@ export class GameCacheService {
         this.sessionsGames.delete(sessionId);
         this.sessionsGameMaps.delete(sessionId);
         this.disabledPlaceables.delete(sessionId);
+    }
+
+    updatePlaceablePosition(sessionId: string, fromX: number, fromY: number, toX: number, toY: number): void {
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        const placeable = this.getPlaceableAtPosition(sessionId, fromX, fromY);
+        if (!placeable) throw new NotFoundException('Placeable not found');
+        placeable.x = toX;
+        placeable.y = toY;
+
+        this.eventEmitter.emit(ServerEvents.PlaceablePositionUpdated, {
+            sessionId,
+            placeable: {
+                ...placeable,
+                id: placeable._id?.toString() || '',
+            },
+        });
     }
 }

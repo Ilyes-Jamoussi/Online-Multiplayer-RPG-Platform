@@ -91,6 +91,30 @@ export class ActionService {
         }
     }
 
+    boardBoat(session: InGameSession, playerId: string, x: number, y: number): void {
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
+        if (player.onBoatId) throw new BadRequestException('Player is already on a boat');
+        const boat = this.gameCache.getPlaceableAtPosition(session.id, x, y);
+        if (!boat) throw new NotFoundException('Boat not found');
+        if (boat.kind !== PlaceableKind.BOAT) throw new BadRequestException('Invalid boat');
+        player.onBoatId = boat._id.toString();
+        if (boat.x !== player.x || boat.y !== player.y) {
+            this.sessionRepository.movePlayerPosition(session.id, playerId, boat.x, boat.y, 0);
+        }
+        this.eventEmitter.emit(ServerEvents.PlayerBoardedBoat, { session, playerId, boatId: player.onBoatId });
+    }
+
+    disembarkBoat(session: InGameSession, playerId: string): void {
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
+        if (!player.onBoatId) throw new BadRequestException('Player is not on a boat');
+        player.onBoatId = undefined;
+        this.eventEmitter.emit(ServerEvents.PlayerDisembarkedBoat, { session, playerId });
+    }
+
     private healSanctuary(
         session: InGameSession,
         playerId: string,
@@ -186,6 +210,10 @@ export class ActionService {
 
                     if (object && object.kind === 'FIGHT') {
                         actions.push({ type: 'FIGHT', x: pos.x, y: pos.y });
+                    }
+
+                    if (object && object.kind === 'BOAT') {
+                        actions.push({ type: 'BOAT', x: pos.x, y: pos.y });
                     }
                 } catch {
                     continue;

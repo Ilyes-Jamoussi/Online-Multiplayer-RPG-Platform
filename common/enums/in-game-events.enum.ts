@@ -32,6 +32,10 @@ export enum InGameEvents {
     PlayerSanctuaryRequest = 'playerSanctuaryRequest',
     PlayerSanctuaryAction = 'playerSanctuaryAction',
     PlayerBonusesChanged = 'playerBonusesChanged',
+    PlayerBoardBoat = 'playerBoardBoat',
+    PlayerBoardedBoat = 'playerBoardedBoat',
+    PlayerDisembarkBoat = 'playerDisembarkBoat',
+    PlayerDisembarkedBoat = 'playerDisembarkedBoat',
 
     OpenSanctuary = 'openSanctuary',
     SanctuaryActionFailed = 'sanctuaryActionFailed',
@@ -62,4 +66,6 @@ export enum InGameEvents {
     DoorToggled = 'doorToggled',
     PlayerHealthChanged = 'playerHealthChanged',
     LeftInGameSessionAck = 'leftInGameSessionAck',
+
+    PlaceablePositionUpdated = 'placeablePositionUpdated',
 }

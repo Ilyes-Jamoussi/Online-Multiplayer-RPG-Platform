@@ -179,6 +179,10 @@ export class InGameService {
         this._isTransitioning.set(false);
     }
 
+    boatAction(x: number, y: number): void {
+        this.playerService.boatAction(x, y);
+    }
+
     reset(): void {
         this.timerCoordinatorService.resetAllTimers();
         this._isGameStarted.set(false);
@@ -330,6 +334,35 @@ export class InGameService {
             this.notificationCoordinatorService.displayErrorPopup({
                 title: 'Action impossible',
                 message,
+            });
+        });
+
+        this.inGameSocketService.onPlayerBoardedBoat((data) => {
+            this.updateInGameSession({
+                inGamePlayers: {
+                    ...this.inGameSession().inGamePlayers,
+                    [data.playerId]: {
+                        ...this.inGameSession().inGamePlayers[data.playerId],
+                        onBoatId: data.boatId,
+                    },
+                },
+            });
+            if (this.playerService.id() === data.playerId) {
+                this.playerService.updatePlayer({
+                    onBoatId: data.boatId,
+                });
+            }
+        });
+
+        this.inGameSocketService.onPlayerDisembarkedBoat((data) => {
+            this.updateInGameSession({
+                inGamePlayers: {
+                    ...this.inGameSession().inGamePlayers,
+                    [data.playerId]: {
+                        ...this.inGameSession().inGamePlayers[data.playerId],
+                        onBoatId: undefined,
+                    },
+                },
             });
         });
     }

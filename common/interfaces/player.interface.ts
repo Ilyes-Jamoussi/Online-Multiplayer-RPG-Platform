@@ -30,5 +30,6 @@ export interface Player {
     combatLosses: number;
     combatDraws: number;
     hasCombatBonus: boolean;
+    onBoatId?: string;
     virtualPlayerType?: VirtualPlayerType;
 }

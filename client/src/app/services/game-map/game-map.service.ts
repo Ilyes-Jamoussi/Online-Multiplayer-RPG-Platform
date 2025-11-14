@@ -39,31 +39,12 @@ export class GameMapService {
     private readonly _teleportChannels = signal<TeleportChannelDto[]>([]);
 
     readonly visibleObjects: Signal<GameEditorPlaceableDto[]> = computed(() => {
-        const visibleObjects = this.objects().filter((obj) => obj.placed);
+        const visibleObjects = this._objects().filter((obj) => obj.placed);
         return visibleObjects.filter((obj) => {
             const isInStartPoints = this.inGameService.startPoints().some((startPoint) => startPoint.id === obj.id);
             return obj.kind !== PlaceableKind.START || isInStartPoints;
         });
     });
-
-    // readonly visibleTiles = computed<GameEditorTileDto[]>(() => {
-    //     const tiles = [...this._tiles()];
-    //     const updateTile = (x: number, y: number, channelNumber: number) => {
-    //         const index = this.getIndexByCoord(x, y);
-    //         if (index >= 0 && index < tiles.length) {
-    //             tiles[index] = { ...tiles[index], kind: TileKind.TELEPORT, teleportChannel: channelNumber };
-    //         }
-    //     };
-    //     for (const channel of this._teleportChannels()) {
-    //         if (channel.tiles?.entryA) {
-    //             updateTile(channel.tiles.entryA.x, channel.tiles.entryA.y, channel.channelNumber);
-    //         }
-    //         if (channel.tiles?.entryB) {
-    //             updateTile(channel.tiles.entryB.x, channel.tiles.entryB.y, channel.channelNumber);
-    //         }
-    //     }
-    //     return tiles;
-    // });
 
     constructor(
         private readonly gameHttpService: GameHttpService,
@@ -72,12 +53,15 @@ export class GameMapService {
         private readonly assetsService: AssetsService,
         private readonly inGameSocketService: InGameSocketService,
     ) {
-        this.initDoorListener();
+        this.initListeners();
     }
 
-    private initDoorListener(): void {
+    private initListeners(): void {
         this.inGameSocketService.onDoorToggled((data) => {
             this.updateTileState(data.x, data.y, data.isOpen);
+        });
+        this.inGameSocketService.onPlaceablePositionUpdated((data) => {
+            this.updateObjectState(data);
         });
     }
 
@@ -154,6 +138,10 @@ export class GameMapService {
 
     private updateTileState(x: number, y: number, isOpen: boolean): void {
         this._tiles.update((tiles) => tiles.map((tile) => (tile.x === x && tile.y === y ? { ...tile, open: isOpen } : tile)));
+    }
+
+    private updateObjectState(placeable: GameEditorPlaceableDto): void {
+        this._objects.update((objects) => objects.map((obj) => (obj.id === placeable.id ? placeable : obj)));
     }
 
     getActiveTile(coords?: Vector2): GameEditorTileDto | null {
@@ -265,6 +253,10 @@ export class GameMapService {
 
         this._tiles.set(tiles);
         this._objects.set(objects);
+    }
+
+    boatAction(x: number, y: number): void {
+        this.inGameService.boatAction(x, y);
     }
 
     reset(): void {

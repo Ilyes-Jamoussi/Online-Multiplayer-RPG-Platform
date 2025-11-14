@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AdminModeToggledDto } from '@app/dto/admin-mode-toggled-dto';
 import { DoorToggledDto } from '@app/dto/door-toggled-dto';
+import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameOverDto } from '@app/dto/game-over-dto';
 import { GameStatisticsDto } from '@app/dto/game-statistics-dto';
 import { PlayerLeftSessionDto } from '@app/dto/player-left-session-dto';
@@ -23,6 +24,14 @@ export class InGameSocketService {
 
     playerJoinInGameSession(sessionId: string): void {
         this.socket.emit(InGameEvents.PlayerJoinInGameSession, sessionId);
+    }
+
+    playerBoardBoat(sessionId: string, x: number, y: number): void {
+        this.socket.emit(InGameEvents.PlayerBoardBoat, { sessionId, x, y });
+    }
+
+    playerDisembarkBoat(sessionId: string): void {
+        this.socket.emit(InGameEvents.PlayerDisembarkBoat, { sessionId });
     }
 
     playerLeaveInGameSession(sessionId: string): void {
@@ -165,5 +174,17 @@ export class InGameSocketService {
 
     onLoadGameStatisticsError(callback: (message: string) => void): void {
         this.socket.onErrorEvent(InGameEvents.LoadGameStatistics, callback);
+    }
+
+    onPlayerBoardedBoat(callback: (data: { playerId: string; boatId: string }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerBoardedBoat, callback);
+    }
+
+    onPlayerDisembarkedBoat(callback: (data: { playerId: string }) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerDisembarkedBoat, callback);
+    }
+
+    onPlaceablePositionUpdated(callback: (data: GameEditorPlaceableDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlaceablePositionUpdated, callback);
     }
 }

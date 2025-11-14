@@ -80,6 +80,8 @@ export class GameMapTileComponent {
             this.gameMapService.healPlayer(this.tile.x, this.tile.y);
         } else if (actionType === 'FIGHT') {
             this.gameMapService.fightPlayer(this.tile.x, this.tile.y);
+        } else if (actionType === 'BOAT') {
+            this.gameMapService.boatAction(this.tile.x, this.tile.y);
         }
     }
 

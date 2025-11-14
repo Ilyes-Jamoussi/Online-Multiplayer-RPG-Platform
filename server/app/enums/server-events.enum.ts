@@ -17,6 +17,8 @@ export enum ServerEvents {
     PlayerCombatWinsChanged = 'player.combatWinsChanged',
     PlayerCombatLossesChanged = 'player.combatLossesChanged',
     PlayerCombatDrawsChanged = 'player.combatDrawsChanged',
+    PlayerBoardedBoat = 'player.boardedBoat',
+    PlayerDisembarkedBoat = 'player.disembarkedBoat',
 
     TurnStarted = 'turn.started',
     TurnEnded = 'turn.ended',
@@ -40,4 +42,6 @@ export enum ServerEvents {
     OpenSanctuaryDenied = 'openSanctuaryDenied',
     SanctuaryActionFailed = 'sanctuaryActionFailed',
     SanctuaryActionSuccess = 'sanctuaryActionSuccess',
+
+    PlaceablePositionUpdated = 'placeable.positionUpdated',
 }

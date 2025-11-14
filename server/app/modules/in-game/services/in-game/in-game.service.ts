@@ -66,6 +66,14 @@ export class InGameService {
         return session;
     }
 
+    boardBoat(sessionId: string, playerId: string, x: number, y: number): void {
+        this.gameplayService.boardBoat(sessionId, playerId, x, y);
+    }
+
+    disembarkBoat(sessionId: string, playerId: string): void {
+        this.gameplayService.disembarkBoat(sessionId, playerId);
+    }
+
     private startSessionWithTransition(sessionId: string): InGameSession {
         const session = this.sessionRepository.findById(sessionId);
         if (session.isGameStarted) throw new BadRequestException('Game already started');

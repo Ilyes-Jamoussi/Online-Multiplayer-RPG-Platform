@@ -55,6 +55,10 @@ export class MovementService {
             throw new BadRequestException('Tile is occupied');
         }
 
+        if (player.onBoatId) {
+            this.gameCache.updatePlaceablePosition(session.id, player.x, player.y, nextX, nextY);
+        }
+
         this.sessionRepository.movePlayerPosition(session.id, playerId, nextX, nextY, moveCost);
 
         this.calculateReachableTiles(session, playerId);

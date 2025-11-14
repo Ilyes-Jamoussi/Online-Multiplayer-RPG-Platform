@@ -152,6 +152,22 @@ export class PlayerService {
         this.updatePlayer({ actionsRemaining });
     }
 
+    boatAction(x: number, y: number): void {
+        if (this.player().onBoatId) {
+            this.disembarkBoat();
+        } else {
+            this.boardBoat(x, y);
+        }
+    }
+
+    private boardBoat(x: number, y: number): void {
+        this.inGameSocketService.playerBoardBoat(this.sessionService.id(), x, y);
+    }
+
+    private disembarkBoat(): void {
+        this.inGameSocketService.playerDisembarkBoat(this.sessionService.id());
+    }
+
     private initListeners(): void {
         this.sessionSocketService.onSessionCreated((data) => {
             this.updatePlayer({ id: data.playerId });
