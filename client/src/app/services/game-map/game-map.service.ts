@@ -2,6 +2,7 @@ import { Injectable, Signal, computed, signal } from '@angular/core';
 import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
 import { Vector2 } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
@@ -11,6 +12,7 @@ import { NotificationCoordinatorService } from '@app/services/notification-coord
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
@@ -34,6 +36,7 @@ export class GameMapService {
     private readonly _description = signal<string>(this.initialState.description);
     private readonly _mode = signal<GameMode>(this.initialState.mode);
     private readonly _activeTileCoords = signal<{ x: number; y: number } | null>(null);
+    private readonly _teleportChannels = signal<TeleportChannelDto[]>([]);
 
     readonly visibleObjects: Signal<GameEditorPlaceableDto[]> = computed(() => {
         const visibleObjects = this.objects().filter((obj) => obj.placed);
@@ -42,6 +45,25 @@ export class GameMapService {
             return obj.kind !== PlaceableKind.START || isInStartPoints;
         });
     });
+
+    // readonly visibleTiles = computed<GameEditorTileDto[]>(() => {
+    //     const tiles = [...this._tiles()];
+    //     const updateTile = (x: number, y: number, channelNumber: number) => {
+    //         const index = this.getIndexByCoord(x, y);
+    //         if (index >= 0 && index < tiles.length) {
+    //             tiles[index] = { ...tiles[index], kind: TileKind.TELEPORT, teleportChannel: channelNumber };
+    //         }
+    //     };
+    //     for (const channel of this._teleportChannels()) {
+    //         if (channel.tiles?.entryA) {
+    //             updateTile(channel.tiles.entryA.x, channel.tiles.entryA.y, channel.channelNumber);
+    //         }
+    //         if (channel.tiles?.entryB) {
+    //             updateTile(channel.tiles.entryB.x, channel.tiles.entryB.y, channel.channelNumber);
+    //         }
+    //     }
+    //     return tiles;
+    // });
 
     constructor(
         private readonly gameHttpService: GameHttpService,
@@ -204,16 +226,37 @@ export class GameMapService {
         return this.assetsService.getAvatarStaticImage(player.avatar);
     }
 
+    private getIndexByCoord(x: number, y: number): number {
+        const width = this.size();
+        return y * width + x;
+    }
+
     private buildGameMap(gameData: GameEditorDto): void {
         this._name.set(gameData.name);
         this._description.set(gameData.description);
         this._size.set(gameData.size);
         this._mode.set(gameData.mode);
+        this._teleportChannels.set(gameData.teleportChannels);
 
         const tiles: GameEditorTileDto[] = gameData.tiles.map((tile) => ({
             ...tile,
             open: tile.open ?? false,
         }));
+
+        const updateTile = (x: number, y: number, channelNumber: number) => {
+            const index = this.getIndexByCoord(x, y);
+            if (index >= 0 && index < tiles.length) {
+                tiles[index] = { ...tiles[index], kind: TileKind.TELEPORT, teleportChannel: channelNumber };
+            }
+        };
+        for (const channel of gameData.teleportChannels) {
+            if (channel.tiles?.entryA) {
+                updateTile(channel.tiles.entryA.x, channel.tiles.entryA.y, channel.channelNumber);
+            }
+            if (channel.tiles?.entryB) {
+                updateTile(channel.tiles.entryB.x, channel.tiles.entryB.y, channel.channelNumber);
+            }
+        }
 
         const objects: GameEditorPlaceableDto[] = gameData.objects.map((obj) => ({
             ...obj,

@@ -43,10 +43,22 @@ export class GameCacheService {
 
         this.disabledPlaceables.set(sessionId, new Map());
 
+        const tiles = game.tiles.map((tile) => ({ ...tile, playerId: null }));
+        for (const channel of game.teleportChannels) {
+            if (channel.tiles?.entryA) {
+                tiles[channel.tiles.entryA.y * game.size + channel.tiles.entryA.x].kind = TileKind.TELEPORT;
+                tiles[channel.tiles.entryA.y * game.size + channel.tiles.entryA.x].teleportChannel = channel.channelNumber;
+            }
+            if (channel.tiles?.entryB) {
+                tiles[channel.tiles.entryB.y * game.size + channel.tiles.entryB.x].kind = TileKind.TELEPORT;
+                tiles[channel.tiles.entryB.y * game.size + channel.tiles.entryB.x].teleportChannel = channel.channelNumber;
+            }
+        }
+
         this.sessionsGameMaps.set(sessionId, {
-            tiles: game.tiles.map((tile) => ({ ...tile, playerId: null })),
             objects: expandedObjects,
             size: game.size,
+            tiles,
         });
         return game;
     }
@@ -74,6 +86,32 @@ export class GameCacheService {
         const { tiles, size: mapSize } = game;
         const index = y * mapSize + x;
         return tiles[index];
+    }
+
+    getTeleportDestination(sessionId: string, x: number, y: number): { x: number; y: number } {
+        const game = this.getGameForSession(sessionId);
+        const teleportChannel = game.teleportChannels.find(
+            (channel) =>
+                (channel.tiles?.entryA?.x === x && channel.tiles?.entryA?.y === y) ||
+                (channel.tiles?.entryB?.x === x && channel.tiles?.entryB?.y === y),
+        );
+
+        if (!teleportChannel?.tiles) {
+            throw new NotFoundException('Teleport channel not found');
+        }
+
+        const entryA = teleportChannel.tiles.entryA;
+        const entryB = teleportChannel.tiles.entryB;
+        const isAtEntryA = entryA?.x === x && entryA?.y === y;
+
+        if (isAtEntryA && entryB) {
+            return { x: entryB.x, y: entryB.y };
+        }
+        if (!isAtEntryA && entryA) {
+            return { x: entryA.x, y: entryA.y };
+        }
+
+        throw new NotFoundException('Teleport channel not found');
     }
 
     getNextPosition(sessionId: string, currentX: number, currentY: number, orientation: Orientation): { x: number; y: number } {

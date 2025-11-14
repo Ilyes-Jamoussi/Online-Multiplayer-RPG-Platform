@@ -174,8 +174,6 @@ export class GameEditorStoreService {
             teleportChannels: [...this._teleportChannels()],
         };
 
-        console.log('current', current);
-
         return this.pickChangedProperties(current, this._initial());
     }
 

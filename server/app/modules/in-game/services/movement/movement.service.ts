@@ -24,7 +24,12 @@ export class MovementService {
             throw new NotFoundException('Player not found');
         }
 
-        const { x: nextX, y: nextY } = this.gameCache.getNextPosition(session.id, player.x, player.y, orientation);
+        let nextX = player.x;
+        let nextY = player.y;
+
+        const { x, y } = this.gameCache.getNextPosition(session.id, player.x, player.y, orientation);
+        nextX = x;
+        nextY = y;
         const tile = this.gameCache.getTileAtPosition(session.id, nextX, nextY);
         if (!tile) {
             throw new NotFoundException('Tile not found');
@@ -37,6 +42,13 @@ export class MovementService {
             throw new BadRequestException('Cannot move onto this tile');
         } else if (moveCost > player.speed) {
             throw new BadRequestException('Not enough movement points for this tile');
+        }
+
+        if (tile.kind === TileKind.TELEPORT) {
+            const { x: destinationX, y: destinationY } = this.gameCache.getTeleportDestination(session.id, nextX, nextY);
+            const destinationOccupant = this.gameCache.getTileOccupant(session.id, destinationX, destinationY);
+            nextX = destinationOccupant ? nextX : destinationX;
+            nextY = destinationOccupant ? nextY : destinationY;
         }
 
         if (this.gameCache.getTileOccupant(session.id, nextX, nextY)) {
@@ -149,15 +161,58 @@ export class MovementService {
 
             if (this.isPositionOccupied(context.session, next.x, next.y)) continue;
 
+            const tile = this.gameCache.getTileAtPosition(context.session.id, next.x, next.y);
+            if (tile?.kind === TileKind.TELEPORT) {
+                if (this.isTeleportDestinationOccupied(context.session.id, next.x, next.y)) {
+                    continue;
+                }
+            }
+
             const newRemainingPoints = current.remainingPoints - tileCost;
             if (newRemainingPoints < 0) continue;
 
-            context.queue.push({
+            const nextTile: ReachableTile = {
                 x: next.x,
                 y: next.y,
                 cost: current.cost + tileCost,
                 remainingPoints: newRemainingPoints,
+            };
+            context.queue.push(nextTile);
+
+            if (tile?.kind === TileKind.TELEPORT) {
+                this.addTeleportDestination(nextTile, context);
+            }
+        }
+    }
+
+    private isTeleportDestinationOccupied(sessionId: string, teleportX: number, teleportY: number): boolean {
+        try {
+            const destination = this.gameCache.getTeleportDestination(sessionId, teleportX, teleportY);
+            return this.gameCache.getTileOccupant(sessionId, destination.x, destination.y) !== null;
+        } catch {
+            return true;
+        }
+    }
+
+    private addTeleportDestination(teleportTile: ReachableTile, context: ReachableTileExplorationContext): void {
+        try {
+            const destination = this.gameCache.getTeleportDestination(context.session.id, teleportTile.x, teleportTile.y);
+            const destinationKey = `${destination.x},${destination.y}`;
+
+            if (context.visited.has(destinationKey)) return;
+            if (this.isPositionOccupied(context.session, destination.x, destination.y)) return;
+
+            const destinationTileCost = this.calculateTileCost(context.session.id, destination.x, destination.y, context.isOnBoat);
+            if (destinationTileCost === null) return;
+
+            context.queue.push({
+                x: destination.x,
+                y: destination.y,
+                cost: teleportTile.cost,
+                remainingPoints: teleportTile.remainingPoints,
             });
+        } catch {
+            return;
         }
     }
 
