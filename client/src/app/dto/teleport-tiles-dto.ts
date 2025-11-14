@@ -11,7 +11,7 @@ import { TeleportTileCoordinatesDto } from './teleport-tile-coordinates-dto';
 
 
 export interface TeleportTilesDto { 
-    a?: TeleportTileCoordinatesDto;
-    b?: TeleportTileCoordinatesDto;
+    entryA?: TeleportTileCoordinatesDto;
+    entryB?: TeleportTileCoordinatesDto;
 }
 

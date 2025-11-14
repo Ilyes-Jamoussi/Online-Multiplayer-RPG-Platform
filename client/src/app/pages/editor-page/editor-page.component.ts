@@ -16,7 +16,8 @@ import { ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-import { distinctUntilChanged, filter, map, Subject, takeUntil, tap } from 'rxjs';
+import { GameEditorTeleportService } from '@app/services/game-editor-teleport/game-editor-teleport.service';
+import { Subject, distinctUntilChanged, filter, map, takeUntil, tap } from 'rxjs';
 
 @Component({
     selector: 'app-editor-page',
@@ -37,7 +38,7 @@ import { distinctUntilChanged, filter, map, Subject, takeUntil, tap } from 'rxjs
     templateUrl: './editor-page.component.html',
     styleUrls: ['./editor-page.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [GameEditorStoreService, GameEditorInteractionsService, GameEditorCheckService],
+    providers: [GameEditorTeleportService, GameEditorStoreService, GameEditorInteractionsService, GameEditorCheckService],
 })
 export class EditorPageComponent implements OnInit, OnDestroy {
     readonly gameNameMaxLength = GAME_NAME_MAX_LENGTH;
@@ -147,7 +148,15 @@ export class EditorPageComponent implements OnInit, OnDestroy {
 
     @HostListener('keydown', ['$event'])
     onKeyDown(evt: KeyboardEvent): void {
-        if (evt.key === 'Escape') {
+        if (evt.key === 'Escape' && this.gameEditorInteractionsService.activeTool?.type === ToolType.TeleportTileTool) {
+            this.gameEditorInteractionsService.cancelTeleportPlacement();
+        }
+    }
+
+    @HostListener('contextmenu', ['$event'])
+    onRightClick(evt: MouseEvent): void {
+        evt.preventDefault();
+        if (this.gameEditorInteractionsService.activeTool?.type === ToolType.TeleportTileTool) {
             this.gameEditorInteractionsService.cancelTeleportPlacement();
         }
     }

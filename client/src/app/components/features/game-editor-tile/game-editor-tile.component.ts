@@ -82,9 +82,8 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         if (event.button === 0) {
             this.gameEditorInteractionsService.dragStart(this.tile.x, this.tile.y, 'left');
         } else if (event.button === 2) {
-            const tool = this.gameEditorInteractionsService.activeTool;
-            if (tool?.type === ToolType.TeleportTileTool) {
-                this.gameEditorInteractionsService.handleTeleportTileRightClick(this.tile.x, this.tile.y);
+            if (this.tile.kind === TileKind.TELEPORT) {
+                this.gameEditorInteractionsService.selectTeleportTileEraserTool();
             } else {
                 this.gameEditorInteractionsService.activeTool = {
                     type: ToolType.TileBrushTool,
@@ -92,15 +91,15 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
                     leftDrag: false,
                     rightDrag: false,
                 };
-                this.gameEditorInteractionsService.dragStart(this.tile.x, this.tile.y, 'right');
             }
+            this.gameEditorInteractionsService.dragStart(this.tile.x, this.tile.y, 'right');
         }
     }
 
     onMouseUp(event: MouseEvent): void {
         event.preventDefault();
         this.gameEditorInteractionsService.dragEnd();
-        if (event.button === 2) {
+        if (event.button === 2 && this.gameEditorInteractionsService.activeTool?.type) {
             this.gameEditorInteractionsService.revertToPreviousTool();
         }
     }

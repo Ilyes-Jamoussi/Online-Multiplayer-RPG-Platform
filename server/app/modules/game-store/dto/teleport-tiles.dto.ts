@@ -19,11 +19,11 @@ export class TeleportTilesDto {
     @IsOptional()
     @ValidateNested()
     @Type(() => TeleportTileCoordinatesDto)
-    a?: TeleportTileCoordinatesDto;
+    entryA?: TeleportTileCoordinatesDto;
 
     @ApiPropertyOptional({ type: TeleportTileCoordinatesDto })
     @IsOptional()
     @ValidateNested()
     @Type(() => TeleportTileCoordinatesDto)
-    b?: TeleportTileCoordinatesDto;
+    entryB?: TeleportTileCoordinatesDto;
 }

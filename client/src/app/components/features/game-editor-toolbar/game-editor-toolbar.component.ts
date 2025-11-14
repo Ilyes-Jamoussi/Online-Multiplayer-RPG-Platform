@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { TileLabel } from '@app/enums/tile-label.enum';
 import { ToolbarItem, ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { GameEditorTeleportService } from '@app/services/game-editor-teleport/game-editor-teleport.service';
 import { TileKind } from '@common/enums/tile.enum';
 
 @Component({
@@ -14,7 +15,10 @@ export class GameEditorToolbarComponent {
     readonly tileLabel = TileLabel;
     readonly tileKind = TileKind;
 
-    constructor(private readonly gameEditorInteractionsService: GameEditorInteractionsService) {}
+    constructor(
+        private readonly gameEditorInteractionsService: GameEditorInteractionsService,
+        private readonly teleportService: GameEditorTeleportService,
+    ) {}
 
     get brushes() {
         return this.gameEditorInteractionsService.getToolbarBrushes();
@@ -34,7 +38,7 @@ export class GameEditorToolbarComponent {
     }
 
     isTeleportDisabled(): boolean {
-        return this.gameEditorInteractionsService.isTeleportDisabled();
+        return this.teleportService.isTeleportDisabled();
     }
 
     isTeleportSelected(): boolean {
@@ -58,5 +62,9 @@ export class GameEditorToolbarComponent {
             return tool.channelNumber;
         }
         return null;
+    }
+
+    getAvailableTeleportCount(): number {
+        return this.teleportService.getAvailableTeleportChannels().length;
     }
 }

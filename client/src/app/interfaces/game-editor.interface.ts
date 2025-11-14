@@ -8,6 +8,7 @@ export enum ToolType {
     PlaceableTool = 'placeable-tool',
     PlaceableEraserTool = 'placeable-eraser-tool',
     TeleportTileTool = 'teleport-tile-tool',
+    TeleportTileEraserTool = 'teleport-tile-eraser-tool',
 }
 
 export enum GameEditorIssuesEnum {
@@ -63,6 +64,10 @@ export interface TeleportTileTool {
     firstTilePlaced?: Vector2;
 }
 
+interface TeleportTileEraserTool {
+    type: ToolType.TeleportTileEraserTool;
+}
+
 interface PlaceableTool {
     type: ToolType.PlaceableTool;
     placeableKind: PlaceableKind;
@@ -72,7 +77,7 @@ interface PlaceableEraserTool {
     type: ToolType.PlaceableEraserTool;
 }
 
-export type ActiveTool = TileBrushTool | TeleportTileTool | PlaceableTool | PlaceableEraserTool;
+export type ActiveTool = TileBrushTool | TeleportTileTool | PlaceableTool | PlaceableEraserTool | TeleportTileEraserTool;
 
 export interface Vector2 {
     x: number;

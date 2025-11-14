@@ -9,7 +9,9 @@
         [attr.data-tooltip]="tileLabel[b.tileKind]"
     >
         @if (b.tileKind === tileKind.TELEPORT && getActiveTeleportChannelNumber() !== null) {
-            <span class="teleport-channel-number">{{ getActiveTeleportChannelNumber() }}</span>
+        <span class="teleport-channel-number">{{ getActiveTeleportChannelNumber() }}</span>
+        } @if (b.tileKind === tileKind.TELEPORT) {
+        <span class="teleport-count-badge">{{ getAvailableTeleportCount() }}</span>
         }
     </button>
     }

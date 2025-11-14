@@ -9,8 +9,8 @@ const teleportTileCoordinatesSchema = SchemaFactory.createForClass(TeleportTileC
 
 @Schema({ versionKey: false, _id: false })
 class TeleportTiles {
-    @Prop({ type: teleportTileCoordinatesSchema, required: false }) a?: TeleportTileCoordinates;
-    @Prop({ type: teleportTileCoordinatesSchema, required: false }) b?: TeleportTileCoordinates;
+    @Prop({ type: teleportTileCoordinatesSchema, required: false }) entryA?: TeleportTileCoordinates;
+    @Prop({ type: teleportTileCoordinatesSchema, required: false }) entryB?: TeleportTileCoordinates;
 }
 const teleportTilesSchema = SchemaFactory.createForClass(TeleportTiles);
 

@@ -1,10 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
-import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
 import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ActiveTool, ToolType, ToolbarItem, Vector2 } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
+import { GameEditorTeleportService } from '@app/services/game-editor-teleport/game-editor-teleport.service';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 
@@ -13,6 +13,7 @@ export class GameEditorInteractionsService {
     constructor(
         private readonly store: GameEditorStoreService,
         private readonly assetService: AssetsService,
+        private readonly teleportService: GameEditorTeleportService,
     ) {}
 
     private readonly _activeTool = signal<ActiveTool | null>(null);
@@ -83,7 +84,15 @@ export class GameEditorInteractionsService {
     }
 
     revertToPreviousTool(): void {
-        this._activeTool.set(this._previousActiveTool());
+        const currentTool = this._activeTool();
+        const previousTool = this._previousActiveTool();
+
+        if (currentTool?.type === ToolType.TeleportTileEraserTool && previousTool?.type === ToolType.TeleportTileTool) {
+            this.selectTeleportTool();
+            return;
+        }
+
+        this._activeTool.set(previousTool);
         this._previousActiveTool.set(null);
         this._hoveredTiles.set([]);
     }
@@ -93,11 +102,10 @@ export class GameEditorInteractionsService {
         if (!tool) return;
 
         if (tool.type === ToolType.TeleportTileTool) {
-            if (click === 'left') {
-                this.handleTeleportTileClick(x, y);
-            } else if (click === 'right') {
-                this.handleTeleportTileRightClick(x, y);
-            }
+            this.handleTeleportTileClick(x, y);
+            return;
+        } else if (tool.type === ToolType.TeleportTileEraserTool) {
+            this.handleTeleportTileRightClick(x, y);
             return;
         }
 
@@ -195,20 +203,8 @@ export class GameEditorInteractionsService {
         return Object.values(PlaceableMime).some((mime) => types.includes(mime));
     }
 
-    getAvailableTeleportChannels(): TeleportChannelDto[] {
-        return this.store.availableTeleportChannels();
-    }
-
-    getNextAvailableTeleportChannel(): TeleportChannelDto | undefined {
-        return this.store.availableTeleportChannels().find((channel) => !channel.tiles?.a && !channel.tiles?.b);
-    }
-
-    isTeleportDisabled(): boolean {
-        return this.store.isTeleportDisabled();
-    }
-
     selectTeleportTool(): void {
-        const channel = this.getNextAvailableTeleportChannel();
+        const channel = this.teleportService.getNextAvailableTeleportChannel();
         if (!channel) return;
 
         this.activeTool = {
@@ -218,42 +214,45 @@ export class GameEditorInteractionsService {
         };
     }
 
-    handleTeleportTileClick(x: number, y: number): void {
+    selectTeleportTileEraserTool(): void {
+        this.activeTool = {
+            type: ToolType.TeleportTileEraserTool,
+        };
+    }
+
+    cancelTeleportPlacement(): void {
+        const tool = this.activeTool;
+        if (!tool || tool.type !== ToolType.TeleportTileTool) return;
+        this.teleportService.cancelTeleportPlacement(tool.channelNumber);
+        this.selectTeleportTool();
+    }
+
+    private handleTeleportTileClick(x: number, y: number): void {
         const tool = this._activeTool();
         if (!tool || tool.type !== ToolType.TeleportTileTool) return;
 
         if (!tool.firstTilePlaced) {
-            this.store.placeTeleportTile(x, y, tool.channelNumber, true);
+            this.teleportService.placeTeleportTile(x, y, tool.channelNumber, true);
             this._activeTool.set({
                 ...tool,
                 firstTilePlaced: { x, y },
             });
         } else {
-            this.store.placeTeleportTile(x, y, tool.channelNumber, false);
-            const nextChannel = this.getNextAvailableTeleportChannel();
+            this.teleportService.placeTeleportTile(x, y, tool.channelNumber, false);
+            const nextChannel = this.teleportService.getNextAvailableTeleportChannel();
             if (nextChannel) {
-                this.activeTool = {
+                this._activeTool.set({
                     type: ToolType.TeleportTileTool,
                     channelNumber: nextChannel.channelNumber,
                     teleportChannel: nextChannel,
-                };
+                });
             } else {
                 this._activeTool.set(null);
             }
         }
     }
 
-    cancelTeleportPlacement(): void {
-        const tool = this._activeTool();
-        if (!tool || tool.type !== ToolType.TeleportTileTool) return;
-
-        if (tool.firstTilePlaced) {
-            this.store.cancelTeleportPlacement(tool.channelNumber);
-        }
-        this._activeTool.set(null);
-    }
-
-    handleTeleportTileRightClick(x: number, y: number): void {
+    private handleTeleportTileRightClick(x: number, y: number): void {
         const tool = this._activeTool();
         if (tool && tool.type === ToolType.TeleportTileTool && tool.firstTilePlaced) {
             this.cancelTeleportPlacement();
@@ -262,7 +261,21 @@ export class GameEditorInteractionsService {
 
         const tile = this.store.getTileAt(x, y);
         if (tile && tile.kind === TileKind.TELEPORT && tile.teleportChannel) {
-            this.store.removeTeleportPair(x, y);
+            this.teleportService.removeTeleportPair(x, y);
+
+            if (tool?.type === ToolType.TeleportTileTool) {
+                const nextChannel = this.teleportService.getNextAvailableTeleportChannel();
+                if (nextChannel) {
+                    this._activeTool.set({
+                        type: ToolType.TeleportTileTool,
+                        channelNumber: nextChannel.channelNumber,
+                        teleportChannel: nextChannel,
+                        firstTilePlaced: tool.firstTilePlaced,
+                    });
+                } else {
+                    this._activeTool.set(null);
+                }
+            }
         }
     }
 
