@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { NotificationService } from './notification-coordinator.service';
+import { NotificationService } from './notification.service';
 import { ROUTES } from '@app/enums/routes.enum';
 
 const TEST_DURATION_1000 = 1000;
