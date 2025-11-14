@@ -11,6 +11,7 @@ import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-s
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { InitializationService } from '@app/modules/in-game/services/initialization/initialization.service';
 import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
+import { StatisticsService } from '@app/modules/in-game/services/statistics/statistics.service';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { TurnTimerService } from '@app/modules/in-game/services/turn-timer/turn-timer.service';
 import { VirtualPlayerService } from '@app/modules/in-game/services/virtual-player/virtual-player.service';
@@ -35,8 +36,9 @@ import { MongooseModule } from '@nestjs/mongoose';
         ActionService,
         CombatService,
         VirtualPlayerService,
+        StatisticsService,
     ],
-    exports: [InGameService],
+    exports: [InGameService, InGameSessionRepository],
     imports: [MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }]), EventEmitterModule.forRoot()],
 })
 export class InGameModule {}

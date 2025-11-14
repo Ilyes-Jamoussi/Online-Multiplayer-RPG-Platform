@@ -150,7 +150,7 @@ export class SessionService {
 
         const avatars = Object.values(Avatar);
         const availableAvatars = avatars.filter((botAvatar) => !existingPlayers.some((player) => player.avatar === botAvatar));
-        const avatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)] || avatars[0];
+        const avatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
 
         const attackDice = Math.random() > RANDOM_THRESHOLD ? Dice.D4 : Dice.D6;
         const defenseDice = attackDice === Dice.D4 ? Dice.D6 : Dice.D4;

@@ -5,6 +5,7 @@ import { Server, Socket } from 'socket.io';
 import { ChatEvents } from '@common/enums/chat-events.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { ChatService } from '@app/modules/chat/services/chat.service';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { SendMessageDto } from '@app/modules/chat/dto/send-message.dto';
 import { LoadMessagesDto, ChatMessageDto } from '@app/modules/chat/dto/load-messages.dto';
 import { validationExceptionFactory } from '@app/utils/validation/validation.util';
@@ -23,17 +24,32 @@ import { successResponse } from '@app/utils/socket-response/socket-response.util
 export class ChatGateway {
     @WebSocketServer() private readonly server: Server;
 
-    constructor(private readonly chatService: ChatService) {}
+    constructor(
+        private readonly chatService: ChatService,
+        private readonly inGameSessionRepository: InGameSessionRepository,
+    ) {}
 
     @SubscribeMessage(ChatEvents.SendMessage)
     sendMessage(socket: Socket, data: SendMessageDto): void {
         const message = this.chatService.sendMessage(data, socket.id);
         
-        if (!socket.rooms.has(data.sessionId)) {
-            void socket.join(data.sessionId);
+        let targetRoom = data.sessionId;
+        
+        if (data.isGameStarted) {
+            try {
+                const inGameSession = this.inGameSessionRepository.findById(data.sessionId);
+                targetRoom = inGameSession.inGameId;
+            } catch {
+                // Fallback vers sessionId si session in-game non trouvée
+                targetRoom = data.sessionId;
+            }
         }
         
-        this.server.to(data.sessionId).emit(ChatEvents.MessageReceived, successResponse<ChatMessageDto>(message));
+        if (!socket.rooms.has(targetRoom)) {
+            void socket.join(targetRoom);
+        }
+        
+        this.server.to(targetRoom).emit(ChatEvents.MessageReceived, successResponse<ChatMessageDto>(message));
     }
 
     @OnEvent(ServerEvents.LoadMessages)

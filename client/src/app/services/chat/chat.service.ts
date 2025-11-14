@@ -3,6 +3,7 @@ import { ChatMessage } from '@common/interfaces/chat-message.interface';
 import { ChatSocketService } from '@app/services/chat-socket/chat-socket.service';
 import { SessionService } from '@app/services/session/session.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { InGameService } from '@app/services/in-game/in-game.service';
 import { ResetService } from '@app/services/reset/reset.service';
 
 @Injectable({
@@ -17,6 +18,7 @@ export class ChatService {
         private readonly chatSocketService: ChatSocketService,
         private readonly sessionService: SessionService,
         private readonly playerService: PlayerService,
+        private readonly inGameService: InGameService,
     ) {
         this.initListeners();
         inject(ResetService).reset$.subscribe(() => this.reset());
@@ -27,6 +29,7 @@ export class ChatService {
             sessionId: this.sessionService.id(),
             authorName: this.playerService.name(),
             content,
+            isGameStarted: this.inGameService.isGameStarted(),
         });
     }
 

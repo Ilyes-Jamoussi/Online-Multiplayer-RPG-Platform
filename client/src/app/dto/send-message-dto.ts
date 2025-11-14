@@ -13,5 +13,6 @@ export interface SendMessageDto {
     sessionId: string;
     authorName: string;
     content: string;
+    isGameStarted: boolean;
 }
 
