@@ -106,16 +106,6 @@ export class InGameGateway {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnTransitionEnded, successResponse(payload.session));
     }
 
-    @OnEvent(ServerEvents.TurnTimeout)
-    handleTurnTimeout(payload: { session: InGameSession }) {
-        this.server.to(payload.session.inGameId).emit(InGameEvents.TurnTimeout, successResponse(payload.session));
-    }
-
-    @OnEvent(ServerEvents.TurnForcedEnd)
-    handleForcedEnd(payload: { session: InGameSession }) {
-        this.server.to(payload.session.inGameId).emit(InGameEvents.TurnForcedEnd, successResponse(payload.session));
-    }
-
     @OnEvent(ServerEvents.DoorToggled)
     handleDoorToggled(payload: { session: InGameSession; playerId: string; x: number; y: number; isOpen: boolean }) {
         this.server

@@ -1,37 +1,35 @@
 export enum SessionEvents {
-    CreateSession = 'createSession',
-    SessionCreated = 'sessionCreated',
+    CreateSession = 'create-session',
+    SessionCreated = 'session-created',
 
-    JoinSession = 'joinSession',
-    SessionJoined = 'sessionJoined',
+    JoinSession = 'join-session',
+    SessionJoined = 'session-joined',
 
-    LeaveSession = 'leaveSession',
-    SessionLeft = 'sessionLeft',
+    LeaveSession = 'leave-session',
 
-    JoinAvatarSelection = 'joinAvatarSelection',
-    AvatarSelectionJoined = 'avatarSelectionJoined',
-    LeaveAvatarSelection = 'leaveAvatarSelection',
+    JoinAvatarSelection = 'join-avatar-selection',
+    AvatarSelectionJoined = 'avatar-selection-joined',
+    LeaveAvatarSelection = 'leave-avatar-selection',
 
-    UpdateAvatarAssignments = 'updateAvatarAssignments',
-    AvatarAssignmentsUpdated = 'avatarAssignmentsUpdated',
+    UpdateAvatarAssignments = 'update-avatar-assignments',
+    AvatarAssignmentsUpdated = 'avatar-assignments-updated',
 
-    SessionPlayersUpdated = 'sessionPlayersUpdated',
-    UpdatedAvatarAssignments = 'updateAvatarAssignments',
+    SessionPlayersUpdated = 'session-players-updated',
 
-    PlayerNameUpdated = 'playerNameUpdated',
+    PlayerNameUpdated = 'player-name-updated',
 
-    LockSession = 'lockSession',
-    SessionAutoLocked = 'sessionAutoLocked',
-    UnlockSession = 'unlockSession',
+    LockSession = 'lock-session',
+    SessionAutoLocked = 'session-auto-locked',
+    UnlockSession = 'unlock-session',
 
-    StartGameSession = 'startGameSession',
-    GameSessionStarted = 'gameSessionStarted',
+    StartGameSession = 'start-game-session',
+    GameSessionStarted = 'game-session-started',
 
-    KickPlayer = 'kickPlayer',
-    SessionEnded = 'sessionEnded',
+    KickPlayer = 'kick-player',
+    SessionEnded = 'session-ended',
 
-    AddVirtualPlayer = 'addVirtualPlayer',
+    AddVirtualPlayer = 'add-virtual-player',
 
-    AvailableSessionsUpdated = 'availableSessionsUpdated',
-    LoadAvailableSessions = 'loadAvailableSessions',
+    AvailableSessionsUpdated = 'available-sessions-updated',
+    LoadAvailableSessions = 'load-available-sessions',
 }
