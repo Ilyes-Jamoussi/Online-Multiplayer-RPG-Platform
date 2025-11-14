@@ -4,7 +4,7 @@ import { PlayerService } from './player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { BonusType } from '@app/enums/character-creation.enum';
 import { ROUTES } from '@app/enums/routes.enum';
 import { Avatar } from '@common/enums/avatar.enum';
@@ -26,7 +26,7 @@ describe('PlayerService', () => {
     let mockSessionService: jasmine.SpyObj<SessionService>;
     let mockSessionSocketService: jasmine.SpyObj<SessionSocketService>;
     let mockInGameSocketService: jasmine.SpyObj<InGameSocketService>;
-    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
     let mockRouter: jasmine.SpyObj<Router>;
 
     beforeEach(() => {
@@ -60,7 +60,7 @@ describe('PlayerService', () => {
         ]);
 
         mockInGameSocketService = jasmine.createSpyObj('InGameSocketService', ['onPlayerUpdated']);
-        mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', ['displayErrorPopup']);
+        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
         TestBed.configureTestingModule({
@@ -68,7 +68,7 @@ describe('PlayerService', () => {
                 { provide: SessionService, useValue: mockSessionService },
                 { provide: SessionSocketService, useValue: mockSessionSocketService },
                 { provide: InGameSocketService, useValue: mockInGameSocketService },
-                { provide: NotificationCoordinatorService, useValue: mockNotificationService },
+                { provide: NotificationService, useValue: mockNotificationService },
                 { provide: Router, useValue: mockRouter },
             ],
         });

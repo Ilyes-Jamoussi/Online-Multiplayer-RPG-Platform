@@ -11,9 +11,9 @@ import { PlayerCombatWinsDto } from '@app/dto/player-combat-wins-dto';
 import { PlayerCombatLossesDto } from '@app/dto/player-combat-losses-dto';
 import { PlayerCombatDrawsDto } from '@app/dto/player-combat-draws-dto';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { CombatResult } from '@common/interfaces/combat.interface';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
@@ -35,9 +35,9 @@ describe('CombatService', () => {
     let service: CombatService;
     let mockCombatSocketService: jasmine.SpyObj<CombatSocketService>;
     let mockInGameService: jasmine.SpyObj<InGameService>;
-    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
     let mockPlayerService: jasmine.SpyObj<PlayerService>;
-    let mockTimerService: jasmine.SpyObj<TimerCoordinatorService>;
+    let mockTimerService: jasmine.SpyObj<TimerService>;
 
     const mockPlayer: Player = {
         id: 'player1',
@@ -201,11 +201,11 @@ describe('CombatService', () => {
 
         const inGameSpy = jasmine.createSpyObj('InGameService', ['getPlayerByPlayerId', 'updateInGameSession', 'sessionId', 'inGameSession']);
 
-        const notificationSpy = jasmine.createSpyObj('NotificationCoordinatorService', ['showInfoToast', 'showSuccessToast']);
+        const notificationSpy = jasmine.createSpyObj('NotificationService', ['showInfoToast', 'showSuccessToast']);
 
         const playerSpy = jasmine.createSpyObj('PlayerService', ['id', 'updatePlayer']);
 
-        const timerSpy = jasmine.createSpyObj('TimerCoordinatorService', [
+        const timerSpy = jasmine.createSpyObj('TimerService', [
             'pauseTurnTimer',
             'resumeTurnTimer',
             'startCombatTimer',
@@ -219,18 +219,18 @@ describe('CombatService', () => {
                 CombatService,
                 { provide: CombatSocketService, useValue: combatSocketSpy },
                 { provide: InGameService, useValue: inGameSpy },
-                { provide: NotificationCoordinatorService, useValue: notificationSpy },
+                { provide: NotificationService, useValue: notificationSpy },
                 { provide: PlayerService, useValue: playerSpy },
-                { provide: TimerCoordinatorService, useValue: timerSpy },
+                { provide: TimerService, useValue: timerSpy },
             ],
         });
 
         service = TestBed.inject(CombatService);
         mockCombatSocketService = TestBed.inject(CombatSocketService) as jasmine.SpyObj<CombatSocketService>;
         mockInGameService = TestBed.inject(InGameService) as jasmine.SpyObj<InGameService>;
-        mockNotificationService = TestBed.inject(NotificationCoordinatorService) as jasmine.SpyObj<NotificationCoordinatorService>;
+        mockNotificationService = TestBed.inject(NotificationService) as jasmine.SpyObj<NotificationService>;
         mockPlayerService = TestBed.inject(PlayerService) as jasmine.SpyObj<PlayerService>;
-        mockTimerService = TestBed.inject(TimerCoordinatorService) as jasmine.SpyObj<TimerCoordinatorService>;
+        mockTimerService = TestBed.inject(TimerService) as jasmine.SpyObj<TimerService>;
 
         mockInGameService.getPlayerByPlayerId.and.callFake((id: string) => {
             return id === 'player1' ? mockPlayer : mockTargetPlayer;

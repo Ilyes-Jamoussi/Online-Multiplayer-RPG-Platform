@@ -4,13 +4,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/enums/routes.enum';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { PopupNotificationDisplayComponent } from './popup-notification-display.component';
 
 describe('NotificationDisplayComponent', () => {
     let component: PopupNotificationDisplayComponent;
     let fixture: ComponentFixture<PopupNotificationDisplayComponent>;
-    let notificationCoordinatorService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let notificationCoordinatorService: jasmine.SpyObj<NotificationService>;
     let router: jasmine.SpyObj<Router>;
 
     const mockErrorNotification = {
@@ -33,7 +33,7 @@ describe('NotificationDisplayComponent', () => {
 
     beforeEach(async () => {
         const notificationSignal = signal(null);
-        notificationCoordinatorService = jasmine.createSpyObj('NotificationCoordinatorService', ['resetPopup'], {
+        notificationCoordinatorService = jasmine.createSpyObj('NotificationService', ['resetPopup'], {
             notification: notificationSignal,
         });
         router = jasmine.createSpyObj('Router', ['navigate']);
@@ -41,7 +41,7 @@ describe('NotificationDisplayComponent', () => {
         await TestBed.configureTestingModule({
             imports: [PopupNotificationDisplayComponent, MatIconModule],
             providers: [
-                { provide: NotificationCoordinatorService, useValue: notificationCoordinatorService },
+                { provide: NotificationService, useValue: notificationCoordinatorService },
                 { provide: Router, useValue: router },
             ],
         }).compileComponents();

@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { SessionService } from './session.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { ROUTES } from '@app/enums/routes.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { MapSize } from '@common/enums/map-size.enum';
@@ -14,7 +14,7 @@ const TEST_MAX_PLAYERS = 4;
 describe('SessionService', () => {
     let service: SessionService;
     let mockSessionSocketService: jasmine.SpyObj<SessionSocketService>;
-    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
     let mockRouter: jasmine.SpyObj<Router>;
 
     const mockPlayer: Player = {
@@ -74,13 +74,13 @@ describe('SessionService', () => {
             'onStartGameSessionError',
         ]);
 
-        mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', ['displayErrorPopup']);
+        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
         TestBed.configureTestingModule({
             providers: [
                 { provide: SessionSocketService, useValue: mockSessionSocketService },
-                { provide: NotificationCoordinatorService, useValue: mockNotificationService },
+                { provide: NotificationService, useValue: mockNotificationService },
                 { provide: Router, useValue: mockRouter },
             ],
         });

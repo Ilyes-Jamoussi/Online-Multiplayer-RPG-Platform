@@ -9,7 +9,7 @@ import { ROUTES } from '@app/enums/routes.enum';
 @Injectable({
     providedIn: 'root',
 })
-export class NotificationCoordinatorService {
+export class NotificationService {
     private readonly _popupNotification = signal<NotificationMessage | null>(null);
     private readonly _toastNotifications = signal<Toast[]>([]);
     private toastIdCounter = 0;

@@ -8,6 +8,7 @@ import { PlayerTeleportedDto } from '@app/modules/in-game/dto/player-teleported.
 import { ToggleDoorActionDto } from '@app/modules/in-game/dto/toggle-door-action.dto';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
+import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
@@ -42,7 +43,7 @@ export class InGameGateway {
                 this.server.to(session.inGameId).emit(InGameEvents.GameStarted, successResponse(session));
             }
         } catch (error) {
-            socket.emit(InGameEvents.PlayerJoinedInGameSession, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -52,7 +53,7 @@ export class InGameGateway {
             const session = this.inGameService.endPlayerTurn(sessionId, socket.id);
             this.server.to(session.inGameId).emit(InGameEvents.TurnEnded, successResponse(session));
         } catch (error) {
-            socket.emit(InGameEvents.TurnEnded, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -69,7 +70,7 @@ export class InGameGateway {
         try {
             this.inGameService.toggleDoorAction(payload.sessionId, socket.id, payload.x, payload.y);
         } catch (error) {
-            socket.emit(InGameEvents.ToggleDoorAction, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -78,7 +79,7 @@ export class InGameGateway {
         try {
             this.inGameService.movePlayer(payload.sessionId, socket.id, payload.orientation);
         } catch (error) {
-            socket.emit(InGameEvents.PlayerMoved, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -144,7 +145,7 @@ export class InGameGateway {
             const session = this.inGameService.toggleAdminMode(sessionId, socket.id);
             this.server.to(session.inGameId).emit(InGameEvents.AdminModeToggled, successResponse({ isAdminModeActive: session.isAdminModeActive }));
         } catch (error) {
-            socket.emit(InGameEvents.AdminModeToggled, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -159,7 +160,7 @@ export class InGameGateway {
                 .emit(InGameEvents.PlayerTeleported, successResponse<PlayerTeleportedDto>({ playerId: socket.id, x: player.x, y: player.y }));
             this.inGameService.getReachableTiles(payload.sessionId, socket.id);
         } catch (error) {
-            socket.emit(InGameEvents.PlayerTeleported, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -207,7 +208,7 @@ export class InGameGateway {
                 this.server.to(result.session.inGameId).emit(InGameEvents.PlayerLeftInGameSession, successResponse(result));
             }
         } catch (error) {
-            this.server.to(playerId).emit(InGameEvents.PlayerLeftInGameSession, errorResponse(error.message));
+            this.server.to(playerId).emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 }

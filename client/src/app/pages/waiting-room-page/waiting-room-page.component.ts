@@ -5,7 +5,7 @@ import { VirtualPlayerCardComponent } from '@app/components/features/virtual-pla
 import { WaitingRoomActionsComponent } from '@app/components/features/waiting-room-actions/waiting-room-actions.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { ROUTES } from '@app/enums/routes.enum';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { Player } from '@common/interfaces/player.interface';
@@ -21,7 +21,7 @@ export class WaitingRoomPageComponent implements OnInit {
     constructor(
         private readonly playerService: PlayerService,
         private readonly sessionService: SessionService,
-        private readonly notificationCoordinatorService: NotificationCoordinatorService,
+        private readonly notificationCoordinatorService: NotificationService,
     ) {}
 
     ngOnInit(): void {

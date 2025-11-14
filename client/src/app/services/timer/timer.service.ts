@@ -8,7 +8,7 @@ import { GAME_OVER_REDIRECT_DELAY_MS } from '@app/constants/game.constants';
 @Injectable({
     providedIn: 'root',
 })
-export class TimerCoordinatorService {
+export class TimerService {
     private readonly _turnTimeRemaining = signal<number>(0);
     private readonly _isTurnActive = signal<boolean>(false);
     private readonly _combatTimeRemaining = signal<number>(0);

@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { COMBAT_ROUND_DURATION_SECONDS } from '@app/constants/combat.constants';
 import { MILLISECONDS_PER_SECOND } from '@common/constants/in-game';
-import { TimerCoordinatorService } from './timer-coordinator.service';
+import { TimerService } from './timer-coordinator.service';
 
 const TEST_DURATION_1000 = 1000;
 const TEST_DURATION_2000 = 2000;
@@ -14,12 +14,12 @@ const TEST_SECONDS_8 = 8;
 const TEST_SECONDS_9 = 9;
 const TEST_SECONDS_10 = 10;
 
-describe('TimerCoordinatorService', () => {
-    let service: TimerCoordinatorService;
+describe('TimerService', () => {
+    let service: TimerService;
 
     beforeEach(() => {
         TestBed.configureTestingModule({});
-        service = TestBed.inject(TimerCoordinatorService);
+        service = TestBed.inject(TimerService);
         jasmine.clock().install();
     });
 

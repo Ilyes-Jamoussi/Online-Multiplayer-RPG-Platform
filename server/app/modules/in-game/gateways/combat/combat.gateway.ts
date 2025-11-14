@@ -2,6 +2,7 @@ import { CombatService } from '@app/modules/in-game/services/combat/combat.servi
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
+import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
 import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
@@ -28,7 +29,7 @@ export class CombatGateway {
         try {
             this.combatService.attackPlayerAction(payload.sessionId, socket.id, payload.x, payload.y);
         } catch (error) {
-            socket.emit(InGameEvents.AttackPlayerAction, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -37,7 +38,7 @@ export class CombatGateway {
         try {
             this.combatService.combatChoice(payload.sessionId, socket.id, payload.choice);
         } catch (error) {
-            socket.emit(InGameEvents.CombatChoice, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -46,7 +47,7 @@ export class CombatGateway {
         try {
             this.combatService.combatAbandon(payload.sessionId, socket.id);
         } catch (error) {
-            socket.emit(InGameEvents.CombatAbandon, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 

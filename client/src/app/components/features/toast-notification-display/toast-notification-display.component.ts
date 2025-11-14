@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 
 @Component({
     selector: 'app-toast',
@@ -10,7 +10,7 @@ import { NotificationCoordinatorService } from '@app/services/notification-coord
     styleUrls: ['./toast-notification-display.component.scss'],
 })
 export class ToastNotificationDisplayComponent {
-    constructor(private readonly notificationCoordinatorService: NotificationCoordinatorService) {}
+    constructor(private readonly notificationCoordinatorService: NotificationService) {}
 
     get toasts() {
         return this.notificationCoordinatorService.toasts();

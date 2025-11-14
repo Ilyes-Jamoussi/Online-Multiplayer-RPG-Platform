@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { NotificationCoordinatorService } from './notification-coordinator.service';
+import { NotificationService } from './notification-coordinator.service';
 import { ROUTES } from '@app/enums/routes.enum';
 
 const TEST_DURATION_1000 = 1000;
@@ -7,12 +7,12 @@ const TEST_DURATION_2000 = 2000;
 const TEST_DURATION_3000 = 3000;
 const TEST_DURATION_5000 = 5000;
 
-describe('NotificationCoordinatorService', () => {
-    let service: NotificationCoordinatorService;
+describe('NotificationService', () => {
+    let service: NotificationService;
 
     beforeEach(() => {
         TestBed.configureTestingModule({});
-        service = TestBed.inject(NotificationCoordinatorService);
+        service = TestBed.inject(NotificationService);
         jasmine.clock().install();
     });
 
