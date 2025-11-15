@@ -123,8 +123,4 @@ export class InGameSocketService {
     onLoadGameStatistics(callback: (data: GameStatisticsDto) => void): void {
         this.socket.onSuccessEvent(InGameEvents.LoadGameStatistics, callback);
     }
-
-    onLoadGameStatisticsError(callback: (message: string) => void): void {
-        this.socket.onErrorEvent(InGameEvents.LoadGameStatistics, callback);
-    }
 }

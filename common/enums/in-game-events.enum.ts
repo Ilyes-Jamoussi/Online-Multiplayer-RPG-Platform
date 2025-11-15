@@ -45,4 +45,5 @@ export enum InGameEvents {
     DoorToggled = 'door-toggled',
     PlayerHealthChanged = 'player-health-changed',
     LeftInGameSessionAck = 'left-in-game-session-ack',
+    LoadGameStatistics = 'load-game-statistics',
 }

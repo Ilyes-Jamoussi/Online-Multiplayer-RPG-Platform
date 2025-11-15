@@ -1,8 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { GameStatisticsDto } from '@app/dto/game-statistics-dto';
-import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { ResetService } from '@app/services/reset/reset.service';
 
 @Injectable({
@@ -14,7 +12,6 @@ export class StatisticsService {
 
     constructor(
         private readonly inGameSocketService: InGameSocketService,
-        private readonly notificationCoordinatorService: NotificationCoordinatorService,
     ) {
         inject(ResetService).reset$.subscribe(() => this.resetGameStatistics());
         this.initListeners();
@@ -35,14 +32,6 @@ export class StatisticsService {
     private initListeners(): void {
         this.inGameSocketService.onLoadGameStatistics((data) => {
             this.setGameStatistics(data);
-        });
-
-        this.inGameSocketService.onLoadGameStatisticsError((message) => {
-            this.notificationCoordinatorService.displayErrorPopup({
-                title: 'Erreur de chargement',
-                message,
-                redirectRoute: ROUTES.HomePage,
-            });
         });
     }
 }
