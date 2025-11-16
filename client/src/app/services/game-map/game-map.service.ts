@@ -36,7 +36,7 @@ export class GameMapService {
     private readonly _name = signal<string>(this.initialState.name);
     private readonly _description = signal<string>(this.initialState.description);
     private readonly _mode = signal<GameMode>(this.initialState.mode);
-    private readonly _activeTileCoords = signal<{ x: number; y: number } | null>(null);
+    private readonly _activeTileCoords = signal<Position | null>(null);
     private readonly _teleportChannels = signal<TeleportChannelDto[]>([]);
 
     readonly visibleObjects: Signal<GameEditorPlaceableDto[]> = computed(() => {
