@@ -7,6 +7,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 
@@ -72,15 +73,15 @@ export class GameMapTileComponent {
 
         const actionType = this.gameMapService.getActionTypeAt(this.tile.x, this.tile.y);
 
-        if (actionType === 'DOOR') {
+        if (actionType === AvailableActionType.DOOR) {
             this.gameMapService.toggleDoor(this.tile.x, this.tile.y);
-        } else if (actionType === 'ATTACK') {
+        } else if (actionType === AvailableActionType.ATTACK) {
             this.combatService.attackPlayer(this.tile.x, this.tile.y);
-        } else if (actionType === 'HEAL') {
+        } else if (actionType === AvailableActionType.HEAL) {
             this.gameMapService.healPlayer(this.tile.x, this.tile.y);
-        } else if (actionType === 'FIGHT') {
+        } else if (actionType === AvailableActionType.FIGHT) {
             this.gameMapService.fightPlayer(this.tile.x, this.tile.y);
-        } else if (actionType === 'BOAT') {
+        } else if (actionType === AvailableActionType.BOAT) {
             this.gameMapService.boatAction(this.tile.x, this.tile.y);
         }
     }

@@ -4,10 +4,12 @@ import { Game } from '@app/modules/game-store/entities/game.entity';
 import { ActionService } from '@app/modules/in-game/services/action/action.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
+import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 
@@ -212,7 +214,7 @@ export class GameplayService {
         this.moveProgressively(sessionId, playerId, nearestPlayer, onComplete);
     }
 
-    private findNearestPlayer(sessionId: string, playerId: string): { x: number; y: number } | null {
+    private findNearestPlayer(sessionId: string, playerId: string): Position | null {
         const session = this.sessionRepository.findById(sessionId);
         const currentPlayer = session.inGamePlayers[playerId];
         const otherPlayers = Object.values(session.inGamePlayers).filter((p) => p.id !== playerId);
@@ -230,10 +232,10 @@ export class GameplayService {
             }
         }
 
-        return nearestPlayer;
+        return nearestPlayer as Position;
     }
 
-    private moveProgressively(sessionId: string, playerId: string, target: { x: number; y: number }, onComplete: () => void): void {
+    private moveProgressively(sessionId: string, playerId: string, target: Position, onComplete: () => void): void {
         const session = this.sessionRepository.findById(sessionId);
         const currentPlayer = session.inGamePlayers[playerId];
 
@@ -255,7 +257,7 @@ export class GameplayService {
         }
     }
 
-    private isAdjacentTo(player1: { x: number; y: number }, player2: { x: number; y: number }): boolean {
+    private isAdjacentTo(player1: Position, player2: Position): boolean {
         const distance = Math.abs(player1.x - player2.x) + Math.abs(player1.y - player2.y);
         return distance <= 1;
     }
@@ -278,7 +280,7 @@ export class GameplayService {
         const action = availableActions[0];
 
         try {
-            if (action.type === 'ATTACK') {
+            if (action.type === AvailableActionType.ATTACK) {
                 this.actionService.attackPlayer(sessionId, playerId, action.x, action.y);
             }
             this.waitAndContinueIfPossible(sessionId, playerId);
@@ -370,7 +372,7 @@ export class GameplayService {
         return bestDirection;
     }
 
-    private getNextPosition(player: { x: number; y: number }, direction: Orientation): { x: number; y: number } {
+    private getNextPosition(player: Position, direction: Orientation): Position {
         switch (direction) {
             case Orientation.N:
                 return { x: player.x, y: player.y - 1 };

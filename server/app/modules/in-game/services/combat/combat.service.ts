@@ -1,6 +1,7 @@
 import { COMBAT_WINS_TO_WIN_GAME } from '@app/constants/game-config.constants';
 import { DiceSides } from '@app/enums/dice-sides.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { ActiveCombat } from '@app/interfaces/active-combat.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
@@ -117,7 +118,7 @@ export class CombatService {
         this.activeCombats.delete(sessionId);
     }
 
-    getActiveCombat(sessionId: string): { playerAId: string; playerBId: string } | null {
+    getActiveCombat(sessionId: string): ActiveCombat | null {
         const combat = this.activeCombats.get(sessionId);
         return combat ? { playerAId: combat.playerAId, playerBId: combat.playerBId } : null;
     }

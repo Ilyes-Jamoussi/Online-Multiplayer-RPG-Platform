@@ -5,6 +5,7 @@ import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
@@ -150,7 +151,7 @@ describe('GameMapService', () => {
                 configurable: true,
             });
             Object.defineProperty(mockInGameService, 'availableActions', {
-                value: signal([{ x: 1, y: 1, type: 'ATTACK' }]),
+                value: signal([{ x: 1, y: 1, type: AvailableActionType.ATTACK }]),
                 configurable: true,
             });
 
@@ -164,7 +165,7 @@ describe('GameMapService', () => {
                 configurable: true,
             });
             Object.defineProperty(mockInGameService, 'availableActions', {
-                value: signal([{ x: 1, y: 1, type: 'DOOR' }]),
+                value: signal([{ x: 1, y: 1, type: AvailableActionType.DOOR }]),
                 configurable: true,
             });
 
@@ -181,12 +182,12 @@ describe('GameMapService', () => {
     describe('Actions', () => {
         it('should get action type and deactivate action mode', () => {
             Object.defineProperty(mockInGameService, 'availableActions', {
-                value: signal([{ x: 1, y: 1, type: 'ATTACK' }]),
+                value: signal([{ x: 1, y: 1, type: AvailableActionType.ATTACK }]),
                 configurable: true,
             });
 
             const actionType = service.getActionTypeAt(1, 1);
-            expect(actionType).toBe('ATTACK');
+            expect(actionType).toBe(AvailableActionType.ATTACK);
             expect(mockInGameService.deactivateActionMode).toHaveBeenCalled();
         });
 

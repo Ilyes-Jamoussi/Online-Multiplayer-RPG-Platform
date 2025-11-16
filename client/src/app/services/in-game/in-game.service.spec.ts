@@ -7,6 +7,7 @@ import { NotificationCoordinatorService } from '@app/services/notification-coord
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Orientation } from '@common/enums/orientation.enum';
@@ -349,7 +350,7 @@ describe('InGameService', () => {
                 currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
             });
             const callback = mockInGameSocketService.onPlayerAvailableActions.calls.mostRecent().args[0];
-            const mockActions = [{ type: 'ATTACK', x: 1, y: 1 }] as AvailableAction[];
+            const mockActions = [{ type: AvailableActionType.ATTACK, x: 1, y: 1 }] as AvailableAction[];
             callback(mockActions);
             expect(service.availableActions()).toEqual(mockActions);
             expect(mockPlayerService.updateActionsRemaining).toHaveBeenCalledWith(1);
@@ -360,7 +361,7 @@ describe('InGameService', () => {
                 currentTurn: { turnNumber: 1, activePlayerId: 'player2', hasUsedAction: false },
             });
             const callback = mockInGameSocketService.onPlayerAvailableActions.calls.mostRecent().args[0];
-            const mockActions = [{ type: 'ATTACK', x: 1, y: 1 }] as AvailableAction[];
+            const mockActions = [{ type: AvailableActionType.ATTACK, x: 1, y: 1 }] as AvailableAction[];
             callback(mockActions);
             expect(service.availableActions()).toEqual(mockActions);
             expect(mockPlayerService.updateActionsRemaining).not.toHaveBeenCalled();

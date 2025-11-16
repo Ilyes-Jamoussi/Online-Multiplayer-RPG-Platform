@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
@@ -121,7 +122,7 @@ describe('PlayerInfoComponent', () => {
         mockInGameService.isMyTurn.and.returnValue(true);
         mockInGameService.isGameStarted.and.returnValue(true);
         mockInGameService.hasUsedAction.and.returnValue(false);
-        mockInGameService.availableActions.and.returnValue([{ type: 'ATTACK', x: 1, y: 1 }]);
+        mockInGameService.availableActions.and.returnValue([{ type: AvailableActionType.ATTACK, x: 1, y: 1 }]);
     });
 
     it('should create', () => {

@@ -6,6 +6,7 @@ import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileCost, TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { Position, PositionWithDistance } from '@common/interfaces/position.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -100,7 +101,7 @@ export class MovementService {
         const queue: ReachableTile[] = this.initializeQueue(player);
         const isOnBoat = Boolean(player.onBoatId);
         const mapSize = this.gameCache.getMapSize(session.id);
-        const startPosition = { x: player.x, y: player.y };
+        const startPosition: Position = { x: player.x, y: player.y };
 
         while (queue.length > 0) {
             const current = queue.shift();
@@ -133,7 +134,7 @@ export class MovementService {
         visited: Set<string>,
         reachable: ReachableTile[],
         sessionId: string,
-        startPosition: { x: number; y: number },
+        startPosition: Position,
     ): boolean {
         const key = `${current.x},${current.y}`;
 
@@ -221,7 +222,7 @@ export class MovementService {
         }
     }
 
-    private getAdjacentPositions(current: ReachableTile): { x: number; y: number }[] {
+    private getAdjacentPositions(current: ReachableTile): Position[] {
         return [
             { x: current.x + 1, y: current.y },
             { x: current.x - 1, y: current.y },
@@ -230,7 +231,7 @@ export class MovementService {
         ];
     }
 
-    private shouldSkipPosition(next: { x: number; y: number }, visited: Set<string>, mapSize: number): boolean {
+    private shouldSkipPosition(next: Position, visited: Set<string>, mapSize: number): boolean {
         const nextKey = `${next.x},${next.y}`;
         if (visited.has(nextKey)) return true;
 
@@ -268,7 +269,7 @@ export class MovementService {
         return Boolean(this.gameCache.getTileOccupant(session.id, x, y));
     }
 
-    private findClosestFreeTile(session: InGameSession, x: number, y: number): { x: number; y: number } {
+    private findClosestFreeTile(session: InGameSession, x: number, y: number): Position {
         const mapSize = this.gameCache.getMapSize(session.id);
 
         if (this.gameCache.isTileFree(session.id, x, y)) {
@@ -276,7 +277,7 @@ export class MovementService {
         }
 
         const visited = new Set<string>();
-        const queue: { x: number; y: number; distance: number }[] = [{ x, y, distance: 0 }];
+        const queue: PositionWithDistance[] = [{ x, y, distance: 0 }];
         visited.add(`${x},${y}`);
 
         while (queue.length > 0) {

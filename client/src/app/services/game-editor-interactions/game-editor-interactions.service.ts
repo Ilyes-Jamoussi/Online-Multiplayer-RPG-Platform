@@ -1,12 +1,13 @@
 import { Injectable, signal } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { PlaceableMime } from '@app/enums/placeable-mime.enum';
-import { ActiveTool, ToolType, ToolbarItem, Vector2 } from '@app/interfaces/game-editor.interface';
+import { ActiveTool, ToolType, ToolbarItem } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameEditorTeleportService } from '@app/services/game-editor-teleport/game-editor-teleport.service';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
+import { Position } from '@common/interfaces/position.interface';
 
 @Injectable()
 export class GameEditorInteractionsService {
@@ -18,24 +19,24 @@ export class GameEditorInteractionsService {
 
     private readonly _activeTool = signal<ActiveTool | null>(null);
     private readonly _previousActiveTool = signal<ActiveTool | null>(null);
-    private readonly _hoveredTiles = signal<Vector2[]>([]);
-    private readonly _objectGrabOffset = signal<Vector2>({ x: 0, y: 0 });
-    private readonly _objectDropVec2 = signal<Vector2>({ x: 0, y: 0 });
+    private readonly _hoveredTiles = signal<Position[]>([]);
+    private readonly _objectGrabOffset = signal<Position>({ x: 0, y: 0 });
+    private readonly _objectDropVec2 = signal<Position>({ x: 0, y: 0 });
     private readonly _draggedObject = signal<PlaceableKind | string>('');
 
-    private get objectGrabOffset(): Vector2 {
+    private get objectGrabOffset(): Position {
         return this._objectGrabOffset();
     }
 
-    private set objectGrabOffset(offset: Vector2) {
+    private set objectGrabOffset(offset: Position) {
         this._objectGrabOffset.set(offset);
     }
 
-    private get objectDropVec2(): Vector2 {
+    private get objectDropVec2(): Position {
         return this._objectDropVec2();
     }
 
-    private set objectDropVec2(vec: Vector2) {
+    private set objectDropVec2(vec: Position) {
         this._objectDropVec2.set(vec);
     }
 
@@ -151,7 +152,7 @@ export class GameEditorInteractionsService {
         if (!tool || tool.type !== ToolType.PlaceableTool) return;
 
         const footprint = PlaceableFootprint[tool.placeableKind];
-        const hoveredTiles: Vector2[] = [];
+        const hoveredTiles: Position[] = [];
 
         const offsetX = evt.offsetX;
         const offsetY = evt.offsetY;
@@ -320,7 +321,7 @@ export class GameEditorInteractionsService {
         this.store.movePlacedObject(id, x, y);
     }
 
-    private processDropTile(tileX: number, tileY: number, offsetX: number, offsetY: number): Vector2 {
+    private processDropTile(tileX: number, tileY: number, offsetX: number, offsetY: number): Position {
         const tileSize = this.store.tileSizePx;
 
         const pointerPxX = tileX * tileSize + offsetX;

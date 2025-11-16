@@ -1,14 +1,20 @@
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { ActiveCombat } from '@app/interfaces/active-combat.interface';
 import { Game } from '@app/modules/game-store/entities/game.entity';
+import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
+import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { Player } from '@common/interfaces/player.interface';
+import { Position } from '@common/interfaces/position.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -122,13 +128,7 @@ export class ActionService {
         this.eventEmitter.emit(ServerEvents.PlayerDisembarkedBoat, { session, playerId });
     }
 
-    private healSanctuary(
-        session: InGameSession,
-        playerId: string,
-        kind: PlaceableKind,
-        pos: { x: number; y: number },
-        double: boolean = false,
-    ): void {
+    private healSanctuary(session: InGameSession, playerId: string, kind: PlaceableKind, pos: Position, double: boolean = false): void {
         const { x, y } = pos;
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
@@ -155,13 +155,7 @@ export class ActionService {
         this.gameCache.disablePlaceable(session.id, x, y, playerId);
     }
 
-    private fightSanctuary(
-        session: InGameSession,
-        playerId: string,
-        kind: PlaceableKind,
-        pos: { x: number; y: number },
-        double: boolean = false,
-    ): void {
+    private fightSanctuary(session: InGameSession, playerId: string, kind: PlaceableKind, pos: Position, double: boolean = false): void {
         const { x, y } = pos;
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
@@ -236,41 +230,35 @@ export class ActionService {
         return actions;
     }
 
-    private addAttackAction(actions: AvailableAction[], occupantId: string | null, playerId: string, pos: { x: number; y: number }): void {
+    private addAttackAction(actions: AvailableAction[], occupantId: string | null, playerId: string, pos: Position): void {
         if (occupantId && occupantId !== playerId) {
-            actions.push({ type: 'ATTACK', x: pos.x, y: pos.y });
+            actions.push({ type: AvailableActionType.ATTACK, x: pos.x, y: pos.y });
         }
     }
 
-    private addDoorAction(actions: AvailableAction[], tile: { kind: string } | null, pos: { x: number; y: number }): void {
-        if (tile && tile.kind === 'DOOR') {
-            actions.push({ type: 'DOOR', x: pos.x, y: pos.y });
+    private addDoorAction(actions: AvailableAction[], tile: Tile | null, pos: Position): void {
+        if (tile && tile.kind === TileKind.DOOR) {
+            actions.push({ type: AvailableActionType.DOOR, x: pos.x, y: pos.y });
         }
     }
 
-    private addPlaceableActions(actions: AvailableAction[], object: { kind: string } | null, pos: { x: number; y: number }): void {
+    private addPlaceableActions(actions: AvailableAction[], object: Placeable | null, pos: Position): void {
         if (!object) return;
 
-        if (object.kind === 'HEAL') {
-            actions.push({ type: 'HEAL', x: pos.x, y: pos.y });
+        if (object.kind === PlaceableKind.HEAL) {
+            actions.push({ type: AvailableActionType.HEAL, x: pos.x, y: pos.y });
         }
 
-        if (object.kind === 'FIGHT') {
-            actions.push({ type: 'FIGHT', x: pos.x, y: pos.y });
+        if (object.kind === PlaceableKind.FIGHT) {
+            actions.push({ type: AvailableActionType.FIGHT, x: pos.x, y: pos.y });
         }
 
-        if (object.kind === 'BOAT') {
-            actions.push({ type: 'BOAT', x: pos.x, y: pos.y });
+        if (object.kind === PlaceableKind.BOAT) {
+            actions.push({ type: AvailableActionType.BOAT, x: pos.x, y: pos.y });
         }
     }
 
-    private addDisembarkAction(
-        actions: AvailableAction[],
-        player: { onBoatId?: string },
-        tile: { kind: string; open?: boolean } | null,
-        occupantId: string | null,
-        pos: { x: number; y: number },
-    ): void {
+    private addDisembarkAction(actions: AvailableAction[], player: Player, tile: Tile | null, occupantId: string | null, pos: Position): void {
         if (!player.onBoatId) return;
 
         const canDisembark =
@@ -282,7 +270,7 @@ export class ActionService {
                 (tile.kind === TileKind.DOOR && tile.open));
 
         if (canDisembark) {
-            actions.push({ type: 'BOAT', x: pos.x, y: pos.y });
+            actions.push({ type: AvailableActionType.BOAT, x: pos.x, y: pos.y });
         }
     }
 
@@ -314,11 +302,11 @@ export class ActionService {
         this.combatService.combatChoice(sessionId, playerId, posture);
     }
 
-    getActiveCombat(sessionId: string): { playerAId: string; playerBId: string } | null {
+    getActiveCombat(sessionId: string): ActiveCombat | null {
         return this.combatService.getActiveCombat(sessionId);
     }
 
-    calculateDirectionToTarget(currentPlayer: { x: number; y: number }, targetPlayer: { x: number; y: number }): Orientation {
+    calculateDirectionToTarget(currentPlayer: Position, targetPlayer: Position): Orientation {
         const dx = targetPlayer.x - currentPlayer.x;
         const dy = targetPlayer.y - currentPlayer.y;
 

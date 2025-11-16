@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
@@ -67,8 +68,8 @@ describe('GameMapFooterComponent', () => {
             hasCombatBonus: false,
         });
         const availableActionsSignal = signal([
-            { type: 'ATTACK', x: 1, y: 1 },
-            { type: 'DOOR', x: 2, y: 2 },
+            { type: AvailableActionType.ATTACK, x: 1, y: 1 },
+            { type: AvailableActionType.DOOR, x: 2, y: 2 },
         ] as AvailableAction[]);
         const isMyTurnSignal = signal(true);
         const isGameStartedSignal = signal(true);

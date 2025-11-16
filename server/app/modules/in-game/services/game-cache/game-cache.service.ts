@@ -8,6 +8,7 @@ import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileCost, TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { Position } from '@common/interfaces/position.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
@@ -93,7 +94,7 @@ export class GameCacheService {
         return tiles[index];
     }
 
-    getTeleportDestination(sessionId: string, x: number, y: number): { x: number; y: number } {
+    getTeleportDestination(sessionId: string, x: number, y: number): Position {
         const game = this.getGameForSession(sessionId);
         const teleportChannel = game.teleportChannels.find(
             (channel) =>
@@ -119,7 +120,7 @@ export class GameCacheService {
         throw new NotFoundException('Teleport channel not found');
     }
 
-    getNextPosition(sessionId: string, currentX: number, currentY: number, orientation: Orientation): { x: number; y: number } {
+    getNextPosition(sessionId: string, currentX: number, currentY: number, orientation: Orientation): Position {
         const game = this.getGameForSession(sessionId);
         const { size: mapSize } = game;
         if (currentX < 0 || currentX >= mapSize || currentY < 0 || currentY >= mapSize) {

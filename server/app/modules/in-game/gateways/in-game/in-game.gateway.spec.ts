@@ -1,6 +1,7 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { validationExceptionFactory } from '@app/utils/validation/validation.util';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
@@ -114,7 +115,7 @@ describe('InGameGateway', () => {
     });
 
     const createMockAvailableAction = (overrides: Partial<AvailableAction> = {}): AvailableAction => ({
-        type: 'DOOR',
+        type: AvailableActionType.DOOR,
         x: TARGET_X,
         y: TARGET_Y,
         ...overrides,

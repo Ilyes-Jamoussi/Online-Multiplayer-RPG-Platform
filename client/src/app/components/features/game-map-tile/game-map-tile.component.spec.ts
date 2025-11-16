@@ -7,6 +7,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
@@ -225,7 +226,7 @@ describe('GameMapTileComponent', () => {
 
         it('should toggle door when action type is DOOR', () => {
             mockGameMapService.isActionModeActive = true;
-            (mockGameMapService.getActionTypeAt as jasmine.Spy).and.returnValue('DOOR');
+            (mockGameMapService.getActionTypeAt as jasmine.Spy).and.returnValue(AvailableActionType.DOOR);
 
             component.onTileClick(mockEvent);
             expect(mockGameMapService.toggleDoor).toHaveBeenCalledWith(TEST_TILE_X, TEST_TILE_Y);
@@ -233,7 +234,7 @@ describe('GameMapTileComponent', () => {
 
         it('should attack player when action type is ATTACK', () => {
             mockGameMapService.isActionModeActive = true;
-            (mockGameMapService.getActionTypeAt as jasmine.Spy).and.returnValue('ATTACK');
+            (mockGameMapService.getActionTypeAt as jasmine.Spy).and.returnValue(AvailableActionType.ATTACK);
 
             component.onTileClick(mockEvent);
             expect(mockCombatService.attackPlayer).toHaveBeenCalledWith(TEST_TILE_X, TEST_TILE_Y);

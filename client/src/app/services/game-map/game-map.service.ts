@@ -3,18 +3,19 @@ import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
-import { Vector2 } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
+import { Position } from '@common/interfaces/position.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { catchError, of, take, tap } from 'rxjs';
 
@@ -113,10 +114,10 @@ export class GameMapService {
 
     private getActionClass(x: number, y: number): string {
         const action = this.availableActions.find((availableAction: AvailableAction) => availableAction.x === x && availableAction.y === y);
-        return action?.type === 'ATTACK' ? 'action-attack' : 'action-door';
+        return action?.type === AvailableActionType.ATTACK ? 'action-attack' : 'action-door';
     }
 
-    getActionTypeAt(x: number, y: number): 'ATTACK' | 'DOOR' | 'HEAL' | 'FIGHT' | 'BOAT' | 'DISEMBARK' | null {
+    getActionTypeAt(x: number, y: number): AvailableActionType | null {
         const action = this.availableActions.find((availableAction: AvailableAction) => availableAction.x === x && availableAction.y === y);
         if (action) {
             this.inGameService.deactivateActionMode();
@@ -144,7 +145,7 @@ export class GameMapService {
         this._objects.update((objects) => objects.map((obj) => (obj.id === placeable.id ? placeable : obj)));
     }
 
-    getActiveTile(coords?: Vector2): GameEditorTileDto | null {
+    getActiveTile(coords?: Position): GameEditorTileDto | null {
         const targetCoords = coords ?? this._activeTileCoords();
         if (!targetCoords) return null;
         return this.tiles().find((tile) => tile.x === targetCoords.x && tile.y === targetCoords.y) ?? null;
@@ -163,13 +164,13 @@ export class GameMapService {
         return !!coords && coords.x === tile.x && coords.y === tile.y;
     }
 
-    getPlayerOnTile(coords?: Vector2): Player | undefined {
+    getPlayerOnTile(coords?: Position): Player | undefined {
         const targetCoords = coords ?? this._activeTileCoords();
         if (!targetCoords) return undefined;
         return this.currentlyPlayers.find((player) => player.x === targetCoords.x && player.y === targetCoords.y);
     }
 
-    getObjectOnTile(coords?: Vector2): GameEditorPlaceableDto | undefined {
+    getObjectOnTile(coords?: Position): GameEditorPlaceableDto | undefined {
         const targetCoords = coords ?? this._activeTileCoords();
         if (!targetCoords) return undefined;
 

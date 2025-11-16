@@ -1,4 +1,5 @@
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { MoveResult } from '@app/interfaces/move-result.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { BOAT_SPEED_BONUS } from '@common/constants/game.constants';
 import { Player } from '@common/interfaces/player.interface';
@@ -224,13 +225,7 @@ export class InGameSessionRepository {
         return session.startPoints.find((s) => s.id === startPointId);
     }
 
-    movePlayerPosition(
-        sessionId: string,
-        playerId: string,
-        newX: number,
-        newY: number,
-        cost: number,
-    ): { oldX: number; oldY: number; newX: number; newY: number } {
+    movePlayerPosition(sessionId: string, playerId: string, newX: number, newY: number, cost: number): MoveResult {
         const session = this.findById(sessionId);
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
