@@ -212,6 +212,19 @@ export class ActionService {
                     continue;
                 }
             }
+
+            try {
+                const currentPos = { x: player.x, y: player.y };
+                const currentOccupantId = this.gameCache.getTileOccupant(session.id, currentPos.x, currentPos.y);
+                const currentTile = this.gameCache.getTileAtPosition(session.id, currentPos.x, currentPos.y);
+                const currentObject = this.gameCache.getPlaceableAtPosition(session.id, currentPos.x, currentPos.y);
+
+                this.addDoorAction(actions, currentTile, currentPos);
+                this.addPlaceableActions(actions, currentObject, currentPos);
+                this.addDisembarkAction(actions, player, currentTile, currentOccupantId, currentPos);
+            } catch {
+                return;
+            }
         }
 
         this.eventEmitter.emit(ServerEvents.PlayerAvailableActions, {
