@@ -163,11 +163,11 @@ export class SessionGateway implements OnGatewayDisconnect {
     addVirtualPlayer(socket: Socket, data: AddVirtualPlayerDto): void {
         const players = this.sessionService.addVirtualPlayer(data.sessionId, data.virtualPlayerType);
         this.server.to(data.sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
-        
+
         const roomId = this.getAvatarSelectionRoomId(data.sessionId);
         const avatarAssignments = this.sessionService.getChosenAvatars(data.sessionId);
         this.server.to(roomId).emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
-        
+
         this.handleAvailabilityChange();
     }
 

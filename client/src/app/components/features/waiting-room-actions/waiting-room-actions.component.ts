@@ -18,13 +18,9 @@ export class WaitingRoomActionsComponent {
     readonly showVirtualPlayerModal = this._showVirtualPlayerModal.asReadonly();
     readonly isAdmin = computed(() => this.playerService.isAdmin());
     readonly isLocked = computed(() => this.sessionService.isRoomLocked());
-    readonly canToggleLock = computed(() => 
-        this.sessionService.canBeLocked() || this.sessionService.canBeUnlocked()
-    );
+    readonly canToggleLock = computed(() => this.sessionService.canBeLocked() || this.sessionService.canBeUnlocked());
     readonly canStartGame = computed(() => this.sessionService.canStartGame());
-    readonly canAddVirtualPlayer = computed(() => 
-        this.sessionService.players().length < this.sessionService.maxPlayers()
-    );
+    readonly canAddVirtualPlayer = computed(() => this.sessionService.players().length < this.sessionService.maxPlayers());
 
     constructor(
         private readonly playerService: PlayerService,

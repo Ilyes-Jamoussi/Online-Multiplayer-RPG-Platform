@@ -1,13 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-<<<<<<< HEAD
-import { SessionService } from './session.service';
-import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
-import { NotificationService } from '@app/services/notification/notification.service';
-=======
->>>>>>> origin/dev
 import { ROUTES } from '@app/enums/routes.enum';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';

@@ -7,13 +7,11 @@
                     <span class="player-count">{{ players().length }} / {{ maxPlayers() }}</span>
                 </div>
                 <div class="players-list">
-                    @for (player of players(); track player.id) {
-                        @if (isVirtualPlayer(player)) {
-                            <app-virtual-player-card [player]="player" />
-                        } @else {
-                            <app-player-card [player]="player" />
-                        }
-                    }
+                    @for (player of players(); track player.id) { @if (isVirtualPlayer(player)) {
+                    <app-virtual-player-card [player]="player" />
+                    } @else {
+                    <app-player-card [player]="player" />
+                    } }
                 </div>
                 @if (isRoomLocked()) {
                 <div class="lock-message">

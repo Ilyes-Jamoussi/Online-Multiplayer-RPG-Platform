@@ -11,7 +11,6 @@ export enum InGameEvents {
     TurnTransitionEnded = 'turn-transition-ended',
     TurnManualEnd = 'turn-manual-end',
 
-<<<<<<< HEAD
     PlayerEndTurn = 'player-end-turn',
     PlayerJoinInGameSession = 'player-join-in-game-session',
     PlayerJoinedInGameSession = 'player-joined-in-game-session',
@@ -29,7 +28,7 @@ export enum InGameEvents {
     AdminModeToggled = 'admin-mode-toggled',
     PlayerTeleport = 'player-teleport',
     PlayerTeleported = 'player-teleported',
-    
+
     ToggleDoorAction = 'toggle-door-action',
     AttackPlayerAction = 'attack-player-action',
     CombatChoice = 'combat-choice',
@@ -47,22 +46,11 @@ export enum InGameEvents {
     PlayerHealthChanged = 'player-health-changed',
     LeftInGameSessionAck = 'left-in-game-session-ack',
     LoadGameStatistics = 'load-game-statistics',
-=======
-    PlayerEndTurn = 'playerEndTurn',
     PlayerAbandonGame = 'playerAbandonGame',
     PlayerAbandoned = 'playerAbandoned',
-    PlayerJoinInGameSession = 'playerJoinInGameSession',
-    PlayerJoinedInGameSession = 'playerJoinedInGameSession',
-    PlayerLeaveInGameSession = 'playerLeaveInGameSession',
-    PlayerLeftInGameSession = 'playerLeftInGameSession',
-    PlayerMove = 'playerMove',
-    PlayerMoved = 'playerMoved',
+
     PlayerCombatAction = 'playerCombatAction',
-    PlayerCombatResult = 'playerCombatResult',
-    PlayerUpdated = 'playerUpdated',
-    PlayerActionUsed = 'playerAvailableActionsUpdated',
-    PlayerReachableTiles = 'playerReachableTiles',
-    PlayerAvailableActions = 'playerAvailableActions',
+
     PlayerSanctuaryRequest = 'playerSanctuaryRequest',
     PlayerSanctuaryAction = 'playerSanctuaryAction',
     PlayerBonusesChanged = 'playerBonusesChanged',
@@ -75,32 +63,9 @@ export enum InGameEvents {
     SanctuaryActionFailed = 'sanctuaryActionFailed',
     SanctuaryActionSuccess = 'sanctuaryActionSuccess',
 
-    ToggleAdminMode = 'toggleAdminMode',
-    AdminModeToggled = 'adminModeToggled',
-    PlayerTeleport = 'playerTeleport',
-    PlayerTeleported = 'playerTeleported',
-
-    ToggleDoorAction = 'toggleDoorAction',
-    AttackPlayerAction = 'attackPlayerAction',
-    CombatChoice = 'combatChoice',
-    CombatPostureSelected = 'combatPostureSelected',
-    CombatStarted = 'combatStarted',
     CombatNotification = 'combatNotification',
     CombatTimerUpdate = 'combatTimerUpdate',
     CombatTileEffect = 'combatTileEffect',
-    CombatNewRoundStarted = 'combatNewRoundStarted',
-    CombatVictory = 'combatVictory',
-    CombatEnded = 'combatEnded',
-    CombatAbandon = 'combatAbandon',
-    CombatCountChanged = 'combatCountChanged',
-    CombatWinsChanged = 'combatWinsChanged',
-    CombatLossesChanged = 'combatLossesChanged',
-    CombatDrawsChanged = 'combatDrawsChanged',
-    CombatTimerRestart = 'combatTimerRestart',
-    DoorToggled = 'doorToggled',
-    PlayerHealthChanged = 'playerHealthChanged',
-    LeftInGameSessionAck = 'leftInGameSessionAck',
 
     PlaceablePositionUpdated = 'placeablePositionUpdated',
->>>>>>> origin/dev
 }

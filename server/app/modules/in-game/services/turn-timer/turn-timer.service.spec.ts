@@ -1,1 +1,5 @@
-describe('', () => { it('', () => { expect(true).toBe(true); }); });
+describe('', () => {
+    it('', () => {
+        expect(true).toBe(true);
+    });
+});

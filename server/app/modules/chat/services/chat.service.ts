@@ -21,7 +21,7 @@ export class ChatService {
         if (sessionMessages) {
             sessionMessages.push(message);
         }
-        
+
         return message;
     }
 

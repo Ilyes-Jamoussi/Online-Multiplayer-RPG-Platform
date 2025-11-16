@@ -4,13 +4,7 @@ import { Router } from '@angular/router';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
-<<<<<<< HEAD
 import { TimerService } from '@app/services/timer/timer.service';
-import { ROUTES } from '@app/enums/routes.enum';
-import { Player } from '@common/interfaces/player.interface';
-=======
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
->>>>>>> origin/dev
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
@@ -107,11 +101,7 @@ describe('GameOverOverlayComponent', () => {
         });
 
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
-        mockTimerService = jasmine.createSpyObj('TimerService', [
-            'startGameOverTimer',
-            'stopGameOverTimer',
-            'gameOverTimeRemaining',
-        ]);
+        mockTimerService = jasmine.createSpyObj('TimerService', ['startGameOverTimer', 'stopGameOverTimer', 'gameOverTimeRemaining']);
 
         await TestBed.configureTestingModule({
             imports: [GameOverOverlayComponent],

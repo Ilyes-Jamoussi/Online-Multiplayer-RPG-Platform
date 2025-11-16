@@ -4,12 +4,8 @@ import { BASE_STAT_VALUE, BONUS_STAT_VALUE, DEFAULT_PLAYER } from '@app/constant
 import { BonusType } from '@app/enums/character-creation.enum';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
-<<<<<<< HEAD
 import { NotificationService } from '@app/services/notification/notification.service';
-=======
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { ResetService } from '@app/services/reset/reset.service';
->>>>>>> origin/dev
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { SessionService } from '@app/services/session/session.service';
 import { Avatar } from '@common/enums/avatar.enum';

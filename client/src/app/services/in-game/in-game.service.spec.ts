@@ -5,21 +5,11 @@ import { AvailableActionDto } from '@app/dto/available-action-dto';
 import { AvailableActionsDto } from '@app/dto/available-actions-dto';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
-<<<<<<< HEAD
 import { TimerService } from '@app/services/timer/timer.service';
-import { PlayerService } from '@app/services/player/player.service';
-import { NotificationService } from '@app/services/notification/notification.service';
-import { ROUTES } from '@app/enums/routes.enum';
-import { Orientation } from '@common/enums/orientation.enum';
-import { signal } from '@angular/core';
-import { Player } from '@common/interfaces/player.interface';
-=======
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
 import { AvailableActionType } from '@common/enums/available-action-type.enum';
->>>>>>> origin/dev
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Orientation } from '@common/enums/orientation.enum';
@@ -115,11 +105,7 @@ describe('InGameService', () => {
             id: signal('player1'),
         });
 
-        mockNotificationService = jasmine.createSpyObj('NotificationService', [
-            'displayErrorPopup',
-            'displayInformationPopup',
-            'showInfoToast',
-        ]);
+        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup', 'displayInformationPopup', 'showInfoToast']);
 
         TestBed.configureTestingModule({
             providers: [

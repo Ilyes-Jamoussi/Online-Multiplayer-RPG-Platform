@@ -92,107 +92,8 @@ export class InGameGateway {
         try {
             this.inGameService.movePlayer(payload.sessionId, socket.id, payload.orientation);
         } catch (error) {
-            socket.emit(InGameEvents.PlayerMoved, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
-    }
-
-    @SubscribeMessage(InGameEvents.PlayerSanctuaryRequest)
-    playerSanctuaryRequest(socket: Socket, payload: { sessionId: string; x: number; y: number; kind: PlaceableKind }): void {
-        try {
-            if (payload.kind !== PlaceableKind.HEAL && payload.kind !== PlaceableKind.FIGHT) {
-                throw new BadRequestException('Invalid sanctuary kind');
-            }
-            this.inGameService.sanctuaryRequest(payload.sessionId, socket.id, { x: payload.x, y: payload.y }, payload.kind);
-        } catch (error) {
-            socket.emit(InGameEvents.PlayerSanctuaryRequest, errorResponse(error.message));
-        }
-    }
-
-    @SubscribeMessage(InGameEvents.PlayerSanctuaryAction)
-    playerSanctuaryAction(socket: Socket, payload: { sessionId: string; x: number; y: number; kind: PlaceableKind; double?: boolean }): void {
-        try {
-            this.inGameService.performSanctuaryAction(payload.sessionId, socket.id, { x: payload.x, y: payload.y }, payload.double);
-        } catch (error) {
-            socket.emit(InGameEvents.PlayerSanctuaryAction, errorResponse(error.message));
-        }
-    }
-
-    @SubscribeMessage(InGameEvents.PlayerBoardBoat)
-    playerBoardBoat(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
-        try {
-            this.inGameService.boardBoat(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
-        } catch (error) {
-            socket.emit(InGameEvents.PlayerBoardBoat, errorResponse(error.message));
-        }
-    }
-
-    @SubscribeMessage(InGameEvents.PlayerDisembarkBoat)
-    playerDisembarkBoat(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
-        try {
-            this.inGameService.disembarkBoat(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
-        } catch (error) {
-            socket.emit(InGameEvents.PlayerDisembarkBoat, errorResponse(error.message));
-        }
-    }
-
-    @OnEvent(ServerEvents.PlaceablePositionUpdated)
-    handlePlaceablePositionUpdated(payload: { sessionId: string; placeable: Placeable }): void {
-        const session = this.inGameService.getSession(payload.sessionId);
-        const placeableDto: PlaceablePositionUpdatedDto = {
-            ...payload.placeable,
-            _id: payload.placeable._id?.toString(),
-        };
-        this.server.to(session.inGameId).emit(InGameEvents.PlaceablePositionUpdated, successResponse<PlaceablePositionUpdatedDto>(placeableDto));
-    }
-
-    @OnEvent(ServerEvents.OpenSanctuaryDenied)
-    handleOpenSanctuaryDenied(payload: { session: InGameSession; playerId: string; message: string }): void {
-        const response = errorResponse(payload.message);
-        this.server.to(payload.playerId).emit(InGameEvents.OpenSanctuary, response);
-    }
-
-    @OnEvent(ServerEvents.OpenSanctuary)
-    handleOpenSanctuary(payload: { session: InGameSession; playerId: string; kind: PlaceableKind; x: number; y: number }): void {
-        const response = successResponse<OpenSanctuaryDto>({ kind: payload.kind, x: payload.x, y: payload.y });
-        this.server.to(payload.playerId).emit(InGameEvents.OpenSanctuary, response);
-    }
-
-    @OnEvent(ServerEvents.SanctuaryActionFailed)
-    handleSanctuaryActionFailed(payload: { session: InGameSession; playerId: string }): void {
-        const response = successResponse<SanctuaryActionFailedDto>({ message: 'Sanctuary action failed' });
-        this.server.to(payload.playerId).emit(InGameEvents.SanctuaryActionFailed, response);
-    }
-
-    @OnEvent(ServerEvents.SanctuaryActionSuccess)
-    handleSanctuaryActionSuccess(payload: {
-        session: InGameSession;
-        playerId: string;
-        kind: PlaceableKind;
-        x: number;
-        y: number;
-        addedHealth?: number;
-        addedDefense?: number;
-        addedAttack?: number;
-    }): void {
-        const response = successResponse<SanctuaryActionSuccessDto>({
-            kind: payload.kind,
-            x: payload.x,
-            y: payload.y,
-            success: true,
-            addedHealth: payload.addedHealth,
-            addedDefense: payload.addedDefense,
-            addedAttack: payload.addedAttack,
-        });
-        this.server.to(payload.playerId).emit(InGameEvents.SanctuaryActionSuccess, response);
-    }
-
-    @OnEvent(ServerEvents.PlayerBonusesChanged)
-    handlePlayerBonusesChanged(payload: { session: InGameSession; playerId: string; attackBonus: number; defenseBonus: number }) {
-        const response = successResponse<PlayerBonusesChangedDto>({
-            attackBonus: payload.attackBonus,
-            defenseBonus: payload.defenseBonus,
-        });
-        this.server.to(payload.playerId).emit(InGameEvents.PlayerBonusesChanged, response);
     }
 
     @SubscribeMessage(InGameEvents.PlayerSanctuaryRequest)
@@ -435,19 +336,6 @@ export class InGameGateway {
         } catch (error) {
             this.server.to(playerId).emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
-    }
-
-    @OnEvent(ServerEvents.PlayerBoardedBoat)
-    handlePlayerBoardedBoat(payload: { session: InGameSession; playerId: string; boatId: string }) {
-        this.server
-            .to(payload.session.inGameId)
-            .emit(InGameEvents.PlayerBoardedBoat, successResponse<PlayerBoardedBoatDto>({ playerId: payload.playerId, boatId: payload.boatId }));
-    }
-
-    @OnEvent(ServerEvents.PlayerDisembarkedBoat)
-    handlePlayerDisembarkedBoat(payload: { session: InGameSession; playerId: string }) {
-        const response = successResponse<PlayerDisembarkedBoatDto>({ playerId: payload.playerId });
-        this.server.to(payload.session.inGameId).emit(InGameEvents.PlayerDisembarkedBoat, response);
     }
 
     @OnEvent(ServerEvents.PlayerBoardedBoat)

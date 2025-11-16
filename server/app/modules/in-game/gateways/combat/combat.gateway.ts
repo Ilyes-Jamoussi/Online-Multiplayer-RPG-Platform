@@ -4,11 +4,7 @@ import { errorResponse, successResponse } from '@app/utils/socket-response/socke
 import { validationExceptionFactory } from '@app/utils/validation/validation.util';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
-<<<<<<< HEAD
 import { NotificationEvents } from '@common/enums/notification-events.enum';
-import { ServerEvents } from '@app/enums/server-events.enum';
-=======
->>>>>>> origin/dev
 import { CombatResult } from '@common/interfaces/combat.interface';
 import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';

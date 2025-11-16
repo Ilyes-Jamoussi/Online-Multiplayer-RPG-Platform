@@ -1,17 +1,10 @@
 /* eslint-disable max-lines -- Test file */
 import { TestBed } from '@angular/core/testing';
-<<<<<<< HEAD
-import { GameMapService } from './game-map.service';
-import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { NotificationService } from '@app/services/notification/notification.service';
-import { InGameService } from '@app/services/in-game/in-game.service';
-=======
->>>>>>> origin/dev
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';

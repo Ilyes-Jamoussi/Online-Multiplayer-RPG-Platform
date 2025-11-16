@@ -10,9 +10,7 @@ export class StatisticsService {
     private readonly _gameStatistics = signal<GameStatisticsDto | null>(null);
     readonly gameStatistics = this._gameStatistics.asReadonly();
 
-    constructor(
-        private readonly inGameSocketService: InGameSocketService,
-    ) {
+    constructor(private readonly inGameSocketService: InGameSocketService) {
         inject(ResetService).reset$.subscribe(() => this.resetGameStatistics());
         this.initListeners();
     }

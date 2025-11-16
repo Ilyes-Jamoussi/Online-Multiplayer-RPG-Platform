@@ -9,12 +9,8 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-<<<<<<< HEAD
 import { NotificationService } from '@app/services/notification/notification.service';
-=======
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { AvailableActionType } from '@common/enums/available-action-type.enum';
->>>>>>> origin/dev
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';

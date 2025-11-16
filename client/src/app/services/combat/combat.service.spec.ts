@@ -12,14 +12,7 @@ import { CombatSocketService } from '@app/services/combat-socket/combat-socket.s
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
-<<<<<<< HEAD
 import { TimerService } from '@app/services/timer/timer.service';
-import { CombatResult } from '@common/interfaces/combat.interface';
-import { Dice } from '@common/enums/dice.enum';
-import { TileCombatEffect } from '@common/enums/tile.enum';
-=======
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
->>>>>>> origin/dev
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';

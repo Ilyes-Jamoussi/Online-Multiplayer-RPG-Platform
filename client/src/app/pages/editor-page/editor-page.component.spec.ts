@@ -7,12 +7,8 @@ import { ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
-<<<<<<< HEAD
-import { NotificationService } from '@app/services/notification/notification.service';
-=======
 import { GameEditorTeleportService } from '@app/services/game-editor-teleport/game-editor-teleport.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
->>>>>>> origin/dev
+import { NotificationService } from '@app/services/notification/notification.service';
 import { MapSize } from '@common/enums/map-size.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Subject } from 'rxjs';

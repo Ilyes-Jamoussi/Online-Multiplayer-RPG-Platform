@@ -7,12 +7,7 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { PlayerService } from '@app/services/player/player.service';
 import { ResetService } from '@app/services/reset/reset.service';
 import { SessionService } from '@app/services/session/session.service';
-<<<<<<< HEAD
 import { TimerService } from '@app/services/timer/timer.service';
-import { ResetService } from '@app/services/reset/reset.service';
-=======
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
->>>>>>> origin/dev
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';

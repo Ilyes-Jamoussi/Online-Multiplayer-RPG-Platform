@@ -167,8 +167,6 @@ export class InGameSocketService {
     onLoadGameStatistics(callback: (data: GameStatisticsDto) => void): void {
         this.socket.onSuccessEvent(InGameEvents.LoadGameStatistics, callback);
     }
-<<<<<<< HEAD
-=======
 
     onLoadGameStatisticsError(callback: (message: string) => void): void {
         this.socket.onErrorEvent(InGameEvents.LoadGameStatistics, callback);
@@ -185,5 +183,4 @@ export class InGameSocketService {
     onPlaceablePositionUpdated(callback: (data: PlaceablePositionUpdatedDto) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlaceablePositionUpdated, callback);
     }
->>>>>>> origin/dev
 }
