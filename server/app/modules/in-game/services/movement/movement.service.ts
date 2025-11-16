@@ -1,10 +1,12 @@
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { ReachableTileExplorationContext } from '@app/interfaces/reachable-tile-exploration-context.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { ServerEvents } from '@app/enums/server-events.enum';
 import { TileCost, TileKind } from '@common/enums/tile.enum';
+import { Player } from '@common/interfaces/player.interface';
+import { Position, PositionWithDistance } from '@common/interfaces/position.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -24,32 +26,48 @@ export class MovementService {
             throw new NotFoundException('Player not found');
         }
 
-        const { x: nextX, y: nextY } = this.gameCache.getNextPosition(session.id, player.x, player.y, orientation);
-        const tile = this.gameCache.getTileAtPosition(session.id, nextX, nextY);
+        let nextX = player.x;
+        let nextY = player.y;
+
+        const nextPosition = this.gameCache.getNextPosition(session.id, { x: player.x, y: player.y }, orientation);
+        nextX = nextPosition.x;
+        nextY = nextPosition.y;
+        const tile = this.gameCache.getTileAtPosition(session.id, { x: nextX, y: nextY });
         if (!tile) {
             throw new NotFoundException('Tile not found');
         }
 
-        const doorCost = tile.open ? TileCost.DOOR_OPEN : -1;
-        const moveCost = tile.kind === TileKind.DOOR ? doorCost : TileCost[tile.kind];
+        const isOnBoat = Boolean(player.onBoatId);
+        if (isOnBoat && tile.kind === TileKind.TELEPORT) {
+            throw new BadRequestException('Cannot use teleporter while on a boat');
+        }
 
-        if (moveCost === -1) {
+        const moveCost = this.calculateTileCost(session.id, { x: nextX, y: nextY }, isOnBoat);
+
+        if (moveCost === null) {
             throw new BadRequestException('Cannot move onto this tile');
-        } else if (moveCost > player.speed) {
+        } else if (moveCost > player.speed + player.boatSpeed) {
             throw new BadRequestException('Not enough movement points for this tile');
         }
 
-        if (this.gameCache.getTileOccupant(session.id, nextX, nextY)) {
+        if (tile.kind === TileKind.TELEPORT) {
+            const destination = this.gameCache.getTeleportDestination(session.id, { x: nextX, y: nextY });
+            const destinationOccupant = this.gameCache.getTileOccupant(session.id, destination);
+            nextX = destinationOccupant ? nextX : destination.x;
+            nextY = destinationOccupant ? nextY : destination.y;
+        }
+
+        if (this.gameCache.getTileOccupant(session.id, { x: nextX, y: nextY })) {
             throw new BadRequestException('Tile is occupied');
+        }
+
+        if (player.onBoatId) {
+            this.gameCache.updatePlaceablePosition(session.id, { x: player.x, y: player.y }, { x: nextX, y: nextY });
         }
 
         this.sessionRepository.movePlayerPosition(session.id, playerId, nextX, nextY, moveCost);
 
-        if (player.speed > 0) {
-            this.calculateReachableTiles(session, playerId);
-        } else {
-            this.eventEmitter.emit(ServerEvents.PlayerReachableTiles, { playerId, reachable: [] });
-        }
+        this.calculateReachableTiles(session, playerId);
 
         return player.speed;
     }
@@ -59,17 +77,28 @@ export class MovementService {
         if (!player) {
             throw new NotFoundException('Player not found');
         }
+        this.disembarkBoat(session, playerId, { x: player.x, y: player.y });
         const startPointId = player.startPointId;
         const startPoint = this.sessionRepository.findStartPointById(session.id, startPointId);
         if (!startPoint) {
             throw new NotFoundException('Start point not found');
         }
         if (!(startPoint.x === player.x && startPoint.y === player.y)) {
-            const { x: nextX, y: nextY } = this.findClosestFreeTile(session, startPoint.x, startPoint.y);
+            const nextPosition = this.findClosestFreeTile(session, { x: startPoint.x, y: startPoint.y });
             player.health = player.maxHealth;
-            this.sessionRepository.movePlayerPosition(session.id, playerId, nextX, nextY, 0);
+            this.sessionRepository.movePlayerPosition(session.id, playerId, nextPosition.x, nextPosition.y, 0);
         }
         this.calculateReachableTiles(session, session.currentTurn.activePlayerId);
+    }
+
+    disembarkBoat(session: InGameSession, playerId: string, position: Position): void {
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.onBoatId = undefined;
+        if (position.x !== player.x || position.y !== player.y) {
+            this.sessionRepository.movePlayerPosition(session.id, playerId, position.x, position.y, 0);
+        }
+        this.sessionRepository.resetPlayerBoatSpeedBonus(session.id, playerId);
     }
 
     calculateReachableTiles(session: InGameSession, playerId: string): ReachableTile[] {
@@ -81,14 +110,16 @@ export class MovementService {
         const reachable: ReachableTile[] = [];
         const visited = new Set<string>();
         const queue: ReachableTile[] = this.initializeQueue(player);
-        const isOnBoat = this.isPlayerOnBoat(session.id, player.x, player.y);
+        const isOnBoat = Boolean(player.onBoatId);
         const mapSize = this.gameCache.getMapSize(session.id);
+        const startPosition: Position = { x: player.x, y: player.y };
 
         while (queue.length > 0) {
             const current = queue.shift();
             if (!current) continue;
 
-            if (!this.processCurrentTile(current, visited, reachable)) continue;
+            const shouldExplore = this.processCurrentTile(current, visited, reachable, session.id, startPosition);
+            if (!shouldExplore) continue;
 
             const context: ReachableTileExplorationContext = { session, playerId, visited, queue, mapSize, isOnBoat };
             this.exploreNeighbors(current, context);
@@ -98,24 +129,40 @@ export class MovementService {
         return reachable;
     }
 
-    private initializeQueue(player: InGameSession['inGamePlayers'][string]): ReachableTile[] {
+    private initializeQueue(player: Player): ReachableTile[] {
         return [
             {
                 x: player.x,
                 y: player.y,
                 cost: 0,
-                remainingPoints: player.speed,
+                remainingPoints: player.speed + player.boatSpeed,
             },
         ];
     }
 
-    private processCurrentTile(current: ReachableTile, visited: Set<string>, reachable: ReachableTile[]): boolean {
+    private processCurrentTile(
+        current: ReachableTile,
+        visited: Set<string>,
+        reachable: ReachableTile[],
+        sessionId: string,
+        startPosition: Position,
+    ): boolean {
         const key = `${current.x},${current.y}`;
 
         if (visited.has(key)) return false;
         visited.add(key);
 
-        reachable.push(current);
+        const placeable = this.gameCache.getPlaceableAtPosition(sessionId, { x: current.x, y: current.y });
+        const isStartPosition = current.x === startPosition.x && current.y === startPosition.y;
+        const hasHealOrFight = placeable && (placeable.kind === PlaceableKind.HEAL || placeable.kind === PlaceableKind.FIGHT);
+
+        if (hasHealOrFight && !isStartPosition) {
+            return false;
+        }
+
+        if (!hasHealOrFight) {
+            reachable.push(current);
+        }
 
         return true;
     }
@@ -126,24 +173,67 @@ export class MovementService {
         for (const next of directions) {
             if (this.shouldSkipPosition(next, context.visited, context.mapSize)) continue;
 
-            const tileCost = this.calculateTileCost(context.session.id, next.x, next.y, context.isOnBoat);
+            const tileCost = this.calculateTileCost(context.session.id, next, context.isOnBoat);
             if (tileCost === null) continue;
 
-            if (this.isPositionOccupied(context.session, next.x, next.y)) continue;
+            if (this.isPositionOccupied(context.session, next)) continue;
+
+            const tile = this.gameCache.getTileAtPosition(context.session.id, next);
+            if (tile?.kind === TileKind.TELEPORT) {
+                if (this.isTeleportDestinationOccupied(context.session.id, next)) {
+                    continue;
+                }
+            }
 
             const newRemainingPoints = current.remainingPoints - tileCost;
             if (newRemainingPoints < 0) continue;
 
-            context.queue.push({
+            const nextTile: ReachableTile = {
                 x: next.x,
                 y: next.y,
                 cost: current.cost + tileCost,
                 remainingPoints: newRemainingPoints,
-            });
+            };
+            context.queue.push(nextTile);
+
+            if (tile?.kind === TileKind.TELEPORT) {
+                this.addTeleportDestination(nextTile, context);
+            }
         }
     }
 
-    private getAdjacentPositions(current: ReachableTile): { x: number; y: number }[] {
+    private isTeleportDestinationOccupied(sessionId: string, teleportPosition: Position): boolean {
+        try {
+            const destination = this.gameCache.getTeleportDestination(sessionId, teleportPosition);
+            return this.gameCache.getTileOccupant(sessionId, destination) !== null;
+        } catch {
+            return true;
+        }
+    }
+
+    private addTeleportDestination(teleportTile: ReachableTile, context: ReachableTileExplorationContext): void {
+        try {
+            const destination = this.gameCache.getTeleportDestination(context.session.id, { x: teleportTile.x, y: teleportTile.y });
+            const destinationKey = `${destination.x},${destination.y}`;
+
+            if (context.visited.has(destinationKey)) return;
+            if (this.isPositionOccupied(context.session, destination)) return;
+
+            const destinationTileCost = this.calculateTileCost(context.session.id, destination, context.isOnBoat);
+            if (destinationTileCost === null) return;
+
+            context.queue.push({
+                x: destination.x,
+                y: destination.y,
+                cost: teleportTile.cost,
+                remainingPoints: teleportTile.remainingPoints,
+            });
+        } catch {
+            return;
+        }
+    }
+
+    private getAdjacentPositions(current: ReachableTile): Position[] {
         return [
             { x: current.x + 1, y: current.y },
             { x: current.x - 1, y: current.y },
@@ -152,7 +242,7 @@ export class MovementService {
         ];
     }
 
-    private shouldSkipPosition(next: { x: number; y: number }, visited: Set<string>, mapSize: number): boolean {
+    private shouldSkipPosition(next: Position, visited: Set<string>, mapSize: number): boolean {
         const nextKey = `${next.x},${next.y}`;
         if (visited.has(nextKey)) return true;
 
@@ -163,9 +253,16 @@ export class MovementService {
         return false;
     }
 
-    private calculateTileCost(sessionId: string, x: number, y: number, isOnBoat: boolean): number | null {
-        const tile = this.gameCache.getTileAtPosition(sessionId, x, y);
+    private calculateTileCost(sessionId: string, position: Position, isOnBoat: boolean): number | null {
+        const tile = this.gameCache.getTileAtPosition(sessionId, position);
         if (!tile) return null;
+
+        if (isOnBoat) {
+            if (tile.kind === TileKind.WATER) {
+                return 1;
+            }
+            return null;
+        }
 
         let tileCost = TileCost[tile.kind];
         if (tileCost === undefined) return null;
@@ -176,32 +273,23 @@ export class MovementService {
 
         if (tileCost === -1) return null;
 
-        if (tile.kind === TileKind.WATER && isOnBoat) {
-            return 1;
-        }
-
         return tileCost;
     }
 
-    private isPlayerOnBoat(sessionId: string, x: number, y: number): boolean {
-        const placeables = this.gameCache.getPlaceablesAtPosition(sessionId, x, y);
-        return placeables.some((placeable) => placeable.kind === PlaceableKind.BOAT);
+    private isPositionOccupied(session: InGameSession, position: Position): boolean {
+        return Boolean(this.gameCache.getTileOccupant(session.id, position));
     }
 
-    private isPositionOccupied(session: InGameSession, x: number, y: number): boolean {
-        return Boolean(this.gameCache.getTileOccupant(session.id, x, y));
-    }
-
-    private findClosestFreeTile(session: InGameSession, x: number, y: number): { x: number; y: number } {
+    private findClosestFreeTile(session: InGameSession, position: Position): Position {
         const mapSize = this.gameCache.getMapSize(session.id);
 
-        if (this.gameCache.isTileFree(session.id, x, y)) {
-            return { x, y };
+        if (this.gameCache.isTileFree(session.id, position)) {
+            return position;
         }
 
         const visited = new Set<string>();
-        const queue: { x: number; y: number; distance: number }[] = [{ x, y, distance: 0 }];
-        visited.add(`${x},${y}`);
+        const queue: PositionWithDistance[] = [{ ...position, distance: 0 }];
+        visited.add(`${position.x},${position.y}`);
 
         while (queue.length > 0) {
             const current = queue.shift();
@@ -226,8 +314,8 @@ export class MovementService {
                 }
 
                 visited.add(key);
-                if (this.gameCache.isTileFree(session.id, neighbor.x, neighbor.y)) {
-                    return { x: neighbor.x, y: neighbor.y };
+                if (this.gameCache.isTileFree(session.id, neighbor)) {
+                    return neighbor;
                 }
 
                 queue.push({ x: neighbor.x, y: neighbor.y, distance: current.distance + 1 });

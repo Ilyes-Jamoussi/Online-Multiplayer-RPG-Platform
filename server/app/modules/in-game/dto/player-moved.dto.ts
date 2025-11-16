@@ -17,4 +17,8 @@ export class PlayerMovedDto {
     @ApiProperty()
     @IsNumber()
     speed: number;
+
+    @ApiProperty()
+    @IsNumber()
+    boatSpeed: number;
 }

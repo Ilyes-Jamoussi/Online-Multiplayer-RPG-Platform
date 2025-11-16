@@ -7,6 +7,7 @@
         "deploy": "ng build",
         "format": "prettier --config ../.prettierrc.yaml --ignore-path ../.prettierignore --write \"src/**/*\"",
         "test": "ng test",
+        "test:headless": "ng test --watch=false --browsers=ChromeHeadless",
         "coverage": "ng test --code-coverage --source-map=true",
         "lint": "eslint --config eslint.config.mjs \"src/**/*.ts\"",
         "lint:fix": "eslint --config eslint.config.mjs \"src/**/*.ts\" --fix",

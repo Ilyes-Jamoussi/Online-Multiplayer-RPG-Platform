@@ -29,12 +29,23 @@ export enum InGameEvents {
     PlayerActionUsed = 'playerAvailableActionsUpdated',
     PlayerReachableTiles = 'playerReachableTiles',
     PlayerAvailableActions = 'playerAvailableActions',
+    PlayerSanctuaryRequest = 'playerSanctuaryRequest',
+    PlayerSanctuaryAction = 'playerSanctuaryAction',
+    PlayerBonusesChanged = 'playerBonusesChanged',
+    PlayerBoardBoat = 'playerBoardBoat',
+    PlayerBoardedBoat = 'playerBoardedBoat',
+    PlayerDisembarkBoat = 'playerDisembarkBoat',
+    PlayerDisembarkedBoat = 'playerDisembarkedBoat',
+
+    OpenSanctuary = 'openSanctuary',
+    SanctuaryActionFailed = 'sanctuaryActionFailed',
+    SanctuaryActionSuccess = 'sanctuaryActionSuccess',
 
     ToggleAdminMode = 'toggleAdminMode',
     AdminModeToggled = 'adminModeToggled',
     PlayerTeleport = 'playerTeleport',
     PlayerTeleported = 'playerTeleported',
-    
+
     ToggleDoorAction = 'toggleDoorAction',
     AttackPlayerAction = 'attackPlayerAction',
     CombatChoice = 'combatChoice',
@@ -55,4 +66,6 @@ export enum InGameEvents {
     DoorToggled = 'doorToggled',
     PlayerHealthChanged = 'playerHealthChanged',
     LeftInGameSessionAck = 'leftInGameSessionAck',
+
+    PlaceablePositionUpdated = 'placeablePositionUpdated',
 }

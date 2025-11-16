@@ -7,7 +7,9 @@ import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ActiveTool, ExtendedGameEditorPlaceableDto, TileBrushTool, ToolType } from '@app/interfaces/game-editor.interface';
+import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
+import { GameEditorTeleportService } from '@app/services/game-editor-teleport/game-editor-teleport.service';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
@@ -170,8 +172,26 @@ describe('GameEditorInteractionsService', () => {
         store.setTiles(makeTiles(SIZE, TileKind.BASE));
         store.tileSizePx = 50;
 
+        const assetsServiceSpy = jasmine.createSpyObj('AssetsService', ['getTileImage']);
+        assetsServiceSpy.getTileImage.and.returnValue('/assets/tiles/base.png');
+
         TestBed.configureTestingModule({
-            providers: [GameEditorInteractionsService, { provide: GameEditorStoreService, useValue: store }],
+            providers: [
+                GameEditorInteractionsService,
+                { provide: GameEditorStoreService, useValue: store },
+                { provide: AssetsService, useValue: assetsServiceSpy },
+                {
+                    provide: GameEditorTeleportService,
+                    useValue: jasmine.createSpyObj('GameEditorTeleportService', [
+                        'getAvailableTeleportChannels',
+                        'getNextAvailableTeleportChannel',
+                        'isTeleportDisabled',
+                        'placeTeleportTile',
+                        'cancelTeleportPlacement',
+                        'removeTeleportPair',
+                    ]),
+                },
+            ],
         });
 
         service = TestBed.inject(GameEditorInteractionsService);

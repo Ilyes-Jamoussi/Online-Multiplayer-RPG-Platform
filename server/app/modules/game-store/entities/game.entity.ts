@@ -1,8 +1,10 @@
+import { MAX_TELEPORT_CHANNEL } from '@app/constants/game-config.constants';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { Placeable, placeableSchema } from './placeable.entity';
+import { TeleportChannel, teleportChannelSchema } from './teleport-channel.entity';
 import { Tile, tileSchema } from './tile.entity';
 
 @Schema({ versionKey: false })
@@ -41,5 +43,15 @@ export class Game {
 
     @Prop({ required: true })
     draft: boolean;
+
+    @Prop({
+        type: [teleportChannelSchema],
+        default: [],
+        validate: {
+            validator: (value: TeleportChannel[]) => value.length <= MAX_TELEPORT_CHANNEL,
+            message: 'teleportChannels array cannot exceed 5 elements',
+        },
+    })
+    teleportChannels: TeleportChannel[];
 }
 export const gameSchema = SchemaFactory.createForClass(Game);

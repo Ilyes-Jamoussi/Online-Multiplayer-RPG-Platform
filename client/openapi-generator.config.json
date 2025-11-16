@@ -9,7 +9,8 @@
         "Dice": "@common/enums/dice.enum",
         "Orientation": "@common/enums/orientation.enum",
         "CombatPosture": "@common/enums/combat-posture.enum",
-        "VirtualPlayerType": "@common/enums/virtual-player-type.enum"
+        "VirtualPlayerType": "@common/enums/virtual-player-type.enum",
+        "AvailableActionType": "@common/enums/available-action-type.enum"
     },
     "typeMappings": {
         "GameMode": "GameMode",
@@ -20,7 +21,8 @@
         "Dice": "Dice",
         "Orientation": "Orientation",
         "CombatPosture": "CombatPosture",
-        "VirtualPlayerType": "VirtualPlayerType"
+        "VirtualPlayerType": "VirtualPlayerType",
+        "AvailableActionType": "AvailableActionType"
     },
     "templateDir": "openapi-templates/ts-angular"
 }

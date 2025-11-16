@@ -1,6 +1,7 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { validationExceptionFactory } from '@app/utils/validation/validation.util';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
@@ -66,12 +67,12 @@ describe('InGameGateway', () => {
         baseSpeed: 3,
         speedBonus: 0,
         speed: 3,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
         baseAttack: 10,
         attackBonus: 0,
-        attack: 10,
         baseDefense: 5,
         defenseBonus: 0,
-        defense: 5,
         attackDice: Dice.D6,
         defenseDice: Dice.D4,
         x: 0,
@@ -83,6 +84,7 @@ describe('InGameGateway', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
         ...overrides,
     });
 
@@ -113,7 +115,7 @@ describe('InGameGateway', () => {
     });
 
     const createMockAvailableAction = (overrides: Partial<AvailableAction> = {}): AvailableAction => ({
-        type: 'DOOR',
+        type: AvailableActionType.DOOR,
         x: TARGET_X,
         y: TARGET_Y,
         ...overrides,
@@ -292,7 +294,7 @@ describe('InGameGateway', () => {
 
             gateway.toggleDoorAction(mockSocket, payload);
 
-            expect(inGameService.toggleDoorAction).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID, TARGET_X, TARGET_Y);
+            expect(inGameService.toggleDoorAction).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID, { x: TARGET_X, y: TARGET_Y });
             expect(mockSocket.emit).not.toHaveBeenCalled();
         });
 
@@ -497,6 +499,7 @@ describe('InGameGateway', () => {
                 x: TARGET_X,
                 y: TARGET_Y,
                 speed: SPEED,
+                boatSpeed: 0,
             };
 
             gateway.handlePlayerMoved(payload);
@@ -511,6 +514,7 @@ describe('InGameGateway', () => {
                         x: TARGET_X,
                         y: TARGET_Y,
                         speed: SPEED,
+                        boatSpeed: 0,
                     },
                 }),
             );
@@ -599,7 +603,7 @@ describe('InGameGateway', () => {
 
             gateway.playerTeleport(mockSocket, { sessionId: SESSION_ID, x: TARGET_X, y: TARGET_Y });
 
-            expect(inGameService.teleportPlayer).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID, TARGET_X, TARGET_Y);
+            expect(inGameService.teleportPlayer).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID, { x: TARGET_X, y: TARGET_Y });
             expect(inGameService.getSession).toHaveBeenCalledWith(SESSION_ID);
             expect(mockServer.to).toHaveBeenCalledWith(IN_GAME_ID);
             expect(mockServer.mockBroadcastOperator.emit).toHaveBeenCalledWith(
@@ -672,7 +676,7 @@ describe('InGameGateway', () => {
                 InGameEvents.PlayerAvailableActions,
                 expect.objectContaining({
                     success: true,
-                    data: actions,
+                    data: { availableActions: actions },
                 }),
             );
         });

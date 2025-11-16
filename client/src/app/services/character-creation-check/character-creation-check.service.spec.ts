@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { CharacterCreationCheckService } from './character-creation-check.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { CharacterCreationCheckService } from './character-creation-check.service';
 
 const TEST_ERROR_COUNT = 3;
 
@@ -25,10 +25,8 @@ describe('CharacterCreationCheckService', () => {
         speed: 4,
         baseAttack: 4,
         attackBonus: 0,
-        attack: 4,
         baseDefense: 4,
         defenseBonus: 0,
-        defense: 4,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
         x: 0,
@@ -40,6 +38,9 @@ describe('CharacterCreationCheckService', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     beforeEach(() => {

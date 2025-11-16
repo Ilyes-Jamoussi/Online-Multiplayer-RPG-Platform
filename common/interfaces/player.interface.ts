@@ -14,12 +14,12 @@ export interface Player {
     baseSpeed: number;
     speedBonus: number;
     speed: number;
+    boatSpeedBonus: number;
+    boatSpeed: number;
     baseAttack: number;
     attackBonus: number;
-    attack: number;
     baseDefense: number;
     defenseBonus: number;
-    defense: number;
     attackDice: Dice;
     defenseDice: Dice;
     x: number;
@@ -31,5 +31,7 @@ export interface Player {
     combatWins: number;
     combatLosses: number;
     combatDraws: number;
+    hasCombatBonus: boolean;
+    onBoatId?: string;
     virtualPlayerType?: VirtualPlayerType;
 }

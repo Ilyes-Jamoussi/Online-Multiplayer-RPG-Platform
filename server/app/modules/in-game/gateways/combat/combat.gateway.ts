@@ -1,14 +1,14 @@
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
+import { validationExceptionFactory } from '@app/utils/validation/validation.util';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
-import { ServerEvents } from '@app/enums/server-events.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
 import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { validationExceptionFactory } from '@app/utils/validation/validation.util';
 
 @UsePipes(
     new ValidationPipe({
@@ -26,7 +26,7 @@ export class CombatGateway {
     @SubscribeMessage(InGameEvents.AttackPlayerAction)
     attackPlayerAction(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
         try {
-            this.combatService.attackPlayerAction(payload.sessionId, socket.id, payload.x, payload.y);
+            this.combatService.attackPlayerAction(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
         } catch (error) {
             socket.emit(InGameEvents.AttackPlayerAction, errorResponse(error.message));
         }

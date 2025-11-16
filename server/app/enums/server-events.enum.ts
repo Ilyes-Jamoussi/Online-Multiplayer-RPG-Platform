@@ -12,10 +12,13 @@ export enum ServerEvents {
 
     PlayerCombatResult = 'player.combatResult',
     PlayerHealthChanged = 'player.healthChanged',
+    PlayerBonusesChanged = 'player.bonusesChanged',
     PlayerCombatCountChanged = 'player.combatCountChanged',
     PlayerCombatWinsChanged = 'player.combatWinsChanged',
     PlayerCombatLossesChanged = 'player.combatLossesChanged',
     PlayerCombatDrawsChanged = 'player.combatDrawsChanged',
+    PlayerBoardedBoat = 'player.boardedBoat',
+    PlayerDisembarkedBoat = 'player.disembarkedBoat',
 
     TurnStarted = 'turn.started',
     TurnEnded = 'turn.ended',
@@ -34,4 +37,11 @@ export enum ServerEvents {
     DoorToggled = 'door.toggled',
 
     GameOver = 'game.over',
+
+    OpenSanctuary = 'openSanctuary',
+    OpenSanctuaryDenied = 'openSanctuaryDenied',
+    SanctuaryActionFailed = 'sanctuaryActionFailed',
+    SanctuaryActionSuccess = 'sanctuaryActionSuccess',
+
+    PlaceablePositionUpdated = 'placeable.positionUpdated',
 }
