@@ -69,7 +69,7 @@ export class InGameGateway {
     @SubscribeMessage(InGameEvents.ToggleDoorAction)
     toggleDoorAction(socket: Socket, payload: ToggleDoorActionDto): void {
         try {
-            this.inGameService.toggleDoorAction(payload.sessionId, socket.id, payload.x, payload.y);
+            this.inGameService.toggleDoorAction(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
         } catch (error) {
             socket.emit(InGameEvents.ToggleDoorAction, errorResponse(error.message));
         }
@@ -90,7 +90,7 @@ export class InGameGateway {
             if (payload.kind !== PlaceableKind.HEAL && payload.kind !== PlaceableKind.FIGHT) {
                 throw new BadRequestException('Invalid sanctuary kind');
             }
-            this.inGameService.sanctuaryRequest(payload.sessionId, socket.id, payload.x, payload.y, payload.kind);
+            this.inGameService.sanctuaryRequest(payload.sessionId, socket.id, { x: payload.x, y: payload.y }, payload.kind);
         } catch (error) {
             socket.emit(InGameEvents.PlayerSanctuaryRequest, errorResponse(error.message));
         }
@@ -99,7 +99,7 @@ export class InGameGateway {
     @SubscribeMessage(InGameEvents.PlayerSanctuaryAction)
     playerSanctuaryAction(socket: Socket, payload: { sessionId: string; x: number; y: number; kind: PlaceableKind; double?: boolean }): void {
         try {
-            this.inGameService.performSanctuaryAction(payload.sessionId, socket.id, payload.x, payload.y, payload.double);
+            this.inGameService.performSanctuaryAction(payload.sessionId, socket.id, { x: payload.x, y: payload.y }, payload.double);
         } catch (error) {
             socket.emit(InGameEvents.PlayerSanctuaryAction, errorResponse(error.message));
         }
@@ -108,7 +108,7 @@ export class InGameGateway {
     @SubscribeMessage(InGameEvents.PlayerBoardBoat)
     playerBoardBoat(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
         try {
-            this.inGameService.boardBoat(payload.sessionId, socket.id, payload.x, payload.y);
+            this.inGameService.boardBoat(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
         } catch (error) {
             socket.emit(InGameEvents.PlayerBoardBoat, errorResponse(error.message));
         }
@@ -117,7 +117,7 @@ export class InGameGateway {
     @SubscribeMessage(InGameEvents.PlayerDisembarkBoat)
     playerDisembarkBoat(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
         try {
-            this.inGameService.disembarkBoat(payload.sessionId, socket.id, payload.x, payload.y);
+            this.inGameService.disembarkBoat(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
         } catch (error) {
             socket.emit(InGameEvents.PlayerDisembarkBoat, errorResponse(error.message));
         }
@@ -260,7 +260,7 @@ export class InGameGateway {
     @SubscribeMessage(InGameEvents.PlayerTeleport)
     playerTeleport(socket: Socket, payload: PlayerTeleportDto): void {
         try {
-            this.inGameService.teleportPlayer(payload.sessionId, socket.id, payload.x, payload.y);
+            this.inGameService.teleportPlayer(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
             const session = this.inGameService.getSession(payload.sessionId);
             const player = session.inGamePlayers[socket.id];
             this.server

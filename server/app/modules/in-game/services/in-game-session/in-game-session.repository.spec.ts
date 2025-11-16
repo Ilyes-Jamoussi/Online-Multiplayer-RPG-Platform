@@ -491,7 +491,7 @@ describe('InGameSessionRepository', () => {
 
             service.playerLeave(SESSION_ID, PLAYER_A_ID);
 
-            expect(gameCache.clearTileOccupant).toHaveBeenCalledWith(SESSION_ID, POS_X_1, POS_Y_1);
+            expect(gameCache.clearTileOccupant).toHaveBeenCalledWith(SESSION_ID, { x: POS_X_1, y: POS_Y_1 });
         });
 
         it('should not clear tile occupant when player has negative position', () => {
@@ -627,7 +627,7 @@ describe('InGameSessionRepository', () => {
 
             service.movePlayerPosition(SESSION_ID, PLAYER_A_ID, POS_X_2, POS_Y_3, MOVE_COST);
 
-            expect(gameCache.moveTileOccupant).toHaveBeenCalledWith(SESSION_ID, POS_X_2, POS_Y_3, session.inGamePlayers[PLAYER_A_ID]);
+            expect(gameCache.moveTileOccupant).toHaveBeenCalledWith(SESSION_ID, { x: POS_X_2, y: POS_Y_3 }, session.inGamePlayers[PLAYER_A_ID]);
         });
 
         it('should emit player.moved event', () => {

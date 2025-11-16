@@ -195,7 +195,7 @@ export class InGameSessionRepository {
         session.inGamePlayers[playerId].isInGame = false;
 
         if (player.x >= 0 && player.y >= 0) {
-            this.gameCache.clearTileOccupant(sessionId, player.x, player.y);
+            this.gameCache.clearTileOccupant(sessionId, { x: player.x, y: player.y });
         }
 
         this.gameCache.reenablePlaceablesForPlayer(sessionId, playerId);
@@ -233,7 +233,7 @@ export class InGameSessionRepository {
         const oldX = player.x;
         const oldY = player.y;
 
-        this.gameCache.moveTileOccupant(sessionId, newX, newY, player);
+        this.gameCache.moveTileOccupant(sessionId, { x: newX, y: newY }, player);
 
         player.x = newX;
         player.y = newY;

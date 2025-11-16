@@ -361,7 +361,7 @@ describe('GameCacheService', () => {
 
             await service.fetchAndCacheGame(mockSessionId, mockGameId);
 
-            const result = service.getTileAtPosition(mockSessionId, POS_X_2, POS_Y_3);
+            const result = service.getTileAtPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 });
 
             expect(result).toBeDefined();
             expect(result?.x).toBe(POS_X_2);
@@ -382,13 +382,13 @@ describe('GameCacheService', () => {
 
             await service.fetchAndCacheGame(mockSessionId, mockGameId);
 
-            const result = service.getTileAtPosition(mockSessionId, MAP_SIZE_NUM, MAP_SIZE_NUM);
+            const result = service.getTileAtPosition(mockSessionId, { x: MAP_SIZE_NUM, y: MAP_SIZE_NUM });
 
             expect(result).toBeUndefined();
         });
 
         it('should throw NotFoundException when game map not found', () => {
-            expect(() => service.getTileAtPosition('non-existent-session', POS_X_0, POS_Y_0)).toThrow(NotFoundException);
+            expect(() => service.getTileAtPosition('non-existent-session', { x: POS_X_0, y: POS_Y_0 })).toThrow(NotFoundException);
         });
 
         it('should calculate correct index for different positions', async () => {
@@ -405,7 +405,7 @@ describe('GameCacheService', () => {
 
             await service.fetchAndCacheGame(mockSessionId, mockGameId);
 
-            const result = service.getTileAtPosition(mockSessionId, POS_X_3, POS_Y_2);
+            const result = service.getTileAtPosition(mockSessionId, { x: POS_X_3, y: POS_Y_2 });
 
             expect(result?.kind).toBe(TileKind.ICE);
         });
@@ -430,71 +430,71 @@ describe('GameCacheService', () => {
         });
 
         it('should return position north of current position', () => {
-            const result = service.getNextPosition(mockSessionId, POS_X_2, POS_Y_3, Orientation.N);
+            const result = service.getNextPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, Orientation.N);
 
             expect(result.x).toBe(POS_X_2);
             expect(result.y).toBe(POS_Y_2);
         });
 
         it('should return position east of current position', () => {
-            const result = service.getNextPosition(mockSessionId, POS_X_2, POS_Y_3, Orientation.E);
+            const result = service.getNextPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, Orientation.E);
 
             expect(result.x).toBe(POS_X_3);
             expect(result.y).toBe(POS_Y_3);
         });
 
         it('should return position south of current position', () => {
-            const result = service.getNextPosition(mockSessionId, POS_X_2, POS_Y_3, Orientation.S);
+            const result = service.getNextPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, Orientation.S);
 
             expect(result.x).toBe(POS_X_2);
             expect(result.y).toBe(POS_X_4);
         });
 
         it('should return position west of current position', () => {
-            const result = service.getNextPosition(mockSessionId, POS_X_2, POS_Y_3, Orientation.W);
+            const result = service.getNextPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, Orientation.W);
 
             expect(result.x).toBe(POS_X_1);
             expect(result.y).toBe(POS_Y_3);
         });
 
         it('should throw BadRequestException for invalid current position (negative x)', () => {
-            expect(() => service.getNextPosition(mockSessionId, NEGATIVE_POS, POS_Y_0, Orientation.N)).toThrow(BadRequestException);
-            expect(() => service.getNextPosition(mockSessionId, NEGATIVE_POS, POS_Y_0, Orientation.N)).toThrow('Invalid position');
+            expect(() => service.getNextPosition(mockSessionId, { x: NEGATIVE_POS, y: POS_Y_0 }, Orientation.N)).toThrow(BadRequestException);
+            expect(() => service.getNextPosition(mockSessionId, { x: NEGATIVE_POS, y: POS_Y_0 }, Orientation.N)).toThrow('Invalid position');
         });
 
         it('should throw BadRequestException for invalid current position (negative y)', () => {
-            expect(() => service.getNextPosition(mockSessionId, POS_X_0, NEGATIVE_POS, Orientation.N)).toThrow(BadRequestException);
+            expect(() => service.getNextPosition(mockSessionId, { x: POS_X_0, y: NEGATIVE_POS }, Orientation.N)).toThrow(BadRequestException);
         });
 
         it('should throw BadRequestException for invalid current position (x >= mapSize)', () => {
-            expect(() => service.getNextPosition(mockSessionId, MAP_SIZE_NUM, 0, Orientation.N)).toThrow(BadRequestException);
+            expect(() => service.getNextPosition(mockSessionId, { x: MAP_SIZE_NUM, y: 0 }, Orientation.N)).toThrow(BadRequestException);
         });
 
         it('should throw BadRequestException for invalid current position (y >= mapSize)', () => {
-            expect(() => service.getNextPosition(mockSessionId, 0, MAP_SIZE_NUM, Orientation.N)).toThrow(BadRequestException);
+            expect(() => service.getNextPosition(mockSessionId, { x: 0, y: MAP_SIZE_NUM }, Orientation.N)).toThrow(BadRequestException);
         });
 
         it('should throw BadRequestException when next position is out of bounds (north)', () => {
-            expect(() => service.getNextPosition(mockSessionId, POS_X_0, POS_Y_0, Orientation.N)).toThrow(BadRequestException);
-            expect(() => service.getNextPosition(mockSessionId, POS_X_0, POS_Y_0, Orientation.N)).toThrow('Next position is out of bounds');
+            expect(() => service.getNextPosition(mockSessionId, { x: POS_X_0, y: POS_Y_0 }, Orientation.N)).toThrow(BadRequestException);
+            expect(() => service.getNextPosition(mockSessionId, { x: POS_X_0, y: POS_Y_0 }, Orientation.N)).toThrow('Next position is out of bounds');
         });
 
         it('should throw BadRequestException when next position is out of bounds (east)', () => {
             const LAST_POSITION = MAP_SIZE_NUM - 1;
-            expect(() => service.getNextPosition(mockSessionId, LAST_POSITION, POS_Y_0, Orientation.E)).toThrow(BadRequestException);
+            expect(() => service.getNextPosition(mockSessionId, { x: LAST_POSITION, y: POS_Y_0 }, Orientation.E)).toThrow(BadRequestException);
         });
 
         it('should throw BadRequestException when next position is out of bounds (south)', () => {
             const LAST_POSITION = MAP_SIZE_NUM - 1;
-            expect(() => service.getNextPosition(mockSessionId, POS_X_0, LAST_POSITION, Orientation.S)).toThrow(BadRequestException);
+            expect(() => service.getNextPosition(mockSessionId, { x: POS_X_0, y: LAST_POSITION }, Orientation.S)).toThrow(BadRequestException);
         });
 
         it('should throw BadRequestException when next position is out of bounds (west)', () => {
-            expect(() => service.getNextPosition(mockSessionId, POS_X_0, POS_Y_0, Orientation.W)).toThrow(BadRequestException);
+            expect(() => service.getNextPosition(mockSessionId, { x: POS_X_0, y: POS_Y_0 }, Orientation.W)).toThrow(BadRequestException);
         });
 
         it('should throw NotFoundException when game not found', () => {
-            expect(() => service.getNextPosition('non-existent-session', POS_X_0, POS_Y_0, Orientation.N)).toThrow(NotFoundException);
+            expect(() => service.getNextPosition('non-existent-session', { x: POS_X_0, y: POS_Y_0 }, Orientation.N)).toThrow(NotFoundException);
         });
     });
 
@@ -512,7 +512,7 @@ describe('GameCacheService', () => {
 
             await service.fetchAndCacheGame(mockSessionId, mockGameId);
 
-            const result = service.getPlaceablesAtPosition(mockSessionId, POS_X_2, POS_Y_3);
+            const result = service.getPlaceablesAtPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 });
 
             expect(result).toHaveLength(EXPECTED_PLACEABLES_COUNT);
             expect(result.every((obj) => obj.x === POS_X_2 && obj.y === POS_Y_3 && obj.placed)).toBe(true);
@@ -530,7 +530,7 @@ describe('GameCacheService', () => {
 
             await service.fetchAndCacheGame(mockSessionId, mockGameId);
 
-            const result = service.getPlaceablesAtPosition(mockSessionId, POS_X_2, POS_Y_3);
+            const result = service.getPlaceablesAtPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 });
 
             expect(result).toHaveLength(EXPECTED_PLACEABLES_COUNT_ONE);
             expect(result[0].kind).toBe(PlaceableKind.HEAL);
@@ -544,13 +544,13 @@ describe('GameCacheService', () => {
 
             await service.fetchAndCacheGame(mockSessionId, mockGameId);
 
-            const result = service.getPlaceablesAtPosition(mockSessionId, POS_FAR_OUT_OF_BOUNDS, POS_FAR_OUT_OF_BOUNDS);
+            const result = service.getPlaceablesAtPosition(mockSessionId, { x: POS_FAR_OUT_OF_BOUNDS, y: POS_FAR_OUT_OF_BOUNDS });
 
             expect(result).toEqual([]);
         });
 
         it('should throw NotFoundException when game map not found', () => {
-            expect(() => service.getPlaceablesAtPosition('non-existent-session', POS_X_0, POS_Y_0)).toThrow(NotFoundException);
+            expect(() => service.getPlaceablesAtPosition('non-existent-session', { x: POS_X_0, y: POS_Y_0 })).toThrow(NotFoundException);
         });
     });
 
@@ -594,16 +594,16 @@ describe('GameCacheService', () => {
         it('should set playerId on tile at position', () => {
             const player = createMockPlayer({ x: POS_X_2, y: POS_Y_3 });
 
-            service.setTileOccupant(mockSessionId, POS_X_2, POS_Y_3, player);
+            service.setTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, player);
 
-            const tile = service.getTileAtPosition(mockSessionId, POS_X_2, POS_Y_3);
+            const tile = service.getTileAtPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 });
             expect(tile?.playerId).toBe('player-123');
         });
 
         it('should throw NotFoundException when game map not found', () => {
             const player = createMockPlayer();
 
-            expect(() => service.setTileOccupant('non-existent-session', POS_X_0, POS_Y_0, player)).toThrow(NotFoundException);
+            expect(() => service.setTileOccupant('non-existent-session', { x: POS_X_0, y: POS_Y_0 }, player)).toThrow(NotFoundException);
         });
     });
 
@@ -628,22 +628,22 @@ describe('GameCacheService', () => {
         it('should clear old position and set new position', () => {
             const player = createMockPlayer({ x: POS_X_1, y: POS_Y_1 });
 
-            service.setTileOccupant(mockSessionId, POS_X_1, POS_Y_1, player);
-            service.moveTileOccupant(mockSessionId, POS_X_2, POS_Y_3, player);
+            service.setTileOccupant(mockSessionId, { x: POS_X_1, y: POS_Y_1 }, player);
+            service.moveTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, player);
 
-            expect(service.getTileOccupant(mockSessionId, POS_X_1, POS_Y_1)).toBeNull();
-            expect(service.getTileOccupant(mockSessionId, POS_X_2, POS_Y_3)).toBe('player-123');
+            expect(service.getTileOccupant(mockSessionId, { x: POS_X_1, y: POS_Y_1 })).toBeNull();
+            expect(service.getTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 })).toBe('player-123');
         });
 
         it('should throw NotFoundException when game map not found (in clearTileOccupant)', () => {
             const player = createMockPlayer();
 
-            expect(() => service.moveTileOccupant('non-existent-session', POS_X_1, POS_Y_1, player)).toThrow(NotFoundException);
+            expect(() => service.moveTileOccupant('non-existent-session', { x: POS_X_1, y: POS_Y_1 }, player)).toThrow(NotFoundException);
         });
 
         it('should throw NotFoundException when game map not found (after clearTileOccupant)', () => {
             const player = createMockPlayer({ x: POS_X_1, y: POS_Y_1 });
-            service.setTileOccupant(mockSessionId, POS_X_1, POS_Y_1, player);
+            service.setTileOccupant(mockSessionId, { x: POS_X_1, y: POS_Y_1 }, player);
 
             type ServiceWithPrivateMap = {
                 sessionsGameMaps: Map<string, unknown>;
@@ -655,8 +655,8 @@ describe('GameCacheService', () => {
                 servicePrivate.sessionsGameMaps.delete(mockSessionId);
             });
 
-            expect(() => service.moveTileOccupant(mockSessionId, POS_X_2, POS_Y_3, player)).toThrow(NotFoundException);
-            expect(() => service.moveTileOccupant(mockSessionId, POS_X_2, POS_Y_3, player)).toThrow('Game map not found');
+            expect(() => service.moveTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, player)).toThrow(NotFoundException);
+            expect(() => service.moveTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, player)).toThrow('Game map not found');
             expect(clearTileOccupantSpy).toHaveBeenCalled();
 
             clearTileOccupantSpy.mockRestore();
@@ -684,16 +684,16 @@ describe('GameCacheService', () => {
         it('should set playerId to null on tile at position', () => {
             const player = createMockPlayer({ x: POS_X_2, y: POS_Y_3 });
 
-            service.setTileOccupant(mockSessionId, POS_X_2, POS_Y_3, player);
-            expect(service.getTileOccupant(mockSessionId, POS_X_2, POS_Y_3)).toBe('player-123');
+            service.setTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, player);
+            expect(service.getTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 })).toBe('player-123');
 
-            service.clearTileOccupant(mockSessionId, POS_X_2, POS_Y_3);
+            service.clearTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 });
 
-            expect(service.getTileOccupant(mockSessionId, POS_X_2, POS_Y_3)).toBeNull();
+            expect(service.getTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 })).toBeNull();
         });
 
         it('should throw NotFoundException when game map not found', () => {
-            expect(() => service.clearTileOccupant('non-existent-session', POS_X_0, POS_Y_0)).toThrow(NotFoundException);
+            expect(() => service.clearTileOccupant('non-existent-session', { x: POS_X_0, y: POS_Y_0 })).toThrow(NotFoundException);
         });
     });
 
@@ -718,21 +718,21 @@ describe('GameCacheService', () => {
         it('should return playerId when tile is occupied', () => {
             const player = createMockPlayer({ x: POS_X_2, y: POS_Y_3 });
 
-            service.setTileOccupant(mockSessionId, POS_X_2, POS_Y_3, player);
+            service.setTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, player);
 
-            const result = service.getTileOccupant(mockSessionId, POS_X_2, POS_Y_3);
+            const result = service.getTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 });
 
             expect(result).toBe('player-123');
         });
 
         it('should return null when tile is not occupied', () => {
-            const result = service.getTileOccupant(mockSessionId, POS_X_0, POS_Y_0);
+            const result = service.getTileOccupant(mockSessionId, { x: POS_X_0, y: POS_Y_0 });
 
             expect(result).toBeNull();
         });
 
         it('should throw NotFoundException when game map not found', () => {
-            expect(() => service.getTileOccupant('non-existent-session', POS_X_0, POS_Y_0)).toThrow(NotFoundException);
+            expect(() => service.getTileOccupant('non-existent-session', { x: POS_X_0, y: POS_Y_0 })).toThrow(NotFoundException);
         });
     });
 
@@ -759,7 +759,7 @@ describe('GameCacheService', () => {
         });
 
         it('should return true for free base tile', () => {
-            const result = service.isTileFree(mockSessionId, POS_X_0, POS_Y_0);
+            const result = service.isTileFree(mockSessionId, { x: POS_X_0, y: POS_Y_0 });
 
             expect(result).toBe(true);
         });
@@ -767,9 +767,9 @@ describe('GameCacheService', () => {
         it('should return false when tile is occupied', () => {
             const player = createMockPlayer({ x: POS_X_1, y: POS_Y_1 });
 
-            service.setTileOccupant(mockSessionId, POS_X_1, POS_Y_1, player);
+            service.setTileOccupant(mockSessionId, { x: POS_X_1, y: POS_Y_1 }, player);
 
-            const result = service.isTileFree(mockSessionId, POS_X_1, POS_Y_1);
+            const result = service.isTileFree(mockSessionId, { x: POS_X_1, y: POS_Y_1 });
 
             expect(result).toBe(false);
         });
@@ -782,7 +782,7 @@ describe('GameCacheService', () => {
             });
             await service.fetchAndCacheGame('session-empty', mockGameId);
 
-            expect(() => service.isTileFree('session-empty', POS_X_0, POS_Y_0)).toThrow();
+            expect(() => service.isTileFree('session-empty', { x: POS_X_0, y: POS_Y_0 })).toThrow();
         });
 
         it('should return false when tile is out of bounds (getTileAtPosition returns undefined)', async () => {
@@ -801,31 +801,31 @@ describe('GameCacheService', () => {
             jest.spyOn(service, 'getTileOccupant').mockReturnValue(null);
             jest.spyOn(service, 'getTileAtPosition').mockReturnValue(undefined);
 
-            const result = service.isTileFree('session-out-of-bounds', MAP_SIZE_NUM, MAP_SIZE_NUM);
+            const result = service.isTileFree('session-out-of-bounds', { x: MAP_SIZE_NUM, y: MAP_SIZE_NUM });
 
             expect(result).toBe(false);
         });
 
         it('should return false for door tile', () => {
-            const result = service.isTileFree(mockSessionId, POS_X_2, POS_Y_2);
+            const result = service.isTileFree(mockSessionId, { x: POS_X_2, y: POS_Y_2 });
 
             expect(result).toBe(false);
         });
 
         it('should return false for wall tile', () => {
-            const result = service.isTileFree(mockSessionId, POS_X_4, POS_Y_2);
+            const result = service.isTileFree(mockSessionId, { x: POS_X_4, y: POS_Y_2 });
 
             expect(result).toBe(false);
         });
 
         it('should return true for open door', () => {
-            const result = service.isTileFree(mockSessionId, POS_X_3, POS_Y_2);
+            const result = service.isTileFree(mockSessionId, { x: POS_X_3, y: POS_Y_2 });
 
             expect(result).toBe(true);
         });
 
         it('should return true for water tile', () => {
-            const result = service.isTileFree(mockSessionId, POS_X_0, POS_Y_3);
+            const result = service.isTileFree(mockSessionId, { x: POS_X_0, y: POS_Y_3 });
 
             expect(result).toBe(true);
         });
@@ -844,7 +844,7 @@ describe('GameCacheService', () => {
             });
             await service.fetchAndCacheGame('session-ice', mockGameId);
 
-            const result = service.isTileFree('session-ice', POS_X_0, POS_Y_0);
+            const result = service.isTileFree('session-ice', { x: POS_X_0, y: POS_Y_0 });
 
             expect(result).toBe(true);
         });

@@ -144,7 +144,7 @@ describe('CombatGateway', () => {
 
             gateway.attackPlayerAction(mockSocket, payload);
 
-            expect(combatService.attackPlayerAction).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID, TARGET_X, TARGET_Y);
+            expect(combatService.attackPlayerAction).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID, { x: TARGET_X, y: TARGET_Y });
             expect(mockSocket.emit).not.toHaveBeenCalled();
         });
 

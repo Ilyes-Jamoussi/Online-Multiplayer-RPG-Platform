@@ -30,9 +30,9 @@ export class ActionService {
         private readonly sessionRepository: InGameSessionRepository,
     ) {}
 
-    toggleDoor(session: InGameSession, playerId: string, x: number, y: number): void {
+    toggleDoor(session: InGameSession, playerId: string, position: Position): void {
         const gameMap = this.gameCache.getGameMapForSession(session.id);
-        const tile = gameMap.tiles.find((t) => t.x === x && t.y === y);
+        const tile = gameMap.tiles.find((t) => t.x === position.x && t.y === position.y);
 
         if (tile && tile.kind === TileKind.DOOR) {
             tile.open = !tile.open;
@@ -40,15 +40,15 @@ export class ActionService {
             this.eventEmitter.emit(ServerEvents.DoorToggled, {
                 session,
                 playerId,
-                x,
-                y,
+                x: position.x,
+                y: position.y,
                 isOpen: tile.open,
             });
         }
     }
 
-    sanctuaryRequest(session: InGameSession, playerId: string, x: number, y: number, kind: PlaceableKind.HEAL | PlaceableKind.FIGHT): void {
-        const object = this.gameCache.getPlaceableAtPosition(session.id, x, y);
+    sanctuaryRequest(session: InGameSession, playerId: string, position: Position, kind: PlaceableKind.HEAL | PlaceableKind.FIGHT): void {
+        const object = this.gameCache.getPlaceableAtPosition(session.id, position);
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
         if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
@@ -65,7 +65,7 @@ export class ActionService {
                 playerId,
                 message: 'Vous ne pouvez pas utiliser cette action car vous avez atteint votre santé maximale',
             });
-        } else if (object && this.gameCache.isPlaceableDisabled(session.id, x, y)) {
+        } else if (object && this.gameCache.isPlaceableDisabled(session.id, position)) {
             this.eventEmitter.emit(ServerEvents.OpenSanctuaryDenied, {
                 session,
                 playerId,
@@ -76,33 +76,33 @@ export class ActionService {
                 session,
                 playerId,
                 kind: object.kind,
-                x,
-                y,
+                x: position.x,
+                y: position.y,
             });
         }
     }
 
-    performSanctuaryAction(session: InGameSession, playerId: string, x: number, y: number, double: boolean = false): void {
-        const object = this.gameCache.getPlaceableAtPosition(session.id, x, y);
+    performSanctuaryAction(session: InGameSession, playerId: string, position: Position, double: boolean = false): void {
+        const object = this.gameCache.getPlaceableAtPosition(session.id, position);
         if (!object) throw new NotFoundException('Object not fou1nd');
         if (object.kind !== PlaceableKind.HEAL && object.kind !== PlaceableKind.FIGHT) throw new BadRequestException('Invalid object');
 
         switch (object.kind) {
             case PlaceableKind.HEAL:
-                this.healSanctuary(session, playerId, object.kind, { x, y }, double);
+                this.healSanctuary(session, playerId, object.kind, position, double);
                 break;
             case PlaceableKind.FIGHT:
-                this.fightSanctuary(session, playerId, object.kind, { x, y }, double);
+                this.fightSanctuary(session, playerId, object.kind, position, double);
                 break;
         }
     }
 
-    boardBoat(session: InGameSession, playerId: string, x: number, y: number): void {
+    boardBoat(session: InGameSession, playerId: string, position: Position): void {
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
         if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
         if (player.onBoatId) throw new BadRequestException('Player is already on a boat');
-        const boat = this.gameCache.getPlaceableAtPosition(session.id, x, y);
+        const boat = this.gameCache.getPlaceableAtPosition(session.id, position);
         if (!boat) throw new NotFoundException('Boat not found');
         if (boat.kind !== PlaceableKind.BOAT) throw new BadRequestException('Invalid boat');
         player.onBoatId = boat._id.toString();
@@ -114,14 +114,14 @@ export class ActionService {
         this.eventEmitter.emit(ServerEvents.PlayerBoardedBoat, { session, playerId, boatId: player.onBoatId });
     }
 
-    disembarkBoat(session: InGameSession, playerId: string, x: number, y: number): void {
+    disembarkBoat(session: InGameSession, playerId: string, position: Position): void {
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
         if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
         if (!player.onBoatId) throw new BadRequestException('Player is not on a boat');
         player.onBoatId = undefined;
-        if (x !== player.x || y !== player.y) {
-            this.sessionRepository.movePlayerPosition(session.id, playerId, x, y, 0);
+        if (position.x !== player.x || position.y !== player.y) {
+            this.sessionRepository.movePlayerPosition(session.id, playerId, position.x, position.y, 0);
         }
         this.sessionRepository.resetPlayerBoatSpeedBonus(session.id, playerId);
         this.movementService.calculateReachableTiles(session, playerId);
@@ -152,7 +152,7 @@ export class ActionService {
             addedAttack: undefined,
         });
         this.sessionRepository.increasePlayerHealth(session.id, playerId, addedHealth);
-        this.gameCache.disablePlaceable(session.id, x, y, playerId);
+        this.gameCache.disablePlaceable(session.id, pos, playerId);
     }
 
     private fightSanctuary(session: InGameSession, playerId: string, kind: PlaceableKind, pos: Position, double: boolean = false): void {
@@ -180,7 +180,7 @@ export class ActionService {
         });
 
         this.sessionRepository.applyPlayerBonus(session.id, playerId, bonus);
-        this.gameCache.disablePlaceable(session.id, x, y, playerId);
+        this.gameCache.disablePlaceable(session.id, pos, playerId);
     }
 
     calculateAvailableActions(session: InGameSession, playerId: string): AvailableAction[] {
@@ -193,10 +193,10 @@ export class ActionService {
         if (player.actionsRemaining > 0) {
             for (const orientation of orientations) {
                 try {
-                    const pos = this.gameCache.getNextPosition(session.id, player.x, player.y, orientation);
-                    const occupantId = this.gameCache.getTileOccupant(session.id, pos.x, pos.y);
-                    const tile = this.gameCache.getTileAtPosition(session.id, pos.x, pos.y);
-                    const object = this.gameCache.getPlaceableAtPosition(session.id, pos.x, pos.y);
+                    const pos = this.gameCache.getNextPosition(session.id, { x: player.x, y: player.y }, orientation);
+                    const occupantId = this.gameCache.getTileOccupant(session.id, pos);
+                    const tile = this.gameCache.getTileAtPosition(session.id, pos);
+                    const object = this.gameCache.getPlaceableAtPosition(session.id, pos);
 
                     this.addAttackAction(actions, occupantId, playerId, pos);
                     this.addDoorAction(actions, tile, pos);
@@ -209,9 +209,9 @@ export class ActionService {
 
             try {
                 const currentPos = { x: player.x, y: player.y };
-                const currentOccupantId = this.gameCache.getTileOccupant(session.id, currentPos.x, currentPos.y);
-                const currentTile = this.gameCache.getTileAtPosition(session.id, currentPos.x, currentPos.y);
-                const currentObject = this.gameCache.getPlaceableAtPosition(session.id, currentPos.x, currentPos.y);
+                const currentOccupantId = this.gameCache.getTileOccupant(session.id, currentPos);
+                const currentTile = this.gameCache.getTileAtPosition(session.id, currentPos);
+                const currentObject = this.gameCache.getPlaceableAtPosition(session.id, currentPos);
 
                 this.addDoorAction(actions, currentTile, currentPos);
                 this.addPlaceableActions(actions, currentObject, currentPos);
@@ -286,8 +286,8 @@ export class ActionService {
         return await this.gameCache.fetchAndCacheGame(sessionId, gameId);
     }
 
-    isTileFree(sessionId: string, x: number, y: number): boolean {
-        return this.gameCache.isTileFree(sessionId, x, y);
+    isTileFree(sessionId: string, position: Position): boolean {
+        return this.gameCache.isTileFree(sessionId, position);
     }
 
     clearSessionGameCache(sessionId: string): void {
@@ -317,7 +317,7 @@ export class ActionService {
         }
     }
 
-    attackPlayer(sessionId: string, playerId: string, targetX: number, targetY: number): void {
-        this.combatService.attackPlayerAction(sessionId, playerId, targetX, targetY);
+    attackPlayer(sessionId: string, playerId: string, targetPosition: Position): void {
+        this.combatService.attackPlayerAction(sessionId, playerId, targetPosition);
     }
 }

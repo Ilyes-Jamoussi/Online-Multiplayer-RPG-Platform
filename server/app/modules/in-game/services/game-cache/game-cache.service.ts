@@ -87,19 +87,19 @@ export class GameCacheService {
         return gameMap;
     }
 
-    getTileAtPosition(sessionId: string, x: number, y: number): (Tile & { playerId: string | null }) | undefined {
+    getTileAtPosition(sessionId: string, position: Position): (Tile & { playerId: string | null }) | undefined {
         const game = this.getGameMapForSession(sessionId);
         const { tiles, size: mapSize } = game;
-        const index = y * mapSize + x;
+        const index = position.y * mapSize + position.x;
         return tiles[index];
     }
 
-    getTeleportDestination(sessionId: string, x: number, y: number): Position {
+    getTeleportDestination(sessionId: string, position: Position): Position {
         const game = this.getGameForSession(sessionId);
         const teleportChannel = game.teleportChannels.find(
             (channel) =>
-                (channel.tiles?.entryA?.x === x && channel.tiles?.entryA?.y === y) ||
-                (channel.tiles?.entryB?.x === x && channel.tiles?.entryB?.y === y),
+                (channel.tiles?.entryA?.x === position.x && channel.tiles?.entryA?.y === position.y) ||
+                (channel.tiles?.entryB?.x === position.x && channel.tiles?.entryB?.y === position.y),
         );
 
         if (!teleportChannel?.tiles) {
@@ -108,7 +108,7 @@ export class GameCacheService {
 
         const entryA = teleportChannel.tiles.entryA;
         const entryB = teleportChannel.tiles.entryB;
-        const isAtEntryA = entryA?.x === x && entryA?.y === y;
+        const isAtEntryA = entryA?.x === position.x && entryA?.y === position.y;
 
         if (isAtEntryA && entryB) {
             return { x: entryB.x, y: entryB.y };
@@ -120,10 +120,10 @@ export class GameCacheService {
         throw new NotFoundException('Teleport channel not found');
     }
 
-    getNextPosition(sessionId: string, currentX: number, currentY: number, orientation: Orientation): Position {
+    getNextPosition(sessionId: string, currentPosition: Position, orientation: Orientation): Position {
         const game = this.getGameForSession(sessionId);
         const { size: mapSize } = game;
-        if (currentX < 0 || currentX >= mapSize || currentY < 0 || currentY >= mapSize) {
+        if (currentPosition.x < 0 || currentPosition.x >= mapSize || currentPosition.y < 0 || currentPosition.y >= mapSize) {
             throw new BadRequestException('Invalid position');
         }
 
@@ -132,20 +132,20 @@ export class GameCacheService {
 
         switch (orientation) {
             case Orientation.N:
-                nextX = currentX;
-                nextY = currentY - 1;
+                nextX = currentPosition.x;
+                nextY = currentPosition.y - 1;
                 break;
             case Orientation.E:
-                nextX = currentX + 1;
-                nextY = currentY;
+                nextX = currentPosition.x + 1;
+                nextY = currentPosition.y;
                 break;
             case Orientation.S:
-                nextX = currentX;
-                nextY = currentY + 1;
+                nextX = currentPosition.x;
+                nextY = currentPosition.y + 1;
                 break;
             case Orientation.W:
-                nextX = currentX - 1;
-                nextY = currentY;
+                nextX = currentPosition.x - 1;
+                nextY = currentPosition.y;
                 break;
         }
 
@@ -162,16 +162,16 @@ export class GameCacheService {
         return gameMap.objects.filter((obj) => obj.placed && obj._id?.toString() === id);
     }
 
-    getPlaceablesAtPosition(sessionId: string, x: number, y: number): Placeable[] {
+    getPlaceablesAtPosition(sessionId: string, position: Position): Placeable[] {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
-        return gameMap.objects.filter((obj) => obj.placed && obj.x === x && obj.y === y);
+        return gameMap.objects.filter((obj) => obj.placed && obj.x === position.x && obj.y === position.y);
     }
 
-    getPlaceableAtPosition(sessionId: string, x: number, y: number): Placeable | undefined {
+    getPlaceableAtPosition(sessionId: string, position: Position): Placeable | undefined {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
-        return gameMap.objects.find((obj) => obj.placed && obj.x === x && obj.y === y);
+        return gameMap.objects.find((obj) => obj.placed && obj.x === position.x && obj.y === position.y);
     }
 
     private getPlaceableKey(placeable: Placeable): string {
@@ -182,33 +182,33 @@ export class GameCacheService {
         return this.getGameForSession(sessionId).size;
     }
 
-    setTileOccupant(sessionId: string, x: number, y: number, player: Player): void {
+    setTileOccupant(sessionId: string, position: Position, player: Player): void {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
-        gameMap.tiles[y * gameMap.size + x].playerId = player.id;
+        gameMap.tiles[position.y * gameMap.size + position.x].playerId = player.id;
     }
 
-    moveTileOccupant(sessionId: string, x: number, y: number, player: Player): void {
-        this.clearTileOccupant(sessionId, player.x, player.y);
+    moveTileOccupant(sessionId: string, position: Position, player: Player): void {
+        this.clearTileOccupant(sessionId, { x: player.x, y: player.y });
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
-        gameMap.tiles[y * gameMap.size + x].playerId = player.id;
+        gameMap.tiles[position.y * gameMap.size + position.x].playerId = player.id;
     }
 
-    clearTileOccupant(sessionId: string, x: number, y: number): void {
+    clearTileOccupant(sessionId: string, position: Position): void {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
-        gameMap.tiles[y * gameMap.size + x].playerId = null;
+        gameMap.tiles[position.y * gameMap.size + position.x].playerId = null;
     }
 
-    getTileOccupant(sessionId: string, x: number, y: number): string | null {
+    getTileOccupant(sessionId: string, position: Position): string | null {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
-        return gameMap.tiles[y * gameMap.size + x].playerId;
+        return gameMap.tiles[position.y * gameMap.size + position.x].playerId;
     }
 
-    disablePlaceable(sessionId: string, x: number, y: number, playerId: string): void {
-        const object = this.getPlaceableAtPosition(sessionId, x, y);
+    disablePlaceable(sessionId: string, position: Position, playerId: string): void {
+        const object = this.getPlaceableAtPosition(sessionId, position);
         if (!object) throw new NotFoundException('Object not found');
         const placeables = this.getPlaceablesById(sessionId, object._id?.toString() || '');
 
@@ -224,8 +224,8 @@ export class GameCacheService {
         }
     }
 
-    isPlaceableDisabled(sessionId: string, x: number, y: number): boolean {
-        const object = this.getPlaceableAtPosition(sessionId, x, y);
+    isPlaceableDisabled(sessionId: string, position: Position): boolean {
+        const object = this.getPlaceableAtPosition(sessionId, position);
         if (!object) return false;
 
         const sessionDisabled = this.disabledPlaceables.get(sessionId);
@@ -259,12 +259,12 @@ export class GameCacheService {
         }
     }
 
-    isTileFree(sessionId: string, x: number, y: number): boolean {
-        if (this.getTileOccupant(sessionId, x, y)) {
+    isTileFree(sessionId: string, position: Position): boolean {
+        if (this.getTileOccupant(sessionId, position)) {
             return false;
         }
 
-        const tile = this.getTileAtPosition(sessionId, x, y);
+        const tile = this.getTileAtPosition(sessionId, position);
         if (!tile) {
             return false;
         }
@@ -278,7 +278,7 @@ export class GameCacheService {
             return false;
         }
 
-        const placeables = this.getPlaceablesAtPosition(sessionId, x, y);
+        const placeables = this.getPlaceablesAtPosition(sessionId, position);
         for (const placeable of placeables) {
             if (placeable.kind === PlaceableKind.FIGHT || placeable.kind === PlaceableKind.HEAL) {
                 return false;
@@ -294,13 +294,13 @@ export class GameCacheService {
         this.disabledPlaceables.delete(sessionId);
     }
 
-    updatePlaceablePosition(sessionId: string, fromX: number, fromY: number, toX: number, toY: number): void {
+    updatePlaceablePosition(sessionId: string, fromPosition: Position, toPosition: Position): void {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
-        const placeable = this.getPlaceableAtPosition(sessionId, fromX, fromY);
+        const placeable = this.getPlaceableAtPosition(sessionId, fromPosition);
         if (!placeable) throw new NotFoundException('Placeable not found');
-        placeable.x = toX;
-        placeable.y = toY;
+        placeable.x = toPosition.x;
+        placeable.y = toPosition.y;
 
         this.eventEmitter.emit(ServerEvents.PlaceablePositionUpdated, {
             sessionId,

@@ -10,6 +10,7 @@ import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatState } from '@common/interfaces/combat.interface';
+import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
@@ -45,14 +46,16 @@ export class CombatService {
         }
     }
 
-    attackPlayerAction(sessionId: string, playerId: string, x: number, y: number): void {
+    attackPlayerAction(sessionId: string, playerId: string, targetPosition: Position): void {
         const session = this.sessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
 
         if (!player) throw new NotFoundException('Player not found');
         if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
 
-        const targetPlayer = Object.values(session.inGamePlayers).find((p) => p.x === x && p.y === y && p.id !== playerId);
+        const targetPlayer = Object.values(session.inGamePlayers).find(
+            (p) => p.x === targetPosition.x && p.y === targetPosition.y && p.id !== playerId,
+        );
 
         if (!targetPlayer) {
             throw new BadRequestException('No opponent at this position');

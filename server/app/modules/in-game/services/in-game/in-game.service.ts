@@ -8,6 +8,7 @@ import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { Position } from '@common/interfaces/position.interface';
 import { InGameSession, WaitingRoomSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 
@@ -66,12 +67,12 @@ export class InGameService {
         return session;
     }
 
-    boardBoat(sessionId: string, playerId: string, x: number, y: number): void {
-        this.gameplayService.boardBoat(sessionId, playerId, x, y);
+    boardBoat(sessionId: string, playerId: string, position: Position): void {
+        this.gameplayService.boardBoat(sessionId, playerId, position);
     }
 
-    disembarkBoat(sessionId: string, playerId: string, x: number, y: number): void {
-        this.gameplayService.disembarkBoat(sessionId, playerId, x, y);
+    disembarkBoat(sessionId: string, playerId: string, position: Position): void {
+        this.gameplayService.disembarkBoat(sessionId, playerId, position);
     }
 
     private startSessionWithTransition(sessionId: string): InGameSession {
@@ -112,12 +113,12 @@ export class InGameService {
         return this.gameplayService.endPlayerTurn(sessionId, playerId);
     }
 
-    toggleDoorAction(sessionId: string, playerId: string, x: number, y: number): void {
-        this.gameplayService.toggleDoorAction(sessionId, playerId, x, y);
+    toggleDoorAction(sessionId: string, playerId: string, position: Position): void {
+        this.gameplayService.toggleDoorAction(sessionId, playerId, position);
     }
 
-    sanctuaryRequest(sessionId: string, playerId: string, x: number, y: number, kind: PlaceableKind.HEAL | PlaceableKind.FIGHT): void {
-        this.gameplayService.sanctuaryRequest(sessionId, playerId, x, y, kind);
+    sanctuaryRequest(sessionId: string, playerId: string, position: Position, kind: PlaceableKind.HEAL | PlaceableKind.FIGHT): void {
+        this.gameplayService.sanctuaryRequest(sessionId, playerId, position, kind);
     }
 
     movePlayer(sessionId: string, playerId: string, orientation: Orientation): void {
@@ -172,8 +173,8 @@ export class InGameService {
         return this.gameplayService.toggleAdminMode(sessionId, playerId);
     }
 
-    teleportPlayer(sessionId: string, playerId: string, x: number, y: number): void {
-        this.gameplayService.teleportPlayer(sessionId, playerId, x, y);
+    teleportPlayer(sessionId: string, playerId: string, position: Position): void {
+        this.gameplayService.teleportPlayer(sessionId, playerId, position);
     }
 
     removeSession(sessionId: string): void {
@@ -182,8 +183,8 @@ export class InGameService {
         this.timerService.clearTimerForSession(sessionId);
     }
 
-    performSanctuaryAction(sessionId: string, playerId: string, x: number, y: number, double: boolean = false): void {
-        this.gameplayService.performSanctuaryAction(sessionId, playerId, x, y, double);
+    performSanctuaryAction(sessionId: string, playerId: string, position: Position, double: boolean = false): void {
+        this.gameplayService.performSanctuaryAction(sessionId, playerId, position, double);
     }
 
     getGameStatistics(sessionId: string) {
