@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
+import { AvailableActionDto } from '@app/dto/available-action-dto';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
@@ -10,7 +11,6 @@ import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-c
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -23,11 +23,11 @@ export class InGameService {
     private readonly _isTransitioning = signal<boolean>(false);
     private readonly _isGameStarted = signal<boolean>(false);
     private readonly _reachableTiles = signal<ReachableTile[]>([]);
-    private readonly _availableActions = signal<AvailableAction[]>([]);
+    private readonly _availableActions = signal<AvailableActionDto[]>([]);
     private readonly _isActionModeActive = signal<boolean>(false);
     private readonly _gameOverData = signal<{ winnerId: string; winnerName: string } | null>(null);
     private readonly _openedSanctuary = signal<{
-        kind: PlaceableKind.HEAL | PlaceableKind.FIGHT;
+        kind: PlaceableKind;
         x: number;
         y: number;
         success: boolean;
@@ -152,7 +152,7 @@ export class InGameService {
         this._openedSanctuary.set(null);
     }
 
-    performSanctuaryAction(x: number, y: number, kind: PlaceableKind.HEAL | PlaceableKind.FIGHT, double: boolean = false): void {
+    performSanctuaryAction(x: number, y: number, kind: PlaceableKind, double: boolean = false): void {
         this.inGameSocketService.playerSanctuaryAction({ sessionId: this.sessionService.id(), x, y, kind, double });
     }
 
@@ -251,10 +251,10 @@ export class InGameService {
             }
         });
 
-        this.inGameSocketService.onPlayerAvailableActions((actions) => {
-            this._availableActions.set(actions);
+        this.inGameSocketService.onPlayerAvailableActions((data) => {
+            this._availableActions.set(data.availableActions);
             if (this.isMyTurn()) {
-                this.playerService.updateActionsRemaining(actions.length);
+                this.playerService.updateActionsRemaining(data.availableActions.length);
             }
         });
 

@@ -1,7 +1,9 @@
 import { Injectable, Signal, computed, signal } from '@angular/core';
+import { AvailableActionDto } from '@app/dto/available-action-dto';
 import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { PlaceablePositionUpdatedDto } from '@app/dto/placeable-position-updated-dto';
 import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
@@ -13,7 +15,6 @@ import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
-import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
@@ -109,16 +110,16 @@ export class GameMapService {
     }
 
     private hasActionAt(x: number, y: number): boolean {
-        return this.availableActions.some((action: AvailableAction) => action.x === x && action.y === y);
+        return this.availableActions.some((action: AvailableActionDto) => action.x === x && action.y === y);
     }
 
     private getActionClass(x: number, y: number): string {
-        const action = this.availableActions.find((availableAction: AvailableAction) => availableAction.x === x && availableAction.y === y);
+        const action = this.availableActions.find((availableAction: AvailableActionDto) => availableAction.x === x && availableAction.y === y);
         return action?.type === AvailableActionType.ATTACK ? 'action-attack' : 'action-door';
     }
 
     getActionTypeAt(x: number, y: number): AvailableActionType | null {
-        const action = this.availableActions.find((availableAction: AvailableAction) => availableAction.x === x && availableAction.y === y);
+        const action = this.availableActions.find((availableAction: AvailableActionDto) => availableAction.x === x && availableAction.y === y);
         if (action) {
             this.inGameService.deactivateActionMode();
         }
@@ -141,8 +142,13 @@ export class GameMapService {
         this._tiles.update((tiles) => tiles.map((tile) => (tile.x === x && tile.y === y ? { ...tile, open: isOpen } : tile)));
     }
 
-    private updateObjectState(placeable: GameEditorPlaceableDto): void {
-        this._objects.update((objects) => objects.map((obj) => (obj.id === placeable.id ? placeable : obj)));
+    private updateObjectState(placeable: PlaceablePositionUpdatedDto): void {
+        this._objects.update((objects) =>
+            objects.map((obj) => {
+                const matchId = placeable._id ? obj.id === placeable._id : false;
+                return matchId ? { ...obj, ...placeable, id: obj.id } : obj;
+            }),
+        );
     }
 
     getActiveTile(coords?: Position): GameEditorTileDto | null {

@@ -676,7 +676,7 @@ describe('InGameGateway', () => {
                 InGameEvents.PlayerAvailableActions,
                 expect.objectContaining({
                     success: true,
-                    data: actions,
+                    data: { availableActions: actions },
                 }),
             );
         });
