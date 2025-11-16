@@ -46,6 +46,8 @@ describe('PlayersListComponent', () => {
             combatLosses: 1,
             combatDraws: 1,
             hasCombatBonus: false,
+            boatSpeedBonus: 0,
+            boatSpeed: 0,
         },
         player2: {
             id: 'player2',
@@ -75,6 +77,8 @@ describe('PlayersListComponent', () => {
             combatLosses: 2,
             combatDraws: 0,
             hasCombatBonus: false,
+            boatSpeedBonus: 0,
+            boatSpeed: 0,
         },
     };
 

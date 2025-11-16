@@ -54,6 +54,8 @@ describe('GameOverOverlayComponent', () => {
             combatLosses: 1,
             combatDraws: 1,
             hasCombatBonus: false,
+            boatSpeedBonus: 0,
+            boatSpeed: 0,
         },
         {
             id: 'player2',
@@ -83,6 +85,8 @@ describe('GameOverOverlayComponent', () => {
             combatLosses: 2,
             combatDraws: 0,
             hasCombatBonus: false,
+            boatSpeedBonus: 0,
+            boatSpeed: 0,
         },
     ];
 

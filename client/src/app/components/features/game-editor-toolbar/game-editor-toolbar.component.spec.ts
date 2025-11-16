@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActiveTool, ToolbarItem, ToolType } from '@app/interfaces/game-editor.interface';
+import { ActiveTool, ToolType, ToolbarItem } from '@app/interfaces/game-editor.interface';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { GameEditorTeleportService } from '@app/services/game-editor-teleport/game-editor-teleport.service';
 import { TileKind } from '@common/enums/tile.enum';
 import { GameEditorToolbarComponent } from './game-editor-toolbar.component';
 
@@ -30,7 +31,20 @@ describe('GameEditorToolbarComponent', () => {
 
         await TestBed.configureTestingModule({
             imports: [GameEditorToolbarComponent],
-            providers: [{ provide: GameEditorInteractionsService, useValue: interactionsSpy }],
+            providers: [
+                { provide: GameEditorInteractionsService, useValue: interactionsSpy },
+                {
+                    provide: GameEditorTeleportService,
+                    useValue: jasmine.createSpyObj('GameEditorTeleportService', [
+                        'getAvailableTeleportChannels',
+                        'getNextAvailableTeleportChannel',
+                        'isTeleportDisabled',
+                        'placeTeleportTile',
+                        'cancelTeleportPlacement',
+                        'removeTeleportPair',
+                    ]),
+                },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GameEditorToolbarComponent);

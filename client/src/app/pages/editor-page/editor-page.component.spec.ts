@@ -7,6 +7,7 @@ import { ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
+import { GameEditorTeleportService } from '@app/services/game-editor-teleport/game-editor-teleport.service';
 import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { MapSize } from '@common/enums/map-size.enum';
 import { TileKind } from '@common/enums/tile.enum';
@@ -88,6 +89,17 @@ describe('EditorPageComponent', () => {
                         { provide: GameEditorStoreService, useValue: mockGameEditorStoreService },
                         { provide: GameEditorInteractionsService, useValue: mockGameEditorInteractionsService },
                         { provide: GameEditorCheckService, useValue: mockGameEditorCheckService },
+                        {
+                            provide: GameEditorTeleportService,
+                            useValue: jasmine.createSpyObj('GameEditorTeleportService', [
+                                'getAvailableTeleportChannels',
+                                'getNextAvailableTeleportChannel',
+                                'isTeleportDisabled',
+                                'placeTeleportTile',
+                                'cancelTeleportPlacement',
+                                'removeTeleportPair',
+                            ]),
+                        },
                     ],
                 },
             })

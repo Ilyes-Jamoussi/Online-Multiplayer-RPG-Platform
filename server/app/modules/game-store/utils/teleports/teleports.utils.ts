@@ -1,5 +1,5 @@
 import { MAX_TELEPORT_CHANNEL } from '@app/constants/game-config.constants';
-import { TeleportChannel } from '../../entities/teleport-channel.entity';
+import { TeleportChannel } from '@app/modules/game-store/entities/teleport-channel.entity';
 
 const makeDefaultTeleportChannels = (): TeleportChannel[] => {
     const out: TeleportChannel[] = [];
@@ -10,4 +10,3 @@ const makeDefaultTeleportChannels = (): TeleportChannel[] => {
 };
 
 export { makeDefaultTeleportChannels };
-

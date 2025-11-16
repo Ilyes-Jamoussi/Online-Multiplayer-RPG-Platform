@@ -67,6 +67,8 @@ describe('CombatService', () => {
         combatLosses: 0,
         combatDraws: 0,
         hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     const mockTargetPlayer: Player = {

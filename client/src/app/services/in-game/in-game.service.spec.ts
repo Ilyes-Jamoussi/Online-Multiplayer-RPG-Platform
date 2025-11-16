@@ -56,6 +56,8 @@ describe('InGameService', () => {
         combatLosses: 0,
         combatDraws: 0,
         hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     beforeEach(() => {
@@ -75,10 +77,17 @@ describe('InGameService', () => {
             'onPlayerMoved',
             'onPlayerAvailableActions',
             'onLeftInGameSessionAck',
+            'onOpenSanctuary',
+            'onOpenSanctuaryError',
+            'onSanctuaryActionFailed',
+            'onSanctuaryActionSuccess',
             'onGameForceStopped',
             'onPlayerReachableTiles',
             'onPlayerTeleported',
             'onPlayerActionUsed',
+            'onPlayerBonusesChanged',
+            'onPlayerBoardedBoat',
+            'onPlayerDisembarkedBoat',
             'onGameOver',
         ]);
 
@@ -322,15 +331,15 @@ describe('InGameService', () => {
         it('should handle player moved for current player', () => {
             service.updateInGameSession({ inGamePlayers: { player1: mockPlayer } });
             const callback = mockInGameSocketService.onPlayerMoved.calls.mostRecent().args[0];
-            const mockData = { playerId: 'player1', x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3 };
+            const mockData = { playerId: 'player1', x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3, boatSpeed: 0 };
             callback(mockData);
-            expect(mockPlayerService.updatePlayer).toHaveBeenCalledWith({ x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3 });
+            expect(mockPlayerService.updatePlayer).toHaveBeenCalledWith({ x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3, boatSpeed: 0 });
         });
 
         it('should handle player moved for other player', () => {
             service.updateInGameSession({ inGamePlayers: { player2: { ...mockPlayer, id: 'player2' } } });
             const callback = mockInGameSocketService.onPlayerMoved.calls.mostRecent().args[0];
-            const mockData = { playerId: 'player2', x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3 };
+            const mockData = { playerId: 'player2', x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3, boatSpeed: 0 };
             callback(mockData);
             expect(mockPlayerService.updatePlayer).not.toHaveBeenCalled();
         });

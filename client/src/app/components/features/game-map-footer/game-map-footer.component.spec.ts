@@ -1,10 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal, signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { Dice } from '@common/enums/dice.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { Player } from '@common/interfaces/player.interface';
 import { GameMapFooterComponent } from './game-map-footer.component';
 
 const MOCK_SPEED_VALUE = 3;
@@ -13,6 +15,7 @@ const EXPECTED_ACTIONS_COUNT = 2;
 type MockPlayerService = Partial<PlayerService> & {
     _speedSignal: WritableSignal<number>;
     _isAdminSignal: WritableSignal<boolean>;
+    _playerSignal: WritableSignal<Player>;
 };
 
 type MockInGameService = Partial<InGameService> & {
@@ -32,6 +35,37 @@ describe('GameMapFooterComponent', () => {
     beforeEach(async () => {
         const speedSignal = signal(MOCK_SPEED_VALUE);
         const isAdminSignal = signal(false);
+        const playerSignal = signal<Player>({
+            id: 'test-player',
+            name: 'Test Player',
+            avatar: null,
+            isAdmin: false,
+            baseHealth: 10,
+            healthBonus: 0,
+            health: 10,
+            maxHealth: 10,
+            baseSpeed: 3,
+            speedBonus: 0,
+            speed: MOCK_SPEED_VALUE,
+            boatSpeedBonus: 0,
+            boatSpeed: 0,
+            baseAttack: 4,
+            attackBonus: 0,
+            baseDefense: 4,
+            defenseBonus: 0,
+            attackDice: Dice.D6,
+            defenseDice: Dice.D6,
+            x: 0,
+            y: 0,
+            isInGame: true,
+            startPointId: '',
+            actionsRemaining: 1,
+            combatCount: 0,
+            combatWins: 0,
+            combatLosses: 0,
+            combatDraws: 0,
+            hasCombatBonus: false,
+        });
         const availableActionsSignal = signal([
             { type: 'ATTACK', x: 1, y: 1 },
             { type: 'DOOR', x: 2, y: 2 },
@@ -43,8 +77,10 @@ describe('GameMapFooterComponent', () => {
         mockPlayerService = {
             speed: speedSignal.asReadonly(),
             isAdmin: isAdminSignal.asReadonly(),
+            player: playerSignal.asReadonly(),
             _speedSignal: speedSignal,
             _isAdminSignal: isAdminSignal,
+            _playerSignal: playerSignal,
         };
 
         mockInGameService = {

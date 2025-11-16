@@ -60,6 +60,8 @@ describe('GameMapService', () => {
         combatLosses: 0,
         combatDraws: 0,
         hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     const mockTile = {
@@ -88,6 +90,7 @@ describe('GameMapService', () => {
         objects: [mockObject],
         gridPreviewUrl: '',
         lastModified: '',
+        teleportChannels: [],
     };
 
     beforeEach(() => {
@@ -103,7 +106,7 @@ describe('GameMapService', () => {
             currentlyPlayers: [mockPlayer],
         });
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getAvatarStaticImage']);
-        mockInGameSocketService = jasmine.createSpyObj('InGameSocketService', ['onDoorToggled']);
+        mockInGameSocketService = jasmine.createSpyObj('InGameSocketService', ['onDoorToggled', 'onPlaceablePositionUpdated']);
 
         TestBed.configureTestingModule({
             providers: [

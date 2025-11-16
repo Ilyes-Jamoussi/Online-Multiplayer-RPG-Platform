@@ -76,6 +76,8 @@ describe('CombatOverlayComponent', () => {
         combatLosses: 0,
         combatDraws: 0,
         hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     const mockPlayerB: Player = {
@@ -106,6 +108,8 @@ describe('CombatOverlayComponent', () => {
         combatLosses: 0,
         combatDraws: 0,
         hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     const mockVictoryData = {

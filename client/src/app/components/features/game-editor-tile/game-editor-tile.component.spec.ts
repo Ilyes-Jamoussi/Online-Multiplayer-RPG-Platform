@@ -223,6 +223,12 @@ describe('GameEditorTileComponent', () => {
     });
 
     it('onMouseUp right should also revertToPreviousTool', () => {
+        activeToolState = {
+            type: ToolType.TileBrushTool,
+            tileKind: TileKind.BASE,
+            leftDrag: false,
+            rightDrag: false,
+        };
         let prevented = false;
         const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: 2 });
         component.onMouseUp(evt);

@@ -32,7 +32,7 @@ export class GameEditorTeleportService {
     placeTeleportTile(x: number, y: number, channelNumber: number, isFirstTile: boolean): void {
         this.gameEditorStoreService.teleportChannelsSignal.update((channels) => {
             const draft = [...channels];
-            const channel = draft.find((c) => c.channelNumber === channelNumber);
+            const channel = draft.find((channelCandidate) => channelCandidate.channelNumber === channelNumber);
             if (!channel) return channels;
 
             if (isFirstTile) {
@@ -53,7 +53,7 @@ export class GameEditorTeleportService {
     cancelTeleportPlacement(channelNumber: number): void {
         this.gameEditorStoreService.teleportChannelsSignal.update((teleportChannels) => {
             const draft = [...teleportChannels];
-            const channel = draft.find((c) => c.channelNumber === channelNumber);
+            const channel = draft.find((channelCandidate) => channelCandidate.channelNumber === channelNumber);
             if (!channel || !channel.tiles) return teleportChannels;
 
             channel.tiles = { entryA: undefined, entryB: undefined };

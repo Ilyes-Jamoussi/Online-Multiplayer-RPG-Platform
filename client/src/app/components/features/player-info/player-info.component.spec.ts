@@ -61,6 +61,8 @@ describe('PlayerInfoComponent', () => {
         combatLosses: TEST_COMBAT_LOSSES,
         combatDraws: TEST_COMBAT_DRAWS,
         hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     beforeEach(async () => {
