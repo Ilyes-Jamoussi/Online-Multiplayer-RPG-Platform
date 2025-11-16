@@ -116,7 +116,7 @@ export class GameMapService {
         return action?.type === 'ATTACK' ? 'action-attack' : 'action-door';
     }
 
-    getActionTypeAt(x: number, y: number): 'ATTACK' | 'DOOR' | 'HEAL' | 'FIGHT' | 'BOAT' | null {
+    getActionTypeAt(x: number, y: number): 'ATTACK' | 'DOOR' | 'HEAL' | 'FIGHT' | 'BOAT' | 'DISEMBARK' | null {
         const action = this.availableActions.find((availableAction: AvailableAction) => availableAction.x === x && availableAction.y === y);
         if (action) {
             this.inGameService.deactivateActionMode();

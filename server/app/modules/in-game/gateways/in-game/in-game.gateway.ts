@@ -115,9 +115,9 @@ export class InGameGateway {
     }
 
     @SubscribeMessage(InGameEvents.PlayerDisembarkBoat)
-    playerDisembarkBoat(socket: Socket, payload: { sessionId: string }): void {
+    playerDisembarkBoat(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
         try {
-            this.inGameService.disembarkBoat(payload.sessionId, socket.id);
+            this.inGameService.disembarkBoat(payload.sessionId, socket.id, payload.x, payload.y);
         } catch (error) {
             socket.emit(InGameEvents.PlayerDisembarkBoat, errorResponse(error.message));
         }
@@ -219,13 +219,17 @@ export class InGameGateway {
     }
 
     @OnEvent(ServerEvents.PlayerMoved)
-    handlePlayerMoved(payload: { session: InGameSession; playerId: string; x: number; y: number; speed: number }) {
-        this.server
-            .to(payload.session.inGameId)
-            .emit(
-                InGameEvents.PlayerMoved,
-                successResponse<PlayerMovedDto>({ playerId: payload.playerId, x: payload.x, y: payload.y, speed: payload.speed }),
-            );
+    handlePlayerMoved(payload: { session: InGameSession; playerId: string; x: number; y: number; speed: number; boatSpeed: number }) {
+        this.server.to(payload.session.inGameId).emit(
+            InGameEvents.PlayerMoved,
+            successResponse<PlayerMovedDto>({
+                playerId: payload.playerId,
+                x: payload.x,
+                y: payload.y,
+                speed: payload.speed,
+                boatSpeed: payload.boatSpeed,
+            }),
+        );
     }
 
     @OnEvent(ServerEvents.PlayerReachableTiles)

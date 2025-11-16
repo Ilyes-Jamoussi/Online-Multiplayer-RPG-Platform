@@ -34,6 +34,7 @@ export class TurnTimerService {
 
         session.currentTurn = newTurn;
         session.inGamePlayers[firstPlayer].speed = session.inGamePlayers[firstPlayer].baseSpeed + session.inGamePlayers[firstPlayer].speedBonus;
+        session.inGamePlayers[firstPlayer].boatSpeed = session.inGamePlayers[firstPlayer].boatSpeedBonus;
 
         this.setGameTimerState(session.id, TurnTimerStates.TurnTransition);
 
@@ -79,7 +80,7 @@ export class TurnTimerService {
 
         session.currentTurn = newTurn;
         session.inGamePlayers[nextPlayerId].speed = session.inGamePlayers[nextPlayerId].baseSpeed + session.inGamePlayers[nextPlayerId].speedBonus;
-
+        session.inGamePlayers[nextPlayerId].boatSpeed = session.inGamePlayers[nextPlayerId].boatSpeedBonus;
         this.eventEmitter.emit(ServerEvents.TurnEnded, { session });
         this.setGameTimerState(session.id, TurnTimerStates.TurnTransition);
 

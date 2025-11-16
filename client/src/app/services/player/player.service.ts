@@ -154,7 +154,7 @@ export class PlayerService {
 
     boatAction(x: number, y: number): void {
         if (this.player().onBoatId) {
-            this.disembarkBoat();
+            this.disembarkBoat(x, y);
         } else {
             this.boardBoat(x, y);
         }
@@ -164,8 +164,8 @@ export class PlayerService {
         this.inGameSocketService.playerBoardBoat(this.sessionService.id(), x, y);
     }
 
-    private disembarkBoat(): void {
-        this.inGameSocketService.playerDisembarkBoat(this.sessionService.id());
+    private disembarkBoat(x: number, y: number): void {
+        this.inGameSocketService.playerDisembarkBoat(this.sessionService.id(), x, y);
     }
 
     private initListeners(): void {

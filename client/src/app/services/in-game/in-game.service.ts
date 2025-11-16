@@ -237,6 +237,7 @@ export class InGameService {
                         x: data.x,
                         y: data.y,
                         speed: data.speed,
+                        boatSpeed: data.boatSpeed,
                     },
                 },
             });
@@ -245,6 +246,7 @@ export class InGameService {
                     x: data.x,
                     y: data.y,
                     speed: data.speed,
+                    boatSpeed: data.boatSpeed,
                 });
             }
         });

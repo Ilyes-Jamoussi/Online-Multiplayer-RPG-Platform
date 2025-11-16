@@ -103,15 +103,22 @@ export class ActionService {
         if (boat.x !== player.x || boat.y !== player.y) {
             this.sessionRepository.movePlayerPosition(session.id, playerId, boat.x, boat.y, 0);
         }
+        this.sessionRepository.applyPlayerBoatSpeedBonus(session.id, playerId);
+        this.movementService.calculateReachableTiles(session, playerId);
         this.eventEmitter.emit(ServerEvents.PlayerBoardedBoat, { session, playerId, boatId: player.onBoatId });
     }
 
-    disembarkBoat(session: InGameSession, playerId: string): void {
+    disembarkBoat(session: InGameSession, playerId: string, x: number, y: number): void {
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
         if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
         if (!player.onBoatId) throw new BadRequestException('Player is not on a boat');
         player.onBoatId = undefined;
+        if (x !== player.x || y !== player.y) {
+            this.sessionRepository.movePlayerPosition(session.id, playerId, x, y, 0);
+        }
+        this.sessionRepository.resetPlayerBoatSpeedBonus(session.id, playerId);
+        this.movementService.calculateReachableTiles(session, playerId);
         this.eventEmitter.emit(ServerEvents.PlayerDisembarkedBoat, { session, playerId });
     }
 
@@ -194,27 +201,13 @@ export class ActionService {
                 try {
                     const pos = this.gameCache.getNextPosition(session.id, player.x, player.y, orientation);
                     const occupantId = this.gameCache.getTileOccupant(session.id, pos.x, pos.y);
-                    if (occupantId && occupantId !== playerId) {
-                        actions.push({ type: 'ATTACK', x: pos.x, y: pos.y });
-                    }
-
                     const tile = this.gameCache.getTileAtPosition(session.id, pos.x, pos.y);
-                    if (tile && tile.kind === 'DOOR') {
-                        actions.push({ type: 'DOOR', x: pos.x, y: pos.y });
-                    }
-
                     const object = this.gameCache.getPlaceableAtPosition(session.id, pos.x, pos.y);
-                    if (object && object.kind === 'HEAL') {
-                        actions.push({ type: 'HEAL', x: pos.x, y: pos.y });
-                    }
 
-                    if (object && object.kind === 'FIGHT') {
-                        actions.push({ type: 'FIGHT', x: pos.x, y: pos.y });
-                    }
-
-                    if (object && object.kind === 'BOAT') {
-                        actions.push({ type: 'BOAT', x: pos.x, y: pos.y });
-                    }
+                    this.addAttackAction(actions, occupantId, playerId, pos);
+                    this.addDoorAction(actions, tile, pos);
+                    this.addPlaceableActions(actions, object, pos);
+                    this.addDisembarkAction(actions, player, tile, occupantId, pos);
                 } catch {
                     continue;
                 }
@@ -228,6 +221,56 @@ export class ActionService {
         });
 
         return actions;
+    }
+
+    private addAttackAction(actions: AvailableAction[], occupantId: string | null, playerId: string, pos: { x: number; y: number }): void {
+        if (occupantId && occupantId !== playerId) {
+            actions.push({ type: 'ATTACK', x: pos.x, y: pos.y });
+        }
+    }
+
+    private addDoorAction(actions: AvailableAction[], tile: { kind: string } | null, pos: { x: number; y: number }): void {
+        if (tile && tile.kind === 'DOOR') {
+            actions.push({ type: 'DOOR', x: pos.x, y: pos.y });
+        }
+    }
+
+    private addPlaceableActions(actions: AvailableAction[], object: { kind: string } | null, pos: { x: number; y: number }): void {
+        if (!object) return;
+
+        if (object.kind === 'HEAL') {
+            actions.push({ type: 'HEAL', x: pos.x, y: pos.y });
+        }
+
+        if (object.kind === 'FIGHT') {
+            actions.push({ type: 'FIGHT', x: pos.x, y: pos.y });
+        }
+
+        if (object.kind === 'BOAT') {
+            actions.push({ type: 'BOAT', x: pos.x, y: pos.y });
+        }
+    }
+
+    private addDisembarkAction(
+        actions: AvailableAction[],
+        player: { onBoatId?: string },
+        tile: { kind: string; open?: boolean } | null,
+        occupantId: string | null,
+        pos: { x: number; y: number },
+    ): void {
+        if (!player.onBoatId) return;
+
+        const canDisembark =
+            tile &&
+            !occupantId &&
+            (tile.kind === TileKind.BASE ||
+                tile.kind === TileKind.WATER ||
+                tile.kind === TileKind.TELEPORT ||
+                (tile.kind === TileKind.DOOR && tile.open));
+
+        if (canDisembark) {
+            actions.push({ type: 'BOAT', x: pos.x, y: pos.y });
+        }
     }
 
     movePlayer(session: InGameSession, playerId: string, orientation: Orientation): number {

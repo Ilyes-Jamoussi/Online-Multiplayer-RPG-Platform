@@ -5,6 +5,7 @@ import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-s
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileCost, TileKind } from '@common/enums/tile.enum';
+import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -35,12 +36,16 @@ export class MovementService {
             throw new NotFoundException('Tile not found');
         }
 
-        const doorCost = tile.open ? TileCost.DOOR_OPEN : -1;
-        const moveCost = tile.kind === TileKind.DOOR ? doorCost : TileCost[tile.kind];
+        const isOnBoat = Boolean(player.onBoatId);
+        if (isOnBoat && tile.kind === TileKind.TELEPORT) {
+            throw new BadRequestException('Cannot use teleporter while on a boat');
+        }
 
-        if (moveCost === -1) {
+        const moveCost = this.calculateTileCost(session.id, nextX, nextY, isOnBoat);
+
+        if (moveCost === null) {
             throw new BadRequestException('Cannot move onto this tile');
-        } else if (moveCost > player.speed) {
+        } else if (moveCost > player.speed + player.boatSpeed) {
             throw new BadRequestException('Not enough movement points for this tile');
         }
 
@@ -93,7 +98,7 @@ export class MovementService {
         const reachable: ReachableTile[] = [];
         const visited = new Set<string>();
         const queue: ReachableTile[] = this.initializeQueue(player);
-        const isOnBoat = this.isPlayerOnBoat(session.id, player.x, player.y);
+        const isOnBoat = Boolean(player.onBoatId);
         const mapSize = this.gameCache.getMapSize(session.id);
         const startPosition = { x: player.x, y: player.y };
 
@@ -112,13 +117,13 @@ export class MovementService {
         return reachable;
     }
 
-    private initializeQueue(player: InGameSession['inGamePlayers'][string]): ReachableTile[] {
+    private initializeQueue(player: Player): ReachableTile[] {
         return [
             {
                 x: player.x,
                 y: player.y,
                 cost: 0,
-                remainingPoints: player.speed,
+                remainingPoints: player.speed + player.boatSpeed,
             },
         ];
     }
@@ -240,6 +245,13 @@ export class MovementService {
         const tile = this.gameCache.getTileAtPosition(sessionId, x, y);
         if (!tile) return null;
 
+        if (isOnBoat) {
+            if (tile.kind === TileKind.WATER) {
+                return 1;
+            }
+            return null;
+        }
+
         let tileCost = TileCost[tile.kind];
         if (tileCost === undefined) return null;
 
@@ -249,16 +261,7 @@ export class MovementService {
 
         if (tileCost === -1) return null;
 
-        if (tile.kind === TileKind.WATER && isOnBoat) {
-            return 1;
-        }
-
         return tileCost;
-    }
-
-    private isPlayerOnBoat(sessionId: string, x: number, y: number): boolean {
-        const placeables = this.gameCache.getPlaceablesAtPosition(sessionId, x, y);
-        return placeables.some((placeable) => placeable.kind === PlaceableKind.BOAT);
     }
 
     private isPositionOccupied(session: InGameSession, x: number, y: number): boolean {

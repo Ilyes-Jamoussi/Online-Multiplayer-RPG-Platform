@@ -14,6 +14,8 @@ export interface Player {
     baseSpeed: number;
     speedBonus: number;
     speed: number;
+    boatSpeedBonus: number;
+    boatSpeed: number;
     baseAttack: number;
     attackBonus: number;
     baseDefense: number;

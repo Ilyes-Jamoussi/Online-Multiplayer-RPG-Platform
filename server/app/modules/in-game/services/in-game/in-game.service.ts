@@ -70,8 +70,8 @@ export class InGameService {
         this.gameplayService.boardBoat(sessionId, playerId, x, y);
     }
 
-    disembarkBoat(sessionId: string, playerId: string): void {
-        this.gameplayService.disembarkBoat(sessionId, playerId);
+    disembarkBoat(sessionId: string, playerId: string, x: number, y: number): void {
+        this.gameplayService.disembarkBoat(sessionId, playerId, x, y);
     }
 
     private startSessionWithTransition(sessionId: string): InGameSession {

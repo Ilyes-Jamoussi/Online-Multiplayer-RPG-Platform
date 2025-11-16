@@ -30,8 +30,8 @@ export class InGameSocketService {
         this.socket.emit(InGameEvents.PlayerBoardBoat, { sessionId, x, y });
     }
 
-    playerDisembarkBoat(sessionId: string): void {
-        this.socket.emit(InGameEvents.PlayerDisembarkBoat, { sessionId });
+    playerDisembarkBoat(sessionId: string, x: number, y: number): void {
+        this.socket.emit(InGameEvents.PlayerDisembarkBoat, { sessionId, x, y });
     }
 
     playerLeaveInGameSession(sessionId: string): void {

@@ -77,6 +77,10 @@ export class PlayerInfoComponent {
         return this.player.speedBonus;
     }
 
+    get boatSpeedBonus(): number {
+        return this.player.boatSpeedBonus;
+    }
+
     get baseHealth(): number {
         return this.player.baseHealth;
     }

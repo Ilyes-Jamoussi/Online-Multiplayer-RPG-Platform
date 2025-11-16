@@ -1,5 +1,6 @@
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { BOAT_SPEED_BONUS } from '@common/constants/game.constants';
 import { Player } from '@common/interfaces/player.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { StartPoint } from '@common/interfaces/start-point.interface';
@@ -78,6 +79,20 @@ export class InGameSessionRepository {
             attackBonus: player.attackBonus,
             defenseBonus: player.defenseBonus,
         });
+    }
+
+    applyPlayerBoatSpeedBonus(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        this.updatePlayer(sessionId, playerId, { boatSpeedBonus: BOAT_SPEED_BONUS, boatSpeed: BOAT_SPEED_BONUS });
+    }
+
+    resetPlayerBoatSpeedBonus(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        this.updatePlayer(sessionId, playerId, { boatSpeedBonus: 0, boatSpeed: 0 });
     }
 
     resetPlayerBonuses(sessionId: string, playerId: string): void {
@@ -227,7 +242,12 @@ export class InGameSessionRepository {
 
         player.x = newX;
         player.y = newY;
-        player.speed = player.speed - cost;
+
+        if (player.onBoatId && player.boatSpeed) {
+            player.boatSpeed = player.boatSpeed - cost;
+        } else {
+            player.speed = player.speed - cost;
+        }
 
         this.eventEmitter.emit(ServerEvents.PlayerMoved, {
             session,
@@ -235,6 +255,7 @@ export class InGameSessionRepository {
             x: newX,
             y: newY,
             speed: player.speed,
+            boatSpeed: player.boatSpeed,
         });
 
         return { oldX, oldY, newX, newY };

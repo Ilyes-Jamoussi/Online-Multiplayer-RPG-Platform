@@ -22,6 +22,8 @@ export const DEFAULT_PLAYER: Player = {
     baseSpeed: BASE_STAT_VALUE,
     speedBonus: 0,
     speed: BASE_STAT_VALUE,
+    boatSpeedBonus: 0,
+    boatSpeed: 0,
     baseAttack: BASE_STAT_VALUE,
     attackBonus: 0,
     baseDefense: BASE_STAT_VALUE,

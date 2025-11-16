@@ -54,6 +54,8 @@ export class SessionService {
             combatDraws: 0,
             hasCombatBonus: false,
             actionsRemaining: 1,
+            boatSpeedBonus: 0,
+            boatSpeed: 0,
         };
         session.players.push(player);
 
@@ -187,6 +189,8 @@ export class SessionService {
             combatDraws: 0,
             hasCombatBonus: false,
             virtualPlayerType,
+            boatSpeedBonus: 0,
+            boatSpeed: 0,
         };
     }
 
@@ -286,6 +290,8 @@ export class SessionService {
             combatDraws: 0,
             hasCombatBonus: false,
             actionsRemaining: 1,
+            boatSpeedBonus: 0,
+            boatSpeed: 0,
         };
         return {
             players: [adminPlayer],
