@@ -42,6 +42,8 @@ describe('SessionService', () => {
         speed: 5,
         actionsRemaining: 1,
         hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
         ...overrides,
     });
 
