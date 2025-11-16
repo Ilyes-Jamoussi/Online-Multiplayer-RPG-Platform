@@ -11,12 +11,16 @@ import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Model, Types } from 'mongoose';
 import { GameCacheService } from './game-cache.service';
 
 describe('GameCacheService', () => {
     let service: GameCacheService;
     const mockModel: Record<string, unknown> = {};
+    const mockEventEmitter = {
+        emit: jest.fn(),
+    } as unknown as EventEmitter2;
 
     const mockSessionId = 'session-123';
     const mockGameId = new Types.ObjectId().toString();
@@ -56,6 +60,8 @@ describe('GameCacheService', () => {
         baseSpeed: BASE_SPEED,
         speedBonus: NO_BONUS,
         speed: BASE_SPEED,
+        boatSpeedBonus: NO_BONUS,
+        boatSpeed: NO_BONUS,
         baseAttack: BASE_ATTACK,
         attackBonus: NO_BONUS,
         baseDefense: BASE_DEFENSE,
@@ -88,12 +94,13 @@ describe('GameCacheService', () => {
         createdAt: new Date(),
         gridPreviewUrl: '',
         draft: false,
+        teleportChannels: [],
         ...overrides,
     });
 
     beforeEach(() => {
         Object.keys(mockModel).forEach((k) => delete mockModel[k]);
-        service = new GameCacheService(mockModel as unknown as Model<GameDocument>);
+        service = new GameCacheService(mockModel as unknown as Model<GameDocument>, mockEventEmitter);
     });
 
     it('should be defined', () => {

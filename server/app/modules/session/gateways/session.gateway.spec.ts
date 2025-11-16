@@ -91,6 +91,8 @@ describe('SessionGateway', () => {
         baseSpeed: 3,
         speedBonus: 0,
         speed: 3,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
         baseAttack: 10,
         attackBonus: 0,
         baseDefense: 5,
@@ -207,7 +209,10 @@ describe('SessionGateway', () => {
         baseSpeed: 3,
         speedBonus: 0,
         speed: 3,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
         actionsRemaining: 1,
+        hasCombatBonus: false,
         ...overrides,
     });
 

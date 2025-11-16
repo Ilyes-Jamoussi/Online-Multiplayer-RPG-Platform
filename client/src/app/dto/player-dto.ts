@@ -31,5 +31,7 @@ export interface PlayerDto {
     speed: number;
     actionsRemaining: number;
     hasCombatBonus: boolean;
+    boatSpeedBonus: number;
+    boatSpeed: number;
 }
 

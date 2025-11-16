@@ -79,4 +79,12 @@ export class PlayerDto {
     @ApiProperty()
     @IsBoolean()
     readonly hasCombatBonus: boolean;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly boatSpeedBonus: number;
+
+    @ApiProperty()
+    @IsNumber()
+    readonly boatSpeed: number;
 }

@@ -52,6 +52,8 @@ describe('InGameSessionRepository', () => {
         baseSpeed: BASE_SPEED,
         speedBonus: NO_BONUS,
         speed: BASE_SPEED,
+        boatSpeedBonus: NO_BONUS,
+        boatSpeed: NO_BONUS,
         baseAttack: BASE_ATTACK,
         attackBonus: NO_BONUS,
         baseDefense: BASE_DEFENSE,
@@ -94,6 +96,7 @@ describe('InGameSessionRepository', () => {
         const mockGameCache = {
             clearTileOccupant: jest.fn(),
             moveTileOccupant: jest.fn(),
+            reenablePlaceablesForPlayer: jest.fn(),
         };
 
         const mockEventEmitter = {
@@ -639,6 +642,7 @@ describe('InGameSessionRepository', () => {
                 x: POS_X_2,
                 y: POS_Y_3,
                 speed: BASE_SPEED - MOVE_COST,
+                boatSpeed: NO_BONUS,
             });
         });
 

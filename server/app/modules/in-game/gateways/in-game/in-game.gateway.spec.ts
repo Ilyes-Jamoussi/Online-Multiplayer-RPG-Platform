@@ -66,6 +66,8 @@ describe('InGameGateway', () => {
         baseSpeed: 3,
         speedBonus: 0,
         speed: 3,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
         baseAttack: 10,
         attackBonus: 0,
         baseDefense: 5,
@@ -496,6 +498,7 @@ describe('InGameGateway', () => {
                 x: TARGET_X,
                 y: TARGET_Y,
                 speed: SPEED,
+                boatSpeed: 0,
             };
 
             gateway.handlePlayerMoved(payload);
@@ -510,6 +513,7 @@ describe('InGameGateway', () => {
                         x: TARGET_X,
                         y: TARGET_Y,
                         speed: SPEED,
+                        boatSpeed: 0,
                     },
                 }),
             );
