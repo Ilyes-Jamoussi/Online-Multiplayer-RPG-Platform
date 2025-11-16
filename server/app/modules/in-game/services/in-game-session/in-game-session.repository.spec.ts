@@ -52,12 +52,12 @@ describe('InGameSessionRepository', () => {
         baseSpeed: BASE_SPEED,
         speedBonus: NO_BONUS,
         speed: BASE_SPEED,
+        boatSpeedBonus: NO_BONUS,
+        boatSpeed: NO_BONUS,
         baseAttack: BASE_ATTACK,
         attackBonus: NO_BONUS,
-        attack: BASE_ATTACK,
         baseDefense: BASE_DEFENSE,
         defenseBonus: NO_BONUS,
-        defense: BASE_DEFENSE,
         attackDice: Dice.D6,
         defenseDice: Dice.D4,
         x: POS_X_1,
@@ -69,6 +69,7 @@ describe('InGameSessionRepository', () => {
         combatWins: NO_COMBAT_STATS,
         combatLosses: NO_COMBAT_STATS,
         combatDraws: NO_COMBAT_STATS,
+        hasCombatBonus: false,
         ...overrides,
     });
 
@@ -95,6 +96,7 @@ describe('InGameSessionRepository', () => {
         const mockGameCache = {
             clearTileOccupant: jest.fn(),
             moveTileOccupant: jest.fn(),
+            reenablePlaceablesForPlayer: jest.fn(),
         };
 
         const mockEventEmitter = {
@@ -489,7 +491,7 @@ describe('InGameSessionRepository', () => {
 
             service.playerLeave(SESSION_ID, PLAYER_A_ID);
 
-            expect(gameCache.clearTileOccupant).toHaveBeenCalledWith(SESSION_ID, POS_X_1, POS_Y_1);
+            expect(gameCache.clearTileOccupant).toHaveBeenCalledWith(SESSION_ID, { x: POS_X_1, y: POS_Y_1 });
         });
 
         it('should not clear tile occupant when player has negative position', () => {
@@ -625,7 +627,7 @@ describe('InGameSessionRepository', () => {
 
             service.movePlayerPosition(SESSION_ID, PLAYER_A_ID, POS_X_2, POS_Y_3, MOVE_COST);
 
-            expect(gameCache.moveTileOccupant).toHaveBeenCalledWith(SESSION_ID, POS_X_2, POS_Y_3, session.inGamePlayers[PLAYER_A_ID]);
+            expect(gameCache.moveTileOccupant).toHaveBeenCalledWith(SESSION_ID, { x: POS_X_2, y: POS_Y_3 }, session.inGamePlayers[PLAYER_A_ID]);
         });
 
         it('should emit player.moved event', () => {
@@ -640,6 +642,7 @@ describe('InGameSessionRepository', () => {
                 x: POS_X_2,
                 y: POS_Y_3,
                 speed: BASE_SPEED - MOVE_COST,
+                boatSpeed: NO_BONUS,
             });
         });
 

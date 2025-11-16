@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { COMBAT_TOAST_DURATION_MS, DAMAGE_DISPLAY_DURATION_MS, VICTORY_NOTIFICATION_DURATION_MS } from '@app/constants/combat.constants';
 import { CombatData } from '@app/interfaces/combat-data.interface';
 import { DamageDisplay } from '@app/interfaces/damage-display.interface';
@@ -7,8 +7,12 @@ import { CombatSocketService } from '@app/services/combat-socket/combat-socket.s
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
+<<<<<<< HEAD
 import { TimerService } from '@app/services/timer/timer.service';
+=======
+>>>>>>> origin/dev
 import { ResetService } from '@app/services/reset/reset.service';
+import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
@@ -231,9 +235,13 @@ export class CombatService {
             damage: data.playerADamage,
             attackRoll: data.playerAAttack.diceRoll,
             attackDice: data.playerAAttack.dice,
+            attackBonus: data.playerAAttack.attackBonus,
+            attackPostureBonus: data.playerAAttack.postureBonus,
             totalAttack: data.playerAAttack.totalAttack,
             defenseRoll: data.playerADefense.diceRoll,
             defenseDice: data.playerADefense.dice,
+            defenseBonus: data.playerADefense.defenseBonus,
+            defensePostureBonus: data.playerADefense.postureBonus,
             totalDefense: data.playerADefense.totalDefense,
             tileEffect: tileEffects[data.playerAId] ?? 0,
             visible: true,
@@ -244,9 +252,13 @@ export class CombatService {
             damage: data.playerBDamage,
             attackRoll: data.playerBAttack.diceRoll,
             attackDice: data.playerBAttack.dice,
+            attackBonus: data.playerBAttack.attackBonus,
+            attackPostureBonus: data.playerBAttack.postureBonus,
             totalAttack: data.playerBAttack.totalAttack,
             defenseRoll: data.playerBDefense.diceRoll,
             defenseDice: data.playerBDefense.dice,
+            defenseBonus: data.playerBDefense.defenseBonus,
+            defensePostureBonus: data.playerBDefense.postureBonus,
             totalDefense: data.playerBDefense.totalDefense,
             tileEffect: tileEffects[data.playerBId] ?? 0,
             visible: true,

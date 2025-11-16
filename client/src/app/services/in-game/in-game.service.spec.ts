@@ -1,8 +1,14 @@
 /* eslint-disable max-lines -- Extensive tests needed for 100% code coverage */
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { InGameService } from './in-game.service';
+import { AvailableActionDto } from '@app/dto/available-action-dto';
+import { AvailableActionsDto } from '@app/dto/available-actions-dto';
+import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
+import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
+<<<<<<< HEAD
 import { TimerService } from '@app/services/timer/timer.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { NotificationService } from '@app/services/notification/notification.service';
@@ -10,11 +16,17 @@ import { ROUTES } from '@app/enums/routes.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { signal } from '@angular/core';
 import { Player } from '@common/interfaces/player.interface';
+=======
+import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
+>>>>>>> origin/dev
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { InGameSession } from '@common/interfaces/session.interface';
-import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { Orientation } from '@common/enums/orientation.enum';
+import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
+import { InGameService } from './in-game.service';
 
 const TEST_TIMER_DURATION = 30;
 const TEST_X_COORDINATE = 5;
@@ -42,10 +54,8 @@ describe('InGameService', () => {
         speed: 3,
         baseAttack: 4,
         attackBonus: 0,
-        attack: 4,
         baseDefense: 4,
         defenseBonus: 0,
-        defense: 4,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
         x: 0,
@@ -57,6 +67,9 @@ describe('InGameService', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     beforeEach(() => {
@@ -76,10 +89,17 @@ describe('InGameService', () => {
             'onPlayerMoved',
             'onPlayerAvailableActions',
             'onLeftInGameSessionAck',
+            'onOpenSanctuary',
+            'onOpenSanctuaryError',
+            'onSanctuaryActionFailed',
+            'onSanctuaryActionSuccess',
             'onGameForceStopped',
             'onPlayerReachableTiles',
             'onPlayerTeleported',
             'onPlayerActionUsed',
+            'onPlayerBonusesChanged',
+            'onPlayerBoardedBoat',
+            'onPlayerDisembarkedBoat',
             'onGameOver',
         ]);
 
@@ -323,15 +343,15 @@ describe('InGameService', () => {
         it('should handle player moved for current player', () => {
             service.updateInGameSession({ inGamePlayers: { player1: mockPlayer } });
             const callback = mockInGameSocketService.onPlayerMoved.calls.mostRecent().args[0];
-            const mockData = { playerId: 'player1', x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3 };
+            const mockData = { playerId: 'player1', x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3, boatSpeed: 0 };
             callback(mockData);
-            expect(mockPlayerService.updatePlayer).toHaveBeenCalledWith({ x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3 });
+            expect(mockPlayerService.updatePlayer).toHaveBeenCalledWith({ x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3, boatSpeed: 0 });
         });
 
         it('should handle player moved for other player', () => {
             service.updateInGameSession({ inGamePlayers: { player2: { ...mockPlayer, id: 'player2' } } });
             const callback = mockInGameSocketService.onPlayerMoved.calls.mostRecent().args[0];
-            const mockData = { playerId: 'player2', x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3 };
+            const mockData = { playerId: 'player2', x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3, boatSpeed: 0 };
             callback(mockData);
             expect(mockPlayerService.updatePlayer).not.toHaveBeenCalled();
         });
@@ -341,8 +361,9 @@ describe('InGameService', () => {
                 currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
             });
             const callback = mockInGameSocketService.onPlayerAvailableActions.calls.mostRecent().args[0];
-            const mockActions = [{ type: 'ATTACK', x: 1, y: 1 }] as AvailableAction[];
-            callback(mockActions);
+            const mockActions: AvailableActionDto[] = [{ type: AvailableActionType.ATTACK, x: 1, y: 1 }];
+            const mockData: AvailableActionsDto = { availableActions: mockActions };
+            callback(mockData);
             expect(service.availableActions()).toEqual(mockActions);
             expect(mockPlayerService.updateActionsRemaining).toHaveBeenCalledWith(1);
         });
@@ -352,8 +373,9 @@ describe('InGameService', () => {
                 currentTurn: { turnNumber: 1, activePlayerId: 'player2', hasUsedAction: false },
             });
             const callback = mockInGameSocketService.onPlayerAvailableActions.calls.mostRecent().args[0];
-            const mockActions = [{ type: 'ATTACK', x: 1, y: 1 }] as AvailableAction[];
-            callback(mockActions);
+            const mockActions: AvailableActionDto[] = [{ type: AvailableActionType.ATTACK, x: 1, y: 1 }];
+            const mockData: AvailableActionsDto = { availableActions: mockActions };
+            callback(mockData);
             expect(service.availableActions()).toEqual(mockActions);
             expect(mockPlayerService.updateActionsRemaining).not.toHaveBeenCalled();
         });

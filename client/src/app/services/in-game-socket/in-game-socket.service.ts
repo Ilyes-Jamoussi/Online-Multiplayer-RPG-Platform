@@ -1,17 +1,25 @@
 import { Injectable } from '@angular/core';
 import { AdminModeToggledDto } from '@app/dto/admin-mode-toggled-dto';
+import { AvailableActionsDto } from '@app/dto/available-actions-dto';
 import { DoorToggledDto } from '@app/dto/door-toggled-dto';
 import { GameOverDto } from '@app/dto/game-over-dto';
 import { GameStatisticsDto } from '@app/dto/game-statistics-dto';
+import { OpenSanctuaryDto } from '@app/dto/open-sanctuary-dto';
+import { PlaceablePositionUpdatedDto } from '@app/dto/placeable-position-updated-dto';
+import { PlayerBoardedBoatDto } from '@app/dto/player-boarded-boat-dto';
+import { PlayerBonusesChangedDto } from '@app/dto/player-bonuses-changed-dto';
+import { PlayerDisembarkedBoatDto } from '@app/dto/player-disembarked-boat-dto';
 import { PlayerLeftSessionDto } from '@app/dto/player-left-session-dto';
 import { PlayerMoveDto } from '@app/dto/player-move-dto';
 import { PlayerMovedDto } from '@app/dto/player-moved-dto';
 import { PlayerTeleportDto } from '@app/dto/player-teleport-dto';
 import { PlayerTeleportedDto } from '@app/dto/player-teleported-dto';
+import { SanctuaryActionFailedDto } from '@app/dto/sanctuary-action-failed-dto';
+import { SanctuaryActionSuccessDto } from '@app/dto/sanctuary-action-success-dto';
 import { ToggleDoorActionDto } from '@app/dto/toggle-door-action-dto';
 import { SocketService } from '@app/services/socket/socket.service';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
-import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -22,6 +30,14 @@ export class InGameSocketService {
 
     playerJoinInGameSession(sessionId: string): void {
         this.socket.emit(InGameEvents.PlayerJoinInGameSession, sessionId);
+    }
+
+    playerBoardBoat(sessionId: string, x: number, y: number): void {
+        this.socket.emit(InGameEvents.PlayerBoardBoat, { sessionId, x, y });
+    }
+
+    playerDisembarkBoat(sessionId: string, x: number, y: number): void {
+        this.socket.emit(InGameEvents.PlayerDisembarkBoat, { sessionId, x, y });
     }
 
     playerLeaveInGameSession(sessionId: string): void {
@@ -42,6 +58,14 @@ export class InGameSocketService {
 
     playerToggleDoorAction(data: ToggleDoorActionDto): void {
         this.socket.emit(InGameEvents.ToggleDoorAction, data);
+    }
+
+    playerSanctuaryRequest(data: { sessionId: string; x: number; y: number; kind: PlaceableKind }): void {
+        this.socket.emit(InGameEvents.PlayerSanctuaryRequest, data);
+    }
+
+    playerSanctuaryAction(data: { sessionId: string; x: number; y: number; kind: PlaceableKind; double?: boolean }): void {
+        this.socket.emit(InGameEvents.PlayerSanctuaryAction, data);
     }
 
     toggleAdminMode(sessionId: string): void {
@@ -80,6 +104,22 @@ export class InGameSocketService {
         this.socket.onSuccessEvent(InGameEvents.DoorToggled, callback);
     }
 
+    onOpenSanctuary(callback: (data: OpenSanctuaryDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.OpenSanctuary, callback);
+    }
+
+    onOpenSanctuaryError(callback: (message: string) => void): void {
+        this.socket.onErrorEvent(InGameEvents.OpenSanctuary, callback);
+    }
+
+    onSanctuaryActionFailed(callback: (data: SanctuaryActionFailedDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.SanctuaryActionFailed, callback);
+    }
+
+    onSanctuaryActionSuccess(callback: (data: SanctuaryActionSuccessDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.SanctuaryActionSuccess, callback);
+    }
+
     onPlayerUpdated(callback: (data: Player) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerUpdated, callback);
     }
@@ -88,7 +128,7 @@ export class InGameSocketService {
         this.socket.onSuccessEvent(InGameEvents.PlayerActionUsed, callback);
     }
 
-    onPlayerAvailableActions(callback: (data: AvailableAction[]) => void): void {
+    onPlayerAvailableActions(callback: (data: AvailableActionsDto) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlayerAvailableActions, callback);
     }
 
@@ -120,7 +160,30 @@ export class InGameSocketService {
         this.socket.onSuccessEvent(InGameEvents.PlayerLeftInGameSession, callback);
     }
 
+    onPlayerBonusesChanged(callback: (data: PlayerBonusesChangedDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerBonusesChanged, callback);
+    }
+
     onLoadGameStatistics(callback: (data: GameStatisticsDto) => void): void {
         this.socket.onSuccessEvent(InGameEvents.LoadGameStatistics, callback);
     }
+<<<<<<< HEAD
+=======
+
+    onLoadGameStatisticsError(callback: (message: string) => void): void {
+        this.socket.onErrorEvent(InGameEvents.LoadGameStatistics, callback);
+    }
+
+    onPlayerBoardedBoat(callback: (data: PlayerBoardedBoatDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerBoardedBoat, callback);
+    }
+
+    onPlayerDisembarkedBoat(callback: (data: PlayerDisembarkedBoatDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlayerDisembarkedBoat, callback);
+    }
+
+    onPlaceablePositionUpdated(callback: (data: PlaceablePositionUpdatedDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlaceablePositionUpdated, callback);
+    }
+>>>>>>> origin/dev
 }

@@ -6,10 +6,10 @@ import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameKeyboardEventsService } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { SessionService } from '@app/services/session/session.service';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { GameSessionPageComponent } from './game-session-page.component';
 
 const TEST_MAP_SIZE = 10;
@@ -51,10 +51,8 @@ describe('GameSessionPageComponent', () => {
                 speed: TEST_PLAYER_SPEED,
                 baseAttack: 6,
                 attackBonus: 0,
-                attack: 6,
                 baseDefense: 5,
                 defenseBonus: 0,
-                defense: 5,
                 attackDice: Dice.D6,
                 defenseDice: Dice.D6,
                 x: 5,
@@ -66,6 +64,9 @@ describe('GameSessionPageComponent', () => {
                 combatWins: 0,
                 combatLosses: 0,
                 combatDraws: 0,
+                hasCombatBonus: false,
+                boatSpeedBonus: 0,
+                boatSpeed: 0,
             },
         },
         currentTurn: {

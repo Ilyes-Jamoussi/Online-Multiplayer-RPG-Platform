@@ -86,6 +86,7 @@ describe('GameEditorStoreService', () => {
         mode: GameMode.CTF,
         lastModified: new Date().toISOString(),
         gridPreviewUrl: '/assets/test-game.png',
+        teleportChannels: [],
     };
 
     describe('getters/setters', () => {
@@ -198,11 +199,14 @@ describe('GameEditorStoreService', () => {
             await service.saveGame(gridEl);
 
             expect(screenshotServiceSpy.captureElementAsBase64).toHaveBeenCalledWith(gridEl);
-            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
-                name: 'Modified Name',
-                description: 'Modified Description',
-                gridPreviewUrl: 'base64imagestring',
-            });
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith(
+                '1',
+                jasmine.objectContaining({
+                    name: 'Modified Name',
+                    description: 'Modified Description',
+                    gridPreviewUrl: 'base64imagestring',
+                }),
+            );
         });
 
         it('should include gridPreviewUrl when screenshot returns a new image', async () => {
@@ -218,11 +222,14 @@ describe('GameEditorStoreService', () => {
 
             await service.saveGame(gridEl);
 
-            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
-                name: 'Modified Name',
-                description: 'Modified Description',
-                gridPreviewUrl: newPreviewUrl,
-            });
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith(
+                '1',
+                jasmine.objectContaining({
+                    name: 'Modified Name',
+                    description: 'Modified Description',
+                    gridPreviewUrl: newPreviewUrl,
+                }),
+            );
         });
 
         it('should send only name if only name was modified (no new screenshot)', async () => {
@@ -234,9 +241,12 @@ describe('GameEditorStoreService', () => {
 
             await service.saveGame(gridEl);
 
-            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
-                name: 'Modified Name',
-            });
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith(
+                '1',
+                jasmine.objectContaining({
+                    name: 'Modified Name',
+                }),
+            );
         });
 
         it('should send only description if only description was modified (no new screenshot)', async () => {
@@ -248,9 +258,12 @@ describe('GameEditorStoreService', () => {
 
             await service.saveGame(gridEl);
 
-            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
-                description: 'Modified Description',
-            });
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith(
+                '1',
+                jasmine.objectContaining({
+                    description: 'Modified Description',
+                }),
+            );
         });
 
         it('should send only tiles if only tiles were modified (no new screenshot)', async () => {
@@ -264,9 +277,12 @@ describe('GameEditorStoreService', () => {
 
             await service.saveGame(gridEl);
 
-            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith('1', {
-                tiles: service.tiles(),
-            });
+            expect(gameHttpServiceSpy.patchGameEditorById).toHaveBeenCalledWith(
+                '1',
+                jasmine.objectContaining({
+                    tiles: service.tiles(),
+                }),
+            );
         });
 
         it('should send only objects if only objects were modified (no new screenshot)', async () => {

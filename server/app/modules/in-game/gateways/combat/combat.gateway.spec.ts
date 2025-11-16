@@ -61,6 +61,7 @@ describe('CombatGateway', () => {
         diceRoll: 4,
         baseAttack: 10,
         attackBonus: 0,
+        postureBonus: 0,
         totalAttack: 10,
         tileCombatEffect: 0,
         ...overrides,
@@ -71,6 +72,7 @@ describe('CombatGateway', () => {
         diceRoll: 3,
         baseDefense: 5,
         defenseBonus: 0,
+        postureBonus: 0,
         totalDefense: 5,
         tileCombatEffect: 0,
         ...overrides,
@@ -143,7 +145,7 @@ describe('CombatGateway', () => {
 
             gateway.attackPlayerAction(mockSocket, payload);
 
-            expect(combatService.attackPlayerAction).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID, TARGET_X, TARGET_Y);
+            expect(combatService.attackPlayerAction).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID, { x: TARGET_X, y: TARGET_Y });
             expect(mockSocket.emit).not.toHaveBeenCalled();
         });
 

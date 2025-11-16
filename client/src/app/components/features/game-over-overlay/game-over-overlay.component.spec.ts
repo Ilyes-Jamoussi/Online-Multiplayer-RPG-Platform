@@ -1,14 +1,20 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { signal } from '@angular/core';
-import { GameOverOverlayComponent } from './game-over-overlay.component';
+import { ROUTES } from '@app/enums/routes.enum';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
+<<<<<<< HEAD
 import { TimerService } from '@app/services/timer/timer.service';
 import { ROUTES } from '@app/enums/routes.enum';
 import { Player } from '@common/interfaces/player.interface';
+=======
+import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+>>>>>>> origin/dev
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { Player } from '@common/interfaces/player.interface';
+import { GameOverOverlayComponent } from './game-over-overlay.component';
 
 const TEST_TIMER_DURATION = 5000;
 
@@ -40,10 +46,8 @@ describe('GameOverOverlayComponent', () => {
             speed: 3,
             baseAttack: 4,
             attackBonus: 0,
-            attack: 4,
             baseDefense: 4,
             defenseBonus: 0,
-            defense: 4,
             attackDice: Dice.D6,
             defenseDice: Dice.D6,
             x: 1,
@@ -55,6 +59,9 @@ describe('GameOverOverlayComponent', () => {
             combatWins: 3,
             combatLosses: 1,
             combatDraws: 1,
+            hasCombatBonus: false,
+            boatSpeedBonus: 0,
+            boatSpeed: 0,
         },
         {
             id: 'player2',
@@ -70,10 +77,8 @@ describe('GameOverOverlayComponent', () => {
             speed: 3,
             baseAttack: 4,
             attackBonus: 0,
-            attack: 4,
             baseDefense: 4,
             defenseBonus: 0,
-            defense: 4,
             attackDice: Dice.D6,
             defenseDice: Dice.D6,
             x: 2,
@@ -85,6 +90,9 @@ describe('GameOverOverlayComponent', () => {
             combatWins: 1,
             combatLosses: 2,
             combatDraws: 0,
+            hasCombatBonus: false,
+            boatSpeedBonus: 0,
+            boatSpeed: 0,
         },
     ];
 

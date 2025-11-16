@@ -21,6 +21,7 @@ export class GameDtoMapper {
                 const { _id: objectId, ...objWithoutId } = obj;
                 return { ...objWithoutId, id: objectId.toString() };
             }),
+            teleportChannels: game.teleportChannels,
         };
     }
 

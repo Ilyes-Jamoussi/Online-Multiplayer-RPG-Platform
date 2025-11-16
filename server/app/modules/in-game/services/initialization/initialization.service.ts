@@ -38,7 +38,7 @@ export class InitializationService {
             const player = session.inGamePlayers[playerId];
             player.startPointId = startPoint._id.toString();
 
-            this.gameCache.setTileOccupant(session.id, startPoint.x, startPoint.y, player);
+            this.gameCache.setTileOccupant(session.id, { x: startPoint.x, y: startPoint.y }, player);
             player.x = startPoint.x;
             player.y = startPoint.y;
 

@@ -38,6 +38,15 @@
                                     <img [src]="getDiceImage(playerADamage.attackDice)" class="dice-image" />
                                     <span class="dice-roll">{{ playerADamage.attackRoll }}</span>
                                 </div>
+                                @if (playerADamage.attackBonus > 0 || playerADamage.attackPostureBonus > 0) {
+                                <div class="bonus-info">
+                                    @if (playerADamage.attackBonus > 0) {
+                                    <span class="bonus-badge">+{{ playerADamage.attackBonus }}</span>
+                                    } @if (playerADamage.attackPostureBonus > 0) {
+                                    <span class="bonus-badge posture">+{{ playerADamage.attackPostureBonus }}</span>
+                                    }
+                                </div>
+                                }
                             </div>
                             <div class="stat-line defense-line">
                                 <span class="stat-icon">🛡️</span>
@@ -46,6 +55,15 @@
                                     <img [src]="getDiceImage(playerADamage.defenseDice)" class="dice-image" />
                                     <span class="dice-roll">{{ playerADamage.defenseRoll }}</span>
                                 </div>
+                                @if (playerADamage.defenseBonus > 0 || playerADamage.defensePostureBonus > 0) {
+                                <div class="bonus-info">
+                                    @if (playerADamage.defenseBonus > 0) {
+                                    <span class="bonus-badge">+{{ playerADamage.defenseBonus }}</span>
+                                    } @if (playerADamage.defensePostureBonus > 0) {
+                                    <span class="bonus-badge posture">+{{ playerADamage.defensePostureBonus }}</span>
+                                    }
+                                </div>
+                                }
                             </div>
                             @if (playerADamage.tileEffect !== 0) {
                             <div class="stat-line tile-effect-line">
@@ -110,6 +128,15 @@
                                     <img [src]="getDiceImage(playerBDamage.attackDice)" class="dice-image" />
                                     <span class="dice-roll">{{ playerBDamage.attackRoll }}</span>
                                 </div>
+                                @if (playerBDamage.attackBonus > 0 || playerBDamage.attackPostureBonus > 0) {
+                                <div class="bonus-info">
+                                    @if (playerBDamage.attackBonus > 0) {
+                                    <span class="bonus-badge">+{{ playerBDamage.attackBonus }}</span>
+                                    } @if (playerBDamage.attackPostureBonus > 0) {
+                                    <span class="bonus-badge posture">+{{ playerBDamage.attackPostureBonus }}</span>
+                                    }
+                                </div>
+                                }
                             </div>
                             <div class="stat-line defense-line">
                                 <span class="stat-icon">🛡️</span>
@@ -118,6 +145,15 @@
                                     <img [src]="getDiceImage(playerBDamage.defenseDice)" class="dice-image" />
                                     <span class="dice-roll">{{ playerBDamage.defenseRoll }}</span>
                                 </div>
+                                @if (playerBDamage.defenseBonus > 0 || playerBDamage.defensePostureBonus > 0) {
+                                <div class="bonus-info">
+                                    @if (playerBDamage.defenseBonus > 0) {
+                                    <span class="bonus-badge">+{{ playerBDamage.defenseBonus }}</span>
+                                    } @if (playerBDamage.defensePostureBonus > 0) {
+                                    <span class="bonus-badge posture">+{{ playerBDamage.defensePostureBonus }}</span>
+                                    }
+                                </div>
+                                }
                             </div>
                             @if (playerBDamage.tileEffect !== 0) {
                             <div class="stat-line tile-effect-line">
