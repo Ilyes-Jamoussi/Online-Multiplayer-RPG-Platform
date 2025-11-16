@@ -77,6 +77,7 @@ export class MovementService {
         if (!player) {
             throw new NotFoundException('Player not found');
         }
+        this.disembarkBoat(session, playerId, { x: player.x, y: player.y });
         const startPointId = player.startPointId;
         const startPoint = this.sessionRepository.findStartPointById(session.id, startPointId);
         if (!startPoint) {
@@ -88,6 +89,16 @@ export class MovementService {
             this.sessionRepository.movePlayerPosition(session.id, playerId, nextPosition.x, nextPosition.y, 0);
         }
         this.calculateReachableTiles(session, session.currentTurn.activePlayerId);
+    }
+
+    disembarkBoat(session: InGameSession, playerId: string, position: Position): void {
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.onBoatId = undefined;
+        if (position.x !== player.x || position.y !== player.y) {
+            this.sessionRepository.movePlayerPosition(session.id, playerId, position.x, position.y, 0);
+        }
+        this.sessionRepository.resetPlayerBoatSpeedBonus(session.id, playerId);
     }
 
     calculateReachableTiles(session: InGameSession, playerId: string): ReachableTile[] {

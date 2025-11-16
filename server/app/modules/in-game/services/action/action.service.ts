@@ -119,11 +119,7 @@ export class ActionService {
         if (!player) throw new NotFoundException('Player not found');
         if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
         if (!player.onBoatId) throw new BadRequestException('Player is not on a boat');
-        player.onBoatId = undefined;
-        if (position.x !== player.x || position.y !== player.y) {
-            this.sessionRepository.movePlayerPosition(session.id, playerId, position.x, position.y, 0);
-        }
-        this.sessionRepository.resetPlayerBoatSpeedBonus(session.id, playerId);
+        this.movementService.disembarkBoat(session, playerId, position);
         this.movementService.calculateReachableTiles(session, playerId);
         this.eventEmitter.emit(ServerEvents.PlayerDisembarkedBoat, { session, playerId });
     }
