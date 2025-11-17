@@ -17,7 +17,7 @@ import { MAX_CHAT_MESSAGE_LENGTH } from '@common/constants/chat';
 })
 export class ChatComponent implements AfterViewChecked {
     @ViewChild('messagesContainer') private readonly messagesContainer!: ElementRef;
-    
+
     messageInput = '';
     private shouldScrollToBottom = false;
     readonly maxMessageLength = MAX_CHAT_MESSAGE_LENGTH;
@@ -42,11 +42,11 @@ export class ChatComponent implements AfterViewChecked {
 
     sendMessage(): void {
         const input = this.messageInput.trim();
-        
+
         if (input.length === 0 || input.length > MAX_CHAT_MESSAGE_LENGTH) {
             return;
         }
-        
+
         this.chatService.sendMessage(input);
         this.messageInput = '';
         this.shouldScrollToBottom = true;

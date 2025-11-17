@@ -5,6 +5,7 @@ import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
+import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
@@ -231,7 +232,7 @@ describe('InGameGateway', () => {
 
             gateway.playerJoinInGameSession(mockSocket, SESSION_ID);
 
-            expect(mockSocket.emit).toHaveBeenCalledWith(InGameEvents.PlayerJoinedInGameSession, {
+            expect(mockSocket.emit).toHaveBeenCalledWith(NotificationEvents.ErrorMessage, {
                 success: false,
                 message: errorMessage,
             });
@@ -264,7 +265,7 @@ describe('InGameGateway', () => {
 
             gateway.playerEndTurn(mockSocket, SESSION_ID);
 
-            expect(mockSocket.emit).toHaveBeenCalledWith(InGameEvents.TurnEnded, {
+            expect(mockSocket.emit).toHaveBeenCalledWith(NotificationEvents.ErrorMessage, {
                 success: false,
                 message: errorMessage,
             });
@@ -307,7 +308,7 @@ describe('InGameGateway', () => {
 
             gateway.toggleDoorAction(mockSocket, payload);
 
-            expect(mockSocket.emit).toHaveBeenCalledWith(InGameEvents.ToggleDoorAction, {
+            expect(mockSocket.emit).toHaveBeenCalledWith(NotificationEvents.ErrorMessage, {
                 success: false,
                 message: errorMessage,
             });
@@ -333,7 +334,7 @@ describe('InGameGateway', () => {
 
             gateway.playerMove(mockSocket, payload);
 
-            expect(mockSocket.emit).toHaveBeenCalledWith(InGameEvents.PlayerMoved, {
+            expect(mockSocket.emit).toHaveBeenCalledWith(NotificationEvents.ErrorMessage, {
                 success: false,
                 message: errorMessage,
             });
@@ -388,42 +389,6 @@ describe('InGameGateway', () => {
             expect(mockServer.to).toHaveBeenCalledWith(IN_GAME_ID);
             expect(mockServer.mockBroadcastOperator.emit).toHaveBeenCalledWith(
                 InGameEvents.TurnTransitionEnded,
-                expect.objectContaining({
-                    success: true,
-                    data: session,
-                }),
-            );
-        });
-    });
-
-    describe('handleTurnTimeout', () => {
-        it('should emit TurnTimeout', () => {
-            const session = createMockInGameSession();
-            const payload = { session };
-
-            gateway.handleTurnTimeout(payload);
-
-            expect(mockServer.to).toHaveBeenCalledWith(IN_GAME_ID);
-            expect(mockServer.mockBroadcastOperator.emit).toHaveBeenCalledWith(
-                InGameEvents.TurnTimeout,
-                expect.objectContaining({
-                    success: true,
-                    data: session,
-                }),
-            );
-        });
-    });
-
-    describe('handleForcedEnd', () => {
-        it('should emit TurnForcedEnd', () => {
-            const session = createMockInGameSession();
-            const payload = { session };
-
-            gateway.handleForcedEnd(payload);
-
-            expect(mockServer.to).toHaveBeenCalledWith(IN_GAME_ID);
-            expect(mockServer.mockBroadcastOperator.emit).toHaveBeenCalledWith(
-                InGameEvents.TurnForcedEnd,
                 expect.objectContaining({
                     success: true,
                     data: session,
@@ -587,7 +552,7 @@ describe('InGameGateway', () => {
 
             gateway.handleToggleAdminMode(mockSocket, SESSION_ID);
 
-            expect(mockSocket.emit).toHaveBeenCalledWith(InGameEvents.AdminModeToggled, {
+            expect(mockSocket.emit).toHaveBeenCalledWith(NotificationEvents.ErrorMessage, {
                 success: false,
                 message: errorMessage,
             });
@@ -628,7 +593,7 @@ describe('InGameGateway', () => {
 
             gateway.playerTeleport(mockSocket, { sessionId: SESSION_ID, x: TARGET_X, y: TARGET_Y });
 
-            expect(mockSocket.emit).toHaveBeenCalledWith(InGameEvents.PlayerTeleported, {
+            expect(mockSocket.emit).toHaveBeenCalledWith(NotificationEvents.ErrorMessage, {
                 success: false,
                 message: errorMessage,
             });
@@ -854,7 +819,7 @@ describe('InGameGateway', () => {
             gatewayPrivate.playerLeaveSession(SESSION_ID, PLAYER_ID);
 
             expect(mockServer.to).toHaveBeenCalledWith(PLAYER_ID);
-            expect(mockServer.mockBroadcastOperator.emit).toHaveBeenCalledWith(InGameEvents.PlayerLeftInGameSession, {
+            expect(mockServer.mockBroadcastOperator.emit).toHaveBeenCalledWith(NotificationEvents.ErrorMessage, {
                 success: false,
                 message: errorMessage,
             });

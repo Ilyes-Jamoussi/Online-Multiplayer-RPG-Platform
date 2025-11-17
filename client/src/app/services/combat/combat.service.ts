@@ -5,10 +5,10 @@ import { DamageDisplay } from '@app/interfaces/damage-display.interface';
 import { VictoryData } from '@app/interfaces/victory-data.interface';
 import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { ResetService } from '@app/services/reset/reset.service';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
@@ -39,11 +39,11 @@ export class CombatService {
     readonly isVictoryNotificationVisible = this._isVictoryNotificationVisible.asReadonly();
     readonly isCombatActive = this._isCombatActive.asReadonly();
     constructor(
-        private readonly timerCoordinatorService: TimerCoordinatorService,
+        private readonly timerCoordinatorService: TimerService,
         private readonly combatSocketService: CombatSocketService,
         private readonly playerService: PlayerService,
         private readonly inGameService: InGameService,
-        private readonly notificationCoordinatorService: NotificationCoordinatorService,
+        private readonly notificationCoordinatorService: NotificationService,
     ) {
         this.initListeners();
         inject(ResetService).reset$.subscribe(() => this.reset());

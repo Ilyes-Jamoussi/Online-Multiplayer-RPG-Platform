@@ -9,7 +9,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
@@ -50,7 +50,7 @@ export class GameMapService {
 
     constructor(
         private readonly gameHttpService: GameHttpService,
-        private readonly notificationCoordinatorService: NotificationCoordinatorService,
+        private readonly notificationCoordinatorService: NotificationService,
         private readonly inGameService: InGameService,
         private readonly assetsService: AssetsService,
         private readonly inGameSocketService: InGameSocketService,

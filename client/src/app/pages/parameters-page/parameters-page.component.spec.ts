@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { ROUTES } from '@app/enums/routes.enum';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { MAP_SIZE_TO_MAX_PLAYERS } from '@app/constants/map-size.constants';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
@@ -17,7 +17,7 @@ describe('ParametersPageComponent', () => {
     let fixture: ComponentFixture<ParametersPageComponent>;
     let mockRouter: jasmine.SpyObj<Router>;
     let mockGameStoreService: jasmine.SpyObj<GameStoreService>;
-    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
 
     const mockGamePreview: GamePreviewDto = {
         id: 'test-game-id',
@@ -34,7 +34,7 @@ describe('ParametersPageComponent', () => {
     beforeEach(async () => {
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         mockGameStoreService = jasmine.createSpyObj('GameStoreService', ['createGame']);
-        mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', ['displayErrorPopup']);
+        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
 
         await TestBed.configureTestingModule({
             imports: [ParametersPageComponent],
@@ -43,7 +43,7 @@ describe('ParametersPageComponent', () => {
                 provideHttpClientTesting(),
                 { provide: Router, useValue: mockRouter },
                 { provide: GameStoreService, useValue: mockGameStoreService },
-                { provide: NotificationCoordinatorService, useValue: mockNotificationService },
+                { provide: NotificationService, useValue: mockNotificationService },
             ],
         }).compileComponents();
 

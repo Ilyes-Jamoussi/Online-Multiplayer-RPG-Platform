@@ -4,7 +4,7 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
@@ -28,7 +28,7 @@ const TEST_COORDINATE_20 = 20;
 describe('GameMapService', () => {
     let service: GameMapService;
     let mockGameHttpService: jasmine.SpyObj<GameHttpService>;
-    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
     let mockInGameService: jasmine.SpyObj<InGameService>;
     let mockAssetsService: jasmine.SpyObj<AssetsService>;
     let mockInGameSocketService: jasmine.SpyObj<InGameSocketService>;
@@ -96,7 +96,7 @@ describe('GameMapService', () => {
 
     beforeEach(() => {
         mockGameHttpService = jasmine.createSpyObj('GameHttpService', ['getGameEditorById']);
-        mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', ['displayErrorPopup']);
+        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
         mockInGameService = jasmine.createSpyObj('InGameService', ['deactivateActionMode', 'toggleDoorAction', 'getPlayerByPlayerId'], {
             inGamePlayers: signal({ player1: mockPlayer }),
             startPoints: signal([{ id: 'start1', x: 0, y: 0 }]),
@@ -113,7 +113,7 @@ describe('GameMapService', () => {
             providers: [
                 GameMapService,
                 { provide: GameHttpService, useValue: mockGameHttpService },
-                { provide: NotificationCoordinatorService, useValue: mockNotificationService },
+                { provide: NotificationService, useValue: mockNotificationService },
                 { provide: InGameService, useValue: mockInGameService },
                 { provide: AssetsService, useValue: mockAssetsService },
                 { provide: InGameSocketService, useValue: mockInGameSocketService },

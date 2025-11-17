@@ -4,6 +4,7 @@ import { validationExceptionFactory } from '@app/utils/validation/validation.uti
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
+import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { CombatAttack, CombatDefense, CombatResult } from '@common/interfaces/combat.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Logger } from '@nestjs/common';
@@ -157,7 +158,7 @@ describe('CombatGateway', () => {
 
             gateway.attackPlayerAction(mockSocket, payload);
 
-            expect(mockSocket.emit).toHaveBeenCalledWith(InGameEvents.AttackPlayerAction, {
+            expect(mockSocket.emit).toHaveBeenCalledWith(NotificationEvents.ErrorMessage, {
                 success: false,
                 message: errorMessage,
             });
@@ -191,7 +192,7 @@ describe('CombatGateway', () => {
 
             gateway.combatChoice(mockSocket, payload);
 
-            expect(mockSocket.emit).toHaveBeenCalledWith(InGameEvents.CombatChoice, {
+            expect(mockSocket.emit).toHaveBeenCalledWith(NotificationEvents.ErrorMessage, {
                 success: false,
                 message: errorMessage,
             });
@@ -217,7 +218,7 @@ describe('CombatGateway', () => {
 
             gateway.combatAbandon(mockSocket, payload);
 
-            expect(mockSocket.emit).toHaveBeenCalledWith(InGameEvents.CombatAbandon, {
+            expect(mockSocket.emit).toHaveBeenCalledWith(NotificationEvents.ErrorMessage, {
                 success: false,
                 message: errorMessage,
             });

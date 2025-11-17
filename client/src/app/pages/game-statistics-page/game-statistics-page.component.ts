@@ -54,14 +54,14 @@ export class GameStatisticsPageComponent implements OnInit {
         const sortedStats = [...currentStats].sort((playerA, playerB) => {
             const aValue = playerA[column];
             const bValue = playerB[column];
-            
+
             let comparison = 0;
             if (typeof aValue === 'string' && typeof bValue === 'string') {
                 comparison = aValue.localeCompare(bValue);
             } else {
                 comparison = (aValue as number) - (bValue as number);
             }
-            
+
             return this.sortDirection === 'asc' ? comparison : -comparison;
         });
 

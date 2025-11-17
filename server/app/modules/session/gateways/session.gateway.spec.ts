@@ -13,6 +13,7 @@ import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { SessionEvents } from '@common/enums/session-events.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { WaitingRoomSession } from '@common/interfaces/session.interface';
@@ -265,7 +266,7 @@ describe('SessionGateway', () => {
             gateway.createSession(mockSocket, data);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.SessionCreated,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: errorMessage,
@@ -284,7 +285,7 @@ describe('SessionGateway', () => {
             gateway.joinSession(mockSocket, data);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.SessionJoined,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: 'Session non trouvée',
@@ -300,7 +301,7 @@ describe('SessionGateway', () => {
             gateway.joinSession(mockSocket, data);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.SessionJoined,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: 'Session est verrouillée',
@@ -317,7 +318,7 @@ describe('SessionGateway', () => {
             gateway.joinSession(mockSocket, data);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.SessionJoined,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: 'Session est pleine',
@@ -393,7 +394,7 @@ describe('SessionGateway', () => {
             gateway.joinAvatarSelection(mockSocket, data);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.AvatarSelectionJoined,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: 'Session non trouvée',
@@ -548,7 +549,7 @@ describe('SessionGateway', () => {
             gateway.kickPlayer(mockSocket, data);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.SessionEnded,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: errorMessage,
@@ -564,7 +565,7 @@ describe('SessionGateway', () => {
             await gateway.startGameSession(mockSocket);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.StartGameSession,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: 'Joueur non connecté à une session',
@@ -579,7 +580,7 @@ describe('SessionGateway', () => {
             await gateway.startGameSession(mockSocket);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.StartGameSession,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: 'Session introuvable',
@@ -598,7 +599,7 @@ describe('SessionGateway', () => {
             await gateway.startGameSession(mockSocket);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.StartGameSession,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: errorMessage,

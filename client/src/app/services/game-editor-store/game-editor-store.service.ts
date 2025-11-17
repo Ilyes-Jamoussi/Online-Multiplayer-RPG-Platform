@@ -11,7 +11,7 @@ import { ROUTES } from '@app/enums/routes.enum';
 import { ExtendedGameEditorPlaceableDto, Inventory } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
@@ -26,7 +26,7 @@ export class GameEditorStoreService {
         private readonly gameHttpService: GameHttpService,
         private readonly screenshotService: ScreenshotService,
         private readonly assetsService: AssetsService,
-        private readonly notificationCoordinatorService: NotificationCoordinatorService,
+        private readonly notificationCoordinatorService: NotificationService,
     ) {}
 
     private readonly _initial = signal<GameEditorDto>({

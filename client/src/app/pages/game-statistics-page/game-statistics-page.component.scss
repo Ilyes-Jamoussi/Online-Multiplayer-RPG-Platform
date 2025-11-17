@@ -223,7 +223,8 @@
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 
-    th, td {
+    th,
+    td {
         padding: 1.25rem 1rem;
         text-align: left;
         border-bottom: 1px solid rgba(99, 102, 241, 0.1);
@@ -350,7 +351,7 @@
                 background: rgba(255, 255, 255, 0.4);
             }
 
-            &[data-sort="asc"] .sort-indicator {
+            &[data-sort='asc'] .sort-indicator {
                 &::before {
                     border-bottom-color: #ffffff;
                     transform: scale(1.2);
@@ -360,7 +361,7 @@
                 }
             }
 
-            &[data-sort="desc"] .sort-indicator {
+            &[data-sort='desc'] .sort-indicator {
                 &::after {
                     border-top-color: #ffffff;
                     transform: scale(1.2);
@@ -497,8 +498,9 @@
 
     .players-table {
         font-size: 0.8rem;
-        
-        th, td {
+
+        th,
+        td {
             padding: 0.5rem 0.25rem;
         }
     }

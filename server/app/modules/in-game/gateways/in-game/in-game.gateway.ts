@@ -22,6 +22,7 @@ import { InGameService } from '@app/modules/in-game/services/in-game/in-game.ser
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { validationExceptionFactory } from '@app/utils/validation/validation.util';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
+import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
@@ -55,7 +56,7 @@ export class InGameGateway {
                 this.server.to(session.inGameId).emit(InGameEvents.GameStarted, successResponse(session));
             }
         } catch (error) {
-            socket.emit(InGameEvents.PlayerJoinedInGameSession, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -65,7 +66,7 @@ export class InGameGateway {
             const session = this.inGameService.endPlayerTurn(sessionId, socket.id);
             this.server.to(session.inGameId).emit(InGameEvents.TurnEnded, successResponse(session));
         } catch (error) {
-            socket.emit(InGameEvents.TurnEnded, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -82,7 +83,7 @@ export class InGameGateway {
         try {
             this.inGameService.toggleDoorAction(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
         } catch (error) {
-            socket.emit(InGameEvents.ToggleDoorAction, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -91,7 +92,7 @@ export class InGameGateway {
         try {
             this.inGameService.movePlayer(payload.sessionId, socket.id, payload.orientation);
         } catch (error) {
-            socket.emit(InGameEvents.PlayerMoved, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -217,16 +218,6 @@ export class InGameGateway {
         this.server.to(payload.session.inGameId).emit(InGameEvents.TurnTransitionEnded, successResponse(payload.session));
     }
 
-    @OnEvent(ServerEvents.TurnTimeout)
-    handleTurnTimeout(payload: { session: InGameSession }) {
-        this.server.to(payload.session.inGameId).emit(InGameEvents.TurnTimeout, successResponse(payload.session));
-    }
-
-    @OnEvent(ServerEvents.TurnForcedEnd)
-    handleForcedEnd(payload: { session: InGameSession }) {
-        this.server.to(payload.session.inGameId).emit(InGameEvents.TurnForcedEnd, successResponse(payload.session));
-    }
-
     @OnEvent(ServerEvents.DoorToggled)
     handleDoorToggled(payload: { session: InGameSession; playerId: string; x: number; y: number; isOpen: boolean }) {
         this.server
@@ -261,7 +252,7 @@ export class InGameGateway {
             const response = successResponse<AdminModeToggledDto>({ isAdminModeActive: session.isAdminModeActive });
             this.server.to(session.inGameId).emit(InGameEvents.AdminModeToggled, response);
         } catch (error) {
-            socket.emit(InGameEvents.AdminModeToggled, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -271,7 +262,7 @@ export class InGameGateway {
             const gameStatistics = this.inGameService.getGameStatistics(sessionId);
             socket.emit(InGameEvents.LoadGameStatistics, successResponse<GameStatisticsDto>(gameStatistics));
         } catch {
-            socket.emit(InGameEvents.LoadGameStatistics, errorResponse('Impossible de charger les statistiques de la partie'));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse('Impossible de charger les statistiques de la partie'));
         }
     }
 
@@ -286,7 +277,7 @@ export class InGameGateway {
                 .emit(InGameEvents.PlayerTeleported, successResponse<PlayerTeleportedDto>({ playerId: socket.id, x: player.x, y: player.y }));
             this.inGameService.getReachableTiles(payload.sessionId, socket.id);
         } catch (error) {
-            socket.emit(InGameEvents.PlayerTeleported, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -343,7 +334,7 @@ export class InGameGateway {
                 this.server.to(result.session.inGameId).emit(InGameEvents.PlayerLeftInGameSession, successResponse(result));
             }
         } catch (error) {
-            this.server.to(playerId).emit(InGameEvents.PlayerLeftInGameSession, errorResponse(error.message));
+            this.server.to(playerId).emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 

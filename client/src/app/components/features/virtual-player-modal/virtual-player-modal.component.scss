@@ -60,7 +60,7 @@
         align-items: center;
         justify-content: center;
         transition: all 0.2s ease;
-        
+
         &:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: scale(1.1);
@@ -152,7 +152,7 @@
     &:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        
+
         &::before {
             left: 100%;
         }
@@ -207,17 +207,19 @@
         cursor: not-allowed;
         transform: none !important;
         box-shadow: none !important;
-        
+
         &::before {
             display: none;
         }
-        
+
         &:hover {
             background: #f8f9fa !important;
             border-color: transparent !important;
             color: inherit !important;
-            
-            i, span, small {
+
+            i,
+            span,
+            small {
                 color: inherit !important;
             }
         }
@@ -254,7 +256,7 @@
     .type-options {
         grid-template-columns: 1fr;
     }
-    
+
     .modal-content {
         width: 95%;
         margin: 20px;

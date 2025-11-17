@@ -1,9 +1,4 @@
-<app-ui-page-layout 
-    [hasHeader]="true" 
-    [showBackButton]="true"
-    headerTitle="Statistiques de fin de partie"
-    (backClick)="onBackClick()">
-    
+<app-ui-page-layout [hasHeader]="true" [showBackButton]="true" headerTitle="Statistiques de fin de partie" (backClick)="onBackClick()">
     <div class="statistics-grid">
         <!-- Zone des statistiques globales - 1/3 hauteur, toute la largeur -->
         <section class="global-statistics">
@@ -26,20 +21,17 @@
                     <span class="stat-label">Total téléportations</span>
                     <span class="stat-value">{{ globalStatistics().totalTeleportations }}</span>
                 </div>
-                }
-                @if (globalStatistics().doorsManipulatedPercentage !== undefined) {
+                } @if (globalStatistics().doorsManipulatedPercentage !== undefined) {
                 <div class="stat-item">
                     <span class="stat-label">Portes manipulées</span>
                     <span class="stat-value">{{ globalStatistics().doorsManipulatedPercentage }}%</span>
                 </div>
-                }
-                @if (globalStatistics().sanctuariesUsedPercentage !== undefined) {
+                } @if (globalStatistics().sanctuariesUsedPercentage !== undefined) {
                 <div class="stat-item">
                     <span class="stat-label">Sanctuaires utilisés</span>
                     <span class="stat-value">{{ globalStatistics().sanctuariesUsedPercentage }}%</span>
                 </div>
-                }
-                @if (globalStatistics().flagHoldersCount !== undefined) {
+                } @if (globalStatistics().flagHoldersCount !== undefined) {
                 <div class="stat-item">
                     <span class="stat-label">Joueurs ayant détenu le drapeau</span>
                     <span class="stat-value">{{ globalStatistics().flagHoldersCount }}</span>
@@ -55,40 +47,68 @@
                 <table class="players-table">
                     <thead>
                         <tr>
-                            <th>
-                                Nom
-                            </th>
-                            <th class="sortable" (click)="sortBy('combatCount')" [class.active]="isSortActive('combatCount')" [attr.data-sort]="getSortIcon('combatCount')">
+                            <th>Nom</th>
+                            <th
+                                class="sortable"
+                                (click)="sortBy('combatCount')"
+                                [class.active]="isSortActive('combatCount')"
+                                [attr.data-sort]="getSortIcon('combatCount')"
+                            >
                                 <div class="header-content">
                                     <span class="header-text">Combats</span>
                                     <span class="sort-indicator"></span>
                                 </div>
                             </th>
-                            <th class="sortable" (click)="sortBy('combatWins')" [class.active]="isSortActive('combatWins')" [attr.data-sort]="getSortIcon('combatWins')">
+                            <th
+                                class="sortable"
+                                (click)="sortBy('combatWins')"
+                                [class.active]="isSortActive('combatWins')"
+                                [attr.data-sort]="getSortIcon('combatWins')"
+                            >
                                 <div class="header-content">
                                     <span class="header-text">Victoires</span>
                                     <span class="sort-indicator"></span>
                                 </div>
                             </th>
-                            <th class="sortable" (click)="sortBy('combatLosses')" [class.active]="isSortActive('combatLosses')" [attr.data-sort]="getSortIcon('combatLosses')">
+                            <th
+                                class="sortable"
+                                (click)="sortBy('combatLosses')"
+                                [class.active]="isSortActive('combatLosses')"
+                                [attr.data-sort]="getSortIcon('combatLosses')"
+                            >
                                 <div class="header-content">
                                     <span class="header-text">Défaites</span>
                                     <span class="sort-indicator"></span>
                                 </div>
                             </th>
-                            <th class="sortable" (click)="sortBy('healthLost')" [class.active]="isSortActive('healthLost')" [attr.data-sort]="getSortIcon('healthLost')">
+                            <th
+                                class="sortable"
+                                (click)="sortBy('healthLost')"
+                                [class.active]="isSortActive('healthLost')"
+                                [attr.data-sort]="getSortIcon('healthLost')"
+                            >
                                 <div class="header-content">
                                     <span class="header-text">PV perdus</span>
                                     <span class="sort-indicator"></span>
                                 </div>
                             </th>
-                            <th class="sortable" (click)="sortBy('healthDealt')" [class.active]="isSortActive('healthDealt')" [attr.data-sort]="getSortIcon('healthDealt')">
+                            <th
+                                class="sortable"
+                                (click)="sortBy('healthDealt')"
+                                [class.active]="isSortActive('healthDealt')"
+                                [attr.data-sort]="getSortIcon('healthDealt')"
+                            >
                                 <div class="header-content">
                                     <span class="header-text">PV infligés</span>
                                     <span class="sort-indicator"></span>
                                 </div>
                             </th>
-                            <th class="sortable" (click)="sortBy('tilesVisitedPercentage')" [class.active]="isSortActive('tilesVisitedPercentage')" [attr.data-sort]="getSortIcon('tilesVisitedPercentage')">
+                            <th
+                                class="sortable"
+                                (click)="sortBy('tilesVisitedPercentage')"
+                                [class.active]="isSortActive('tilesVisitedPercentage')"
+                                [attr.data-sort]="getSortIcon('tilesVisitedPercentage')"
+                            >
                                 <div class="header-content">
                                     <span class="header-text">Tuiles visitées (%)</span>
                                     <span class="sort-indicator"></span>

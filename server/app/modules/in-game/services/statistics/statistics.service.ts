@@ -16,7 +16,7 @@ export class StatisticsService {
 
     calculateAndStoreGameStatistics(session: InGameSession, winnerId: string, winnerName: string, gameStartTime: Date): GameStatisticsDto {
         const statistics = this.calculateGameStatistics(session, winnerId, winnerName, gameStartTime);
-        
+
         this.sessionStatistics.set(session.id, {
             data: statistics,
             timestamp: Date.now(),
@@ -35,9 +35,9 @@ export class StatisticsService {
     }
 
     private calculateGameStatistics(session: InGameSession, winnerId: string, winnerName: string, gameStartTime: Date): GameStatisticsDto {
-        const players = Object.values(session.inGamePlayers).filter(player => player.isInGame);
-        
-        const playersStatistics = players.map(player => this.calculatePlayerStatistics(player));
+        const players = Object.values(session.inGamePlayers).filter((player) => player.isInGame);
+
+        const playersStatistics = players.map((player) => this.calculatePlayerStatistics(player));
         const globalStatistics = this.calculateGlobalStatistics(session, gameStartTime);
 
         return {
@@ -65,7 +65,7 @@ export class StatisticsService {
 
     private calculateGlobalStatistics(session: InGameSession, gameStartTime: Date): GlobalStatisticsDto {
         const gameDuration = this.formatDuration(Date.now() - gameStartTime.getTime());
-        
+
         return {
             gameDuration,
             totalTurns: session.currentTurn.turnNumber,

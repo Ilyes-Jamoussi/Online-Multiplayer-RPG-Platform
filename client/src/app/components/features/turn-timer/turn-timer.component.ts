@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Signal } from '@angular/core';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { CombatService } from '@app/services/combat/combat.service';
 
 @Component({
@@ -14,7 +14,7 @@ import { CombatService } from '@app/services/combat/combat.service';
 export class TurnTimerComponent {
     constructor(
         private readonly inGameService: InGameService,
-        private readonly timerCoordinatorService: TimerCoordinatorService,
+        private readonly timerCoordinatorService: TimerService,
         private readonly combatService: CombatService,
     ) {}
 

@@ -5,7 +5,7 @@ import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
     selector: 'app-virtual-player-modal',
     standalone: true,
     templateUrl: './virtual-player-modal.component.html',
-    styleUrl: './virtual-player-modal.component.scss'
+    styleUrl: './virtual-player-modal.component.scss',
 })
 export class VirtualPlayerModalComponent {
     @Input() canAddVirtualPlayer = true;

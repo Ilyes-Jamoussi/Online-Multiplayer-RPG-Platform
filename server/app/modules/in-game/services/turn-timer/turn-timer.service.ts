@@ -118,7 +118,6 @@ export class TurnTimerService {
     }
 
     private autoEndTurn(session: InGameSession): void {
-        this.eventEmitter.emit(ServerEvents.TurnTimeout, { session });
         this.nextTurn(session);
     }
 

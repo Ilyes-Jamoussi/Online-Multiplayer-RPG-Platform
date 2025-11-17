@@ -5,10 +5,10 @@ import { AvailableActionDto } from '@app/dto/available-action-dto';
 import { AvailableActionsDto } from '@app/dto/available-actions-dto';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
@@ -26,9 +26,9 @@ describe('InGameService', () => {
     let service: InGameService;
     let mockInGameSocketService: jasmine.SpyObj<InGameSocketService>;
     let mockSessionService: jasmine.SpyObj<SessionService>;
-    let mockTimerCoordinatorService: jasmine.SpyObj<TimerCoordinatorService>;
+    let mockTimerService: jasmine.SpyObj<TimerService>;
     let mockPlayerService: jasmine.SpyObj<PlayerService>;
-    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
 
     const mockPlayer: Player = {
         id: 'player1',
@@ -97,7 +97,7 @@ describe('InGameService', () => {
             id: signal('session1'),
         });
 
-        mockTimerCoordinatorService = jasmine.createSpyObj('TimerCoordinatorService', ['startTurnTimer', 'stopTurnTimer', 'resetAllTimers'], {
+        mockTimerService = jasmine.createSpyObj('TimerService', ['startTurnTimer', 'stopTurnTimer', 'resetAllTimers'], {
             turnTimeRemaining: signal(TEST_TIMER_DURATION),
         });
 
@@ -105,19 +105,15 @@ describe('InGameService', () => {
             id: signal('player1'),
         });
 
-        mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', [
-            'displayErrorPopup',
-            'displayInformationPopup',
-            'showInfoToast',
-        ]);
+        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup', 'displayInformationPopup', 'showInfoToast']);
 
         TestBed.configureTestingModule({
             providers: [
                 { provide: InGameSocketService, useValue: mockInGameSocketService },
                 { provide: SessionService, useValue: mockSessionService },
-                { provide: TimerCoordinatorService, useValue: mockTimerCoordinatorService },
+                { provide: TimerService, useValue: mockTimerService },
                 { provide: PlayerService, useValue: mockPlayerService },
-                { provide: NotificationCoordinatorService, useValue: mockNotificationService },
+                { provide: NotificationService, useValue: mockNotificationService },
             ],
         });
         service = TestBed.inject(InGameService);
@@ -264,7 +260,7 @@ describe('InGameService', () => {
     describe('Reset', () => {
         it('should reset all state', () => {
             service.reset();
-            expect(mockTimerCoordinatorService.resetAllTimers).toHaveBeenCalled();
+            expect(mockTimerService.resetAllTimers).toHaveBeenCalled();
             expect(service.isGameStarted()).toBe(false);
             expect(service.isTransitioning()).toBe(false);
             expect(service.reachableTiles()).toEqual([]);
@@ -285,7 +281,7 @@ describe('InGameService', () => {
             const mockData = { isGameStarted: true } as Partial<InGameSession>;
             callback(mockData as InGameSession);
             expect(service.isGameStarted()).toBe(true);
-            expect(mockTimerCoordinatorService.startTurnTimer).toHaveBeenCalled();
+            expect(mockTimerService.startTurnTimer).toHaveBeenCalled();
         });
 
         it('should handle turn started', () => {
@@ -293,7 +289,7 @@ describe('InGameService', () => {
             const mockData = { isGameStarted: true } as Partial<InGameSession>;
             callback(mockData as InGameSession);
             expect(service.isGameStarted()).toBe(true);
-            expect(mockTimerCoordinatorService.startTurnTimer).toHaveBeenCalled();
+            expect(mockTimerService.startTurnTimer).toHaveBeenCalled();
         });
 
         it('should handle turn ended', () => {
@@ -312,7 +308,7 @@ describe('InGameService', () => {
 
             callback();
 
-            expect(mockTimerCoordinatorService.stopTurnTimer).toHaveBeenCalled();
+            expect(mockTimerService.stopTurnTimer).toHaveBeenCalled();
             expect(service.isTransitioning()).toBe(false);
         });
 
@@ -419,7 +415,7 @@ describe('InGameService', () => {
             const mockData = { winnerId: 'player1', winnerName: 'Winner' };
             callback(mockData);
             expect(service.gameOverData()).toEqual(mockData);
-            expect(mockTimerCoordinatorService.stopTurnTimer).toHaveBeenCalled();
+            expect(mockTimerService.stopTurnTimer).toHaveBeenCalled();
             jasmine.clock().uninstall();
         });
     });

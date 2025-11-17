@@ -7,7 +7,7 @@ import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layou
 import { ROUTES } from '@app/enums/routes.enum';
 import { GameModeOption, MapSizeOption } from '@app/interfaces/game-parameters.interface';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { MAP_SIZE_TO_MAX_PLAYERS } from '@app/constants/map-size.constants';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
@@ -25,7 +25,7 @@ export class ParametersPageComponent {
 
     constructor(
         private readonly router: Router,
-        private readonly notificationCoordinatorService: NotificationCoordinatorService,
+        private readonly notificationCoordinatorService: NotificationService,
         private readonly gameStoreService: GameStoreService,
     ) {}
 
