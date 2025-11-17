@@ -4,6 +4,7 @@ import { GameLogService } from '@app/modules/game-log/services/game-log.service'
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { successResponse } from '@app/utils/socket-response/socket-response.util';
 import { GameLogEvents } from '@common/enums/game-log-events.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -121,6 +122,62 @@ export class GameLogGateway {
 
         const entry = this.gameLogService.createGameOverEntry(payload.sessionId);
         this.emitLogEntry(session.inGameId, entry);
+    }
+
+    @OnEvent(ServerEvents.PlayerBoardedBoat)
+    handlePlayerBoardedBoat(payload: { session: InGameSession; playerId: string; boatId: string }): void {
+        const entry = this.gameLogService.createBoatEmbarkEntry(payload.session.id, payload.playerId);
+        this.emitLogEntry(payload.session.inGameId, entry);
+    }
+
+    @OnEvent(ServerEvents.PlayerDisembarkedBoat)
+    handlePlayerDisembarkedBoat(payload: { session: InGameSession; playerId: string }): void {
+        const entry = this.gameLogService.createBoatDisembarkEntry(payload.session.id, payload.playerId);
+        this.emitLogEntry(payload.session.inGameId, entry);
+    }
+
+    @OnEvent(ServerEvents.SanctuaryActionSuccess)
+    handleSanctuaryActionSuccess(payload: {
+        session: InGameSession;
+        playerId: string;
+        kind: PlaceableKind;
+        x: number;
+        y: number;
+        addedHealth?: number;
+        addedDefense?: number;
+        addedAttack?: number;
+    }): void {
+        const entry = this.gameLogService.createSanctuaryUseEntry(
+            payload.session.id,
+            payload.playerId,
+            payload.kind,
+            payload.x,
+            payload.y,
+            payload.addedHealth,
+            payload.addedDefense,
+            payload.addedAttack,
+        );
+        this.emitLogEntry(payload.session.inGameId, entry);
+    }
+
+    @OnEvent(ServerEvents.Teleported)
+    handlePlayerTeleported(payload: {
+        session: InGameSession;
+        playerId: string;
+        originX: number;
+        originY: number;
+        destinationX: number;
+        destinationY: number;
+    }): void {
+        const entry = this.gameLogService.createTeleportEntry(
+            payload.session.id,
+            payload.playerId,
+            payload.originX,
+            payload.originY,
+            payload.destinationX,
+            payload.destinationY,
+        );
+        this.emitLogEntry(payload.session.inGameId, entry);
     }
 
     private emitLogEntry(inGameId: string, entry: Omit<GameLogEntryDto, 'id' | 'timestamp'>): void {

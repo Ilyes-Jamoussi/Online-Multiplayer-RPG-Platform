@@ -195,5 +195,108 @@ export class GameLogService {
             icon: 'Check',
         };
     }
+
+    createBoatEmbarkEntry(sessionId: string, playerId: string): {
+        type: GameLogEventType;
+        message: string;
+        involvedPlayerIds: string[];
+        involvedPlayerNames: string[];
+        icon: string;
+    } {
+        const session = this.inGameSessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+
+        return {
+            type: GameLogEventType.BoatEmbark,
+            message: `${player.name} a embarqué sur un bateau`,
+            involvedPlayerIds: [playerId],
+            involvedPlayerNames: [player.name],
+            icon: 'Anchor',
+        };
+    }
+
+    createBoatDisembarkEntry(sessionId: string, playerId: string): {
+        type: GameLogEventType;
+        message: string;
+        involvedPlayerIds: string[];
+        involvedPlayerNames: string[];
+        icon: string;
+    } {
+        const session = this.inGameSessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+
+        return {
+            type: GameLogEventType.BoatDisembark,
+            message: `${player.name} a débarqué d'un bateau`,
+            involvedPlayerIds: [playerId],
+            involvedPlayerNames: [player.name],
+            icon: 'Anchor',
+        };
+    }
+
+    createSanctuaryUseEntry(
+        sessionId: string,
+        playerId: string,
+        kind: string,
+        x: number,
+        y: number,
+        addedHealth?: number,
+        addedDefense?: number,
+        addedAttack?: number,
+    ): {
+        type: GameLogEventType;
+        message: string;
+        involvedPlayerIds: string[];
+        involvedPlayerNames: string[];
+        icon: string;
+    } {
+        const session = this.inGameSessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+
+        let message: string;
+        const kindStr = String(kind);
+        if (kindStr === 'HEAL' && addedHealth) {
+            message = `${player.name} a utilisé un sanctuaire de soin à (${x}, ${y}) (+${addedHealth} santé)`;
+        } else if (kindStr === 'FIGHT' && (addedDefense || addedAttack)) {
+            const bonus = addedDefense || addedAttack || 0;
+            message = `${player.name} a utilisé un sanctuaire de combat à (${x}, ${y}) (+${bonus} attaque/défense)`;
+        } else {
+            message = `${player.name} a utilisé un sanctuaire à (${x}, ${y})`;
+        }
+
+        return {
+            type: GameLogEventType.SanctuaryUse,
+            message,
+            involvedPlayerIds: [playerId],
+            involvedPlayerNames: [player.name],
+            icon: 'Heart',
+        };
+    }
+
+    createTeleportEntry(
+        sessionId: string,
+        playerId: string,
+        originX: number,
+        originY: number,
+        destinationX: number,
+        destinationY: number,
+    ): {
+        type: GameLogEventType;
+        message: string;
+        involvedPlayerIds: string[];
+        involvedPlayerNames: string[];
+        icon: string;
+    } {
+        const session = this.inGameSessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+
+        return {
+            type: GameLogEventType.Teleport,
+            message: `${player.name} s'est téléporté de (${originX}, ${originY}) → (${destinationX}, ${destinationY})`,
+            involvedPlayerIds: [playerId],
+            involvedPlayerNames: [player.name],
+            icon: 'LocationDot',
+        };
+    }
 }
 

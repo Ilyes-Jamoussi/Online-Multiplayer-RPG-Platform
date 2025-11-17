@@ -1,4 +1,5 @@
 import { VIRTUAL_PLAYER_ACTION_DELAY_MS, VIRTUAL_PLAYER_MOVEMENT_DELAY_MS } from '@app/constants/virtual-player.constants';
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
 import { Game } from '@app/modules/game-store/entities/game.entity';
 import { ActionService } from '@app/modules/in-game/services/action/action.service';
@@ -13,7 +14,6 @@ import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ServerEvents } from '@app/enums/server-events.enum';
 
 @Injectable()
 export class GameplayService {
@@ -107,13 +107,13 @@ export class GameplayService {
 
         session.isAdminModeActive = !session.isAdminModeActive;
         this.sessionRepository.update(session);
-        
+
         this.eventEmitter.emit(ServerEvents.AdminModeToggled, {
             sessionId: session.id,
             playerId,
             isAdminModeActive: session.isAdminModeActive,
         });
-        
+
         return session;
     }
 

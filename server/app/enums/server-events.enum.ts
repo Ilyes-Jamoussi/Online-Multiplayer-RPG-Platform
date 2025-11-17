@@ -31,6 +31,7 @@ export enum ServerEvents {
     VirtualPlayerTurn = 'virtual-player-turn',
 
     PlayerMoved = 'player-moved',
+    Teleported = 'teleported',
     PlayerReachableTiles = 'player-reachable-tiles',
     PlayerUpdated = 'player-updated',
     PlayerAvailableActions = 'player-available-actions',
