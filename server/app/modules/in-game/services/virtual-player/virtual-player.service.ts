@@ -7,9 +7,7 @@ import { VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS, VIRTUAL_PLAYER_THINKING_DELAY_MAX
 
 @Injectable()
 export class VirtualPlayerService {
-    constructor(
-        private readonly gameplayService: GameplayService,
-    ) {}
+    constructor(private readonly gameplayService: GameplayService) {}
 
     @OnEvent(ServerEvents.CombatStarted)
     handleCombatStarted(payload: { sessionId: string; attackerId: string; targetId: string }): void {
@@ -28,10 +26,11 @@ export class VirtualPlayerService {
     }
 
     private async simulateThinkingTime(): Promise<void> {
-        const randomDelay = Math.floor(Math.random() * (VIRTUAL_PLAYER_THINKING_DELAY_MAX_MS - VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS + 1)) 
-            + VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS;
-        
-        return new Promise(resolve => setTimeout(resolve, randomDelay));
+        const randomDelay =
+            Math.floor(Math.random() * (VIRTUAL_PLAYER_THINKING_DELAY_MAX_MS - VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS + 1)) +
+            VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS;
+
+        return new Promise((resolve) => setTimeout(resolve, randomDelay));
     }
 
     private executeVPTurn(sessionId: string, playerId: string, playerType: VirtualPlayerType): void {

@@ -1,26 +1,35 @@
 /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function -- OpenAPI DTO generation placeholders */
-import { Controller, Post, Body } from '@nestjs/common';
-import { PlayerMoveDto } from '@app/modules/in-game/dto/player-move.dto';
-import { PlayerMovedDto } from '@app/modules/in-game/dto/player-moved.dto';
+import { AdminModeToggledDto } from '@app/modules/in-game/dto/admin-mode-toggled.dto';
+import { AttackPlayerActionDto } from '@app/modules/in-game/dto/attack-player-action.dto';
+import { AvailableActionsDto } from '@app/modules/in-game/dto/available-actions.dto';
+import { CombatAbandonDto } from '@app/modules/in-game/dto/combat-abandon.dto';
 import { CombatChoiceDto } from '@app/modules/in-game/dto/combat-choice.dto';
 import { CombatPostureSelectedDto } from '@app/modules/in-game/dto/combat-posture-selected.dto';
-import { PlayerCombatWinsDto } from '@app/modules/in-game/dto/player-combat-wins.dto';
 import { CombatStartedDto } from '@app/modules/in-game/dto/combat-started.dto';
-import { PlayerCombatLossesDto } from '@app/modules/in-game/dto/player-combat-losses.dto';
-import { PlayerLeftSessionDto } from '@app/modules/in-game/dto/player-left-session.dto';
-import { ToggleDoorActionDto } from '@app/modules/in-game/dto/toggle-door-action.dto';
-import { CombatAbandonDto } from '@app/modules/in-game/dto/combat-abandon.dto';
-import { PlayerCombatDrawsDto } from '@app/modules/in-game/dto/player-combat-draws.dto';
 import { CombatVictoryDto } from '@app/modules/in-game/dto/combat-victory.dto';
-import { PlayerCombatStatsDto } from '@app/modules/in-game/dto/player-combat-stats.dto';
-import { GameOverDto } from '@app/modules/in-game/dto/game-over.dto';
-import { PlayerTeleportedDto } from '@app/modules/in-game/dto/player-teleported.dto';
 import { DoorToggledDto } from '@app/modules/in-game/dto/door-toggled.dto';
-import { PlayerTeleportDto } from '@app/modules/in-game/dto/player-teleport.dto';
-import { AdminModeToggledDto } from '@app/modules/in-game/dto/admin-mode-toggled.dto';
-import { PlayerHealthChangedDto } from '@app/modules/in-game/dto/player-health-changed.dto';
-import { AttackPlayerActionDto } from '@app/modules/in-game/dto/attack-player-action.dto';
+import { EmptyResponseDto } from '@app/modules/in-game/dto/empty-response.dto';
+import { GameOverDto } from '@app/modules/in-game/dto/game-over.dto';
 import { GameStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
+import { OpenSanctuaryDto } from '@app/modules/in-game/dto/open-sanctuary.dto';
+import { PlaceablePositionUpdatedDto } from '@app/modules/in-game/dto/placeable-position-updated.dto';
+import { PlayerBoardedBoatDto } from '@app/modules/in-game/dto/player-boarded-boat.dto';
+import { PlayerBonusesChangedDto } from '@app/modules/in-game/dto/player-bonuses-changed.dto';
+import { PlayerCombatDrawsDto } from '@app/modules/in-game/dto/player-combat-draws.dto';
+import { PlayerCombatLossesDto } from '@app/modules/in-game/dto/player-combat-losses.dto';
+import { PlayerCombatStatsDto } from '@app/modules/in-game/dto/player-combat-stats.dto';
+import { PlayerCombatWinsDto } from '@app/modules/in-game/dto/player-combat-wins.dto';
+import { PlayerDisembarkedBoatDto } from '@app/modules/in-game/dto/player-disembarked-boat.dto';
+import { PlayerHealthChangedDto } from '@app/modules/in-game/dto/player-health-changed.dto';
+import { PlayerLeftSessionDto } from '@app/modules/in-game/dto/player-left-session.dto';
+import { PlayerMoveDto } from '@app/modules/in-game/dto/player-move.dto';
+import { PlayerMovedDto } from '@app/modules/in-game/dto/player-moved.dto';
+import { PlayerTeleportDto } from '@app/modules/in-game/dto/player-teleport.dto';
+import { PlayerTeleportedDto } from '@app/modules/in-game/dto/player-teleported.dto';
+import { SanctuaryActionFailedDto } from '@app/modules/in-game/dto/sanctuary-action-failed.dto';
+import { SanctuaryActionSuccessDto } from '@app/modules/in-game/dto/sanctuary-action-success.dto';
+import { ToggleDoorActionDto } from '@app/modules/in-game/dto/toggle-door-action.dto';
+import { Body, Controller, Post } from '@nestjs/common';
 
 @Controller('in-game')
 export class InGameController {
@@ -86,4 +95,31 @@ export class InGameController {
 
     @Post('game-statistics')
     gameStatistics(@Body() data: GameStatisticsDto): void {}
+
+    @Post('empty-response')
+    emptyResponse(@Body() data: EmptyResponseDto): void {}
+
+    @Post('placeable-position-updated')
+    placeablePositionUpdated(@Body() data: PlaceablePositionUpdatedDto): void {}
+
+    @Post('open-sanctuary')
+    openSanctuary(@Body() data: OpenSanctuaryDto): void {}
+
+    @Post('sanctuary-action-failed')
+    sanctuaryActionFailed(@Body() data: SanctuaryActionFailedDto): void {}
+
+    @Post('sanctuary-action-success')
+    sanctuaryActionSuccess(@Body() data: SanctuaryActionSuccessDto): void {}
+
+    @Post('player-bonuses-changed')
+    playerBonusesChanged(@Body() data: PlayerBonusesChangedDto): void {}
+
+    @Post('available-actions')
+    availableActions(@Body() data: AvailableActionsDto): void {}
+
+    @Post('player-boarded-boat')
+    playerBoardedBoat(@Body() data: PlayerBoardedBoatDto): void {}
+
+    @Post('player-disembarked-boat')
+    playerDisembarkedBoat(@Body() data: PlayerDisembarkedBoatDto): void {}
 }

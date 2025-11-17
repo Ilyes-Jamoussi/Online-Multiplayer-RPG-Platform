@@ -52,7 +52,10 @@ export class SessionService {
             combatWins: 0,
             combatLosses: 0,
             combatDraws: 0,
+            hasCombatBonus: false,
             actionsRemaining: 1,
+            boatSpeedBonus: 0,
+            boatSpeed: 0,
         };
         session.players.push(player);
 
@@ -144,15 +147,11 @@ export class SessionService {
     }
 
     private createVirtualPlayer(virtualPlayerType: VirtualPlayerType, existingPlayers: Player[]): Player {
-        const availableNames = VIRTUAL_PLAYER_NAMES.filter(botName =>
-            !existingPlayers.some(player => player.name === botName)
-        );
+        const availableNames = VIRTUAL_PLAYER_NAMES.filter((botName) => !existingPlayers.some((player) => player.name === botName));
         const name = availableNames[Math.floor(Math.random() * availableNames.length)] || `Bot-${Date.now()}`;
 
         const avatars = Object.values(Avatar);
-        const availableAvatars = avatars.filter(botAvatar =>
-            !existingPlayers.some(player => player.avatar === botAvatar)
-        );
+        const availableAvatars = avatars.filter((botAvatar) => !existingPlayers.some((player) => player.avatar === botAvatar));
         const avatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
 
         const attackDice = Math.random() > RANDOM_THRESHOLD ? Dice.D4 : Dice.D6;
@@ -175,10 +174,8 @@ export class SessionService {
             speed: BASE_STAT_VALUE + speedBonus,
             baseAttack: BASE_STAT_VALUE,
             attackBonus: 0,
-            attack: BASE_STAT_VALUE,
             baseDefense: BASE_STAT_VALUE,
             defenseBonus: 0,
-            defense: BASE_STAT_VALUE,
             attackDice,
             defenseDice,
             x: 0,
@@ -190,7 +187,10 @@ export class SessionService {
             combatWins: 0,
             combatLosses: 0,
             combatDraws: 0,
+            hasCombatBonus: false,
             virtualPlayerType,
+            boatSpeedBonus: 0,
+            boatSpeed: 0,
         };
     }
 
@@ -288,7 +288,10 @@ export class SessionService {
             combatWins: 0,
             combatLosses: 0,
             combatDraws: 0,
+            hasCombatBonus: false,
             actionsRemaining: 1,
+            boatSpeedBonus: 0,
+            boatSpeed: 0,
         };
         return {
             players: [adminPlayer],

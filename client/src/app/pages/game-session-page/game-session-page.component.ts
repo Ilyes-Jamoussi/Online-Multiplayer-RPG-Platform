@@ -9,6 +9,7 @@ import { GameMapComponent } from '@app/components/features/game-map/game-map.com
 import { GameOverOverlayComponent } from '@app/components/features/game-over-overlay/game-over-overlay.component';
 import { PlayerInfoComponent } from '@app/components/features/player-info/player-info.component';
 import { PlayersListComponent } from '@app/components/features/players-list/players-list.component';
+import { SanctuaryOverlayComponent } from '@app/components/features/sanctuary-overlay/sanctuary-overlay.component';
 import { ToastNotificationDisplayComponent } from '@app/components/features/toast-notification-display/toast-notification-display.component';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameKeyboardEventsService } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
@@ -26,6 +27,7 @@ import { MapSize } from '@common/enums/map-size.enum';
         PlayerInfoComponent,
         PlayersListComponent,
         CombatOverlayComponent,
+        SanctuaryOverlayComponent,
         GameOverOverlayComponent,
         ToastNotificationDisplayComponent,
         MessagesZoneComponent,

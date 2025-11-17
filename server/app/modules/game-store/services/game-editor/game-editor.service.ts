@@ -4,12 +4,14 @@ import { GameEditorTileDto } from '@app/modules/game-store/dto/game-editor-tile.
 import { GameEditorDto } from '@app/modules/game-store/dto/game-editor.dto';
 import { GamePreviewDto } from '@app/modules/game-store/dto/game-preview.dto';
 import { PatchGameEditorDto } from '@app/modules/game-store/dto/patch-game-editor.dto';
+import { TeleportChannelDto } from '@app/modules/game-store/dto/teleport-channel.dto';
 import { Game } from '@app/modules/game-store/entities/game.entity';
-import { GameDocument } from '@app/types/mongoose-documents.types';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
+import { TeleportChannel } from '@app/modules/game-store/entities/teleport-channel.entity';
 import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { ImageService } from '@app/modules/game-store/services/image/image.service';
 import { GameDtoMapper } from '@app/modules/game-store/utils/game-dto-mapper/game-dto-mapper.util';
+import { GameDocument } from '@app/types/mongoose-documents.types';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -50,6 +52,7 @@ export class GameEditorService {
             ...(await this.buildImageUpdate(dto, id)),
             ...{ tiles: dto.tiles ? this.mapTiles(dto.tiles) : undefined },
             ...{ objects: dto.objects ? this.mapObjects(dto.objects) : undefined },
+            ...{ teleportChannels: dto.teleportChannels ? this.mapTeleportChannels(dto.teleportChannels) : undefined },
             lastModified: new Date(),
             draft: false,
             visibility: false,
@@ -99,6 +102,14 @@ export class GameEditorService {
             y: object.y,
             placed: object.placed,
             orientation: object.orientation,
+        }));
+    }
+
+    private mapTeleportChannels(teleportChannels: TeleportChannelDto[]): TeleportChannel[] {
+        if (!teleportChannels) return [];
+        return teleportChannels.map((channel) => ({
+            channelNumber: channel.channelNumber,
+            tiles: channel.tiles,
         }));
     }
 }

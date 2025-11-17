@@ -1,0 +1,41 @@
+@if (openedSanctuary) {
+<div class="sanctuary-overlay" (click)="close()">
+    <div class="sanctuary-modal" (click)="$event.stopPropagation()">
+        <div class="sanctuary-header">
+            <button class="close-btn" (click)="close()" aria-label="Fermer">✕</button>
+            <h2>{{ sanctuaryName }}</h2>
+        </div>
+
+        <div class="sanctuary-content">
+            <div class="sanctuary-image-container">
+                <img [src]="sanctuaryImage" [alt]="sanctuaryName" class="sanctuary-image" />
+            </div>
+
+            @if (showActions) {
+            <div class="sanctuary-actions">
+                <p class="action-instruction">Choisissez votre action :</p>
+
+                <div class="action-buttons">
+                    <button class="action-btn normal" (click)="performAction(false)">
+                        <span class="btn-icon">✨</span>
+                        <span class="btn-text">Action normale</span>
+                    </button>
+                    <button class="action-btn double" (click)="performAction(true)">
+                        <span class="btn-icon">⚡</span>
+                        <span class="btn-text">Doubler l'action</span>
+                        <span class="btn-subtext">50% de réussite</span>
+                    </button>
+                </div>
+            </div>
+            } @if (hasResult) {
+            <div class="sanctuary-result">
+                <div class="result-icon success">✓</div>
+                <h3 class="result-title">Action réussie !</h3>
+                <p class="result-message">{{ resultMessage }}</p>
+                <button class="result-close-btn" (click)="close()">Fermer</button>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+}

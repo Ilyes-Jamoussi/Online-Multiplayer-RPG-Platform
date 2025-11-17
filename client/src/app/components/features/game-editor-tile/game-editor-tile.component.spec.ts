@@ -1,11 +1,12 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
-import { ActiveTool, GameEditorIssues, ToolType, Vector2 } from '@app/interfaces/game-editor.interface';
+import { ActiveTool, GameEditorIssues, ToolType } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
 import { TileKind } from '@common/enums/tile.enum';
+import { Position } from '@common/interfaces/position.interface';
 import { GameEditorTileComponent } from './game-editor-tile.component';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stubs
@@ -77,7 +78,7 @@ describe('GameEditorTileComponent', () => {
     };
 
     let activeToolState: ActiveTool | null = null;
-    let hoveredTilesState: Vector2[] = [];
+    let hoveredTilesState: Position[] = [];
 
     beforeEach(async () => {
         interactionsSpy = jasmine.createSpyObj<GameEditorInteractionsService>('GameEditorInteractionsService', [
@@ -117,7 +118,7 @@ describe('GameEditorTileComponent', () => {
         });
 
         Object.defineProperty(interactionsSpy, 'hoveredTiles', {
-            get: (): (() => readonly Vector2[]) => {
+            get: (): (() => readonly Position[]) => {
                 return () => hoveredTilesState;
             },
             configurable: true,
@@ -223,6 +224,12 @@ describe('GameEditorTileComponent', () => {
     });
 
     it('onMouseUp right should also revertToPreviousTool', () => {
+        activeToolState = {
+            type: ToolType.TileBrushTool,
+            tileKind: TileKind.BASE,
+            leftDrag: false,
+            rightDrag: false,
+        };
         let prevented = false;
         const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: 2 });
         component.onMouseUp(evt);
@@ -312,7 +319,7 @@ describe('GameEditorTileComponent', () => {
     it('isDropHovered returns false when hoveredTiles is undefined', () => {
         const original = Object.getOwnPropertyDescriptor(interactionsSpy, 'hoveredTiles');
         Object.defineProperty(interactionsSpy, 'hoveredTiles', {
-            get: (): (() => readonly Vector2[] | undefined) => () => undefined,
+            get: (): (() => readonly Position[] | undefined) => () => undefined,
             configurable: true,
         });
         expect(component.isDropHovered).toBeFalse();

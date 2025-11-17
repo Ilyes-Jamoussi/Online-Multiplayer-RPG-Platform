@@ -7,9 +7,9 @@ export class AddVirtualPlayerDto {
     @IsString()
     sessionId: string;
 
-    @ApiProperty({ 
+    @ApiProperty({
         enum: VirtualPlayerType,
-        enumName: 'VirtualPlayerType'
+        enumName: 'VirtualPlayerType',
     })
     @IsEnum(VirtualPlayerType)
     virtualPlayerType: VirtualPlayerType;

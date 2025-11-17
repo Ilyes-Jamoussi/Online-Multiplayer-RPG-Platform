@@ -1,22 +1,23 @@
 /* eslint-disable max-lines -- Test file */
 import { TestBed } from '@angular/core/testing';
-import { GameMapService } from './game-map.service';
-import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
-import { InGameService } from '@app/services/in-game/in-game.service';
 import { AssetsService } from '@app/services/assets/assets.service';
+import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
+import { InGameService } from '@app/services/in-game/in-game.service';
+import { NotificationService } from '@app/services/notification/notification.service';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
+import { Avatar } from '@common/enums/avatar.enum';
+import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
-import { Avatar } from '@common/enums/avatar.enum';
-import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { GameMapService } from './game-map.service';
 
-import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { of, throwError } from 'rxjs';
 
 const TEST_COORDINATE_5 = 5;
 const TEST_COORDINATE_10 = 10;
@@ -27,7 +28,7 @@ const TEST_COORDINATE_20 = 20;
 describe('GameMapService', () => {
     let service: GameMapService;
     let mockGameHttpService: jasmine.SpyObj<GameHttpService>;
-    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
     let mockInGameService: jasmine.SpyObj<InGameService>;
     let mockAssetsService: jasmine.SpyObj<AssetsService>;
     let mockInGameSocketService: jasmine.SpyObj<InGameSocketService>;
@@ -46,10 +47,8 @@ describe('GameMapService', () => {
         speed: 3,
         baseAttack: 4,
         attackBonus: 0,
-        attack: 4,
         baseDefense: 4,
         defenseBonus: 0,
-        defense: 4,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
         x: TEST_COORDINATE_5,
@@ -61,6 +60,9 @@ describe('GameMapService', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     const mockTile = {
@@ -89,11 +91,12 @@ describe('GameMapService', () => {
         objects: [mockObject],
         gridPreviewUrl: '',
         lastModified: '',
+        teleportChannels: [],
     };
 
     beforeEach(() => {
         mockGameHttpService = jasmine.createSpyObj('GameHttpService', ['getGameEditorById']);
-        mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', ['displayErrorPopup']);
+        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
         mockInGameService = jasmine.createSpyObj('InGameService', ['deactivateActionMode', 'toggleDoorAction', 'getPlayerByPlayerId'], {
             inGamePlayers: signal({ player1: mockPlayer }),
             startPoints: signal([{ id: 'start1', x: 0, y: 0 }]),
@@ -104,13 +107,13 @@ describe('GameMapService', () => {
             currentlyPlayers: [mockPlayer],
         });
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getAvatarStaticImage']);
-        mockInGameSocketService = jasmine.createSpyObj('InGameSocketService', ['onDoorToggled']);
+        mockInGameSocketService = jasmine.createSpyObj('InGameSocketService', ['onDoorToggled', 'onPlaceablePositionUpdated']);
 
         TestBed.configureTestingModule({
             providers: [
                 GameMapService,
                 { provide: GameHttpService, useValue: mockGameHttpService },
-                { provide: NotificationCoordinatorService, useValue: mockNotificationService },
+                { provide: NotificationService, useValue: mockNotificationService },
                 { provide: InGameService, useValue: mockInGameService },
                 { provide: AssetsService, useValue: mockAssetsService },
                 { provide: InGameSocketService, useValue: mockInGameSocketService },
@@ -148,7 +151,7 @@ describe('GameMapService', () => {
                 configurable: true,
             });
             Object.defineProperty(mockInGameService, 'availableActions', {
-                value: signal([{ x: 1, y: 1, type: 'ATTACK' }]),
+                value: signal([{ x: 1, y: 1, type: AvailableActionType.ATTACK }]),
                 configurable: true,
             });
 
@@ -162,7 +165,7 @@ describe('GameMapService', () => {
                 configurable: true,
             });
             Object.defineProperty(mockInGameService, 'availableActions', {
-                value: signal([{ x: 1, y: 1, type: 'DOOR' }]),
+                value: signal([{ x: 1, y: 1, type: AvailableActionType.DOOR }]),
                 configurable: true,
             });
 
@@ -179,12 +182,12 @@ describe('GameMapService', () => {
     describe('Actions', () => {
         it('should get action type and deactivate action mode', () => {
             Object.defineProperty(mockInGameService, 'availableActions', {
-                value: signal([{ x: 1, y: 1, type: 'ATTACK' }]),
+                value: signal([{ x: 1, y: 1, type: AvailableActionType.ATTACK }]),
                 configurable: true,
             });
 
             const actionType = service.getActionTypeAt(1, 1);
-            expect(actionType).toBe('ATTACK');
+            expect(actionType).toBe(AvailableActionType.ATTACK);
             expect(mockInGameService.deactivateActionMode).toHaveBeenCalled();
         });
 

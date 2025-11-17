@@ -1,5 +1,5 @@
 export enum ChatEvents {
-    SendMessage = 'sendMessage',
-    MessageReceived = 'messageReceived',
-    LoadMessages = 'loadMessages',
+    SendMessage = 'send-message',
+    MessageReceived = 'message-received',
+    LoadMessages = 'load-messages',
 }

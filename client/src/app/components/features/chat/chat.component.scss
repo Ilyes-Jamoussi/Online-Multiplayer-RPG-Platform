@@ -40,10 +40,10 @@
     .message {
         display: flex;
         animation: messageSlide 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        
+
         &.my-message {
             justify-content: flex-end;
-            
+
             .message-bubble {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
@@ -51,10 +51,10 @@
                 margin-left: 15%;
             }
         }
-        
+
         &.other-message {
             justify-content: flex-start;
-            
+
             .message-bubble {
                 background: white;
                 color: #2d3748;
@@ -70,7 +70,7 @@
         border-radius: 16px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         max-width: 85%;
-        
+
         .message-header {
             display: flex;
             justify-content: space-between;
@@ -80,17 +80,17 @@
             opacity: 0.7;
             gap: 0.5rem;
         }
-        
+
         .author {
             font-weight: 600;
             font-size: 0.75rem;
         }
-        
+
         .time {
             font-size: 0.65rem;
             white-space: nowrap;
         }
-        
+
         .content {
             word-wrap: break-word;
             line-height: 1.3;
@@ -118,7 +118,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            
+
             i {
                 font-size: 1rem;
             }

@@ -1,5 +1,7 @@
-import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { MoveResult } from '@app/interfaces/move-result.interface';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { BOAT_SPEED_BONUS } from '@common/constants/game.constants';
 import { Player } from '@common/interfaces/player.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { StartPoint } from '@common/interfaces/start-point.interface';
@@ -39,6 +41,19 @@ export class InGameSessionRepository {
         return player.health;
     }
 
+    increasePlayerHealth(sessionId: string, playerId: string, health: number): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.health += health;
+        if (player.health > player.maxHealth) player.health = player.maxHealth;
+        this.eventEmitter.emit(ServerEvents.PlayerHealthChanged, {
+            sessionId,
+            playerId,
+            newHealth: player.health,
+        });
+    }
+
     resetPlayerHealth(sessionId: string, playerId: string): void {
         const session = this.findById(sessionId);
         const player = session.inGamePlayers[playerId];
@@ -49,6 +64,51 @@ export class InGameSessionRepository {
             sessionId,
             playerId,
             newHealth: player.health,
+        });
+    }
+
+    applyPlayerBonus(sessionId: string, playerId: string, value: 1 | 2): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.attackBonus += value;
+        player.defenseBonus += value;
+
+        this.eventEmitter.emit(ServerEvents.PlayerBonusesChanged, {
+            sessionId,
+            playerId,
+            attackBonus: player.attackBonus,
+            defenseBonus: player.defenseBonus,
+        });
+    }
+
+    applyPlayerBoatSpeedBonus(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        this.updatePlayer(sessionId, playerId, { boatSpeedBonus: BOAT_SPEED_BONUS, boatSpeed: BOAT_SPEED_BONUS });
+    }
+
+    resetPlayerBoatSpeedBonus(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        this.updatePlayer(sessionId, playerId, { boatSpeedBonus: 0, boatSpeed: 0 });
+    }
+
+    resetPlayerBonuses(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        player.attackBonus = 0;
+        player.defenseBonus = 0;
+        player.hasCombatBonus = false;
+
+        this.eventEmitter.emit(ServerEvents.PlayerBonusesChanged, {
+            sessionId,
+            playerId,
+            attackBonus: player.attackBonus,
+            defenseBonus: player.defenseBonus,
         });
     }
 
@@ -135,8 +195,10 @@ export class InGameSessionRepository {
         session.inGamePlayers[playerId].isInGame = false;
 
         if (player.x >= 0 && player.y >= 0) {
-            this.gameCache.clearTileOccupant(sessionId, player.x, player.y);
+            this.gameCache.clearTileOccupant(sessionId, { x: player.x, y: player.y });
         }
+
+        this.gameCache.reenablePlaceablesForPlayer(sessionId, playerId);
 
         player.x = -1;
         player.y = -1;
@@ -163,13 +225,7 @@ export class InGameSessionRepository {
         return session.startPoints.find((s) => s.id === startPointId);
     }
 
-    movePlayerPosition(
-        sessionId: string,
-        playerId: string,
-        newX: number,
-        newY: number,
-        cost: number,
-    ): { oldX: number; oldY: number; newX: number; newY: number } {
+    movePlayerPosition(sessionId: string, playerId: string, newX: number, newY: number, cost: number): MoveResult {
         const session = this.findById(sessionId);
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
@@ -177,11 +233,16 @@ export class InGameSessionRepository {
         const oldX = player.x;
         const oldY = player.y;
 
-        this.gameCache.moveTileOccupant(sessionId, newX, newY, player);
+        this.gameCache.moveTileOccupant(sessionId, { x: newX, y: newY }, player);
 
         player.x = newX;
         player.y = newY;
-        player.speed = player.speed - cost;
+
+        if (player.onBoatId && player.boatSpeed) {
+            player.boatSpeed = player.boatSpeed - cost;
+        } else {
+            player.speed = player.speed - cost;
+        }
 
         this.eventEmitter.emit(ServerEvents.PlayerMoved, {
             session,
@@ -189,6 +250,7 @@ export class InGameSessionRepository {
             x: newX,
             y: newY,
             speed: player.speed,
+            boatSpeed: player.boatSpeed,
         });
 
         return { oldX, oldY, newX, newY };

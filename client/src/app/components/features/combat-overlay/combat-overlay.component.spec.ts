@@ -1,16 +1,16 @@
 /* eslint-disable max-lines -- Extensive tests needed for 100% code coverage */
 import { WritableSignal, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { DamageDisplay } from '@app/interfaces/damage-display.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { Avatar } from '@common/enums/avatar.enum';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
-import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Player } from '@common/interfaces/player.interface';
-import { DamageDisplay } from '@app/interfaces/damage-display.interface';
 import { CombatOverlayComponent } from './combat-overlay.component';
 
 const MOCK_HEALTH_PLAYER_A = 8;
@@ -40,7 +40,7 @@ describe('CombatOverlayComponent', () => {
     let mockCombatService: MockCombatService;
     let mockInGameService: jasmine.SpyObj<InGameService>;
     let mockAssetsService: jasmine.SpyObj<AssetsService>;
-    let mockTimerCoordinatorService: jasmine.SpyObj<TimerCoordinatorService>;
+    let mockTimerService: jasmine.SpyObj<TimerService>;
 
     const mockCombatData = {
         attackerId: 'player1',
@@ -62,10 +62,8 @@ describe('CombatOverlayComponent', () => {
         speed: 4,
         baseAttack: 4,
         attackBonus: 0,
-        attack: 4,
         baseDefense: 4,
         defenseBonus: 0,
-        defense: 4,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
         x: 0,
@@ -77,6 +75,9 @@ describe('CombatOverlayComponent', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     const mockPlayerB: Player = {
@@ -93,10 +94,8 @@ describe('CombatOverlayComponent', () => {
         speed: 4,
         baseAttack: 4,
         attackBonus: 0,
-        attack: 4,
         baseDefense: 4,
         defenseBonus: 0,
-        defense: 4,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
         x: 0,
@@ -108,6 +107,9 @@ describe('CombatOverlayComponent', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     const mockVictoryData = {
@@ -122,9 +124,13 @@ describe('CombatOverlayComponent', () => {
         damage: MOCK_DAMAGE,
         attackRoll: 4,
         attackDice: Dice.D6,
+        attackBonus: 0,
+        attackPostureBonus: 0,
         totalAttack: 8,
         defenseRoll: 2,
         defenseDice: Dice.D6,
+        defenseBonus: 0,
+        defensePostureBonus: 0,
         totalDefense: 6,
         tileEffect: 0,
         visible: true,
@@ -171,8 +177,8 @@ describe('CombatOverlayComponent', () => {
         mockAssetsService.getAvatarStaticImage.and.returnValue('avatar.png');
         mockAssetsService.getDiceImage.and.returnValue('dice.png');
 
-        mockTimerCoordinatorService = jasmine.createSpyObj('TimerCoordinatorService', ['getPausedTurnTime']);
-        mockTimerCoordinatorService.getPausedTurnTime.and.returnValue(MOCK_TURN_TIME);
+        mockTimerService = jasmine.createSpyObj('TimerService', ['getPausedTurnTime']);
+        mockTimerService.getPausedTurnTime.and.returnValue(MOCK_TURN_TIME);
 
         await TestBed.configureTestingModule({
             imports: [CombatOverlayComponent],
@@ -180,7 +186,7 @@ describe('CombatOverlayComponent', () => {
                 { provide: CombatService, useValue: mockCombatService },
                 { provide: InGameService, useValue: mockInGameService },
                 { provide: AssetsService, useValue: mockAssetsService },
-                { provide: TimerCoordinatorService, useValue: mockTimerCoordinatorService },
+                { provide: TimerService, useValue: mockTimerService },
             ],
         }).compileComponents();
 

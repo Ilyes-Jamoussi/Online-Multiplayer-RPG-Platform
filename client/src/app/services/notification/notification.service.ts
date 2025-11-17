@@ -3,17 +3,33 @@ import { NotificationMessage } from '@app/interfaces/notification-message.interf
 import { DEFAULT_NOTIFICATION_DURATION_MS } from '@app/constants/notification.constants';
 import { Toast } from '@app/interfaces/toast.interface';
 import { ToastType } from '@app/types/notifications.types';
+import { NotificationSocketService } from '@app/services/notification-socket/notification-socket.service';
+import { ROUTES } from '@app/enums/routes.enum';
 
 @Injectable({
     providedIn: 'root',
 })
-export class NotificationCoordinatorService {
+export class NotificationService {
     private readonly _popupNotification = signal<NotificationMessage | null>(null);
     private readonly _toastNotifications = signal<Toast[]>([]);
     private toastIdCounter = 0;
 
     readonly notification = this._popupNotification.asReadonly();
     readonly toasts = this._toastNotifications.asReadonly();
+
+    constructor(private readonly notificationSocketService: NotificationSocketService) {
+        this.initListeners();
+    }
+
+    private initListeners(): void {
+        this.notificationSocketService.onErrorMessage((message: string) => {
+            this.displayErrorPopup({
+                title: 'Erreur',
+                message,
+                redirectRoute: ROUTES.HomePage,
+            });
+        });
+    }
 
     displayErrorPopup(error: Omit<NotificationMessage, 'type'>): void {
         this._popupNotification.set({ ...error, type: 'error' });

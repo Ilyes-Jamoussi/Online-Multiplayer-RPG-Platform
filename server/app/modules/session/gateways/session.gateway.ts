@@ -12,6 +12,7 @@ import { SessionService } from '@app/modules/session/services/session.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { SessionEvents } from '@common/enums/session-events.enum';
 import { SocketResponse } from '@common/types/socket-response.type';
@@ -51,7 +52,7 @@ export class SessionGateway implements OnGatewayDisconnect {
             socket.emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
             this.handleAvailabilityChange();
         } catch (error) {
-            socket.emit(SessionEvents.SessionCreated, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -59,7 +60,7 @@ export class SessionGateway implements OnGatewayDisconnect {
     joinSession(socket: Socket, data: JoinSessionDto): void {
         const validationError = this.validateSessionJoin(data.sessionId);
         if (validationError) {
-            socket.emit(SessionEvents.SessionJoined, validationError);
+            socket.emit(NotificationEvents.ErrorMessage, validationError);
             return;
         }
         const modifiedPlayerName = this.handleJoinSession(socket, data);
@@ -82,7 +83,7 @@ export class SessionGateway implements OnGatewayDisconnect {
     joinAvatarSelection(socket: Socket, data: JoinAvatarSelectionDto): void {
         const validationError = this.validateSessionJoin(data.sessionId);
         if (validationError) {
-            socket.emit(SessionEvents.AvatarSelectionJoined, validationError);
+            socket.emit(NotificationEvents.ErrorMessage, validationError);
             return;
         }
         void socket.join(this.getAvatarSelectionRoomId(data.sessionId));
@@ -154,7 +155,7 @@ export class SessionGateway implements OnGatewayDisconnect {
 
             this.handleAvailabilityChange();
         } catch (error) {
-            socket.emit(SessionEvents.SessionEnded, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
     }
 
@@ -162,11 +163,11 @@ export class SessionGateway implements OnGatewayDisconnect {
     addVirtualPlayer(socket: Socket, data: AddVirtualPlayerDto): void {
         const players = this.sessionService.addVirtualPlayer(data.sessionId, data.virtualPlayerType);
         this.server.to(data.sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
-        
+
         const roomId = this.getAvatarSelectionRoomId(data.sessionId);
         const avatarAssignments = this.sessionService.getChosenAvatars(data.sessionId);
         this.server.to(roomId).emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
-        
+
         this.handleAvailabilityChange();
     }
 
@@ -174,13 +175,13 @@ export class SessionGateway implements OnGatewayDisconnect {
     async startGameSession(socket: Socket): Promise<void> {
         const sessionId = this.sessionService.getPlayerSessionId(socket.id);
         if (!sessionId) {
-            socket.emit(SessionEvents.StartGameSession, errorResponse('Joueur non connecté à une session'));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse('Joueur non connecté à une session'));
             return;
         }
 
         const waitingSession = this.sessionService.getSession(sessionId);
         if (!waitingSession) {
-            socket.emit(SessionEvents.StartGameSession, errorResponse('Session introuvable'));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse('Session introuvable'));
             return;
         }
 
@@ -188,7 +189,7 @@ export class SessionGateway implements OnGatewayDisconnect {
         try {
             inGameSession = await this.inGameService.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.SMALL);
         } catch (error) {
-            socket.emit(SessionEvents.StartGameSession, errorResponse(error.message));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
             return;
         }
 

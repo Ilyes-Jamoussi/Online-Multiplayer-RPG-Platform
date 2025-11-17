@@ -7,7 +7,6 @@ import { JoinSessionDto } from '@app/dto/join-session-dto';
 import { SessionJoinedDto } from '@app/dto/session-joined-dto';
 import { SessionPreviewDto } from '@app/dto/session-preview-dto';
 import { ROUTES } from '@app/enums/routes.enum';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { MapSize } from '@common/enums/map-size.enum';
@@ -31,7 +30,6 @@ export class SessionService {
 
     constructor(
         private readonly sessionSocketService: SessionSocketService,
-        private readonly notificationCoordinatorService: NotificationCoordinatorService,
         private readonly router: Router,
     ) {
         this.initListeners();
@@ -160,29 +158,6 @@ export class SessionService {
             void this.router.navigate([ROUTES.WaitingRoomPage]);
         });
 
-        this.sessionSocketService.onSessionCreatedError((error) => {
-            this.notificationCoordinatorService.displayErrorPopup({
-                title: 'Erreur de création',
-                message: error,
-                redirectRoute: ROUTES.HomePage,
-            });
-        });
-
-        this.sessionSocketService.onSessionJoinError((message) => {
-            this.notificationCoordinatorService.displayErrorPopup({
-                title: 'Erreur',
-                message,
-                redirectRoute: ROUTES.HomePage,
-            });
-        });
-
-        this.sessionSocketService.onAvatarSelectionJoinError((message) => {
-            this.notificationCoordinatorService.displayErrorPopup({
-                title: 'Erreur de connexion',
-                message,
-            });
-        });
-
         this.sessionSocketService.onAvatarSelectionJoined((data) => {
             this.updateSession({ id: data.sessionId });
             void this.router.navigate([ROUTES.CharacterCreationPage]);
@@ -194,13 +169,6 @@ export class SessionService {
 
         this.sessionSocketService.onSessionAutoLocked(() => {
             this.updateSession({ isRoomLocked: true });
-        });
-
-        this.sessionSocketService.onStartGameSessionError((message) => {
-            this.notificationCoordinatorService.displayErrorPopup({
-                title: 'Impossible de démarrer le jeu',
-                message,
-            });
         });
     }
 }

@@ -143,30 +143,4 @@ describe('SessionSocketService', () => {
             expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(SessionEvents.SessionAutoLocked, callback);
         });
     });
-
-    describe('Error Event Listeners', () => {
-        it('should listen to sessionCreated errors', () => {
-            const callback = jasmine.createSpy();
-            service.onSessionCreatedError(callback);
-            expect(mockSocketService.onErrorEvent).toHaveBeenCalledWith(SessionEvents.SessionCreated, callback);
-        });
-
-        it('should listen to avatarSelectionJoin errors', () => {
-            const callback = jasmine.createSpy();
-            service.onAvatarSelectionJoinError(callback);
-            expect(mockSocketService.onErrorEvent).toHaveBeenCalledWith(SessionEvents.AvatarSelectionJoined, callback);
-        });
-
-        it('should listen to sessionJoin errors', () => {
-            const callback = jasmine.createSpy();
-            service.onSessionJoinError(callback);
-            expect(mockSocketService.onErrorEvent).toHaveBeenCalledWith(SessionEvents.SessionJoined, callback);
-        });
-
-        it('should listen to startGameSession errors', () => {
-            const callback = jasmine.createSpy();
-            service.onStartGameSessionError(callback);
-            expect(mockSocketService.onErrorEvent).toHaveBeenCalledWith(SessionEvents.StartGameSession, callback);
-        });
-    });
 });

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { PlayerStat } from '@common/interfaces/player-stat.interface';
 
 @Component({
@@ -19,7 +19,7 @@ export class GameOverOverlayComponent implements OnDestroy {
         private readonly inGameService: InGameService,
         private readonly playerService: PlayerService,
         private readonly router: Router,
-        private readonly timerCoordinatorService: TimerCoordinatorService,
+        private readonly timerCoordinatorService: TimerService,
     ) {
         effect(() => {
             const gameOverData = this.inGameService.gameOverData();

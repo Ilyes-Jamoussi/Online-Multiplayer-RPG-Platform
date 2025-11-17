@@ -5,6 +5,7 @@ import { Type } from 'class-transformer';
 import { IsArray, IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { GameEditorPlaceableDto } from './game-editor-placeable.dto';
 import { GameEditorTileDto } from './game-editor-tile.dto';
+import { TeleportChannelDto } from './teleport-channel.dto';
 
 export class PatchGameEditorDto {
     @ApiPropertyOptional()
@@ -45,4 +46,11 @@ export class PatchGameEditorDto {
     @ValidateNested({ each: true })
     @Type(() => GameEditorPlaceableDto)
     objects?: GameEditorPlaceableDto[];
+
+    @ApiPropertyOptional({ type: [TeleportChannelDto] })
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => TeleportChannelDto)
+    teleportChannels?: TeleportChannelDto[];
 }

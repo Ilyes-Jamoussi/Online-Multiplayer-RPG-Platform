@@ -4,6 +4,7 @@ import { validationExceptionFactory } from '@app/utils/validation/validation.uti
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
+import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { CombatAttack, CombatDefense, CombatResult } from '@common/interfaces/combat.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Logger } from '@nestjs/common';
@@ -60,6 +61,7 @@ describe('CombatGateway', () => {
         diceRoll: 4,
         baseAttack: 10,
         attackBonus: 0,
+        postureBonus: 0,
         totalAttack: 10,
         tileCombatEffect: 0,
         ...overrides,
@@ -70,6 +72,7 @@ describe('CombatGateway', () => {
         diceRoll: 3,
         baseDefense: 5,
         defenseBonus: 0,
+        postureBonus: 0,
         totalDefense: 5,
         tileCombatEffect: 0,
         ...overrides,
@@ -142,7 +145,7 @@ describe('CombatGateway', () => {
 
             gateway.attackPlayerAction(mockSocket, payload);
 
-            expect(combatService.attackPlayerAction).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID, TARGET_X, TARGET_Y);
+            expect(combatService.attackPlayerAction).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID, { x: TARGET_X, y: TARGET_Y });
             expect(mockSocket.emit).not.toHaveBeenCalled();
         });
 
@@ -155,7 +158,7 @@ describe('CombatGateway', () => {
 
             gateway.attackPlayerAction(mockSocket, payload);
 
-            expect(mockSocket.emit).toHaveBeenCalledWith(InGameEvents.AttackPlayerAction, {
+            expect(mockSocket.emit).toHaveBeenCalledWith(NotificationEvents.ErrorMessage, {
                 success: false,
                 message: errorMessage,
             });
@@ -189,7 +192,7 @@ describe('CombatGateway', () => {
 
             gateway.combatChoice(mockSocket, payload);
 
-            expect(mockSocket.emit).toHaveBeenCalledWith(InGameEvents.CombatChoice, {
+            expect(mockSocket.emit).toHaveBeenCalledWith(NotificationEvents.ErrorMessage, {
                 success: false,
                 message: errorMessage,
             });
@@ -215,7 +218,7 @@ describe('CombatGateway', () => {
 
             gateway.combatAbandon(mockSocket, payload);
 
-            expect(mockSocket.emit).toHaveBeenCalledWith(InGameEvents.CombatAbandon, {
+            expect(mockSocket.emit).toHaveBeenCalledWith(NotificationEvents.ErrorMessage, {
                 success: false,
                 message: errorMessage,
             });

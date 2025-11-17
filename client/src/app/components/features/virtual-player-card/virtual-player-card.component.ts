@@ -9,7 +9,7 @@ import { Player } from '@common/interfaces/player.interface';
     selector: 'app-virtual-player-card',
     standalone: true,
     templateUrl: './virtual-player-card.component.html',
-    styleUrl: './virtual-player-card.component.scss'
+    styleUrl: './virtual-player-card.component.scss',
 })
 export class VirtualPlayerCardComponent {
     @Input({ required: true }) player: Player;

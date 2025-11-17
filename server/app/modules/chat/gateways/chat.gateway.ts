@@ -32,9 +32,9 @@ export class ChatGateway {
     @SubscribeMessage(ChatEvents.SendMessage)
     sendMessage(socket: Socket, data: SendMessageDto): void {
         const message = this.chatService.sendMessage(data, socket.id);
-        
+
         let targetRoom = data.sessionId;
-        
+
         if (data.isGameStarted) {
             try {
                 const inGameSession = this.inGameSessionRepository.findById(data.sessionId);
@@ -43,11 +43,11 @@ export class ChatGateway {
                 targetRoom = data.sessionId;
             }
         }
-        
+
         if (!socket.rooms.has(targetRoom)) {
             void socket.join(targetRoom);
         }
-        
+
         this.server.to(targetRoom).emit(ChatEvents.MessageReceived, successResponse<ChatMessageDto>(message));
     }
 

@@ -1,6 +1,6 @@
 export enum GameStoreEvents {
-    GameCreated = 'gameCreated',
-    GameUpdated = 'gameUpdated',
-    GameDeleted = 'gameDeleted',
-    GameVisibilityToggled = 'gameVisibilityToggled'
+    GameCreated = 'game-created',
+    GameUpdated = 'game-updated',
+    GameDeleted = 'game-deleted',
+    GameVisibilityToggled = 'game-visibility-toggled'
 }
