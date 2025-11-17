@@ -12,6 +12,7 @@ import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import 'reflect-metadata';
 import { Server, Socket } from 'socket.io';
@@ -142,12 +143,24 @@ describe('InGameGateway', () => {
             storeGameStatistics: jest.fn(),
         };
 
+        const mockEventEmitter = {
+            emit: jest.fn(),
+            on: jest.fn(),
+            once: jest.fn(),
+            removeListener: jest.fn(),
+            removeAllListeners: jest.fn(),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 InGameGateway,
                 {
                     provide: InGameService,
                     useValue: mockInGameService,
+                },
+                {
+                    provide: EventEmitter2,
+                    useValue: mockEventEmitter,
                 },
             ],
         }).compile();

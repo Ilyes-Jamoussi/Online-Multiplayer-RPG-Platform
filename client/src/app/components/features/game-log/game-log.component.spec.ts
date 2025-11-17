@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameLogComponent } from './game-log.component';
 import { GameLogService } from '@app/services/game-log/game-log.service';
@@ -8,8 +9,9 @@ describe('GameLogComponent', () => {
     let gameLogService: jasmine.SpyObj<GameLogService>;
 
     beforeEach(async () => {
-        gameLogService = jasmine.createSpyObj('GameLogService', ['toggleFilter', 'getFilteredEntries'], {
-            filterByMe: jasmine.createSpy().and.returnValue(false),
+        gameLogService = jasmine.createSpyObj('GameLogService', ['toggleFilter'], {
+            getFilteredEntries: jasmine.createSpy('getFilteredEntries').and.returnValue([]),
+            filterByMe: signal(false),
         });
 
         await TestBed.configureTestingModule({
