@@ -1,3 +1,6 @@
+import { CombatResultEntryDto } from '@app/modules/game-log/dto/combat-result-entry.dto';
+import { SanctuaryUseEntryDto } from '@app/modules/game-log/dto/sanctuary-use-entry.dto';
+import { TeleportEntryDto } from '@app/modules/game-log/dto/teleport-entry.dto';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { GameLogEventType } from '@common/enums/game-log-event-type.enum';
 import { Injectable } from '@nestjs/common';
@@ -74,14 +77,7 @@ export class GameLogService {
         };
     }
 
-    createCombatResultEntry(
-        sessionId: string,
-        attackerId: string,
-        targetId: string,
-        attackerAttack: { diceRoll: number; baseAttack: number; attackBonus: number; totalAttack: number },
-        targetDefense: { diceRoll: number; baseDefense: number; defenseBonus: number; totalDefense: number },
-        damage: number,
-    ): {
+    createCombatResultEntry(params: CombatResultEntryDto): {
         type: GameLogEventType;
         message: string;
         involvedPlayerIds: string[];
@@ -89,25 +85,28 @@ export class GameLogService {
         icon: string;
         metadata: Record<string, unknown>;
     } {
-        const session = this.inGameSessionRepository.findById(sessionId);
-        const attacker = session.inGamePlayers[attackerId];
-        const target = session.inGamePlayers[targetId];
+        const session = this.inGameSessionRepository.findById(params.sessionId);
+        const attacker = session.inGamePlayers[params.attackerId];
+        const target = session.inGamePlayers[params.targetId];
 
-        const attackTotal = attackerAttack.totalAttack;
-        const defenseTotal = targetDefense.totalDefense;
-        const damageValue = damage;
+        const attackTotal = params.attackerAttack.totalAttack;
+        const defenseTotal = params.targetDefense.totalDefense;
+        const damageValue = params.damage;
 
-        const message = `Attaque ${attacker.name} vs ${target.name} (A:${attackerAttack.diceRoll}+${attackerAttack.baseAttack}+${attackerAttack.attackBonus} - D:${targetDefense.diceRoll}+${targetDefense.baseDefense}+${targetDefense.defenseBonus} = ${damageValue > 0 ? '+' : ''}${damageValue})`;
+        const attackPart = `A:${params.attackerAttack.diceRoll}+${params.attackerAttack.baseAttack}+${params.attackerAttack.attackBonus}`;
+        const defensePart = `D:${params.targetDefense.diceRoll}+${params.targetDefense.baseDefense}+${params.targetDefense.defenseBonus}`;
+        const damagePart = `${damageValue > 0 ? '+' : ''}${damageValue}`;
+        const message = `Attaque ${attacker.name} vs ${target.name} (${attackPart} - ${defensePart} = ${damagePart})`;
 
         return {
             type: GameLogEventType.CombatResult,
             message,
-            involvedPlayerIds: [attackerId, targetId],
+            involvedPlayerIds: [params.attackerId, params.targetId],
             involvedPlayerNames: [attacker.name, target.name],
             icon: 'Bolt',
             metadata: {
-                attackerId,
-                targetId,
+                attackerId: params.attackerId,
+                targetId: params.targetId,
                 attackTotal,
                 defenseTotal,
                 damage: damageValue,
@@ -234,66 +233,50 @@ export class GameLogService {
         };
     }
 
-    createSanctuaryUseEntry(
-        sessionId: string,
-        playerId: string,
-        kind: string,
-        x: number,
-        y: number,
-        addedHealth?: number,
-        addedDefense?: number,
-        addedAttack?: number,
-    ): {
+    createSanctuaryUseEntry(params: SanctuaryUseEntryDto): {
         type: GameLogEventType;
         message: string;
         involvedPlayerIds: string[];
         involvedPlayerNames: string[];
         icon: string;
     } {
-        const session = this.inGameSessionRepository.findById(sessionId);
-        const player = session.inGamePlayers[playerId];
+        const session = this.inGameSessionRepository.findById(params.sessionId);
+        const player = session.inGamePlayers[params.playerId];
 
         let message: string;
-        const kindStr = String(kind);
-        if (kindStr === 'HEAL' && addedHealth) {
-            message = `${player.name} a utilisé un sanctuaire de soin à (${x}, ${y}) (+${addedHealth} santé)`;
-        } else if (kindStr === 'FIGHT' && (addedDefense || addedAttack)) {
-            const bonus = addedDefense || addedAttack || 0;
-            message = `${player.name} a utilisé un sanctuaire de combat à (${x}, ${y}) (+${bonus} attaque/défense)`;
+        const kindStr = String(params.kind);
+        if (kindStr === 'HEAL' && params.addedHealth) {
+            message = `${player.name} a utilisé un sanctuaire de soin à (${params.x}, ${params.y}) (+${params.addedHealth} santé)`;
+        } else if (kindStr === 'FIGHT' && (params.addedDefense || params.addedAttack)) {
+            const bonus = params.addedDefense || params.addedAttack || 0;
+            message = `${player.name} a utilisé un sanctuaire de combat à (${params.x}, ${params.y}) (+${bonus} attaque/défense)`;
         } else {
-            message = `${player.name} a utilisé un sanctuaire à (${x}, ${y})`;
+            message = `${player.name} a utilisé un sanctuaire à (${params.x}, ${params.y})`;
         }
 
         return {
             type: GameLogEventType.SanctuaryUse,
             message,
-            involvedPlayerIds: [playerId],
+            involvedPlayerIds: [params.playerId],
             involvedPlayerNames: [player.name],
             icon: 'Heart',
         };
     }
 
-    createTeleportEntry(
-        sessionId: string,
-        playerId: string,
-        originX: number,
-        originY: number,
-        destinationX: number,
-        destinationY: number,
-    ): {
+    createTeleportEntry(params: TeleportEntryDto): {
         type: GameLogEventType;
         message: string;
         involvedPlayerIds: string[];
         involvedPlayerNames: string[];
         icon: string;
     } {
-        const session = this.inGameSessionRepository.findById(sessionId);
-        const player = session.inGamePlayers[playerId];
+        const session = this.inGameSessionRepository.findById(params.sessionId);
+        const player = session.inGamePlayers[params.playerId];
 
         return {
             type: GameLogEventType.Teleport,
-            message: `${player.name} s'est téléporté de (${originX}, ${originY}) → (${destinationX}, ${destinationY})`,
-            involvedPlayerIds: [playerId],
+            message: `${player.name} s'est téléporté de (${params.originX}, ${params.originY}) → (${params.destinationX}, ${params.destinationY})`,
+            involvedPlayerIds: [params.playerId],
             involvedPlayerNames: [player.name],
             icon: 'LocationDot',
         };

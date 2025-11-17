@@ -1,4 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core';
+import { ID_GENERATION } from '@app/constants/game-log.constants';
 import { GameLogSocketService } from '@app/services/game-log-socket/game-log-socket.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { ResetService } from '@app/services/reset/reset.service';
@@ -60,6 +61,6 @@ export class GameLogService {
     }
 
     private generateId(): string {
-        return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        return `${Date.now()}-${Math.random().toString(ID_GENERATION.radix).substring(2, 2 + ID_GENERATION.substringLength)}`;
     }
 }

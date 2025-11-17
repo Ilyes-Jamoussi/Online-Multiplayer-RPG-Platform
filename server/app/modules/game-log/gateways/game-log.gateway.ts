@@ -1,4 +1,5 @@
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { ID_GENERATION } from '@app/modules/game-log/constants/game-log.constants';
 import { GameLogEntryDto } from '@app/modules/game-log/dto/game-log-entry.dto';
 import { GameLogService } from '@app/modules/game-log/services/game-log.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
@@ -70,15 +71,15 @@ export class GameLogGateway {
         const session = this.inGameSessionRepository.findById(payload.sessionId);
         if (!session) return;
 
-        const entryA = this.gameLogService.createCombatResultEntry(
-            payload.sessionId,
-            payload.playerAId,
-            payload.playerBId,
-            payload.playerAAttack,
-            payload.playerBDefense,
-            payload.playerBDamage,
-        );
-        this.emitLogEntryToPlayers(session.inGameId, entryA, [payload.playerAId, payload.playerBId]);
+        const entryA = this.gameLogService.createCombatResultEntry({
+            sessionId: payload.sessionId,
+            attackerId: payload.playerAId,
+            targetId: payload.playerBId,
+            attackerAttack: payload.playerAAttack,
+            targetDefense: payload.playerBDefense,
+            damage: payload.playerBDamage,
+        });
+        this.emitLogEntry(session.inGameId, entryA);
     }
 
     @OnEvent(ServerEvents.DoorToggled)
@@ -147,16 +148,16 @@ export class GameLogGateway {
         addedDefense?: number;
         addedAttack?: number;
     }): void {
-        const entry = this.gameLogService.createSanctuaryUseEntry(
-            payload.session.id,
-            payload.playerId,
-            payload.kind,
-            payload.x,
-            payload.y,
-            payload.addedHealth,
-            payload.addedDefense,
-            payload.addedAttack,
-        );
+        const entry = this.gameLogService.createSanctuaryUseEntry({
+            sessionId: payload.session.id,
+            playerId: payload.playerId,
+            kind: payload.kind,
+            x: payload.x,
+            y: payload.y,
+            addedHealth: payload.addedHealth,
+            addedDefense: payload.addedDefense,
+            addedAttack: payload.addedAttack,
+        });
         this.emitLogEntry(payload.session.inGameId, entry);
     }
 
@@ -169,14 +170,14 @@ export class GameLogGateway {
         destinationX: number;
         destinationY: number;
     }): void {
-        const entry = this.gameLogService.createTeleportEntry(
-            payload.session.id,
-            payload.playerId,
-            payload.originX,
-            payload.originY,
-            payload.destinationX,
-            payload.destinationY,
-        );
+        const entry = this.gameLogService.createTeleportEntry({
+            sessionId: payload.session.id,
+            playerId: payload.playerId,
+            originX: payload.originX,
+            originY: payload.originY,
+            destinationX: payload.destinationX,
+            destinationY: payload.destinationY,
+        });
         this.emitLogEntry(payload.session.inGameId, entry);
     }
 
@@ -189,21 +190,9 @@ export class GameLogGateway {
         this.server.to(inGameId).emit(GameLogEvents.LogEntry, successResponse<GameLogEntryDto>(logEntry));
     }
 
-    private emitLogEntryToPlayers(
-        inGameId: string,
-        entry: Omit<GameLogEntryDto, 'id' | 'timestamp'>,
-        playerIds: string[],
-    ): void {
-        const logEntry: GameLogEntryDto = {
-            ...entry,
-            id: this.generateId(),
-            timestamp: new Date().toISOString(),
-        };
-        this.server.to(inGameId).emit(GameLogEvents.LogEntry, successResponse<GameLogEntryDto>(logEntry));
-    }
 
     private generateId(): string {
-        return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        return `${Date.now()}-${Math.random().toString(ID_GENERATION.radix).substring(2, 2 + ID_GENERATION.substringLength)}`;
     }
 }
 

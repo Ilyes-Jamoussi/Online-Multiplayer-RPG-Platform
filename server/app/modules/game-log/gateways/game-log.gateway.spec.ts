@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GameLogGateway } from './game-log.gateway';
-import { GameLogService } from '../services/game-log.service';
+import { GameLogService } from '@app/modules/game-log/services/game-log.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 
 describe('GameLogGateway', () => {
