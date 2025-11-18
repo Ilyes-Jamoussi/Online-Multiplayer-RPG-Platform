@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewChecked, Component, computed, ElementRef, Signal, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, computed, effect, ElementRef, Signal, ViewChild } from '@angular/core';
 import { UiIconComponent } from '@app/components/ui/icon/icon.component';
 import { FaIcons } from '@app/enums/fa-icons.enum';
 import { GameLogService } from '@app/services/game-log/game-log.service';
@@ -17,7 +17,14 @@ export class GameLogComponent implements AfterViewChecked {
 
     private shouldScrollToBottom = false;
 
-    constructor(private readonly gameLogService: GameLogService) {}
+    private readonly _entries = computed(() => this.gameLogService.getFilteredEntries());
+
+    constructor(private readonly gameLogService: GameLogService) {
+        effect(() => {
+            this._entries();
+            this.shouldScrollToBottom = true;
+        });
+    }
 
     ngAfterViewChecked(): void {
         if (this.shouldScrollToBottom) {
@@ -27,9 +34,7 @@ export class GameLogComponent implements AfterViewChecked {
     }
 
     get entries(): Signal<GameLogEntry[]> {
-        const entries = computed(() => this.gameLogService.getFilteredEntries());
-        this.shouldScrollToBottom = true;
-        return entries;
+        return this._entries;
     }
 
     get filterByMeValue(): Signal<boolean> {

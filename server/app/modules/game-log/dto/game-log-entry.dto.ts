@@ -1,29 +1,49 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { GameLogEventType } from '@common/enums/game-log-event-type.enum';
+import { GameLogMetadata } from '@common/types/game-log-metadata.type';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class GameLogEntryDto {
     @ApiProperty()
-    id!: string;
+    @IsString()
+    @IsNotEmpty()
+    id: string;
 
     @ApiProperty()
-    timestamp!: string;
+    @IsString()
+    @IsNotEmpty()
+    timestamp: string;
 
     @ApiProperty({ enum: GameLogEventType })
-    type!: GameLogEventType;
+    @IsEnum(GameLogEventType)
+    @IsNotEmpty()
+    type: GameLogEventType;
 
     @ApiProperty()
-    message!: string;
+    @IsString()
+    @IsNotEmpty()
+    message: string;
 
     @ApiProperty({ type: [String] })
-    involvedPlayerIds!: string[];
+    @IsArray()
+    @IsString({ each: true })
+    @IsNotEmpty()
+    involvedPlayerIds: string[];
 
     @ApiProperty({ type: [String] })
-    involvedPlayerNames!: string[];
+    @IsArray()
+    @IsString({ each: true })
+    @IsNotEmpty()
+    involvedPlayerNames: string[];
 
     @ApiProperty({ required: false })
-    icon?: string;
+    @IsOptional()
+    @IsString()
+    icon: string;
 
     @ApiProperty({ required: false })
-    metadata?: Record<string, unknown>;
+    @IsOptional()
+    @IsObject()
+    metadata?: GameLogMetadata;
 }
 

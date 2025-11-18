@@ -1,12 +1,24 @@
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { ID_GENERATION } from '@app/modules/game-log/constants/game-log.constants';
 import { GameLogEntryDto } from '@app/modules/game-log/dto/game-log-entry.dto';
+import {
+    AdminModeToggledPayload,
+    CombatStartedPayload,
+    CombatVictoryPayload,
+    DoorToggledPayload,
+    GameOverPayload,
+    PlayerAbandonPayload,
+    PlayerBoardedBoatPayload,
+    PlayerCombatResultPayload,
+    PlayerDisembarkedBoatPayload,
+    SanctuaryActionSuccessPayload,
+    TeleportedPayload,
+    TurnStartedPayload,
+} from '@app/modules/game-log/dto/game-log-payloads.dto';
 import { GameLogService } from '@app/modules/game-log/services/game-log.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { successResponse } from '@app/utils/socket-response/socket-response.util';
 import { GameLogEvents } from '@common/enums/game-log-events.enum';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { InGameSession } from '@common/interfaces/session.interface';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
@@ -25,7 +37,7 @@ export class GameLogGateway {
     ) {}
 
     @OnEvent(ServerEvents.TurnStarted)
-    handleTurnStarted(payload: { session: InGameSession }): void {
+    handleTurnStarted(payload: TurnStartedPayload): void {
         const session = payload.session;
         const activePlayerId = session.currentTurn.activePlayerId;
 
@@ -34,7 +46,7 @@ export class GameLogGateway {
     }
 
     @OnEvent(ServerEvents.CombatStarted)
-    handleCombatStarted(payload: { sessionId: string; attackerId: string; targetId: string }): void {
+    handleCombatStarted(payload: CombatStartedPayload): void {
         const session = this.inGameSessionRepository.findById(payload.sessionId);
         if (!session) return;
 
@@ -43,7 +55,7 @@ export class GameLogGateway {
     }
 
     @OnEvent(ServerEvents.CombatVictory)
-    handleCombatVictory(payload: { sessionId: string; playerAId: string; playerBId: string; winnerId: string | null }): void {
+    handleCombatVictory(payload: CombatVictoryPayload): void {
         const session = this.inGameSessionRepository.findById(payload.sessionId);
         if (!session) return;
 
@@ -57,17 +69,7 @@ export class GameLogGateway {
     }
 
     @OnEvent(ServerEvents.PlayerCombatResult)
-    handlePlayerCombatResult(payload: {
-        sessionId: string;
-        playerAId: string;
-        playerBId: string;
-        playerAAttack: { diceRoll: number; baseAttack: number; attackBonus: number; totalAttack: number };
-        playerBAttack: { diceRoll: number; baseAttack: number; attackBonus: number; totalAttack: number };
-        playerADefense: { diceRoll: number; baseDefense: number; defenseBonus: number; totalDefense: number };
-        playerBDefense: { diceRoll: number; baseDefense: number; defenseBonus: number; totalDefense: number };
-        playerADamage: number;
-        playerBDamage: number;
-    }): void {
+    handlePlayerCombatResult(payload: PlayerCombatResultPayload): void {
         const session = this.inGameSessionRepository.findById(payload.sessionId);
         if (!session) return;
 
@@ -83,7 +85,7 @@ export class GameLogGateway {
     }
 
     @OnEvent(ServerEvents.DoorToggled)
-    handleDoorToggled(payload: { session: InGameSession; playerId: string; x: number; y: number; isOpen: boolean }): void {
+    handleDoorToggled(payload: DoorToggledPayload): void {
         const entry = this.gameLogService.createDoorToggleEntry(
             payload.session.id,
             payload.playerId,
@@ -95,7 +97,7 @@ export class GameLogGateway {
     }
 
     @OnEvent(ServerEvents.AdminModeToggled)
-    handleAdminModeToggled(payload: { sessionId: string; playerId: string; isAdminModeActive: boolean }): void {
+    handleAdminModeToggled(payload: AdminModeToggledPayload): void {
         const session = this.inGameSessionRepository.findById(payload.sessionId);
         if (!session) return;
 
@@ -108,7 +110,7 @@ export class GameLogGateway {
     }
 
     @OnEvent(ServerEvents.PlayerAbandon)
-    handlePlayerAbandon(payload: { sessionId: string; playerId: string; playerName: string }): void {
+    handlePlayerAbandon(payload: PlayerAbandonPayload): void {
         const session = this.inGameSessionRepository.findById(payload.sessionId);
         if (!session) return;
 
@@ -117,7 +119,7 @@ export class GameLogGateway {
     }
 
     @OnEvent(ServerEvents.GameOver)
-    handleGameOver(payload: { sessionId: string; winnerId: string; winnerName: string }): void {
+    handleGameOver(payload: GameOverPayload): void {
         const session = this.inGameSessionRepository.findById(payload.sessionId);
         if (!session) return;
 
@@ -126,28 +128,19 @@ export class GameLogGateway {
     }
 
     @OnEvent(ServerEvents.PlayerBoardedBoat)
-    handlePlayerBoardedBoat(payload: { session: InGameSession; playerId: string; boatId: string }): void {
+    handlePlayerBoardedBoat(payload: PlayerBoardedBoatPayload): void {
         const entry = this.gameLogService.createBoatEmbarkEntry(payload.session.id, payload.playerId);
         this.emitLogEntry(payload.session.inGameId, entry);
     }
 
     @OnEvent(ServerEvents.PlayerDisembarkedBoat)
-    handlePlayerDisembarkedBoat(payload: { session: InGameSession; playerId: string }): void {
+    handlePlayerDisembarkedBoat(payload: PlayerDisembarkedBoatPayload): void {
         const entry = this.gameLogService.createBoatDisembarkEntry(payload.session.id, payload.playerId);
         this.emitLogEntry(payload.session.inGameId, entry);
     }
 
     @OnEvent(ServerEvents.SanctuaryActionSuccess)
-    handleSanctuaryActionSuccess(payload: {
-        session: InGameSession;
-        playerId: string;
-        kind: PlaceableKind;
-        x: number;
-        y: number;
-        addedHealth?: number;
-        addedDefense?: number;
-        addedAttack?: number;
-    }): void {
+    handleSanctuaryActionSuccess(payload: SanctuaryActionSuccessPayload): void {
         const entry = this.gameLogService.createSanctuaryUseEntry({
             sessionId: payload.session.id,
             playerId: payload.playerId,
@@ -162,14 +155,7 @@ export class GameLogGateway {
     }
 
     @OnEvent(ServerEvents.Teleported)
-    handlePlayerTeleported(payload: {
-        session: InGameSession;
-        playerId: string;
-        originX: number;
-        originY: number;
-        destinationX: number;
-        destinationY: number;
-    }): void {
+    handlePlayerTeleported(payload: TeleportedPayload): void {
         const entry = this.gameLogService.createTeleportEntry({
             sessionId: payload.session.id,
             playerId: payload.playerId,

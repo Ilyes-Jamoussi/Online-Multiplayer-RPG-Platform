@@ -1,4 +1,5 @@
 import { CombatResultEntryDto } from '@app/modules/game-log/dto/combat-result-entry.dto';
+import { GameLogEntryBase, GameLogEntryWithMetadata } from '@app/modules/game-log/dto/game-log-entry-base.dto';
 import { SanctuaryUseEntryDto } from '@app/modules/game-log/dto/sanctuary-use-entry.dto';
 import { TeleportEntryDto } from '@app/modules/game-log/dto/teleport-entry.dto';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
@@ -9,13 +10,7 @@ import { Injectable } from '@nestjs/common';
 export class GameLogService {
     constructor(private readonly inGameSessionRepository: InGameSessionRepository) {}
 
-    createTurnStartEntry(sessionId: string, playerId: string): {
-        type: GameLogEventType;
-        message: string;
-        involvedPlayerIds: string[];
-        involvedPlayerNames: string[];
-        icon: string;
-    } {
+    createTurnStartEntry(sessionId: string, playerId: string): GameLogEntryBase {
         const session = this.inGameSessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
 
@@ -28,13 +23,7 @@ export class GameLogService {
         };
     }
 
-    createCombatStartEntry(sessionId: string, attackerId: string, targetId: string): {
-        type: GameLogEventType;
-        message: string;
-        involvedPlayerIds: string[];
-        involvedPlayerNames: string[];
-        icon: string;
-    } {
+    createCombatStartEntry(sessionId: string, attackerId: string, targetId: string): GameLogEntryBase {
         const session = this.inGameSessionRepository.findById(sessionId);
         const attacker = session.inGamePlayers[attackerId];
         const target = session.inGamePlayers[targetId];
@@ -48,13 +37,7 @@ export class GameLogService {
         };
     }
 
-    createCombatEndEntry(sessionId: string, playerAId: string, playerBId: string, winnerId: string | null): {
-        type: GameLogEventType;
-        message: string;
-        involvedPlayerIds: string[];
-        involvedPlayerNames: string[];
-        icon: string;
-    } {
+    createCombatEndEntry(sessionId: string, playerAId: string, playerBId: string, winnerId: string | null): GameLogEntryBase {
         const session = this.inGameSessionRepository.findById(sessionId);
         const playerA = session.inGamePlayers[playerAId];
         const playerB = session.inGamePlayers[playerBId];
@@ -77,14 +60,7 @@ export class GameLogService {
         };
     }
 
-    createCombatResultEntry(params: CombatResultEntryDto): {
-        type: GameLogEventType;
-        message: string;
-        involvedPlayerIds: string[];
-        involvedPlayerNames: string[];
-        icon: string;
-        metadata: Record<string, unknown>;
-    } {
+    createCombatResultEntry(params: CombatResultEntryDto): GameLogEntryWithMetadata {
         const session = this.inGameSessionRepository.findById(params.sessionId);
         const attacker = session.inGamePlayers[params.attackerId];
         const target = session.inGamePlayers[params.targetId];
@@ -114,13 +90,7 @@ export class GameLogService {
         };
     }
 
-    createDoorToggleEntry(sessionId: string, playerId: string, x: number, y: number, isOpen: boolean): {
-        type: GameLogEventType;
-        message: string;
-        involvedPlayerIds: string[];
-        involvedPlayerNames: string[];
-        icon: string;
-    } {
+    createDoorToggleEntry(sessionId: string, playerId: string, x: number, y: number, isOpen: boolean): GameLogEntryBase {
         const session = this.inGameSessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
 
@@ -134,13 +104,7 @@ export class GameLogService {
         };
     }
 
-    createDebugModeToggleEntry(sessionId: string, playerId: string, isActive: boolean): {
-        type: GameLogEventType;
-        message: string;
-        involvedPlayerIds: string[];
-        involvedPlayerNames: string[];
-        icon: string;
-    } {
+    createDebugModeToggleEntry(sessionId: string, playerId: string, isActive: boolean): GameLogEntryBase {
         const session = this.inGameSessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
 
@@ -154,13 +118,7 @@ export class GameLogService {
         };
     }
 
-    createPlayerAbandonEntry(sessionId: string, playerId: string): {
-        type: GameLogEventType;
-        message: string;
-        involvedPlayerIds: string[];
-        involvedPlayerNames: string[];
-        icon: string;
-    } {
+    createPlayerAbandonEntry(sessionId: string, playerId: string): GameLogEntryBase {
         const session = this.inGameSessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
 
@@ -173,13 +131,7 @@ export class GameLogService {
         };
     }
 
-    createGameOverEntry(sessionId: string): {
-        type: GameLogEventType;
-        message: string;
-        involvedPlayerIds: string[];
-        involvedPlayerNames: string[];
-        icon: string;
-    } {
+    createGameOverEntry(sessionId: string): GameLogEntryBase {
         const session = this.inGameSessionRepository.findById(sessionId);
         const activePlayers = Object.values(session.inGamePlayers).filter((p) => p.isInGame);
         const activePlayerNames = activePlayers.map((p) => p.name);
@@ -195,13 +147,7 @@ export class GameLogService {
         };
     }
 
-    createBoatEmbarkEntry(sessionId: string, playerId: string): {
-        type: GameLogEventType;
-        message: string;
-        involvedPlayerIds: string[];
-        involvedPlayerNames: string[];
-        icon: string;
-    } {
+    createBoatEmbarkEntry(sessionId: string, playerId: string): GameLogEntryBase {
         const session = this.inGameSessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
 
@@ -214,13 +160,7 @@ export class GameLogService {
         };
     }
 
-    createBoatDisembarkEntry(sessionId: string, playerId: string): {
-        type: GameLogEventType;
-        message: string;
-        involvedPlayerIds: string[];
-        involvedPlayerNames: string[];
-        icon: string;
-    } {
+    createBoatDisembarkEntry(sessionId: string, playerId: string): GameLogEntryBase {
         const session = this.inGameSessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
 
@@ -233,13 +173,7 @@ export class GameLogService {
         };
     }
 
-    createSanctuaryUseEntry(params: SanctuaryUseEntryDto): {
-        type: GameLogEventType;
-        message: string;
-        involvedPlayerIds: string[];
-        involvedPlayerNames: string[];
-        icon: string;
-    } {
+    createSanctuaryUseEntry(params: SanctuaryUseEntryDto): GameLogEntryBase {
         const session = this.inGameSessionRepository.findById(params.sessionId);
         const player = session.inGamePlayers[params.playerId];
 
@@ -263,13 +197,7 @@ export class GameLogService {
         };
     }
 
-    createTeleportEntry(params: TeleportEntryDto): {
-        type: GameLogEventType;
-        message: string;
-        involvedPlayerIds: string[];
-        involvedPlayerNames: string[];
-        icon: string;
-    } {
+    createTeleportEntry(params: TeleportEntryDto): GameLogEntryBase {
         const session = this.inGameSessionRepository.findById(params.sessionId);
         const player = session.inGamePlayers[params.playerId];
 
