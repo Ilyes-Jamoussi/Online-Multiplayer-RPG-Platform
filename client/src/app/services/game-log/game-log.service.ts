@@ -15,19 +15,20 @@ export class GameLogService {
     readonly entries = this._entries.asReadonly();
     readonly filterByMe = this._filterByMe.asReadonly();
 
-    readonly filteredEntries: Signal<GameLogEntry[]> = computed(() => {
-        const allEntries = this.entries();
-        if (!this.filterByMe()) {
-            return allEntries;
-        }
-        const myId = this.playerService.id();
-        return allEntries.filter((entry) => entry.involvedPlayerIds.includes(myId));
-    });
+    private _filteredEntries!: Signal<GameLogEntry[]>;
 
     constructor(
         private readonly playerService: PlayerService,
         private readonly gameLogSocketService: GameLogSocketService,
     ) {
+        this._filteredEntries = computed(() => {
+            const allEntries = this.entries();
+            if (!this.filterByMe()) {
+                return allEntries;
+            }
+            const myId = this.playerService.id();
+            return allEntries.filter((entry) => entry.involvedPlayerIds.includes(myId));
+        });
         inject(ResetService).reset$.subscribe(() => this.reset());
         this.initListeners();
     }
@@ -61,7 +62,7 @@ export class GameLogService {
     }
 
     getFilteredEntries(): Signal<GameLogEntry[]> {
-        return this.filteredEntries;
+        return this._filteredEntries;
     }
 
     private generateId(): string {
