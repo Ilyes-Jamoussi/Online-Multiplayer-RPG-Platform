@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewChecked, Component, computed, effect, ElementRef, Signal, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, Signal, ViewChild } from '@angular/core';
 import { UiIconComponent } from '@app/components/ui/icon/icon.component';
 import { FaIcons } from '@app/enums/fa-icons.enum';
 import { GameLogService } from '@app/services/game-log/game-log.service';
-import { GameLogEntry } from '@common/interfaces/game-log-entry.interface';
 
 @Component({
     selector: 'app-game-log',
@@ -15,26 +14,18 @@ import { GameLogEntry } from '@common/interfaces/game-log-entry.interface';
 export class GameLogComponent implements AfterViewChecked {
     @ViewChild('entriesContainer') private readonly entriesContainer!: ElementRef;
 
-    private shouldScrollToBottom = false;
+    private previousEntriesLength = 0;
 
-    private readonly _entries = computed(() => this.gameLogService.getFilteredEntries());
+    readonly entries = this.gameLogService.getFilteredEntries();
 
-    constructor(private readonly gameLogService: GameLogService) {
-        effect(() => {
-            this._entries();
-            this.shouldScrollToBottom = true;
-        });
-    }
+    constructor(private readonly gameLogService: GameLogService) {}
 
     ngAfterViewChecked(): void {
-        if (this.shouldScrollToBottom) {
+        const currentLength = this.entries().length;
+        if (currentLength !== this.previousEntriesLength) {
+            this.previousEntriesLength = currentLength;
             this.scrollToBottom();
-            this.shouldScrollToBottom = false;
         }
-    }
-
-    get entries(): Signal<GameLogEntry[]> {
-        return this._entries;
     }
 
     get filterByMeValue(): Signal<boolean> {

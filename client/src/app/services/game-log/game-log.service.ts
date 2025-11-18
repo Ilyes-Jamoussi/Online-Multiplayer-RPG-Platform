@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, Signal, signal } from '@angular/core';
 import { ID_GENERATION } from '@app/constants/game-log.constants';
 import { GameLogSocketService } from '@app/services/game-log-socket/game-log-socket.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -14,6 +14,15 @@ export class GameLogService {
 
     readonly entries = this._entries.asReadonly();
     readonly filterByMe = this._filterByMe.asReadonly();
+
+    readonly filteredEntries: Signal<GameLogEntry[]> = computed(() => {
+        const allEntries = this.entries();
+        if (!this.filterByMe()) {
+            return allEntries;
+        }
+        const myId = this.playerService.id();
+        return allEntries.filter((entry) => entry.involvedPlayerIds.includes(myId));
+    });
 
     constructor(
         private readonly playerService: PlayerService,
@@ -51,13 +60,8 @@ export class GameLogService {
         this._filterByMe.set(false);
     }
 
-    getFilteredEntries(): GameLogEntry[] {
-        const allEntries = this.entries();
-        if (!this.filterByMe()) {
-            return allEntries;
-        }
-        const myId = this.playerService.id();
-        return allEntries.filter((entry) => entry.involvedPlayerIds.includes(myId));
+    getFilteredEntries(): Signal<GameLogEntry[]> {
+        return this.filteredEntries;
     }
 
     private generateId(): string {

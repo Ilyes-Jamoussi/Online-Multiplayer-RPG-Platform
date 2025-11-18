@@ -67,8 +67,8 @@ describe('GameLogService', () => {
 
         service.setFilter(true);
         const filtered = service.getFilteredEntries();
-        expect(filtered.length).toBe(1);
-        expect(filtered[0].message).toBe('Player 1 message');
+        expect(filtered().length).toBe(1);
+        expect(filtered()[0].message).toBe('Player 1 message');
     });
 
     it('should reset entries', () => {

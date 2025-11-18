@@ -10,7 +10,7 @@ describe('GameLogComponent', () => {
 
     beforeEach(async () => {
         gameLogService = jasmine.createSpyObj('GameLogService', ['toggleFilter'], {
-            getFilteredEntries: jasmine.createSpy('getFilteredEntries').and.returnValue([]),
+            getFilteredEntries: jasmine.createSpy('getFilteredEntries').and.returnValue(signal([])),
             filterByMe: signal(false),
         });
 
