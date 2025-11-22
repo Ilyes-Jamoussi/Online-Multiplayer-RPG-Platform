@@ -6,6 +6,9 @@ import {
     STATISTICS_DELETE_DELAY_MS,
 } from '@app/constants/statistics.constants';
 import { GameStatisticsDto, PlayerStatisticsDto, GlobalStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
+import { TrackingService } from '@app/modules/in-game/services/tracking/tracking.service';
+import { MapSize } from '@common/enums/map-size.enum';
+import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { StoredStatistics } from '@common/interfaces/game-statistics.interface';
@@ -14,8 +17,19 @@ import { StoredStatistics } from '@common/interfaces/game-statistics.interface';
 export class StatisticsService {
     private readonly sessionStatistics = new Map<string, StoredStatistics>();
 
+    constructor(private readonly trackingService: TrackingService) {}
+
+    initializeTracking(sessionId: string, mapSize: MapSize, totalDoors: number, totalSanctuaries: number): void {
+        this.trackingService.initializeTracking(sessionId, mapSize, totalDoors, totalSanctuaries);
+    }
+
+    trackTileVisited(sessionId: string, playerId: string, position: Position): void {
+        this.trackingService.trackTileVisited(sessionId, playerId, position);
+    }
+
     calculateAndStoreGameStatistics(session: InGameSession, winnerId: string, winnerName: string, gameStartTime: Date): GameStatisticsDto {
-        const statistics = this.calculateGameStatistics(session, winnerId, winnerName, gameStartTime);
+        const trackingData = this.trackingService.getTrackingData(session.id);
+        const statistics = this.calculateGameStatistics(session, trackingData, winnerId, winnerName, gameStartTime);
 
         this.sessionStatistics.set(session.id, {
             data: statistics,
@@ -26,6 +40,7 @@ export class StatisticsService {
             this.sessionStatistics.delete(session.id);
         }, STATISTICS_DELETE_DELAY_MS);
 
+        this.trackingService.removeTracking(session.id);
         return statistics;
     }
 
@@ -34,11 +49,11 @@ export class StatisticsService {
         return stored ? stored.data : null;
     }
 
-    private calculateGameStatistics(session: InGameSession, winnerId: string, winnerName: string, gameStartTime: Date): GameStatisticsDto {
+    private calculateGameStatistics(session: InGameSession, trackingData: any, winnerId: string, winnerName: string, gameStartTime: Date): GameStatisticsDto {
         const players = Object.values(session.inGamePlayers).filter((player) => player.isInGame);
 
-        const playersStatistics = players.map((player) => this.calculatePlayerStatistics(player));
-        const globalStatistics = this.calculateGlobalStatistics(session, gameStartTime);
+        const playersStatistics = players.map((player) => this.calculatePlayerStatistics(player, trackingData));
+        const globalStatistics = this.calculateGlobalStatistics(session, trackingData, gameStartTime);
 
         return {
             winnerId,
@@ -48,9 +63,15 @@ export class StatisticsService {
         };
     }
 
-    private calculatePlayerStatistics(player: Player): PlayerStatisticsDto {
+    private calculatePlayerStatistics(player: Player, trackingData: any): PlayerStatisticsDto {
         const healthLost = player.maxHealth - player.health;
         const healthDealt = player.combatWins * DEFAULT_HEALTH_DEALT_MULTIPLIER;
+        
+        let tilesVisitedPercentage = 0;
+        if (trackingData?.playerTiles?.has(player.id)) {
+            const playerTiles = trackingData.playerTiles.get(player.id);
+            tilesVisitedPercentage = Math.round((playerTiles.size / trackingData.totalTiles) * 100);
+        }
 
         return {
             name: player.name,
@@ -59,21 +80,30 @@ export class StatisticsService {
             combatLosses: player.combatLosses,
             healthLost,
             healthDealt,
-            tilesVisitedPercentage: 0,
+            tilesVisitedPercentage,
         };
     }
 
-    private calculateGlobalStatistics(session: InGameSession, gameStartTime: Date): GlobalStatisticsDto {
+    private calculateGlobalStatistics(session: InGameSession, trackingData: any, gameStartTime: Date): GlobalStatisticsDto {
         const gameDuration = this.formatDuration(Date.now() - gameStartTime.getTime());
+        
+        let globalTilesVisitedPercentage = 0;
+        if (trackingData?.playerTiles) {
+            const allVisitedTiles = new Set<string>();
+            trackingData.playerTiles.forEach((tiles: Set<string>) => {
+                tiles.forEach(tile => allVisitedTiles.add(tile));
+            });
+            globalTilesVisitedPercentage = Math.round((allVisitedTiles.size / trackingData.totalTiles) * 100);
+        }
 
         return {
             gameDuration,
             totalTurns: session.currentTurn.turnNumber,
-            tilesVisitedPercentage: 0,
-            totalTeleportations: 0,
-            doorsManipulatedPercentage: 0,
-            sanctuariesUsedPercentage: 0,
-            flagHoldersCount: 0,
+            tilesVisitedPercentage: globalTilesVisitedPercentage,
+            totalTeleportations: trackingData?.teleportations || 0,
+            doorsManipulatedPercentage: trackingData ? Math.round((trackingData.toggledDoors.size / trackingData.totalDoors) * 100) : 0,
+            sanctuariesUsedPercentage: trackingData ? Math.round((trackingData.usedSanctuaries.size / trackingData.totalSanctuaries) * 100) : 0,
+            flagHoldersCount: trackingData?.flagHolders.size || 0,
         };
     }
 
