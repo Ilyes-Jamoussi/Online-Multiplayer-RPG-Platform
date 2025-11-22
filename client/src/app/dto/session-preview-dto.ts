@@ -7,11 +7,17 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 
 
 export interface SessionPreviewDto { 
     id: string;
     currentPlayers: number;
     maxPlayers: number;
+    gameName: string;
+    gameDescription: string;
+    mapSize: MapSize;
+    gameMode: GameMode;
 }
 

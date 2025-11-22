@@ -263,14 +263,14 @@ export class SessionGateway implements OnGatewayDisconnect {
     }
 
     @SubscribeMessage(SessionEvents.LoadAvailableSessions)
-    loadAvailableSessions(socket: Socket): void {
-        const sessions = this.sessionService.getAvailableSessions();
+    async loadAvailableSessions(socket: Socket): Promise<void> {
+        const sessions = await this.sessionService.getAvailableSessions();
         socket.emit(SessionEvents.AvailableSessionsUpdated, successResponse<AvailableSessionsUpdatedDto>({ sessions }));
     }
 
     @OnEvent(ServerEvents.SessionAvailabilityChanged)
-    handleAvailabilityChange(): void {
-        const sessions = this.sessionService.getAvailableSessions();
+    async handleAvailabilityChange(): Promise<void> {
+        const sessions = await this.sessionService.getAvailableSessions();
         this.server.emit(SessionEvents.AvailableSessionsUpdated, successResponse<AvailableSessionsUpdatedDto>({ sessions }));
     }
 

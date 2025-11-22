@@ -1,5 +1,28 @@
-<div class="session-card">
-    <h3 class="session-title">Partie {{ session.id }}</h3>
-    <p class="session-players">{{ session.currentPlayers }} / {{ session.maxPlayers }} joueurs</p>
-    <app-ui-button [fullWidth]="true" (buttonClick)="onJoinClick()"> Rejoindre </app-ui-button>
+<div class="session-card" (click)="onJoinClick()">
+    <div class="card-header">
+        <h3 class="game-name">{{ session.gameName }}</h3>
+        <div class="players-badge">
+            <i class="material-icons">group</i>
+            <span>{{ session.currentPlayers }}/{{ session.maxPlayers }}</span>
+        </div>
+    </div>
+    
+    <p class="game-description">{{ session.gameDescription }}</p>
+    
+    <div class="game-info">
+        <div class="info-item">
+            <i class="material-icons">map</i>
+            <span>{{ formattedMapSize }}</span>
+        </div>
+        <div class="info-item">
+            <i class="material-icons">sports_esports</i>
+            <span>{{ formattedGameMode }}</span>
+        </div>
+    </div>
+    
+    <div class="card-footer">
+        <app-ui-button [fullWidth]="true" (buttonClick)="$event.stopPropagation(); onJoinClick()">
+            Rejoindre
+        </app-ui-button>
+    </div>
 </div>
