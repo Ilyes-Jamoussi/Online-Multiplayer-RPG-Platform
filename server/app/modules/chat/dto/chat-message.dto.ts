@@ -13,8 +13,3 @@ export class ChatMessageDto {
     @ApiProperty()
     timestamp: string;
 }
-
-export class LoadMessagesDto {
-    @ApiProperty({ type: [ChatMessageDto] })
-    messages: ChatMessageDto[];
-}

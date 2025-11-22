@@ -227,7 +227,7 @@ describe('TimerService', () => {
             expect(service.gameOverTimeRemaining()).toBe(1);
 
             jasmine.clock().tick(MILLISECONDS_PER_SECOND);
-            expect(mockRouter.navigate).toHaveBeenCalledWith(['home']);
+            expect(mockRouter.navigate).toHaveBeenCalledWith(['statistics']);
             expect(service.isGameOverActive()).toBe(false);
             expect(service.gameOverTimeRemaining()).toBe(0);
         });

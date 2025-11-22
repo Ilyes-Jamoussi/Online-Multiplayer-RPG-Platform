@@ -4,6 +4,7 @@ import { Game } from '@app/modules/game-store/entities/game.entity';
 import { ActionService } from '@app/modules/in-game/services/action/action.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
+import { TrackingService } from '@app/modules/in-game/services/tracking/tracking.service';
 import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Orientation } from '@common/enums/orientation.enum';
@@ -19,6 +20,7 @@ export class GameplayService {
         private readonly sessionRepository: InGameSessionRepository,
         private readonly actionService: ActionService,
         private readonly timerService: TimerService,
+        private readonly trackingService: TrackingService,
     ) {}
 
     endPlayerTurn(sessionId: string, playerId: string): InGameSession {
@@ -37,6 +39,8 @@ export class GameplayService {
         if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
 
         this.actionService.toggleDoor(session, playerId, position);
+        this.trackingService.trackDoorToggled(sessionId, position);
+
         player.actionsRemaining--;
         session.currentTurn.hasUsedAction = true;
         this.actionService.calculateReachableTiles(session, playerId);
@@ -59,7 +63,10 @@ export class GameplayService {
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
         if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
+
         this.actionService.performSanctuaryAction(session, playerId, position, double);
+        this.trackingService.trackSanctuaryUsed(sessionId, position);
+
         player.actionsRemaining--;
     }
 
@@ -69,6 +76,13 @@ export class GameplayService {
         if (this.timerService.getGameTimerState(sessionId) !== TurnTimerStates.PlayerTurn) throw new BadRequestException('Not your turn');
 
         this.actionService.movePlayer(session, playerId, orientation);
+
+        // Track tile visited after movement
+        const player = session.inGamePlayers[playerId];
+        if (player) {
+            this.trackingService.trackTileVisited(sessionId, playerId, { x: player.x, y: player.y });
+        }
+
         const availableActions = this.actionService.calculateAvailableActions(session, playerId);
         const reachableTiles = this.actionService.calculateReachableTiles(session, playerId);
         if (reachableTiles.length <= 1 && !availableActions.length) {
@@ -123,6 +137,9 @@ export class GameplayService {
         }
 
         this.sessionRepository.movePlayerPosition(sessionId, playerId, position.x, position.y, 0);
+        this.trackingService.trackTeleportation(sessionId);
+        this.trackingService.trackTileVisited(sessionId, playerId, position);
+
         this.actionService.calculateReachableTiles(session, playerId);
         this.actionService.calculateAvailableActions(session, playerId);
     }

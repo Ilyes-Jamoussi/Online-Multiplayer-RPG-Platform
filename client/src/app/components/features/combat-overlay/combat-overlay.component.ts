@@ -36,7 +36,7 @@ export class CombatOverlayComponent {
     get playerAAvatar() {
         if (!this.combatData) return '';
         const player = this.inGameService.getPlayerByPlayerId(this.combatData.attackerId);
-        return this.assetsService.getAvatarStaticImage(player.avatar);
+        return this.assetsService.getAvatarAnimatedImage(player.avatar);
     }
 
     get playerBName() {
@@ -46,7 +46,7 @@ export class CombatOverlayComponent {
     get playerBAvatar() {
         if (!this.combatData) return '';
         const player = this.inGameService.getPlayerByPlayerId(this.combatData.targetId);
-        return this.assetsService.getAvatarStaticImage(player.avatar);
+        return this.assetsService.getAvatarAnimatedImage(player.avatar);
     }
 
     get playerAHealth() {

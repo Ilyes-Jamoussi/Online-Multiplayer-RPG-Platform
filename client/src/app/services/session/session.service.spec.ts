@@ -5,6 +5,7 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { SessionService } from './session.service';
@@ -96,7 +97,7 @@ describe('SessionService', () => {
 
         it('should reset session', () => {
             service.updateSession({ id: 'test-id' });
-            service.resetSession();
+            service.reset();
             expect(service.id()).toBe('');
         });
 
@@ -133,7 +134,7 @@ describe('SessionService', () => {
             service.updateSession({ isRoomLocked: true, players: [mockPlayer, mockPlayer] });
             expect(service.canStartGame()).toBe(true);
 
-            service.updateSession({ isRoomLocked: false });
+            service.updateSession({ players: [mockPlayer] });
             expect(service.canStartGame()).toBe(false);
         });
     });
@@ -169,18 +170,19 @@ describe('SessionService', () => {
 
     describe('Session Operations', () => {
         it('should initialize session with game', () => {
-            service.initializeSessionWithGame('game1', MapSize.SMALL);
+            service.initializeSessionWithGame('game1', MapSize.SMALL, GameMode.CLASSIC);
             expect(service.gameId()).toBe('game1');
             expect(service.maxPlayers()).toBe(2);
             expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.CharacterCreationPage]);
         });
 
         it('should create session', () => {
-            service.updateSession({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS });
+            service.updateSession({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS, mode: GameMode.CLASSIC });
             service.createSession(mockPlayer);
             expect(mockSessionSocketService.createSession).toHaveBeenCalledWith({
                 gameId: 'game1',
                 maxPlayers: TEST_MAX_PLAYERS,
+                mode: GameMode.CLASSIC,
                 player: mockPlayer,
             });
         });
@@ -218,7 +220,7 @@ describe('SessionService', () => {
 
     describe('Event Handlers', () => {
         it('should handle session joined', () => {
-            service.handleSessionJoined({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS });
+            service.handleSessionJoined({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS, chatId: 'chat1', mode: GameMode.CLASSIC });
             expect(service.gameId()).toBe('game1');
             expect(service.maxPlayers()).toBe(TEST_MAX_PLAYERS);
             expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.WaitingRoomPage]);
@@ -228,10 +230,8 @@ describe('SessionService', () => {
     describe('Socket Event Listeners', () => {
         it('should register all socket listeners', () => {
             expect(mockSessionSocketService.onAvatarAssignmentsUpdated).toHaveBeenCalled();
-            expect(mockSessionSocketService.onAvatarAssignmentsUpdated).toHaveBeenCalled();
             expect(mockSessionSocketService.onSessionPlayersUpdated).toHaveBeenCalled();
             expect(mockSessionSocketService.onGameSessionStarted).toHaveBeenCalled();
-            expect(mockSessionSocketService.onSessionJoined).toHaveBeenCalled();
             expect(mockSessionSocketService.onAvatarSelectionJoined).toHaveBeenCalled();
             expect(mockSessionSocketService.onAvailableSessionsUpdated).toHaveBeenCalled();
             expect(mockSessionSocketService.onSessionAutoLocked).toHaveBeenCalled();
@@ -258,9 +258,8 @@ describe('SessionService', () => {
         });
 
         it('should handle session joined event', () => {
-            const callback = mockSessionSocketService.onSessionJoined.calls.mostRecent().args[0];
-            const mockData = { gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS };
-            callback(mockData);
+            const mockData = { gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS, chatId: 'chat1', mode: GameMode.CLASSIC };
+            service.handleSessionJoined(mockData);
             expect(service.gameId()).toBe('game1');
             expect(service.maxPlayers()).toBe(TEST_MAX_PLAYERS);
             expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.WaitingRoomPage]);
@@ -276,7 +275,19 @@ describe('SessionService', () => {
 
         it('should handle available sessions updated', () => {
             const callback = mockSessionSocketService.onAvailableSessionsUpdated.calls.mostRecent().args[0];
-            const mockData = { sessions: [{ id: 'session1', currentPlayers: 2, maxPlayers: TEST_MAX_PLAYERS }] };
+            const mockData = {
+                sessions: [
+                    {
+                        id: 'session1',
+                        currentPlayers: 2,
+                        maxPlayers: TEST_MAX_PLAYERS,
+                        gameName: 'Test Game',
+                        gameDescription: 'Test Description',
+                        mapSize: MapSize.SMALL,
+                        gameMode: GameMode.CLASSIC,
+                    },
+                ],
+            };
             callback(mockData);
             expect(service.availableSessions()).toEqual(mockData.sessions);
         });
@@ -293,19 +304,6 @@ describe('SessionService', () => {
             callback(mockData);
             expect(service.id()).toBe('session1');
             expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.CharacterCreationPage]);
-        });
-
-        it('should handle available sessions updated', () => {
-            const callback = mockSessionSocketService.onAvailableSessionsUpdated.calls.mostRecent().args[0];
-            const mockData = { sessions: [{ id: 'session1', currentPlayers: 2, maxPlayers: TEST_MAX_PLAYERS }] };
-            callback(mockData);
-            expect(service.availableSessions()).toEqual(mockData.sessions);
-        });
-
-        it('should handle session auto locked', () => {
-            const callback = mockSessionSocketService.onSessionAutoLocked.calls.mostRecent().args[0];
-            callback();
-            expect(service.isRoomLocked()).toBe(true);
         });
     });
 

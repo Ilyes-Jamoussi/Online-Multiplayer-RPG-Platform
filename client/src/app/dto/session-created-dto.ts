@@ -11,4 +11,5 @@
 export interface SessionCreatedDto {
     sessionId: string;
     playerId: string;
+    chatId: string;
 }

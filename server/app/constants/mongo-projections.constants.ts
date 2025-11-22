@@ -11,6 +11,7 @@ export const GAME_PREVIEW_PROJECTION = {
     _id: 1,
     name: 1,
     size: 1,
+    mode: 1,
     description: 1,
     mapImageUrl: 1,
     lastModified: 1,

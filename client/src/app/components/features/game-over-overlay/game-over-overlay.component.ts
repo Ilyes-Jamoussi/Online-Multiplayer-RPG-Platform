@@ -72,6 +72,6 @@ export class GameOverOverlayComponent implements OnDestroy {
 
     viewStatistics(): void {
         this.timerCoordinatorService.stopGameOverTimer();
-        void this.router.navigate([ROUTES.GameStatisticsPage]);
+        void this.router.navigate([ROUTES.StatisticsPage]);
     }
 }

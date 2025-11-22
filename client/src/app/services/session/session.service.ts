@@ -7,8 +7,10 @@ import { JoinSessionDto } from '@app/dto/join-session-dto';
 import { SessionJoinedDto } from '@app/dto/session-joined-dto';
 import { SessionPreviewDto } from '@app/dto/session-preview-dto';
 import { ROUTES } from '@app/enums/routes.enum';
+import { ChatSocketService } from '@app/services/chat-socket/chat-socket.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Player } from '@common/interfaces/player.interface';
@@ -27,10 +29,13 @@ export class SessionService {
     readonly gameId: Signal<string> = computed(() => this.session().gameId);
     readonly maxPlayers: Signal<number> = computed(() => this.session().maxPlayers);
     readonly isRoomLocked: Signal<boolean> = computed(() => this.session().isRoomLocked);
+    readonly chatId: Signal<string> = computed(() => this.session().chatId);
+    readonly mode: Signal<GameMode> = computed(() => this.session().mode);
 
     constructor(
         private readonly sessionSocketService: SessionSocketService,
         private readonly router: Router,
+        private readonly chatSocketService: ChatSocketService,
     ) {
         this.initListeners();
     }
@@ -39,7 +44,11 @@ export class SessionService {
         this._session.update((session) => ({ ...session, ...partial }));
     }
 
-    resetSession(): void {
+    reset(): void {
+        const currentChatId = this.chatId();
+        if (currentChatId) {
+            this.chatSocketService.leaveChatRoom({ chatId: currentChatId });
+        }
         this._session.set({ ...DEFAULT_SESSION });
     }
 
@@ -62,7 +71,8 @@ export class SessionService {
     }
 
     canStartGame(): boolean {
-        return this.isRoomLocked() && this.players().length >= MIN_SESSION_PLAYERS;
+        const playerCount = this.players().length;
+        return this.mode() === GameMode.CTF ? playerCount % 2 === 0 && playerCount > 0 : playerCount >= MIN_SESSION_PLAYERS;
     }
 
     updateAvatarAssignment(playerId: string, avatar: Avatar, isAdmin: boolean): void {
@@ -80,14 +90,14 @@ export class SessionService {
     }
 
     leaveSession(): void {
-        this.resetSession();
+        this.reset();
         void this.router.navigate([ROUTES.HomePage]);
         this.sessionSocketService.leaveSession();
     }
 
-    initializeSessionWithGame(gameId: string, mapSize: MapSize): void {
+    initializeSessionWithGame(gameId: string, mapSize: MapSize, mode: GameMode): void {
         const maxPlayers = MAP_SIZE_TO_MAX_PLAYERS[mapSize];
-        this.updateSession({ id: Date.now().toString(), gameId, maxPlayers });
+        this.updateSession({ id: Date.now().toString(), gameId, maxPlayers, mode });
         void this.router.navigate([ROUTES.CharacterCreationPage]);
     }
 
@@ -96,6 +106,7 @@ export class SessionService {
         const dto: CreateSessionDto = {
             gameId: session.gameId,
             maxPlayers: session.maxPlayers,
+            mode: session.mode,
             player,
         };
         this.sessionSocketService.createSession(dto);
@@ -111,6 +122,9 @@ export class SessionService {
     }
 
     startGameSession(): void {
+        if (!this.isRoomLocked()) {
+            this.lock();
+        }
         this.sessionSocketService.startGameSession();
     }
 
@@ -127,7 +141,7 @@ export class SessionService {
     }
 
     handleSessionJoined(data: SessionJoinedDto): void {
-        this.updateSession({ gameId: data.gameId, maxPlayers: data.maxPlayers });
+        this.updateSession({ gameId: data.gameId, maxPlayers: data.maxPlayers, mode: data.mode, chatId: data.chatId });
         void this.router.navigate([ROUTES.WaitingRoomPage]);
     }
 
@@ -151,11 +165,6 @@ export class SessionService {
 
         this.sessionSocketService.onGameSessionStarted(() => {
             void this.router.navigate([ROUTES.GameSessionPage]);
-        });
-
-        this.sessionSocketService.onSessionJoined((data) => {
-            this.updateSession({ gameId: data.gameId, maxPlayers: data.maxPlayers });
-            void this.router.navigate([ROUTES.WaitingRoomPage]);
         });
 
         this.sessionSocketService.onAvatarSelectionJoined((data) => {

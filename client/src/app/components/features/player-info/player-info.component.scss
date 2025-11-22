@@ -131,6 +131,23 @@ $text-secondary: rgba(255, 255, 255, 0.7);
     gap: 0.5rem;
 }
 
+.stats-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    align-items: start;
+}
+
+.stats-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stats-column .stat-group {
+    flex: 1;
+}
+
 .stat-group {
     display: flex;
     flex-direction: column;

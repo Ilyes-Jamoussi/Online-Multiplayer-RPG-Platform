@@ -3,7 +3,7 @@ import { SocketService } from '@app/services/socket/socket.service';
 import { ChatEvents } from '@common/enums/chat-events.enum';
 import { ChatMessage } from '@common/interfaces/chat-message.interface';
 import { SendMessageDto } from '@app/dto/send-message-dto';
-import { LoadMessagesDto } from '@app/dto/load-messages-dto';
+import { LeaveChatDto } from '@app/dto/leave-chat-dto';
 
 @Injectable({
     providedIn: 'root',
@@ -21,9 +21,7 @@ export class ChatSocketService {
         });
     }
 
-    onLoadMessages(callback: (data: LoadMessagesDto) => void): void {
-        this.socketService.onSuccessEvent(ChatEvents.LoadMessages, (data: LoadMessagesDto) => {
-            callback(data);
-        });
+    leaveChatRoom(data: LeaveChatDto): void {
+        this.socketService.emit(ChatEvents.LeaveChatRoom, data);
     }
 }
