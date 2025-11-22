@@ -59,6 +59,22 @@
             color: #666;
             font-weight: 500;
         }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .ctf-rule {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid #ffeaa7;
+        }
     }
 
     .players-list {

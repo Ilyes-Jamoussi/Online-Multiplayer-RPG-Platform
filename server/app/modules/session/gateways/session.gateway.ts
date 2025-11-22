@@ -52,7 +52,7 @@ export class SessionGateway implements OnGatewayDisconnect {
             const sessionCreatedDto: SessionCreatedDto = { sessionId: sessionData.sessionId, playerId: adminId, chatId: sessionData.chatId };
             socket.emit(SessionEvents.SessionCreated, successResponse<SessionCreatedDto>(sessionCreatedDto));
             socket.emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
-            this.handleAvailabilityChange();
+            void this.handleAvailabilityChange();
         } catch (error) {
             socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
@@ -72,6 +72,7 @@ export class SessionGateway implements OnGatewayDisconnect {
             gameId: session.gameId,
             maxPlayers: session.maxPlayers,
             chatId: session.chatId,
+            mode: session.mode,
         };
 
         if (modifiedPlayerName !== data.player.name) {
@@ -79,7 +80,7 @@ export class SessionGateway implements OnGatewayDisconnect {
         }
         socket.emit(SessionEvents.SessionJoined, successResponse(dto));
         this.server.to(data.sessionId).emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
-        this.handleAvailabilityChange();
+        void this.handleAvailabilityChange();
     }
 
     @SubscribeMessage(SessionEvents.JoinAvatarSelection)
@@ -156,7 +157,7 @@ export class SessionGateway implements OnGatewayDisconnect {
                 .to(avatarRoomId)
                 .emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
 
-            this.handleAvailabilityChange();
+            void this.handleAvailabilityChange();
         } catch (error) {
             socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
@@ -171,7 +172,7 @@ export class SessionGateway implements OnGatewayDisconnect {
         const avatarAssignments = this.sessionService.getChosenAvatars(data.sessionId);
         this.server.to(roomId).emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
 
-        this.handleAvailabilityChange();
+        void this.handleAvailabilityChange();
     }
 
     @SubscribeMessage(SessionEvents.StartGameSession)
@@ -239,7 +240,7 @@ export class SessionGateway implements OnGatewayDisconnect {
             }
 
             this.sessionService.endSession(sessionId);
-            this.handleAvailabilityChange();
+            void this.handleAvailabilityChange();
             return;
         }
 
@@ -255,7 +256,7 @@ export class SessionGateway implements OnGatewayDisconnect {
             .to(avatarRoomId)
             .emit(SessionEvents.AvatarAssignmentsUpdated, successResponse<AvatarAssignmentsUpdatedDto>({ avatarAssignments }));
 
-        this.handleAvailabilityChange();
+        void this.handleAvailabilityChange();
     }
 
     handleDisconnect(socket: Socket): void {

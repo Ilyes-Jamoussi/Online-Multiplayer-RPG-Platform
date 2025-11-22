@@ -191,7 +191,7 @@ export class PlayerService {
 
         this.sessionSocketService.onSessionJoined((data) => {
             if (data.modifiedPlayerName) this.updatePlayer({ name: data.modifiedPlayerName });
-            this.sessionService.handleSessionJoined({ gameId: data.gameId, maxPlayers: data.maxPlayers, chatId: data.chatId });
+            this.sessionService.handleSessionJoined(data);
         });
 
         this.inGameSocketService.onPlayerUpdated((updatedPlayer) => {

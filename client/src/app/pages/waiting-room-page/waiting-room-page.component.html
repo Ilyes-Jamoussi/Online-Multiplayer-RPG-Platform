@@ -4,7 +4,12 @@
             <div class="players-section">
                 <div class="header">
                     <h2><i class="material-icons">group</i> Joueurs</h2>
-                    <span class="player-count">{{ players().length }} / {{ maxPlayers() }}</span>
+                    <div class="player-info">
+                        @if (showCTFRule()) {
+                            <span class="ctf-rule">Mode CTF : nombre pair requis</span>
+                        }
+                        <span class="player-count">{{ players().length }} / {{ maxPlayers() }}</span>
+                    </div>
                 </div>
                 <div class="players-list">
                     @for (player of players(); track player.id) { @if (isVirtualPlayer(player)) {

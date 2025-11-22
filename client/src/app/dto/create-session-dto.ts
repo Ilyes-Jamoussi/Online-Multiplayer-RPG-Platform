@@ -7,12 +7,14 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { GameMode } from '@common/enums/game-mode.enum';
 import { PlayerDto } from './player-dto';
 
 
 export interface CreateSessionDto { 
     gameId: string;
     maxPlayers: number;
+    mode: GameMode;
     player: PlayerDto;
 }
 

@@ -9,6 +9,7 @@ export const DEFAULT_SESSION: WaitingRoomSession = {
     id: '',
     gameId: '',
     maxPlayers: 0,
+    mode: GameMode.CLASSIC,
     players: [],
     avatarAssignments: DEFAULT_AVATAR_ASSIGNMENTS,
     isRoomLocked: false,

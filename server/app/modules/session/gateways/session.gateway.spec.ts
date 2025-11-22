@@ -746,7 +746,7 @@ describe('SessionGateway', () => {
 
             sessionService.getAvailableSessions.mockReturnValue(sessions);
 
-            gateway.loadAvailableSessions(mockSocket);
+            void gateway.loadAvailableSessions(mockSocket);
 
             expect(sessionService.getAvailableSessions).toHaveBeenCalled();
             expect(mockSocket.emit).toHaveBeenCalledWith(
@@ -765,7 +765,7 @@ describe('SessionGateway', () => {
 
             sessionService.getAvailableSessions.mockReturnValue(sessions);
 
-            gateway.handleAvailabilityChange();
+            void gateway.handleAvailabilityChange();
 
             expect(sessionService.getAvailableSessions).toHaveBeenCalled();
             expect(mockServer.emit).toHaveBeenCalledWith(

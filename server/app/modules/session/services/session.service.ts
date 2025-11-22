@@ -319,6 +319,7 @@ export class SessionService {
             id: sessionId,
             gameId: data.gameId,
             maxPlayers: data.maxPlayers,
+            mode: data.mode,
             isRoomLocked: false,
             chatId,
         };

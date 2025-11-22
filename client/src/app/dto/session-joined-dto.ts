@@ -7,12 +7,14 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { GameMode } from '@common/enums/game-mode.enum';
 
 
 export interface SessionJoinedDto { 
     gameId: string;
     maxPlayers: number;
     chatId: string;
+    mode: GameMode;
     modifiedPlayerName?: string;
 }
 

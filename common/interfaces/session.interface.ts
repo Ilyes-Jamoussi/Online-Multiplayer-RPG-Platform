@@ -14,6 +14,7 @@ export interface BaseSession {
     id: string;
     gameId: string;
     maxPlayers: number;
+    mode: GameMode;
 }
 
 export interface WaitingRoomSession extends BaseSession {
@@ -30,7 +31,6 @@ export interface InGameSession extends BaseSession {
     currentTurn: TurnState;
     startPoints: StartPoint[];
     mapSize: MapSize;
-    mode: GameMode;
     turnOrder: string[];
     isAdminModeActive?: boolean;
     gameStartTime?: Date;

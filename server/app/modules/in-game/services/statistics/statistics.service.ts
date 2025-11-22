@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common';
 import {
     DEFAULT_HEALTH_DEALT_MULTIPLIER,
     MILLISECONDS_PER_SECOND,
+    PERCENTAGE_MULTIPLIER,
     SECONDS_PER_MINUTE,
     STATISTICS_DELETE_DELAY_MS,
 } from '@app/constants/statistics.constants';
 import { GameStatisticsDto, PlayerStatisticsDto, GlobalStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
-import { TrackingService } from '@app/modules/in-game/services/tracking/tracking.service';
+import { TrackingService, GameTracker } from '@app/modules/in-game/services/tracking/tracking.service';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -49,7 +50,13 @@ export class StatisticsService {
         return stored ? stored.data : null;
     }
 
-    private calculateGameStatistics(session: InGameSession, trackingData: any, winnerId: string, winnerName: string, gameStartTime: Date): GameStatisticsDto {
+    private calculateGameStatistics(
+        session: InGameSession,
+        trackingData: GameTracker,
+        winnerId: string,
+        winnerName: string,
+        gameStartTime: Date,
+    ): GameStatisticsDto {
         const players = Object.values(session.inGamePlayers).filter((player) => player.isInGame);
 
         const playersStatistics = players.map((player) => this.calculatePlayerStatistics(player, trackingData));
@@ -63,14 +70,14 @@ export class StatisticsService {
         };
     }
 
-    private calculatePlayerStatistics(player: Player, trackingData: any): PlayerStatisticsDto {
+    private calculatePlayerStatistics(player: Player, trackingData: GameTracker): PlayerStatisticsDto {
         const healthLost = player.maxHealth - player.health;
         const healthDealt = player.combatWins * DEFAULT_HEALTH_DEALT_MULTIPLIER;
         
         let tilesVisitedPercentage = 0;
         if (trackingData?.playerTiles?.has(player.id)) {
             const playerTiles = trackingData.playerTiles.get(player.id);
-            tilesVisitedPercentage = Math.round((playerTiles.size / trackingData.totalTiles) * 100);
+            tilesVisitedPercentage = Math.round((playerTiles.size / trackingData.totalTiles) * PERCENTAGE_MULTIPLIER);
         }
 
         return {
@@ -84,7 +91,7 @@ export class StatisticsService {
         };
     }
 
-    private calculateGlobalStatistics(session: InGameSession, trackingData: any, gameStartTime: Date): GlobalStatisticsDto {
+    private calculateGlobalStatistics(session: InGameSession, trackingData: GameTracker, gameStartTime: Date): GlobalStatisticsDto {
         const gameDuration = this.formatDuration(Date.now() - gameStartTime.getTime());
         
         let globalTilesVisitedPercentage = 0;
@@ -93,7 +100,7 @@ export class StatisticsService {
             trackingData.playerTiles.forEach((tiles: Set<string>) => {
                 tiles.forEach(tile => allVisitedTiles.add(tile));
             });
-            globalTilesVisitedPercentage = Math.round((allVisitedTiles.size / trackingData.totalTiles) * 100);
+            globalTilesVisitedPercentage = Math.round((allVisitedTiles.size / trackingData.totalTiles) * PERCENTAGE_MULTIPLIER);
         }
 
         return {
@@ -101,8 +108,8 @@ export class StatisticsService {
             totalTurns: session.currentTurn.turnNumber,
             tilesVisitedPercentage: globalTilesVisitedPercentage,
             totalTeleportations: trackingData?.teleportations || 0,
-            doorsManipulatedPercentage: trackingData ? Math.round((trackingData.toggledDoors.size / trackingData.totalDoors) * 100) : 0,
-            sanctuariesUsedPercentage: trackingData ? Math.round((trackingData.usedSanctuaries.size / trackingData.totalSanctuaries) * 100) : 0,
+            doorsManipulatedPercentage: Math.round((trackingData.toggledDoors.size / trackingData.totalDoors) * PERCENTAGE_MULTIPLIER),
+            sanctuariesUsedPercentage: Math.round((trackingData.usedSanctuaries.size / trackingData.totalSanctuaries) * PERCENTAGE_MULTIPLIER),
             flagHoldersCount: trackingData?.flagHolders.size || 0,
         };
     }

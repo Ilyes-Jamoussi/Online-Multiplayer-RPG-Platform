@@ -4,7 +4,7 @@ import { MapSize } from '@common/enums/map-size.enum';
 
 interface GameTracker {
     sessionId: string;
-    playerTiles: Map<string, Set<string>>; // playerId -> Set of "x,y"
+    playerTiles: Map<string, Set<string>>;
     totalTiles: number;
     teleportations: number;
     toggledDoors: Set<string>;
@@ -38,7 +38,10 @@ export class TrackingService {
             if (!tracker.playerTiles.has(playerId)) {
                 tracker.playerTiles.set(playerId, new Set());
             }
-            tracker.playerTiles.get(playerId)!.add(`${position.x},${position.y}`);
+            const playerTiles = tracker.playerTiles.get(playerId);
+            if (playerTiles) {
+                playerTiles.add(`${position.x},${position.y}`);
+            }
         }
     }
 
