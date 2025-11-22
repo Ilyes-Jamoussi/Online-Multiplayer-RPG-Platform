@@ -19,9 +19,7 @@ import { Player } from '@common/interfaces/player.interface';
     styleUrls: ['./waiting-room-page.component.scss'],
 })
 export class WaitingRoomPageComponent implements OnInit {
-    readonly showCTFRule = computed(() => 
-        this.sessionService.mode() === GameMode.CTF && !this.sessionService.canStartGame()
-    );
+    readonly showCTFRule = computed(() => this.sessionService.mode() === GameMode.CTF && !this.sessionService.canStartGame());
 
     get sessionMode(): Signal<GameMode> {
         return this.sessionService.mode;

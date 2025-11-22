@@ -8,11 +8,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-    imports: [
-        InGameModule, 
-        ChatModule,
-        MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }])
-    ],
+    imports: [InGameModule, ChatModule, MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }])],
     controllers: [SessionController],
     providers: [SessionService, SessionGateway],
 })

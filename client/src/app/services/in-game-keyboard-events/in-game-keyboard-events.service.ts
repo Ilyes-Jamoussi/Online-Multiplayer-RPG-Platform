@@ -73,7 +73,7 @@ export class InGameKeyboardEventsService implements OnDestroy {
         const target = event.target as HTMLElement;
         const inputTags: InputTagName[] = ['INPUT', 'TEXTAREA'];
         const isInputField = inputTags.includes(target?.tagName as InputTagName) || target?.isContentEditable;
-        
+
         if (event.key === GameKey.AdminMode && !isInputField) {
             event.preventDefault();
             this.handleAdminModeToggle();

@@ -23,9 +23,7 @@ import { Server, Socket } from 'socket.io';
 export class ChatGateway {
     @WebSocketServer() private readonly server: Server;
 
-    constructor(
-        private readonly chatService: ChatService,
-    ) {}
+    constructor(private readonly chatService: ChatService) {}
 
     @SubscribeMessage(ChatEvents.SendMessage)
     sendMessage(socket: Socket, data: SendMessageDto): void {

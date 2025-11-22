@@ -291,15 +291,32 @@ describe('PlayerService', () => {
             const callback = mockSessionSocketService.onSessionJoined.calls.mostRecent().args[0];
             callback({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4, chatId: 'chat1', mode: GameMode.CLASSIC });
 
-            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4, chatId: 'chat1', mode: GameMode.CLASSIC });
+            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({
+                gameId: 'game1',
+                maxPlayers: TEST_MAX_PLAYERS_4,
+                chatId: 'chat1',
+                mode: GameMode.CLASSIC,
+            });
         });
 
         it('should handle session joined with modified name', () => {
             const callback = mockSessionSocketService.onSessionJoined.calls.mostRecent().args[0];
-            callback({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4, modifiedPlayerName: 'Modified Name', chatId: 'chat1', mode: GameMode.CLASSIC });
+            callback({
+                gameId: 'game1',
+                maxPlayers: TEST_MAX_PLAYERS_4,
+                modifiedPlayerName: 'Modified Name',
+                chatId: 'chat1',
+                mode: GameMode.CLASSIC,
+            });
 
             expect(service.name()).toBe('Modified Name');
-            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4, modifiedPlayerName: 'Modified Name', chatId: 'chat1', mode: GameMode.CLASSIC });
+            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({
+                gameId: 'game1',
+                maxPlayers: TEST_MAX_PLAYERS_4,
+                modifiedPlayerName: 'Modified Name',
+                chatId: 'chat1',
+                mode: GameMode.CLASSIC,
+            });
         });
 
         it('should handle player updated for current player', () => {

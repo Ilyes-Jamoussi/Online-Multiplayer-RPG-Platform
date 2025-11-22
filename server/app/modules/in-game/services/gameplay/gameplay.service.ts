@@ -40,7 +40,7 @@ export class GameplayService {
 
         this.actionService.toggleDoor(session, playerId, position);
         this.trackingService.trackDoorToggled(sessionId, position);
-        
+
         player.actionsRemaining--;
         session.currentTurn.hasUsedAction = true;
         this.actionService.calculateReachableTiles(session, playerId);
@@ -63,10 +63,10 @@ export class GameplayService {
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
         if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
-        
+
         this.actionService.performSanctuaryAction(session, playerId, position, double);
         this.trackingService.trackSanctuaryUsed(sessionId, position);
-        
+
         player.actionsRemaining--;
     }
 
@@ -76,13 +76,13 @@ export class GameplayService {
         if (this.timerService.getGameTimerState(sessionId) !== TurnTimerStates.PlayerTurn) throw new BadRequestException('Not your turn');
 
         this.actionService.movePlayer(session, playerId, orientation);
-        
+
         // Track tile visited after movement
         const player = session.inGamePlayers[playerId];
         if (player) {
             this.trackingService.trackTileVisited(sessionId, playerId, { x: player.x, y: player.y });
         }
-        
+
         const availableActions = this.actionService.calculateAvailableActions(session, playerId);
         const reachableTiles = this.actionService.calculateReachableTiles(session, playerId);
         if (reachableTiles.length <= 1 && !availableActions.length) {
@@ -139,7 +139,7 @@ export class GameplayService {
         this.sessionRepository.movePlayerPosition(sessionId, playerId, position.x, position.y, 0);
         this.trackingService.trackTeleportation(sessionId);
         this.trackingService.trackTileVisited(sessionId, playerId, position);
-        
+
         this.actionService.calculateReachableTiles(session, playerId);
         this.actionService.calculateAvailableActions(session, playerId);
     }

@@ -207,7 +207,7 @@ export class SessionService {
 
     async getAvailableSessions(): Promise<SessionPreviewDto[]> {
         const availableSessions = Array.from(this.sessions.values()).filter((session) => !session.isRoomLocked);
-        
+
         const sessionsWithGameInfo = await Promise.all(
             availableSessions.map(async (session) => {
                 const gameInfo = await this.getGameInfo(session.gameId);
@@ -220,7 +220,7 @@ export class SessionService {
                     mapSize: gameInfo.size,
                     gameMode: gameInfo.mode,
                 };
-            })
+            }),
         );
 
         return sessionsWithGameInfo;

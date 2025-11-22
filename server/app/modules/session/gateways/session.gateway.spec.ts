@@ -77,6 +77,8 @@ describe('SessionGateway', () => {
         players: [],
         avatarAssignments: [],
         isRoomLocked: false,
+        chatId: 'chat1',
+        mode: GameMode.CLASSIC,
         ...overrides,
     });
 
@@ -218,18 +220,25 @@ describe('SessionGateway', () => {
     });
 
     describe('createSession', () => {
-        it('should create session successfully', () => {
+        it('should create session successfully', async () => {
             const data: CreateSessionDto = {
                 gameId: GAME_ID,
                 maxPlayers: MAX_PLAYERS,
+                mode: GameMode.CLASSIC,
                 player: createMockPlayerDto(),
             };
             const players = [createMockPlayer()];
 
-            sessionService.createSession.mockReturnValue(SESSION_ID);
+            sessionService.createSession.mockReturnValue({ sessionId: SESSION_ID, chatId: 'chat1' });
             sessionService.getPlayersSession.mockReturnValue(players);
+            sessionService.getAvailableSessions.mockResolvedValue([]);
+
+            const handleAvailabilityChangeSpy = jest.spyOn(gateway, 'handleAvailabilityChange').mockResolvedValue();
 
             gateway.createSession(mockSocket, data);
+
+            // Wait for async handleAvailabilityChange to complete
+            await new Promise((resolve) => setTimeout(resolve, 0));
 
             expect(sessionService.createSession).toHaveBeenCalledWith(SOCKET_ID, data);
             expect(mockSocket.join).toHaveBeenCalledWith(SESSION_ID);
@@ -238,7 +247,7 @@ describe('SessionGateway', () => {
                 SessionEvents.SessionCreated,
                 expect.objectContaining({
                     success: true,
-                    data: { sessionId: SESSION_ID, playerId: SOCKET_ID },
+                    data: { sessionId: SESSION_ID, playerId: SOCKET_ID, chatId: 'chat1' },
                 }),
             );
             expect(mockSocket.emit).toHaveBeenCalledWith(
@@ -248,13 +257,14 @@ describe('SessionGateway', () => {
                     data: { players },
                 }),
             );
-            expect(mockServer.emit).toHaveBeenCalled();
+            expect(handleAvailabilityChangeSpy).toHaveBeenCalled();
         });
 
         it('should handle error when creating session', () => {
             const data: CreateSessionDto = {
                 gameId: GAME_ID,
                 maxPlayers: MAX_PLAYERS,
+                mode: GameMode.CLASSIC,
                 player: createMockPlayerDto(),
             };
             const errorMessage = 'Session creation failed';
@@ -350,6 +360,8 @@ describe('SessionGateway', () => {
                     data: {
                         gameId: GAME_ID,
                         maxPlayers: MAX_PLAYERS,
+                        chatId: 'chat1',
+                        mode: GameMode.CLASSIC,
                     },
                 }),
             );
@@ -379,6 +391,8 @@ describe('SessionGateway', () => {
                         gameId: GAME_ID,
                         maxPlayers: MAX_PLAYERS,
                         modifiedPlayerName: MODIFIED_PLAYER_NAME,
+                        chatId: 'chat1',
+                        mode: GameMode.CLASSIC,
                     },
                 }),
             );
@@ -674,7 +688,7 @@ describe('SessionGateway', () => {
             }).toThrow(errorMessage);
         });
 
-        it('should leave session as admin successfully', () => {
+        it('should leave session as admin successfully', async () => {
             const session = createMockWaitingSession({
                 players: [createMockPlayer({ id: SOCKET_ID }), createMockPlayer({ id: 'player-2' })],
             });
@@ -682,18 +696,24 @@ describe('SessionGateway', () => {
             sessionService.getPlayerSessionId.mockReturnValue(SESSION_ID);
             sessionService.getSession.mockReturnValue(session);
             sessionService.isAdmin.mockReturnValue(true);
+            sessionService.getAvailableSessions.mockResolvedValue([]);
 
             const playerSocket2 = createMockSocket('player-2');
             mockServer.sockets.sockets.set('player-2', playerSocket2);
 
+            const handleAvailabilityChangeSpy = jest.spyOn(gateway, 'handleAvailabilityChange').mockResolvedValue();
+
             gateway.leaveSession(mockSocket);
+
+            // Wait for async handleAvailabilityChange to complete
+            await new Promise((resolve) => setTimeout(resolve, 0));
 
             expect(mockSocket.broadcast.to).toHaveBeenCalledWith(SESSION_ID);
             expect(playerSocket2.leave).toHaveBeenCalledWith(SESSION_ID);
             expect(sessionService.releaseAvatar).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID);
             expect(sessionService.releaseAvatar).toHaveBeenCalledWith(SESSION_ID, 'player-2');
             expect(sessionService.endSession).toHaveBeenCalledWith(SESSION_ID);
-            expect(mockServer.emit).toHaveBeenCalled();
+            expect(handleAvailabilityChangeSpy).toHaveBeenCalled();
         });
 
         it('should leave session as admin with missing player sockets', () => {
@@ -741,12 +761,12 @@ describe('SessionGateway', () => {
     });
 
     describe('loadAvailableSessions', () => {
-        it('should load and emit available sessions', () => {
+        it('should load and emit available sessions', async () => {
             const sessions = [];
 
-            sessionService.getAvailableSessions.mockReturnValue(sessions);
+            sessionService.getAvailableSessions.mockReturnValue(Promise.resolve(sessions));
 
-            void gateway.loadAvailableSessions(mockSocket);
+            await gateway.loadAvailableSessions(mockSocket);
 
             expect(sessionService.getAvailableSessions).toHaveBeenCalled();
             expect(mockSocket.emit).toHaveBeenCalledWith(
@@ -760,12 +780,12 @@ describe('SessionGateway', () => {
     });
 
     describe('handleAvailabilityChange', () => {
-        it('should emit available sessions to all clients', () => {
+        it('should emit available sessions to all clients', async () => {
             const sessions = [];
 
-            sessionService.getAvailableSessions.mockReturnValue(sessions);
+            sessionService.getAvailableSessions.mockReturnValue(Promise.resolve(sessions));
 
-            void gateway.handleAvailabilityChange();
+            await gateway.handleAvailabilityChange();
 
             expect(sessionService.getAvailableSessions).toHaveBeenCalled();
             expect(mockServer.emit).toHaveBeenCalledWith(
@@ -895,6 +915,7 @@ describe('SessionGateway', () => {
                 player: createMockPlayerDto(),
             };
 
+            sessionService.getSession.mockReturnValue(createMockWaitingSession());
             sessionService.joinSession.mockReturnValue(MODIFIED_PLAYER_NAME);
 
             type GatewayWithPrivateMethod = {

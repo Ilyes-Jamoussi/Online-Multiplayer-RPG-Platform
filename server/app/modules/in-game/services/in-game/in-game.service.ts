@@ -44,8 +44,8 @@ export class InGameService {
         const game = await this.gameplayService.fetchAndCacheGame(id, gameId);
 
         // Initialize tracking with game data
-        const totalDoors = game.tiles.filter(tile => tile.kind === TileKind.DOOR).length;
-        const totalSanctuaries = game.objects.filter(p => p.kind === PlaceableKind.HEAL || p.kind === PlaceableKind.FIGHT).length;
+        const totalDoors = game.tiles.filter((tile) => tile.kind === TileKind.DOOR).length;
+        const totalSanctuaries = game.objects.filter((p) => p.kind === PlaceableKind.HEAL || p.kind === PlaceableKind.FIGHT).length;
         this.statisticsService.initializeTracking(id, mapSize, totalDoors, totalSanctuaries);
 
         const playerIdsOrder = this.initialization.makeTurnOrder(players);
@@ -62,12 +62,12 @@ export class InGameService {
         }
 
         this.initialization.assignStartPoints(session, game);
-        
+
         // Track initial player positions as visited tiles
-        Object.values(session.inGamePlayers).forEach(player => {
+        Object.values(session.inGamePlayers).forEach((player) => {
             this.statisticsService.trackTileVisited(id, player.id, { x: player.x, y: player.y });
         });
-        
+
         this.sessionRepository.save(session);
 
         // Auto-join virtual players

@@ -179,7 +179,7 @@ export class SessionGateway implements OnGatewayDisconnect {
     async startGameSession(socket: Socket): Promise<void> {
         try {
             const sessionId = this.sessionService.getPlayerSessionId(socket.id);
-            
+
             if (!sessionId) {
                 socket.emit(NotificationEvents.ErrorMessage, errorResponse('Joueur non connecté à une session'));
                 return;
@@ -192,7 +192,7 @@ export class SessionGateway implements OnGatewayDisconnect {
             }
 
             const inGameSession = await this.inGameService.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.SMALL);
-            
+
             const players = this.sessionService.getPlayersSession(sessionId);
 
             for (const player of players) {
@@ -305,7 +305,7 @@ export class SessionGateway implements OnGatewayDisconnect {
     private handleJoinSession(socket: Socket, data: JoinSessionDto): string {
         void socket.leave(this.getAvatarSelectionRoomId(data.sessionId));
         void socket.join(data.sessionId);
-        
+
         const session = this.sessionService.getSession(data.sessionId);
         void socket.join(session.chatId);
 

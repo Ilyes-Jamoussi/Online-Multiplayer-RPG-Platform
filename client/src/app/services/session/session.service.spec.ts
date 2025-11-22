@@ -275,16 +275,18 @@ describe('SessionService', () => {
 
         it('should handle available sessions updated', () => {
             const callback = mockSessionSocketService.onAvailableSessionsUpdated.calls.mostRecent().args[0];
-            const mockData = { 
-                sessions: [{ 
-                    id: 'session1', 
-                    currentPlayers: 2, 
-                    maxPlayers: TEST_MAX_PLAYERS,
-                    gameName: 'Test Game',
-                    gameDescription: 'Test Description',
-                    mapSize: MapSize.SMALL,
-                    gameMode: GameMode.CLASSIC
-                }] 
+            const mockData = {
+                sessions: [
+                    {
+                        id: 'session1',
+                        currentPlayers: 2,
+                        maxPlayers: TEST_MAX_PLAYERS,
+                        gameName: 'Test Game',
+                        gameDescription: 'Test Description',
+                        mapSize: MapSize.SMALL,
+                        gameMode: GameMode.CLASSIC,
+                    },
+                ],
             };
             callback(mockData);
             expect(service.availableSessions()).toEqual(mockData.sessions);

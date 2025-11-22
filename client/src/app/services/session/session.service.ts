@@ -72,9 +72,7 @@ export class SessionService {
 
     canStartGame(): boolean {
         const playerCount = this.players().length;
-        return this.mode() === GameMode.CTF
-            ? playerCount % 2 === 0 && playerCount > 0
-            : playerCount >= MIN_SESSION_PLAYERS;
+        return this.mode() === GameMode.CTF ? playerCount % 2 === 0 && playerCount > 0 : playerCount >= MIN_SESSION_PLAYERS;
     }
 
     updateAvatarAssignment(playerId: string, avatar: Avatar, isAdmin: boolean): void {

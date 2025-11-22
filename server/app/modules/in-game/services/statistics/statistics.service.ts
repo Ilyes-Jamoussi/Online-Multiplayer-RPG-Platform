@@ -73,7 +73,7 @@ export class StatisticsService {
     private calculatePlayerStatistics(player: Player, trackingData: GameTracker): PlayerStatisticsDto {
         const healthLost = player.maxHealth - player.health;
         const healthDealt = player.combatWins * DEFAULT_HEALTH_DEALT_MULTIPLIER;
-        
+
         let tilesVisitedPercentage = 0;
         if (trackingData?.playerTiles?.has(player.id)) {
             const playerTiles = trackingData.playerTiles.get(player.id);
@@ -93,12 +93,12 @@ export class StatisticsService {
 
     private calculateGlobalStatistics(session: InGameSession, trackingData: GameTracker, gameStartTime: Date): GlobalStatisticsDto {
         const gameDuration = this.formatDuration(Date.now() - gameStartTime.getTime());
-        
+
         let globalTilesVisitedPercentage = 0;
         if (trackingData?.playerTiles) {
             const allVisitedTiles = new Set<string>();
             trackingData.playerTiles.forEach((tiles: Set<string>) => {
-                tiles.forEach(tile => allVisitedTiles.add(tile));
+                tiles.forEach((tile) => allVisitedTiles.add(tile));
             });
             globalTilesVisitedPercentage = Math.round((allVisitedTiles.size / trackingData.totalTiles) * PERCENTAGE_MULTIPLIER);
         }
