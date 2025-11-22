@@ -4,6 +4,7 @@ import { PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { Avatar } from '@common/enums/avatar.enum';
 import { Player } from '@common/interfaces/player.interface';
 
 @Component({
@@ -52,7 +53,7 @@ export class PlayersListComponent {
         return (player.health / player.maxHealth) * PERCENTAGE_MULTIPLIER;
     }
 
-    getPlayerAvatar(player: Player): string {
-        return this.assetsService.getAvatarStaticImage(player.avatar);
+    getPlayerAvatar(avatar: Avatar | null): string {
+        return this.assetsService.getAvatarStaticImage(avatar);
     }
 }
