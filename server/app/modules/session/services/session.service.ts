@@ -21,14 +21,13 @@ export class SessionService {
         private readonly chatService: ChatService,
     ) {}
 
-    createSession(adminId: string, data: CreateSessionDto): string {
+    createSession(adminId: string, data: CreateSessionDto): { sessionId: string; chatId: string } {
         const sessionId = this.getUniqueAccessCode();
-        const session = this.buildSession(sessionId, adminId, data);
+        const chatId = this.chatService.createChat();
+        const session = this.buildSession(sessionId, adminId, data, chatId);
         this.sessions.set(sessionId, session);
-        this.chatService.createSessionChat(sessionId);
         this.eventEmitter.emit(ServerEvents.SessionAvailabilityChanged);
-        this.eventEmitter.emit(ServerEvents.LoadMessages, sessionId, adminId);
-        return sessionId;
+        return { sessionId, chatId };
     }
 
     endSession(sessionId: string): void {
@@ -64,7 +63,6 @@ export class SessionService {
             this.eventEmitter.emit(ServerEvents.SessionAutoLocked, data.sessionId);
         }
 
-        this.eventEmitter.emit(ServerEvents.LoadMessages, data.sessionId, playerId);
         return uniqueName;
     }
 
@@ -276,7 +274,7 @@ export class SessionService {
         return uniqueName;
     }
 
-    private buildSession(sessionId: string, adminId: string, data: CreateSessionDto): WaitingRoomSession {
+    private buildSession(sessionId: string, adminId: string, data: CreateSessionDto, chatId: string): WaitingRoomSession {
         const adminPlayer: Player = {
             ...data.player,
             id: adminId,
@@ -300,6 +298,7 @@ export class SessionService {
             gameId: data.gameId,
             maxPlayers: data.maxPlayers,
             isRoomLocked: false,
+            chatId,
         };
     }
 }

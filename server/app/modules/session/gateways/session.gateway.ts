@@ -44,11 +44,13 @@ export class SessionGateway implements OnGatewayDisconnect {
     createSession(socket: Socket, data: CreateSessionDto): void {
         try {
             const adminId = socket.id;
-            const sessionId = this.sessionService.createSession(adminId, data);
-            void socket.join(sessionId);
+            const sessionData = this.sessionService.createSession(adminId, data);
+            void socket.join(sessionData.sessionId);
+            void socket.join(sessionData.chatId);
 
-            const players = this.sessionService.getPlayersSession(sessionId);
-            socket.emit(SessionEvents.SessionCreated, successResponse<SessionCreatedDto>({ sessionId, playerId: adminId }));
+            const players = this.sessionService.getPlayersSession(sessionData.sessionId);
+            const sessionCreatedDto: SessionCreatedDto = { sessionId: sessionData.sessionId, playerId: adminId, chatId: sessionData.chatId };
+            socket.emit(SessionEvents.SessionCreated, successResponse<SessionCreatedDto>(sessionCreatedDto));
             socket.emit(SessionEvents.SessionPlayersUpdated, successResponse<SessionPlayersUpdatedDto>({ players }));
             this.handleAvailabilityChange();
         } catch (error) {
@@ -69,6 +71,7 @@ export class SessionGateway implements OnGatewayDisconnect {
         const dto: SessionJoinedDto = {
             gameId: session.gameId,
             maxPlayers: session.maxPlayers,
+            chatId: session.chatId,
         };
 
         if (modifiedPlayerName !== data.player.name) {
@@ -173,48 +176,47 @@ export class SessionGateway implements OnGatewayDisconnect {
 
     @SubscribeMessage(SessionEvents.StartGameSession)
     async startGameSession(socket: Socket): Promise<void> {
-        const sessionId = this.sessionService.getPlayerSessionId(socket.id);
-        if (!sessionId) {
-            socket.emit(NotificationEvents.ErrorMessage, errorResponse('Joueur non connecté à une session'));
-            return;
-        }
-
-        const waitingSession = this.sessionService.getSession(sessionId);
-        if (!waitingSession) {
-            socket.emit(NotificationEvents.ErrorMessage, errorResponse('Session introuvable'));
-            return;
-        }
-
-        let inGameSession;
         try {
-            inGameSession = await this.inGameService.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.SMALL);
+            const sessionId = this.sessionService.getPlayerSessionId(socket.id);
+            
+            if (!sessionId) {
+                socket.emit(NotificationEvents.ErrorMessage, errorResponse('Joueur non connecté à une session'));
+                return;
+            }
+
+            const waitingSession = this.sessionService.getSession(sessionId);
+            if (!waitingSession) {
+                socket.emit(NotificationEvents.ErrorMessage, errorResponse('Session introuvable'));
+                return;
+            }
+
+            const inGameSession = await this.inGameService.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.SMALL);
+            
+            const players = this.sessionService.getPlayersSession(sessionId);
+
+            for (const player of players) {
+                if (!player.virtualPlayerType) {
+                    const playerSocket = this.server.sockets.sockets.get(player.id);
+                    if (playerSocket) {
+                        void playerSocket.join(inGameSession.inGameId);
+                    }
+                }
+            }
+
+            this.server.to(sessionId).emit(SessionEvents.GameSessionStarted, successResponse({}));
+
+            for (const player of players) {
+                if (!player.virtualPlayerType) {
+                    const playerSocket = this.server.sockets.sockets.get(player.id);
+                    if (playerSocket) {
+                        void playerSocket.leave(sessionId);
+                    }
+                }
+            }
+            this.sessionService.endSession(sessionId);
         } catch (error) {
-            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
-            return;
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message || 'Erreur lors du démarrage de la partie'));
         }
-
-        const players = this.sessionService.getPlayersSession(sessionId);
-
-        for (const player of players) {
-            if (!player.virtualPlayerType) {
-                const playerSocket = this.server.sockets.sockets.get(player.id);
-                if (playerSocket) {
-                    void playerSocket.join(inGameSession.inGameId);
-                }
-            }
-        }
-
-        this.server.to(sessionId).emit(SessionEvents.GameSessionStarted, successResponse({}));
-
-        for (const player of players) {
-            if (!player.virtualPlayerType) {
-                const playerSocket = this.server.sockets.sockets.get(player.id);
-                if (playerSocket) {
-                    void playerSocket.leave(sessionId);
-                }
-            }
-        }
-        this.sessionService.endSession(sessionId);
     }
 
     @SubscribeMessage(SessionEvents.LeaveSession)
@@ -302,6 +304,9 @@ export class SessionGateway implements OnGatewayDisconnect {
     private handleJoinSession(socket: Socket, data: JoinSessionDto): string {
         void socket.leave(this.getAvatarSelectionRoomId(data.sessionId));
         void socket.join(data.sessionId);
+        
+        const session = this.sessionService.getSession(data.sessionId);
+        void socket.join(session.chatId);
 
         return this.sessionService.joinSession(socket.id, data);
     }

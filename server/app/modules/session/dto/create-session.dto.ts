@@ -26,4 +26,8 @@ export class SessionCreatedDto {
     @ApiProperty()
     @IsString()
     readonly playerId: string;
+
+    @ApiProperty()
+    @IsString()
+    readonly chatId: string;
 }

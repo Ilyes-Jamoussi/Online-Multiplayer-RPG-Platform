@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { MAX_CHAT_MESSAGE_LENGTH } from '@common/constants/chat';
 
@@ -6,7 +6,7 @@ export class SendMessageDto {
     @ApiProperty()
     @IsString()
     @IsNotEmpty()
-    sessionId: string;
+    chatId: string;
 
     @ApiProperty()
     @IsString()
@@ -18,8 +18,4 @@ export class SendMessageDto {
     @IsNotEmpty()
     @MaxLength(MAX_CHAT_MESSAGE_LENGTH)
     content: string;
-
-    @ApiProperty()
-    @IsBoolean()
-    isGameStarted: boolean;
 }

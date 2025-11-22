@@ -20,6 +20,7 @@ export interface WaitingRoomSession extends BaseSession {
     players: Player[];
     avatarAssignments: AvatarAssignment[];
     isRoomLocked: boolean;
+    chatId: string;
 }
 
 export interface InGameSession extends BaseSession {

@@ -23,6 +23,10 @@ export class SessionJoinedDto {
     @IsNumber()
     maxPlayers: number;
 
+    @ApiProperty()
+    @IsString()
+    chatId: string;
+
     @ApiProperty({ required: false })
     @IsOptional()
     @IsString()

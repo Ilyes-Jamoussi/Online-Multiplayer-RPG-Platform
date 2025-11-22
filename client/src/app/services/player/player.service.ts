@@ -110,7 +110,7 @@ export class PlayerService {
 
     reset(): void {
         this._player.set({ ...DEFAULT_PLAYER });
-        this.sessionService.resetSession();
+        this.sessionService.reset();
     }
 
     setAsAdmin(): void {
@@ -171,7 +171,7 @@ export class PlayerService {
     private initListeners(): void {
         this.sessionSocketService.onSessionCreated((data) => {
             this.updatePlayer({ id: data.playerId });
-            this.sessionService.updateSession({ id: data.sessionId });
+            this.sessionService.updateSession({ id: data.sessionId, chatId: data.chatId });
             void this.router.navigate([ROUTES.WaitingRoomPage]);
         });
 
@@ -191,7 +191,7 @@ export class PlayerService {
 
         this.sessionSocketService.onSessionJoined((data) => {
             if (data.modifiedPlayerName) this.updatePlayer({ name: data.modifiedPlayerName });
-            this.sessionService.handleSessionJoined({ gameId: data.gameId, maxPlayers: data.maxPlayers });
+            this.sessionService.handleSessionJoined({ gameId: data.gameId, maxPlayers: data.maxPlayers, chatId: data.chatId });
         });
 
         this.inGameSocketService.onPlayerUpdated((updatedPlayer) => {

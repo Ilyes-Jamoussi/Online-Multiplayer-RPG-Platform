@@ -7,6 +7,7 @@ import { JoinSessionDto } from '@app/dto/join-session-dto';
 import { SessionJoinedDto } from '@app/dto/session-joined-dto';
 import { SessionPreviewDto } from '@app/dto/session-preview-dto';
 import { ROUTES } from '@app/enums/routes.enum';
+import { ChatSocketService } from '@app/services/chat-socket/chat-socket.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { MapSize } from '@common/enums/map-size.enum';
@@ -27,10 +28,12 @@ export class SessionService {
     readonly gameId: Signal<string> = computed(() => this.session().gameId);
     readonly maxPlayers: Signal<number> = computed(() => this.session().maxPlayers);
     readonly isRoomLocked: Signal<boolean> = computed(() => this.session().isRoomLocked);
+    readonly chatId: Signal<string> = computed(() => this.session().chatId);
 
     constructor(
         private readonly sessionSocketService: SessionSocketService,
         private readonly router: Router,
+        private readonly chatSocketService: ChatSocketService,
     ) {
         this.initListeners();
     }
@@ -39,7 +42,11 @@ export class SessionService {
         this._session.update((session) => ({ ...session, ...partial }));
     }
 
-    resetSession(): void {
+    reset(): void {
+        const currentChatId = this.chatId();
+        if (currentChatId) {
+            this.chatSocketService.leaveChatRoom({ chatId: currentChatId });
+        }
         this._session.set({ ...DEFAULT_SESSION });
     }
 
@@ -80,7 +87,7 @@ export class SessionService {
     }
 
     leaveSession(): void {
-        this.resetSession();
+        this.reset();
         void this.router.navigate([ROUTES.HomePage]);
         this.sessionSocketService.leaveSession();
     }
@@ -154,7 +161,7 @@ export class SessionService {
         });
 
         this.sessionSocketService.onSessionJoined((data) => {
-            this.updateSession({ gameId: data.gameId, maxPlayers: data.maxPlayers });
+            this.updateSession({ gameId: data.gameId, maxPlayers: data.maxPlayers, chatId: data.chatId });
             void this.router.navigate([ROUTES.WaitingRoomPage]);
         });
 
