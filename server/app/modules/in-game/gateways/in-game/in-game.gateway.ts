@@ -304,6 +304,10 @@ export class InGameGateway {
             .to(session.inGameId)
             .emit(InGameEvents.GameOver, successResponse<GameOverDto>({ winnerId: payload.winnerId, winnerName: payload.winnerName }));
 
+        // Faire quitter tous les sockets des rooms
+        this.server.socketsLeave(session.inGameId);
+        this.server.socketsLeave(session.id);
+
         this.inGameService.removeSession(session.id);
     }
 
