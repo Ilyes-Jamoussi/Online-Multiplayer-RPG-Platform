@@ -173,8 +173,9 @@ describe('CombatOverlayComponent', () => {
             return id === 'player1' ? mockPlayerA : mockPlayerB;
         });
 
-        mockAssetsService = jasmine.createSpyObj('AssetsService', ['getAvatarStaticImage', 'getDiceImage']);
+        mockAssetsService = jasmine.createSpyObj('AssetsService', ['getAvatarStaticImage', 'getAvatarAnimatedImage', 'getDiceImage']);
         mockAssetsService.getAvatarStaticImage.and.returnValue('avatar.png');
+        mockAssetsService.getAvatarAnimatedImage.and.returnValue('avatar.png');
         mockAssetsService.getDiceImage.and.returnValue('dice.png');
 
         mockTimerService = jasmine.createSpyObj('TimerService', ['getPausedTurnTime']);
