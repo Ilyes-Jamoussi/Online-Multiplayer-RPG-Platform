@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { PlayerDto } from './player.dto';
 
 export class JoinSessionDto {
@@ -22,6 +23,14 @@ export class SessionJoinedDto {
     @ApiProperty()
     @IsNumber()
     maxPlayers: number;
+
+    @ApiProperty()
+    @IsString()
+    chatId: string;
+
+    @ApiProperty({ enum: GameMode, enumName: 'GameMode' })
+    @IsEnum(GameMode)
+    mode: GameMode;
 
     @ApiProperty({ required: false })
     @IsOptional()

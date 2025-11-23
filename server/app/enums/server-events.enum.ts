@@ -1,7 +1,6 @@
 export enum ServerEvents {
     SessionAvailabilityChanged = 'session-availability-changed',
     SessionAutoLocked = 'session-auto-locked',
-    LoadMessages = 'load-messages',
 
     CombatStarted = 'combat-started',
     CombatTimerRestart = 'combat-timer-restart',

@@ -7,8 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { ChatMessageDto } from './chat-message-dto';
 
-export interface LoadMessagesDto {
-    messages: Array<ChatMessageDto>;
+export interface LeaveChatDto {
+    chatId: string;
 }

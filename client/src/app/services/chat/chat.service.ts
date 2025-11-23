@@ -1,10 +1,9 @@
-import { Injectable, signal, inject } from '@angular/core';
-import { ChatMessage } from '@common/interfaces/chat-message.interface';
+import { inject, Injectable, signal } from '@angular/core';
 import { ChatSocketService } from '@app/services/chat-socket/chat-socket.service';
-import { SessionService } from '@app/services/session/session.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { InGameService } from '@app/services/in-game/in-game.service';
 import { ResetService } from '@app/services/reset/reset.service';
+import { SessionService } from '@app/services/session/session.service';
+import { ChatMessage } from '@common/interfaces/chat-message.interface';
 
 @Injectable({
     providedIn: 'root',
@@ -16,9 +15,8 @@ export class ChatService {
 
     constructor(
         private readonly chatSocketService: ChatSocketService,
-        private readonly sessionService: SessionService,
         private readonly playerService: PlayerService,
-        private readonly inGameService: InGameService,
+        private readonly sessionService: SessionService,
     ) {
         this.initListeners();
         inject(ResetService).reset$.subscribe(() => this.reset());
@@ -26,10 +24,9 @@ export class ChatService {
 
     sendMessage(content: string): void {
         this.chatSocketService.sendMessage({
-            sessionId: this.sessionService.id(),
+            chatId: this.sessionService.chatId(),
             authorName: this.playerService.name(),
             content,
-            isGameStarted: this.inGameService.isGameStarted(),
         });
     }
 
@@ -40,10 +37,6 @@ export class ChatService {
     private initListeners(): void {
         this.chatSocketService.onMessageReceived((data) => {
             this._messages.update((messages) => [...messages, data]);
-        });
-
-        this.chatSocketService.onLoadMessages((data) => {
-            this._messages.set(data.messages);
         });
     }
 }

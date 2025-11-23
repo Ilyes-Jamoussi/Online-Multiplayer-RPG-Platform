@@ -133,7 +133,7 @@ export class TimerService {
             const currentTime = this._gameOverTimeRemaining();
             if (currentTime <= 1) {
                 this.stopGameOverTimer();
-                void router.navigate([ROUTES.HomePage]);
+                void router.navigate([ROUTES.StatisticsPage]);
             } else {
                 this._gameOverTimeRemaining.set(currentTime - 1);
             }

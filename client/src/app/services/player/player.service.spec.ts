@@ -1,16 +1,17 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { PlayerService } from './player.service';
-import { SessionService } from '@app/services/session/session.service';
-import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
-import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
-import { NotificationService } from '@app/services/notification/notification.service';
 import { BonusType } from '@app/enums/character-creation.enum';
 import { ROUTES } from '@app/enums/routes.enum';
+import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
+import { NotificationService } from '@app/services/notification/notification.service';
+import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
+import { SessionService } from '@app/services/session/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { Player } from '@common/interfaces/player.interface';
-import { signal } from '@angular/core';
+import { PlayerService } from './player.service';
 
 const TEST_HEALTH_5 = 5;
 const TEST_HEALTH_6 = 6;
@@ -34,6 +35,7 @@ describe('PlayerService', () => {
             'SessionService',
             [
                 'resetSession',
+                'reset',
                 'updateAvatarAssignment',
                 'createSession',
                 'joinAvatarSelection',
@@ -179,7 +181,7 @@ describe('PlayerService', () => {
             service.updatePlayer({ name: 'Test' });
             service.reset();
             expect(service.name()).toBe('');
-            expect(mockSessionService.resetSession).toHaveBeenCalled();
+            expect(mockSessionService.reset).toHaveBeenCalled();
         });
 
         it('should set as admin', () => {
@@ -258,10 +260,10 @@ describe('PlayerService', () => {
     describe('Event Listeners', () => {
         it('should handle session created', () => {
             const callback = mockSessionSocketService.onSessionCreated.calls.mostRecent().args[0];
-            callback({ sessionId: 'session1', playerId: 'player1' });
+            callback({ sessionId: 'session1', playerId: 'player1', chatId: 'chat1' });
 
             expect(service.id()).toBe('player1');
-            expect(mockSessionService.updateSession).toHaveBeenCalledWith({ id: 'session1' });
+            expect(mockSessionService.updateSession).toHaveBeenCalledWith({ id: 'session1', chatId: 'chat1' });
             expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.WaitingRoomPage]);
         });
 
@@ -287,17 +289,34 @@ describe('PlayerService', () => {
 
         it('should handle session joined without modified name', () => {
             const callback = mockSessionSocketService.onSessionJoined.calls.mostRecent().args[0];
-            callback({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4 });
+            callback({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4, chatId: 'chat1', mode: GameMode.CLASSIC });
 
-            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4 });
+            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({
+                gameId: 'game1',
+                maxPlayers: TEST_MAX_PLAYERS_4,
+                chatId: 'chat1',
+                mode: GameMode.CLASSIC,
+            });
         });
 
         it('should handle session joined with modified name', () => {
             const callback = mockSessionSocketService.onSessionJoined.calls.mostRecent().args[0];
-            callback({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4, modifiedPlayerName: 'Modified Name' });
+            callback({
+                gameId: 'game1',
+                maxPlayers: TEST_MAX_PLAYERS_4,
+                modifiedPlayerName: 'Modified Name',
+                chatId: 'chat1',
+                mode: GameMode.CLASSIC,
+            });
 
             expect(service.name()).toBe('Modified Name');
-            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4 });
+            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({
+                gameId: 'game1',
+                maxPlayers: TEST_MAX_PLAYERS_4,
+                modifiedPlayerName: 'Modified Name',
+                chatId: 'chat1',
+                mode: GameMode.CLASSIC,
+            });
         });
 
         it('should handle player updated for current player', () => {

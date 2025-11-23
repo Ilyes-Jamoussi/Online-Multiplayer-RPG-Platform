@@ -1,39 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { ChatMessage } from '@common/interfaces/chat-message.interface';
-import { SendMessageDto } from '@app/modules/chat/dto/send-message.dto';
+import { CHAT_ID_MIN_VALUE, CHAT_ID_MAX_VALUE } from '@app/constants/chat.constants';
 
 @Injectable()
 export class ChatService {
-    private readonly chatSessions = new Map<string, ChatMessage[]>();
+    private readonly activeChatSessions = new Set<string>();
 
-    sendMessage(data: SendMessageDto, authorId: string): ChatMessage {
-        const message: ChatMessage = {
-            ...data,
-            authorId,
-            timestamp: new Date().toISOString(),
-        };
-
-        if (!this.chatSessions.has(data.sessionId)) {
-            this.chatSessions.set(data.sessionId, []);
-        }
-
-        const sessionMessages = this.chatSessions.get(data.sessionId);
-        if (sessionMessages) {
-            sessionMessages.push(message);
-        }
-
-        return message;
+    createChat(): string {
+        const chatId = this.generateUniqueChatId();
+        this.activeChatSessions.add(chatId);
+        return chatId;
     }
 
-    createSessionChat(sessionId: string): void {
-        this.chatSessions.set(sessionId, []);
+    deleteChat(chatId: string): void {
+        this.activeChatSessions.delete(chatId);
     }
 
-    getMessages(sessionId: string): ChatMessage[] {
-        return this.chatSessions.get(sessionId) || [];
-    }
-
-    clearSession(sessionId: string): void {
-        this.chatSessions.delete(sessionId);
+    private generateUniqueChatId(): string {
+        let chatId: string;
+        do {
+            chatId = Math.floor(CHAT_ID_MIN_VALUE + Math.random() * (CHAT_ID_MAX_VALUE - CHAT_ID_MIN_VALUE + 1)).toString();
+        } while (this.activeChatSessions.has(chatId));
+        return chatId;
     }
 }

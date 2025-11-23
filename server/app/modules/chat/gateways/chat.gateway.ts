@@ -1,15 +1,14 @@
+import { ChatMessageDto } from '@app/modules/chat/dto/chat-message.dto';
+import { LeaveChatDto } from '@app/modules/chat/dto/leave-chat.dto';
+import { SendMessageDto } from '@app/modules/chat/dto/send-message.dto';
+import { ChatService } from '@app/modules/chat/services/chat.service';
+import { successResponse } from '@app/utils/socket-response/socket-response.util';
+import { validationExceptionFactory } from '@app/utils/validation/validation.util';
+import { ChatEvents } from '@common/enums/chat-events.enum';
+import { ChatMessage } from '@common/interfaces/chat-message.interface';
 import { Injectable, UsePipes, ValidationPipe } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ChatEvents } from '@common/enums/chat-events.enum';
-import { ServerEvents } from '@app/enums/server-events.enum';
-import { ChatService } from '@app/modules/chat/services/chat.service';
-import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
-import { SendMessageDto } from '@app/modules/chat/dto/send-message.dto';
-import { LoadMessagesDto, ChatMessageDto } from '@app/modules/chat/dto/load-messages.dto';
-import { validationExceptionFactory } from '@app/utils/validation/validation.util';
-import { successResponse } from '@app/utils/socket-response/socket-response.util';
 
 @UsePipes(
     new ValidationPipe({
@@ -24,38 +23,25 @@ import { successResponse } from '@app/utils/socket-response/socket-response.util
 export class ChatGateway {
     @WebSocketServer() private readonly server: Server;
 
-    constructor(
-        private readonly chatService: ChatService,
-        private readonly inGameSessionRepository: InGameSessionRepository,
-    ) {}
+    constructor(private readonly chatService: ChatService) {}
 
     @SubscribeMessage(ChatEvents.SendMessage)
     sendMessage(socket: Socket, data: SendMessageDto): void {
-        const message = this.chatService.sendMessage(data, socket.id);
+        const message: ChatMessage = {
+            ...data,
+            authorId: socket.id,
+            timestamp: new Date().toISOString(),
+        };
 
-        let targetRoom = data.sessionId;
-
-        if (data.isGameStarted) {
-            try {
-                const inGameSession = this.inGameSessionRepository.findById(data.sessionId);
-                targetRoom = inGameSession.inGameId;
-            } catch {
-                targetRoom = data.sessionId;
-            }
+        if (!socket.rooms.has(data.chatId)) {
+            void socket.join(data.chatId);
         }
 
-        if (!socket.rooms.has(targetRoom)) {
-            void socket.join(targetRoom);
-        }
-
-        this.server.to(targetRoom).emit(ChatEvents.MessageReceived, successResponse<ChatMessageDto>(message));
+        this.server.to(data.chatId).emit(ChatEvents.MessageReceived, successResponse<ChatMessageDto>(message));
     }
 
-    @OnEvent(ServerEvents.LoadMessages)
-    loadMessages(sessionId: string, playerId: string): void {
-        const messages = this.chatService.getMessages(sessionId);
-        if (messages.length > 0) {
-            this.server.to(playerId).emit(ChatEvents.LoadMessages, successResponse<LoadMessagesDto>({ messages }));
-        }
+    @SubscribeMessage(ChatEvents.LeaveChatRoom)
+    leaveChatRoom(socket: Socket, data: LeaveChatDto): void {
+        void socket.leave(data.chatId);
     }
 }

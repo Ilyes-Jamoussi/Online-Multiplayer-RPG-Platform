@@ -9,13 +9,13 @@ import { SessionService } from '@app/services/session/session.service';
 import { StatisticsService } from '@app/services/statistics/statistics.service';
 
 @Component({
-    selector: 'app-game-statistics-page',
+    selector: 'app-statistics-page',
     standalone: true,
     imports: [CommonModule, UiPageLayoutComponent, ChatComponent],
-    templateUrl: './game-statistics-page.component.html',
-    styleUrl: './game-statistics-page.component.scss',
+    templateUrl: './statistics-page.component.html',
+    styleUrl: './statistics-page.component.scss',
 })
-export class GameStatisticsPageComponent implements OnInit {
+export class StatisticsPageComponent implements OnInit {
     sortColumn: SortColumn = 'name';
     sortDirection: SortDirection = 'asc';
 

@@ -9,8 +9,7 @@
  */
 
 export interface SendMessageDto {
-    sessionId: string;
+    chatId: string;
     authorName: string;
     content: string;
-    isGameStarted: boolean;
 }
