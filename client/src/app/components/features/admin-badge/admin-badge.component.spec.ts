@@ -12,9 +12,7 @@ describe('AdminBadgeComponent', () => {
 
         await TestBed.configureTestingModule({
             imports: [AdminBadgeComponent],
-            providers: [
-                { provide: AdminModeService, useValue: mockAdminModeService }
-            ]
+            providers: [{ provide: AdminModeService, useValue: mockAdminModeService }],
         }).compileComponents();
 
         fixture = TestBed.createComponent(AdminBadgeComponent);

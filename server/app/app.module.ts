@@ -1,5 +1,7 @@
-import { GameStoreModule } from '@app/modules/game-store/module/game-store.module';
-import { SessionModule } from '@app/modules/session/module/session.module';
+import { ChatModule } from '@app/modules/chat/chat.module';
+import { GameLogModule } from '@app/modules/game-log/game-log.module';
+import { GameStoreModule } from '@app/modules/game-store/game-store.module';
+import { SessionModule } from '@app/modules/session/session.module';
 
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -16,6 +18,8 @@ import { MongooseModule } from '@nestjs/mongoose';
                 uri: config.get<string>('DATABASE_CONNECTION_STRING'),
             }),
         }),
+        ChatModule,
+        GameLogModule,
         GameStoreModule,
         SessionModule,
     ],

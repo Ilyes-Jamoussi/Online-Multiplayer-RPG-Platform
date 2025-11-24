@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { AddVirtualPlayerDto } from '@app/dto/add-virtual-player-dto';
 import { AvailableSessionsUpdatedDto } from '@app/dto/available-sessions-updated-dto';
 import { AvatarAssignmentsUpdatedDto } from '@app/dto/avatar-assignments-updated-dto';
 import { AvatarSelectionJoinedDto } from '@app/dto/avatar-selection-joined-dto';
@@ -53,6 +54,10 @@ export class SessionSocketService {
         this.socket.emit(SessionEvents.KickPlayer, data);
     }
 
+    addVirtualPlayer(data: AddVirtualPlayerDto): void {
+        this.socket.emit(SessionEvents.AddVirtualPlayer, data);
+    }
+
     updateAvatarsAssignment(data: UpdateAvatarAssignmentsDto): void {
         this.socket.emit(SessionEvents.UpdateAvatarAssignments, data);
     }
@@ -65,24 +70,12 @@ export class SessionSocketService {
         this.socket.onSuccessEvent(SessionEvents.SessionCreated, callback);
     }
 
-    onSessionCreatedError(callback: (message: string) => void): void {
-        this.socket.onErrorEvent(SessionEvents.SessionCreated, callback);
-    }
-
     onAvatarSelectionJoined(callback: (data: AvatarSelectionJoinedDto) => void): void {
         this.socket.onSuccessEvent(SessionEvents.AvatarSelectionJoined, callback);
     }
 
-    onAvatarSelectionJoinError(callback: (message: string) => void): void {
-        this.socket.onErrorEvent(SessionEvents.AvatarSelectionJoined, callback);
-    }
-
     onSessionJoined(callback: (data: SessionJoinedDto) => void): void {
         this.socket.onSuccessEvent(SessionEvents.SessionJoined, callback);
-    }
-
-    onSessionJoinError(callback: (message: string) => void): void {
-        this.socket.onErrorEvent(SessionEvents.SessionJoined, callback);
     }
 
     onSessionEnded(callback: (message: string) => void): void {
@@ -101,10 +94,6 @@ export class SessionSocketService {
 
     onGameSessionStarted(callback: () => void): void {
         this.socket.onSuccessEvent(SessionEvents.GameSessionStarted, callback);
-    }
-
-    onStartGameSessionError(callback: (message: string) => void): void {
-        this.socket.onErrorEvent(SessionEvents.StartGameSession, callback);
     }
 
     onAvailableSessionsUpdated(callback: (data: AvailableSessionsUpdatedDto) => void): void {

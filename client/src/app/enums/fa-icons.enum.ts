@@ -10,8 +10,6 @@ export enum FaIcons {
     UserMinus = 'user-minus',
     UserSecret = 'user-secret',
     Users = 'users',
-
-    // Communication
     Comment = 'comment',
     Comments = 'comments',
     Envelope = 'envelope',
@@ -19,8 +17,6 @@ export enum FaIcons {
     HandshakeSlash = 'handshake-slash',
     Phone = 'phone',
     PhoneVolume = 'phone-volume',
-
-    // Interface & Controls
     ArrowRight = 'arrow-right',
     ArrowUp = 'arrow-up',
     ArrowUpFromBracket = 'arrow-up-from-bracket',
@@ -86,8 +82,6 @@ export enum FaIcons {
     Upload = 'upload',
     WandMagicSparkles = 'wand-magic-sparkles',
     Xmark = 'xmark',
-
-    // Files & Documents
     Calendar = 'calendar',
     CalendarDays = 'calendar-days',
     Clipboard = 'clipboard',
@@ -102,8 +96,6 @@ export enum FaIcons {
     NotesMedical = 'notes-medical',
     Passport = 'passport',
     Table = 'table',
-
-    // Media & Devices
     Camera = 'camera',
     CameraRetro = 'camera-retro',
     Film = 'film',
@@ -114,8 +106,6 @@ export enum FaIcons {
     Mobile = 'mobile',
     Music = 'music',
     Video = 'video',
-
-    // Shopping & Commerce
     BagShopping = 'bag-shopping',
     Barcode = 'barcode',
     Book = 'book',
@@ -129,8 +119,6 @@ export enum FaIcons {
     Suitcase = 'suitcase',
     Tag = 'tag',
     Ticket = 'ticket',
-
-    // Nature & Weather
     Anchor = 'anchor',
     Bath = 'bath',
     Droplet = 'droplet',
@@ -149,8 +137,6 @@ export enum FaIcons {
     Sun = 'sun',
     Tree = 'tree',
     Umbrella = 'umbrella',
-
-    // Transportation
     Bicycle = 'bicycle',
     CableCar = 'cable-car',
     Car = 'car',
@@ -159,8 +145,6 @@ export enum FaIcons {
     TruckFast = 'truck-fast',
     TruckFront = 'truck-front',
     Plane = 'plane',
-
-    // Technology & Science
     Binoculars = 'binoculars',
     Bug = 'bug',
     ChartSimple = 'chart-simple',
@@ -175,12 +159,8 @@ export enum FaIcons {
     LayerGroup = 'layer-group',
     Magnet = 'magnet',
     Wifi = 'wifi',
-
-    // Food & Drink
     Coffee = 'coffee',
     Lemon = 'lemon',
-
-    // Miscellaneous
     AlarmClock = 'alarm-clock',
     Bomb = 'bomb',
     Building = 'building',

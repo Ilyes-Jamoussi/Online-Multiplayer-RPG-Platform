@@ -1,10 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString, IsArray } from 'class-validator';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { GameEditorTileDto } from './game-editor-tile.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsEnum, IsString } from 'class-validator';
 import { GameEditorPlaceableDto } from './game-editor-placeable.dto';
-
+import { GameEditorTileDto } from './game-editor-tile.dto';
+import { TeleportChannelDto } from './teleport-channel.dto';
 export class GameEditorDto {
     @ApiProperty()
     @IsString()
@@ -33,6 +33,10 @@ export class GameEditorDto {
     @ApiProperty({ type: [GameEditorPlaceableDto] })
     @IsArray()
     objects!: GameEditorPlaceableDto[];
+
+    @ApiProperty({ type: [TeleportChannelDto] })
+    @IsArray()
+    teleportChannels!: TeleportChannelDto[];
 
     @ApiProperty()
     @IsString()

@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { CharacterCreationCheckService } from './character-creation-check.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { CharacterCreationCheckService } from './character-creation-check.service';
 
 const TEST_ERROR_COUNT = 3;
 
@@ -25,10 +25,8 @@ describe('CharacterCreationCheckService', () => {
         speed: 4,
         baseAttack: 4,
         attackBonus: 0,
-        attack: 4,
         baseDefense: 4,
         defenseBonus: 0,
-        defense: 4,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
         x: 0,
@@ -40,16 +38,16 @@ describe('CharacterCreationCheckService', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     beforeEach(() => {
         const playerSpy = jasmine.createSpyObj('PlayerService', ['player']);
 
         TestBed.configureTestingModule({
-            providers: [
-                CharacterCreationCheckService,
-                { provide: PlayerService, useValue: playerSpy },
-            ],
+            providers: [CharacterCreationCheckService, { provide: PlayerService, useValue: playerSpy }],
         });
 
         service = TestBed.inject(CharacterCreationCheckService);
@@ -134,7 +132,7 @@ describe('CharacterCreationCheckService', () => {
             mockPlayerService.player.and.returnValue(invalidPlayer);
 
             const errors = service.getErrorMessages();
-            expect(errors).toContain('Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d\'espaces.');
+            expect(errors).toContain("Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d'espaces.");
         });
 
         it('should return name validation error for long name', () => {
@@ -147,7 +145,7 @@ describe('CharacterCreationCheckService', () => {
             mockPlayerService.player.and.returnValue(invalidPlayer);
 
             const errors = service.getErrorMessages();
-            expect(errors).toContain('Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d\'espaces.');
+            expect(errors).toContain("Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d'espaces.");
         });
 
         it('should return name validation error for whitespace-only name', () => {
@@ -160,7 +158,7 @@ describe('CharacterCreationCheckService', () => {
             mockPlayerService.player.and.returnValue(invalidPlayer);
 
             const errors = service.getErrorMessages();
-            expect(errors).toContain('Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d\'espaces.');
+            expect(errors).toContain("Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d'espaces.");
         });
 
         it('should return avatar selection error', () => {
@@ -201,10 +199,91 @@ describe('CharacterCreationCheckService', () => {
             mockPlayerService.player.and.returnValue(invalidPlayer);
 
             const errors = service.getErrorMessages();
-            expect(errors).toContain('Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d\'espaces.');
+            expect(errors).toContain("Le nom doit contenir entre 3 et 15 caractères et ne pas être composé uniquement d'espaces.");
             expect(errors).toContain('Un avatar doit être sélectionné.');
             expect(errors).toContain('Un bonus doit être sélectionné.');
             expect(errors.length).toBe(TEST_ERROR_COUNT);
+        });
+
+        it('should handle null nameValidation gracefully', () => {
+            const validPlayer = {
+                ...basePlayer,
+                name: 'ValidName',
+                avatar: Avatar.Avatar1,
+                healthBonus: 2,
+            };
+            mockPlayerService.player.and.returnValue(validPlayer);
+            spyOn(
+                service as unknown as {
+                    validationProblems: () => {
+                        nameValidation: null;
+                        avatarSelection: { isValid: boolean; errors: string[] };
+                        bonusSelection: { isValid: boolean; errors: string[] };
+                    };
+                },
+                'validationProblems',
+            ).and.returnValue({
+                nameValidation: null,
+                avatarSelection: { isValid: true, errors: [] },
+                bonusSelection: { isValid: true, errors: [] },
+            });
+
+            const errors = service.getErrorMessages();
+            expect(errors).toEqual([]);
+        });
+
+        it('should handle null bonusSelection gracefully', () => {
+            const validPlayer = {
+                ...basePlayer,
+                name: 'ValidName',
+                avatar: Avatar.Avatar1,
+                healthBonus: 2,
+            };
+            mockPlayerService.player.and.returnValue(validPlayer);
+            spyOn(
+                service as unknown as {
+                    validationProblems: () => {
+                        nameValidation: { isValid: boolean; errors: string[] };
+                        avatarSelection: { isValid: boolean; errors: string[] };
+                        bonusSelection: null;
+                    };
+                },
+                'validationProblems',
+            ).and.returnValue({
+                nameValidation: { isValid: true, errors: [] },
+                avatarSelection: { isValid: true, errors: [] },
+                bonusSelection: null,
+            });
+
+            const errors = service.getErrorMessages();
+            expect(errors).toEqual([]);
+        });
+
+        it('should handle null avatarSelection gracefully', () => {
+            const validPlayer = {
+                ...basePlayer,
+                name: 'ValidName',
+                avatar: Avatar.Avatar1,
+                healthBonus: 2,
+            };
+            mockPlayerService.player.and.returnValue(validPlayer);
+            spyOn(
+                service as unknown as {
+                    validationProblems: () => {
+                        nameValidation: { isValid: boolean; errors: string[] };
+                        avatarSelection: null;
+                        bonusSelection: { isValid: boolean; errors: string[] };
+                    };
+                },
+                'validationProblems',
+            ).and.returnValue({
+                nameValidation: { isValid: true, errors: [] },
+                avatarSelection: null,
+                bonusSelection: { isValid: true, errors: [] },
+            });
+
+            const errors = service.getErrorMessages();
+            expect(errors).toEqual([]);
         });
     });
 

@@ -12,9 +12,7 @@ describe('CombatSocketService', () => {
         mockSocketService = jasmine.createSpyObj('SocketService', ['emit', 'onSuccessEvent']);
 
         TestBed.configureTestingModule({
-            providers: [
-                { provide: SocketService, useValue: mockSocketService }
-            ]
+            providers: [{ provide: SocketService, useValue: mockSocketService }],
         });
         service = TestBed.inject(CombatSocketService);
     });
@@ -59,14 +57,6 @@ describe('CombatSocketService', () => {
             service.onCombatStarted(callback);
 
             expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.CombatStarted, callback);
-        });
-
-        it('should register onCombatEnded listener', () => {
-            const callback = jasmine.createSpy('callback');
-
-            service.onCombatEnded(callback);
-
-            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.CombatEnded, callback);
         });
 
         it('should register onPlayerCombatResult listener', () => {

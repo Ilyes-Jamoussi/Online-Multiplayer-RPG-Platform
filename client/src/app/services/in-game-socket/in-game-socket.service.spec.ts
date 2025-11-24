@@ -27,11 +27,6 @@ describe('InGameSocketService', () => {
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerJoinInGameSession, 'session1');
         });
 
-        it('should emit playerStartGame', () => {
-            service.playerStartGame('session1');
-            expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.GameStart, 'session1');
-        });
-
         it('should emit playerLeaveInGameSession', () => {
             service.playerLeaveInGameSession('session1');
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerLeaveInGameSession, 'session1');
@@ -51,7 +46,7 @@ describe('InGameSocketService', () => {
             service.playerMove({ sessionId: 'session1', orientation: Orientation.N });
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerMove, {
                 sessionId: 'session1',
-                orientation: Orientation.N
+                orientation: Orientation.N,
             });
         });
 
@@ -60,7 +55,7 @@ describe('InGameSocketService', () => {
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerTeleport, {
                 sessionId: 'session1',
                 x: 5,
-                y: 10
+                y: 10,
             });
         });
 
@@ -69,7 +64,7 @@ describe('InGameSocketService', () => {
             expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.ToggleDoorAction, {
                 sessionId: 'session1',
                 x: 3,
-                y: 7
+                y: 7,
             });
         });
     });
@@ -109,18 +104,6 @@ describe('InGameSocketService', () => {
             const callback = jasmine.createSpy();
             service.onPlayerLeftInGameSession(callback);
             expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.PlayerLeftInGameSession, callback);
-        });
-
-        it('should listen to onTurnTimeout', () => {
-            const callback = jasmine.createSpy();
-            service.onTurnTimeout(callback);
-            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.TurnTimeout, callback);
-        });
-
-        it('should listen to onTurnForcedEnd', () => {
-            const callback = jasmine.createSpy();
-            service.onTurnForcedEnd(callback);
-            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.TurnForcedEnd, callback);
         });
 
         it('should listen to onAdminModeToggled', () => {

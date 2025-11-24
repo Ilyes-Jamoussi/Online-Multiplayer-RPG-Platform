@@ -2,11 +2,12 @@ import { GAME_NOT_FOUND } from '@app/constants/error-messages.constants';
 import { CreateGameDto } from '@app/modules/game-store/dto/create-game.dto';
 import { GamePreviewDto } from '@app/modules/game-store/dto/game-preview.dto';
 import { Game } from '@app/modules/game-store/entities/game.entity';
-import { GameDocument } from '@app/types/mongoose-documents.types';
 import { ImageService } from '@app/modules/game-store/services/image/image.service';
 import { GameDtoMapper } from '@app/modules/game-store/utils/game-dto-mapper/game-dto-mapper.util';
 import { makeDefaultPlaceables } from '@app/modules/game-store/utils/placeable/placeable.util';
+import { makeDefaultTeleportChannels } from '@app/modules/game-store/utils/teleports/teleports.utils';
 import { makeDefaultTiles } from '@app/modules/game-store/utils/tile/tile.util';
+import { GameDocument } from '@app/types/mongoose-documents.types';
 import { getProjection } from '@app/utils/mongo/mongo.util';
 import { DEFAULT_DRAFT_GAME_DESCRIPTION, DEFAULT_DRAFT_GAME_NAME } from '@common/constants/game.constants';
 import { Injectable, NotFoundException } from '@nestjs/common';
@@ -62,8 +63,9 @@ export class GameStoreService {
     private async createDraftGame(dto: CreateGameDto): Promise<GamePreviewDto> {
         const defaultObjects = makeDefaultPlaceables(dto.size, dto.mode);
         const defaultTiles = makeDefaultTiles(dto.size);
+        const defaultTeleportChannels = makeDefaultTeleportChannels();
 
-        const newDraft = {
+        const newDraft: Game = {
             ...dto,
             name: dto?.name || DEFAULT_DRAFT_GAME_NAME,
             description: dto?.description || DEFAULT_DRAFT_GAME_DESCRIPTION,
@@ -74,6 +76,7 @@ export class GameStoreService {
             createdAt: new Date(),
             gridPreviewUrl: '',
             draft: true,
+            teleportChannels: defaultTeleportChannels,
         };
 
         const createdGame = await this.gameModel.create(newDraft);

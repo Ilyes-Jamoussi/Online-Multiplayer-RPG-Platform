@@ -33,7 +33,7 @@ export class SessionCreationPageComponent implements OnInit {
     }
 
     onStartGame(game: GamePreviewDto): void {
-        this.sessionService.initializeSessionWithGame(game.id, game.size);
+        this.sessionService.initializeSessionWithGame(game.id, game.size, game.mode);
     }
 
     onBack(): void {

@@ -1,16 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { InGameChatComponent } from '@app/components/features/in-game-chat/in-game-chat.component';
+import { AdminBadgeComponent } from '@app/components/features/admin-badge/admin-badge.component';
+import { MessagesZoneComponent } from '@app/components/features/messages-zone/messages-zone.component';
 import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
-import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
 import { GameMapFooterComponent } from '@app/components/features/game-map-footer/game-map-footer.component';
 import { GameMapHeaderComponent } from '@app/components/features/game-map-header/game-map-header.component';
+import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
 import { GameOverOverlayComponent } from '@app/components/features/game-over-overlay/game-over-overlay.component';
 import { PlayerInfoComponent } from '@app/components/features/player-info/player-info.component';
 import { PlayersListComponent } from '@app/components/features/players-list/players-list.component';
+import { SanctuaryOverlayComponent } from '@app/components/features/sanctuary-overlay/sanctuary-overlay.component';
 import { ToastNotificationDisplayComponent } from '@app/components/features/toast-notification-display/toast-notification-display.component';
-import { AdminBadgeComponent } from '@app/components/features/admin-badge/admin-badge.component';
-import { CombatService } from '@app/services/combat/combat.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameKeyboardEventsService } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
@@ -27,9 +27,10 @@ import { MapSize } from '@common/enums/map-size.enum';
         PlayerInfoComponent,
         PlayersListComponent,
         CombatOverlayComponent,
+        SanctuaryOverlayComponent,
         GameOverOverlayComponent,
         ToastNotificationDisplayComponent,
-        InGameChatComponent,
+        MessagesZoneComponent,
         AdminBadgeComponent,
     ],
     templateUrl: './game-session-page.component.html',
@@ -44,7 +45,6 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
         private readonly gameMapService: GameMapService,
         readonly inGameService: InGameService,
         private readonly keyboardEventsService: InGameKeyboardEventsService,
-        private readonly combatService: CombatService,
     ) {}
 
     get gameId(): string {
@@ -125,10 +125,5 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.keyboardEventsService.stopListening();
         this.inGameService.reset();
-    }
-
-    onLeaveGame(): void {
-        this.combatService.combatAbandon();
-        this.inGameService.leaveGame();
     }
 }

@@ -13,51 +13,73 @@
     </div>
 
     <div class="stats-section">
-        <div class="stat-group">
-            <h4 class="stat-group-title">Vie</h4>
-            <div class="stat-item">
-                <span class="label">Vie de base</span>
-                <span class="value">{{ baseHealth }}</span>
-            </div>
-            <div class="stat-item">
-                <span class="label">Bonus</span>
-                <span class="value">{{ healthBonus }}</span>
-            </div>
-        </div>
+        <div class="stats-columns">
+            <div class="stats-column">
+                <div class="stat-group">
+                    <h4 class="stat-group-title">Vie</h4>
+                    <div class="stat-item">
+                        <span class="label">Vie de base</span>
+                        <span class="value">{{ baseHealth }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Bonus</span>
+                        <span class="value">{{ healthBonus }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Vie maximale</span>
+                        <span class="value">{{ maxHealth }}</span>
+                    </div>
+                </div>
 
-        <div class="stat-group">
-            <h4 class="stat-group-title">Vitesse</h4>
-            <div class="stat-item">
-                <span class="label">Vitesse de base</span>
-                <span class="value">{{ baseSpeed }}</span>
+                <div class="stat-group">
+                    <h4 class="stat-group-title">Vitesse</h4>
+                    <div class="stat-item">
+                        <span class="label">Vitesse de base</span>
+                        <span class="value">{{ baseSpeed }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Bonus</span>
+                        <span class="value">{{ speedBonus }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Bonus bateau</span>
+                        <span class="value">{{ boatSpeedBonus }}</span>
+                    </div>
+                </div>
             </div>
-            <div class="stat-item">
-                <span class="label">Bonus</span>
-                <span class="value">{{ speedBonus }}</span>
-            </div>
-        </div>
 
-        <div class="stat-group">
-            <h4 class="stat-group-title">Attaque</h4>
-            <div class="stat-item">
-                <span class="label">Base</span>
-                <span class="value">{{ baseAttack }}</span>
-            </div>
-            <div class="stat-item">
-                <span class="label">Dé sélectionné</span>
-                <span class="value">{{ attackDiceType }}</span>
-            </div>
-        </div>
+            <div class="stats-column">
+                <div class="stat-group">
+                    <h4 class="stat-group-title">Attaque</h4>
+                    <div class="stat-item">
+                        <span class="label">Base</span>
+                        <span class="value">{{ baseAttack }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Dé sélectionné</span>
+                        <span class="value">{{ attackDiceType }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Bonus</span>
+                        <span class="value">{{ attackBonus }}</span>
+                    </div>
+                </div>
 
-        <div class="stat-group">
-            <h4 class="stat-group-title">Défense</h4>
-            <div class="stat-item">
-                <span class="label">Base</span>
-                <span class="value">{{ baseDefense }}</span>
-            </div>
-            <div class="stat-item">
-                <span class="label">Dé sélectionné</span>
-                <span class="value">{{ defenseDiceType }}</span>
+                <div class="stat-group">
+                    <h4 class="stat-group-title">Défense</h4>
+                    <div class="stat-item">
+                        <span class="label">Base</span>
+                        <span class="value">{{ baseDefense }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Dé sélectionné</span>
+                        <span class="value">{{ defenseDiceType }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Bonus</span>
+                        <span class="value">{{ defenseBonus }}</span>
+                    </div>
+                </div>
             </div>
         </div>
 

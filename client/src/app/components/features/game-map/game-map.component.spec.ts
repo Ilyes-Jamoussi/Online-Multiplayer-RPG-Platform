@@ -1,18 +1,18 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
-import { GameMapComponent } from './game-map.component';
-import { GameMapService } from '@app/services/game-map/game-map.service';
-import { AssetsService } from '@app/services/assets/assets.service';
-import { PlayerService } from '@app/services/player/player.service';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { AssetsService } from '@app/services/assets/assets.service';
+import { GameMapService } from '@app/services/game-map/game-map.service';
+import { PlayerService } from '@app/services/player/player.service';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { GameMapComponent } from './game-map.component';
 
-import { Player } from '@common/interfaces/player.interface';
-import { StartPoint } from '@common/interfaces/start-point.interface';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { Player } from '@common/interfaces/player.interface';
+import { StartPoint } from '@common/interfaces/start-point.interface';
 
 const TEST_MAP_SIZE = 10;
 
@@ -37,10 +37,8 @@ describe('GameMapComponent', () => {
         speed: 3,
         baseAttack: 4,
         attackBonus: 0,
-        attack: 4,
         baseDefense: 4,
         defenseBonus: 0,
-        defense: 4,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
         x: 2,
@@ -52,6 +50,9 @@ describe('GameMapComponent', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     const mockObject: GameEditorPlaceableDto = {
@@ -60,33 +61,29 @@ describe('GameMapComponent', () => {
         orientation: 'north',
         x: 1,
         y: 1,
-        placed: true
+        placed: true,
     };
 
     const mockStartPoint: StartPoint = {
         id: 'start1',
         x: 0,
         y: 0,
-        playerId: 'player1'
+        playerId: 'player1',
     };
 
     beforeEach(async () => {
-        mockGameMapService = jasmine.createSpyObj('GameMapService', [
-            'loadGameMap', 'getTileClass', 'getAvatarByPlayerId'
-        ], {
+        mockGameMapService = jasmine.createSpyObj('GameMapService', ['loadGameMap', 'getTileClass', 'getAvatarByPlayerId'], {
             currentlyPlayers: [mockPlayer],
             tiles: signal([]),
             objects: signal([mockObject]),
             size: signal(TEST_MAP_SIZE),
-            visibleObjects: signal([mockObject])
+            visibleObjects: signal([mockObject]),
         });
 
-        mockAssetsService = jasmine.createSpyObj('AssetsService', [
-            'getTileImage', 'getPlaceableImage'
-        ]);
+        mockAssetsService = jasmine.createSpyObj('AssetsService', ['getTileImage', 'getPlaceableImage']);
 
         mockPlayerService = jasmine.createSpyObj('PlayerService', [], {
-            id: signal('player1')
+            id: signal('player1'),
         });
 
         await TestBed.configureTestingModule({
@@ -95,17 +92,15 @@ describe('GameMapComponent', () => {
                 provideHttpClient(),
                 provideHttpClientTesting(),
                 { provide: AssetsService, useValue: mockAssetsService },
-                { provide: PlayerService, useValue: mockPlayerService }
-            ]
+                { provide: PlayerService, useValue: mockPlayerService },
+            ],
         })
-        .overrideComponent(GameMapComponent, {
-            set: {
-                providers: [
-                    { provide: GameMapService, useValue: mockGameMapService }
-                ]
-            }
-        })
-        .compileComponents();
+            .overrideComponent(GameMapComponent, {
+                set: {
+                    providers: [{ provide: GameMapService, useValue: mockGameMapService }],
+                },
+            })
+            .compileComponents();
 
         fixture = TestBed.createComponent(GameMapComponent);
         component = fixture.componentInstance;

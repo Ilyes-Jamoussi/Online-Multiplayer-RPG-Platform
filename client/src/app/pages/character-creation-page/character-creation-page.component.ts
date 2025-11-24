@@ -10,7 +10,7 @@ import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layou
 import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@app/constants/validation.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { BonusType } from '@app/enums/character-creation.enum';
 import { Dice } from '@common/enums/dice.enum';
@@ -35,7 +35,7 @@ export class CharacterCreationPageComponent implements OnInit {
         private readonly characterCreationCheckService: CharacterCreationCheckService,
         private readonly playerService: PlayerService,
         private readonly location: Location,
-        private readonly notificationCoordinatorService: NotificationCoordinatorService,
+        private readonly notificationCoordinatorService: NotificationService,
     ) {}
 
     ngOnInit(): void {

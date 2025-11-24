@@ -1,28 +1,28 @@
-import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
+import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { InitializationService } from '@app/modules/in-game/services/initialization/initialization.service';
+import { StatisticsService } from '@app/modules/in-game/services/statistics/statistics.service';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
+import { Position } from '@common/interfaces/position.interface';
 import { InGameSession, WaitingRoomSession } from '@common/interfaces/session.interface';
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { InGameActionService } from '@app/modules/in-game/services/in-game-action/in-game-action.service';
-import { InGameInitializationService } from '@app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
-import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class InGameService {
     constructor(
         private readonly timerService: TimerService,
-        private readonly gameCache: GameCacheService,
-        private readonly initialization: InGameInitializationService,
+        private readonly initialization: InitializationService,
         private readonly sessionRepository: InGameSessionRepository,
-        private readonly movementService: InGameMovementService,
+        private readonly gameplayService: GameplayService,
+        private readonly statisticsService: StatisticsService,
     ) {}
 
-    @Inject(InGameActionService) private readonly actionService: InGameActionService;
     async createInGameSession(waiting: WaitingRoomSession, mode: GameMode, mapSize: MapSize): Promise<InGameSession> {
         const { id, gameId, maxPlayers, players } = waiting;
 
@@ -41,7 +41,12 @@ export class InGameService {
             isAdminModeActive: false,
         };
 
-        const game = await this.gameCache.fetchAndCacheGame(id, gameId);
+        const game = await this.gameplayService.fetchAndCacheGame(id, gameId);
+
+        // Initialize tracking with game data
+        const totalDoors = game.tiles.filter((tile) => tile.kind === TileKind.DOOR).length;
+        const totalSanctuaries = game.objects.filter((p) => p.kind === PlaceableKind.HEAL || p.kind === PlaceableKind.FIGHT).length;
+        this.statisticsService.initializeTracking(id, mapSize, totalDoors, totalSanctuaries);
 
         const playerIdsOrder = this.initialization.makeTurnOrder(players);
         session.turnOrder = playerIdsOrder;
@@ -57,8 +62,29 @@ export class InGameService {
         }
 
         this.initialization.assignStartPoints(session, game);
+
+        // Track initial player positions as visited tiles
+        Object.values(session.inGamePlayers).forEach((player) => {
+            this.statisticsService.trackTileVisited(id, player.id, { x: player.x, y: player.y });
+        });
+
         this.sessionRepository.save(session);
+
+        // Auto-join virtual players
+        const virtualPlayers = players.filter((player) => player.virtualPlayerType);
+        for (const virtualPlayer of virtualPlayers) {
+            this.joinInGameSession(session.id, virtualPlayer.id);
+        }
+
         return session;
+    }
+
+    boardBoat(sessionId: string, playerId: string, position: Position): void {
+        this.gameplayService.boardBoat(sessionId, playerId, position);
+    }
+
+    disembarkBoat(sessionId: string, playerId: string, position: Position): void {
+        this.gameplayService.disembarkBoat(sessionId, playerId, position);
     }
 
     private startSessionWithTransition(sessionId: string): InGameSession {
@@ -66,6 +92,7 @@ export class InGameService {
         if (session.isGameStarted) throw new BadRequestException('Game already started');
 
         session.isGameStarted = true;
+        session.gameStartTime = new Date();
         session.currentTurn = this.timerService.startFirstTurnWithTransition(session, DEFAULT_TURN_DURATION);
 
         return session;
@@ -95,39 +122,19 @@ export class InGameService {
     }
 
     endPlayerTurn(sessionId: string, playerId: string): InGameSession {
-        const session = this.sessionRepository.findById(sessionId);
-        if (session.currentTurn.activePlayerId !== playerId) {
-            throw new BadRequestException('Not your turn');
-        }
-        this.timerService.endTurnManual(session);
-        return session;
+        return this.gameplayService.endPlayerTurn(sessionId, playerId);
     }
 
-    toggleDoorAction(sessionId: string, playerId: string, x: number, y: number): void {
-        const session = this.sessionRepository.findById(sessionId);
-        const player = session.inGamePlayers[playerId];
-        if (!player) throw new NotFoundException('Player not found');
-        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
-        this.actionService.toggleDoor(session, playerId, x, y);
-        player.actionsRemaining--;
-        session.currentTurn.hasUsedAction = true;
-        this.movementService.calculateReachableTiles(session, playerId);
-        if (!player.actionsRemaining && !player.speed) {
-            this.timerService.endTurnManual(session);
-        }
+    toggleDoorAction(sessionId: string, playerId: string, position: Position): void {
+        this.gameplayService.toggleDoorAction(sessionId, playerId, position);
+    }
+
+    sanctuaryRequest(sessionId: string, playerId: string, position: Position, kind: PlaceableKind.HEAL | PlaceableKind.FIGHT): void {
+        this.gameplayService.sanctuaryRequest(sessionId, playerId, position, kind);
     }
 
     movePlayer(sessionId: string, playerId: string, orientation: Orientation): void {
-        const session = this.sessionRepository.findById(sessionId);
-        if (playerId !== session.currentTurn.activePlayerId) throw new BadRequestException('Not your turn');
-        if (this.timerService.getGameTimerState(sessionId) !== TurnTimerStates.PlayerTurn) throw new BadRequestException('Not your turn');
-
-        const remainingSpeed = this.movementService.movePlayer(session, playerId, orientation);
-        const availableActions = this.actionService.calculateAvailableActions(session, playerId);
-
-        if (!remainingSpeed && !availableActions.length) {
-            this.timerService.endTurnManual(session);
-        }
+        this.gameplayService.movePlayer(sessionId, playerId, orientation);
     }
 
     leaveInGameSession(
@@ -167,53 +174,38 @@ export class InGameService {
     }
 
     getReachableTiles(sessionId: string, playerId: string): void {
-        const session = this.sessionRepository.findById(sessionId);
-        const player = session.inGamePlayers[playerId];
-        const reachableTiles = this.movementService.calculateReachableTiles(session, playerId);
-        if (!reachableTiles.length && !player.actionsRemaining) {
-            this.timerService.endTurnManual(session);
-        }
+        this.gameplayService.getReachableTiles(sessionId, playerId);
     }
 
     getAvailableActions(sessionId: string, playerId: string) {
-        const session = this.sessionRepository.findById(sessionId);
-        this.actionService.calculateAvailableActions(session, playerId);
+        return this.gameplayService.getAvailableActions(sessionId, playerId);
     }
 
     toggleAdminMode(sessionId: string, playerId: string): InGameSession {
-        const session = this.sessionRepository.findById(sessionId);
-        const player = session.inGamePlayers[playerId];
-
-        if (!player) {
-            throw new NotFoundException('Player not found');
-        }
-
-        if (!player.isAdmin) {
-            throw new BadRequestException('Only admin can toggle admin mode');
-        }
-
-        session.isAdminModeActive = !session.isAdminModeActive;
-        this.sessionRepository.update(session);
-        return session;
+        return this.gameplayService.toggleAdminMode(sessionId, playerId);
     }
 
-    teleportPlayer(sessionId: string, playerId: string, x: number, y: number): void {
+    teleportPlayer(sessionId: string, playerId: string, position: Position): void {
+        this.gameplayService.teleportPlayer(sessionId, playerId, position);
+    }
+
+    removeSession(sessionId: string): void {
+        this.sessionRepository.delete(sessionId);
+        this.gameplayService.clearSessionResources(sessionId);
+        this.timerService.clearTimerForSession(sessionId);
+    }
+
+    performSanctuaryAction(sessionId: string, playerId: string, position: Position, double: boolean = false): void {
+        this.gameplayService.performSanctuaryAction(sessionId, playerId, position, double);
+    }
+
+    getGameStatistics(sessionId: string) {
+        return this.statisticsService.getStoredGameStatistics(sessionId);
+    }
+
+    storeGameStatistics(sessionId: string, winnerId: string, winnerName: string): void {
         const session = this.sessionRepository.findById(sessionId);
-
-        if (!session.isAdminModeActive) {
-            throw new BadRequestException('Admin mode not active');
-        }
-
-        if (session.currentTurn.activePlayerId !== playerId) {
-            throw new BadRequestException('Not your turn');
-        }
-
-        if (!this.gameCache.isTileFree(sessionId, x, y)) {
-            throw new BadRequestException('Tile is not free');
-        }
-
-        this.sessionRepository.movePlayerPosition(sessionId, playerId, x, y, 0);
-        this.movementService.calculateReachableTiles(session, playerId);
-        this.actionService.calculateAvailableActions(session, playerId);
+        const gameStartTime = session.gameStartTime || new Date();
+        this.statisticsService.calculateAndStoreGameStatistics(session, winnerId, winnerName, gameStartTime);
     }
 }

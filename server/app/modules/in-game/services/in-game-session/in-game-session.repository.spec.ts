@@ -1,15 +1,15 @@
-/* eslint-disable max-lines -- Test file */
-import { InGameSessionRepository } from './in-game-session.repository';
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { NotFoundException } from '@nestjs/common';
-import { InGameSession } from '@common/interfaces/session.interface';
-import { Player } from '@common/interfaces/player.interface';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { ServerEvents } from '@app/enums/server-events.enum';
+import { Player } from '@common/interfaces/player.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
+import { NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InGameSessionRepository } from './in-game-session.repository';
 
 describe('InGameSessionRepository', () => {
     let service: InGameSessionRepository;
@@ -52,12 +52,12 @@ describe('InGameSessionRepository', () => {
         baseSpeed: BASE_SPEED,
         speedBonus: NO_BONUS,
         speed: BASE_SPEED,
+        boatSpeedBonus: NO_BONUS,
+        boatSpeed: NO_BONUS,
         baseAttack: BASE_ATTACK,
         attackBonus: NO_BONUS,
-        attack: BASE_ATTACK,
         baseDefense: BASE_DEFENSE,
         defenseBonus: NO_BONUS,
-        defense: BASE_DEFENSE,
         attackDice: Dice.D6,
         defenseDice: Dice.D4,
         x: POS_X_1,
@@ -69,6 +69,7 @@ describe('InGameSessionRepository', () => {
         combatWins: NO_COMBAT_STATS,
         combatLosses: NO_COMBAT_STATS,
         combatDraws: NO_COMBAT_STATS,
+        hasCombatBonus: false,
         ...overrides,
     });
 
@@ -83,9 +84,7 @@ describe('InGameSessionRepository', () => {
             [PLAYER_B_ID]: createMockPlayer({ id: PLAYER_B_ID }),
         },
         currentTurn: { turnNumber: 1, activePlayerId: PLAYER_A_ID, hasUsedAction: false },
-        startPoints: [
-            { id: START_POINT_ID, playerId: PLAYER_A_ID, x: POS_X_1, y: POS_Y_1 },
-        ],
+        startPoints: [{ id: START_POINT_ID, playerId: PLAYER_A_ID, x: POS_X_1, y: POS_Y_1 }],
         mapSize: MapSize.MEDIUM,
         mode: GameMode.CLASSIC,
         turnOrder: [PLAYER_A_ID, PLAYER_B_ID],
@@ -97,6 +96,7 @@ describe('InGameSessionRepository', () => {
         const mockGameCache = {
             clearTileOccupant: jest.fn(),
             moveTileOccupant: jest.fn(),
+            reenablePlaceablesForPlayer: jest.fn(),
         };
 
         const mockEventEmitter = {
@@ -491,7 +491,7 @@ describe('InGameSessionRepository', () => {
 
             service.playerLeave(SESSION_ID, PLAYER_A_ID);
 
-            expect(gameCache.clearTileOccupant).toHaveBeenCalledWith(SESSION_ID, POS_X_1, POS_Y_1);
+            expect(gameCache.clearTileOccupant).toHaveBeenCalledWith(SESSION_ID, { x: POS_X_1, y: POS_Y_1 });
         });
 
         it('should not clear tile occupant when player has negative position', () => {
@@ -627,7 +627,7 @@ describe('InGameSessionRepository', () => {
 
             service.movePlayerPosition(SESSION_ID, PLAYER_A_ID, POS_X_2, POS_Y_3, MOVE_COST);
 
-            expect(gameCache.moveTileOccupant).toHaveBeenCalledWith(SESSION_ID, POS_X_2, POS_Y_3, session.inGamePlayers[PLAYER_A_ID]);
+            expect(gameCache.moveTileOccupant).toHaveBeenCalledWith(SESSION_ID, { x: POS_X_2, y: POS_Y_3 }, session.inGamePlayers[PLAYER_A_ID]);
         });
 
         it('should emit player.moved event', () => {
@@ -642,6 +642,7 @@ describe('InGameSessionRepository', () => {
                 x: POS_X_2,
                 y: POS_Y_3,
                 speed: BASE_SPEED - MOVE_COST,
+                boatSpeed: NO_BONUS,
             });
         });
 

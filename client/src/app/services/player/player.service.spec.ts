@@ -1,16 +1,17 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { PlayerService } from './player.service';
-import { SessionService } from '@app/services/session/session.service';
-import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
-import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { BonusType } from '@app/enums/character-creation.enum';
 import { ROUTES } from '@app/enums/routes.enum';
+import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
+import { NotificationService } from '@app/services/notification/notification.service';
+import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
+import { SessionService } from '@app/services/session/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { Player } from '@common/interfaces/player.interface';
-import { signal } from '@angular/core';
+import { PlayerService } from './player.service';
 
 const TEST_HEALTH_5 = 5;
 const TEST_HEALTH_6 = 6;
@@ -26,27 +27,42 @@ describe('PlayerService', () => {
     let mockSessionService: jasmine.SpyObj<SessionService>;
     let mockSessionSocketService: jasmine.SpyObj<SessionSocketService>;
     let mockInGameSocketService: jasmine.SpyObj<InGameSocketService>;
-    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
     let mockRouter: jasmine.SpyObj<Router>;
 
     beforeEach(() => {
-        mockSessionService = jasmine.createSpyObj('SessionService', [
-            'resetSession', 'updateAvatarAssignment', 'createSession', 'joinAvatarSelection',
-            'joinSession', 'leaveSession', 'leaveAvatarSelection', 'updateSession', 'handleSessionJoined'
-        ], {
-            id: signal('session1'),
-            avatarAssignments: signal([
-                { avatar: Avatar.Avatar1, chosenBy: null },
-                { avatar: Avatar.Avatar2, chosenBy: 'other-player' }
-            ])
-        });
+        mockSessionService = jasmine.createSpyObj(
+            'SessionService',
+            [
+                'resetSession',
+                'reset',
+                'updateAvatarAssignment',
+                'createSession',
+                'joinAvatarSelection',
+                'joinSession',
+                'leaveSession',
+                'leaveAvatarSelection',
+                'updateSession',
+                'handleSessionJoined',
+            ],
+            {
+                id: signal('session1'),
+                avatarAssignments: signal([
+                    { avatar: Avatar.Avatar1, chosenBy: null },
+                    { avatar: Avatar.Avatar2, chosenBy: 'other-player' },
+                ]),
+            },
+        );
 
         mockSessionSocketService = jasmine.createSpyObj('SessionSocketService', [
-            'onSessionCreated', 'onSessionEnded', 'onAvatarSelectionJoined', 'onSessionJoined'
+            'onSessionCreated',
+            'onSessionEnded',
+            'onAvatarSelectionJoined',
+            'onSessionJoined',
         ]);
 
         mockInGameSocketService = jasmine.createSpyObj('InGameSocketService', ['onPlayerUpdated']);
-        mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', ['displayErrorPopup']);
+        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
         TestBed.configureTestingModule({
@@ -54,7 +70,7 @@ describe('PlayerService', () => {
                 { provide: SessionService, useValue: mockSessionService },
                 { provide: SessionSocketService, useValue: mockSessionSocketService },
                 { provide: InGameSocketService, useValue: mockInGameSocketService },
-                { provide: NotificationCoordinatorService, useValue: mockNotificationService },
+                { provide: NotificationService, useValue: mockNotificationService },
                 { provide: Router, useValue: mockRouter },
             ],
         });
@@ -113,15 +129,44 @@ describe('PlayerService', () => {
             expect(service.attackDice()).toBe(Dice.D4);
             expect(service.defenseDice()).toBe(Dice.D6);
         });
+
+        it('should set attack dice to D4 and defense to D6 when value is D4', () => {
+            service.setDice('attack', Dice.D4);
+            expect(service.attackDice()).toBe(Dice.D4);
+            expect(service.defenseDice()).toBe(Dice.D6);
+        });
+
+        it('should set defense dice to D4 and attack to D6 when value is D4', () => {
+            service.setDice('defense', Dice.D4);
+            expect(service.attackDice()).toBe(Dice.D6);
+            expect(service.defenseDice()).toBe(Dice.D4);
+        });
     });
 
     describe('Random Generation', () => {
         it('should generate random character', () => {
             spyOn(Math, 'random').and.returnValues(TEST_RANDOM_VALUE, TEST_RANDOM_VALUE, TEST_RANDOM_VALUE, TEST_RANDOM_VALUE);
             service.generateRandom();
-            
+
             expect(service.name()).toBeTruthy();
             expect(service.avatar()).toBe(Avatar.Avatar1);
+        });
+
+        it('should generate random character with Speed bonus when random >= 0.5', () => {
+            const highRandomValue = 0.6;
+            spyOn(Math, 'random').and.returnValues(TEST_RANDOM_VALUE, TEST_RANDOM_VALUE, highRandomValue, TEST_RANDOM_VALUE);
+            service.generateRandom();
+
+            expect(service.isSpeedBonusSelected()).toBe(true);
+            expect(service.isLifeBonusSelected()).toBe(false);
+        });
+
+        it('should generate random character with defense dice when random >= 0.5', () => {
+            const highRandomValue = 0.6;
+            spyOn(Math, 'random').and.returnValues(TEST_RANDOM_VALUE, TEST_RANDOM_VALUE, TEST_RANDOM_VALUE, highRandomValue);
+            service.generateRandom();
+
+            expect(service.defenseDice()).toBe(Dice.D6);
         });
     });
 
@@ -136,7 +181,7 @@ describe('PlayerService', () => {
             service.updatePlayer({ name: 'Test' });
             service.reset();
             expect(service.name()).toBe('');
-            expect(mockSessionService.resetSession).toHaveBeenCalled();
+            expect(mockSessionService.reset).toHaveBeenCalled();
         });
 
         it('should set as admin', () => {
@@ -153,7 +198,7 @@ describe('PlayerService', () => {
             expect(service.isConnected()).toBe(true);
             Object.defineProperty(mockSessionService, 'id', {
                 value: signal(''),
-                configurable: true
+                configurable: true,
             });
             expect(service.isConnected()).toBe(false);
         });
@@ -180,11 +225,6 @@ describe('PlayerService', () => {
         it('should create session', () => {
             service.createSession();
             expect(mockSessionService.createSession).toHaveBeenCalledWith(service.player());
-        });
-
-        it('should join avatar selection', () => {
-            service.joinAvatarSelection('session1');
-            expect(mockSessionService.joinAvatarSelection).toHaveBeenCalledWith('session1');
         });
 
         it('should join session', () => {
@@ -220,28 +260,28 @@ describe('PlayerService', () => {
     describe('Event Listeners', () => {
         it('should handle session created', () => {
             const callback = mockSessionSocketService.onSessionCreated.calls.mostRecent().args[0];
-            callback({ sessionId: 'session1', playerId: 'player1' });
-            
+            callback({ sessionId: 'session1', playerId: 'player1', chatId: 'chat1' });
+
             expect(service.id()).toBe('player1');
-            expect(mockSessionService.updateSession).toHaveBeenCalledWith({ id: 'session1' });
+            expect(mockSessionService.updateSession).toHaveBeenCalledWith({ id: 'session1', chatId: 'chat1' });
             expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.WaitingRoomPage]);
         });
 
         it('should handle session ended', () => {
             const callback = mockSessionSocketService.onSessionEnded.calls.mostRecent().args[0];
             callback('Session ended message');
-            
+
             expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
                 title: 'Session terminée',
                 message: 'Session ended message',
-                redirectRoute: ROUTES.HomePage
+                redirectRoute: ROUTES.HomePage,
             });
         });
 
         it('should handle avatar selection joined', () => {
             const callback = mockSessionSocketService.onAvatarSelectionJoined.calls.mostRecent().args[0];
             callback({ sessionId: 'session1', playerId: 'player1' });
-            
+
             expect(service.id()).toBe('player1');
             expect(mockSessionService.updateSession).toHaveBeenCalledWith({ id: 'session1' });
             expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.CharacterCreationPage]);
@@ -249,24 +289,41 @@ describe('PlayerService', () => {
 
         it('should handle session joined without modified name', () => {
             const callback = mockSessionSocketService.onSessionJoined.calls.mostRecent().args[0];
-            callback({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4 });
-            
-            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4 });
+            callback({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4, chatId: 'chat1', mode: GameMode.CLASSIC });
+
+            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({
+                gameId: 'game1',
+                maxPlayers: TEST_MAX_PLAYERS_4,
+                chatId: 'chat1',
+                mode: GameMode.CLASSIC,
+            });
         });
 
         it('should handle session joined with modified name', () => {
             const callback = mockSessionSocketService.onSessionJoined.calls.mostRecent().args[0];
-            callback({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4, modifiedPlayerName: 'Modified Name' });
-            
+            callback({
+                gameId: 'game1',
+                maxPlayers: TEST_MAX_PLAYERS_4,
+                modifiedPlayerName: 'Modified Name',
+                chatId: 'chat1',
+                mode: GameMode.CLASSIC,
+            });
+
             expect(service.name()).toBe('Modified Name');
-            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS_4 });
+            expect(mockSessionService.handleSessionJoined).toHaveBeenCalledWith({
+                gameId: 'game1',
+                maxPlayers: TEST_MAX_PLAYERS_4,
+                modifiedPlayerName: 'Modified Name',
+                chatId: 'chat1',
+                mode: GameMode.CLASSIC,
+            });
         });
 
         it('should handle player updated for current player', () => {
             service.updatePlayer({ id: 'player1' });
             const callback = mockInGameSocketService.onPlayerUpdated.calls.mostRecent().args[0];
             callback({ id: 'player1', name: 'Updated Player', health: TEST_HEALTH_10 } as unknown as Player);
-            
+
             expect(service.name()).toBe('Updated Player');
             expect(service.health()).toBe(TEST_HEALTH_10);
         });
@@ -275,7 +332,7 @@ describe('PlayerService', () => {
             service.updatePlayer({ id: 'player1', name: 'Original' });
             const callback = mockInGameSocketService.onPlayerUpdated.calls.mostRecent().args[0];
             callback({ id: 'other-player', name: 'Other Player' } as unknown as Player);
-            
+
             expect(service.name()).toBe('Original');
         });
     });

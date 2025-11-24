@@ -1,4 +1,3 @@
-/* eslint-disable max-len -- Test file max-len goes over by 9 lines*/
 import { NAME_ALREADY_EXISTS } from '@app/constants/error-messages.constants';
 import { GamePreviewDto } from '@app/modules/game-store/dto/game-preview.dto';
 import { GameEditorService } from '@app/modules/game-store/services/game-editor/game-editor.service';
@@ -36,7 +35,9 @@ describe('GameEditorService', () => {
         mockImageService.deleteImage = jest.fn().mockResolvedValue(undefined);
         mockMapper.toGamePreviewDto = jest
             .fn()
-            .mockImplementation((game: { _id: { toString: () => string }; name: string }) => ({ id: game._id.toString(), name: game.name }) as GamePreviewDto);
+            .mockImplementation(
+                (game: { _id: { toString: () => string }; name: string }) => ({ id: game._id.toString(), name: game.name }) as GamePreviewDto,
+            );
         mockMapper.toGameEditorDto = jest.fn().mockImplementation((game: GameDocument) => ({
             id: game._id.toString(),
             name: game.name,

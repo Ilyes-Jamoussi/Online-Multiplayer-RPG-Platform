@@ -11,4 +11,8 @@
     (dragover)="onTileDragOver($event)"
     (dragenter)="onTileDragEnter($event)"
     (drop)="onTileDrop($event)"
-></div>
+>
+    @if (teleportChannelNumber !== null) {
+    <span class="teleport-channel-number">{{ teleportChannelNumber }}</span>
+    }
+</div>

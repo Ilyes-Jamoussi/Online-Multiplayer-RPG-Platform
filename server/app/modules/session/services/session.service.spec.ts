@@ -1,12 +1,13 @@
-
-/* eslint-disable max-lines -- Test file */
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { ACCESS_CODE_LENGTH } from '@app/constants/session.constants';
+import { ServerEvents } from '@app/enums/server-events.enum';
+import { ChatService } from '@app/modules/chat/services/chat.service';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
 import { SessionService } from '@app/modules/session/services/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { ServerEvents } from '@app/enums/server-events.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('SessionService', () => {
@@ -35,20 +36,22 @@ describe('SessionService', () => {
         maxHealth: 100,
         baseAttack: 10,
         attackBonus: 0,
-        attack: 10,
         baseDefense: 5,
         defenseBonus: 0,
-        defense: 5,
         baseSpeed: 5,
         speedBonus: 0,
         speed: 5,
         actionsRemaining: 1,
+        hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
         ...overrides,
     });
 
     const createCreateSessionDto = (overrides: Partial<CreateSessionDto> = {}): CreateSessionDto => ({
         gameId: GAME_ID,
         maxPlayers: MAX_PLAYERS,
+        mode: GameMode.CLASSIC,
         player: createMockPlayerDto({ isAdmin: true, ...overrides.player }),
         ...overrides,
     });
@@ -64,7 +67,24 @@ describe('SessionService', () => {
             emit: jest.fn(),
         } as unknown as jest.Mocked<EventEmitter2>;
 
-        service = new SessionService(mockEventEmitter);
+        const mockChatService = {
+            createChat: jest.fn().mockReturnValue('chat1'),
+            deleteChat: jest.fn(),
+        };
+
+        const mockGameModel = {
+            findById: jest.fn().mockReturnValue({
+                lean: jest.fn().mockResolvedValue({
+                    name: 'Test Game',
+                    description: 'Test Description',
+                    size: { width: 100, height: 100 },
+                    mode: 'classic',
+                }),
+            }),
+        };
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Mock object for testing
+        service = new SessionService(mockEventEmitter, mockChatService as unknown as ChatService, mockGameModel as any);
     });
 
     afterEach(() => {
@@ -79,10 +99,10 @@ describe('SessionService', () => {
         it('should create a session with unique access code', () => {
             const dto = createCreateSessionDto();
 
-            const sessionId = service.createSession(ADMIN_ID, dto);
+            const result = service.createSession(ADMIN_ID, dto);
 
-            expect(sessionId).toBeDefined();
-            expect(sessionId.length).toBe(ACCESS_CODE_LENGTH);
+            expect(result).toBeDefined();
+            expect(result.sessionId.length).toBe(ACCESS_CODE_LENGTH);
             expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionAvailabilityChanged);
         });
 
@@ -90,12 +110,12 @@ describe('SessionService', () => {
             const dto = createCreateSessionDto();
             const playerName = 'AdminPlayer';
 
-            const sessionId = service.createSession(ADMIN_ID, {
+            const result = service.createSession(ADMIN_ID, {
                 ...dto,
                 player: createMockPlayerDto({ name: playerName, isAdmin: true }),
             });
 
-            const session = service.getSession(sessionId);
+            const session = service.getSession(result.sessionId);
             expect(session.players).toHaveLength(1);
             expect(session.players[0].id).toBe(ADMIN_ID);
             expect(session.players[0].name).toBe(playerName);
@@ -107,8 +127,8 @@ describe('SessionService', () => {
                 player: createMockPlayerDto({ avatar: Avatar.Avatar3, isAdmin: true }),
             });
 
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            const session = service.getSession(sessionId);
+            const result = service.createSession(ADMIN_ID, dto);
+            const session = service.getSession(result.sessionId);
 
             const adminAvatar = session.avatarAssignments.find((a) => a.chosenBy === ADMIN_ID);
             expect(adminAvatar).toBeDefined();
@@ -120,33 +140,33 @@ describe('SessionService', () => {
             const sessionIds = new Set<string>();
 
             for (let i = 0; i < TEST_ITERATIONS; i++) {
-                const sessionId = service.createSession(`${ADMIN_ID}-${i}`, dto);
-                expect(sessionIds.has(sessionId)).toBe(false);
-                sessionIds.add(sessionId);
+                const result = service.createSession(`${ADMIN_ID}-${i}`, dto);
+                expect(sessionIds.has(result.sessionId)).toBe(false);
+                sessionIds.add(result.sessionId);
             }
         });
 
         it('should set session properties correctly', () => {
             const dto = createCreateSessionDto({ maxPlayers: MAX_PLAYERS_TEST });
 
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            const session = service.getSession(sessionId);
+            const result = service.createSession(ADMIN_ID, dto);
+            const session = service.getSession(result.sessionId);
 
             expect(session.gameId).toBe(GAME_ID);
             expect(session.maxPlayers).toBe(MAX_PLAYERS_TEST);
             expect(session.isRoomLocked).toBe(false);
-            expect(session.id).toBe(sessionId);
+            expect(session.id).toBe(result.sessionId);
         });
     });
 
     describe('endSession', () => {
         it('should delete session and emit availabilityChanged event', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
+            const result = service.createSession(ADMIN_ID, dto);
 
-            service.endSession(sessionId);
+            service.endSession(result.sessionId);
 
-            expect(() => service.getSession(sessionId)).toThrow('Session non trouvée');
+            expect(() => service.getSession(result.sessionId)).toThrow('Session non trouvée');
             expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionAvailabilityChanged);
         });
     });
@@ -154,14 +174,14 @@ describe('SessionService', () => {
     describe('joinSession', () => {
         it('should add player to session', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            const joinDto = createJoinSessionDto(sessionId, {
+            const result = service.createSession(ADMIN_ID, dto);
+            const joinDto = createJoinSessionDto(result.sessionId, {
                 player: createMockPlayerDto({ name: 'NewPlayer' }),
             });
 
             const uniqueName = service.joinSession(PLAYER_ID_1, joinDto);
 
-            const session = service.getSession(sessionId);
+            const session = service.getSession(result.sessionId);
             expect(session.players).toHaveLength(2);
             expect(session.players.some((p) => p.id === PLAYER_ID_1)).toBe(true);
             expect(uniqueName).toBe('NewPlayer');
@@ -169,14 +189,14 @@ describe('SessionService', () => {
 
         it('should generate unique name when name already exists', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, {
+            const result = service.createSession(ADMIN_ID, {
                 ...dto,
                 player: createMockPlayerDto({ name: 'Player', isAdmin: true }),
             });
-            const joinDto1 = createJoinSessionDto(sessionId, {
+            const joinDto1 = createJoinSessionDto(result.sessionId, {
                 player: createMockPlayerDto({ name: 'Player' }),
             });
-            const joinDto2 = createJoinSessionDto(sessionId, {
+            const joinDto2 = createJoinSessionDto(result.sessionId, {
                 player: createMockPlayerDto({ name: 'Player' }),
             });
 
@@ -189,34 +209,34 @@ describe('SessionService', () => {
 
         it('should auto-lock session when max players reached', () => {
             const dto = createCreateSessionDto({ maxPlayers: 2 });
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            const joinDto = createJoinSessionDto(sessionId);
+            const result = service.createSession(ADMIN_ID, dto);
+            const joinDto = createJoinSessionDto(result.sessionId);
 
             service.joinSession(PLAYER_ID_1, joinDto);
 
-            expect(service.isRoomLocked(sessionId)).toBe(true);
-            expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionAutoLocked, sessionId);
+            expect(service.isRoomLocked(result.sessionId)).toBe(true);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionAutoLocked, result.sessionId);
         });
 
         it('should not auto-lock when session not full', () => {
             const dto = createCreateSessionDto({ maxPlayers: 4 });
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            const joinDto = createJoinSessionDto(sessionId);
+            const result = service.createSession(ADMIN_ID, dto);
+            const joinDto = createJoinSessionDto(result.sessionId);
 
             service.joinSession(PLAYER_ID_1, joinDto);
 
-            expect(service.isRoomLocked(sessionId)).toBe(false);
+            expect(service.isRoomLocked(result.sessionId)).toBe(false);
             expect(mockEventEmitter.emit).not.toHaveBeenCalledWith(ServerEvents.SessionAutoLocked, expect.anything());
         });
 
         it('should initialize player with default game values', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            const joinDto = createJoinSessionDto(sessionId);
+            const result = service.createSession(ADMIN_ID, dto);
+            const joinDto = createJoinSessionDto(result.sessionId);
 
             service.joinSession(PLAYER_ID_1, joinDto);
 
-            const session = service.getSession(sessionId);
+            const session = service.getSession(result.sessionId);
             const player = session.players.find((p) => p.id === PLAYER_ID_1);
             expect(player).toBeDefined();
             expect(player?.x).toBe(0);
@@ -234,27 +254,27 @@ describe('SessionService', () => {
     describe('leaveSession', () => {
         it('should remove player from session', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            const joinDto = createJoinSessionDto(sessionId);
+            const result = service.createSession(ADMIN_ID, dto);
+            const joinDto = createJoinSessionDto(result.sessionId);
             service.joinSession(PLAYER_ID_1, joinDto);
 
-            service.leaveSession(sessionId, PLAYER_ID_1);
+            service.leaveSession(result.sessionId, PLAYER_ID_1);
 
-            const session = service.getSession(sessionId);
+            const session = service.getSession(result.sessionId);
             expect(session.players).toHaveLength(1);
             expect(session.players.some((p) => p.id === PLAYER_ID_1)).toBe(false);
         });
 
         it('should release avatar when player leaves', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            const joinDto = createJoinSessionDto(sessionId);
+            const result = service.createSession(ADMIN_ID, dto);
+            const joinDto = createJoinSessionDto(result.sessionId);
             service.joinSession(PLAYER_ID_1, joinDto);
-            service.chooseAvatar(sessionId, PLAYER_ID_1, Avatar.Avatar2);
+            service.chooseAvatar(result.sessionId, PLAYER_ID_1, Avatar.Avatar2);
 
-            service.leaveSession(sessionId, PLAYER_ID_1);
+            service.leaveSession(result.sessionId, PLAYER_ID_1);
 
-            const avatars = service.getChosenAvatars(sessionId);
+            const avatars = service.getChosenAvatars(result.sessionId);
             const avatar = avatars.find((a) => a.avatar === Avatar.Avatar2);
             expect(avatar?.chosenBy).toBeNull();
         });
@@ -263,41 +283,41 @@ describe('SessionService', () => {
     describe('isSessionFull', () => {
         it('should return false when session is not full', () => {
             const dto = createCreateSessionDto({ maxPlayers: 4 });
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            service.joinSession(PLAYER_ID_1, createJoinSessionDto(sessionId));
+            const result = service.createSession(ADMIN_ID, dto);
+            service.joinSession(PLAYER_ID_1, createJoinSessionDto(result.sessionId));
 
-            expect(service.isSessionFull(sessionId)).toBe(false);
+            expect(service.isSessionFull(result.sessionId)).toBe(false);
         });
 
         it('should return true when session is full', () => {
             const dto = createCreateSessionDto({ maxPlayers: 2 });
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            service.joinSession(PLAYER_ID_1, createJoinSessionDto(sessionId));
+            const result = service.createSession(ADMIN_ID, dto);
+            service.joinSession(PLAYER_ID_1, createJoinSessionDto(result.sessionId));
 
-            expect(service.isSessionFull(sessionId)).toBe(true);
+            expect(service.isSessionFull(result.sessionId)).toBe(true);
         });
     });
 
     describe('getPlayerSessionId', () => {
         it('should return session ID for existing player', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            service.joinSession(PLAYER_ID_1, createJoinSessionDto(sessionId));
+            const result = service.createSession(ADMIN_ID, dto);
+            service.joinSession(PLAYER_ID_1, createJoinSessionDto(result.sessionId));
 
             const foundSessionId = service.getPlayerSessionId(PLAYER_ID_1);
 
-            expect(foundSessionId).toBe(sessionId);
+            expect(foundSessionId).toBe(result.sessionId);
         });
 
         it('should return session ID when player is in second session', () => {
             const dto = createCreateSessionDto();
             service.createSession(ADMIN_ID, dto);
-            const sessionId2 = service.createSession('admin-2', dto);
-            service.joinSession(PLAYER_ID_1, createJoinSessionDto(sessionId2));
+            const result2 = service.createSession('admin-2', dto);
+            service.joinSession(PLAYER_ID_1, createJoinSessionDto(result2.sessionId));
 
             const foundSessionId = service.getPlayerSessionId(PLAYER_ID_1);
 
-            expect(foundSessionId).toBe(sessionId2);
+            expect(foundSessionId).toBe(result2.sessionId);
         });
 
         it('should return null for non-existent player', () => {
@@ -310,11 +330,11 @@ describe('SessionService', () => {
     describe('getPlayersSession', () => {
         it('should return all players in session', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            service.joinSession(PLAYER_ID_1, createJoinSessionDto(sessionId));
-            service.joinSession(PLAYER_ID_2, createJoinSessionDto(sessionId));
+            const result = service.createSession(ADMIN_ID, dto);
+            service.joinSession(PLAYER_ID_1, createJoinSessionDto(result.sessionId));
+            service.joinSession(PLAYER_ID_2, createJoinSessionDto(result.sessionId));
 
-            const players = service.getPlayersSession(sessionId);
+            const players = service.getPlayersSession(result.sessionId);
 
             expect(players).toHaveLength(EXPECTED_PLAYERS_COUNT);
             expect(players.some((p) => p.id === ADMIN_ID)).toBe(true);
@@ -326,25 +346,25 @@ describe('SessionService', () => {
     describe('chooseAvatar', () => {
         it('should assign avatar to player', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            service.joinSession(PLAYER_ID_1, createJoinSessionDto(sessionId));
+            const result = service.createSession(ADMIN_ID, dto);
+            service.joinSession(PLAYER_ID_1, createJoinSessionDto(result.sessionId));
 
-            service.chooseAvatar(sessionId, PLAYER_ID_1, Avatar.Avatar5);
+            service.chooseAvatar(result.sessionId, PLAYER_ID_1, Avatar.Avatar5);
 
-            const avatars = service.getChosenAvatars(sessionId);
+            const avatars = service.getChosenAvatars(result.sessionId);
             const avatar = avatars.find((a) => a.avatar === Avatar.Avatar5);
             expect(avatar?.chosenBy).toBe(PLAYER_ID_1);
         });
 
         it('should release previous avatar when choosing new one', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            service.joinSession(PLAYER_ID_1, createJoinSessionDto(sessionId));
-            service.chooseAvatar(sessionId, PLAYER_ID_1, Avatar.Avatar3);
+            const result = service.createSession(ADMIN_ID, dto);
+            service.joinSession(PLAYER_ID_1, createJoinSessionDto(result.sessionId));
+            service.chooseAvatar(result.sessionId, PLAYER_ID_1, Avatar.Avatar3);
 
-            service.chooseAvatar(sessionId, PLAYER_ID_1, Avatar.Avatar7);
+            service.chooseAvatar(result.sessionId, PLAYER_ID_1, Avatar.Avatar7);
 
-            const avatars = service.getChosenAvatars(sessionId);
+            const avatars = service.getChosenAvatars(result.sessionId);
             const previousAvatar = avatars.find((a) => a.avatar === Avatar.Avatar3);
             const newAvatar = avatars.find((a) => a.avatar === Avatar.Avatar7);
             expect(previousAvatar?.chosenBy).toBeNull();
@@ -355,9 +375,9 @@ describe('SessionService', () => {
     describe('getChosenAvatars', () => {
         it('should return all avatar assignments', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
+            const result = service.createSession(ADMIN_ID, dto);
 
-            const avatars = service.getChosenAvatars(sessionId);
+            const avatars = service.getChosenAvatars(result.sessionId);
 
             expect(avatars).toBeDefined();
             expect(avatars.length).toBeGreaterThan(0);
@@ -367,11 +387,11 @@ describe('SessionService', () => {
     describe('lock', () => {
         it('should lock session and emit availabilityChanged event', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
+            const result = service.createSession(ADMIN_ID, dto);
 
-            service.lock(sessionId);
+            service.lock(result.sessionId);
 
-            expect(service.isRoomLocked(sessionId)).toBe(true);
+            expect(service.isRoomLocked(result.sessionId)).toBe(true);
             expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionAvailabilityChanged);
         });
 
@@ -390,12 +410,12 @@ describe('SessionService', () => {
     describe('unlock', () => {
         it('should unlock session and emit availabilityChanged event', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            service.lock(sessionId);
+            const result = service.createSession(ADMIN_ID, dto);
+            service.lock(result.sessionId);
 
-            service.unlock(sessionId);
+            service.unlock(result.sessionId);
 
-            expect(service.isRoomLocked(sessionId)).toBe(false);
+            expect(service.isRoomLocked(result.sessionId)).toBe(false);
             expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionAvailabilityChanged);
         });
     });
@@ -403,17 +423,17 @@ describe('SessionService', () => {
     describe('isRoomLocked', () => {
         it('should return false for unlocked session', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
+            const result = service.createSession(ADMIN_ID, dto);
 
-            expect(service.isRoomLocked(sessionId)).toBe(false);
+            expect(service.isRoomLocked(result.sessionId)).toBe(false);
         });
 
         it('should return true for locked session', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            service.lock(sessionId);
+            const result = service.createSession(ADMIN_ID, dto);
+            service.lock(result.sessionId);
 
-            expect(service.isRoomLocked(sessionId)).toBe(true);
+            expect(service.isRoomLocked(result.sessionId)).toBe(true);
         });
     });
 
@@ -435,8 +455,8 @@ describe('SessionService', () => {
 
         it('should return false for non-admin player', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            service.joinSession(PLAYER_ID_1, createJoinSessionDto(sessionId));
+            const result = service.createSession(ADMIN_ID, dto);
+            service.joinSession(PLAYER_ID_1, createJoinSessionDto(result.sessionId));
 
             expect(service.isAdmin(PLAYER_ID_1)).toBe(false);
         });
@@ -449,25 +469,25 @@ describe('SessionService', () => {
     describe('kickPlayer', () => {
         it('should remove player from session', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            service.joinSession(PLAYER_ID_1, createJoinSessionDto(sessionId));
+            const result = service.createSession(ADMIN_ID, dto);
+            service.joinSession(PLAYER_ID_1, createJoinSessionDto(result.sessionId));
 
-            service.kickPlayer(sessionId, PLAYER_ID_1);
+            service.kickPlayer(result.sessionId, PLAYER_ID_1);
 
-            const session = service.getSession(sessionId);
+            const session = service.getSession(result.sessionId);
             expect(session.players).toHaveLength(1);
             expect(session.players.some((p) => p.id === PLAYER_ID_1)).toBe(false);
         });
 
         it('should release avatar when player is kicked', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            service.joinSession(PLAYER_ID_1, createJoinSessionDto(sessionId));
-            service.chooseAvatar(sessionId, PLAYER_ID_1, Avatar.Avatar4);
+            const result = service.createSession(ADMIN_ID, dto);
+            service.joinSession(PLAYER_ID_1, createJoinSessionDto(result.sessionId));
+            service.chooseAvatar(result.sessionId, PLAYER_ID_1, Avatar.Avatar4);
 
-            service.kickPlayer(sessionId, PLAYER_ID_1);
+            service.kickPlayer(result.sessionId, PLAYER_ID_1);
 
-            const avatars = service.getChosenAvatars(sessionId);
+            const avatars = service.getChosenAvatars(result.sessionId);
             const avatar = avatars.find((a) => a.avatar === Avatar.Avatar4);
             expect(avatar?.chosenBy).toBeNull();
         });
@@ -476,12 +496,12 @@ describe('SessionService', () => {
     describe('getSession', () => {
         it('should return session for valid session ID', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
+            const result = service.createSession(ADMIN_ID, dto);
 
-            const session = service.getSession(sessionId);
+            const session = service.getSession(result.sessionId);
 
             expect(session).toBeDefined();
-            expect(session.id).toBe(sessionId);
+            expect(session.id).toBe(result.sessionId);
         });
 
         it('should throw error for non-existent session', () => {
@@ -490,33 +510,33 @@ describe('SessionService', () => {
     });
 
     describe('getAvailableSessions', () => {
-        it('should return only unlocked sessions', () => {
+        it('should return only unlocked sessions', async () => {
             const dto = createCreateSessionDto();
-            const sessionId1 = service.createSession(ADMIN_ID, dto);
-            const sessionId2 = service.createSession('admin-2', dto);
-            service.lock(sessionId1);
+            const result1 = service.createSession(ADMIN_ID, dto);
+            const result2 = service.createSession('admin-2', dto);
+            service.lock(result1.sessionId);
 
-            const availableSessions = service.getAvailableSessions();
+            const availableSessions = await service.getAvailableSessions();
 
             expect(availableSessions.length).toBe(1);
-            expect(availableSessions[0].id).toBe(sessionId2);
+            expect(availableSessions[0].id).toBe(result2.sessionId);
         });
 
-        it('should return session preview with correct data', () => {
+        it('should return session preview with correct data', async () => {
             const dto = createCreateSessionDto({ maxPlayers: MAX_PLAYERS_TEST });
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            service.joinSession(PLAYER_ID_1, createJoinSessionDto(sessionId));
+            const result = service.createSession(ADMIN_ID, dto);
+            service.joinSession(PLAYER_ID_1, createJoinSessionDto(result.sessionId));
 
-            const availableSessions = service.getAvailableSessions();
+            const availableSessions = await service.getAvailableSessions();
 
             expect(availableSessions).toHaveLength(1);
-            expect(availableSessions[0].id).toBe(sessionId);
+            expect(availableSessions[0].id).toBe(result.sessionId);
             expect(availableSessions[0].currentPlayers).toBe(2);
             expect(availableSessions[0].maxPlayers).toBe(MAX_PLAYERS_TEST);
         });
 
-        it('should return empty array when no sessions available', () => {
-            const availableSessions = service.getAvailableSessions();
+        it('should return empty array when no sessions available', async () => {
+            const availableSessions = await service.getAvailableSessions();
 
             expect(availableSessions).toEqual([]);
         });
@@ -525,13 +545,13 @@ describe('SessionService', () => {
     describe('releaseAvatar', () => {
         it('should release avatar when called directly', () => {
             const dto = createCreateSessionDto();
-            const sessionId = service.createSession(ADMIN_ID, dto);
-            service.joinSession(PLAYER_ID_1, createJoinSessionDto(sessionId));
-            service.chooseAvatar(sessionId, PLAYER_ID_1, Avatar.Avatar6);
+            const result = service.createSession(ADMIN_ID, dto);
+            service.joinSession(PLAYER_ID_1, createJoinSessionDto(result.sessionId));
+            service.chooseAvatar(result.sessionId, PLAYER_ID_1, Avatar.Avatar6);
 
-            service.releaseAvatar(sessionId, PLAYER_ID_1);
+            service.releaseAvatar(result.sessionId, PLAYER_ID_1);
 
-            const avatars = service.getChosenAvatars(sessionId);
+            const avatars = service.getChosenAvatars(result.sessionId);
             const avatar = avatars.find((a) => a.avatar === Avatar.Avatar6);
             expect(avatar?.chosenBy).toBeNull();
         });

@@ -1,20 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { SessionService } from './session.service';
-import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
 import { ROUTES } from '@app/enums/routes.enum';
+import { NotificationService } from '@app/services/notification/notification.service';
+import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
-import { MapSize } from '@common/enums/map-size.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { SessionService } from './session.service';
 
 const TEST_MAX_PLAYERS = 4;
 
 describe('SessionService', () => {
     let service: SessionService;
     let mockSessionSocketService: jasmine.SpyObj<SessionSocketService>;
-    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
     let mockRouter: jasmine.SpyObj<Router>;
 
     const mockPlayer: Player = {
@@ -31,10 +32,8 @@ describe('SessionService', () => {
         speed: 3,
         baseAttack: 4,
         attackBonus: 0,
-        attack: 4,
         baseDefense: 4,
         defenseBonus: 0,
-        defense: 4,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
         x: 0,
@@ -46,26 +45,40 @@ describe('SessionService', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     beforeEach(() => {
         mockSessionSocketService = jasmine.createSpyObj('SessionSocketService', [
-            'lockSession', 'unlockSession', 'updateAvatarsAssignment', 'kickPlayer',
-            'leaveSession', 'createSession', 'joinSession', 'startGameSession',
-            'joinAvatarSelection', 'leaveAvatarSelection', 'loadAvailableSessions',
-            'onAvatarAssignmentsUpdated', 'onSessionPlayersUpdated', 'onGameSessionStarted',
-            'onSessionJoined', 'onSessionCreatedError', 'onSessionJoinError',
-            'onAvatarSelectionJoinError', 'onAvatarSelectionJoined', 'onAvailableSessionsUpdated',
-            'onSessionAutoLocked', 'onStartGameSessionError'
+            'lockSession',
+            'unlockSession',
+            'updateAvatarsAssignment',
+            'kickPlayer',
+            'leaveSession',
+            'createSession',
+            'joinSession',
+            'startGameSession',
+            'joinAvatarSelection',
+            'leaveAvatarSelection',
+            'loadAvailableSessions',
+            'onAvatarAssignmentsUpdated',
+            'onSessionPlayersUpdated',
+            'onGameSessionStarted',
+            'onSessionJoined',
+            'onAvatarSelectionJoined',
+            'onAvailableSessionsUpdated',
+            'onSessionAutoLocked',
         ]);
 
-        mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', ['displayErrorPopup']);
+        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
         TestBed.configureTestingModule({
             providers: [
                 { provide: SessionSocketService, useValue: mockSessionSocketService },
-                { provide: NotificationCoordinatorService, useValue: mockNotificationService },
+                { provide: NotificationService, useValue: mockNotificationService },
                 { provide: Router, useValue: mockRouter },
             ],
         });
@@ -84,7 +97,7 @@ describe('SessionService', () => {
 
         it('should reset session', () => {
             service.updateSession({ id: 'test-id' });
-            service.resetSession();
+            service.reset();
             expect(service.id()).toBe('');
         });
 
@@ -112,7 +125,7 @@ describe('SessionService', () => {
         it('should check if can be unlocked', () => {
             service.updateSession({ isRoomLocked: true, maxPlayers: TEST_MAX_PLAYERS, players: [mockPlayer] });
             expect(service.canBeUnlocked()).toBe(true);
-            
+
             service.updateSession({ isRoomLocked: false });
             expect(service.canBeUnlocked()).toBe(false);
         });
@@ -120,8 +133,8 @@ describe('SessionService', () => {
         it('should check if can start game', () => {
             service.updateSession({ isRoomLocked: true, players: [mockPlayer, mockPlayer] });
             expect(service.canStartGame()).toBe(true);
-            
-            service.updateSession({ isRoomLocked: false });
+
+            service.updateSession({ players: [mockPlayer] });
             expect(service.canStartGame()).toBe(false);
         });
     });
@@ -129,7 +142,7 @@ describe('SessionService', () => {
     describe('Avatar Management', () => {
         it('should update avatar assignment for admin', () => {
             service.updateAvatarAssignment('player1', Avatar.Avatar1, true);
-            expect(service.avatarAssignments().some(assignment => assignment.chosenBy === 'player1')).toBe(true);
+            expect(service.avatarAssignments().some((assignment) => assignment.chosenBy === 'player1')).toBe(true);
         });
 
         it('should emit socket event for non-admin', () => {
@@ -137,7 +150,7 @@ describe('SessionService', () => {
             service.updateAvatarAssignment('player1', Avatar.Avatar1, false);
             expect(mockSessionSocketService.updateAvatarsAssignment).toHaveBeenCalledWith({
                 sessionId: 'session1',
-                avatar: Avatar.Avatar1
+                avatar: Avatar.Avatar1,
             });
         });
     });
@@ -157,19 +170,20 @@ describe('SessionService', () => {
 
     describe('Session Operations', () => {
         it('should initialize session with game', () => {
-            service.initializeSessionWithGame('game1', MapSize.SMALL);
+            service.initializeSessionWithGame('game1', MapSize.SMALL, GameMode.CLASSIC);
             expect(service.gameId()).toBe('game1');
             expect(service.maxPlayers()).toBe(2);
             expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.CharacterCreationPage]);
         });
 
         it('should create session', () => {
-            service.updateSession({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS });
+            service.updateSession({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS, mode: GameMode.CLASSIC });
             service.createSession(mockPlayer);
             expect(mockSessionSocketService.createSession).toHaveBeenCalledWith({
                 gameId: 'game1',
                 maxPlayers: TEST_MAX_PLAYERS,
-                player: mockPlayer
+                mode: GameMode.CLASSIC,
+                player: mockPlayer,
             });
         });
 
@@ -178,7 +192,7 @@ describe('SessionService', () => {
             service.joinSession(mockPlayer);
             expect(mockSessionSocketService.joinSession).toHaveBeenCalledWith({
                 sessionId: 'session1',
-                player: mockPlayer
+                player: mockPlayer,
             });
         });
 
@@ -206,7 +220,7 @@ describe('SessionService', () => {
 
     describe('Event Handlers', () => {
         it('should handle session joined', () => {
-            service.handleSessionJoined({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS });
+            service.handleSessionJoined({ gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS, chatId: 'chat1', mode: GameMode.CLASSIC });
             expect(service.gameId()).toBe('game1');
             expect(service.maxPlayers()).toBe(TEST_MAX_PLAYERS);
             expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.WaitingRoomPage]);
@@ -218,14 +232,9 @@ describe('SessionService', () => {
             expect(mockSessionSocketService.onAvatarAssignmentsUpdated).toHaveBeenCalled();
             expect(mockSessionSocketService.onSessionPlayersUpdated).toHaveBeenCalled();
             expect(mockSessionSocketService.onGameSessionStarted).toHaveBeenCalled();
-            expect(mockSessionSocketService.onSessionJoined).toHaveBeenCalled();
-            expect(mockSessionSocketService.onSessionCreatedError).toHaveBeenCalled();
-            expect(mockSessionSocketService.onSessionJoinError).toHaveBeenCalled();
-            expect(mockSessionSocketService.onAvatarSelectionJoinError).toHaveBeenCalled();
             expect(mockSessionSocketService.onAvatarSelectionJoined).toHaveBeenCalled();
             expect(mockSessionSocketService.onAvailableSessionsUpdated).toHaveBeenCalled();
             expect(mockSessionSocketService.onSessionAutoLocked).toHaveBeenCalled();
-            expect(mockSessionSocketService.onStartGameSessionError).toHaveBeenCalled();
         });
 
         it('should handle avatar assignments updated', () => {
@@ -249,41 +258,11 @@ describe('SessionService', () => {
         });
 
         it('should handle session joined event', () => {
-            const callback = mockSessionSocketService.onSessionJoined.calls.mostRecent().args[0];
-            const mockData = { gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS };
-            callback(mockData);
+            const mockData = { gameId: 'game1', maxPlayers: TEST_MAX_PLAYERS, chatId: 'chat1', mode: GameMode.CLASSIC };
+            service.handleSessionJoined(mockData);
             expect(service.gameId()).toBe('game1');
             expect(service.maxPlayers()).toBe(TEST_MAX_PLAYERS);
             expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.WaitingRoomPage]);
-        });
-
-        it('should handle session created error', () => {
-            const callback = mockSessionSocketService.onSessionCreatedError.calls.mostRecent().args[0];
-            callback('Creation error');
-            expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
-                title: 'Erreur de création',
-                message: 'Creation error',
-                redirectRoute: ROUTES.HomePage
-            });
-        });
-
-        it('should handle session join error', () => {
-            const callback = mockSessionSocketService.onSessionJoinError.calls.mostRecent().args[0];
-            callback('Join error');
-            expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
-                title: 'Erreur',
-                message: 'Join error',
-                redirectRoute: ROUTES.HomePage
-            });
-        });
-
-        it('should handle avatar selection join error', () => {
-            const callback = mockSessionSocketService.onAvatarSelectionJoinError.calls.mostRecent().args[0];
-            callback('Avatar selection error');
-            expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
-                title: 'Erreur de connexion',
-                message: 'Avatar selection error'
-            });
         });
 
         it('should handle avatar selection joined', () => {
@@ -296,7 +275,19 @@ describe('SessionService', () => {
 
         it('should handle available sessions updated', () => {
             const callback = mockSessionSocketService.onAvailableSessionsUpdated.calls.mostRecent().args[0];
-            const mockData = { sessions: [{ id: 'session1', currentPlayers: 2, maxPlayers: TEST_MAX_PLAYERS }] };
+            const mockData = {
+                sessions: [
+                    {
+                        id: 'session1',
+                        currentPlayers: 2,
+                        maxPlayers: TEST_MAX_PLAYERS,
+                        gameName: 'Test Game',
+                        gameDescription: 'Test Description',
+                        mapSize: MapSize.SMALL,
+                        gameMode: GameMode.CLASSIC,
+                    },
+                ],
+            };
             callback(mockData);
             expect(service.availableSessions()).toEqual(mockData.sessions);
         });
@@ -307,13 +298,12 @@ describe('SessionService', () => {
             expect(service.isRoomLocked()).toBe(true);
         });
 
-        it('should handle start game session error', () => {
-            const callback = mockSessionSocketService.onStartGameSessionError.calls.mostRecent().args[0];
-            callback('Start game error');
-            expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
-                title: 'Impossible de démarrer le jeu',
-                message: 'Start game error'
-            });
+        it('should handle avatar selection joined', () => {
+            const callback = mockSessionSocketService.onAvatarSelectionJoined.calls.mostRecent().args[0];
+            const mockData = { sessionId: 'session1', playerId: 'player1' };
+            callback(mockData);
+            expect(service.id()).toBe('session1');
+            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.CharacterCreationPage]);
         });
     });
 
@@ -322,15 +312,15 @@ describe('SessionService', () => {
             service.updateSession({
                 avatarAssignments: [
                     { avatar: Avatar.Avatar1, chosenBy: 'player1' },
-                    { avatar: Avatar.Avatar2, chosenBy: null }
-                ]
+                    { avatar: Avatar.Avatar2, chosenBy: null },
+                ],
             });
-            
+
             service.updateAvatarAssignment('player1', Avatar.Avatar2, true);
-            
+
             const assignments = service.avatarAssignments();
-            expect(assignments.find(assignment => assignment.avatar === Avatar.Avatar1)?.chosenBy).toBeNull();
-            expect(assignments.find(assignment => assignment.avatar === Avatar.Avatar2)?.chosenBy).toBe('player1');
+            expect(assignments.find((assignment) => assignment.avatar === Avatar.Avatar1)?.chosenBy).toBeNull();
+            expect(assignments.find((assignment) => assignment.avatar === Avatar.Avatar2)?.chosenBy).toBe('player1');
         });
     });
 });

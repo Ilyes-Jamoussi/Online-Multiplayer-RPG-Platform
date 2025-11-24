@@ -1,27 +1,27 @@
 /* eslint-disable max-lines -- Extensive tests needed for 100% code coverage */
 import { TestBed } from '@angular/core/testing';
-import { CombatService } from './combat.service';
-import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
+import { CombatPostureSelectedDto } from '@app/dto/combat-posture-selected-dto';
 import { CombatStartedDto } from '@app/dto/combat-started-dto';
 import { CombatVictoryDto } from '@app/dto/combat-victory-dto';
-import { CombatPostureSelectedDto } from '@app/dto/combat-posture-selected-dto';
-import { PlayerHealthChangedDto } from '@app/dto/player-health-changed-dto';
+import { PlayerCombatDrawsDto } from '@app/dto/player-combat-draws-dto';
+import { PlayerCombatLossesDto } from '@app/dto/player-combat-losses-dto';
 import { PlayerCombatStatsDto } from '@app/dto/player-combat-stats-dto';
 import { PlayerCombatWinsDto } from '@app/dto/player-combat-wins-dto';
-import { PlayerCombatLossesDto } from '@app/dto/player-combat-losses-dto';
-import { PlayerCombatDrawsDto } from '@app/dto/player-combat-draws-dto';
+import { PlayerHealthChangedDto } from '@app/dto/player-health-changed-dto';
+import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
-import { CombatResult } from '@common/interfaces/combat.interface';
-import { Dice } from '@common/enums/dice.enum';
-import { TileCombatEffect } from '@common/enums/tile.enum';
+import { TimerService } from '@app/services/timer/timer.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
+import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
+import { TileCombatEffect } from '@common/enums/tile.enum';
+import { CombatResult } from '@common/interfaces/combat.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
+import { CombatService } from './combat.service';
 
 const TEST_TIMEOUT_ID_1 = 123;
 const TEST_TIMEOUT_ID_2 = 456;
@@ -29,14 +29,15 @@ const TEST_TIMEOUT_ID_3 = 789;
 const TEST_ATTACK_COORDINATE = 3;
 const TEST_DAMAGE_DISPLAY_TIMEOUT = 2100;
 const TEST_HEALTH_VALUE = 5;
+const TEST_HEALTH_VALUE_7 = 7;
 
 describe('CombatService', () => {
     let service: CombatService;
     let mockCombatSocketService: jasmine.SpyObj<CombatSocketService>;
     let mockInGameService: jasmine.SpyObj<InGameService>;
-    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
     let mockPlayerService: jasmine.SpyObj<PlayerService>;
-    let mockTimerService: jasmine.SpyObj<TimerCoordinatorService>;
+    let mockTimerService: jasmine.SpyObj<TimerService>;
 
     const mockPlayer: Player = {
         id: 'player1',
@@ -52,10 +53,8 @@ describe('CombatService', () => {
         speed: 3,
         baseAttack: 5,
         attackBonus: 0,
-        attack: 5,
         baseDefense: 4,
         defenseBonus: 0,
-        defense: 4,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
         x: 0,
@@ -67,6 +66,9 @@ describe('CombatService', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     const mockTargetPlayer: Player = {
@@ -105,6 +107,7 @@ describe('CombatService', () => {
             attackBonus: 0,
             totalAttack: 9,
             tileCombatEffect: TileCombatEffect.BASE,
+            postureBonus: 0,
         },
         playerBAttack: {
             dice: Dice.D6,
@@ -113,6 +116,7 @@ describe('CombatService', () => {
             attackBonus: 0,
             totalAttack: 8,
             tileCombatEffect: TileCombatEffect.BASE,
+            postureBonus: 0,
         },
         playerADefense: {
             dice: Dice.D6,
@@ -121,6 +125,7 @@ describe('CombatService', () => {
             defenseBonus: 0,
             totalDefense: 6,
             tileCombatEffect: TileCombatEffect.BASE,
+            postureBonus: 0,
         },
         playerBDefense: {
             dice: Dice.D6,
@@ -129,6 +134,7 @@ describe('CombatService', () => {
             defenseBonus: 0,
             totalDefense: 9,
             tileCombatEffect: TileCombatEffect.BASE,
+            postureBonus: 0,
         },
         playerADamage: 2,
         playerBDamage: 0,
@@ -198,21 +204,13 @@ describe('CombatService', () => {
             combatDrawsCallback = callback;
         });
 
-        const inGameSpy = jasmine.createSpyObj('InGameService', [
-            'getPlayerByPlayerId',
-            'updateInGameSession',
-            'sessionId',
-            'inGameSession',
-        ]);
+        const inGameSpy = jasmine.createSpyObj('InGameService', ['getPlayerByPlayerId', 'updateInGameSession', 'sessionId', 'inGameSession']);
 
-        const notificationSpy = jasmine.createSpyObj('NotificationCoordinatorService', [
-            'showInfoToast',
-            'showSuccessToast',
-        ]);
+        const notificationSpy = jasmine.createSpyObj('NotificationService', ['showInfoToast', 'showSuccessToast']);
 
         const playerSpy = jasmine.createSpyObj('PlayerService', ['id', 'updatePlayer']);
 
-        const timerSpy = jasmine.createSpyObj('TimerCoordinatorService', [
+        const timerSpy = jasmine.createSpyObj('TimerService', [
             'pauseTurnTimer',
             'resumeTurnTimer',
             'startCombatTimer',
@@ -226,18 +224,18 @@ describe('CombatService', () => {
                 CombatService,
                 { provide: CombatSocketService, useValue: combatSocketSpy },
                 { provide: InGameService, useValue: inGameSpy },
-                { provide: NotificationCoordinatorService, useValue: notificationSpy },
+                { provide: NotificationService, useValue: notificationSpy },
                 { provide: PlayerService, useValue: playerSpy },
-                { provide: TimerCoordinatorService, useValue: timerSpy },
+                { provide: TimerService, useValue: timerSpy },
             ],
         });
 
         service = TestBed.inject(CombatService);
         mockCombatSocketService = TestBed.inject(CombatSocketService) as jasmine.SpyObj<CombatSocketService>;
         mockInGameService = TestBed.inject(InGameService) as jasmine.SpyObj<InGameService>;
-        mockNotificationService = TestBed.inject(NotificationCoordinatorService) as jasmine.SpyObj<NotificationCoordinatorService>;
+        mockNotificationService = TestBed.inject(NotificationService) as jasmine.SpyObj<NotificationService>;
         mockPlayerService = TestBed.inject(PlayerService) as jasmine.SpyObj<PlayerService>;
-        mockTimerService = TestBed.inject(TimerCoordinatorService) as jasmine.SpyObj<TimerCoordinatorService>;
+        mockTimerService = TestBed.inject(TimerService) as jasmine.SpyObj<TimerService>;
 
         mockInGameService.getPlayerByPlayerId.and.callFake((id: string) => {
             return id === 'player1' ? mockPlayer : mockTargetPlayer;
@@ -251,9 +249,16 @@ describe('CombatService', () => {
         expect(service).toBeTruthy();
     });
 
-    describe('startCombat', () => {
+    describe('startCombat (via handleCombatStarted)', () => {
         it('should initialize combat data correctly', () => {
-            service.startCombat('player1', 'player2', 'attacker', 1, 0);
+            mockTimerService.isCombatActive.and.returnValue(false);
+
+            combatStartedCallback({
+                attackerId: 'player1',
+                targetId: 'player2',
+                attackerTileEffect: 1,
+                targetTileEffect: 0,
+            });
 
             expect(service.combatData()).toEqual({
                 attackerId: 'player1',
@@ -266,7 +271,14 @@ describe('CombatService', () => {
         });
 
         it('should set tile effects when provided', () => {
-            service.startCombat('player1', 'player2', 'attacker', TileCombatEffect.ICE, TileCombatEffect.BASE);
+            mockTimerService.isCombatActive.and.returnValue(false);
+
+            combatStartedCallback({
+                attackerId: 'player1',
+                targetId: 'player2',
+                attackerTileEffect: TileCombatEffect.ICE,
+                targetTileEffect: TileCombatEffect.BASE,
+            });
 
             expect(service.tileEffects()).toEqual({
                 player1: TileCombatEffect.ICE,
@@ -275,7 +287,12 @@ describe('CombatService', () => {
         });
 
         it('should set min health during combat', () => {
-            service.startCombat('player1', 'player2', 'attacker');
+            mockTimerService.isCombatActive.and.returnValue(false);
+
+            combatStartedCallback({
+                attackerId: 'player1',
+                targetId: 'player2',
+            });
 
             expect(service.minHealthDuringCombat()).toEqual({
                 player1: 10,
@@ -286,7 +303,11 @@ describe('CombatService', () => {
 
     describe('combatAbandon', () => {
         it('should call socket service when in combat', () => {
-            service.startCombat('player1', 'player2', 'attacker');
+            mockTimerService.isCombatActive.and.returnValue(false);
+            combatStartedCallback({
+                attackerId: 'player1',
+                targetId: 'player2',
+            });
 
             service.combatAbandon();
 
@@ -302,7 +323,11 @@ describe('CombatService', () => {
 
     describe('closeVictoryOverlay', () => {
         it('should reset all combat state', () => {
-            service.startCombat('player1', 'player2', 'attacker');
+            mockTimerService.isCombatActive.and.returnValue(false);
+            combatStartedCallback({
+                attackerId: 'player1',
+                targetId: 'player2',
+            });
             service.chooseOffensive();
 
             service.closeVictoryOverlay();
@@ -329,7 +354,11 @@ describe('CombatService', () => {
 
     describe('chooseOffensive', () => {
         it('should set posture and call socket service', () => {
-            service.startCombat('player1', 'player2', 'attacker');
+            mockTimerService.isCombatActive.and.returnValue(false);
+            combatStartedCallback({
+                attackerId: 'player1',
+                targetId: 'player2',
+            });
 
             service.chooseOffensive();
 
@@ -338,7 +367,11 @@ describe('CombatService', () => {
         });
 
         it('should not change posture if already selected', () => {
-            service.startCombat('player1', 'player2', 'attacker');
+            mockTimerService.isCombatActive.and.returnValue(false);
+            combatStartedCallback({
+                attackerId: 'player1',
+                targetId: 'player2',
+            });
             service.chooseOffensive();
 
             service.chooseOffensive();
@@ -349,7 +382,11 @@ describe('CombatService', () => {
 
     describe('chooseDefensive', () => {
         it('should set posture and call socket service', () => {
-            service.startCombat('player1', 'player2', 'attacker');
+            mockTimerService.isCombatActive.and.returnValue(false);
+            combatStartedCallback({
+                attackerId: 'player1',
+                targetId: 'player2',
+            });
 
             service.chooseDefensive();
 
@@ -358,7 +395,11 @@ describe('CombatService', () => {
         });
 
         it('should not change posture if already selected', () => {
-            service.startCombat('player1', 'player2', 'attacker');
+            mockTimerService.isCombatActive.and.returnValue(false);
+            combatStartedCallback({
+                attackerId: 'player1',
+                targetId: 'player2',
+            });
             service.chooseDefensive();
 
             service.chooseDefensive();
@@ -430,16 +471,19 @@ describe('CombatService', () => {
                     targetId: 'player2',
                     userRole: 'spectator',
                 });
-                expect(mockNotificationService.showInfoToast).toHaveBeenCalledWith(
-                    '⚔️ Combat en cours : Player 1 vs Player 2',
-                    jasmine.any(Number),
-                );
+                expect(mockNotificationService.showInfoToast).toHaveBeenCalledWith('⚔️ Combat en cours : Player 1 vs Player 2', jasmine.any(Number));
             });
         });
 
         describe('onPlayerCombatResult', () => {
             it('should handle combat result and show damage displays', () => {
-                service.startCombat('player1', 'player2', 'attacker', TileCombatEffect.BASE, TileCombatEffect.BASE);
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                    attackerTileEffect: TileCombatEffect.BASE,
+                    targetTileEffect: TileCombatEffect.BASE,
+                });
 
                 combatResultCallback(mockCombatResult);
 
@@ -448,7 +492,13 @@ describe('CombatService', () => {
             });
 
             it('should hide damage display after timeout', (done) => {
-                service.startCombat('player1', 'player2', 'attacker', TileCombatEffect.BASE, TileCombatEffect.BASE);
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                    attackerTileEffect: TileCombatEffect.BASE,
+                    targetTileEffect: TileCombatEffect.BASE,
+                });
                 combatResultCallback(mockCombatResult);
 
                 const initialDisplays = service.damageDisplays();
@@ -460,11 +510,30 @@ describe('CombatService', () => {
                     done();
                 }, TEST_DAMAGE_DISPLAY_TIMEOUT);
             });
+
+            it('should use default tile effect of 0 when tile effect is not provided', () => {
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                });
+
+                combatResultCallback(mockCombatResult);
+
+                const displays = service.damageDisplays();
+                expect(displays.length).toBe(2);
+                expect(displays.find((display) => display.playerId === 'player1')?.tileEffect).toBe(0);
+                expect(displays.find((display) => display.playerId === 'player2')?.tileEffect).toBe(0);
+            });
         });
 
         describe('onPlayerHealthChanged', () => {
             it('should update player health in session and service', () => {
-                service.startCombat('player1', 'player2', 'attacker');
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                });
 
                 healthChangedCallback({ playerId: 'player1', newHealth: 8 });
 
@@ -473,17 +542,40 @@ describe('CombatService', () => {
             });
 
             it('should update min health during combat', () => {
-                service.startCombat('player1', 'player2', 'attacker');
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                });
 
                 healthChangedCallback({ playerId: 'player1', newHealth: TEST_HEALTH_VALUE });
 
                 expect(service.minHealthDuringCombat()['player1']).toBe(TEST_HEALTH_VALUE);
             });
+
+            it('should use newHealth as default when playerId is not in minHealthDuringCombat', () => {
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                });
+                service['_minHealthDuringCombat'].set({ player1: 10 });
+                service['_combatData'].set({ attackerId: 'player1', targetId: 'player2', userRole: 'attacker' });
+                service['_victoryData'].set(null);
+
+                healthChangedCallback({ playerId: 'player3', newHealth: TEST_HEALTH_VALUE_7 });
+
+                expect(service.minHealthDuringCombat()['player3']).toBe(TEST_HEALTH_VALUE_7);
+            });
         });
 
         describe('onCombatNewRoundStarted', () => {
             it('should reset combat timer and postures', () => {
-                service.startCombat('player1', 'player2', 'attacker');
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                });
                 service.chooseOffensive();
 
                 newRoundCallback();
@@ -497,7 +589,10 @@ describe('CombatService', () => {
         describe('onCombatTimerRestart', () => {
             it('should restart combat timer when not active', () => {
                 mockTimerService.isCombatActive.and.returnValue(false);
-                service.startCombat('player1', 'player2', 'attacker');
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                });
 
                 timerRestartCallback();
 
@@ -506,8 +601,12 @@ describe('CombatService', () => {
             });
 
             it('should reset combat timer when active', () => {
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                });
                 mockTimerService.isCombatActive.and.returnValue(true);
-                service.startCombat('player1', 'player2', 'attacker');
 
                 timerRestartCallback();
 
@@ -525,7 +624,11 @@ describe('CombatService', () => {
 
         describe('onCombatVictory', () => {
             it('should handle victory as participant', () => {
-                service.startCombat('player1', 'player2', 'attacker');
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                });
 
                 victoryCallback({
                     playerAId: 'player1',
@@ -547,11 +650,10 @@ describe('CombatService', () => {
 
             it('should handle draw victory', () => {
                 mockPlayerService.id.and.returnValue('player3');
-                service.startCombat('player1', 'player2', 'attacker');
-                (service as unknown as { _combatData: { set: (data: unknown) => void } })._combatData.set({
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
                     attackerId: 'player1',
                     targetId: 'player2',
-                    userRole: 'spectator'
                 });
 
                 victoryCallback({
@@ -561,19 +663,15 @@ describe('CombatService', () => {
                     abandon: false,
                 });
 
-                expect(mockNotificationService.showInfoToast).toHaveBeenCalledWith(
-                    '⚔️ Match nul entre Player 1 et Player 2',
-                    jasmine.any(Number)
-                );
+                expect(mockNotificationService.showInfoToast).toHaveBeenCalledWith('⚔️ Match nul entre Player 1 et Player 2', jasmine.any(Number));
             });
 
             it('should handle abandon victory', () => {
                 mockPlayerService.id.and.returnValue('player3');
-                service.startCombat('player1', 'player2', 'attacker');
-                (service as unknown as { _combatData: { set: (data: unknown) => void } })._combatData.set({
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
                     attackerId: 'player1',
                     targetId: 'player2',
-                    userRole: 'spectator'
                 });
 
                 victoryCallback({
@@ -585,17 +683,37 @@ describe('CombatService', () => {
 
                 expect(mockNotificationService.showSuccessToast).toHaveBeenCalledWith(
                     '🏆 Player 1 a gagné par abandon contre Player 2',
-                    jasmine.any(Number)
+                    jasmine.any(Number),
+                );
+            });
+
+            it('should handle abandon victory when winner is playerB', () => {
+                mockPlayerService.id.and.returnValue('player3');
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                });
+
+                victoryCallback({
+                    playerAId: 'player1',
+                    playerBId: 'player2',
+                    winnerId: 'player2',
+                    abandon: true,
+                });
+
+                expect(mockNotificationService.showSuccessToast).toHaveBeenCalledWith(
+                    '🏆 Player 2 a gagné par abandon contre Player 1',
+                    jasmine.any(Number),
                 );
             });
 
             it('should handle normal victory', () => {
                 mockPlayerService.id.and.returnValue('player3');
-                service.startCombat('player1', 'player2', 'attacker');
-                (service as unknown as { _combatData: { set: (data: unknown) => void } })._combatData.set({
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
                     attackerId: 'player1',
                     targetId: 'player2',
-                    userRole: 'spectator'
                 });
 
                 victoryCallback({
@@ -605,15 +723,34 @@ describe('CombatService', () => {
                     abandon: false,
                 });
 
-                expect(mockNotificationService.showSuccessToast).toHaveBeenCalledWith(
-                    '🏆 Player 1 a vaincu Player 2',
-                    jasmine.any(Number)
-                );
+                expect(mockNotificationService.showSuccessToast).toHaveBeenCalledWith('🏆 Player 1 a vaincu Player 2', jasmine.any(Number));
+            });
+
+            it('should handle normal victory when winner is playerB', () => {
+                mockPlayerService.id.and.returnValue('player3');
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                });
+
+                victoryCallback({
+                    playerAId: 'player1',
+                    playerBId: 'player2',
+                    winnerId: 'player2',
+                    abandon: false,
+                });
+
+                expect(mockNotificationService.showSuccessToast).toHaveBeenCalledWith('🏆 Player 2 a vaincu Player 1', jasmine.any(Number));
             });
 
             it('should set victory notification timeout', () => {
                 spyOn(window, 'setTimeout').and.returnValue(TEST_TIMEOUT_ID_2 as unknown as NodeJS.Timeout);
-                service.startCombat('player1', 'player2', 'attacker');
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                });
 
                 victoryCallback({
                     playerAId: 'player1',
@@ -630,7 +767,11 @@ describe('CombatService', () => {
                 spyOn(window, 'clearTimeout');
                 spyOn(window, 'setTimeout').and.returnValue(TEST_TIMEOUT_ID_3 as unknown as NodeJS.Timeout);
                 (service as unknown as { victoryNotificationTimeout: number }).victoryNotificationTimeout = TEST_TIMEOUT_ID_1;
-                service.startCombat('player1', 'player2', 'attacker');
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                });
 
                 victoryCallback({
                     playerAId: 'player1',

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { ROUTES } from '@app/enums/routes.enum';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
-import { PlayerService } from '@app/services/player/player.service';
+import { ResetService } from '@app/services/reset/reset.service';
 
 @Component({
     selector: 'app-home-page',
@@ -21,11 +21,11 @@ export class HomePageComponent implements OnInit {
 
     constructor(
         private readonly router: Router,
-        private readonly playerService: PlayerService,
+        private readonly resetService: ResetService,
     ) {}
 
     ngOnInit(): void {
-        this.playerService.reset();
+        this.resetService.triggerReset();
     }
 
     navigateToCreateGame(): void {

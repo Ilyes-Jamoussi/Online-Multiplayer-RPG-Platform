@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { GameKey } from '@app/enums/game-key.enum';
+import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
+import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 import { Orientation } from '@common/enums/orientation.enum';
-import { GameKey } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
 
 @Component({
     selector: 'app-game-map-footer',
@@ -22,6 +23,7 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
         private readonly playerService: PlayerService,
         private readonly inGameService: InGameService,
         private readonly adminModeService: AdminModeService,
+        private readonly combatService: CombatService,
     ) {}
 
     ngOnInit(): void {
@@ -60,6 +62,10 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
         return this.playerService.speed();
     }
 
+    get boatSpeed(): number {
+        return this.playerService.player().boatSpeed;
+    }
+
     get availableActionsCount(): number {
         return this.inGameService.availableActions().length;
     }
@@ -77,12 +83,7 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
     }
 
     isActionDisabled(): boolean {
-        return (
-            !this.isMyTurn ||
-            !this.isGameStarted ||
-            this.hasUsedAction ||
-            !this.hasAvailableActions()
-        );
+        return !this.isMyTurn || !this.isGameStarted || this.hasUsedAction || !this.hasAvailableActions();
     }
 
     hasAvailableActions(): boolean {
@@ -126,5 +127,9 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
             this.adminModeService.toggleAdminMode();
         }
     }
-}
 
+    onLeaveGame(): void {
+        this.combatService.combatAbandon();
+        this.inGameService.leaveGame();
+    }
+}

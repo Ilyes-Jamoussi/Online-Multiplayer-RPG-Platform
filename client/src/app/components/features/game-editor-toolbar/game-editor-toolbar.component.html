@@ -2,11 +2,17 @@
     @for (b of brushes; track b.image) {
     <button
         class="tool-btn {{ b.class }}"
-        [class.selected]="isBrushSelected(b)"
+        [class.selected]="b.tileKind === tileKind.TELEPORT ? isTeleportSelected() : isBrushSelected(b)"
+        [disabled]="b.tileKind === tileKind.TELEPORT && isTeleportDisabled()"
         (click)="selectTileBrush(b.tileKind)"
         [style.background-image]="'url(' + b.image + ')'"
         [attr.data-tooltip]="tileLabel[b.tileKind]"
-        [disabled]="b.disabled"
-    ></button>
+    >
+        @if (b.tileKind === tileKind.TELEPORT && getActiveTeleportChannelNumber() !== null) {
+        <span class="teleport-channel-number">{{ getActiveTeleportChannelNumber() }}</span>
+        } @if (b.tileKind === tileKind.TELEPORT) {
+        <span class="teleport-count-badge">{{ getAvailableTeleportCount() }}</span>
+        }
+    </button>
     }
 </div>

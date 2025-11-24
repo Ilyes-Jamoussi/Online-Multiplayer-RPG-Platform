@@ -5,7 +5,7 @@ import { PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
@@ -22,7 +22,7 @@ export class CombatOverlayComponent {
         private readonly combatService: CombatService,
         private readonly inGameService: InGameService,
         private readonly assetsService: AssetsService,
-        private readonly timerCoordinatorService: TimerCoordinatorService,
+        private readonly timerCoordinatorService: TimerService,
     ) {}
 
     get combatData() {
@@ -36,7 +36,7 @@ export class CombatOverlayComponent {
     get playerAAvatar() {
         if (!this.combatData) return '';
         const player = this.inGameService.getPlayerByPlayerId(this.combatData.attackerId);
-        return this.assetsService.getAvatarStaticImage(player.avatar);
+        return this.assetsService.getAvatarAnimatedImage(player.avatar);
     }
 
     get playerBName() {
@@ -46,7 +46,7 @@ export class CombatOverlayComponent {
     get playerBAvatar() {
         if (!this.combatData) return '';
         const player = this.inGameService.getPlayerByPlayerId(this.combatData.targetId);
-        return this.assetsService.getAvatarStaticImage(player.avatar);
+        return this.assetsService.getAvatarAnimatedImage(player.avatar);
     }
 
     get playerAHealth() {

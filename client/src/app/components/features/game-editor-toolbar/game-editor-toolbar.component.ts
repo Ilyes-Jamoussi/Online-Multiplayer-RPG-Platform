@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { TileLabel } from '@app/enums/tile-label.enum';
 import { ToolbarItem, ToolType } from '@app/interfaces/game-editor.interface';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { GameEditorTeleportService } from '@app/services/game-editor-teleport/game-editor-teleport.service';
 import { TileKind } from '@common/enums/tile.enum';
 
 @Component({
@@ -12,20 +13,37 @@ import { TileKind } from '@common/enums/tile.enum';
 })
 export class GameEditorToolbarComponent {
     readonly tileLabel = TileLabel;
+    readonly tileKind = TileKind;
 
-    constructor(private readonly gameEditorInteractionsService: GameEditorInteractionsService) {}
+    constructor(
+        private readonly gameEditorInteractionsService: GameEditorInteractionsService,
+        private readonly teleportService: GameEditorTeleportService,
+    ) {}
 
     get brushes() {
         return this.gameEditorInteractionsService.getToolbarBrushes();
     }
 
     selectTileBrush(tileKind: TileKind): void {
-        this.gameEditorInteractionsService.activeTool = {
-            type: ToolType.TileBrushTool,
-            tileKind,
-            leftDrag: false,
-            rightDrag: false,
-        };
+        if (tileKind === TileKind.TELEPORT) {
+            this.gameEditorInteractionsService.selectTeleportTool();
+        } else {
+            this.gameEditorInteractionsService.activeTool = {
+                type: ToolType.TileBrushTool,
+                tileKind,
+                leftDrag: false,
+                rightDrag: false,
+            };
+        }
+    }
+
+    isTeleportDisabled(): boolean {
+        return this.teleportService.isTeleportDisabled();
+    }
+
+    isTeleportSelected(): boolean {
+        const tool = this.gameEditorInteractionsService.activeTool;
+        return tool?.type === ToolType.TeleportTileTool;
     }
 
     isBrushSelected(brush: ToolbarItem): boolean {
@@ -36,5 +54,17 @@ export class GameEditorToolbarComponent {
             return (activeTool as { tileKind: TileKind }).tileKind === brush.tileKind;
         }
         return false;
+    }
+
+    getActiveTeleportChannelNumber(): number | null {
+        const tool = this.gameEditorInteractionsService.activeTool;
+        if (tool?.type === ToolType.TeleportTileTool) {
+            return tool.channelNumber;
+        }
+        return null;
+    }
+
+    getAvailableTeleportCount(): number {
+        return this.teleportService.getAvailableTeleportChannels().length;
     }
 }

@@ -1,5 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal, signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
@@ -7,10 +7,11 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { TileKind } from '@common/enums/tile.enum';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { GameMapTileComponent } from './game-map-tile.component';
 
@@ -35,7 +36,7 @@ describe('GameMapTileComponent', () => {
     const mockTile: GameEditorTileDto = {
         kind: TileKind.BASE,
         x: TEST_TILE_X,
-        y: TEST_TILE_Y
+        y: TEST_TILE_Y,
     };
 
     const mockPlayer: Player = {
@@ -52,10 +53,8 @@ describe('GameMapTileComponent', () => {
         speed: 4,
         baseAttack: 6,
         attackBonus: 0,
-        attack: 6,
         baseDefense: 5,
         defenseBonus: 0,
-        defense: 5,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
         x: TEST_TILE_X,
@@ -66,7 +65,10 @@ describe('GameMapTileComponent', () => {
         combatCount: 0,
         combatWins: 0,
         combatLosses: 0,
-        combatDraws: 0
+        combatDraws: 0,
+        hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     const mockObject: GameEditorPlaceableDto = {
@@ -75,7 +77,7 @@ describe('GameMapTileComponent', () => {
         orientation: 'north',
         x: TEST_TILE_X,
         y: TEST_TILE_Y,
-        placed: true
+        placed: true,
     };
 
     beforeEach(async () => {
@@ -91,7 +93,7 @@ describe('GameMapTileComponent', () => {
             objects: objectsSignal.asReadonly(),
             currentlyPlayers: [mockPlayer],
             isActionModeActive: false,
-            _objectsSignal: objectsSignal
+            _objectsSignal: objectsSignal,
         };
 
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getPlaceableImage']);
@@ -99,13 +101,10 @@ describe('GameMapTileComponent', () => {
 
         mockInGameService = {
             isMyTurn: signal(true),
-            isGameStarted: signal(true)
+            isGameStarted: signal(true),
         };
 
-        mockAdminModeService = jasmine.createSpyObj('AdminModeService', [
-            'isAdminModeActivated',
-            'teleportPlayer'
-        ]);
+        mockAdminModeService = jasmine.createSpyObj('AdminModeService', ['isAdminModeActivated', 'teleportPlayer']);
         mockAdminModeService.isAdminModeActivated.and.returnValue(false);
 
         mockCombatService = jasmine.createSpyObj('CombatService', ['attackPlayer']);
@@ -117,8 +116,8 @@ describe('GameMapTileComponent', () => {
                 { provide: AssetsService, useValue: mockAssetsService },
                 { provide: InGameService, useValue: mockInGameService },
                 { provide: AdminModeService, useValue: mockAdminModeService },
-                { provide: CombatService, useValue: mockCombatService }
-            ]
+                { provide: CombatService, useValue: mockCombatService },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GameMapTileComponent);
@@ -227,7 +226,7 @@ describe('GameMapTileComponent', () => {
 
         it('should toggle door when action type is DOOR', () => {
             mockGameMapService.isActionModeActive = true;
-            (mockGameMapService.getActionTypeAt as jasmine.Spy).and.returnValue('DOOR');
+            (mockGameMapService.getActionTypeAt as jasmine.Spy).and.returnValue(AvailableActionType.DOOR);
 
             component.onTileClick(mockEvent);
             expect(mockGameMapService.toggleDoor).toHaveBeenCalledWith(TEST_TILE_X, TEST_TILE_Y);
@@ -235,7 +234,7 @@ describe('GameMapTileComponent', () => {
 
         it('should attack player when action type is ATTACK', () => {
             mockGameMapService.isActionModeActive = true;
-            (mockGameMapService.getActionTypeAt as jasmine.Spy).and.returnValue('ATTACK');
+            (mockGameMapService.getActionTypeAt as jasmine.Spy).and.returnValue(AvailableActionType.ATTACK);
 
             component.onTileClick(mockEvent);
             expect(mockCombatService.attackPlayer).toHaveBeenCalledWith(TEST_TILE_X, TEST_TILE_Y);

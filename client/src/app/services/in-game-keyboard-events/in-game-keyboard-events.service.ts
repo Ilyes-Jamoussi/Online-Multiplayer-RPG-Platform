@@ -2,23 +2,8 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
-
-export enum GameKey {
-    Up = 'ArrowUp',
-    Down = 'ArrowDown',
-    Left = 'ArrowLeft',
-    Right = 'ArrowRight',
-    AdminMode = 'd',
-}
-
-export interface KeyboardEventData {
-    key: string;
-    code: string;
-    ctrlKey: boolean;
-    shiftKey: boolean;
-    altKey: boolean;
-    metaKey: boolean;
-}
+import { GameKey } from '@app/enums/game-key.enum';
+import { InputTagName } from '@app/types/input.types';
 
 @Injectable({
     providedIn: 'root',
@@ -85,7 +70,11 @@ export class InGameKeyboardEventsService implements OnDestroy {
     }
 
     private handleKeyPress(event: KeyboardEvent): void {
-        if (event.key === GameKey.AdminMode) {
+        const target = event.target as HTMLElement;
+        const inputTags: InputTagName[] = ['INPUT', 'TEXTAREA'];
+        const isInputField = inputTags.includes(target?.tagName as InputTagName) || target?.isContentEditable;
+
+        if (event.key === GameKey.AdminMode && !isInputField) {
             event.preventDefault();
             this.handleAdminModeToggle();
         }

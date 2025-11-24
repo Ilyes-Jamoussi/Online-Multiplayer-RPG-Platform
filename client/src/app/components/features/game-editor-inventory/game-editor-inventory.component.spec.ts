@@ -5,10 +5,9 @@ import { GameEditorInteractionsService } from '@app/services/game-editor-interac
 import { PlaceableMime } from '@app/enums/placeable-mime.enum';
 import { ActiveTool, Inventory, ToolType } from '@app/interfaces/game-editor.interface';
 import { Signal, signal } from '@angular/core';
-import { PlaceableKind} from '@common/enums/placeable-kind.enum';
-const NOOP = (): void => {
-    /** no-op */
-};
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+// eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stubs
+const NOOP = (): void => {};
 
 function createDataTransferStub(types: readonly string[], data: Readonly<Record<string, string>>): DataTransfer {
     const dataTransfer: DataTransfer = {
@@ -85,7 +84,6 @@ describe('GameEditorInventoryComponent', () => {
             },
             configurable: true,
         });
-
 
         Object.defineProperty(interactionsSpy, 'activeTool', {
             get: (): ActiveTool | null => activeToolState,

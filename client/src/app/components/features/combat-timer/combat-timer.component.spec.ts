@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal, signal } from '@angular/core';
-import { CombatService } from '@app/services/combat/combat.service';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CombatData } from '@app/interfaces/combat-data.interface';
+import { CombatService } from '@app/services/combat/combat.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { CombatTimerComponent } from './combat-timer.component';
 
 const MOCK_TIME_REMAINING = 3;
@@ -14,7 +14,7 @@ describe('CombatTimerComponent', () => {
     let component: CombatTimerComponent;
     let fixture: ComponentFixture<CombatTimerComponent>;
     let mockCombatService: Partial<CombatService>;
-    let mockTimerCoordinatorService: Partial<TimerCoordinatorService>;
+    let mockTimerService: Partial<TimerService>;
     let combatTimeRemainingSignal: WritableSignal<number>;
     let combatDataSignal: WritableSignal<CombatData | null>;
 
@@ -23,19 +23,19 @@ describe('CombatTimerComponent', () => {
         combatDataSignal = signal({ attackerId: 'player1', targetId: 'player2', userRole: 'attacker' });
 
         mockCombatService = {
-            combatData: combatDataSignal.asReadonly()
+            combatData: combatDataSignal.asReadonly(),
         };
 
-        mockTimerCoordinatorService = {
-            combatTimeRemaining: combatTimeRemainingSignal
+        mockTimerService = {
+            combatTimeRemaining: combatTimeRemainingSignal,
         };
 
         await TestBed.configureTestingModule({
             imports: [CombatTimerComponent],
             providers: [
                 { provide: CombatService, useValue: mockCombatService },
-                { provide: TimerCoordinatorService, useValue: mockTimerCoordinatorService }
-            ]
+                { provide: TimerService, useValue: mockTimerService },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(CombatTimerComponent);
@@ -104,7 +104,6 @@ describe('CombatTimerComponent', () => {
             fixture.detectChanges();
 
             const progressElement = fixture.nativeElement.querySelector('.timer-progress');
-            // Progress calculation: (2/5) * 100 = 40%
             expect(progressElement.style.width).toBe(`${EXPECTED_PROGRESS_PERCENTAGE}%`);
         });
 

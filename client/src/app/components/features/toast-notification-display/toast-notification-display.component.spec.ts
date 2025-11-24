@@ -1,28 +1,27 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { NotificationCoordinatorService, Toast } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { ToastNotificationDisplayComponent } from './toast-notification-display.component';
+import { Toast } from '@app/interfaces/toast.interface';
 
 describe('ToastNotificationDisplayComponent', () => {
     let component: ToastNotificationDisplayComponent;
     let fixture: ComponentFixture<ToastNotificationDisplayComponent>;
-    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
 
     const mockToasts: Toast[] = [
         { id: '1', message: 'Test toast 1', type: 'info' },
-        { id: '2', message: 'Test toast 2', type: 'success' }
+        { id: '2', message: 'Test toast 2', type: 'success' },
     ];
 
     beforeEach(async () => {
-        mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', ['removeToast'], {
-            toasts: signal(mockToasts)
+        mockNotificationService = jasmine.createSpyObj('NotificationService', ['removeToast'], {
+            toasts: signal(mockToasts),
         });
 
         await TestBed.configureTestingModule({
             imports: [ToastNotificationDisplayComponent],
-            providers: [
-                { provide: NotificationCoordinatorService, useValue: mockNotificationService }
-            ]
+            providers: [{ provide: NotificationService, useValue: mockNotificationService }],
         }).compileComponents();
 
         fixture = TestBed.createComponent(ToastNotificationDisplayComponent);

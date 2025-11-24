@@ -56,12 +56,7 @@ export class GameEditorCheckService {
         top: TileKind | undefined,
         bottom: TileKind | undefined,
     ): boolean {
-        return (
-            left === TileKind.WALL &&
-            right === TileKind.WALL &&
-            this.isTerrainTile(top) &&
-            this.isTerrainTile(bottom)
-        );
+        return left === TileKind.WALL && right === TileKind.WALL && this.isTerrainTile(top) && this.isTerrainTile(bottom);
     }
 
     private isValidVerticalDoor(
@@ -70,12 +65,7 @@ export class GameEditorCheckService {
         left: TileKind | undefined,
         right: TileKind | undefined,
     ): boolean {
-        return (
-            top === TileKind.WALL &&
-            bottom === TileKind.WALL &&
-            this.isTerrainTile(left) &&
-            this.isTerrainTile(right)
-        );
+        return top === TileKind.WALL && bottom === TileKind.WALL && this.isTerrainTile(left) && this.isTerrainTile(right);
     }
 
     private checkAllStartPlaced(): GameEditorIssue {
@@ -247,18 +237,15 @@ export class GameEditorCheckService {
 
     private checkNameValidation(): GameEditorIssue {
         const name = this.gameEditorStoreService.name.trim();
-        const invalid =
-            name.length < NAME_MIN_LENGTH ||
-            name.length > GAME_NAME_MAX_LENGTH ||
-            name.replace(WHITESPACE_PATTERN, '').length === 0;
+        const invalid = name.length < NAME_MIN_LENGTH || name.length > GAME_NAME_MAX_LENGTH || name.replace(WHITESPACE_PATTERN, '').length === 0;
 
         const result: GameEditorIssue = invalid
             ? {
-                hasIssue: true,
-                message:
-                    `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${GAME_NAME_MAX_LENGTH} caractères ` +
-                    `et ne pas être composé uniquement d'espaces.`,
-            }
+                  hasIssue: true,
+                  message:
+                      `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${GAME_NAME_MAX_LENGTH} caractères ` +
+                      `et ne pas être composé uniquement d'espaces.`,
+              }
             : { hasIssue: false };
 
         return result;
@@ -273,11 +260,11 @@ export class GameEditorCheckService {
 
         const result: GameEditorIssue = invalid
             ? {
-                hasIssue: true,
-                message:
-                    `La description doit contenir entre ${DESCRIPTION_MIN_LENGTH} et ${DESCRIPTION_MAX_LENGTH} caractères ` +
-                    `et ne pas être composée uniquement d'espaces.`,
-            }
+                  hasIssue: true,
+                  message:
+                      `La description doit contenir entre ${DESCRIPTION_MIN_LENGTH} et ${DESCRIPTION_MAX_LENGTH} caractères ` +
+                      `et ne pas être composée uniquement d'espaces.`,
+              }
             : { hasIssue: false };
 
         return result;

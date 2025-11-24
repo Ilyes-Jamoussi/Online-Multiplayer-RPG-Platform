@@ -2,6 +2,7 @@ import { MapSize } from '@common/enums/map-size.enum';
 
 export const DEFAULT_DRAFT_GAME_NAME = 'Nom...';
 export const DEFAULT_DRAFT_GAME_DESCRIPTION = 'Description du jeu...';
+export const BOAT_SPEED_BONUS = 4;
 
 export const MAP_SIZE_LABELS: Record<MapSize, string> = {
     [MapSize.SMALL]: 'Petit : 10x10',
