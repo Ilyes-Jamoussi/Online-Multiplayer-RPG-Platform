@@ -76,7 +76,24 @@ $text-secondary: rgba(255, 255, 255, 0.7);
         font-size: 0.9rem;
         font-weight: 700;
         flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
     }
+}
+
+.badge-team {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.3rem 0.7rem;
+    border-radius: 12px;
+    line-height: 1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .hp-section {

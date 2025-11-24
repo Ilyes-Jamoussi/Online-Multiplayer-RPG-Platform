@@ -3,6 +3,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { GameMapTileModalComponent } from '@app/components/features/game-map-tile-modal/game-map-tile-modal.component';
 import { GameMapTileComponent } from '@app/components/features/game-map-tile/game-map-tile.component';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { TeamColor } from '@app/enums/team-color.enum';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -113,5 +114,26 @@ export class GameMapComponent implements OnInit {
 
     isCurrentUser(player: Player): boolean {
         return player.id === this.playerService.id();
+    }
+
+    getTeamColor(player: Player): string | undefined {
+        if (this.isCurrentUser(player)) return undefined;
+        if (player.teamNumber === undefined) return undefined;
+        return player.teamNumber === 1 ? TeamColor.Team1 : TeamColor.Team2;
+    }
+
+    getPlayerBorderStyle(player: Player): { 'border-color'?: string; 'border-width'?: string; 'box-shadow'?: string } {
+        if (this.isCurrentUser(player)) {
+            return {};
+        }
+        const teamColor = this.getTeamColor(player);
+        if (!teamColor) {
+            return {};
+        }
+        return {
+            'border-color': teamColor,
+            'border-width': '3px',
+            'box-shadow': `0 0 15px ${teamColor}, 0 2px 4px rgba(0, 0, 0, 0.5)`,
+        };
     }
 }

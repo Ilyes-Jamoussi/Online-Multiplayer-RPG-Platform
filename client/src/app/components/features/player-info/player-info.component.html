@@ -2,7 +2,14 @@
     <div class="player-header">
         <div class="player-header-top">
             <img [src]="avatarImage" [alt]="playerName" class="avatar" />
-            <h3>{{ playerName }}</h3>
+            <h3>
+                {{ playerName }}
+                @if (teamNumber !== undefined) {
+                <span class="badge-team" [style.background-color]="getTeamColor(teamNumber)">
+                    Équipe {{ teamNumber }}
+                </span>
+                }
+            </h3>
         </div>
         <div class="hp-section">
             <div class="hp-bar">

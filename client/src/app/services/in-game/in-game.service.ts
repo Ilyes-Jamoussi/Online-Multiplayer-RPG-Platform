@@ -138,6 +138,9 @@ export class InGameService {
 
     updateInGameSession(data: Partial<InGameSession>): void {
         this._inGameSession.update((inGameSession) => ({ ...inGameSession, ...data }));
+        if (data.inGamePlayers) {
+            this.playerService.updatePlayer(data.inGamePlayers[this.playerService.id()]);
+        }
     }
 
     healPlayer(x: number, y: number): void {
@@ -366,6 +369,10 @@ export class InGameService {
                     },
                 },
             });
+        });
+
+        this.inGameSocketService.onSessionUpdated((data) => {
+            this.updateInGameSession(data);
         });
     }
 }

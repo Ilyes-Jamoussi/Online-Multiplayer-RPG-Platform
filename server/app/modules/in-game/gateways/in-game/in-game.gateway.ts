@@ -248,6 +248,11 @@ export class InGameGateway {
         this.server.to(payload.playerId).emit(InGameEvents.PlayerReachableTiles, successResponse(payload.reachable));
     }
 
+    @OnEvent(ServerEvents.SessionUpdated)
+    handleSessionUpdated(payload: { session: InGameSession }) {
+        this.server.to(payload.session.inGameId).emit(InGameEvents.SessionUpdated, successResponse(payload.session));
+    }
+
     @SubscribeMessage(InGameEvents.ToggleAdminMode)
     handleToggleAdminMode(socket: Socket, sessionId: string): void {
         try {

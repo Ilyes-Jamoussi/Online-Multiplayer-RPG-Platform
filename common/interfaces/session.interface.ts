@@ -4,6 +4,7 @@ import { Player } from './player.interface';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { StartPoint } from './start-point.interface';
 import { TurnState } from './turn-state.interface';
+import { Team } from './team.interface';
 
 export interface AvatarAssignment {
     avatar: Avatar;
@@ -28,10 +29,12 @@ export interface InGameSession extends BaseSession {
     inGameId: string;
     isGameStarted: boolean;
     inGamePlayers: Record<string, Player>;
+    teams: Record<number, Team>;
     currentTurn: TurnState;
     startPoints: StartPoint[];
     mapSize: MapSize;
     turnOrder: string[];
     isAdminModeActive?: boolean;
     gameStartTime?: Date;
+    playerCount: number;
 }

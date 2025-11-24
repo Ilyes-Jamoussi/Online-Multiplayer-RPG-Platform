@@ -10,8 +10,6 @@ import { AvatarAssignmentsUpdatedDto, UpdateAvatarAssignmentsDto } from '@app/mo
 import { SessionPlayersUpdatedDto } from '@app/modules/session/dto/update-session.dto';
 import { SessionService } from '@app/modules/session/services/session.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
-import { GameMode } from '@common/enums/game-mode.enum';
-import { MapSize } from '@common/enums/map-size.enum';
 import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { SessionEvents } from '@common/enums/session-events.enum';
@@ -191,7 +189,7 @@ export class SessionGateway implements OnGatewayDisconnect {
                 return;
             }
 
-            const inGameSession = await this.inGameService.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.SMALL);
+            const inGameSession = await this.inGameService.createInGameSession(waitingSession, waitingSession.mode);
 
             const players = this.sessionService.getPlayersSession(sessionId);
 

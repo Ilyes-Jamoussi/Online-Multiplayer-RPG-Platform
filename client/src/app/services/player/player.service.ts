@@ -39,6 +39,7 @@ export class PlayerService {
     readonly combatWins = computed(() => this.player().combatWins);
     readonly combatLosses = computed(() => this.player().combatLosses);
     readonly combatDraws = computed(() => this.player().combatDraws);
+    readonly teamNumber = computed(() => this.player().teamNumber);
 
     constructor(
         private readonly sessionService: SessionService,

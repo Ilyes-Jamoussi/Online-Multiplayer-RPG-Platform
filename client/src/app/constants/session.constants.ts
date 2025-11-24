@@ -26,4 +26,6 @@ export const DEFAULT_IN_GAME_SESSION: InGameSession = {
     turnOrder: [],
     mapSize: MapSize.SMALL,
     mode: GameMode.CLASSIC,
+    teams: {},
+    playerCount: 0,
 };

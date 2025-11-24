@@ -20,7 +20,13 @@
         <div class="players-overlay" [ngStyle]="gridStyle">
             @for (player of players; track player.id) {
             <div class="map-player" [class.current-user]="isCurrentUser(player)" [ngStyle]="getPlayerStyle(player)">
-                <img [src]="getPlayerAvatarImage(player.id)" [alt]="player.name" class="player-avatar" draggable="false" />
+                <img
+                    [src]="getPlayerAvatarImage(player.id)"
+                    [alt]="player.name"
+                    class="player-avatar"
+                    [ngStyle]="getPlayerBorderStyle(player)"
+                    draggable="false"
+                />
             </div>
             }
         </div>

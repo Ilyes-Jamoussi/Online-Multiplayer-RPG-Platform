@@ -183,4 +183,8 @@ export class InGameSocketService {
     onPlaceablePositionUpdated(callback: (data: PlaceablePositionUpdatedDto) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlaceablePositionUpdated, callback);
     }
+
+    onSessionUpdated(callback: (data: InGameSession) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.SessionUpdated, callback);
+    }
 }

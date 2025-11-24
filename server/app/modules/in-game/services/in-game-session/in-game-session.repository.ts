@@ -5,6 +5,7 @@ import { BOAT_SPEED_BONUS } from '@common/constants/game.constants';
 import { Player } from '@common/interfaces/player.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { StartPoint } from '@common/interfaces/start-point.interface';
+import { Team } from '@common/interfaces/team.interface';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -179,8 +180,13 @@ export class InGameSessionRepository {
         return session;
     }
 
-    update(session: InGameSession): void {
+    update(session: InGameSession, emitEvent: boolean = false): void {
         this.sessions.set(session.id, session);
+        if (emitEvent) {
+            this.eventEmitter.emit(ServerEvents.SessionUpdated, {
+                session,
+            });
+        }
     }
 
     delete(sessionId: string): void {
@@ -254,5 +260,25 @@ export class InGameSessionRepository {
         });
 
         return { oldX, oldY, newX, newY };
+    }
+
+    getNextFreeTeam(sessionId: string): Team {
+        const session = this.findById(sessionId);
+        for (const team of Object.values(session.teams)) {
+            if (team.playerIds.length < session.playerCount / 2) {
+                return team;
+            }
+        }
+        return null;
+    }
+
+    assignPlayerToTeam(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        const nextFreeTeam = this.getNextFreeTeam(sessionId);
+        if (!player) throw new NotFoundException('Player not found');
+        nextFreeTeam.playerIds.push(playerId);
+        player.teamNumber = nextFreeTeam.number;
+        this.update(session, true);
     }
 }
