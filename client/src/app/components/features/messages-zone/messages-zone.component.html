@@ -1,0 +1,34 @@
+<div class="messages-zone">
+    <div class="header">
+        <h2>Zone des messages</h2>
+        <div class="header-controls">
+            <div class="tabs">
+                <button 
+                    class="tab" 
+                    [class.active]="isActiveTab('chat')"
+                    (click)="setActiveTab('chat')">
+                    Chat
+                </button>
+                <button 
+                    class="tab" 
+                    [class.active]="isActiveTab('journal')"
+                    (click)="setActiveTab('journal')">
+                    Journal
+                </button>
+            </div>
+            @if (isActiveTab('journal')) {
+                <label class="filter-checkbox">
+                    <input type="checkbox" [checked]="!isFilterByMe()" (change)="toggleFilter()" />
+                    <span>Tout</span>
+                </label>
+            }
+        </div>
+    </div>
+    <div class="content">
+        @if (isActiveTab('chat')) {
+            <app-chat></app-chat>
+        } @else {
+            <app-game-log></app-game-log>
+        }
+    </div>
+</div>

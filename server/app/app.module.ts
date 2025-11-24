@@ -1,4 +1,5 @@
 import { ChatModule } from '@app/modules/chat/chat.module';
+import { GameLogModule } from '@app/modules/game-log/game-log.module';
 import { GameStoreModule } from '@app/modules/game-store/game-store.module';
 import { SessionModule } from '@app/modules/session/session.module';
 
@@ -18,6 +19,7 @@ import { MongooseModule } from '@nestjs/mongoose';
             }),
         }),
         ChatModule,
+        GameLogModule,
         GameStoreModule,
         SessionModule,
     ],

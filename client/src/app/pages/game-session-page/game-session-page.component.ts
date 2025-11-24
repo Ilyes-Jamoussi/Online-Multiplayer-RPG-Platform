@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AdminBadgeComponent } from '@app/components/features/admin-badge/admin-badge.component';
-import { ChatComponent } from '@app/components/features/chat/chat.component';
+import { MessagesZoneComponent } from '@app/components/features/messages-zone/messages-zone.component';
 import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
 import { GameMapFooterComponent } from '@app/components/features/game-map-footer/game-map-footer.component';
 import { GameMapHeaderComponent } from '@app/components/features/game-map-header/game-map-header.component';
@@ -30,7 +30,7 @@ import { MapSize } from '@common/enums/map-size.enum';
         SanctuaryOverlayComponent,
         GameOverOverlayComponent,
         ToastNotificationDisplayComponent,
-        ChatComponent,
+        MessagesZoneComponent,
         AdminBadgeComponent,
     ],
     templateUrl: './game-session-page.component.html',

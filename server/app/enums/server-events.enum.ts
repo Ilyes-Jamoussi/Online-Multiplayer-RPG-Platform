@@ -30,10 +30,13 @@ export enum ServerEvents {
     VirtualPlayerTurn = 'virtual-player-turn',
 
     PlayerMoved = 'player-moved',
+    Teleported = 'teleported',
     PlayerReachableTiles = 'player-reachable-tiles',
     PlayerUpdated = 'player-updated',
     PlayerAvailableActions = 'player-available-actions',
     DoorToggled = 'door-toggled',
+    AdminModeToggled = 'adminMode.toggled',
+    PlayerAbandon = 'player.abandon',
 
     GameOver = 'game-over',
 

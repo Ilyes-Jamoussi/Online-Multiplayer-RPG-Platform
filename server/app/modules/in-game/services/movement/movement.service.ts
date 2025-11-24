@@ -50,11 +50,15 @@ export class MovementService {
             throw new BadRequestException('Not enough movement points for this tile');
         }
 
+        const originX = player.x;
+        const originY = player.y;
+        let teleported = false;
         if (tile.kind === TileKind.TELEPORT) {
             const destination = this.gameCache.getTeleportDestination(session.id, { x: nextX, y: nextY });
             const destinationOccupant = this.gameCache.getTileOccupant(session.id, destination);
             nextX = destinationOccupant ? nextX : destination.x;
             nextY = destinationOccupant ? nextY : destination.y;
+            teleported = true;
         }
 
         if (this.gameCache.getTileOccupant(session.id, { x: nextX, y: nextY })) {
@@ -66,6 +70,17 @@ export class MovementService {
         }
 
         this.sessionRepository.movePlayerPosition(session.id, playerId, nextX, nextY, moveCost);
+
+        if (teleported) {
+            this.eventEmitter.emit(ServerEvents.Teleported, {
+                session,
+                playerId,
+                originX,
+                originY,
+                destinationX: nextX,
+                destinationY: nextY,
+            });
+        }
 
         this.calculateReachableTiles(session, playerId);
 
