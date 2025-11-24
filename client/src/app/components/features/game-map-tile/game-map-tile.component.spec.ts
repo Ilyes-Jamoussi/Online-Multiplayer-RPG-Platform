@@ -90,6 +90,9 @@ describe('GameMapTileComponent', () => {
             toggleDoor: jasmine.createSpy('toggleDoor'),
             getActionTypeAt: jasmine.createSpy('getActionTypeAt').and.returnValue(null),
             getAvatarByPlayerId: jasmine.createSpy('getAvatarByPlayerId').and.returnValue(''),
+            healPlayer: jasmine.createSpy('healPlayer'),
+            fightPlayer: jasmine.createSpy('fightPlayer'),
+            boatAction: jasmine.createSpy('boatAction'),
             objects: objectsSignal.asReadonly(),
             currentlyPlayers: [mockPlayer],
             isActionModeActive: false,
@@ -175,6 +178,35 @@ describe('GameMapTileComponent', () => {
             expect(component.isModalOpen).toBe(true);
             expect(mockGameMapService.isTileModalOpen).toHaveBeenCalledWith(mockTile);
         });
+
+        it('should return teleport channel number when tile is TELEPORT with teleportChannel', () => {
+            component.tile = {
+                kind: TileKind.TELEPORT,
+                x: TEST_TILE_X,
+                y: TEST_TILE_Y,
+                teleportChannel: 3,
+            };
+            expect(component.teleportChannelNumber).toBe(3);
+        });
+
+        it('should return null when tile is TELEPORT but has no teleportChannel', () => {
+            component.tile = {
+                kind: TileKind.TELEPORT,
+                x: TEST_TILE_X,
+                y: TEST_TILE_Y,
+            };
+            expect(component.teleportChannelNumber).toBeNull();
+        });
+
+        it('should return null when tile is not TELEPORT', () => {
+            component.tile = {
+                kind: TileKind.BASE,
+                x: TEST_TILE_X,
+                y: TEST_TILE_Y,
+                teleportChannel: 3,
+            };
+            expect(component.teleportChannelNumber).toBeNull();
+        });
     });
 
     describe('onRightClick', () => {
@@ -238,6 +270,30 @@ describe('GameMapTileComponent', () => {
 
             component.onTileClick(mockEvent);
             expect(mockCombatService.attackPlayer).toHaveBeenCalledWith(TEST_TILE_X, TEST_TILE_Y);
+        });
+
+        it('should heal player when action type is HEAL', () => {
+            mockGameMapService.isActionModeActive = true;
+            (mockGameMapService.getActionTypeAt as jasmine.Spy).and.returnValue(AvailableActionType.HEAL);
+
+            component.onTileClick(mockEvent);
+            expect(mockGameMapService.healPlayer).toHaveBeenCalledWith(TEST_TILE_X, TEST_TILE_Y);
+        });
+
+        it('should fight player when action type is FIGHT', () => {
+            mockGameMapService.isActionModeActive = true;
+            (mockGameMapService.getActionTypeAt as jasmine.Spy).and.returnValue(AvailableActionType.FIGHT);
+
+            component.onTileClick(mockEvent);
+            expect(mockGameMapService.fightPlayer).toHaveBeenCalledWith(TEST_TILE_X, TEST_TILE_Y);
+        });
+
+        it('should perform boat action when action type is BOAT', () => {
+            mockGameMapService.isActionModeActive = true;
+            (mockGameMapService.getActionTypeAt as jasmine.Spy).and.returnValue(AvailableActionType.BOAT);
+
+            component.onTileClick(mockEvent);
+            expect(mockGameMapService.boatAction).toHaveBeenCalledWith(TEST_TILE_X, TEST_TILE_Y);
         });
     });
 

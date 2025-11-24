@@ -27,10 +27,11 @@ const TEST_SPEED_BONUS = 0;
 const TEST_SPEED = 3;
 const TEST_BASE_ATTACK = 4;
 const TEST_ATTACK_BONUS = 0;
-const TEST_ATTACK = 4;
 const TEST_BASE_DEFENSE = 4;
 const TEST_DEFENSE_BONUS = 0;
-const TEST_DEFENSE = 4;
+const TEST_BOAT_SPEED_BONUS = 0;
+const TEST_BOAT_SPEED = 0;
+const TEST_HAS_COMBAT_BONUS = false;
 const TEST_X_POSITION = 0;
 const TEST_Y_POSITION = 0;
 const TEST_START_POINT_ID = '';
@@ -43,7 +44,7 @@ const TEST_IS_ADMIN = true;
 const TEST_IS_NOT_ADMIN = false;
 const TEST_IS_IN_GAME = false;
 const CARD_CLASS_IS_ME = 'is-me';
-const CARD_CLASS_ADMIN = 'admin';
+const CARD_CLASS_ADMIN = 'is-admin';
 
 type MockPlayerService = {
     id: Signal<string>;
@@ -64,10 +65,10 @@ const createMockPlayer = (id: string, name: string, isAdmin: boolean = TEST_IS_N
     speed: TEST_SPEED,
     baseAttack: TEST_BASE_ATTACK,
     attackBonus: TEST_ATTACK_BONUS,
-    attack: TEST_ATTACK,
     baseDefense: TEST_BASE_DEFENSE,
     defenseBonus: TEST_DEFENSE_BONUS,
-    defense: TEST_DEFENSE,
+    boatSpeedBonus: TEST_BOAT_SPEED_BONUS,
+    boatSpeed: TEST_BOAT_SPEED,
     attackDice: Dice.D6,
     defenseDice: Dice.D6,
     x: TEST_X_POSITION,
@@ -79,6 +80,7 @@ const createMockPlayer = (id: string, name: string, isAdmin: boolean = TEST_IS_N
     combatWins: TEST_COMBAT_WINS,
     combatLosses: TEST_COMBAT_LOSSES,
     combatDraws: TEST_COMBAT_DRAWS,
+    hasCombatBonus: TEST_HAS_COMBAT_BONUS,
 });
 
 describe('PlayerCardComponent', () => {

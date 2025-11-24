@@ -4,6 +4,7 @@ import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { WaitingRoomActionsComponent } from './waiting-room-actions.component';
 
@@ -21,10 +22,11 @@ const TEST_SPEED_BONUS = 0;
 const TEST_SPEED = 3;
 const TEST_BASE_ATTACK = 4;
 const TEST_ATTACK_BONUS = 0;
-const TEST_ATTACK = 4;
 const TEST_BASE_DEFENSE = 4;
 const TEST_DEFENSE_BONUS = 0;
-const TEST_DEFENSE = 4;
+const TEST_BOAT_SPEED_BONUS = 0;
+const TEST_BOAT_SPEED = 0;
+const TEST_HAS_COMBAT_BONUS = false;
 const TEST_X_POSITION = 0;
 const TEST_Y_POSITION = 0;
 const TEST_START_POINT_ID = '';
@@ -36,9 +38,9 @@ const TEST_COMBAT_DRAWS = 0;
 const TEST_IS_ADMIN = true;
 const TEST_IS_NOT_ADMIN = false;
 const TEST_IS_IN_GAME = false;
-const TEST_MIN_SESSION_PLAYERS = 2;
 const TEST_IS_LOCKED = true;
 const TEST_IS_UNLOCKED = false;
+const TEST_MAX_PLAYERS = 4;
 
 type MockPlayerService = {
     isAdmin: Signal<boolean>;
@@ -46,6 +48,7 @@ type MockPlayerService = {
 
 type MockSessionService = {
     players: Signal<Player[]>;
+    maxPlayers: Signal<number>;
     isRoomLocked: Signal<boolean>;
     canBeLocked: jasmine.Spy;
     canBeUnlocked: jasmine.Spy;
@@ -53,6 +56,7 @@ type MockSessionService = {
     lock: jasmine.Spy;
     unlock: jasmine.Spy;
     startGameSession: jasmine.Spy;
+    addVirtualPlayer: jasmine.Spy;
 };
 
 const createMockPlayer = (id: string, name: string, isAdmin: boolean = TEST_IS_NOT_ADMIN): Player => ({
@@ -69,10 +73,10 @@ const createMockPlayer = (id: string, name: string, isAdmin: boolean = TEST_IS_N
     speed: TEST_SPEED,
     baseAttack: TEST_BASE_ATTACK,
     attackBonus: TEST_ATTACK_BONUS,
-    attack: TEST_ATTACK,
     baseDefense: TEST_BASE_DEFENSE,
     defenseBonus: TEST_DEFENSE_BONUS,
-    defense: TEST_DEFENSE,
+    boatSpeedBonus: TEST_BOAT_SPEED_BONUS,
+    boatSpeed: TEST_BOAT_SPEED,
     attackDice: Dice.D6,
     defenseDice: Dice.D6,
     x: TEST_X_POSITION,
@@ -84,6 +88,7 @@ const createMockPlayer = (id: string, name: string, isAdmin: boolean = TEST_IS_N
     combatWins: TEST_COMBAT_WINS,
     combatLosses: TEST_COMBAT_LOSSES,
     combatDraws: TEST_COMBAT_DRAWS,
+    hasCombatBonus: TEST_HAS_COMBAT_BONUS,
 });
 
 describe('WaitingRoomActionsComponent', () => {
@@ -94,6 +99,7 @@ describe('WaitingRoomActionsComponent', () => {
     let playersSignal: ReturnType<typeof signal<Player[]>>;
     let isAdminSignal: ReturnType<typeof signal<boolean>>;
     let isRoomLockedSignal: ReturnType<typeof signal<boolean>>;
+    let maxPlayersSignal: ReturnType<typeof signal<number>>;
 
     beforeEach(async () => {
         const mockPlayer1 = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
@@ -103,6 +109,7 @@ describe('WaitingRoomActionsComponent', () => {
         playersSignal = signal<Player[]>(mockPlayers);
         isAdminSignal = signal<boolean>(TEST_IS_NOT_ADMIN);
         isRoomLockedSignal = signal<boolean>(TEST_IS_UNLOCKED);
+        maxPlayersSignal = signal<number>(TEST_MAX_PLAYERS);
 
         mockPlayerService = {
             isAdmin: isAdminSignal.asReadonly(),
@@ -110,6 +117,7 @@ describe('WaitingRoomActionsComponent', () => {
 
         mockSessionService = {
             players: playersSignal.asReadonly(),
+            maxPlayers: maxPlayersSignal.asReadonly(),
             isRoomLocked: isRoomLockedSignal.asReadonly(),
             canBeLocked: jasmine.createSpy('canBeLocked').and.returnValue(true),
             canBeUnlocked: jasmine.createSpy('canBeUnlocked').and.returnValue(false),
@@ -117,6 +125,7 @@ describe('WaitingRoomActionsComponent', () => {
             lock: jasmine.createSpy('lock'),
             unlock: jasmine.createSpy('unlock'),
             startGameSession: jasmine.createSpy('startGameSession'),
+            addVirtualPlayer: jasmine.createSpy('addVirtualPlayer'),
         };
 
         await TestBed.configureTestingModule({
@@ -135,30 +144,27 @@ describe('WaitingRoomActionsComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    describe('players', () => {
-        it('should return players from sessionService', () => {
+    describe('canAddVirtualPlayer', () => {
+        it('should return true when players count is less than maxPlayers', () => {
+            const mockPlayer1 = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
+            const mockPlayer2 = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2);
+            playersSignal.set([mockPlayer1, mockPlayer2]);
+            maxPlayersSignal.set(TEST_MAX_PLAYERS);
             fixture.detectChanges();
 
-            const result = component.players;
-
-            expect(result.length).toBe(TEST_MIN_SESSION_PLAYERS);
-            expect(result[0].id).toBe(TEST_PLAYER_ID_1);
-            expect(result[1].id).toBe(TEST_PLAYER_ID_2);
+            expect(component.canAddVirtualPlayer()).toBe(true);
         });
 
-        it('should reflect changes in sessionService players', () => {
+        it('should return false when players count equals maxPlayers', () => {
+            const mockPlayer1 = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
+            const mockPlayer2 = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2);
+            const mockPlayer3 = createMockPlayer('player-3', 'Player 3');
+            const mockPlayer4 = createMockPlayer('player-4', 'Player 4');
+            playersSignal.set([mockPlayer1, mockPlayer2, mockPlayer3, mockPlayer4]);
+            maxPlayersSignal.set(TEST_MAX_PLAYERS);
             fixture.detectChanges();
 
-            const initialPlayers = component.players;
-            expect(initialPlayers.length).toBe(TEST_MIN_SESSION_PLAYERS);
-
-            const newPlayer = createMockPlayer('new-player-id', 'New Player');
-            playersSignal.set([newPlayer]);
-            fixture.detectChanges();
-
-            const updatedPlayers = component.players;
-            expect(updatedPlayers.length).toBe(1);
-            expect(updatedPlayers[0].id).toBe('new-player-id');
+            expect(component.canAddVirtualPlayer()).toBe(false);
         });
     });
 
@@ -167,14 +173,14 @@ describe('WaitingRoomActionsComponent', () => {
             isAdminSignal.set(TEST_IS_ADMIN);
             fixture.detectChanges();
 
-            expect(component.isAdmin).toBe(true);
+            expect(component.isAdmin()).toBe(true);
         });
 
         it('should return false when player is not admin', () => {
             isAdminSignal.set(TEST_IS_NOT_ADMIN);
             fixture.detectChanges();
 
-            expect(component.isAdmin).toBe(false);
+            expect(component.isAdmin()).toBe(false);
         });
     });
 
@@ -183,14 +189,14 @@ describe('WaitingRoomActionsComponent', () => {
             isRoomLockedSignal.set(TEST_IS_LOCKED);
             fixture.detectChanges();
 
-            expect(component.isLocked).toBe(true);
+            expect(component.isLocked()).toBe(true);
         });
 
         it('should return false when room is not locked', () => {
             isRoomLockedSignal.set(TEST_IS_UNLOCKED);
             fixture.detectChanges();
 
-            expect(component.isLocked).toBe(false);
+            expect(component.isLocked()).toBe(false);
         });
     });
 
@@ -200,7 +206,7 @@ describe('WaitingRoomActionsComponent', () => {
             mockSessionService.canBeUnlocked.and.returnValue(false);
             fixture.detectChanges();
 
-            expect(component.canToggleLock).toBe(true);
+            expect(component.canToggleLock()).toBe(true);
         });
 
         it('should return true when canBeUnlocked returns true', () => {
@@ -208,7 +214,7 @@ describe('WaitingRoomActionsComponent', () => {
             mockSessionService.canBeUnlocked.and.returnValue(true);
             fixture.detectChanges();
 
-            expect(component.canToggleLock).toBe(true);
+            expect(component.canToggleLock()).toBe(true);
         });
 
         it('should return false when both canBeLocked and canBeUnlocked return false', () => {
@@ -216,7 +222,7 @@ describe('WaitingRoomActionsComponent', () => {
             mockSessionService.canBeUnlocked.and.returnValue(false);
             fixture.detectChanges();
 
-            expect(component.canToggleLock).toBe(false);
+            expect(component.canToggleLock()).toBe(false);
         });
     });
 
@@ -225,14 +231,14 @@ describe('WaitingRoomActionsComponent', () => {
             mockSessionService.canStartGame.and.returnValue(true);
             fixture.detectChanges();
 
-            expect(component.canStartGame).toBe(true);
+            expect(component.canStartGame()).toBe(true);
         });
 
         it('should return false when sessionService.canStartGame returns false', () => {
             mockSessionService.canStartGame.and.returnValue(false);
             fixture.detectChanges();
 
-            expect(component.canStartGame).toBe(false);
+            expect(component.canStartGame()).toBe(false);
         });
     });
 
@@ -278,6 +284,62 @@ describe('WaitingRoomActionsComponent', () => {
             component.startGame();
 
             expect(mockSessionService.startGameSession).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('showVirtualPlayerModal', () => {
+        it('should return false initially', () => {
+            fixture.detectChanges();
+
+            expect(component.showVirtualPlayerModal()).toBe(false);
+        });
+    });
+
+    describe('openVirtualPlayerModal', () => {
+        it('should set showVirtualPlayerModal to true', () => {
+            fixture.detectChanges();
+
+            expect(component.showVirtualPlayerModal()).toBe(false);
+
+            component.openVirtualPlayerModal();
+
+            expect(component.showVirtualPlayerModal()).toBe(true);
+        });
+    });
+
+    describe('closeVirtualPlayerModal', () => {
+        it('should set showVirtualPlayerModal to false', () => {
+            fixture.detectChanges();
+            component.openVirtualPlayerModal();
+            expect(component.showVirtualPlayerModal()).toBe(true);
+
+            component.closeVirtualPlayerModal();
+
+            expect(component.showVirtualPlayerModal()).toBe(false);
+        });
+    });
+
+    describe('onVirtualPlayerTypeSelected', () => {
+        it('should call sessionService.addVirtualPlayer and close modal', () => {
+            fixture.detectChanges();
+            component.openVirtualPlayerModal();
+            expect(component.showVirtualPlayerModal()).toBe(true);
+
+            component.onVirtualPlayerTypeSelected(VirtualPlayerType.Offensive);
+
+            expect(mockSessionService.addVirtualPlayer).toHaveBeenCalledTimes(1);
+            expect(mockSessionService.addVirtualPlayer).toHaveBeenCalledWith(VirtualPlayerType.Offensive);
+            expect(component.showVirtualPlayerModal()).toBe(false);
+        });
+
+        it('should call sessionService.addVirtualPlayer with Defensive type', () => {
+            fixture.detectChanges();
+
+            component.onVirtualPlayerTypeSelected(VirtualPlayerType.Defensive);
+
+            expect(mockSessionService.addVirtualPlayer).toHaveBeenCalledTimes(1);
+            expect(mockSessionService.addVirtualPlayer).toHaveBeenCalledWith(VirtualPlayerType.Defensive);
+            expect(component.showVirtualPlayerModal()).toBe(false);
         });
     });
 });

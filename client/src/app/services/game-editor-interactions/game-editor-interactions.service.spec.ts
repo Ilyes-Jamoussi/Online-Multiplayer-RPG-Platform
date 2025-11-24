@@ -726,4 +726,432 @@ describe('GameEditorInteractionsService', () => {
             expect(service.getFootprintOf(PlaceableKind.HEAL)).toBe(PlaceableFootprint[PlaceableKind.HEAL]);
         });
     });
+
+    describe('selectTeleportTool', () => {
+        it('sets activeTool to TeleportTileTool when channel is available', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            const mockChannel = { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } };
+            (teleportService.getNextAvailableTeleportChannel as jasmine.Spy).and.returnValue(mockChannel);
+
+            service.selectTeleportTool();
+
+            expect(service.activeTool).toEqual({
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: mockChannel,
+            });
+        });
+
+        it('does nothing when no channel is available', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            (teleportService.getNextAvailableTeleportChannel as jasmine.Spy).and.returnValue(undefined);
+
+            service.activeTool = null;
+            service.selectTeleportTool();
+
+            expect(service.activeTool).toBeNull();
+        });
+    });
+
+    describe('selectTeleportTileEraserTool', () => {
+        it('sets activeTool to TeleportTileEraserTool', () => {
+            service.selectTeleportTileEraserTool();
+
+            expect(service.activeTool).toEqual({
+                type: ToolType.TeleportTileEraserTool,
+            });
+        });
+    });
+
+    describe('cancelTeleportPlacement', () => {
+        it('cancels teleport placement and selects teleport tool when TeleportTileTool is active', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            const mockChannel = { channelNumber: 2, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } };
+            (teleportService.getNextAvailableTeleportChannel as jasmine.Spy).and.returnValue(mockChannel);
+
+            service.activeTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 2,
+                teleportChannel: mockChannel,
+            };
+
+            service.cancelTeleportPlacement();
+
+            expect(teleportService.cancelTeleportPlacement).toHaveBeenCalledWith(2);
+            expect(service.activeTool).toEqual({
+                type: ToolType.TeleportTileTool,
+                channelNumber: 2,
+                teleportChannel: mockChannel,
+            });
+        });
+
+        it('does nothing when tool is not TeleportTileTool', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            service.activeTool = {
+                type: ToolType.TileBrushTool,
+                tileKind: TileKind.BASE,
+                leftDrag: false,
+                rightDrag: false,
+            };
+
+            service.cancelTeleportPlacement();
+
+            expect(teleportService.cancelTeleportPlacement).not.toHaveBeenCalled();
+        });
+
+        it('does nothing when tool is null', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            service.activeTool = null;
+
+            service.cancelTeleportPlacement();
+
+            expect(teleportService.cancelTeleportPlacement).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('handleTeleportTileClick', () => {
+        it('places first tile when firstTilePlaced is not set', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            const mockChannel = { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } };
+
+            service.activeTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: mockChannel,
+            };
+
+            service.dragStart(5, 6, 'left');
+
+            expect(teleportService.placeTeleportTile).toHaveBeenCalledWith(5, 6, 1, true);
+            expect(service.activeTool).toEqual(
+                jasmine.objectContaining({
+                    type: ToolType.TeleportTileTool,
+                    channelNumber: 1,
+                    firstTilePlaced: { x: 5, y: 6 },
+                }),
+            );
+        });
+
+        it('places second tile and selects next channel when available', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            const mockChannel1 = { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } };
+            const mockChannel2 = { channelNumber: 2, tiles: { entryA: { x: 2, y: 2 }, entryB: { x: 3, y: 3 } } };
+            (teleportService.getNextAvailableTeleportChannel as jasmine.Spy).and.returnValue(mockChannel2);
+
+            service.activeTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: mockChannel1,
+                firstTilePlaced: { x: 5, y: 6 },
+            };
+
+            service.dragStart(7, 8, 'left');
+
+            expect(teleportService.placeTeleportTile).toHaveBeenCalledWith(7, 8, 1, false);
+            expect(service.activeTool).toEqual({
+                type: ToolType.TeleportTileTool,
+                channelNumber: 2,
+                teleportChannel: mockChannel2,
+            });
+        });
+
+        it('places second tile and sets tool to null when no next channel available', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            const mockChannel1 = { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } };
+            (teleportService.getNextAvailableTeleportChannel as jasmine.Spy).and.returnValue(undefined);
+
+            service.activeTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: mockChannel1,
+                firstTilePlaced: { x: 5, y: 6 },
+            };
+
+            service.dragStart(7, 8, 'left');
+
+            expect(teleportService.placeTeleportTile).toHaveBeenCalledWith(7, 8, 1, false);
+            expect(service.activeTool).toBeNull();
+        });
+
+        it('does nothing when tool is null', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            service.activeTool = null;
+
+            service.dragStart(5, 6, 'left');
+
+            expect(teleportService.placeTeleportTile).not.toHaveBeenCalled();
+        });
+
+        it('does nothing when tool is not TeleportTileTool', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            service.activeTool = {
+                type: ToolType.TileBrushTool,
+                tileKind: TileKind.BASE,
+                leftDrag: false,
+                rightDrag: false,
+            };
+
+            service.dragStart(5, 6, 'left');
+
+            expect(teleportService.placeTeleportTile).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('handleTeleportTileRightClick', () => {
+        it('cancels teleport placement when TeleportTileTool with firstTilePlaced is active', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            const mockChannel = { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } };
+            (teleportService.getNextAvailableTeleportChannel as jasmine.Spy).and.returnValue(mockChannel);
+
+            service.activeTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: mockChannel,
+                firstTilePlaced: { x: 5, y: 6 },
+            };
+
+            // Call the private method directly to test this branch
+            (service as any).handleTeleportTileRightClick(7, 8);
+
+            expect(teleportService.cancelTeleportPlacement).toHaveBeenCalledWith(1);
+        });
+
+        it('removes teleport pair when tile is TELEPORT with teleportChannel', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            const mockChannel = { channelNumber: 2, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } };
+            (teleportService.getNextAvailableTeleportChannel as jasmine.Spy).and.returnValue(mockChannel);
+
+            const tiles = makeTiles(SIZE, TileKind.BASE);
+            const idx = 4 * SIZE + 3;
+            tiles[idx] = { x: 3, y: 4, kind: TileKind.TELEPORT, teleportChannel: 1 };
+            store.setTiles(tiles);
+
+            service.activeTool = {
+                type: ToolType.TeleportTileEraserTool,
+            };
+
+            service.dragStart(3, 4, 'right');
+
+            expect(teleportService.removeTeleportPair).toHaveBeenCalledWith(3, 4);
+        });
+
+        it('selects next channel after removing teleport pair when TeleportTileTool is active', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            const mockChannel = { channelNumber: 2, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } };
+            (teleportService.getNextAvailableTeleportChannel as jasmine.Spy).and.returnValue(mockChannel);
+
+            const tiles = makeTiles(SIZE, TileKind.BASE);
+            const idx = 4 * SIZE + 3;
+            tiles[idx] = { x: 3, y: 4, kind: TileKind.TELEPORT, teleportChannel: 1 };
+            store.setTiles(tiles);
+
+            // Tool without firstTilePlaced so it doesn't cancel immediately
+            service.activeTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } },
+            };
+
+            // Call the private method directly to test this branch
+            (service as any).handleTeleportTileRightClick(3, 4);
+
+            expect(teleportService.removeTeleportPair).toHaveBeenCalledWith(3, 4);
+            expect(service.activeTool).toEqual(
+                jasmine.objectContaining({
+                    type: ToolType.TeleportTileTool,
+                    channelNumber: 2,
+                    teleportChannel: mockChannel,
+                }),
+            );
+        });
+
+        it('sets tool to null after removing teleport pair when no next channel available', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            (teleportService.getNextAvailableTeleportChannel as jasmine.Spy).and.returnValue(undefined);
+
+            const tiles = makeTiles(SIZE, TileKind.BASE);
+            const idx = 4 * SIZE + 3;
+            tiles[idx] = { x: 3, y: 4, kind: TileKind.TELEPORT, teleportChannel: 1 };
+            store.setTiles(tiles);
+
+            // Tool without firstTilePlaced so it doesn't cancel immediately
+            service.activeTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } },
+            };
+
+            // Call the private method directly to test this branch
+            (service as any).handleTeleportTileRightClick(3, 4);
+
+            expect(teleportService.removeTeleportPair).toHaveBeenCalledWith(3, 4);
+            expect(service.activeTool).toBeNull();
+        });
+
+        it('does nothing when tile is not TELEPORT', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            store.setTileAt(3, 4, TileKind.BASE);
+
+            service.activeTool = {
+                type: ToolType.TeleportTileEraserTool,
+            };
+
+            service.dragStart(3, 4, 'right');
+
+            expect(teleportService.removeTeleportPair).not.toHaveBeenCalled();
+        });
+
+        it('does nothing when tile has no teleportChannel', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            const tiles = makeTiles(SIZE, TileKind.BASE);
+            const idx = 4 * SIZE + 3;
+            tiles[idx] = { x: 3, y: 4, kind: TileKind.TELEPORT };
+            store.setTiles(tiles);
+
+            service.activeTool = {
+                type: ToolType.TeleportTileEraserTool,
+            };
+
+            service.dragStart(3, 4, 'right');
+
+            expect(teleportService.removeTeleportPair).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('dragStart with teleport tools', () => {
+        it('calls handleTeleportTileClick when TeleportTileTool is active', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            const mockChannel = { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } };
+            (teleportService.getNextAvailableTeleportChannel as jasmine.Spy).and.returnValue(mockChannel);
+
+            service.activeTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: mockChannel,
+            };
+
+            service.dragStart(5, 6, 'left');
+
+            expect(teleportService.placeTeleportTile).toHaveBeenCalled();
+        });
+
+        it('calls handleTeleportTileRightClick when TeleportTileEraserTool is active', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            const tiles = makeTiles(SIZE, TileKind.BASE);
+            const idx = 4 * SIZE + 3;
+            tiles[idx] = { x: 3, y: 4, kind: TileKind.TELEPORT, teleportChannel: 1 };
+            store.setTiles(tiles);
+
+            service.activeTool = {
+                type: ToolType.TeleportTileEraserTool,
+            };
+
+            service.dragStart(3, 4, 'right');
+
+            expect(teleportService.removeTeleportPair).toHaveBeenCalled();
+        });
+    });
+
+    describe('revertToPreviousTool', () => {
+        it('selects teleport tool when reverting from TeleportTileEraserTool to TeleportTileTool', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            const mockChannel = { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } };
+            (teleportService.getNextAvailableTeleportChannel as jasmine.Spy).and.returnValue(mockChannel);
+
+            const previousTool: ActiveTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: mockChannel,
+            };
+
+            service.activeTool = previousTool;
+            service.activeTool = { type: ToolType.TeleportTileEraserTool };
+
+            service.revertToPreviousTool();
+
+            expect(service.activeTool).toEqual(
+                jasmine.objectContaining({
+                    type: ToolType.TeleportTileTool,
+                    channelNumber: 1,
+                    teleportChannel: mockChannel,
+                }),
+            );
+        });
+
+        it('reverts to previous tool normally when not TeleportTileEraserTool', () => {
+            const previousTool: ActiveTool = {
+                type: ToolType.TileBrushTool,
+                tileKind: TileKind.BASE,
+                leftDrag: false,
+                rightDrag: false,
+            };
+
+            service.activeTool = previousTool;
+            service.activeTool = {
+                type: ToolType.PlaceableTool,
+                placeableKind: PlaceableKind.HEAL,
+            };
+
+            service.revertToPreviousTool();
+
+            expect(service.activeTool).toEqual(jasmine.objectContaining(previousTool));
+        });
+    });
+
+    describe('activeTool setter', () => {
+        it('cancels teleport placement when switching away from TeleportTileTool', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            const mockChannel = { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } };
+
+            service.activeTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: mockChannel,
+            };
+
+            service.activeTool = {
+                type: ToolType.TileBrushTool,
+                tileKind: TileKind.BASE,
+                leftDrag: false,
+                rightDrag: false,
+            };
+
+            expect(teleportService.cancelTeleportPlacement).toHaveBeenCalledWith(1);
+        });
+
+        it('does not cancel when switching to TeleportTileTool', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            const mockChannel = { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } };
+
+            service.activeTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: mockChannel,
+            };
+
+            (teleportService.cancelTeleportPlacement as jasmine.Spy).calls.reset();
+
+            service.activeTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 2,
+                teleportChannel: { channelNumber: 2, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } },
+            };
+
+            expect(teleportService.cancelTeleportPlacement).not.toHaveBeenCalled();
+        });
+
+        it('does not cancel when current tool is null', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            service.activeTool = null;
+
+            service.activeTool = {
+                type: ToolType.TileBrushTool,
+                tileKind: TileKind.BASE,
+                leftDrag: false,
+                rightDrag: false,
+            };
+
+            expect(teleportService.cancelTeleportPlacement).not.toHaveBeenCalled();
+        });
+    });
 });

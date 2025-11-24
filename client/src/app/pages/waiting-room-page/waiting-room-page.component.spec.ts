@@ -2,11 +2,13 @@ import { signal, Signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ROUTES } from '@app/enums/routes.enum';
 import { AssetsService } from '@app/services/assets/assets.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { WaitingRoomPageComponent } from './waiting-room-page.component';
 
@@ -24,10 +26,11 @@ const TEST_SPEED_BONUS = 0;
 const TEST_SPEED = 3;
 const TEST_BASE_ATTACK = 4;
 const TEST_ATTACK_BONUS = 0;
-const TEST_ATTACK = 4;
 const TEST_BASE_DEFENSE = 4;
 const TEST_DEFENSE_BONUS = 0;
-const TEST_DEFENSE = 4;
+const TEST_BOAT_SPEED_BONUS = 0;
+const TEST_BOAT_SPEED = 0;
+const TEST_HAS_COMBAT_BONUS = false;
 const TEST_X_POSITION = 0;
 const TEST_Y_POSITION = 0;
 const TEST_START_POINT_ID = '';
@@ -59,6 +62,8 @@ type MockSessionService = {
     players: Signal<Player[]>;
     isRoomLocked: Signal<boolean>;
     maxPlayers: Signal<number>;
+    mode: Signal<GameMode>;
+    canStartGame: jasmine.Spy;
     kickPlayer: jasmine.Spy;
 };
 
@@ -76,10 +81,10 @@ const createMockPlayer = (id: string, name: string, isAdmin: boolean = TEST_IS_N
     speed: TEST_SPEED,
     baseAttack: TEST_BASE_ATTACK,
     attackBonus: TEST_ATTACK_BONUS,
-    attack: TEST_ATTACK,
     baseDefense: TEST_BASE_DEFENSE,
     defenseBonus: TEST_DEFENSE_BONUS,
-    defense: TEST_DEFENSE,
+    boatSpeedBonus: TEST_BOAT_SPEED_BONUS,
+    boatSpeed: TEST_BOAT_SPEED,
     attackDice: Dice.D6,
     defenseDice: Dice.D6,
     x: TEST_X_POSITION,
@@ -91,6 +96,7 @@ const createMockPlayer = (id: string, name: string, isAdmin: boolean = TEST_IS_N
     combatWins: TEST_COMBAT_WINS,
     combatLosses: TEST_COMBAT_LOSSES,
     combatDraws: TEST_COMBAT_DRAWS,
+    hasCombatBonus: TEST_HAS_COMBAT_BONUS,
 });
 
 describe('WaitingRoomPageComponent', () => {
@@ -98,11 +104,12 @@ describe('WaitingRoomPageComponent', () => {
     let fixture: ComponentFixture<WaitingRoomPageComponent>;
     let mockPlayerService: MockPlayerService;
     let mockSessionService: MockSessionService;
-    let mockNotificationCoordinatorService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationCoordinatorService: jasmine.SpyObj<NotificationService>;
     let mockAssetsService: jasmine.SpyObj<AssetsService>;
     let playersSignal: ReturnType<typeof signal<Player[]>>;
     let isRoomLockedSignal: ReturnType<typeof signal<boolean>>;
     let maxPlayersSignal: ReturnType<typeof signal<number>>;
+    let modeSignal: ReturnType<typeof signal<GameMode>>;
     let playerIdSignal: ReturnType<typeof signal<string>>;
     let isAdminSignal: ReturnType<typeof signal<boolean>>;
 
@@ -114,6 +121,7 @@ describe('WaitingRoomPageComponent', () => {
         playersSignal = signal<Player[]>(mockPlayers);
         isRoomLockedSignal = signal<boolean>(TEST_IS_UNLOCKED);
         maxPlayersSignal = signal<number>(TEST_MAX_PLAYERS);
+        modeSignal = signal<GameMode>(GameMode.CTF);
         playerIdSignal = signal<string>(TEST_PLAYER_ID_CURRENT);
         isAdminSignal = signal<boolean>(TEST_IS_NOT_ADMIN);
 
@@ -128,10 +136,12 @@ describe('WaitingRoomPageComponent', () => {
             players: playersSignal.asReadonly(),
             isRoomLocked: isRoomLockedSignal.asReadonly(),
             maxPlayers: maxPlayersSignal.asReadonly(),
+            mode: modeSignal.asReadonly(),
+            canStartGame: jasmine.createSpy('canStartGame').and.returnValue(false),
             kickPlayer: jasmine.createSpy('kickPlayer'),
         };
 
-        mockNotificationCoordinatorService = jasmine.createSpyObj('NotificationCoordinatorService', ['displayErrorPopup']);
+        mockNotificationCoordinatorService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
 
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getAvatarStaticImage']);
         mockAssetsService.getAvatarStaticImage.and.returnValue(TEST_AVATAR_STATIC_PATH);
@@ -141,7 +151,7 @@ describe('WaitingRoomPageComponent', () => {
             providers: [
                 { provide: PlayerService, useValue: mockPlayerService },
                 { provide: SessionService, useValue: mockSessionService },
-                { provide: NotificationCoordinatorService, useValue: mockNotificationCoordinatorService },
+                { provide: NotificationService, useValue: mockNotificationCoordinatorService },
                 { provide: AssetsService, useValue: mockAssetsService },
             ],
         }).compileComponents();
@@ -238,6 +248,81 @@ describe('WaitingRoomPageComponent', () => {
             fixture.detectChanges();
 
             expect(component.maxPlayers()).toBe(newMaxPlayers);
+        });
+    });
+
+    describe('sessionMode', () => {
+        it('should return mode signal from sessionService', () => {
+            modeSignal.set(GameMode.CTF);
+            fixture.detectChanges();
+
+            const result = component.sessionMode;
+
+            expect(result).toBe(modeSignal.asReadonly());
+            expect(result()).toBe(GameMode.CTF);
+        });
+
+        it('should reflect changes in sessionService mode', () => {
+            modeSignal.set(GameMode.CTF);
+            fixture.detectChanges();
+
+            expect(component.sessionMode()).toBe(GameMode.CTF);
+
+            modeSignal.set(GameMode.CLASSIC);
+            fixture.detectChanges();
+
+            expect(component.sessionMode()).toBe(GameMode.CLASSIC);
+        });
+    });
+
+    describe('showCTFRule', () => {
+        it('should return true when mode is CTF and cannot start game', () => {
+            modeSignal.set(GameMode.CTF);
+            mockSessionService.canStartGame.and.returnValue(false);
+            fixture.detectChanges();
+
+            expect(component.showCTFRule()).toBe(true);
+        });
+
+        it('should return false when mode is CTF but can start game', () => {
+            modeSignal.set(GameMode.CTF);
+            mockSessionService.canStartGame.and.returnValue(true);
+            fixture.detectChanges();
+
+            expect(component.showCTFRule()).toBe(false);
+        });
+
+        it('should return false when mode is not CTF', () => {
+            modeSignal.set(GameMode.CLASSIC);
+            mockSessionService.canStartGame.and.returnValue(false);
+            fixture.detectChanges();
+
+            expect(component.showCTFRule()).toBe(false);
+        });
+    });
+
+    describe('isVirtualPlayer', () => {
+        it('should return true when player has virtualPlayerType', () => {
+            const virtualPlayer = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
+            virtualPlayer.virtualPlayerType = VirtualPlayerType.Offensive;
+            fixture.detectChanges();
+
+            expect(component.isVirtualPlayer(virtualPlayer)).toBe(true);
+        });
+
+        it('should return false when player does not have virtualPlayerType', () => {
+            const regularPlayer = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
+            fixture.detectChanges();
+
+            expect(component.isVirtualPlayer(regularPlayer)).toBe(false);
+        });
+
+        it('should return false when player has undefined virtualPlayerType', () => {
+            const regularPlayer = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
+            regularPlayer.virtualPlayerType = undefined;
+            fixture.detectChanges();
+
+            expect(component.isVirtualPlayer(regularPlayer)).toBe(false);
         });
     });
 

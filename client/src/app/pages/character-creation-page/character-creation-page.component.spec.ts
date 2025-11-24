@@ -5,7 +5,7 @@ import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@app/constants/valid
 import { BonusType } from '@app/enums/character-creation.enum';
 import { ROUTES } from '@app/enums/routes.enum';
 import { AssetsService } from '@app/services/assets/assets.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
@@ -27,10 +27,11 @@ const TEST_BASE_SPEED = 3;
 const TEST_SPEED_BONUS = 0;
 const TEST_BASE_ATTACK = 4;
 const TEST_ATTACK_BONUS = 0;
-const TEST_ATTACK = 4;
 const TEST_BASE_DEFENSE = 4;
 const TEST_DEFENSE_BONUS = 0;
-const TEST_DEFENSE = 4;
+const TEST_BOAT_SPEED_BONUS = 0;
+const TEST_BOAT_SPEED = 0;
+const TEST_HAS_COMBAT_BONUS = false;
 const TEST_X_POSITION = 0;
 const TEST_Y_POSITION = 0;
 const TEST_START_POINT_ID = '';
@@ -88,10 +89,10 @@ const createMockPlayer = (hasBonus: boolean = true): Player => ({
     speed: TEST_PLAYER_SPEED,
     baseAttack: TEST_BASE_ATTACK,
     attackBonus: TEST_ATTACK_BONUS,
-    attack: TEST_ATTACK,
     baseDefense: TEST_BASE_DEFENSE,
     defenseBonus: TEST_DEFENSE_BONUS,
-    defense: TEST_DEFENSE,
+    boatSpeedBonus: TEST_BOAT_SPEED_BONUS,
+    boatSpeed: TEST_BOAT_SPEED,
     attackDice: Dice.D6,
     defenseDice: Dice.D6,
     x: TEST_X_POSITION,
@@ -103,6 +104,7 @@ const createMockPlayer = (hasBonus: boolean = true): Player => ({
     combatWins: TEST_COMBAT_WINS,
     combatLosses: TEST_COMBAT_LOSSES,
     combatDraws: TEST_COMBAT_DRAWS,
+    hasCombatBonus: TEST_HAS_COMBAT_BONUS,
 });
 
 describe('CharacterCreationPageComponent', () => {
@@ -110,7 +112,7 @@ describe('CharacterCreationPageComponent', () => {
     let fixture: ComponentFixture<CharacterCreationPageComponent>;
     let mockPlayerService: MockPlayerService;
     let mockAssetsService: jasmine.SpyObj<AssetsService>;
-    let mockNotificationCoordinatorService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationCoordinatorService: jasmine.SpyObj<NotificationService>;
     let mockLocation: jasmine.SpyObj<Location>;
     let isAdminSignal: ReturnType<typeof signal<boolean>>;
     let nameSignal: ReturnType<typeof signal<string>>;
@@ -177,7 +179,7 @@ describe('CharacterCreationPageComponent', () => {
         mockAssetsService.getAvatarAnimatedImage.and.returnValue('./assets/images/avatars/animated/avatar1.gif');
 
 
-        mockNotificationCoordinatorService = jasmine.createSpyObj('NotificationCoordinatorService', ['displayErrorPopup']);
+        mockNotificationCoordinatorService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
 
         mockLocation = jasmine.createSpyObj('Location', ['back']);
 
@@ -187,7 +189,7 @@ describe('CharacterCreationPageComponent', () => {
                 { provide: PlayerService, useValue: mockPlayerService },
                 { provide: AssetsService, useValue: mockAssetsService },
                 { provide: SessionService, useValue: mockSessionService },
-                { provide: NotificationCoordinatorService, useValue: mockNotificationCoordinatorService },
+                { provide: NotificationService, useValue: mockNotificationCoordinatorService },
                 { provide: Location, useValue: mockLocation },
             ],
         }).compileComponents();

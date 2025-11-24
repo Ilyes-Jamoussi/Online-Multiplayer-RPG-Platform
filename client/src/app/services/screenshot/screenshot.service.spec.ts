@@ -56,16 +56,23 @@ describe('ScreenshotService', () => {
         TEST_SPEC_TIMEOUT,
     );
 
-    it('should call html2canvas with correct options and return JPEG data URL', async () => {
-        const mockToDataURL = jasmine.createSpy('toDataURL').and.returnValue('data:image/jpeg;base64,mockdata');
-        const mockCanvas = { toDataURL: mockToDataURL } as unknown as HTMLCanvasElement;
+    it(
+        'should call html2canvas with correct options and return JPEG data URL',
+        async () => {
+            const mockToDataURL = jasmine.createSpy('toDataURL').and.returnValue('data:image/jpeg;base64,mockdata');
+            const mockCanvas = { toDataURL: mockToDataURL } as unknown as HTMLCanvasElement;
 
-        spyOn(await import('html2canvas'), 'default').and.returnValue(Promise.resolve(mockCanvas));
+            // Import and spy on html2canvas before calling the service method
+            const html2canvasModule = await import('html2canvas');
+            const html2canvasSpy = spyOn(html2canvasModule, 'default').and.returnValue(Promise.resolve(mockCanvas));
 
-        const testElement = document.createElement('div');
-        const result = await service.captureElementAsBase64(testElement);
+            const testElement = document.createElement('div');
+            const result = await service.captureElementAsBase64(testElement);
 
-        expect(mockToDataURL).toHaveBeenCalledWith('image/jpeg', SCREENSHOT_QUALITY);
-        expect(result).toBe('data:image/jpeg;base64,mockdata');
-    });
+            expect(html2canvasSpy).toHaveBeenCalledWith(testElement, { scale: SCREENSHOT_SCALE });
+            expect(mockToDataURL).toHaveBeenCalledWith('image/jpeg', SCREENSHOT_QUALITY);
+            expect(result).toBe('data:image/jpeg;base64,mockdata');
+        },
+        TEST_SPEC_TIMEOUT,
+    );
 });

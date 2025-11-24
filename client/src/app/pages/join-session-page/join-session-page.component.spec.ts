@@ -3,6 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SessionPreviewDto } from '@app/dto/session-preview-dto';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { JoinSessionPageComponent } from './join-session-page.component';
 
 // Test constants
@@ -13,6 +15,10 @@ const TEST_CURRENT_PLAYERS_4 = 4;
 const TEST_MAX_PLAYERS_4 = 4;
 const TEST_MAX_PLAYERS_6 = 6;
 const TEST_PLAYER_COUNT_ZERO = 0;
+const TEST_GAME_NAME_1 = 'Test Game 1';
+const TEST_GAME_NAME_2 = 'Test Game 2';
+const TEST_GAME_DESCRIPTION_1 = 'Test game description 1';
+const TEST_GAME_DESCRIPTION_2 = 'Test game description 2';
 
 type MockPlayerService = {
     setAsGuest: jasmine.Spy;
@@ -37,11 +43,19 @@ describe('JoinSessionPageComponent', () => {
                 id: TEST_SESSION_ID_1,
                 currentPlayers: TEST_CURRENT_PLAYERS_2,
                 maxPlayers: TEST_MAX_PLAYERS_4,
+                gameName: TEST_GAME_NAME_1,
+                gameDescription: TEST_GAME_DESCRIPTION_1,
+                mapSize: MapSize.SMALL,
+                gameMode: GameMode.CLASSIC,
             },
             {
                 id: TEST_SESSION_ID_2,
                 currentPlayers: TEST_CURRENT_PLAYERS_4,
                 maxPlayers: TEST_MAX_PLAYERS_6,
+                gameName: TEST_GAME_NAME_2,
+                gameDescription: TEST_GAME_DESCRIPTION_2,
+                mapSize: MapSize.MEDIUM,
+                gameMode: GameMode.CTF,
             },
         ];
 
@@ -123,6 +137,10 @@ describe('JoinSessionPageComponent', () => {
                 id: 'new-session-id',
                 currentPlayers: 1,
                 maxPlayers: 4,
+                gameName: 'New Game',
+                gameDescription: 'New game description',
+                mapSize: MapSize.SMALL,
+                gameMode: GameMode.CLASSIC,
             };
             availableSessionsSignal.set([newSession]);
             fixture.detectChanges();
