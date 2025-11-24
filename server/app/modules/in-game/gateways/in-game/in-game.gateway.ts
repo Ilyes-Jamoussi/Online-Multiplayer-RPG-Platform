@@ -63,6 +63,14 @@ export class InGameGateway {
         }
     }
 
+    @SubscribeMessage(InGameEvents.PlayerLeaveInGameSession)
+    playerLeaveInGameSession(socket: Socket, sessionId: string): void {
+        const session = this.inGameService.getSession(sessionId);
+        this.playerLeaveSession(sessionId, socket.id);
+        this.server.to(socket.id).emit(InGameEvents.LeftInGameSessionAck, successResponse<EmptyResponseDto>({}));
+        void socket.leave(session.inGameId);
+    }
+
     @SubscribeMessage(InGameEvents.PlayerEndTurn)
     playerEndTurn(socket: Socket, sessionId: string): void {
         try {
@@ -73,27 +81,34 @@ export class InGameGateway {
         }
     }
 
-    @SubscribeMessage(InGameEvents.PlayerLeaveInGameSession)
-    playerLeaveInGameSession(socket: Socket, sessionId: string): void {
-        const session = this.inGameService.getSession(sessionId);
-        this.playerLeaveSession(sessionId, socket.id);
-        this.server.to(socket.id).emit(InGameEvents.LeftInGameSessionAck, successResponse<EmptyResponseDto>({}));
-        void socket.leave(session.inGameId);
+    @SubscribeMessage(InGameEvents.PlayerMove)
+    playerMove(socket: Socket, payload: PlayerMoveDto): void {
+        try {
+            this.inGameService.movePlayer(payload.sessionId, socket.id, payload.orientation);
+        } catch (error) {
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
+        }
+    }
+
+    @SubscribeMessage(InGameEvents.PlayerTeleport)
+    playerTeleport(socket: Socket, payload: PlayerTeleportDto): void {
+        try {
+            this.inGameService.teleportPlayer(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
+            const session = this.inGameService.getSession(payload.sessionId);
+            const player = session.inGamePlayers[socket.id];
+            this.server
+                .to(session.inGameId)
+                .emit(InGameEvents.PlayerTeleported, successResponse<PlayerTeleportedDto>({ playerId: socket.id, x: player.x, y: player.y }));
+            this.inGameService.getReachableTiles(payload.sessionId, socket.id);
+        } catch (error) {
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
+        }
     }
 
     @SubscribeMessage(InGameEvents.ToggleDoorAction)
     toggleDoorAction(socket: Socket, payload: ToggleDoorActionDto): void {
         try {
             this.inGameService.toggleDoorAction(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
-        } catch (error) {
-            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
-        }
-    }
-
-    @SubscribeMessage(InGameEvents.PlayerMove)
-    playerMove(socket: Socket, payload: PlayerMoveDto): void {
-        try {
-            this.inGameService.movePlayer(payload.sessionId, socket.id, payload.orientation);
         } catch (error) {
             socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
@@ -135,6 +150,27 @@ export class InGameGateway {
             this.inGameService.disembarkBoat(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
         } catch (error) {
             socket.emit(InGameEvents.PlayerDisembarkBoat, errorResponse(error.message));
+        }
+    }
+
+    @SubscribeMessage(InGameEvents.ToggleAdminMode)
+    handleToggleAdminMode(socket: Socket, sessionId: string): void {
+        try {
+            const session = this.inGameService.toggleAdminMode(sessionId, socket.id);
+            const response = successResponse<AdminModeToggledDto>({ isAdminModeActive: session.isAdminModeActive });
+            this.server.to(session.inGameId).emit(InGameEvents.AdminModeToggled, response);
+        } catch (error) {
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
+        }
+    }
+
+    @SubscribeMessage(InGameEvents.LoadGameStatistics)
+    handleLoadGameStatistics(socket: Socket, sessionId: string): void {
+        try {
+            const gameStatistics = this.inGameService.getGameStatistics(sessionId);
+            socket.emit(InGameEvents.LoadGameStatistics, successResponse<GameStatisticsDto>(gameStatistics));
+        } catch {
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse('Impossible de charger les statistiques de la partie'));
         }
     }
 
@@ -189,6 +225,26 @@ export class InGameGateway {
         this.server.to(payload.playerId).emit(InGameEvents.SanctuaryActionSuccess, response);
     }
 
+    @OnEvent(ServerEvents.PlayerMoved)
+    handlePlayerMoved(payload: { session: InGameSession; playerId: string; x: number; y: number; speed: number; boatSpeed: number }) {
+        this.server.to(payload.session.inGameId).emit(
+            InGameEvents.PlayerMoved,
+            successResponse<PlayerMovedDto>({
+                playerId: payload.playerId,
+                x: payload.x,
+                y: payload.y,
+                speed: payload.speed,
+                boatSpeed: payload.boatSpeed,
+            }),
+        );
+    }
+
+    @OnEvent(ServerEvents.PlayerUpdated)
+    handlePlayerUpdated(payload: { sessionId: string; player: Player }) {
+        const session = this.inGameService.getSession(payload.sessionId);
+        this.server.to(session.inGameId).emit(InGameEvents.PlayerUpdated, successResponse(payload.player));
+    }
+
     @OnEvent(ServerEvents.PlayerBonusesChanged)
     handlePlayerBonusesChanged(payload: { session: InGameSession; playerId: string; attackBonus: number; defenseBonus: number }) {
         const response = successResponse<PlayerBonusesChangedDto>({
@@ -196,6 +252,17 @@ export class InGameGateway {
             defenseBonus: payload.defenseBonus,
         });
         this.server.to(payload.playerId).emit(InGameEvents.PlayerBonusesChanged, response);
+    }
+
+    @OnEvent(ServerEvents.PlayerReachableTiles)
+    handlePlayerReachableTiles(payload: { playerId: string; reachable: ReachableTile[] }) {
+        this.server.to(payload.playerId).emit(InGameEvents.PlayerReachableTiles, successResponse(payload.reachable));
+    }
+
+    @OnEvent(ServerEvents.PlayerAvailableActions)
+    handlePlayerAvailableActions(payload: { session: InGameSession; playerId: string; actions: AvailableAction[] }) {
+        const response = successResponse<AvailableActionsDto>({ availableActions: payload.actions });
+        this.server.to(payload.playerId).emit(InGameEvents.PlayerAvailableActions, response);
     }
 
     @OnEvent(ServerEvents.TurnStarted)
@@ -229,76 +296,22 @@ export class InGameGateway {
         this.server.to(payload.playerId).emit(InGameEvents.PlayerActionUsed, successResponse<EmptyResponseDto>({}));
     }
 
-    @OnEvent(ServerEvents.PlayerMoved)
-    handlePlayerMoved(payload: { session: InGameSession; playerId: string; x: number; y: number; speed: number; boatSpeed: number }) {
-        this.server.to(payload.session.inGameId).emit(
-            InGameEvents.PlayerMoved,
-            successResponse<PlayerMovedDto>({
-                playerId: payload.playerId,
-                x: payload.x,
-                y: payload.y,
-                speed: payload.speed,
-                boatSpeed: payload.boatSpeed,
-            }),
-        );
+    @OnEvent(ServerEvents.PlayerBoardedBoat)
+    handlePlayerBoardedBoat(payload: { session: InGameSession; playerId: string; boatId: string }) {
+        this.server
+            .to(payload.session.inGameId)
+            .emit(InGameEvents.PlayerBoardedBoat, successResponse<PlayerBoardedBoatDto>({ playerId: payload.playerId, boatId: payload.boatId }));
     }
 
-    @OnEvent(ServerEvents.PlayerReachableTiles)
-    handlePlayerReachableTiles(payload: { playerId: string; reachable: ReachableTile[] }) {
-        this.server.to(payload.playerId).emit(InGameEvents.PlayerReachableTiles, successResponse(payload.reachable));
+    @OnEvent(ServerEvents.PlayerDisembarkedBoat)
+    handlePlayerDisembarkedBoat(payload: { session: InGameSession; playerId: string }) {
+        const response = successResponse<PlayerDisembarkedBoatDto>({ playerId: payload.playerId });
+        this.server.to(payload.session.inGameId).emit(InGameEvents.PlayerDisembarkedBoat, response);
     }
 
     @OnEvent(ServerEvents.SessionUpdated)
     handleSessionUpdated(payload: { session: InGameSession }) {
         this.server.to(payload.session.inGameId).emit(InGameEvents.SessionUpdated, successResponse(payload.session));
-    }
-
-    @SubscribeMessage(InGameEvents.ToggleAdminMode)
-    handleToggleAdminMode(socket: Socket, sessionId: string): void {
-        try {
-            const session = this.inGameService.toggleAdminMode(sessionId, socket.id);
-            const response = successResponse<AdminModeToggledDto>({ isAdminModeActive: session.isAdminModeActive });
-            this.server.to(session.inGameId).emit(InGameEvents.AdminModeToggled, response);
-        } catch (error) {
-            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
-        }
-    }
-
-    @SubscribeMessage(InGameEvents.LoadGameStatistics)
-    handleLoadGameStatistics(socket: Socket, sessionId: string): void {
-        try {
-            const gameStatistics = this.inGameService.getGameStatistics(sessionId);
-            socket.emit(InGameEvents.LoadGameStatistics, successResponse<GameStatisticsDto>(gameStatistics));
-        } catch {
-            socket.emit(NotificationEvents.ErrorMessage, errorResponse('Impossible de charger les statistiques de la partie'));
-        }
-    }
-
-    @SubscribeMessage(InGameEvents.PlayerTeleport)
-    playerTeleport(socket: Socket, payload: PlayerTeleportDto): void {
-        try {
-            this.inGameService.teleportPlayer(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
-            const session = this.inGameService.getSession(payload.sessionId);
-            const player = session.inGamePlayers[socket.id];
-            this.server
-                .to(session.inGameId)
-                .emit(InGameEvents.PlayerTeleported, successResponse<PlayerTeleportedDto>({ playerId: socket.id, x: player.x, y: player.y }));
-            this.inGameService.getReachableTiles(payload.sessionId, socket.id);
-        } catch (error) {
-            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
-        }
-    }
-
-    @OnEvent(ServerEvents.PlayerUpdated)
-    handlePlayerUpdated(payload: { sessionId: string; player: Player }) {
-        const session = this.inGameService.getSession(payload.sessionId);
-        this.server.to(session.inGameId).emit(InGameEvents.PlayerUpdated, successResponse(payload.player));
-    }
-
-    @OnEvent(ServerEvents.PlayerAvailableActions)
-    handlePlayerAvailableActions(payload: { session: InGameSession; playerId: string; actions: AvailableAction[] }) {
-        const response = successResponse<AvailableActionsDto>({ availableActions: payload.actions });
-        this.server.to(payload.playerId).emit(InGameEvents.PlayerAvailableActions, response);
     }
 
     @OnEvent(ServerEvents.GameOver)
@@ -351,18 +364,5 @@ export class InGameGateway {
         } catch (error) {
             this.server.to(playerId).emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
-    }
-
-    @OnEvent(ServerEvents.PlayerBoardedBoat)
-    handlePlayerBoardedBoat(payload: { session: InGameSession; playerId: string; boatId: string }) {
-        this.server
-            .to(payload.session.inGameId)
-            .emit(InGameEvents.PlayerBoardedBoat, successResponse<PlayerBoardedBoatDto>({ playerId: payload.playerId, boatId: payload.boatId }));
-    }
-
-    @OnEvent(ServerEvents.PlayerDisembarkedBoat)
-    handlePlayerDisembarkedBoat(payload: { session: InGameSession; playerId: string }) {
-        const response = successResponse<PlayerDisembarkedBoatDto>({ playerId: payload.playerId });
-        this.server.to(payload.session.inGameId).emit(InGameEvents.PlayerDisembarkedBoat, response);
     }
 }
