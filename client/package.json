@@ -17,6 +17,8 @@
         "check:unused-members": "tsx scripts/find-unused-members.ts",
         "check:unused-methods": "tsx scripts/find-unused-methods.ts",
         "check:duplicate-methods": "tsx scripts/find-duplicate-methods.ts",
+        "check:unnecessary-files": "cd .. && ./scripts/check-unnecessary-files.sh",
+        "check:quality": "cd .. && ./scripts/check-quality.sh",
         "generate-dto": "shx rm -rf src/app/dto && openapi-generator-cli generate -i http://localhost:3000/api/docs-json -g typescript-angular -c openapi-generator.config.json -o src/app/dto --global-property models --model-package . && shx rm -rf src/app/dto/@common"
     },
     "private": true,
