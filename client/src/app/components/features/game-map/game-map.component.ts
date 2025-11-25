@@ -9,7 +9,6 @@ import { PlayerService } from '@app/services/player/player.service';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
-import { StartPoint } from '@common/interfaces/start-point.interface';
 
 @Component({
     selector: 'app-game-map',
@@ -98,13 +97,6 @@ export class GameMapComponent implements OnInit {
 
     getObjectFootprint(placeableKind: string): number {
         return PlaceableFootprint[placeableKind as PlaceableKind];
-    }
-
-    getStartPointStyle(startPoint: StartPoint) {
-        return {
-            gridColumn: `${startPoint.x + 1}`,
-            gridRow: `${startPoint.y + 1}`,
-        };
     }
 
     getTileClass(x: number, y: number): string {
