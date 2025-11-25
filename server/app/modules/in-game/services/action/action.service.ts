@@ -9,6 +9,7 @@ import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-s
 import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
 import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
@@ -204,7 +205,7 @@ export class ActionService {
                     const tile = this.gameCache.getTileAtPosition(session.id, pos);
                     const object = this.gameCache.getPlaceableAtPosition(session.id, pos);
 
-                    this.addAttackAction(actions, occupantId, playerId, pos);
+                    this.addAttackAction(actions, occupantId, playerId, pos, session);
                     this.addDoorAction(actions, tile, pos);
                     this.addPlaceableActions(actions, object, pos);
                     this.addDisembarkAction(actions, player, tile, occupantId, pos);
@@ -236,10 +237,20 @@ export class ActionService {
         return actions;
     }
 
-    private addAttackAction(actions: AvailableAction[], occupantId: string | null, playerId: string, pos: Position): void {
-        if (occupantId && occupantId !== playerId) {
-            actions.push({ type: AvailableActionType.ATTACK, x: pos.x, y: pos.y });
+    private addAttackAction(actions: AvailableAction[], occupantId: string | null, playerId: string, pos: Position, session: InGameSession): void {
+        if (!occupantId || occupantId === playerId) return;
+
+        const attacker = session.inGamePlayers[playerId];
+        const defender = session.inGamePlayers[occupantId];
+        if (!attacker || !defender) return;
+
+        if (session.mode === GameMode.CTF) {
+            if (Boolean(attacker.teamNumber) && Boolean(defender.teamNumber) && attacker.teamNumber === defender.teamNumber) {
+                return;
+            }
         }
+
+        actions.push({ type: AvailableActionType.ATTACK, x: pos.x, y: pos.y });
     }
 
     private addDoorAction(actions: AvailableAction[], tile: Tile | null, pos: Position): void {
