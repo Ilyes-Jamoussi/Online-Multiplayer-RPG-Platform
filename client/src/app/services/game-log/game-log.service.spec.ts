@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { PlayerService } from '@app/services/player/player.service';
 import { ResetService } from '@app/services/reset/reset.service';
-import { GameLogEventType } from '@common/enums/game-log-event-type.enum';
+import { GameLogEntryType } from '@common/enums/game-log-entry-type.enum';
 import { Subject } from 'rxjs';
 import { GameLogService } from './game-log.service';
 
@@ -28,7 +28,7 @@ describe('GameLogService', () => {
 
     it('should add entry', () => {
         service.addEntry({
-            type: GameLogEventType.TurnStart,
+            type: GameLogEntryType.TurnStart,
             message: 'Test message',
             involvedPlayerIds: ['player-1'],
             involvedPlayerNames: ['Player 1'],
@@ -48,14 +48,14 @@ describe('GameLogService', () => {
 
     it('should filter entries by player', () => {
         service.addEntry({
-            type: GameLogEventType.TurnStart,
+            type: GameLogEntryType.TurnStart,
             message: 'Player 1 message',
             involvedPlayerIds: ['player-1'],
             involvedPlayerNames: ['Player 1'],
         });
 
         service.addEntry({
-            type: GameLogEventType.TurnStart,
+            type: GameLogEntryType.TurnStart,
             message: 'Player 2 message',
             involvedPlayerIds: ['player-2'],
             involvedPlayerNames: ['Player 2'],
@@ -69,7 +69,7 @@ describe('GameLogService', () => {
 
     it('should reset entries', () => {
         service.addEntry({
-            type: GameLogEventType.TurnStart,
+            type: GameLogEntryType.TurnStart,
             message: 'Test',
             involvedPlayerIds: [],
             involvedPlayerNames: [],

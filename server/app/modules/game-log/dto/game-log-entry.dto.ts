@@ -1,4 +1,4 @@
-import { GameLogEventType } from '@common/enums/game-log-event-type.enum';
+import { GameLogEntryType } from '@common/enums/game-log-entry-type.enum';
 import { GameLogMetadata } from '@common/types/game-log-metadata.type';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
@@ -14,10 +14,10 @@ export class GameLogEntryDto {
     @IsNotEmpty()
     timestamp: string;
 
-    @ApiProperty({ enum: GameLogEventType })
-    @IsEnum(GameLogEventType)
+    @ApiProperty({ enum: GameLogEntryType, enumName: 'GameLogEntryType' })
+    @IsEnum(GameLogEntryType)
     @IsNotEmpty()
-    type: GameLogEventType;
+    type: GameLogEntryType;
 
     @ApiProperty()
     @IsString()

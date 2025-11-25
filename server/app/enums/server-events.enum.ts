@@ -35,8 +35,8 @@ export enum ServerEvents {
     PlayerUpdated = 'player-updated',
     PlayerAvailableActions = 'player-available-actions',
     DoorToggled = 'door-toggled',
-    AdminModeToggled = 'adminMode.toggled',
-    PlayerAbandon = 'player.abandon',
+    AdminModeToggled = 'admin-mode-toggled',
+    PlayerAbandon = 'player-abandon',
 
     GameOver = 'game-over',
 

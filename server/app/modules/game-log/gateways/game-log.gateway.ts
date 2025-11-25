@@ -1,5 +1,4 @@
 import { ServerEvents } from '@app/enums/server-events.enum';
-import { ID_GENERATION } from '@app/modules/game-log/constants/game-log.constants';
 import { GameLogEntryDto } from '@app/modules/game-log/dto/game-log-entry.dto';
 import {
     AdminModeToggledPayload,
@@ -19,6 +18,7 @@ import { GameLogService } from '@app/modules/game-log/services/game-log.service'
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { successResponse } from '@app/utils/socket-response/socket-response.util';
 import { GameLogEvents } from '@common/enums/game-log-events.enum';
+import { generateGameLogId } from '@common/utils/game-log.util';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
@@ -155,15 +155,9 @@ export class GameLogGateway {
     private emitLogEntry(inGameId: string, entry: Omit<GameLogEntryDto, 'id' | 'timestamp'>): void {
         const logEntry: GameLogEntryDto = {
             ...entry,
-            id: this.generateId(),
+            id: generateGameLogId(),
             timestamp: new Date().toISOString(),
         };
         this.server.to(inGameId).emit(GameLogEvents.LogEntry, successResponse<GameLogEntryDto>(logEntry));
-    }
-
-    private generateId(): string {
-        return `${Date.now()}-${Math.random()
-            .toString(ID_GENERATION.radix)
-            .substring(2, 2 + ID_GENERATION.substringLength)}`;
     }
 }
