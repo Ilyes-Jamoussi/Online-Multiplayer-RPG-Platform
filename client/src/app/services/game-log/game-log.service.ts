@@ -3,7 +3,6 @@ import { GameLogSocketService } from '@app/services/game-log-socket/game-log-soc
 import { PlayerService } from '@app/services/player/player.service';
 import { ResetService } from '@app/services/reset/reset.service';
 import { GameLogEntry } from '@common/interfaces/game-log-entry.interface';
-import { generateGameLogId } from '@common/utils/game-log.util';
 
 @Injectable({
     providedIn: 'root',
@@ -39,21 +38,8 @@ export class GameLogService {
         });
     }
 
-    addEntry(entry: Omit<GameLogEntry, 'id' | 'timestamp'>): void {
-        const newEntry: GameLogEntry = {
-            ...entry,
-            id: generateGameLogId(),
-            timestamp: new Date().toISOString(),
-        };
-        this._entries.update((entries) => [...entries, newEntry]);
-    }
-
     toggleFilter(): void {
         this._filterByMe.update((value) => !value);
-    }
-
-    setFilter(filterByMe: boolean): void {
-        this._filterByMe.set(filterByMe);
     }
 
     reset(): void {

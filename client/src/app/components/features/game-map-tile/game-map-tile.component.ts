@@ -86,15 +86,6 @@ export class GameMapTileComponent {
         }
     }
 
-    openModal(event: MouseEvent): void {
-        event.preventDefault();
-        this.gameMapService.openTileModal(this.tile);
-    }
-
-    closeModal(): void {
-        this.gameMapService.closeTileModal();
-    }
-
     get isModalOpen(): boolean {
         return this.gameMapService.isTileModalOpen(this.tile);
     }

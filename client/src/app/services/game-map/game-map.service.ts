@@ -266,13 +266,4 @@ export class GameMapService {
         this.inGameService.boatAction(x, y);
     }
 
-    reset(): void {
-        this._tiles.set(this.initialState.tiles);
-        this._objects.set(this.initialState.objects);
-        this._size.set(this.initialState.size);
-        this._name.set(this.initialState.name);
-        this._description.set(this.initialState.description);
-        this._mode.set(this.initialState.mode);
-        this._activeTileCoords.set(null);
-    }
 }
