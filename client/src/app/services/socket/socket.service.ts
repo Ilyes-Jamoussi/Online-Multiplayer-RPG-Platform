@@ -19,10 +19,7 @@ export class SocketService {
         this.socket = io(ENVIRONMENT.socketUrl);
     }
 
-    emit<T>(
-        event: SessionEvents | GameStoreEvents | InGameEvents | ChatEvents | GameLogEvents | NotificationEvents,
-        data: T,
-    ): void {
+    emit<T>(event: SessionEvents | GameStoreEvents | InGameEvents | ChatEvents | GameLogEvents | NotificationEvents, data: T): void {
         this.socket.emit(event, data);
     }
 

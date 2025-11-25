@@ -26,4 +26,3 @@ export class TeleportEntryDto {
     @IsNumber()
     destinationY: number;
 }
-

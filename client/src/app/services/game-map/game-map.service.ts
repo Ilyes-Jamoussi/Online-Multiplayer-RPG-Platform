@@ -265,5 +265,4 @@ export class GameMapService {
     boatAction(x: number, y: number): void {
         this.inGameService.boatAction(x, y);
     }
-
 }
