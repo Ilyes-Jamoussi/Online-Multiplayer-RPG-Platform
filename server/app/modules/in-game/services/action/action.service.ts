@@ -21,7 +21,7 @@ import { Position } from '@common/interfaces/position.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ActionService {
@@ -80,6 +80,24 @@ export class ActionService {
 
     private generateFlagTransferRequestKey(sessionId: string, fromPlayerId: string, toPlayerId: string): string {
         return `${sessionId}-${fromPlayerId}-${toPlayerId}`;
+    }
+
+    @OnEvent(ServerEvents.TurnEnded)
+    clearPendingFlagTransfersForSession({ session }: { session: InGameSession }): void {
+        const affectedPlayerIds = new Set<string>();
+        for (const [key, request] of this.pendingFlagTransfers.entries()) {
+            if (key.startsWith(`${session.id}-`)) {
+                affectedPlayerIds.add(request.fromPlayerId);
+                affectedPlayerIds.add(request.toPlayerId);
+                this.pendingFlagTransfers.delete(key);
+            }
+        }
+        if (affectedPlayerIds.size > 0) {
+            this.eventEmitter.emit(ServerEvents.FlagTransferRequestsCleared, {
+                session,
+                affectedPlayerIds: Array.from(affectedPlayerIds),
+            });
+        }
     }
 
     respondToFlagTransfer(sessionId: string, toPlayerId: string, fromPlayerId: string, accepted: boolean): void {
@@ -242,10 +260,8 @@ export class ActionService {
     calculateAvailableActions(session: InGameSession, playerId: string): AvailableAction[] {
         const player = session.inGamePlayers[playerId];
         if (!player || player.actionsRemaining === 0) return [];
-
         const actions: AvailableAction[] = [];
         const orientations = [Orientation.N, Orientation.E, Orientation.S, Orientation.W];
-
         for (const orientation of orientations) {
             try {
                 const pos = this.gameCache.getNextPosition(session.id, { x: player.x, y: player.y }, orientation);
@@ -254,13 +270,11 @@ export class ActionService {
                 continue;
             }
         }
-
         try {
             this.processPositionActions(actions, session, playerId, player, { x: player.x, y: player.y });
         } catch {
             // Ignore errors for current position
         }
-
         this.eventEmitter.emit(ServerEvents.PlayerAvailableActions, { session, playerId, actions });
         return actions;
     }
@@ -269,7 +283,6 @@ export class ActionService {
         const occupantId = this.gameCache.getTileOccupant(session.id, pos);
         const tile = this.gameCache.getTileAtPosition(session.id, pos);
         const object = this.gameCache.getPlaceableAtPosition(session.id, pos);
-
         this.addAttackAction(actions, occupantId, playerId, pos, session);
         this.addTransferFlagAction(actions, occupantId, playerId, pos, session);
         this.addDoorAction(actions, tile, pos);
@@ -317,7 +330,6 @@ export class ActionService {
 
     private addDisembarkAction(actions: AvailableAction[], player: Player, tile: Tile | null, occupantId: string | null, pos: Position): void {
         if (!player.onBoatId) return;
-
         const canDisembark =
             tile &&
             !occupantId &&
@@ -325,7 +337,6 @@ export class ActionService {
                 tile.kind === TileKind.WATER ||
                 tile.kind === TileKind.TELEPORT ||
                 (tile.kind === TileKind.DOOR && tile.open));
-
         if (canDisembark) {
             actions.push({ type: AvailableActionType.BOAT, x: pos.x, y: pos.y });
         }

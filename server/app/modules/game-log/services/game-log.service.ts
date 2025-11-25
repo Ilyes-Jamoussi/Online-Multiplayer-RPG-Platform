@@ -209,4 +209,31 @@ export class GameLogService {
             icon: 'LocationDot',
         };
     }
+
+    createFlagPickupEntry(sessionId: string, playerId: string): GameLogEntryBase {
+        const session = this.inGameSessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+
+        return {
+            type: GameLogEntryType.FlagPickup,
+            message: `${player.name} a récupéré le drapedau`,
+            involvedPlayerIds: [playerId],
+            involvedPlayerNames: [player.name],
+            icon: 'Flag',
+        };
+    }
+
+    createFlagTransferEntry(sessionId: string, playerId: string, targetPlayerId: string): GameLogEntryBase {
+        const session = this.inGameSessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        const targetPlayer = session.inGamePlayers[targetPlayerId];
+
+        return {
+            type: GameLogEntryType.FlagTransfer,
+            message: `${player.name} a transféré le drapeau à ${targetPlayer.name}`,
+            involvedPlayerIds: [playerId, targetPlayerId],
+            involvedPlayerNames: [player.name, targetPlayer.name],
+            icon: 'Flag',
+        };
+    }
 }
