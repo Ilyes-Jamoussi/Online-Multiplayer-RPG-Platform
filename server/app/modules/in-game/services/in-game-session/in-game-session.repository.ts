@@ -2,6 +2,7 @@ import { ServerEvents } from '@app/enums/server-events.enum';
 import { MoveResult } from '@app/interfaces/move-result.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { BOAT_SPEED_BONUS } from '@common/constants/game.constants';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -29,6 +30,53 @@ export class InGameSessionRepository {
         flagData.position = { x: player.x, y: player.y };
         this.gameCache.hidePlaceable(session.id, position);
         this.eventEmitter.emit(ServerEvents.FlagPickedUp, { session, playerId });
+    }
+
+    transferFlag(session: InGameSession, fromPlayerId: string, position: Position): void {
+        const flagData = session.flagData;
+        if (!flagData) throw new NotFoundException('Flag data not found');
+        if (flagData.holderPlayerId !== fromPlayerId) throw new BadRequestException('Player does not hold the flag');
+
+        const toPlayerId = this.gameCache.getTileOccupant(session.id, position);
+        if (!toPlayerId) throw new NotFoundException('No player at target position');
+        if (toPlayerId === fromPlayerId) throw new BadRequestException('Cannot transfer flag to yourself');
+
+        const fromPlayer = session.inGamePlayers[fromPlayerId];
+        const toPlayer = session.inGamePlayers[toPlayerId];
+        if (!fromPlayer || !toPlayer) throw new NotFoundException('Player not found');
+
+        if (session.mode === GameMode.CTF) {
+            if (!Boolean(fromPlayer.teamNumber) || !Boolean(toPlayer.teamNumber) || fromPlayer.teamNumber !== toPlayer.teamNumber) {
+                throw new BadRequestException('Can only transfer flag to teammate');
+            }
+        }
+
+        flagData.holderPlayerId = toPlayerId;
+        flagData.position = { x: toPlayer.x, y: toPlayer.y };
+        this.eventEmitter.emit(ServerEvents.FlagTransferred, { session, fromPlayerId, toPlayerId });
+    }
+
+    playerHasFlag(sessionId: string, playerId: string): boolean {
+        const session = this.findById(sessionId);
+        const flagData = session.flagData;
+        return flagData ? flagData.holderPlayerId === playerId : false;
+    }
+
+    dropFlag(sessionId: string, playerId: string, position: Position): void {
+        const session = this.findById(sessionId);
+        const flagData = session.flagData;
+        if (!flagData) throw new NotFoundException('Flag data not found');
+        if (flagData.holderPlayerId !== playerId) throw new BadRequestException('Player does not hold the flag');
+
+        const flagPlaceable = this.gameCache.getFlagPlaceable(session.id, false);
+        if (!flagPlaceable) throw new NotFoundException('Flag placeable not found');
+
+        flagData.holderPlayerId = null;
+        flagData.position = position;
+
+        flagPlaceable.x = position.x;
+        flagPlaceable.y = position.y;
+        this.gameCache.showPlaceable(session.id, position);
     }
 
     updatePlayer(sessionId: string, playerId: string, updates: Partial<Player>): void {

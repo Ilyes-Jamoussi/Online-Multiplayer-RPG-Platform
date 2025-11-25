@@ -50,4 +50,5 @@ export enum ServerEvents {
     SessionUpdated = 'session-updated',
 
     FlagPickedUp = 'flag-picked-up',
+    FlagTransferred = 'flag-transferred',
 }

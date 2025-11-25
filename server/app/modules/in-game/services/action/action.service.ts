@@ -41,6 +41,15 @@ export class ActionService {
         this.sessionRepository.pickUpFlag(session, playerId, position);
     }
 
+    transferFlag(session: InGameSession, playerId: string, position: Position): void {
+        const flagData = session.flagData;
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (!flagData) throw new NotFoundException('Flag data not found');
+        if (flagData.holderPlayerId !== playerId) throw new BadRequestException('Player does not hold the flag');
+        this.sessionRepository.transferFlag(session, playerId, position);
+    }
+
     toggleDoor(session: InGameSession, playerId: string, position: Position): void {
         const gameMap = this.gameCache.getGameMapForSession(session.id);
         const tile = gameMap.tiles.find((t) => t.x === position.x && t.y === position.y);
@@ -206,6 +215,7 @@ export class ActionService {
                     const object = this.gameCache.getPlaceableAtPosition(session.id, pos);
 
                     this.addAttackAction(actions, occupantId, playerId, pos, session);
+                    this.addTransferFlagAction(actions, occupantId, playerId, pos, session);
                     this.addDoorAction(actions, tile, pos);
                     this.addPlaceableActions(actions, object, pos);
                     this.addDisembarkAction(actions, player, tile, occupantId, pos);
@@ -220,6 +230,7 @@ export class ActionService {
                 const currentTile = this.gameCache.getTileAtPosition(session.id, currentPos);
                 const currentObject = this.gameCache.getPlaceableAtPosition(session.id, currentPos);
 
+                this.addTransferFlagAction(actions, currentOccupantId, playerId, currentPos, session);
                 this.addDoorAction(actions, currentTile, currentPos);
                 this.addPlaceableActions(actions, currentObject, currentPos);
                 this.addDisembarkAction(actions, player, currentTile, currentOccupantId, currentPos);
@@ -251,6 +262,29 @@ export class ActionService {
         }
 
         actions.push({ type: AvailableActionType.ATTACK, x: pos.x, y: pos.y });
+    }
+
+    private addTransferFlagAction(
+        actions: AvailableAction[],
+        occupantId: string | null,
+        playerId: string,
+        pos: Position,
+        session: InGameSession,
+    ): void {
+        if (session.mode !== GameMode.CTF) return;
+
+        const flagData = session.flagData;
+        if (!flagData || flagData.holderPlayerId !== playerId) return;
+
+        if (!occupantId || occupantId === playerId) return;
+
+        const holder = session.inGamePlayers[playerId];
+        const teammate = session.inGamePlayers[occupantId];
+        if (!holder || !teammate) return;
+
+        if (Boolean(holder.teamNumber) && Boolean(teammate.teamNumber) && holder.teamNumber === teammate.teamNumber) {
+            actions.push({ type: AvailableActionType.TRANSFER_FLAG, x: pos.x, y: pos.y });
+        }
     }
 
     private addDoorAction(actions: AvailableAction[], tile: Tile | null, pos: Position): void {

@@ -171,6 +171,11 @@
 }
 
 ::ng-deep .action-door {
-    background: rgba(0, 0, 255, 0.7) !important;
+    background: rgba(0, 255, 0, 0.7) !important;
     border: 2px solid blue !important;
+}
+
+::ng-deep .action-transfer-flag {
+    background: rgba(255, 215, 0, 0.7) !important;
+    border: 2px solid gold !important;
 }

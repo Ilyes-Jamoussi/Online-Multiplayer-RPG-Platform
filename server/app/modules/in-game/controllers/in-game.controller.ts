@@ -10,6 +10,7 @@ import { CombatVictoryDto } from '@app/modules/in-game/dto/combat-victory.dto';
 import { DoorToggledDto } from '@app/modules/in-game/dto/door-toggled.dto';
 import { EmptyResponseDto } from '@app/modules/in-game/dto/empty-response.dto';
 import { FlagPickedUpDto } from '@app/modules/in-game/dto/flag-picked-up.dto';
+import { FlagTransferredDto } from '@app/modules/in-game/dto/flag-transferred.dto';
 import { GameOverDto } from '@app/modules/in-game/dto/game-over.dto';
 import { GameStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
 import { OpenSanctuaryDto } from '@app/modules/in-game/dto/open-sanctuary.dto';
@@ -126,4 +127,7 @@ export class InGameController {
 
     @Post('flag-picked-up')
     flagPickedUp(@Body() data: FlagPickedUpDto): void {}
+
+    @Post('flag-transferred')
+    flagTransferred(@Body() data: FlagTransferredDto): void {}
 }

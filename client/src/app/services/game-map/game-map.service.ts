@@ -115,7 +115,14 @@ export class GameMapService {
 
     private getActionClass(x: number, y: number): string {
         const action = this.availableActions.find((availableAction: AvailableActionDto) => availableAction.x === x && availableAction.y === y);
-        return action?.type === AvailableActionType.ATTACK ? 'action-attack' : 'action-door';
+        if (!action) return '';
+        if (action.type === AvailableActionType.ATTACK) return 'action-attack';
+        if (action.type === AvailableActionType.DOOR) return 'action-door';
+        if (action.type === AvailableActionType.HEAL) return 'action-heal';
+        if (action.type === AvailableActionType.FIGHT) return 'action-fight';
+        if (action.type === AvailableActionType.BOAT) return 'action-boat';
+        if (action.type === AvailableActionType.TRANSFER_FLAG) return 'action-transfer-flag';
+        return '';
     }
 
     getActionTypeAt(x: number, y: number): AvailableActionType | null {
@@ -268,6 +275,10 @@ export class GameMapService {
 
     pickUpFlag(x: number, y: number): void {
         this.inGameService.pickUpFlag(x, y);
+    }
+
+    transferFlag(x: number, y: number): void {
+        this.inGameService.transferFlag(x, y);
     }
 
     flagData() {

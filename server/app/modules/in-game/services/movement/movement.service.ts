@@ -72,10 +72,6 @@ export class MovementService {
 
         this.sessionRepository.movePlayerPosition(session.id, playerId, nextX, nextY, moveCost);
 
-        if (session.mode === GameMode.CTF) {
-            this.tryPickUpFlag(session, playerId, { x: nextX, y: nextY });
-        }
-
         if (teleported) {
             this.eventEmitter.emit(ServerEvents.Teleported, {
                 session,
@@ -89,6 +85,14 @@ export class MovementService {
 
         this.calculateReachableTiles(session, playerId);
 
+        if (session.mode === GameMode.CTF) {
+            if (this.sessionRepository.playerHasFlag(session.id, playerId)) {
+                this.checkCTFVictory(session, playerId, { x: nextX, y: nextY });
+            } else {
+                this.tryPickUpFlag(session, playerId, { x: nextX, y: nextY });
+            }
+        }
+
         return player.speed;
     }
 
@@ -96,6 +100,22 @@ export class MovementService {
         const placeable = this.gameCache.getPlaceableAtPosition(session.id, position);
         if (placeable && placeable.kind === PlaceableKind.FLAG && placeable.placed) {
             this.sessionRepository.pickUpFlag(session, playerId, position);
+        }
+    }
+
+    private checkCTFVictory(session: InGameSession, playerId: string, position: Position): void {
+        const player = session.inGamePlayers[playerId];
+        if (!player) return;
+
+        const startPoint = this.sessionRepository.findStartPointById(session.id, player.startPointId);
+        if (!startPoint) return;
+
+        if (startPoint.x === position.x && startPoint.y === position.y && this.sessionRepository.playerHasFlag(session.id, playerId)) {
+            this.eventEmitter.emit(ServerEvents.GameOver, {
+                sessionId: session.id,
+                winnerId: playerId,
+                winnerName: player.name,
+            });
         }
     }
 

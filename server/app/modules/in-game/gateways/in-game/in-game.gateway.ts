@@ -5,6 +5,7 @@ import { AvailableActionsDto } from '@app/modules/in-game/dto/available-actions.
 import { DoorToggledDto } from '@app/modules/in-game/dto/door-toggled.dto';
 import { EmptyResponseDto } from '@app/modules/in-game/dto/empty-response.dto';
 import { FlagPickedUpDto } from '@app/modules/in-game/dto/flag-picked-up.dto';
+import { FlagTransferredDto } from '@app/modules/in-game/dto/flag-transferred.dto';
 import { GameOverDto } from '@app/modules/in-game/dto/game-over.dto';
 import { GameStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
 import { OpenSanctuaryDto } from '@app/modules/in-game/dto/open-sanctuary.dto';
@@ -148,6 +149,25 @@ export class InGameGateway {
     @OnEvent(ServerEvents.FlagPickedUp)
     handleFlagPickedUp(payload: { session: InGameSession; playerId: string }): void {
         this.server.to(payload.session.inGameId).emit(InGameEvents.FlagPickedUp, successResponse<FlagPickedUpDto>({ playerId: payload.playerId }));
+    }
+
+    @SubscribeMessage(InGameEvents.TransferFlag)
+    transferFlag(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
+        try {
+            this.inGameService.transferFlag(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
+        } catch (error) {
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
+        }
+    }
+
+    @OnEvent(ServerEvents.FlagTransferred)
+    handleFlagTransferred(payload: { session: InGameSession; fromPlayerId: string; toPlayerId: string }): void {
+        this.server
+            .to(payload.session.inGameId)
+            .emit(
+                InGameEvents.FlagTransferred,
+                successResponse<FlagTransferredDto>({ fromPlayerId: payload.fromPlayerId, toPlayerId: payload.toPlayerId }),
+            );
     }
 
     @SubscribeMessage(InGameEvents.PlayerBoardBoat)
@@ -343,8 +363,6 @@ export class InGameGateway {
         // Faire quitter tous les sockets des rooms
         this.server.socketsLeave(session.inGameId);
         this.server.socketsLeave(session.id);
-
-        this.inGameService.removeSession(session.id);
     }
 
     handleDisconnect(socket: Socket) {

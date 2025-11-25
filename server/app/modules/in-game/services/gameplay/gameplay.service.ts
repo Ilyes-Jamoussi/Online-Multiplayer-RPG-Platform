@@ -61,6 +61,19 @@ export class GameplayService {
         if (!player.actionsRemaining && !player.speed) this.timerService.endTurnManual(session);
     }
 
+    transferFlag(sessionId: string, playerId: string, position: Position): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
+        if (session.mode !== GameMode.CTF) throw new BadRequestException('Not a CTF game');
+        this.actionService.transferFlag(session, playerId, position);
+        player.actionsRemaining--;
+        session.currentTurn.hasUsedAction = true;
+        this.actionService.calculateReachableTiles(session, playerId);
+        if (!player.actionsRemaining && !player.speed) this.timerService.endTurnManual(session);
+    }
+
     sanctuaryRequest(sessionId: string, playerId: string, position: Position, kind: PlaceableKind.HEAL | PlaceableKind.FIGHT): void {
         const session = this.sessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];

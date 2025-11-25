@@ -183,12 +183,31 @@ export class InGameService {
         this._isTransitioning.set(false);
     }
 
+    private updatePlayerInSession(playerId: string, updates: Partial<Player>, updatePlayerService: boolean = false): void {
+        this.updateInGameSession({
+            inGamePlayers: {
+                ...this.inGameSession().inGamePlayers,
+                [playerId]: {
+                    ...this.inGameSession().inGamePlayers[playerId],
+                    ...updates,
+                },
+            },
+        });
+        if (updatePlayerService && this.playerService.id() === playerId) {
+            this.playerService.updatePlayer(updates);
+        }
+    }
+
     boatAction(x: number, y: number): void {
         this.playerService.boatAction(x, y);
     }
 
     pickUpFlag(x: number, y: number): void {
         this.inGameSocketService.playerPickUpFlag({ sessionId: this.sessionService.id(), x, y });
+    }
+
+    transferFlag(x: number, y: number): void {
+        this.inGameSocketService.playerTransferFlag({ sessionId: this.sessionService.id(), x, y });
     }
 
     reset(): void {
@@ -237,26 +256,7 @@ export class InGameService {
         });
 
         this.inGameSocketService.onPlayerMoved((data) => {
-            this.updateInGameSession({
-                inGamePlayers: {
-                    ...this.inGameSession().inGamePlayers,
-                    [data.playerId]: {
-                        ...this.inGameSession().inGamePlayers[data.playerId],
-                        x: data.x,
-                        y: data.y,
-                        speed: data.speed,
-                        boatSpeed: data.boatSpeed,
-                    },
-                },
-            });
-            if (this.playerService.id() === data.playerId) {
-                this.playerService.updatePlayer({
-                    x: data.x,
-                    y: data.y,
-                    speed: data.speed,
-                    boatSpeed: data.boatSpeed,
-                });
-            }
+            this.updatePlayerInSession(data.playerId, { x: data.x, y: data.y, speed: data.speed, boatSpeed: data.boatSpeed }, true);
         });
 
         this.inGameSocketService.onPlayerAvailableActions((data) => {
@@ -289,22 +289,7 @@ export class InGameService {
         });
 
         this.inGameSocketService.onPlayerTeleported((data) => {
-            this.updateInGameSession({
-                inGamePlayers: {
-                    ...this.inGameSession().inGamePlayers,
-                    [data.playerId]: {
-                        ...this.inGameSession().inGamePlayers[data.playerId],
-                        x: data.x,
-                        y: data.y,
-                    },
-                },
-            });
-            if (this.playerService.id() === data.playerId) {
-                this.playerService.updatePlayer({
-                    x: data.x,
-                    y: data.y,
-                });
-            }
+            this.updatePlayerInSession(data.playerId, { x: data.x, y: data.y }, true);
         });
 
         this.inGameSocketService.onPlayerActionUsed(() => {
@@ -348,32 +333,11 @@ export class InGameService {
         });
 
         this.inGameSocketService.onPlayerBoardedBoat((data) => {
-            this.updateInGameSession({
-                inGamePlayers: {
-                    ...this.inGameSession().inGamePlayers,
-                    [data.playerId]: {
-                        ...this.inGameSession().inGamePlayers[data.playerId],
-                        onBoatId: data.boatId,
-                    },
-                },
-            });
-            if (this.playerService.id() === data.playerId) {
-                this.playerService.updatePlayer({
-                    onBoatId: data.boatId,
-                });
-            }
+            this.updatePlayerInSession(data.playerId, { onBoatId: data.boatId }, true);
         });
 
         this.inGameSocketService.onPlayerDisembarkedBoat((data) => {
-            this.updateInGameSession({
-                inGamePlayers: {
-                    ...this.inGameSession().inGamePlayers,
-                    [data.playerId]: {
-                        ...this.inGameSession().inGamePlayers[data.playerId],
-                        onBoatId: undefined,
-                    },
-                },
-            });
+            this.updatePlayerInSession(data.playerId, { onBoatId: undefined });
         });
 
         this.inGameSocketService.onSessionUpdated((data) => {
@@ -384,9 +348,20 @@ export class InGameService {
             const currentFlagData = this.flagData();
             if (currentFlagData) {
                 this.updateInGameSession({
+                    flagData: { ...currentFlagData, holderPlayerId: data.playerId },
+                });
+            }
+        });
+
+        this.inGameSocketService.onFlagTransferred((data) => {
+            const currentFlagData = this.flagData();
+            if (currentFlagData) {
+                const toPlayer = this.inGamePlayers()[data.toPlayerId];
+                this.updateInGameSession({
                     flagData: {
                         ...currentFlagData,
-                        holderPlayerId: data.playerId,
+                        holderPlayerId: data.toPlayerId,
+                        position: toPlayer ? { x: toPlayer.x, y: toPlayer.y } : currentFlagData.position,
                     },
                 });
             }
