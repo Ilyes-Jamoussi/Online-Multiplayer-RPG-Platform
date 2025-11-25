@@ -3,6 +3,7 @@ import { CreateGameDto } from '@app/dto/create-game-dto';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { Observable, tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -22,6 +23,14 @@ export class GameStoreService {
 
     get visibleGames(): Signal<GamePreviewDto[]> {
         return computed(() => this._gameDisplays().filter((game) => !game.draft && game.visibility));
+    }
+
+    get classicGames(): Signal<GamePreviewDto[]> {
+        return computed(() => this.visibleGames().filter((game) => game.mode === GameMode.CLASSIC));
+    }
+
+    get ctfGames(): Signal<GamePreviewDto[]> {
+        return computed(() => this.visibleGames().filter((game) => game.mode === GameMode.CTF));
     }
 
     loadGames(): Observable<GamePreviewDto[]> {
