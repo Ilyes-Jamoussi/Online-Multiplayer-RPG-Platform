@@ -1,9 +1,9 @@
 import { computed, inject, Injectable, Signal, signal } from '@angular/core';
-import { ID_GENERATION } from '@app/constants/game-log.constants';
 import { GameLogSocketService } from '@app/services/game-log-socket/game-log-socket.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { ResetService } from '@app/services/reset/reset.service';
 import { GameLogEntry } from '@common/interfaces/game-log-entry.interface';
+import { generateGameLogId } from '@common/utils/game-log.util';
 
 @Injectable({
     providedIn: 'root',
@@ -42,7 +42,7 @@ export class GameLogService {
     addEntry(entry: Omit<GameLogEntry, 'id' | 'timestamp'>): void {
         const newEntry: GameLogEntry = {
             ...entry,
-            id: this.generateId(),
+            id: generateGameLogId(),
             timestamp: new Date().toISOString(),
         };
         this._entries.update((entries) => [...entries, newEntry]);
@@ -63,9 +63,5 @@ export class GameLogService {
 
     getFilteredEntries(): Signal<GameLogEntry[]> {
         return this._filteredEntries;
-    }
-
-    private generateId(): string {
-        return `${Date.now()}-${Math.random().toString(ID_GENERATION.radix).substring(2, 2 + ID_GENERATION.substringLength)}`;
     }
 }

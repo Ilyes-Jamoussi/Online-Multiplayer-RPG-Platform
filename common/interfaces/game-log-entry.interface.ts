@@ -1,10 +1,10 @@
-import { GameLogEventType } from '@common/enums/game-log-event-type.enum';
+import { GameLogEntryType } from '@common/enums/game-log-entry-type.enum';
 import { GameLogMetadata } from '@common/types/game-log-metadata.type';
 
 export interface GameLogEntry {
     id: string;
     timestamp: string;
-    type: GameLogEventType;
+    type: GameLogEntryType;
     message: string;
     involvedPlayerIds: string[];
     involvedPlayerNames: string[];
