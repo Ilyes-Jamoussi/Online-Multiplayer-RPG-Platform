@@ -18,7 +18,6 @@ import { TrackingService } from '@app/modules/in-game/services/tracking/tracking
 import { TurnTimerService } from '@app/modules/in-game/services/turn-timer/turn-timer.service';
 import { VirtualPlayerService } from '@app/modules/in-game/services/virtual-player/virtual-player.service';
 import { Module } from '@nestjs/common';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
@@ -43,6 +42,6 @@ import { MongooseModule } from '@nestjs/mongoose';
         TrackingService,
     ],
     exports: [InGameService, InGameSessionRepository, TrackingService],
-    imports: [MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }]), EventEmitterModule.forRoot()],
+    imports: [MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }])],
 })
 export class InGameModule {}

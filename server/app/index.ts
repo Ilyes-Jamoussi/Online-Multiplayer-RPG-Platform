@@ -6,6 +6,9 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as express from 'express';
 import { join } from 'path';
+import { EventEmitter } from 'events';
+
+EventEmitter.defaultMaxListeners = 20;
 
 const bootstrap = async (): Promise<void> => {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
