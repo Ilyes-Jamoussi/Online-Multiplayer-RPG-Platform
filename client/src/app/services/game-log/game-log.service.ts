@@ -14,7 +14,7 @@ export class GameLogService {
     readonly entries = this._entries.asReadonly();
     readonly filterByMe = this._filterByMe.asReadonly();
 
-    private _filteredEntries!: Signal<GameLogEntry[]>;
+    private readonly _filteredEntries!: Signal<GameLogEntry[]>;
 
     constructor(
         private readonly playerService: PlayerService,
