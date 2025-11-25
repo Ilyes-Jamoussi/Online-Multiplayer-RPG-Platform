@@ -90,11 +90,16 @@ describe('CombatService', () => {
             player1: mockPlayer,
             player2: mockTargetPlayer,
         },
+        teams: {
+            1: { number: 1, playerIds: ['player1'] },
+            2: { number: 2, playerIds: ['player2'] },
+        },
         currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
         startPoints: [],
         turnOrder: ['player1', 'player2'],
         mapSize: MapSize.SMALL,
         mode: GameMode.CLASSIC,
+        playerCount: 2,
     } as InGameSession;
 
     const mockCombatResult: CombatResult = {

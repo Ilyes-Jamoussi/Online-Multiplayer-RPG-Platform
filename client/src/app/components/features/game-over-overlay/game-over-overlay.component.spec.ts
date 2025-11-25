@@ -7,7 +7,10 @@ import { PlayerService } from '@app/services/player/player.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { MapSize } from '@common/enums/map-size.enum';
+import { InGameSession } from '@common/interfaces/session.interface';
 import { GameOverOverlayComponent } from './game-over-overlay.component';
 
 const TEST_TIMER_DURATION = 5000;
@@ -91,10 +94,37 @@ describe('GameOverOverlayComponent', () => {
     ];
 
     beforeEach(async () => {
-        mockInGameService = jasmine.createSpyObj('InGameService', ['reset'], {
-            gameOverData: signal(mockGameOverData),
-            inGamePlayers: signal(mockPlayers.reduce((acc, player) => ({ ...acc, [player.id]: player }), {})),
-        });
+        const inGamePlayersRecord: Record<string, Player> = mockPlayers.reduce((acc, player) => ({ ...acc, [player.id]: player }), {});
+        const mockSession: InGameSession = {
+            id: 'session1',
+            gameId: 'game1',
+            maxPlayers: 4,
+            mode: GameMode.CLASSIC,
+            inGameId: 'ingame1',
+            isGameStarted: true,
+            inGamePlayers: inGamePlayersRecord,
+            teams: {
+                1: { number: 1, playerIds: ['player1'] },
+                2: { number: 2, playerIds: ['player2'] },
+            },
+            currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
+            startPoints: [],
+            mapSize: MapSize.SMALL,
+            turnOrder: ['player1', 'player2'],
+            playerCount: mockPlayers.length,
+        };
+
+        mockInGameService = jasmine.createSpyObj(
+            'InGameService',
+            ['reset', 'getPlayerByPlayerId'],
+            {
+                gameOverData: signal(mockGameOverData),
+                inGamePlayers: signal(inGamePlayersRecord),
+                mode: () => GameMode.CLASSIC,
+                inGameSession: signal(mockSession),
+            },
+        );
+        mockInGameService.getPlayerByPlayerId.and.callFake((playerId: string) => inGamePlayersRecord[playerId]);
 
         mockPlayerService = jasmine.createSpyObj('PlayerService', [], {
             id: signal('player1'),

@@ -143,7 +143,11 @@ export class InGameService {
     updateInGameSession(data: Partial<InGameSession>): void {
         this._inGameSession.update((inGameSession) => ({ ...inGameSession, ...data }));
         if (data.inGamePlayers) {
-            this.playerService.updatePlayer(data.inGamePlayers[this.playerService.id()]);
+            const currentPlayerId = this.playerService.id();
+            const updatedPlayer = data.inGamePlayers[currentPlayerId];
+            if (updatedPlayer) {
+                this.playerService.updatePlayer(updatedPlayer);
+            }
         }
     }
 
@@ -269,7 +273,8 @@ export class InGameService {
         });
 
         this.inGameSocketService.onPlayerMoved((data) => {
-            this.updatePlayerInSession(data.playerId, { x: data.x, y: data.y, speed: data.speed, boatSpeed: data.boatSpeed }, true);
+            const isCurrentPlayer = this.playerService.id() === data.playerId;
+            this.updatePlayerInSession(data.playerId, { x: data.x, y: data.y, speed: data.speed, boatSpeed: data.boatSpeed }, isCurrentPlayer);
         });
 
         this.inGameSocketService.onPlayerAvailableActions((data) => {
