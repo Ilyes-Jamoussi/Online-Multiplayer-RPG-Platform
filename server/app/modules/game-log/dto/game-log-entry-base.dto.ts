@@ -1,7 +1,7 @@
 import { GameLogEntryType } from '@common/enums/game-log-entry-type.enum';
 import { GameLogMetadata } from '@common/types/game-log-metadata.type';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsObject, IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsEnum, IsObject, IsString } from 'class-validator';
 
 export class GameLogEntryBase {
     @ApiProperty({ enum: GameLogEntryType, enumName: 'GameLogEntryType' })
