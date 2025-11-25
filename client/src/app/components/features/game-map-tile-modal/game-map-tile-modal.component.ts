@@ -3,11 +3,11 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { PlaceableLabel } from '@app/enums/placeable-label.enum';
-import { TeamColor } from '@app/enums/team-color.enum';
 import { TileLabel } from '@app/enums/tile-label.enum';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
+import { PlayerService } from '@app/services/player/player.service';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
@@ -25,6 +25,7 @@ export class GameMapTileModalComponent {
         private readonly gameMapService: GameMapService,
         private readonly assetsService: AssetsService,
         private readonly inGameService: InGameService,
+        private readonly playerService: PlayerService,
     ) {}
 
     tileKind = TileKind;
@@ -66,8 +67,7 @@ export class GameMapTileModalComponent {
     }
 
     getTeamColor(teamNumber: number | undefined): string | undefined {
-        if (teamNumber === undefined) return undefined;
-        return teamNumber === 1 ? TeamColor.Team1 : TeamColor.Team2;
+        return this.playerService.getTeamColor(teamNumber);
     }
 
     close(): void {

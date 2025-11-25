@@ -1,4 +1,4 @@
 export enum TeamColor {
-    Team1 = '#3b82f6',
-    Team2 = '#ef4444',
+    MyTeam = '#3b82f6', 
+    EnemyTeam = '#ef4444', 
 }

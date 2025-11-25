@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, Signal } from '@angular/core';
 import { PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
-import { TeamColor } from '@app/enums/team-color.enum';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -63,8 +62,7 @@ export class PlayersListComponent {
     }
 
     getTeamColor(teamNumber: number | undefined): string | undefined {
-        if (teamNumber === undefined) return undefined;
-        return teamNumber === 1 ? TeamColor.Team1 : TeamColor.Team2;
+        return this.playerService.getTeamColor(teamNumber);
     }
 
     hasFlag(player: Player): boolean {

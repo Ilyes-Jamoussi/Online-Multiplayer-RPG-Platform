@@ -3,7 +3,6 @@ import { Component, Input, OnInit } from '@angular/core';
 import { GameMapTileModalComponent } from '@app/components/features/game-map-tile-modal/game-map-tile-modal.component';
 import { GameMapTileComponent } from '@app/components/features/game-map-tile/game-map-tile.component';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
-import { TeamColor } from '@app/enums/team-color.enum';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -118,8 +117,7 @@ export class GameMapComponent implements OnInit {
 
     getTeamColor(player: Player): string | undefined {
         if (this.isCurrentUser(player)) return undefined;
-        if (player.teamNumber === undefined) return undefined;
-        return player.teamNumber === 1 ? TeamColor.Team1 : TeamColor.Team2;
+        return this.playerService.getTeamColor(player.teamNumber);
     }
 
     getPlayerBorderStyle(player: Player): { 'border-color'?: string; 'border-width'?: string; 'box-shadow'?: string } {
