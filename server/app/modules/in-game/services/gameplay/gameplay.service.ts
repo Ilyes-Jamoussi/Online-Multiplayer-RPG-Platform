@@ -18,17 +18,8 @@ import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-interface PendingFlagTransfer {
-    sessionId: string;
-    fromPlayerId: string;
-    toPlayerId: string;
-    position: Position;
-}
-
 @Injectable()
 export class GameplayService {
-    private readonly pendingFlagTransfers = new Map<string, PendingFlagTransfer>();
-
     constructor(
         private readonly sessionRepository: InGameSessionRepository,
         private readonly actionService: ActionService,
@@ -77,66 +68,16 @@ export class GameplayService {
         if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
         if (session.mode !== GameMode.CTF) throw new BadRequestException('Not a CTF game');
 
-        const flagData = session.flagData;
-        if (!flagData) throw new NotFoundException('Flag data not found');
-        if (flagData.holderPlayerId !== playerId) throw new BadRequestException('Player does not hold the flag');
-
-        const toPlayerId = this.actionService.getTileOccupant(session.id, position);
-        if (!toPlayerId) throw new NotFoundException('No player at target position');
-        if (toPlayerId === playerId) throw new BadRequestException('Cannot transfer flag to yourself');
-
-        const toPlayer = session.inGamePlayers[toPlayerId];
-        if (!toPlayer) throw new NotFoundException('Player not found');
-
-        if (!Boolean(player.teamNumber) || !Boolean(toPlayer.teamNumber) || player.teamNumber !== toPlayer.teamNumber) {
-            throw new BadRequestException('Can only transfer flag to teammate');
-        }
-
-        const requestKey = `${sessionId}-${playerId}-${toPlayerId}`;
-        if (this.pendingFlagTransfers.has(requestKey)) {
-            throw new BadRequestException('Transfer request already pending');
-        }
-
-        this.pendingFlagTransfers.set(requestKey, {
-            sessionId,
-            fromPlayerId: playerId,
-            toPlayerId,
-            position,
-        });
+        this.actionService.requestFlagTransfer(session, playerId, position);
 
         player.actionsRemaining--;
         session.currentTurn.hasUsedAction = true;
         this.actionService.calculateReachableTiles(session, playerId);
         if (!player.actionsRemaining && !player.speed) this.timerService.endTurnManual(session);
-
-        this.eventEmitter.emit(ServerEvents.FlagTransferRequested, {
-            session,
-            fromPlayerId: playerId,
-            toPlayerId,
-            fromPlayerName: player.name,
-        });
     }
 
     respondToFlagTransfer(sessionId: string, toPlayerId: string, fromPlayerId: string, accepted: boolean): void {
-        const requestKey = `${sessionId}-${fromPlayerId}-${toPlayerId}`;
-        const request = this.pendingFlagTransfers.get(requestKey);
-        if (!request) {
-            throw new NotFoundException('Transfer request not found');
-        }
-
-        this.pendingFlagTransfers.delete(requestKey);
-
-        if (accepted) {
-            const session = this.sessionRepository.findById(sessionId);
-            this.actionService.transferFlag(session, fromPlayerId, request.position);
-        }
-
-        this.eventEmitter.emit(ServerEvents.FlagTransferResult, {
-            sessionId,
-            fromPlayerId,
-            toPlayerId,
-            accepted,
-        });
+        this.actionService.respondToFlagTransfer(sessionId, toPlayerId, fromPlayerId, accepted);
     }
 
     sanctuaryRequest(sessionId: string, playerId: string, position: Position, kind: PlaceableKind.HEAL | PlaceableKind.FIGHT): void {

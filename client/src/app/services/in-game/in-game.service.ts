@@ -367,7 +367,6 @@ export class InGameService {
         });
 
         this.inGameSocketService.onFlagTransferRequested((data) => {
-            console.log('Flag transfer requested', data);
             if (this.playerService.id() === data.toPlayerId) {
                 this._pendingFlagTransferRequest.set(data);
             }

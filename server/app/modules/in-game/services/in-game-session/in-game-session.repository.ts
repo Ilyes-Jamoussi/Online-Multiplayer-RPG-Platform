@@ -2,7 +2,6 @@ import { ServerEvents } from '@app/enums/server-events.enum';
 import { MoveResult } from '@app/interfaces/move-result.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { BOAT_SPEED_BONUS } from '@common/constants/game.constants';
-import { GameMode } from '@common/enums/game-mode.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -32,25 +31,14 @@ export class InGameSessionRepository {
         this.eventEmitter.emit(ServerEvents.FlagPickedUp, { session, playerId });
     }
 
-    transferFlag(session: InGameSession, fromPlayerId: string, position: Position): void {
+    transferFlag(session: InGameSession, fromPlayerId: string, toPlayerId: string): void {
         const flagData = session.flagData;
         if (!flagData) throw new NotFoundException('Flag data not found');
         if (flagData.holderPlayerId !== fromPlayerId) throw new BadRequestException('Player does not hold the flag');
 
-        const toPlayerId = this.gameCache.getTileOccupant(session.id, position);
-        if (!toPlayerId) throw new NotFoundException('No player at target position');
-        if (toPlayerId === fromPlayerId) throw new BadRequestException('Cannot transfer flag to yourself');
-
         const fromPlayer = session.inGamePlayers[fromPlayerId];
         const toPlayer = session.inGamePlayers[toPlayerId];
         if (!fromPlayer || !toPlayer) throw new NotFoundException('Player not found');
-
-        if (session.mode === GameMode.CTF) {
-            if (!Boolean(fromPlayer.teamNumber) || !Boolean(toPlayer.teamNumber) || fromPlayer.teamNumber !== toPlayer.teamNumber) {
-                throw new BadRequestException('Can only transfer flag to teammate');
-            }
-        }
-
         flagData.holderPlayerId = toPlayerId;
         flagData.position = { x: toPlayer.x, y: toPlayer.y };
         this.eventEmitter.emit(ServerEvents.FlagTransferred, { session, fromPlayerId, toPlayerId });

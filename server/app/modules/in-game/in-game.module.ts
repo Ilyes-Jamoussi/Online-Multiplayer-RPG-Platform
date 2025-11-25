@@ -1,6 +1,7 @@
 import { Game, gameSchema } from '@app/modules/game-store/entities/game.entity';
 import { InGameController } from '@app/modules/in-game/controllers/in-game.controller';
 import { CombatGateway } from '@app/modules/in-game/gateways/combat/combat.gateway';
+import { InGameActionGateway } from '@app/modules/in-game/gateways/in-game-action/in-game-action.gateway';
 import { InGameGateway } from '@app/modules/in-game/gateways/in-game/in-game.gateway';
 import { ActionService } from '@app/modules/in-game/services/action/action.service';
 import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
@@ -25,6 +26,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     providers: [
         InGameService,
         InGameGateway,
+        InGameActionGateway,
         CombatGateway,
         TimerService,
         TurnTimerService,

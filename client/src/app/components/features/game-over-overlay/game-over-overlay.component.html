@@ -5,6 +5,20 @@
         <h1 class="game-over-title">{{ title }}</h1>
 
         <div class="results-section">
+            @if (isCTFMode && winnerTeamNumber) {
+            <h2 class="results-header">Équipe gagnante</h2>
+            <div class="team-winners">
+                <div class="team-number">Équipe {{ winnerTeamNumber }}</div>
+                <div class="team-members">
+                    @for (playerName of winnerTeamPlayers; track playerName) {
+                    <div class="team-member">
+                        <span class="winner-crown">👑</span>
+                        <span class="player-name">{{ playerName }}</span>
+                    </div>
+                    }
+                </div>
+            </div>
+            } @else {
             <h2 class="results-header">Résultats</h2>
             <div class="player-results">
                 @for (player of playerStats; track player.name) {
@@ -17,6 +31,7 @@
                 </div>
                 }
             </div>
+            }
         </div>
 
         <div class="redirect-message">Redirection vers la page d'accueil dans {{ gameOverTimeRemaining }} secondes...</div>

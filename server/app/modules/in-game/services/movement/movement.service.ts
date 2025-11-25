@@ -103,7 +103,7 @@ export class MovementService {
         }
     }
 
-    private checkCTFVictory(session: InGameSession, playerId: string, position: Position): void {
+    checkCTFVictory(session: InGameSession, playerId: string, position: Position): void {
         const player = session.inGamePlayers[playerId];
         if (!player) return;
 
