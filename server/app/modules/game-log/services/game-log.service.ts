@@ -3,7 +3,7 @@ import { GameLogEntryBase, GameLogEntryWithMetadata } from '@app/modules/game-lo
 import { SanctuaryUseEntryDto } from '@app/modules/game-log/dto/sanctuary-use-entry.dto';
 import { TeleportEntryDto } from '@app/modules/game-log/dto/teleport-entry.dto';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
-import { GameLogEventType } from '@common/enums/game-log-event-type.enum';
+import { GameLogEntryType } from '@common/enums/game-log-entry-type.enum';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class GameLogService {
         const player = session.inGamePlayers[playerId];
 
         return {
-            type: GameLogEventType.TurnStart,
+            type: GameLogEntryType.TurnStart,
             message: `Début de tour : ${player.name}`,
             involvedPlayerIds: [playerId],
             involvedPlayerNames: [player.name],
@@ -29,7 +29,7 @@ export class GameLogService {
         const target = session.inGamePlayers[targetId];
 
         return {
-            type: GameLogEventType.CombatStart,
+            type: GameLogEntryType.CombatStart,
             message: `Combat : ${attacker.name} contre ${target.name}`,
             involvedPlayerIds: [attackerId, targetId],
             involvedPlayerNames: [attacker.name, target.name],
@@ -52,7 +52,7 @@ export class GameLogService {
         }
 
         return {
-            type: GameLogEventType.CombatEnd,
+            type: GameLogEntryType.CombatEnd,
             message,
             involvedPlayerIds: [playerAId, playerBId],
             involvedPlayerNames: [playerA.name, playerB.name],
@@ -75,7 +75,7 @@ export class GameLogService {
         const message = `Attaque ${attacker.name} vs ${target.name} (${attackPart} - ${defensePart} = ${damagePart})`;
 
         return {
-            type: GameLogEventType.CombatResult,
+            type: GameLogEntryType.CombatResult,
             message,
             involvedPlayerIds: [params.attackerId, params.targetId],
             involvedPlayerNames: [attacker.name, target.name],
@@ -96,7 +96,7 @@ export class GameLogService {
 
         const action = isOpen ? 'ouverte' : 'fermée';
         return {
-            type: GameLogEventType.DoorToggle,
+            type: GameLogEntryType.DoorToggle,
             message: `Porte ${action} à (${x}, ${y}) par ${player.name}`,
             involvedPlayerIds: [playerId],
             involvedPlayerNames: [player.name],
@@ -110,7 +110,7 @@ export class GameLogService {
 
         const action = isActive ? 'activé' : 'désactivé';
         return {
-            type: GameLogEventType.DebugModeToggle,
+            type: GameLogEntryType.DebugModeToggle,
             message: `Mode débogage: ${action}`,
             involvedPlayerIds: [playerId],
             involvedPlayerNames: [player.name],
@@ -123,7 +123,7 @@ export class GameLogService {
         const player = session.inGamePlayers[playerId];
 
         return {
-            type: GameLogEventType.GameAbandon,
+            type: GameLogEntryType.GameAbandon,
             message: `${player.name} a abandonné la partie`,
             involvedPlayerIds: [playerId],
             involvedPlayerNames: [player.name],
@@ -139,7 +139,7 @@ export class GameLogService {
 
         const playersList = activePlayerNames.join(', ');
         return {
-            type: GameLogEventType.GameOver,
+            type: GameLogEntryType.GameOver,
             message: `Fin de partie. Joueurs actifs: ${playersList}`,
             involvedPlayerIds: activePlayerIds,
             involvedPlayerNames: activePlayerNames,
@@ -152,7 +152,7 @@ export class GameLogService {
         const player = session.inGamePlayers[playerId];
 
         return {
-            type: GameLogEventType.BoatEmbark,
+            type: GameLogEntryType.BoatEmbark,
             message: `${player.name} a embarqué sur un bateau`,
             involvedPlayerIds: [playerId],
             involvedPlayerNames: [player.name],
@@ -165,7 +165,7 @@ export class GameLogService {
         const player = session.inGamePlayers[playerId];
 
         return {
-            type: GameLogEventType.BoatDisembark,
+            type: GameLogEntryType.BoatDisembark,
             message: `${player.name} a débarqué d'un bateau`,
             involvedPlayerIds: [playerId],
             involvedPlayerNames: [player.name],
@@ -189,7 +189,7 @@ export class GameLogService {
         }
 
         return {
-            type: GameLogEventType.SanctuaryUse,
+            type: GameLogEntryType.SanctuaryUse,
             message,
             involvedPlayerIds: [params.playerId],
             involvedPlayerNames: [player.name],
@@ -202,7 +202,7 @@ export class GameLogService {
         const player = session.inGamePlayers[params.playerId];
 
         return {
-            type: GameLogEventType.Teleport,
+            type: GameLogEntryType.Teleport,
             message: `${player.name} s'est téléporté de (${params.originX}, ${params.originY}) → (${params.destinationX}, ${params.destinationY})`,
             involvedPlayerIds: [params.playerId],
             involvedPlayerNames: [player.name],
