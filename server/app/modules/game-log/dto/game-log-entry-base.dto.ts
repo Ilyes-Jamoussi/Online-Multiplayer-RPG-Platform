@@ -32,4 +32,3 @@ export class GameLogEntryWithMetadata extends GameLogEntryBase {
     @IsObject()
     metadata: GameLogMetadata;
 }
-

@@ -59,12 +59,7 @@ export class GameLogGateway {
         const session = this.inGameSessionRepository.findById(payload.sessionId);
         if (!session) return;
 
-        const entry = this.gameLogService.createCombatEndEntry(
-            payload.sessionId,
-            payload.playerAId,
-            payload.playerBId,
-            payload.winnerId,
-        );
+        const entry = this.gameLogService.createCombatEndEntry(payload.sessionId, payload.playerAId, payload.playerBId, payload.winnerId);
         this.emitLogEntry(session.inGameId, entry);
     }
 
@@ -86,13 +81,7 @@ export class GameLogGateway {
 
     @OnEvent(ServerEvents.DoorToggled)
     handleDoorToggled(payload: DoorToggledPayload): void {
-        const entry = this.gameLogService.createDoorToggleEntry(
-            payload.session.id,
-            payload.playerId,
-            payload.x,
-            payload.y,
-            payload.isOpen,
-        );
+        const entry = this.gameLogService.createDoorToggleEntry(payload.session.id, payload.playerId, payload.x, payload.y, payload.isOpen);
         this.emitLogEntry(payload.session.inGameId, entry);
     }
 
@@ -101,11 +90,7 @@ export class GameLogGateway {
         const session = this.inGameSessionRepository.findById(payload.sessionId);
         if (!session) return;
 
-        const entry = this.gameLogService.createDebugModeToggleEntry(
-            payload.sessionId,
-            payload.playerId,
-            payload.isAdminModeActive,
-        );
+        const entry = this.gameLogService.createDebugModeToggleEntry(payload.sessionId, payload.playerId, payload.isAdminModeActive);
         this.emitLogEntry(session.inGameId, entry);
     }
 
@@ -176,4 +161,3 @@ export class GameLogGateway {
         this.server.to(inGameId).emit(GameLogEvents.LogEntry, successResponse<GameLogEntryDto>(logEntry));
     }
 }
-

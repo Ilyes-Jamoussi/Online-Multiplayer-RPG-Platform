@@ -39,4 +39,3 @@ describe('GameLogComponent', () => {
         expect(formatted).toMatch(/\d{2}:\d{2}:\d{2}/);
     });
 });
-

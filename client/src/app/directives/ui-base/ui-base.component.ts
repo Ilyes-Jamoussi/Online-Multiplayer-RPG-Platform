@@ -24,7 +24,6 @@ export abstract class UiBaseComponent {
     @Input() color?: UiColor;
     @Input() style?: UiStyle;
     @Input() width?: UiWidth;
-    @Input() widthValue?: string;
 
     @Input() size: UiSize = 'md';
     @Input() disabled = false;

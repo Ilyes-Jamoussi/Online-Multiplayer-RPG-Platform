@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AdminBadgeComponent } from '@app/components/features/admin-badge/admin-badge.component';
 import { MessagesZoneComponent } from '@app/components/features/messages-zone/messages-zone.component';
 import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
@@ -38,8 +38,6 @@ import { MapSize } from '@common/enums/map-size.enum';
     providers: [GameMapService],
 })
 export class GameSessionPageComponent implements OnInit, OnDestroy {
-    @ViewChild(GameMapComponent) gameMapComponent?: GameMapComponent;
-
     constructor(
         private readonly sessionService: SessionService,
         private readonly gameMapService: GameMapService,
@@ -77,44 +75,6 @@ export class GameSessionPageComponent implements OnInit, OnDestroy {
 
     get isTransitioning(): boolean {
         return this.inGameService.isTransitioning();
-    }
-
-    getPlayersCount(): number {
-        return Object.keys(this.inGameService.inGameSession().inGamePlayers).length;
-    }
-
-    getMapSizeLabel(): string {
-        switch (this.mapSizeValue) {
-            case MapSize.SMALL:
-                return 'Petite';
-            case MapSize.MEDIUM:
-                return 'Moyenne';
-            case MapSize.LARGE:
-                return 'Grande';
-            default:
-                return 'Inconnue';
-        }
-    }
-
-    getCurrentPlayerSpeed(): number {
-        const session = this.inGameService.inGameSession();
-        const activePlayerId = session.currentTurn.activePlayerId;
-        const player = session.inGamePlayers[activePlayerId];
-        return player?.speed || 0;
-    }
-
-    getReachableTilesCount(): number {
-        return this.inGameService.reachableTiles().length || 0;
-    }
-
-    getDebugInfo(): string {
-        const session = this.inGameService.inGameSession();
-        const activePlayerId = session.currentTurn.activePlayerId;
-        const player = session.inGamePlayers[activePlayerId];
-
-        if (!player) return 'Joueur non trouvé';
-
-        return `Pos:(${player.x},${player.y}) Vitesse:${player.speed}`;
     }
 
     ngOnInit(): void {

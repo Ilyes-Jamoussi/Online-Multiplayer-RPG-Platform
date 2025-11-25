@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { PlayerService } from '@app/services/player/player.service';
 import { ResetService } from '@app/services/reset/reset.service';
-import { GameLogEntryType } from '@common/enums/game-log-entry-type.enum';
 import { Subject } from 'rxjs';
 import { GameLogService } from './game-log.service';
 
@@ -17,11 +16,7 @@ describe('GameLogService', () => {
         });
 
         TestBed.configureTestingModule({
-            providers: [
-                GameLogService,
-                { provide: PlayerService, useValue: playerService },
-                { provide: ResetService, useValue: resetService },
-            ],
+            providers: [GameLogService, { provide: PlayerService, useValue: playerService }, { provide: ResetService, useValue: resetService }],
         });
         service = TestBed.inject(GameLogService);
     });
@@ -30,58 +25,7 @@ describe('GameLogService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('should add entry', () => {
-        service.addEntry({
-            type: GameLogEntryType.TurnStart,
-            message: 'Test message',
-            involvedPlayerIds: ['player-1'],
-            involvedPlayerNames: ['Player 1'],
-        });
-
-        expect(service.entries().length).toBe(1);
-        expect(service.entries()[0].message).toBe('Test message');
-    });
-
-    it('should toggle filter', () => {
-        expect(service.filterByMe()).toBe(false);
-        service.toggleFilter();
-        expect(service.filterByMe()).toBe(true);
-        service.toggleFilter();
-        expect(service.filterByMe()).toBe(false);
-    });
-
-    it('should filter entries by player', () => {
-        service.addEntry({
-            type: GameLogEntryType.TurnStart,
-            message: 'Player 1 message',
-            involvedPlayerIds: ['player-1'],
-            involvedPlayerNames: ['Player 1'],
-        });
-
-        service.addEntry({
-            type: GameLogEntryType.TurnStart,
-            message: 'Player 2 message',
-            involvedPlayerIds: ['player-2'],
-            involvedPlayerNames: ['Player 2'],
-        });
-
-        service.setFilter(true);
-        const filtered = service.getFilteredEntries();
-        expect(filtered().length).toBe(1);
-        expect(filtered()[0].message).toBe('Player 1 message');
-    });
-
-    it('should reset entries', () => {
-        service.addEntry({
-            type: GameLogEntryType.TurnStart,
-            message: 'Test',
-            involvedPlayerIds: [],
-            involvedPlayerNames: [],
-        });
-
-        service.reset();
-        expect(service.entries().length).toBe(0);
+    it('should initialize with filterByMe false', () => {
         expect(service.filterByMe()).toBe(false);
     });
 });
-

@@ -65,4 +65,3 @@ export class CombatResultEntryDto {
     @IsNumber()
     damage: number;
 }
-

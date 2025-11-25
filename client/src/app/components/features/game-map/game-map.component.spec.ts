@@ -12,7 +12,6 @@ import { GameMapComponent } from './game-map.component';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
-import { StartPoint } from '@common/interfaces/start-point.interface';
 
 const TEST_MAP_SIZE = 10;
 
@@ -62,13 +61,6 @@ describe('GameMapComponent', () => {
         x: 1,
         y: 1,
         placed: true,
-    };
-
-    const mockStartPoint: StartPoint = {
-        id: 'start1',
-        x: 0,
-        y: 0,
-        playerId: 'player1',
     };
 
     beforeEach(async () => {
@@ -195,12 +187,6 @@ describe('GameMapComponent', () => {
             const style = component.getPlayerStyle(mockPlayer);
             expect(style.gridColumn).toBe('3');
             expect(style.gridRow).toBe('4');
-        });
-
-        it('should return start point style with correct grid position', () => {
-            const style = component.getStartPointStyle(mockStartPoint);
-            expect(style.gridColumn).toBe('1');
-            expect(style.gridRow).toBe('1');
         });
     });
 

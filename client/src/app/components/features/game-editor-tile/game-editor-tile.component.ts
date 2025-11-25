@@ -28,8 +28,6 @@ export class GameEditorTileComponent extends TileSizeProbeDirective {
         super(elementRef, zone);
     }
 
-    readonly tileKind = TileKind;
-
     get tileImage(): string {
         return this.assetService.getTileImage(TileKind[this.tile.kind], this.tile.open);
     }

@@ -27,7 +27,6 @@ export class GameMapTileModalComponent {
     tileKind = TileKind;
     tileLabel = TileLabel;
     placeableLabel = PlaceableLabel;
-    placeableKind = PlaceableKind;
 
     get objectOnTile(): GameEditorPlaceableDto | undefined {
         return this.gameMapService.getObjectOnTile();

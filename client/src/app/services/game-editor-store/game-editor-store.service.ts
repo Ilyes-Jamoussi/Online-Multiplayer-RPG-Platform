@@ -275,15 +275,6 @@ export class GameEditorStoreService {
         });
     }
 
-    resetTileAt(x: number, y: number): void {
-        this.withBounds(x, y, () => {
-            this.updateTiles((draft) => {
-                const idx = this.getIndexByCoord(x, y);
-                draft[idx] = { x, y, kind: TileKind.BASE };
-            });
-        });
-    }
-
     reset(): void {
         const initial = this._initial();
         this._tiles.set(initial.tiles);
