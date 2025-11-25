@@ -5,6 +5,8 @@ import { AvailableActionsDto } from '@app/modules/in-game/dto/available-actions.
 import { DoorToggledDto } from '@app/modules/in-game/dto/door-toggled.dto';
 import { EmptyResponseDto } from '@app/modules/in-game/dto/empty-response.dto';
 import { FlagPickedUpDto } from '@app/modules/in-game/dto/flag-picked-up.dto';
+import { FlagTransferRequestDto } from '@app/modules/in-game/dto/flag-transfer-request.dto';
+import { FlagTransferResultDto } from '@app/modules/in-game/dto/flag-transfer-result.dto';
 import { FlagTransferredDto } from '@app/modules/in-game/dto/flag-transferred.dto';
 import { GameOverDto } from '@app/modules/in-game/dto/game-over.dto';
 import { GameStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
@@ -151,13 +153,46 @@ export class InGameGateway {
         this.server.to(payload.session.inGameId).emit(InGameEvents.FlagPickedUp, successResponse<FlagPickedUpDto>({ playerId: payload.playerId }));
     }
 
-    @SubscribeMessage(InGameEvents.TransferFlag)
-    transferFlag(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
+    @SubscribeMessage(InGameEvents.FlagTransferRequest)
+    flagTransferRequest(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
         try {
-            this.inGameService.transferFlag(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
+            this.inGameService.requestFlagTransfer(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
         } catch (error) {
             socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }
+    }
+
+    @SubscribeMessage(InGameEvents.FlagTransferResponse)
+    flagTransferResponse(socket: Socket, payload: { sessionId: string; fromPlayerId: string; accepted: boolean }): void {
+        try {
+            this.inGameService.respondToFlagTransfer(payload.sessionId, socket.id, payload.fromPlayerId, payload.accepted);
+        } catch (error) {
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
+        }
+    }
+
+    @OnEvent(ServerEvents.FlagTransferRequested)
+    handleFlagTransferRequested(payload: { session: InGameSession; fromPlayerId: string; toPlayerId: string; fromPlayerName: string }): void {
+        console.log('Flag transfer requested', payload);
+        this.server.to(payload.toPlayerId).emit(
+            InGameEvents.FlagTransferRequested,
+            successResponse<FlagTransferRequestDto>({
+                fromPlayerId: payload.fromPlayerId,
+                toPlayerId: payload.toPlayerId,
+                fromPlayerName: payload.fromPlayerName,
+            }),
+        );
+    }
+
+    @OnEvent(ServerEvents.FlagTransferResult)
+    handleFlagTransferResult(payload: { sessionId: string; fromPlayerId: string; toPlayerId: string; accepted: boolean }): void {
+        this.server.to(payload.fromPlayerId).emit(
+            InGameEvents.FlagTransferResult,
+            successResponse<FlagTransferResultDto>({
+                toPlayerId: payload.toPlayerId,
+                accepted: payload.accepted,
+            }),
+        );
     }
 
     @OnEvent(ServerEvents.FlagTransferred)

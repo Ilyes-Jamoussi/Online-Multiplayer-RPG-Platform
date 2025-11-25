@@ -74,5 +74,9 @@ export enum InGameEvents {
     PickUpFlag = 'pick-up-flag',
     FlagPickedUp = 'flag-picked-up',
     TransferFlag = 'transfer-flag',
+    FlagTransferRequest = 'flag-transfer-request',
+    FlagTransferRequested = 'flag-transfer-requested',
+    FlagTransferResponse = 'flag-transfer-response',
+    FlagTransferResult = 'flag-transfer-result',
     FlagTransferred = 'flag-transferred',
 }

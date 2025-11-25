@@ -50,6 +50,10 @@ export class ActionService {
         this.sessionRepository.transferFlag(session, playerId, position);
     }
 
+    getTileOccupant(sessionId: string, position: Position): string | null {
+        return this.gameCache.getTileOccupant(sessionId, position);
+    }
+
     toggleDoor(session: InGameSession, playerId: string, position: Position): void {
         const gameMap = this.gameCache.getGameMapForSession(session.id);
         const tile = gameMap.tiles.find((t) => t.x === position.x && t.y === position.y);

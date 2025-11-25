@@ -225,7 +225,11 @@ export class InGameService {
         this.gameplayService.pickUpFlag(sessionId, playerId, position);
     }
 
-    transferFlag(sessionId: string, playerId: string, position: Position): void {
-        this.gameplayService.transferFlag(sessionId, playerId, position);
+    requestFlagTransfer(sessionId: string, playerId: string, position: Position): void {
+        this.gameplayService.requestFlagTransfer(sessionId, playerId, position);
+    }
+
+    respondToFlagTransfer(sessionId: string, toPlayerId: string, fromPlayerId: string, accepted: boolean): void {
+        this.gameplayService.respondToFlagTransfer(sessionId, toPlayerId, fromPlayerId, accepted);
     }
 }

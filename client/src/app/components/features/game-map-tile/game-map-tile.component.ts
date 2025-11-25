@@ -84,7 +84,7 @@ export class GameMapTileComponent {
         } else if (actionType === AvailableActionType.BOAT) {
             this.gameMapService.boatAction(this.tile.x, this.tile.y);
         } else if (actionType === AvailableActionType.TRANSFER_FLAG) {
-            this.gameMapService.transferFlag(this.tile.x, this.tile.y);
+            this.gameMapService.requestFlagTransfer(this.tile.x, this.tile.y);
         }
     }
 

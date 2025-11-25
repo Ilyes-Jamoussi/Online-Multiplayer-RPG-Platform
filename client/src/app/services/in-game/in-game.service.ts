@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { AvailableActionDto } from '@app/dto/available-action-dto';
+import { FlagTransferRequestDto } from '@app/dto/flag-transfer-request-dto';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationService } from '@app/services/notification/notification.service';
@@ -35,6 +36,7 @@ export class InGameService {
         addedDefense?: number;
         addedAttack?: number;
     } | null>(null);
+    private readonly _pendingFlagTransferRequest = signal<FlagTransferRequestDto | null>(null);
 
     readonly isMyTurn = computed(() => this._inGameSession().currentTurn.activePlayerId === this.playerService.id());
     private readonly currentTurn = computed(() => this._inGameSession().currentTurn);
@@ -55,6 +57,7 @@ export class InGameService {
     readonly gameOverData = this._gameOverData.asReadonly();
     readonly openedSanctuary = this._openedSanctuary.asReadonly();
     readonly flagData = computed(() => this._inGameSession().flagData);
+    readonly pendingFlagTransferRequest = this._pendingFlagTransferRequest.asReadonly();
 
     sessionId(): string {
         return this.sessionService.id();
@@ -206,8 +209,17 @@ export class InGameService {
         this.inGameSocketService.playerPickUpFlag({ sessionId: this.sessionService.id(), x, y });
     }
 
-    transferFlag(x: number, y: number): void {
-        this.inGameSocketService.playerTransferFlag({ sessionId: this.sessionService.id(), x, y });
+    requestFlagTransfer(x: number, y: number): void {
+        this.inGameSocketService.requestFlagTransfer({ sessionId: this.sessionService.id(), x, y });
+    }
+
+    respondToFlagTransfer(fromPlayerId: string, accepted: boolean): void {
+        this.inGameSocketService.respondToFlagTransfer({
+            sessionId: this.sessionService.id(),
+            fromPlayerId,
+            accepted,
+        });
+        this._pendingFlagTransferRequest.set(null);
     }
 
     reset(): void {
@@ -219,6 +231,7 @@ export class InGameService {
         this._gameOverData.set(null);
         this._isActionModeActive.set(false);
         this._availableActions.set([]);
+        this._pendingFlagTransferRequest.set(null);
     }
 
     private initListeners(): void {
@@ -350,6 +363,21 @@ export class InGameService {
                 this.updateInGameSession({
                     flagData: { ...currentFlagData, holderPlayerId: data.playerId },
                 });
+            }
+        });
+
+        this.inGameSocketService.onFlagTransferRequested((data) => {
+            console.log('Flag transfer requested', data);
+            if (this.playerService.id() === data.toPlayerId) {
+                this._pendingFlagTransferRequest.set(data);
+            }
+        });
+
+        this.inGameSocketService.onFlagTransferResult((data) => {
+            if (data.accepted) {
+                this.notificationCoordinatorService.showInfoToast(`Transfert de drapeau accepté`);
+            } else {
+                this.notificationCoordinatorService.showInfoToast(`Transfert de drapeau refusé`);
             }
         });
 

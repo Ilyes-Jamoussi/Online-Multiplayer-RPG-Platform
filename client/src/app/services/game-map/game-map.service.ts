@@ -277,8 +277,8 @@ export class GameMapService {
         this.inGameService.pickUpFlag(x, y);
     }
 
-    transferFlag(x: number, y: number): void {
-        this.inGameService.transferFlag(x, y);
+    requestFlagTransfer(x: number, y: number): void {
+        this.inGameService.requestFlagTransfer(x, y);
     }
 
     flagData() {

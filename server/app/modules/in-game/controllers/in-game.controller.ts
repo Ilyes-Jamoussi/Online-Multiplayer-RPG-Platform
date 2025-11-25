@@ -10,6 +10,9 @@ import { CombatVictoryDto } from '@app/modules/in-game/dto/combat-victory.dto';
 import { DoorToggledDto } from '@app/modules/in-game/dto/door-toggled.dto';
 import { EmptyResponseDto } from '@app/modules/in-game/dto/empty-response.dto';
 import { FlagPickedUpDto } from '@app/modules/in-game/dto/flag-picked-up.dto';
+import { FlagTransferRequestDto } from '@app/modules/in-game/dto/flag-transfer-request.dto';
+import { FlagTransferResponseDto } from '@app/modules/in-game/dto/flag-transfer-response.dto';
+import { FlagTransferResultDto } from '@app/modules/in-game/dto/flag-transfer-result.dto';
 import { FlagTransferredDto } from '@app/modules/in-game/dto/flag-transferred.dto';
 import { GameOverDto } from '@app/modules/in-game/dto/game-over.dto';
 import { GameStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
@@ -130,4 +133,13 @@ export class InGameController {
 
     @Post('flag-transferred')
     flagTransferred(@Body() data: FlagTransferredDto): void {}
+
+    @Post('flag-transfer-request')
+    flagTransferRequest(@Body() data: FlagTransferRequestDto): void {}
+
+    @Post('flag-transfer-response')
+    flagTransferResponse(@Body() data: FlagTransferResponseDto): void {}
+
+    @Post('flag-transfer-result')
+    flagTransferResult(@Body() data: FlagTransferResultDto): void {}
 }

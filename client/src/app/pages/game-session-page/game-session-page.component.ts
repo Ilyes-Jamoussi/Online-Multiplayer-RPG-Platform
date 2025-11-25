@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AdminBadgeComponent } from '@app/components/features/admin-badge/admin-badge.component';
 import { MessagesZoneComponent } from '@app/components/features/messages-zone/messages-zone.component';
 import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
+import { FlagTransferOverlayComponent } from '@app/components/features/flag-transfer-overlay/flag-transfer-overlay.component';
 import { GameMapFooterComponent } from '@app/components/features/game-map-footer/game-map-footer.component';
 import { GameMapHeaderComponent } from '@app/components/features/game-map-header/game-map-header.component';
 import { GameMapComponent } from '@app/components/features/game-map/game-map.component';
@@ -27,6 +28,7 @@ import { MapSize } from '@common/enums/map-size.enum';
         PlayerInfoComponent,
         PlayersListComponent,
         CombatOverlayComponent,
+        FlagTransferOverlayComponent,
         SanctuaryOverlayComponent,
         GameOverOverlayComponent,
         ToastNotificationDisplayComponent,
