@@ -3,12 +3,14 @@ import { CreateGameDto } from '@app/dto/create-game-dto';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
+import { GameTab } from '@app/types/game-tab.types';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { Observable, tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class GameStoreService {
     private readonly _gameDisplays = signal<GamePreviewDto[]>([]);
+    readonly activeTab = signal<GameTab>('all');
 
     constructor(
         private readonly gameHttpService: GameHttpService,
@@ -31,6 +33,10 @@ export class GameStoreService {
 
     get ctfGames(): Signal<GamePreviewDto[]> {
         return computed(() => this.visibleGames().filter((game) => game.mode === GameMode.CTF));
+    }
+
+    setActiveTab(tab: GameTab): void {
+        this.activeTab.set(tab);
     }
 
     loadGames(): Observable<GamePreviewDto[]> {

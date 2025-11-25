@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, OnInit, signal, Signal } from '@angular/core';
+import { Component, OnInit, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { GamePreviewCardComponent } from '@app/components/features/game-preview-card/game-preview-card.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
@@ -8,8 +8,7 @@ import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
 import { SessionService } from '@app/services/session/session.service';
 import { PlayerService } from '@app/services/player/player.service';
-
-type GameTab = 'classic' | 'ctf';
+import { GameTab } from '@app/types/game-tab.types';
 
 @Component({
     selector: 'app-session-creation-page',
@@ -19,12 +18,6 @@ type GameTab = 'classic' | 'ctf';
     imports: [CommonModule, GamePreviewCardComponent, UiPageLayoutComponent],
 })
 export class SessionCreationPageComponent implements OnInit {
-    readonly activeTab = signal<GameTab>('classic');
-
-    readonly currentGames = computed(() =>
-        this.activeTab() === 'classic' ? this.classicGames() : this.ctfGames(),
-    );
-
     constructor(
         private readonly router: Router,
         private readonly gameStoreService: GameStoreService,
@@ -32,12 +25,31 @@ export class SessionCreationPageComponent implements OnInit {
         private readonly playerService: PlayerService,
     ) {}
 
-    get classicGames(): Signal<GamePreviewDto[]> {
-        return this.gameStoreService.classicGames;
+    get activeTab(): Signal<GameTab> {
+        return this.gameStoreService.activeTab.asReadonly();
     }
 
-    get ctfGames(): Signal<GamePreviewDto[]> {
-        return this.gameStoreService.ctfGames;
+    get visibleGames(): Signal<GamePreviewDto[]> {
+        switch (this.activeTab()) {
+            case 'all':
+                return this.gameStoreService.visibleGames;
+            case 'classic':
+                return this.gameStoreService.classicGames;
+            case 'ctf':
+                return this.gameStoreService.ctfGames;
+        }
+    }
+
+    get ctfCount(): number {
+        return this.gameStoreService.ctfGames().length;
+    }
+
+    get classicCount(): number {
+        return this.gameStoreService.classicGames().length;
+    }
+
+    get allCount(): number {
+        return this.gameStoreService.visibleGames().length;
     }
 
     ngOnInit(): void {
@@ -46,7 +58,7 @@ export class SessionCreationPageComponent implements OnInit {
     }
 
     setActiveTab(tab: GameTab): void {
-        this.activeTab.set(tab);
+        this.gameStoreService.setActiveTab(tab);
     }
 
     onStartGame(game: GamePreviewDto): void {

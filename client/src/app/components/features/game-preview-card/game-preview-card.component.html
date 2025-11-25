@@ -14,7 +14,7 @@
 
         <div class="game-info-section">
             <div class="game-header">
-                <h3 class="game-title">{{ game.name }}</h3>
+                    <h3 class="game-title">{{ game.name }}</h3>
             </div>
 
             <div class="game-stats">
@@ -37,24 +37,24 @@
             <div class="game-actions">
                 @if (isAdmin) {
                 <div class="admin-actions">
-                    <button class="action-btn edit" (click)="onEditGame()">
+                    <app-ui-button variant="secondary" size="sm" (buttonClick)="onEditGame()">
                         <app-ui-icon iconName="Edit"></app-ui-icon>
                         <span>Modifier</span>
-                    </button>
-                    <button class="action-btn visibility" [class.visible]="game.visibility" (click)="onToggleVisibility()">
+                    </app-ui-button>
+                    <app-ui-button variant="secondary" size="sm" (buttonClick)="onToggleVisibility()">
                         <app-ui-icon [iconName]="game.visibility ? 'Eye' : 'EyeSlash'"></app-ui-icon>
                         <span>{{ game.visibility ? 'Publié' : 'Masqué' }}</span>
-                    </button>
-                    <button class="action-btn delete" (click)="onDeleteGame()">
+                    </app-ui-button>
+                    <app-ui-button variant="error" size="sm" (buttonClick)="onDeleteGame()">
                         <app-ui-icon iconName="Trash"></app-ui-icon>
                         <span>Supprimer</span>
-                    </button>
+                    </app-ui-button>
                 </div>
                 } @else {
-                <button class="play-btn" (click)="onStartGame()">
+                <app-ui-button variant="primary" size="md" (buttonClick)="onStartGame()">
                     <span class="play-icon">▶</span>
                     <span class="play-text">Jouer</span>
-                </button>
+                </app-ui-button>
                 }
             </div>
         </div>
