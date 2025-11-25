@@ -2,8 +2,9 @@ import { ServerEvents } from '@app/enums/server-events.enum';
 import { ReachableTileExplorationContext } from '@app/interfaces/reachable-tile-exploration-context.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { Orientation } from '@common/enums/orientation.enum';
-import { PlaceableReachable } from '@common/enums/placeable-kind.enum';
+import { PlaceableKind, PlaceableReachable } from '@common/enums/placeable-kind.enum';
 import { TileCost, TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { Position, PositionWithDistance } from '@common/interfaces/position.interface';
@@ -71,6 +72,10 @@ export class MovementService {
 
         this.sessionRepository.movePlayerPosition(session.id, playerId, nextX, nextY, moveCost);
 
+        if (session.mode === GameMode.CTF) {
+            this.tryPickUpFlag(session, playerId, { x: nextX, y: nextY });
+        }
+
         if (teleported) {
             this.eventEmitter.emit(ServerEvents.Teleported, {
                 session,
@@ -85,6 +90,13 @@ export class MovementService {
         this.calculateReachableTiles(session, playerId);
 
         return player.speed;
+    }
+
+    private tryPickUpFlag(session: InGameSession, playerId: string, position: Position): void {
+        const placeable = this.gameCache.getPlaceableAtPosition(session.id, position);
+        if (placeable && placeable.kind === PlaceableKind.FLAG && placeable.placed) {
+            this.sessionRepository.pickUpFlag(session, playerId, position);
+        }
     }
 
     movePlayerToStartPosition(session: InGameSession, playerId: string): void {

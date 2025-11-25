@@ -18,6 +18,6 @@ export enum PlaceableReachable {
     HEAL = 0,
     FIGHT = 0,
     BOAT = 1,
-    FLAG = 0,
+    FLAG = 1,
     START = 1,
 }

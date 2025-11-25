@@ -9,7 +9,6 @@ import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-s
 import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
 import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
@@ -207,7 +206,7 @@ export class ActionService {
 
                     this.addAttackAction(actions, occupantId, playerId, pos);
                     this.addDoorAction(actions, tile, pos);
-                    this.addPlaceableActions(actions, object, pos, session.mode === GameMode.CTF);
+                    this.addPlaceableActions(actions, object, pos);
                     this.addDisembarkAction(actions, player, tile, occupantId, pos);
                 } catch {
                     continue;
@@ -249,7 +248,7 @@ export class ActionService {
         }
     }
 
-    private addPlaceableActions(actions: AvailableAction[], object: Placeable | null, pos: Position, ctf: boolean = false): void {
+    private addPlaceableActions(actions: AvailableAction[], object: Placeable | null, pos: Position): void {
         if (!object) return;
 
         if (object.kind === PlaceableKind.HEAL) {
@@ -262,10 +261,6 @@ export class ActionService {
 
         if (object.kind === PlaceableKind.BOAT) {
             actions.push({ type: AvailableActionType.BOAT, x: pos.x, y: pos.y });
-        }
-
-        if (ctf && object.kind === PlaceableKind.FLAG) {
-            actions.push({ type: AvailableActionType.PICK_UP_FLAG, x: pos.x, y: pos.y });
         }
     }
 
