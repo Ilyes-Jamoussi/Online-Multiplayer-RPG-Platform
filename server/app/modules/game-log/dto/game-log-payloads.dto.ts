@@ -87,4 +87,3 @@ export interface TeleportedPayload {
     destinationX: number;
     destinationY: number;
 }
-

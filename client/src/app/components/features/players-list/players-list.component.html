@@ -28,6 +28,8 @@
                         <span class="badge-active">ACTUEL</span>
                         } @if (hasAbandoned(player)) {
                         <span class="badge-abandon">ABANDON</span>
+                        } @if (hasFlag(player)) {
+                        <span class="badge-flag">🚩</span>
                         }
                     </div>
                     <div class="player-stats">

@@ -136,4 +136,9 @@ export class GameMapComponent implements OnInit {
             'box-shadow': `0 0 15px ${teamColor}, 0 2px 4px rgba(0, 0, 0, 0.5)`,
         };
     }
+
+    hasFlag(player: Player): boolean {
+        const flagData = this.gameMapService.flagData();
+        return flagData?.holderPlayerId === player.id;
+    }
 }

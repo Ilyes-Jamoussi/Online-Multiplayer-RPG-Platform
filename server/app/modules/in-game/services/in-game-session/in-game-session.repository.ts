@@ -3,10 +3,11 @@ import { MoveResult } from '@app/interfaces/move-result.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { BOAT_SPEED_BONUS } from '@common/constants/game.constants';
 import { Player } from '@common/interfaces/player.interface';
+import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { StartPoint } from '@common/interfaces/start-point.interface';
 import { Team } from '@common/interfaces/team.interface';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -17,6 +18,18 @@ export class InGameSessionRepository {
         private readonly eventEmitter: EventEmitter2,
         private readonly gameCache: GameCacheService,
     ) {}
+
+    pickUpFlag(session: InGameSession, playerId: string, position: Position): void {
+        const flagData = session.flagData;
+        if (!flagData) throw new NotFoundException('Flag data not found');
+        if (flagData.holderPlayerId) throw new BadRequestException('Flag already picked up');
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        flagData.holderPlayerId = playerId;
+        flagData.position = { x: player.x, y: player.y };
+        this.gameCache.hidePlaceable(session.id, position);
+        this.eventEmitter.emit(ServerEvents.FlagPickedUp, { session, playerId });
+    }
 
     updatePlayer(sessionId: string, playerId: string, updates: Partial<Player>): void {
         const session = this.findById(sessionId);

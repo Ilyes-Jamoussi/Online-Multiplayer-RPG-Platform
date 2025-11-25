@@ -7,9 +7,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class InitializationService {
-    constructor(
-        private readonly gameCache: GameCacheService,
-    ) {}
+    constructor(private readonly gameCache: GameCacheService) {}
     makeTurnOrder(players: Player[]): string[] {
         const sortedPlayers = [...players].sort((a, b) => b.speed - a.speed);
         const uniqueSpeeds = Array.from(new Set(sortedPlayers.map((player) => player.speed)));

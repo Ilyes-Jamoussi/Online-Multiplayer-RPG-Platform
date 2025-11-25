@@ -25,10 +25,11 @@ export class InGameService {
 
     async createInGameSession(waiting: WaitingRoomSession, mode: GameMode): Promise<InGameSession> {
         const { id, gameId, maxPlayers, players } = waiting;
+        const isCtf = mode === GameMode.CTF;
         const game = await this.gameplayService.fetchAndCacheGame(id, gameId);
 
         const teams: Record<number, Team> = {};
-        if (mode === GameMode.CTF) {
+        if (isCtf) {
             const teamCount = 2;
             for (let i = 0; i < teamCount; i++) {
                 teams[i + 1] = { number: i + 1, playerIds: [] };
@@ -50,6 +51,7 @@ export class InGameService {
             turnOrder: [],
             isAdminModeActive: false,
             teams,
+            flagData: isCtf ? this.gameplayService.getInitialFlagData(id) : undefined,
         };
 
         const totalDoors = game.tiles.filter((tile) => tile.kind === TileKind.DOOR).length;
@@ -217,5 +219,9 @@ export class InGameService {
         const session = this.sessionRepository.findById(sessionId);
         const gameStartTime = session.gameStartTime || new Date();
         this.statisticsService.calculateAndStoreGameStatistics(session, winnerId, winnerName, gameStartTime);
+    }
+
+    pickUpFlag(sessionId: string, playerId: string, position: Position): void {
+        this.gameplayService.pickUpFlag(sessionId, playerId, position);
     }
 }

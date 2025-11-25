@@ -7,6 +7,7 @@ import { GameDocument } from '@app/types/mongoose-documents.types';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileCost, TileKind } from '@common/enums/tile.enum';
+import { FlagData } from '@common/interfaces/flag-data.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -23,6 +24,36 @@ export class GameCacheService {
         @InjectModel(Game.name) private readonly gameModel: Model<GameDocument>,
         private readonly eventEmitter: EventEmitter2,
     ) {}
+
+    hidePlaceable(sessionId: string, position: Position): void {
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        const placeable = this.getPlaceableAtPosition(sessionId, position);
+        if (!placeable) throw new NotFoundException('Placeable not found');
+        placeable.placed = false;
+        this.eventEmitter.emit(ServerEvents.PlaceableUpdated, {
+            sessionId,
+            placeable: {
+                ...placeable,
+                id: placeable._id?.toString() || '',
+            },
+        });
+    }
+
+    showPlaceable(sessionId: string, position: Position): void {
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        const placeable = this.getPlaceableAtPosition(sessionId, position);
+        if (!placeable) throw new NotFoundException('Placeable not found');
+        placeable.placed = true;
+        this.eventEmitter.emit(ServerEvents.PlaceableUpdated, {
+            sessionId,
+            placeable: {
+                ...placeable,
+                id: placeable._id?.toString() || '',
+            },
+        });
+    }
 
     async fetchAndCacheGame(sessionId: string, gameId: string): Promise<Game> {
         const game = await this.gameModel.findById(gameId).lean();
@@ -302,12 +333,23 @@ export class GameCacheService {
         placeable.x = toPosition.x;
         placeable.y = toPosition.y;
 
-        this.eventEmitter.emit(ServerEvents.PlaceablePositionUpdated, {
+        this.eventEmitter.emit(ServerEvents.PlaceableUpdated, {
             sessionId,
             placeable: {
                 ...placeable,
                 id: placeable._id?.toString() || '',
             },
         });
+    }
+
+    getInitialFlagData(sessionId: string): FlagData | undefined {
+        const session = this.sessionsGameMaps.get(sessionId);
+        if (!session) throw new NotFoundException('Session not found');
+        const flag = session.objects.find((obj) => obj.kind === PlaceableKind.FLAG);
+        if (!flag) return undefined;
+        return {
+            position: { x: flag.x, y: flag.y },
+            holderPlayerId: null,
+        };
     }
 }

@@ -46,4 +46,3 @@ export class GameLogEntryDto {
     @IsObject()
     metadata?: GameLogMetadata;
 }
-

@@ -9,10 +9,12 @@ import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-s
 import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
 import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { FlagData } from '@common/interfaces/flag-data.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
@@ -29,6 +31,15 @@ export class ActionService {
         private readonly eventEmitter: EventEmitter2,
         private readonly sessionRepository: InGameSessionRepository,
     ) {}
+
+    pickUpFlag(session: InGameSession, playerId: string, position: Position): void {
+        const flagData = session.flagData;
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        if (!flagData) throw new NotFoundException('Flag data not found');
+        if (flagData.holderPlayerId) throw new BadRequestException('Flag already picked up');
+        this.sessionRepository.pickUpFlag(session, playerId, position);
+    }
 
     toggleDoor(session: InGameSession, playerId: string, position: Position): void {
         const gameMap = this.gameCache.getGameMapForSession(session.id);
@@ -196,7 +207,7 @@ export class ActionService {
 
                     this.addAttackAction(actions, occupantId, playerId, pos);
                     this.addDoorAction(actions, tile, pos);
-                    this.addPlaceableActions(actions, object, pos);
+                    this.addPlaceableActions(actions, object, pos, session.mode === GameMode.CTF);
                     this.addDisembarkAction(actions, player, tile, occupantId, pos);
                 } catch {
                     continue;
@@ -238,7 +249,7 @@ export class ActionService {
         }
     }
 
-    private addPlaceableActions(actions: AvailableAction[], object: Placeable | null, pos: Position): void {
+    private addPlaceableActions(actions: AvailableAction[], object: Placeable | null, pos: Position, ctf: boolean = false): void {
         if (!object) return;
 
         if (object.kind === PlaceableKind.HEAL) {
@@ -251,6 +262,10 @@ export class ActionService {
 
         if (object.kind === PlaceableKind.BOAT) {
             actions.push({ type: AvailableActionType.BOAT, x: pos.x, y: pos.y });
+        }
+
+        if (ctf && object.kind === PlaceableKind.FLAG) {
+            actions.push({ type: AvailableActionType.PICK_UP_FLAG, x: pos.x, y: pos.y });
         }
     }
 
@@ -280,6 +295,10 @@ export class ActionService {
 
     async fetchAndCacheGame(sessionId: string, gameId: string): Promise<Game> {
         return await this.gameCache.fetchAndCacheGame(sessionId, gameId);
+    }
+
+    getInitialFlagData(sessionId: string): FlagData | undefined {
+        return this.gameCache.getInitialFlagData(sessionId);
     }
 
     isTileFree(sessionId: string, position: Position): boolean {

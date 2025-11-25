@@ -28,4 +28,3 @@ describe('GameLogGateway', () => {
         expect(gateway).toBeDefined();
     });
 });
-

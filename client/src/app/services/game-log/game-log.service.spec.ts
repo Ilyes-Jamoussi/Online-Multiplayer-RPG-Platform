@@ -17,11 +17,7 @@ describe('GameLogService', () => {
         });
 
         TestBed.configureTestingModule({
-            providers: [
-                GameLogService,
-                { provide: PlayerService, useValue: playerService },
-                { provide: ResetService, useValue: resetService },
-            ],
+            providers: [GameLogService, { provide: PlayerService, useValue: playerService }, { provide: ResetService, useValue: resetService }],
         });
         service = TestBed.inject(GameLogService);
     });
@@ -84,4 +80,3 @@ describe('GameLogService', () => {
         expect(service.filterByMe()).toBe(false);
     });
 });
-

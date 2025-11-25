@@ -6,4 +6,3 @@ export interface TeleportEntryDto {
     destinationX: number;
     destinationY: number;
 }
-

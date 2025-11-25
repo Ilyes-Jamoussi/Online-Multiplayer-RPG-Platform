@@ -12,4 +12,3 @@ export interface GameLogEntryBase {
 export interface GameLogEntryWithMetadata extends GameLogEntryBase {
     metadata: GameLogMetadata;
 }
-

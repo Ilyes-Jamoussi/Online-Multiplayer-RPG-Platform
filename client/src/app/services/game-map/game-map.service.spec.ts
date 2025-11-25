@@ -107,7 +107,7 @@ describe('GameMapService', () => {
             currentlyPlayers: [mockPlayer],
         });
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getAvatarStaticImage']);
-        mockInGameSocketService = jasmine.createSpyObj('InGameSocketService', ['onDoorToggled', 'onPlaceablePositionUpdated']);
+        mockInGameSocketService = jasmine.createSpyObj('InGameSocketService', ['onDoorToggled', 'onPlaceableUpdated']);
 
         TestBed.configureTestingModule({
             providers: [

@@ -27,6 +27,9 @@
                     [ngStyle]="getPlayerBorderStyle(player)"
                     draggable="false"
                 />
+                @if (hasFlag(player)) {
+                <span class="flag-indicator">🚩</span>
+                }
             </div>
             }
         </div>

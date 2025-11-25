@@ -13,3 +13,11 @@ export enum PlaceableFootprint {
     FIGHT = 2,
     BOAT = 1,
 }
+
+export enum PlaceableReachable {
+    HEAL = 0,
+    FIGHT = 0,
+    BOAT = 1,
+    FLAG = 0,
+    START = 1,
+}

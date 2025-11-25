@@ -62,7 +62,7 @@ export class GameMapService {
         this.inGameSocketService.onDoorToggled((data) => {
             this.updateTileState(data.x, data.y, data.isOpen);
         });
-        this.inGameSocketService.onPlaceablePositionUpdated((data) => {
+        this.inGameSocketService.onPlaceableUpdated((data) => {
             this.updateObjectState(data);
         });
     }
@@ -264,6 +264,14 @@ export class GameMapService {
 
     boatAction(x: number, y: number): void {
         this.inGameService.boatAction(x, y);
+    }
+
+    pickUpFlag(x: number, y: number): void {
+        this.inGameService.pickUpFlag(x, y);
+    }
+
+    flagData() {
+        return this.inGameService.flagData();
     }
 
     reset(): void {

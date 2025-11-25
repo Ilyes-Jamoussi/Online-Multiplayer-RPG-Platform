@@ -20,4 +20,3 @@ export interface CombatResultEntryDto {
     targetDefense: TargetDefenseDto;
     damage: number;
 }
-

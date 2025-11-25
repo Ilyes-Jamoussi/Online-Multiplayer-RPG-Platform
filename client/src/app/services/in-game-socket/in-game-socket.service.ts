@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { AdminModeToggledDto } from '@app/dto/admin-mode-toggled-dto';
 import { AvailableActionsDto } from '@app/dto/available-actions-dto';
 import { DoorToggledDto } from '@app/dto/door-toggled-dto';
+import { FlagPickedUpDto } from '@app/dto/flag-picked-up-dto';
 import { GameOverDto } from '@app/dto/game-over-dto';
 import { GameStatisticsDto } from '@app/dto/game-statistics-dto';
 import { OpenSanctuaryDto } from '@app/dto/open-sanctuary-dto';
@@ -66,6 +67,10 @@ export class InGameSocketService {
 
     playerSanctuaryAction(data: { sessionId: string; x: number; y: number; kind: PlaceableKind; double?: boolean }): void {
         this.socket.emit(InGameEvents.PlayerSanctuaryAction, data);
+    }
+
+    playerPickUpFlag(data: { sessionId: string; x: number; y: number }): void {
+        this.socket.emit(InGameEvents.PickUpFlag, data);
     }
 
     toggleAdminMode(sessionId: string): void {
@@ -180,11 +185,15 @@ export class InGameSocketService {
         this.socket.onSuccessEvent(InGameEvents.PlayerDisembarkedBoat, callback);
     }
 
-    onPlaceablePositionUpdated(callback: (data: PlaceablePositionUpdatedDto) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.PlaceablePositionUpdated, callback);
+    onPlaceableUpdated(callback: (data: PlaceablePositionUpdatedDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlaceableUpdated, callback);
     }
 
     onSessionUpdated(callback: (data: InGameSession) => void): void {
         this.socket.onSuccessEvent(InGameEvents.SessionUpdated, callback);
+    }
+
+    onFlagPickedUp(callback: (data: FlagPickedUpDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.FlagPickedUp, callback);
     }
 }

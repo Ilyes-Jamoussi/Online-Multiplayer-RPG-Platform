@@ -3,7 +3,7 @@ import { ReachableTileExplorationContext } from '@app/interfaces/reachable-tile-
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { Orientation } from '@common/enums/orientation.enum';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { PlaceableReachable } from '@common/enums/placeable-kind.enum';
 import { TileCost, TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { Position, PositionWithDistance } from '@common/interfaces/position.interface';
@@ -169,13 +169,13 @@ export class MovementService {
 
         const placeable = this.gameCache.getPlaceableAtPosition(sessionId, { x: current.x, y: current.y });
         const isStartPosition = current.x === startPosition.x && current.y === startPosition.y;
-        const hasHealOrFight = placeable && (placeable.kind === PlaceableKind.HEAL || placeable.kind === PlaceableKind.FIGHT);
+        const isPlaceableReachable = placeable ? Boolean(PlaceableReachable[placeable.kind]) : true;
 
-        if (hasHealOrFight && !isStartPosition) {
+        if (!isPlaceableReachable && !isStartPosition) {
             return false;
         }
 
-        if (!hasHealOrFight) {
+        if (isPlaceableReachable || isStartPosition) {
             reachable.push(current);
         }
 

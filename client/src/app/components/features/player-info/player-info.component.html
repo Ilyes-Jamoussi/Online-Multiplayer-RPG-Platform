@@ -5,9 +5,9 @@
             <h3>
                 {{ playerName }}
                 @if (teamNumber !== undefined) {
-                <span class="badge-team" [style.background-color]="getTeamColor(teamNumber)">
-                    Équipe {{ teamNumber }}
-                </span>
+                <span class="badge-team" [style.background-color]="getTeamColor(teamNumber)"> Équipe {{ teamNumber }} </span>
+                } @if (hasFlag) {
+                <span class="badge-flag">🚩</span>
                 }
             </h3>
         </div>

@@ -10,4 +10,3 @@ export interface SanctuaryUseEntryDto {
     addedDefense?: number;
     addedAttack?: number;
 }
-

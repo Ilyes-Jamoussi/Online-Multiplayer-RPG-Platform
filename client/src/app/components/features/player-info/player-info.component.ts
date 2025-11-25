@@ -142,6 +142,11 @@ export class PlayerInfoComponent {
         return teamNumber === 1 ? TeamColor.Team1 : TeamColor.Team2;
     }
 
+    get hasFlag(): boolean {
+        const flagData = this.inGameService.flagData();
+        return flagData?.holderPlayerId === this.playerService.id();
+    }
+
     isActionDisabled(): boolean {
         return (
             !this.inGameService.isMyTurn() || !this.inGameService.isGameStarted() || this.inGameService.hasUsedAction() || !this.hasAvailableActions()

@@ -119,6 +119,18 @@
     pointer-events: none;
 }
 
+.flag-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2rem;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+    z-index: 20;
+    pointer-events: none;
+}
+
 .player-avatar {
     width: 70%;
     height: 70%;

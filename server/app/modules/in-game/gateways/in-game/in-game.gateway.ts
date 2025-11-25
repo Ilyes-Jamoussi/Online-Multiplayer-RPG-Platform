@@ -4,6 +4,7 @@ import { AdminModeToggledDto } from '@app/modules/in-game/dto/admin-mode-toggled
 import { AvailableActionsDto } from '@app/modules/in-game/dto/available-actions.dto';
 import { DoorToggledDto } from '@app/modules/in-game/dto/door-toggled.dto';
 import { EmptyResponseDto } from '@app/modules/in-game/dto/empty-response.dto';
+import { FlagPickedUpDto } from '@app/modules/in-game/dto/flag-picked-up.dto';
 import { GameOverDto } from '@app/modules/in-game/dto/game-over.dto';
 import { GameStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
 import { OpenSanctuaryDto } from '@app/modules/in-game/dto/open-sanctuary.dto';
@@ -135,6 +136,20 @@ export class InGameGateway {
         }
     }
 
+    @SubscribeMessage(InGameEvents.PickUpFlag)
+    pickUpFlag(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
+        try {
+            this.inGameService.pickUpFlag(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
+        } catch (error) {
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
+        }
+    }
+
+    @OnEvent(ServerEvents.FlagPickedUp)
+    handleFlagPickedUp(payload: { session: InGameSession; playerId: string }): void {
+        this.server.to(payload.session.inGameId).emit(InGameEvents.FlagPickedUp, successResponse<FlagPickedUpDto>({ playerId: payload.playerId }));
+    }
+
     @SubscribeMessage(InGameEvents.PlayerBoardBoat)
     playerBoardBoat(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
         try {
@@ -174,14 +189,14 @@ export class InGameGateway {
         }
     }
 
-    @OnEvent(ServerEvents.PlaceablePositionUpdated)
-    handlePlaceablePositionUpdated(payload: { sessionId: string; placeable: Placeable }): void {
+    @OnEvent(ServerEvents.PlaceableUpdated)
+    handlePlaceableUpdated(payload: { sessionId: string; placeable: Placeable }): void {
         const session = this.inGameService.getSession(payload.sessionId);
         const placeableDto: PlaceablePositionUpdatedDto = {
             ...payload.placeable,
             _id: payload.placeable._id?.toString(),
         };
-        this.server.to(session.inGameId).emit(InGameEvents.PlaceablePositionUpdated, successResponse<PlaceablePositionUpdatedDto>(placeableDto));
+        this.server.to(session.inGameId).emit(InGameEvents.PlaceableUpdated, successResponse<PlaceablePositionUpdatedDto>(placeableDto));
     }
 
     @OnEvent(ServerEvents.OpenSanctuaryDenied)

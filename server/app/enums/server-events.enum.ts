@@ -45,7 +45,9 @@ export enum ServerEvents {
     SanctuaryActionFailed = 'sanctuary-action-failed',
     SanctuaryActionSuccess = 'sanctuary-action-success',
 
-    PlaceablePositionUpdated = 'placeable-position-updated',
+    PlaceableUpdated = 'placeable-updated',
 
     SessionUpdated = 'session-updated',
+
+    FlagPickedUp = 'flag-picked-up',
 }

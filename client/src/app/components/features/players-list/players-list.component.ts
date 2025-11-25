@@ -66,4 +66,9 @@ export class PlayersListComponent {
         if (teamNumber === undefined) return undefined;
         return teamNumber === 1 ? TeamColor.Team1 : TeamColor.Team2;
     }
+
+    hasFlag(player: Player): boolean {
+        const flagData = this.inGameService.flagData();
+        return flagData?.holderPlayerId === player.id;
+    }
 }

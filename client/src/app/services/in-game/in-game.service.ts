@@ -54,6 +54,7 @@ export class InGameService {
     readonly isActionModeActive = this._isActionModeActive.asReadonly();
     readonly gameOverData = this._gameOverData.asReadonly();
     readonly openedSanctuary = this._openedSanctuary.asReadonly();
+    readonly flagData = computed(() => this._inGameSession().flagData);
 
     sessionId(): string {
         return this.sessionService.id();
@@ -184,6 +185,10 @@ export class InGameService {
 
     boatAction(x: number, y: number): void {
         this.playerService.boatAction(x, y);
+    }
+
+    pickUpFlag(x: number, y: number): void {
+        this.inGameSocketService.playerPickUpFlag({ sessionId: this.sessionService.id(), x, y });
     }
 
     reset(): void {
@@ -373,6 +378,18 @@ export class InGameService {
 
         this.inGameSocketService.onSessionUpdated((data) => {
             this.updateInGameSession(data);
+        });
+
+        this.inGameSocketService.onFlagPickedUp((data) => {
+            const currentFlagData = this.flagData();
+            if (currentFlagData) {
+                this.updateInGameSession({
+                    flagData: {
+                        ...currentFlagData,
+                        holderPlayerId: data.playerId,
+                    },
+                });
+            }
         });
     }
 }

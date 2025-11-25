@@ -36,6 +36,13 @@
             <img class="avatar" [src]="getPlayerAvatar(playerOnTile.id)" [alt]="playerOnTile.name" />
             <div class="tile-modal__player-info">
                 <div>Nom: {{ playerOnTile.name }}</div>
+                @if (getTeamNumber(playerOnTile) !== undefined) {
+                <div class="team-badge" [style.background-color]="getTeamColor(getTeamNumber(playerOnTile))">
+                    Équipe {{ getTeamNumber(playerOnTile) }}
+                </div>
+                } @if (hasFlag(playerOnTile)) {
+                <div class="flag-info">🚩 Ce joueur a le drapeau</div>
+                }
             </div>
         </div>
     </section>

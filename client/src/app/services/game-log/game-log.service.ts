@@ -66,6 +66,8 @@ export class GameLogService {
     }
 
     private generateId(): string {
-        return `${Date.now()}-${Math.random().toString(ID_GENERATION.radix).substring(2, 2 + ID_GENERATION.substringLength)}`;
+        return `${Date.now()}-${Math.random()
+            .toString(ID_GENERATION.radix)
+            .substring(2, 2 + ID_GENERATION.substringLength)}`;
     }
 }

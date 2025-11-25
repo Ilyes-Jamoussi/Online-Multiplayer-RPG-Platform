@@ -67,7 +67,10 @@ export enum InGameEvents {
     CombatTimerUpdate = 'combatTimerUpdate',
     CombatTileEffect = 'combatTileEffect',
 
-    PlaceablePositionUpdated = 'placeablePositionUpdated',
+    PlaceableUpdated = 'placeable-updated',
 
     SessionUpdated = 'session-updated',
+
+    PickUpFlag = 'pick-up-flag',
+    FlagPickedUp = 'flag-picked-up',
 }
