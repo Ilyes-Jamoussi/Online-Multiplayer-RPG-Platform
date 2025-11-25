@@ -1,29 +1,17 @@
 <app-ui-page-layout [hasHeader]="true" headerTitle="Choisir un jeu" [showBackButton]="true" (backClick)="onBack()">
     <div class="games-section">
         <div class="tabs-container">
-            <button
-                class="tab-button"
-                [class.active]="activeTab() === 'all'"
-                (click)="setActiveTab('all')"
-            >
+            <button class="tab-button" [class.active]="activeTab() === 'all'" (click)="setActiveTab('all')">
                 <span class="tab-icon">📋</span>
                 <span class="tab-label">Tout</span>
                 <span class="tab-count">({{ allCount }})</span>
             </button>
-            <button
-                class="tab-button"
-                [class.active]="activeTab() === 'classic'"
-                (click)="setActiveTab('classic')"
-            >
+            <button class="tab-button" [class.active]="activeTab() === 'classic'" (click)="setActiveTab('classic')">
                 <span class="tab-icon">🎮</span>
                 <span class="tab-label">Classique</span>
                 <span class="tab-count">({{ classicCount }})</span>
             </button>
-            <button
-                class="tab-button"
-                [class.active]="activeTab() === 'ctf'"
-                (click)="setActiveTab('ctf')"
-            >
+            <button class="tab-button" [class.active]="activeTab() === 'ctf'" (click)="setActiveTab('ctf')">
                 <span class="tab-icon">🚩</span>
                 <span class="tab-label">Capture du Drapeau</span>
                 <span class="tab-count">({{ ctfCount }})</span>
@@ -32,17 +20,17 @@
 
         <div class="tab-content">
             @if (visibleGames().length > 0) {
-                <div class="games-grid">
-                    @for (game of visibleGames(); track game.id) {
-                        <app-game-preview-card [game]="game" [isAdmin]="false" (startGame)="onStartGame($event)"></app-game-preview-card>
-                    }
-                </div>
+            <div class="games-grid">
+                @for (game of visibleGames(); track game.id) {
+                <app-game-preview-card [game]="game" [isAdmin]="false" (startGame)="onStartGame($event)"></app-game-preview-card>
+                }
+            </div>
             } @else {
-                <div class="no-games-message">
-                    <span class="no-games-icon">{{ activeTab() === 'all' ? '📋' : activeTab() === 'classic' ? '🎮' : '🚩' }}</span>
-                    <h2>Aucun jeu {{ activeTab() === 'all' ? '' : activeTab() === 'classic' ? 'classique' : 'CTF' }} disponible</h2>
-                    <p>Il n'y a actuellement aucun jeu{{ activeTab() === 'all' ? '' : ' dans ce mode' }}.</p>
-                </div>
+            <div class="no-games-message">
+                <span class="no-games-icon">{{ activeTab() === 'all' ? '📋' : activeTab() === 'classic' ? '🎮' : '🚩' }}</span>
+                <h2>Aucun jeu {{ activeTab() === 'all' ? '' : activeTab() === 'classic' ? 'classique' : 'CTF' }} disponible</h2>
+                <p>Il n'y a actuellement aucun jeu{{ activeTab() === 'all' ? '' : ' dans ce mode' }}.</p>
+            </div>
             }
         </div>
     </div>

@@ -158,13 +158,12 @@ export class GameLogGateway {
         const entry = this.gameLogService.createFlagPickupEntry(payload.session.id, payload.playerId);
         this.emitLogEntry(payload.session.inGameId, entry);
     }
-    
+
     @OnEvent(ServerEvents.FlagTransferred)
-    handleFlagTransferred(payload: { session: InGameSession; fromPlayerId: string; toPlayerId: string; }): void {
+    handleFlagTransferred(payload: { session: InGameSession; fromPlayerId: string; toPlayerId: string }): void {
         const entry = this.gameLogService.createFlagTransferEntry(payload.session.id, payload.fromPlayerId, payload.toPlayerId);
         this.emitLogEntry(payload.session.inGameId, entry);
     }
-
 
     private emitLogEntry(inGameId: string, entry: Omit<GameLogEntryDto, 'id' | 'timestamp'>): void {
         const logEntry: GameLogEntryDto = {

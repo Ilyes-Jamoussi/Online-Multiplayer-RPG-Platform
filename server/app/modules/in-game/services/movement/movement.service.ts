@@ -1,4 +1,5 @@
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { MoveData } from '@app/interfaces/move-data.interface';
 import { ReachableTileExplorationContext } from '@app/interfaces/reachable-tile-exploration-context.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
@@ -22,18 +23,29 @@ export class MovementService {
     ) {}
 
     movePlayer(session: InGameSession, playerId: string, orientation: Orientation): number {
+        const player = this.validatePlayer(session, playerId);
+        const nextPosition = this.calculateNextPosition(session, player, orientation);
+        const moveData = this.validateAndPrepareMove(session, player, nextPosition);
+        const finalPosition = this.handleTeleportation(session, moveData);
+        this.executeMove(session, playerId, player, moveData, finalPosition);
+        this.handleCTFMove(session, playerId, finalPosition);
+        return player.speed;
+    }
+
+    private validatePlayer(session: InGameSession, playerId: string): Player {
         const player = session.inGamePlayers[playerId];
         if (!player) {
             throw new NotFoundException('Player not found');
         }
+        return player;
+    }
 
-        let nextX = player.x;
-        let nextY = player.y;
+    private calculateNextPosition(session: InGameSession, player: Player, orientation: Orientation): Position {
+        return this.gameCache.getNextPosition(session.id, { x: player.x, y: player.y }, orientation);
+    }
 
-        const nextPosition = this.gameCache.getNextPosition(session.id, { x: player.x, y: player.y }, orientation);
-        nextX = nextPosition.x;
-        nextY = nextPosition.y;
-        const tile = this.gameCache.getTileAtPosition(session.id, { x: nextX, y: nextY });
+    private validateAndPrepareMove(session: InGameSession, player: Player, nextPosition: Position): MoveData {
+        const tile = this.gameCache.getTileAtPosition(session.id, nextPosition);
         if (!tile) {
             throw new NotFoundException('Tile not found');
         }
@@ -43,57 +55,70 @@ export class MovementService {
             throw new BadRequestException('Cannot use teleporter while on a boat');
         }
 
-        const moveCost = this.calculateTileCost(session.id, { x: nextX, y: nextY }, isOnBoat);
-
+        const moveCost = this.calculateTileCost(session.id, nextPosition, isOnBoat);
         if (moveCost === null) {
             throw new BadRequestException('Cannot move onto this tile');
-        } else if (moveCost > player.speed + player.boatSpeed) {
+        }
+        if (moveCost > player.speed + player.boatSpeed) {
             throw new BadRequestException('Not enough movement points for this tile');
         }
 
-        const originX = player.x;
-        const originY = player.y;
-        let teleported = false;
-        if (tile.kind === TileKind.TELEPORT) {
-            const destination = this.gameCache.getTeleportDestination(session.id, { x: nextX, y: nextY });
-            const destinationOccupant = this.gameCache.getTileOccupant(session.id, destination);
-            nextX = destinationOccupant ? nextX : destination.x;
-            nextY = destinationOccupant ? nextY : destination.y;
-            teleported = true;
+        return {
+            nextPosition,
+            tile,
+            moveCost,
+            isOnBoat,
+            originX: player.x,
+            originY: player.y,
+        };
+    }
+
+    private handleTeleportation(session: InGameSession, moveData: MoveData): Position {
+        if (moveData.tile.kind !== TileKind.TELEPORT) {
+            return moveData.nextPosition;
         }
 
-        if (this.gameCache.getTileOccupant(session.id, { x: nextX, y: nextY })) {
+        const destination = this.gameCache.getTeleportDestination(session.id, moveData.nextPosition);
+        const destinationOccupant = this.gameCache.getTileOccupant(session.id, destination);
+        return destinationOccupant ? moveData.nextPosition : destination;
+    }
+
+    private executeMove(session: InGameSession, playerId: string, player: Player, moveData: MoveData, finalPosition: Position): void {
+        if (this.gameCache.getTileOccupant(session.id, finalPosition)) {
             throw new BadRequestException('Tile is occupied');
         }
 
         if (player.onBoatId) {
-            this.gameCache.updatePlaceablePosition(session.id, { x: player.x, y: player.y }, { x: nextX, y: nextY });
+            this.gameCache.updatePlaceablePosition(session.id, { x: player.x, y: player.y }, finalPosition);
         }
 
-        this.sessionRepository.movePlayerPosition(session.id, playerId, nextX, nextY, moveCost);
+        this.sessionRepository.movePlayerPosition(session.id, playerId, finalPosition.x, finalPosition.y, moveData.moveCost);
 
+        const teleported =
+            moveData.tile.kind === TileKind.TELEPORT && (finalPosition.x !== moveData.nextPosition.x || finalPosition.y !== moveData.nextPosition.y);
         if (teleported) {
             this.eventEmitter.emit(ServerEvents.Teleported, {
                 session,
                 playerId,
-                originX,
-                originY,
-                destinationX: nextX,
-                destinationY: nextY,
+                originX: moveData.originX,
+                originY: moveData.originY,
+                destinationX: finalPosition.x,
+                destinationY: finalPosition.y,
             });
         }
 
         this.calculateReachableTiles(session, playerId);
+    }
 
-        if (session.mode === GameMode.CTF) {
-            if (this.sessionRepository.playerHasFlag(session.id, playerId)) {
-                this.checkCTFVictory(session, playerId, { x: nextX, y: nextY });
-            } else {
-                this.tryPickUpFlag(session, playerId, { x: nextX, y: nextY });
-            }
+    private handleCTFMove(session: InGameSession, playerId: string, position: Position): void {
+        if (session.mode !== GameMode.CTF) return;
+
+        if (this.sessionRepository.playerHasFlag(session.id, playerId)) {
+            this.sessionRepository.updateFlagPosition(session, playerId, position);
+            this.checkCTFVictory(session, playerId, position);
+        } else {
+            this.tryPickUpFlag(session, playerId, position);
         }
-
-        return player.speed;
     }
 
     private tryPickUpFlag(session: InGameSession, playerId: string, position: Position): void {

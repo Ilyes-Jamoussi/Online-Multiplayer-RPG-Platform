@@ -31,6 +31,13 @@ export class InGameSessionRepository {
         this.eventEmitter.emit(ServerEvents.FlagPickedUp, { session, playerId });
     }
 
+    updateFlagPosition(session: InGameSession, playerId: string, position: Position): void {
+        const flagData = session.flagData;
+        if (!flagData) throw new NotFoundException('Flag data not found');
+        if (flagData.holderPlayerId !== playerId) throw new BadRequestException('Player does not hold the flag');
+        flagData.position = position;
+    }
+
     transferFlag(session: InGameSession, fromPlayerId: string, toPlayerId: string): void {
         const flagData = session.flagData;
         if (!flagData) throw new NotFoundException('Flag data not found');
