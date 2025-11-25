@@ -393,5 +393,11 @@ export class InGameService {
                 });
             }
         });
+
+        this.inGameSocketService.onFlagTransferRequestsCleared(() => {
+            if (this._pendingFlagTransferRequest()) {
+                this._pendingFlagTransferRequest.set(null);
+            }
+        });
     }
 }

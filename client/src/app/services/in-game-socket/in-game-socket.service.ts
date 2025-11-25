@@ -219,4 +219,8 @@ export class InGameSocketService {
     onFlagTransferred(callback: (data: FlagTransferredDto) => void): void {
         this.socket.onSuccessEvent(InGameEvents.FlagTransferred, callback);
     }
+
+    onFlagTransferRequestsCleared(callback: () => void): void {
+        this.socket.onSuccessEvent(InGameEvents.FlagTransferRequestsCleared, callback);
+    }
 }

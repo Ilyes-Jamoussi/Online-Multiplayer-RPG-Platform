@@ -290,4 +290,11 @@ export class InGameActionGateway {
                 successResponse<FlagTransferredDto>({ fromPlayerId: payload.fromPlayerId, toPlayerId: payload.toPlayerId }),
             );
     }
+
+    @OnEvent(ServerEvents.FlagTransferRequestsCleared)
+    handleFlagTransferRequestsCleared(payload: { session: InGameSession; affectedPlayerIds: string[] }): void {
+        payload.affectedPlayerIds.forEach((playerId) => {
+            this.server.to(playerId).emit(InGameEvents.FlagTransferRequestsCleared, successResponse({}));
+        });
+    }
 }

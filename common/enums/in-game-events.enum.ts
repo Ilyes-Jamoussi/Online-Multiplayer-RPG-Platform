@@ -79,4 +79,5 @@ export enum InGameEvents {
     FlagTransferResponse = 'flag-transfer-response',
     FlagTransferResult = 'flag-transfer-result',
     FlagTransferred = 'flag-transferred',
+    FlagTransferRequestsCleared = 'flag-transfer-requests-cleared',
 }
