@@ -1,4 +1,5 @@
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { AdminModeToggledDto } from '@app/modules/in-game/dto/admin-mode-toggled.dto';
 import { AvailableActionsDto } from '@app/modules/in-game/dto/available-actions.dto';
 import { DoorToggledDto } from '@app/modules/in-game/dto/door-toggled.dto';
 import { FlagPickedUpDto } from '@app/modules/in-game/dto/flag-picked-up.dto';
@@ -70,6 +71,18 @@ export class InGameActionGateway {
     toggleDoorAction(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
         try {
             this.inGameService.toggleDoorAction(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
+        } catch (error) {
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
+        }
+    }
+
+    @SubscribeMessage(InGameEvents.ToggleAdminMode)
+    handleToggleAdminMode(socket: Socket, sessionId: string): void {
+        try {
+            const session = this.inGameService.toggleAdminMode(sessionId, socket.id);
+            this.server
+                .to(session.inGameId)
+                .emit(InGameEvents.AdminModeToggled, successResponse<AdminModeToggledDto>({ isAdminModeActive: !!session.isAdminModeActive }));
         } catch (error) {
             socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }

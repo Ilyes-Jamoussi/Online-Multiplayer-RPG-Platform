@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { COMBAT_DURATION } from '@common/constants/in-game';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -23,13 +24,17 @@ describe('CombatTimerService', () => {
         inGameId: 'in-game-1',
         gameId: 'game-1',
         maxPlayers: 4,
+        mode: GameMode.CLASSIC,
         isGameStarted: true,
         inGamePlayers: {},
+        teams: {
+            1: { number: 1, playerIds: [] }, // eslint-disable-line @typescript-eslint/naming-convention -- Test data
+        },
         currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
         startPoints: [],
         mapSize: MapSize.MEDIUM,
-        mode: GameMode.CLASSIC,
         turnOrder: [],
+        playerCount: 0,
         ...overrides,
     });
 
