@@ -37,4 +37,3 @@ describe('MessagesZoneComponent', () => {
         expect(gameLogService.toggleFilter).toHaveBeenCalled();
     });
 });
-

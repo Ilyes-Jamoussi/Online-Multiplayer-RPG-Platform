@@ -1,4 +1,4 @@
 export enum GameLogEvents {
-    LogEntry = 'logEntry',
+    LogEntry = 'log-entry',
 }
 

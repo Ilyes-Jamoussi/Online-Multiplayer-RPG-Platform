@@ -1,5 +1,4 @@
 import { computed, inject, Injectable, Signal, signal } from '@angular/core';
-import { ID_GENERATION } from '@app/constants/game-log.constants';
 import { GameLogSocketService } from '@app/services/game-log-socket/game-log-socket.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { ResetService } from '@app/services/reset/reset.service';
@@ -15,7 +14,7 @@ export class GameLogService {
     readonly entries = this._entries.asReadonly();
     readonly filterByMe = this._filterByMe.asReadonly();
 
-    private _filteredEntries!: Signal<GameLogEntry[]>;
+    private readonly _filteredEntries!: Signal<GameLogEntry[]>;
 
     constructor(
         private readonly playerService: PlayerService,
@@ -39,21 +38,8 @@ export class GameLogService {
         });
     }
 
-    addEntry(entry: Omit<GameLogEntry, 'id' | 'timestamp'>): void {
-        const newEntry: GameLogEntry = {
-            ...entry,
-            id: this.generateId(),
-            timestamp: new Date().toISOString(),
-        };
-        this._entries.update((entries) => [...entries, newEntry]);
-    }
-
     toggleFilter(): void {
         this._filterByMe.update((value) => !value);
-    }
-
-    setFilter(filterByMe: boolean): void {
-        this._filterByMe.set(filterByMe);
     }
 
     reset(): void {
@@ -63,9 +49,5 @@ export class GameLogService {
 
     getFilteredEntries(): Signal<GameLogEntry[]> {
         return this._filteredEntries;
-    }
-
-    private generateId(): string {
-        return `${Date.now()}-${Math.random().toString(ID_GENERATION.radix).substring(2, 2 + ID_GENERATION.substringLength)}`;
     }
 }

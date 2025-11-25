@@ -9,4 +9,3 @@ import { GameLogGateway } from './gateways/game-log.gateway';
     exports: [GameLogService],
 })
 export class GameLogModule {}
-

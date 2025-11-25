@@ -14,7 +14,6 @@ export class TimerService {
     private readonly _combatTimeRemaining = signal<number>(0);
     private readonly _isCombatActive = signal<boolean>(false);
     private readonly _gameOverTimeRemaining = signal<number>(0);
-    private readonly _isGameOverActive = signal<boolean>(false);
 
     private turnTimer: number | null = null;
     private pausedTurnTime: number = 0;
@@ -26,7 +25,6 @@ export class TimerService {
     readonly combatTimeRemaining = this._combatTimeRemaining.asReadonly();
     readonly isCombatActive = this._isCombatActive.asReadonly();
     readonly gameOverTimeRemaining = this._gameOverTimeRemaining.asReadonly();
-    readonly isGameOverActive = this._isGameOverActive.asReadonly();
 
     getPausedTurnTime(): number {
         return this.pausedTurnTime;
@@ -127,7 +125,6 @@ export class TimerService {
         const gameOverDurationSeconds = GAME_OVER_REDIRECT_DELAY_MS / MILLISECONDS_PER_SECOND;
 
         this._gameOverTimeRemaining.set(gameOverDurationSeconds);
-        this._isGameOverActive.set(true);
 
         this.gameOverTimer = window.setInterval(() => {
             const currentTime = this._gameOverTimeRemaining();
@@ -145,7 +142,6 @@ export class TimerService {
             window.clearInterval(this.gameOverTimer);
             this.gameOverTimer = null;
         }
-        this._isGameOverActive.set(false);
         this._gameOverTimeRemaining.set(0);
     }
 

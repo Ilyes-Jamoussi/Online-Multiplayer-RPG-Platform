@@ -421,35 +421,6 @@ describe('GameEditorStoreService', () => {
         });
     });
 
-    describe('resetTileAt', () => {
-        beforeEach(() => {
-            const subject = new Subject<GameEditorDto>();
-            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
-            service.loadGameById('1');
-            subject.next(mockEditorData);
-            subject.complete();
-        });
-
-        it('should reset the tile at specified coordinates to BASE', () => {
-            service.setTileAt(0, 0, TileKind.WATER);
-            const modifiedTile = service.getTileAt(0, 0);
-            expect(modifiedTile).toBeDefined();
-            expect(modifiedTile?.kind).toBe(TileKind.WATER);
-
-            service.resetTileAt(0, 0);
-            const resetTile = service.getTileAt(0, 0);
-            expect(resetTile).toBeDefined();
-            expect(resetTile?.kind).toBe(TileKind.BASE);
-        });
-
-        it('should do nothing if coordinates are invalid', () => {
-            const beforeTile = service.getTileAt(0, 0);
-            service.resetTileAt(invalidTile, invalidTile);
-            const afterTile = service.getTileAt(0, 0);
-            expect(afterTile).toEqual(beforeTile);
-        });
-    });
-
     describe('reset', () => {
         beforeEach(() => {
             const subject = new Subject<GameEditorDto>();

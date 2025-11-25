@@ -398,17 +398,6 @@ describe('GameMapService', () => {
         });
     });
 
-    describe('Reset', () => {
-        it('should reset to initial state', () => {
-            service.openTileModal(mockTile);
-            service.reset();
-
-            expect(service.size()).toBe(MapSize.MEDIUM);
-            expect(service.tiles()).toEqual([]);
-            expect(service.objects()).toEqual([]);
-        });
-    });
-
     describe('Door Listener', () => {
         it('should handle door toggled event', () => {
             const updateTileStateSpy = spyOn(

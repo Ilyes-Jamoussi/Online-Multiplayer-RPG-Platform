@@ -296,17 +296,4 @@ describe('GameMapTileComponent', () => {
             expect(mockGameMapService.boatAction).toHaveBeenCalledWith(TEST_TILE_X, TEST_TILE_Y);
         });
     });
-
-    describe('modal methods', () => {
-        it('should open modal', () => {
-            const mockEvent = jasmine.createSpyObj('MouseEvent', ['preventDefault']);
-            component.openModal(mockEvent);
-            expect(mockGameMapService.openTileModal).toHaveBeenCalledWith(mockTile);
-        });
-
-        it('should close modal', () => {
-            component.closeModal();
-            expect(mockGameMapService.closeTileModal).toHaveBeenCalled();
-        });
-    });
 });
