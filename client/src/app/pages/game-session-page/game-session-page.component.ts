@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AdminBadgeComponent } from '@app/components/features/admin-badge/admin-badge.component';
 import { MessagesZoneComponent } from '@app/components/features/messages-zone/messages-zone.component';
 import { CombatOverlayComponent } from '@app/components/features/combat-overlay/combat-overlay.component';
@@ -38,8 +38,6 @@ import { MapSize } from '@common/enums/map-size.enum';
     providers: [GameMapService],
 })
 export class GameSessionPageComponent implements OnInit, OnDestroy {
-    @ViewChild(GameMapComponent) gameMapComponent?: GameMapComponent;
-
     constructor(
         private readonly sessionService: SessionService,
         private readonly gameMapService: GameMapService,

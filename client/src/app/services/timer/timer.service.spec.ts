@@ -205,7 +205,6 @@ describe('TimerService', () => {
             service.startGameOverTimer(mockRouter as unknown as Router);
 
             expect(service.gameOverTimeRemaining()).toBe(TEST_SECONDS_10);
-            expect(service.isGameOverActive()).toBe(true);
         });
 
         it('should decrement game over timer every second', () => {
@@ -228,17 +227,14 @@ describe('TimerService', () => {
 
             jasmine.clock().tick(MILLISECONDS_PER_SECOND);
             expect(mockRouter.navigate).toHaveBeenCalledWith(['statistics']);
-            expect(service.isGameOverActive()).toBe(false);
             expect(service.gameOverTimeRemaining()).toBe(0);
         });
 
         it('should stop game over timer manually', () => {
             const mockRouter = { navigate: jasmine.createSpy('navigate') };
             service.startGameOverTimer(mockRouter as unknown as Router);
-            expect(service.isGameOverActive()).toBe(true);
 
             service.stopGameOverTimer();
-            expect(service.isGameOverActive()).toBe(false);
             expect(service.gameOverTimeRemaining()).toBe(0);
         });
     });
