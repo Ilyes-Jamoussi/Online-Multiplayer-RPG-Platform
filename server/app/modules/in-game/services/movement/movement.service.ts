@@ -50,6 +50,14 @@ export class MovementService {
             throw new NotFoundException('Tile not found');
         }
 
+        const placeable = this.gameCache.getPlaceableAtPosition(session.id, nextPosition);
+        if (placeable) {
+            const isPlaceableReachable = Boolean(PlaceableReachable[placeable.kind]);
+            if (!isPlaceableReachable) {
+                throw new BadRequestException('Cannot move onto this placeable');
+            }
+        }
+
         const isOnBoat = Boolean(player.onBoatId);
         if (isOnBoat && tile.kind === TileKind.TELEPORT) {
             throw new BadRequestException('Cannot use teleporter while on a boat');
@@ -171,6 +179,7 @@ export class MovementService {
             this.sessionRepository.movePlayerPosition(session.id, playerId, position.x, position.y, 0);
         }
         this.sessionRepository.resetPlayerBoatSpeedBonus(session.id, playerId);
+        this.handleCTFMove(session, playerId, position);
     }
 
     calculateReachableTiles(session: InGameSession, playerId: string): ReachableTile[] {

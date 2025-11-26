@@ -66,14 +66,15 @@ export class GameCacheService {
                 continue;
             }
 
-            const footprint = PlaceableFootprint[obj.kind];
+            const footprint = PlaceableFootprint[obj.kind] || 1;
             for (let offsetY = 0; offsetY < footprint; offsetY++) {
                 for (let offsetX = 0; offsetX < footprint; offsetX++) {
-                    expandedObjects.push({
+                    const expanded = {
                         ...obj,
                         x: obj.x + offsetX,
                         y: obj.y + offsetY,
-                    });
+                    };
+                    expandedObjects.push(expanded);
                 }
             }
         }
@@ -202,7 +203,8 @@ export class GameCacheService {
     getPlaceableAtPosition(sessionId: string, position: Position, placedOnly: boolean = true): Placeable | undefined {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
-        return gameMap.objects.find((obj) => (placedOnly ? obj.placed : true) && obj.x === position.x && obj.y === position.y);
+        const found = gameMap.objects.find((obj) => (placedOnly ? obj.placed : true) && obj.x === position.x && obj.y === position.y);
+        return found;
     }
 
     getFlagPlaceable(sessionId: string, placedOnly: boolean = true): Placeable | undefined {

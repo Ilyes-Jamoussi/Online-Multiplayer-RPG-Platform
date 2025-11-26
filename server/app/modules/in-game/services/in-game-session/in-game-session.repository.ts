@@ -72,6 +72,7 @@ export class InGameSessionRepository {
         flagPlaceable.x = position.x;
         flagPlaceable.y = position.y;
         this.gameCache.showPlaceable(session.id, position);
+        this.update(session, true);
     }
 
     updatePlayer(sessionId: string, playerId: string, updates: Partial<Player>): void {
