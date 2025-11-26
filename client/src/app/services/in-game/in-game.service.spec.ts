@@ -365,7 +365,7 @@ describe('InGameService', () => {
                 value: signal('player1'),
                 configurable: true,
             });
-        mockPlayerService.updatePlayer.calls.reset();
+            mockPlayerService.updatePlayer.calls.reset();
             callback(mockData);
             expect(mockPlayerService.updatePlayer).not.toHaveBeenCalled();
         });
@@ -389,7 +389,7 @@ describe('InGameService', () => {
             const callback = mockInGameSocketService.onPlayerAvailableActions.calls.mostRecent().args[0];
             const mockActions: AvailableActionDto[] = [{ type: AvailableActionType.ATTACK, x: 1, y: 1 }];
             const mockData: AvailableActionsDto = { availableActions: mockActions };
-        mockPlayerService.updateActionsRemaining.calls.reset();
+            mockPlayerService.updateActionsRemaining.calls.reset();
             callback(mockData);
             expect(service.availableActions()).toEqual(mockActions);
             expect(mockPlayerService.updateActionsRemaining).not.toHaveBeenCalled();

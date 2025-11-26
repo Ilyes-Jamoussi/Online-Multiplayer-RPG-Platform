@@ -114,16 +114,12 @@ describe('GameOverOverlayComponent', () => {
             playerCount: mockPlayers.length,
         };
 
-        mockInGameService = jasmine.createSpyObj(
-            'InGameService',
-            ['reset', 'getPlayerByPlayerId'],
-            {
-                gameOverData: signal(mockGameOverData),
-                inGamePlayers: signal(inGamePlayersRecord),
-                mode: () => GameMode.CLASSIC,
-                inGameSession: signal(mockSession),
-            },
-        );
+        mockInGameService = jasmine.createSpyObj('InGameService', ['reset', 'getPlayerByPlayerId'], {
+            gameOverData: signal(mockGameOverData),
+            inGamePlayers: signal(inGamePlayersRecord),
+            mode: () => GameMode.CLASSIC,
+            inGameSession: signal(mockSession),
+        });
         mockInGameService.getPlayerByPlayerId.and.callFake((playerId: string) => inGamePlayersRecord[playerId]);
 
         mockPlayerService = jasmine.createSpyObj('PlayerService', [], {

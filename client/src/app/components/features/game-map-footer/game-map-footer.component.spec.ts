@@ -24,6 +24,7 @@ type MockInGameService = Partial<InGameService> & {
     _isMyTurnSignal: WritableSignal<boolean>;
     _isGameStartedSignal: WritableSignal<boolean>;
     _hasUsedActionSignal: WritableSignal<boolean>;
+    _isActionModeActiveSignal: WritableSignal<boolean>;
 };
 
 describe('GameMapFooterComponent', () => {
@@ -74,6 +75,7 @@ describe('GameMapFooterComponent', () => {
         const isMyTurnSignal = signal(true);
         const isGameStartedSignal = signal(true);
         const hasUsedActionSignal = signal(false);
+        const isActionModeActiveSignal = signal(false);
 
         mockPlayerService = {
             speed: speedSignal.asReadonly(),
@@ -89,12 +91,15 @@ describe('GameMapFooterComponent', () => {
             isMyTurn: isMyTurnSignal.asReadonly(),
             isGameStarted: isGameStartedSignal.asReadonly(),
             hasUsedAction: hasUsedActionSignal.asReadonly(),
+            isActionModeActive: isActionModeActiveSignal.asReadonly(),
             activateActionMode: jasmine.createSpy('activateActionMode'),
+            deactivateActionMode: jasmine.createSpy('deactivateActionMode'),
             movePlayer: jasmine.createSpy('movePlayer'),
             _availableActionsSignal: availableActionsSignal,
             _isMyTurnSignal: isMyTurnSignal,
             _isGameStartedSignal: isGameStartedSignal,
             _hasUsedActionSignal: hasUsedActionSignal,
+            _isActionModeActiveSignal: isActionModeActiveSignal,
         };
 
         mockAdminModeService = jasmine.createSpyObj('AdminModeService', ['toggleAdminMode']);
@@ -208,9 +213,18 @@ describe('GameMapFooterComponent', () => {
     });
 
     describe('actions', () => {
-        it('should call activateActionMode on onAction', () => {
+        it('should call activateActionMode on onAction when mode is inactive', () => {
+            mockInGameService._isActionModeActiveSignal.set(false);
             component.onAction();
             expect(mockInGameService.activateActionMode).toHaveBeenCalled();
+            expect(mockInGameService.deactivateActionMode).not.toHaveBeenCalled();
+        });
+
+        it('should call deactivateActionMode on onAction when mode is active', () => {
+            mockInGameService._isActionModeActiveSignal.set(true);
+            component.onAction();
+            expect(mockInGameService.deactivateActionMode).toHaveBeenCalled();
+            expect(mockInGameService.activateActionMode).not.toHaveBeenCalled();
         });
 
         it('should move player in all directions when conditions are met', () => {
