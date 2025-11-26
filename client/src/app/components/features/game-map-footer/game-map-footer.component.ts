@@ -90,8 +90,16 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
         return this.inGameService.availableActions().length > 0;
     }
 
+    get isActionModeActive(): boolean {
+        return this.inGameService.isActionModeActive();
+    }
+
     onAction(): void {
-        this.inGameService.activateActionMode();
+        if (this.isActionModeActive) {
+            this.inGameService.deactivateActionMode();
+        } else {
+            this.inGameService.activateActionMode();
+        }
     }
 
     get isAdmin(): boolean {

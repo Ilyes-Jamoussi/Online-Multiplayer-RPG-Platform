@@ -188,7 +188,7 @@ describe('GameMapService', () => {
 
             const actionType = service.getActionTypeAt(1, 1);
             expect(actionType).toBe(AvailableActionType.ATTACK);
-            expect(mockInGameService.deactivateActionMode).toHaveBeenCalled();
+            expect(mockInGameService.resetActions).toHaveBeenCalled();
         });
 
         it('should return null when no action at coordinates', () => {

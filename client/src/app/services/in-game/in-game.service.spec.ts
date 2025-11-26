@@ -207,7 +207,7 @@ describe('InGameService', () => {
 
         it('should deactivate action mode', () => {
             service.activateActionMode();
-            service.deactivateActionMode();
+            service.resetActions();
             expect(service.isActionModeActive()).toBe(false);
             expect(service.availableActions()).toEqual([]);
         });

@@ -84,6 +84,10 @@ export class InGameService {
 
     deactivateActionMode(): void {
         this._isActionModeActive.set(false);
+    }
+
+    resetActions(): void {
+        this._isActionModeActive.set(false);
         this._availableActions.set([]);
     }
 
@@ -184,6 +188,7 @@ export class InGameService {
         this.stopTurnTimer();
         this.startTurnTransitionTimer();
         this._isTransitioning.set(true);
+        this.resetActions();
     }
 
     private turnTransitionEnded(): void {
@@ -308,7 +313,7 @@ export class InGameService {
 
         this.inGameSocketService.onPlayerActionUsed(() => {
             this.playerActionUsed();
-            this.deactivateActionMode();
+            this.resetActions();
         });
 
         this.inGameSocketService.onGameOver((data) => {
