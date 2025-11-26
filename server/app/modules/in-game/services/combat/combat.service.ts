@@ -233,11 +233,11 @@ export class CombatService {
 
     private handlePlayerDeath(sessionId: string, session: InGameSession, playerId: string): void {
         const player = session.inGamePlayers[playerId];
-        if (player && this.sessionRepository.playerHasFlag(sessionId, playerId)) {
-            this.sessionRepository.dropFlag(sessionId, playerId, { x: player.x, y: player.y });
-        }
         this.inGameMovementService.movePlayerToStartPosition(session, playerId);
         this.sessionRepository.resetPlayerHealth(sessionId, playerId);
+        if (player && this.sessionRepository.playerHasFlag(sessionId, playerId)) {
+            this.sessionRepository.dropFlag(sessionId, playerId);
+        }
     }
 
     private getPlayerDefense(

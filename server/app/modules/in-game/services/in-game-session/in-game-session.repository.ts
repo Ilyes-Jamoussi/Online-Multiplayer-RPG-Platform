@@ -57,7 +57,7 @@ export class InGameSessionRepository {
         return flagData ? flagData.holderPlayerId === playerId : false;
     }
 
-    dropFlag(sessionId: string, playerId: string, position: Position): void {
+    dropFlag(sessionId: string, playerId: string): void {
         const session = this.findById(sessionId);
         const flagData = session.flagData;
         if (!flagData) throw new NotFoundException('Flag data not found');
@@ -67,11 +67,10 @@ export class InGameSessionRepository {
         if (!flagPlaceable) throw new NotFoundException('Flag placeable not found');
 
         flagData.holderPlayerId = null;
-        flagData.position = position;
 
-        flagPlaceable.x = position.x;
-        flagPlaceable.y = position.y;
-        this.gameCache.showPlaceable(session.id, position);
+        flagPlaceable.x = flagData.position.x;
+        flagPlaceable.y = flagData.position.y;
+        this.gameCache.showPlaceable(session.id, flagData.position);
         this.update(session, true);
     }
 
