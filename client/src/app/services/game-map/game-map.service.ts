@@ -272,26 +272,11 @@ export class GameMapService {
     boatAction(x: number, y: number): void {
         this.inGameService.boatAction(x, y);
     }
-
-    pickUpFlag(x: number, y: number): void {
-        this.inGameService.pickUpFlag(x, y);
-    }
-
     requestFlagTransfer(x: number, y: number): void {
         this.inGameService.requestFlagTransfer(x, y);
     }
 
     flagData() {
         return this.inGameService.flagData();
-    }
-
-    reset(): void {
-        this._tiles.set(this.initialState.tiles);
-        this._objects.set(this.initialState.objects);
-        this._size.set(this.initialState.size);
-        this._name.set(this.initialState.name);
-        this._description.set(this.initialState.description);
-        this._mode.set(this.initialState.mode);
-        this._activeTileCoords.set(null);
     }
 }

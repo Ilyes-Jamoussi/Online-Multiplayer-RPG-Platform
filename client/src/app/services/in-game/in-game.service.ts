@@ -209,10 +209,6 @@ export class InGameService {
         this.playerService.boatAction(x, y);
     }
 
-    pickUpFlag(x: number, y: number): void {
-        this.inGameSocketService.playerPickUpFlag({ sessionId: this.sessionService.id(), x, y });
-    }
-
     requestFlagTransfer(x: number, y: number): void {
         this.inGameSocketService.requestFlagTransfer({ sessionId: this.sessionService.id(), x, y });
     }

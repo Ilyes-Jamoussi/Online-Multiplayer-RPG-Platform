@@ -72,10 +72,6 @@ export class InGameSocketService {
         this.socket.emit(InGameEvents.PlayerSanctuaryAction, data);
     }
 
-    playerPickUpFlag(data: { sessionId: string; x: number; y: number }): void {
-        this.socket.emit(InGameEvents.PickUpFlag, data);
-    }
-
     requestFlagTransfer(data: { sessionId: string; x: number; y: number }): void {
         this.socket.emit(InGameEvents.FlagTransferRequest, data);
     }
