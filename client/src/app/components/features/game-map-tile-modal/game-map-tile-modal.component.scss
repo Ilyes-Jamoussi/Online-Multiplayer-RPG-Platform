@@ -61,6 +61,22 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+.team-badge {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.flag-info {
+    margin-top: 0.5rem;
+    font-weight: 600;
+    color: #dc2626;
+}
+
 .tile-modal__footer {
     display: flex;
     justify-content: flex-end;

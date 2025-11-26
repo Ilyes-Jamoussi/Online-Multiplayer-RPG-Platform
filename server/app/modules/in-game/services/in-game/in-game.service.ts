@@ -5,12 +5,12 @@ import { StatisticsService } from '@app/modules/in-game/services/statistics/stat
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { GameMode } from '@common/enums/game-mode.enum';
-import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession, WaitingRoomSession } from '@common/interfaces/session.interface';
+import { Team } from '@common/interfaces/team.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
@@ -23,11 +23,22 @@ export class InGameService {
         private readonly statisticsService: StatisticsService,
     ) {}
 
-    async createInGameSession(waiting: WaitingRoomSession, mode: GameMode, mapSize: MapSize): Promise<InGameSession> {
+    async createInGameSession(waiting: WaitingRoomSession, mode: GameMode): Promise<InGameSession> {
         const { id, gameId, maxPlayers, players } = waiting;
+        const isCtf = mode === GameMode.CTF;
+        const game = await this.gameplayService.fetchAndCacheGame(id, gameId);
+
+        const teams: Record<number, Team> = {};
+        if (isCtf) {
+            const teamCount = 2;
+            for (let i = 0; i < teamCount; i++) {
+                teams[i + 1] = { number: i + 1, playerIds: [] };
+            }
+        }
 
         const session: InGameSession = {
             id,
+            playerCount: players.length,
             inGameId: `${id}-${gameId}`,
             gameId,
             maxPlayers,
@@ -35,18 +46,17 @@ export class InGameService {
             inGamePlayers: {},
             currentTurn: { turnNumber: 1, activePlayerId: '', hasUsedAction: false },
             startPoints: [],
-            mapSize,
+            mapSize: game.size,
             mode,
             turnOrder: [],
             isAdminModeActive: false,
+            teams,
+            flagData: isCtf ? this.gameplayService.getInitialFlagData(id) : undefined,
         };
 
-        const game = await this.gameplayService.fetchAndCacheGame(id, gameId);
-
-        // Initialize tracking with game data
         const totalDoors = game.tiles.filter((tile) => tile.kind === TileKind.DOOR).length;
         const totalSanctuaries = game.objects.filter((p) => p.kind === PlaceableKind.HEAL || p.kind === PlaceableKind.FIGHT).length;
-        this.statisticsService.initializeTracking(id, mapSize, totalDoors, totalSanctuaries);
+        this.statisticsService.initializeTracking(id, game.size, totalDoors, totalSanctuaries);
 
         const playerIdsOrder = this.initialization.makeTurnOrder(players);
         session.turnOrder = playerIdsOrder;
@@ -63,14 +73,12 @@ export class InGameService {
 
         this.initialization.assignStartPoints(session, game);
 
-        // Track initial player positions as visited tiles
         Object.values(session.inGamePlayers).forEach((player) => {
             this.statisticsService.trackTileVisited(id, player.id, { x: player.x, y: player.y });
         });
 
         this.sessionRepository.save(session);
 
-        // Auto-join virtual players
         const virtualPlayers = players.filter((player) => player.virtualPlayerType);
         for (const virtualPlayer of virtualPlayers) {
             this.joinInGameSession(session.id, virtualPlayer.id);
@@ -110,6 +118,10 @@ export class InGameService {
 
         this.sessionRepository.updatePlayer(sessionId, playerId, { isInGame: true });
         const updatedSession = this.sessionRepository.findById(sessionId);
+
+        if (session.mode === GameMode.CTF) {
+            this.sessionRepository.assignPlayerToTeam(sessionId, playerId);
+        }
 
         if (!updatedSession.isGameStarted) {
             const allPlayersJoined = Object.values(updatedSession.inGamePlayers).every((p) => p.isInGame);
@@ -207,5 +219,17 @@ export class InGameService {
         const session = this.sessionRepository.findById(sessionId);
         const gameStartTime = session.gameStartTime || new Date();
         this.statisticsService.calculateAndStoreGameStatistics(session, winnerId, winnerName, gameStartTime);
+    }
+
+    pickUpFlag(sessionId: string, playerId: string, position: Position): void {
+        this.gameplayService.pickUpFlag(sessionId, playerId, position);
+    }
+
+    requestFlagTransfer(sessionId: string, playerId: string, position: Position): void {
+        this.gameplayService.requestFlagTransfer(sessionId, playerId, position);
+    }
+
+    respondToFlagTransfer(sessionId: string, toPlayerId: string, fromPlayerId: string, accepted: boolean): void {
+        this.gameplayService.respondToFlagTransfer(sessionId, toPlayerId, fromPlayerId, accepted);
     }
 }

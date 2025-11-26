@@ -3,9 +3,11 @@ import { MoveResult } from '@app/interfaces/move-result.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { BOAT_SPEED_BONUS } from '@common/constants/game.constants';
 import { Player } from '@common/interfaces/player.interface';
+import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { StartPoint } from '@common/interfaces/start-point.interface';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Team } from '@common/interfaces/team.interface';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -16,6 +18,61 @@ export class InGameSessionRepository {
         private readonly eventEmitter: EventEmitter2,
         private readonly gameCache: GameCacheService,
     ) {}
+
+    pickUpFlag(session: InGameSession, playerId: string, position: Position): void {
+        const flagData = session.flagData;
+        if (!flagData) throw new NotFoundException('Flag data not found');
+        if (flagData.holderPlayerId) throw new BadRequestException('Flag already picked up');
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+        flagData.holderPlayerId = playerId;
+        flagData.position = { x: player.x, y: player.y };
+        this.gameCache.hidePlaceable(session.id, position);
+        this.eventEmitter.emit(ServerEvents.FlagPickedUp, { session, playerId });
+    }
+
+    updateFlagPosition(session: InGameSession, playerId: string, position: Position): void {
+        const flagData = session.flagData;
+        if (!flagData) throw new NotFoundException('Flag data not found');
+        if (flagData.holderPlayerId !== playerId) throw new BadRequestException('Player does not hold the flag');
+        flagData.position = position;
+    }
+
+    transferFlag(session: InGameSession, fromPlayerId: string, toPlayerId: string): void {
+        const flagData = session.flagData;
+        if (!flagData) throw new NotFoundException('Flag data not found');
+        if (flagData.holderPlayerId !== fromPlayerId) throw new BadRequestException('Player does not hold the flag');
+
+        const fromPlayer = session.inGamePlayers[fromPlayerId];
+        const toPlayer = session.inGamePlayers[toPlayerId];
+        if (!fromPlayer || !toPlayer) throw new NotFoundException('Player not found');
+        flagData.holderPlayerId = toPlayerId;
+        flagData.position = { x: toPlayer.x, y: toPlayer.y };
+        this.eventEmitter.emit(ServerEvents.FlagTransferred, { session, fromPlayerId, toPlayerId });
+    }
+
+    playerHasFlag(sessionId: string, playerId: string): boolean {
+        const session = this.findById(sessionId);
+        const flagData = session.flagData;
+        return flagData ? flagData.holderPlayerId === playerId : false;
+    }
+
+    dropFlag(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const flagData = session.flagData;
+        if (!flagData) throw new NotFoundException('Flag data not found');
+        if (flagData.holderPlayerId !== playerId) throw new BadRequestException('Player does not hold the flag');
+
+        const flagPlaceable = this.gameCache.getFlagPlaceable(session.id, false);
+        if (!flagPlaceable) throw new NotFoundException('Flag placeable not found');
+
+        flagData.holderPlayerId = null;
+
+        flagPlaceable.x = flagData.position.x;
+        flagPlaceable.y = flagData.position.y;
+        this.gameCache.showPlaceable(session.id, flagData.position);
+        this.update(session, true);
+    }
 
     updatePlayer(sessionId: string, playerId: string, updates: Partial<Player>): void {
         const session = this.findById(sessionId);
@@ -179,8 +236,13 @@ export class InGameSessionRepository {
         return session;
     }
 
-    update(session: InGameSession): void {
+    update(session: InGameSession, emitEvent: boolean = false): void {
         this.sessions.set(session.id, session);
+        if (emitEvent) {
+            this.eventEmitter.emit(ServerEvents.SessionUpdated, {
+                session,
+            });
+        }
     }
 
     delete(sessionId: string): void {
@@ -254,5 +316,25 @@ export class InGameSessionRepository {
         });
 
         return { oldX, oldY, newX, newY };
+    }
+
+    getNextFreeTeam(sessionId: string): Team {
+        const session = this.findById(sessionId);
+        for (const team of Object.values(session.teams)) {
+            if (team.playerIds.length < session.playerCount / 2) {
+                return team;
+            }
+        }
+        return null;
+    }
+
+    assignPlayerToTeam(sessionId: string, playerId: string): void {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        const nextFreeTeam = this.getNextFreeTeam(sessionId);
+        if (!player) throw new NotFoundException('Player not found');
+        nextFreeTeam.playerIds.push(playerId);
+        player.teamNumber = nextFreeTeam.number;
+        this.update(session, true);
     }
 }

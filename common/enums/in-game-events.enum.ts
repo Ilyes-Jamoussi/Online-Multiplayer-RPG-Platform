@@ -67,5 +67,17 @@ export enum InGameEvents {
     CombatTimerUpdate = 'combatTimerUpdate',
     CombatTileEffect = 'combatTileEffect',
 
-    PlaceablePositionUpdated = 'placeablePositionUpdated',
+    PlaceableUpdated = 'placeable-updated',
+
+    SessionUpdated = 'session-updated',
+
+    PickUpFlag = 'pick-up-flag',
+    FlagPickedUp = 'flag-picked-up',
+    TransferFlag = 'transfer-flag',
+    FlagTransferRequest = 'flag-transfer-request',
+    FlagTransferRequested = 'flag-transfer-requested',
+    FlagTransferResponse = 'flag-transfer-response',
+    FlagTransferResult = 'flag-transfer-result',
+    FlagTransferred = 'flag-transferred',
+    FlagTransferRequestsCleared = 'flag-transfer-requests-cleared',
 }

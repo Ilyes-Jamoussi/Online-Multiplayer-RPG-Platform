@@ -28,9 +28,16 @@
                         <span class="badge-active">ACTUEL</span>
                         } @if (hasAbandoned(player)) {
                         <span class="badge-abandon">ABANDON</span>
+                        } @if (hasFlag(player)) {
+                        <span class="badge-flag">🚩</span>
                         }
                     </div>
                     <div class="player-stats">
+                        @if (getTeamNumber(player) !== undefined) {
+                        <span class="badge-team" [style.background-color]="getTeamColor(getTeamNumber(player))">
+                            Équipe {{ getTeamNumber(player) }}
+                        </span>
+                        }
                         <span class="combat-wins">⚔️ Victoires : {{ getCombatWins(player) }}</span>
                     </div>
                 </div>

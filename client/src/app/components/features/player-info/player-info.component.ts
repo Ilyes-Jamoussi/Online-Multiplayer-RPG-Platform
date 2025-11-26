@@ -132,6 +132,19 @@ export class PlayerInfoComponent {
         return this.playerService.combatDraws();
     }
 
+    get teamNumber(): number | undefined {
+        return this.player.teamNumber;
+    }
+
+    getTeamColor(teamNumber: number | undefined): string | undefined {
+        return this.playerService.getTeamColor(teamNumber);
+    }
+
+    get hasFlag(): boolean {
+        const flagData = this.inGameService.flagData();
+        return flagData?.holderPlayerId === this.playerService.id();
+    }
+
     isActionDisabled(): boolean {
         return (
             !this.inGameService.isMyTurn() || !this.inGameService.isGameStarted() || this.inGameService.hasUsedAction() || !this.hasAvailableActions()

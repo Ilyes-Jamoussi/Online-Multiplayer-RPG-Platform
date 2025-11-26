@@ -8,6 +8,7 @@ import { MovementService } from '@app/modules/in-game/services/movement/movement
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatState } from '@common/interfaces/combat.interface';
 import { Position } from '@common/interfaces/position.interface';
@@ -198,13 +199,11 @@ export class CombatService {
             }
 
             if (playerADead) {
-                this.inGameMovementService.movePlayerToStartPosition(session, playerAId);
-                this.sessionRepository.resetPlayerHealth(sessionId, playerAId);
+                this.handlePlayerDeath(sessionId, session, playerAId);
             }
 
             if (playerBDead) {
-                this.inGameMovementService.movePlayerToStartPosition(session, playerBId);
-                this.sessionRepository.resetPlayerHealth(sessionId, playerBId);
+                this.handlePlayerDeath(sessionId, session, playerBId);
             }
 
             if (isDraw) {
@@ -230,6 +229,15 @@ export class CombatService {
 
         combat.playerAPosture = null;
         combat.playerBPosture = null;
+    }
+
+    private handlePlayerDeath(sessionId: string, session: InGameSession, playerId: string): void {
+        const player = session.inGamePlayers[playerId];
+        this.inGameMovementService.movePlayerToStartPosition(session, playerId);
+        this.sessionRepository.resetPlayerHealth(sessionId, playerId);
+        if (player && this.sessionRepository.playerHasFlag(sessionId, playerId)) {
+            this.sessionRepository.dropFlag(sessionId, playerId);
+        }
     }
 
     private getPlayerDefense(
@@ -339,7 +347,7 @@ export class CombatService {
         const session = this.sessionRepository.findById(sessionId);
         const winner = session.inGamePlayers[winnerId];
 
-        if (winner && winner.combatWins >= COMBAT_WINS_TO_WIN_GAME) {
+        if (session.mode !== GameMode.CTF && winner && winner.combatWins >= COMBAT_WINS_TO_WIN_GAME) {
             this.timerService.clearTimerForSession(sessionId);
             this.eventEmitter.emit(ServerEvents.GameOver, {
                 sessionId,

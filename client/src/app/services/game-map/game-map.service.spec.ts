@@ -97,17 +97,21 @@ describe('GameMapService', () => {
     beforeEach(() => {
         mockGameHttpService = jasmine.createSpyObj('GameHttpService', ['getGameEditorById']);
         mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
-        mockInGameService = jasmine.createSpyObj('InGameService', ['deactivateActionMode', 'toggleDoorAction', 'getPlayerByPlayerId'], {
-            inGamePlayers: signal({ player1: mockPlayer }),
-            startPoints: signal([{ id: 'start1', x: 0, y: 0 }]),
-            reachableTiles: signal([{ x: 1, y: 1, cost: 1, remainingPoints: 2 }]),
-            isMyTurn: signal(true),
-            isActionModeActive: signal(false),
-            availableActions: signal([]),
-            currentlyPlayers: [mockPlayer],
-        });
+        mockInGameService = jasmine.createSpyObj(
+            'InGameService',
+            ['deactivateActionMode', 'toggleDoorAction', 'getPlayerByPlayerId', 'resetActions'],
+            {
+                inGamePlayers: signal({ player1: mockPlayer }),
+                startPoints: signal([{ id: 'start1', x: 0, y: 0 }]),
+                reachableTiles: signal([{ x: 1, y: 1, cost: 1, remainingPoints: 2 }]),
+                isMyTurn: signal(true),
+                isActionModeActive: signal(false),
+                availableActions: signal([]),
+                currentlyPlayers: [mockPlayer],
+            },
+        );
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getAvatarStaticImage']);
-        mockInGameSocketService = jasmine.createSpyObj('InGameSocketService', ['onDoorToggled', 'onPlaceablePositionUpdated']);
+        mockInGameSocketService = jasmine.createSpyObj('InGameSocketService', ['onDoorToggled', 'onPlaceableUpdated']);
 
         TestBed.configureTestingModule({
             providers: [
@@ -188,7 +192,7 @@ describe('GameMapService', () => {
 
             const actionType = service.getActionTypeAt(1, 1);
             expect(actionType).toBe(AvailableActionType.ATTACK);
-            expect(mockInGameService.deactivateActionMode).toHaveBeenCalled();
+            expect(mockInGameService.resetActions).toHaveBeenCalled();
         });
 
         it('should return null when no action at coordinates', () => {

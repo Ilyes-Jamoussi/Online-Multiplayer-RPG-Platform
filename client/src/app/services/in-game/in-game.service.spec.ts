@@ -91,7 +91,28 @@ describe('InGameService', () => {
             'onPlayerBoardedBoat',
             'onPlayerDisembarkedBoat',
             'onGameOver',
+            'onSessionUpdated',
+            'onFlagPickedUp',
+            'onFlagTransferRequested',
+            'onFlagTransferResult',
+            'onFlagTransferred',
+            'onFlagTransferRequestsCleared',
         ]);
+
+        // eslint-disable-next-line @typescript-eslint/no-empty-function -- Noop function
+        const noop = () => {};
+        [
+            'onSessionUpdated',
+            'onFlagPickedUp',
+            'onFlagTransferRequested',
+            'onFlagTransferResult',
+            'onFlagTransferred',
+            'onFlagTransferRequestsCleared',
+        ].forEach((method) => {
+            (mockInGameSocketService[method as keyof InGameSocketService] as jasmine.Spy).and.callFake(() => {
+                noop();
+            });
+        });
 
         mockSessionService = jasmine.createSpyObj('SessionService', [], {
             id: signal('session1'),
@@ -101,8 +122,10 @@ describe('InGameService', () => {
             turnTimeRemaining: signal(TEST_TIMER_DURATION),
         });
 
-        mockPlayerService = jasmine.createSpyObj('PlayerService', ['updateActionsRemaining', 'updatePlayer'], {
-            id: signal('player1'),
+        mockPlayerService = jasmine.createSpyObj('PlayerService', ['updateActionsRemaining', 'updatePlayer']);
+        Object.defineProperty(mockPlayerService, 'id', {
+            value: signal('player1'),
+            configurable: true,
         });
 
         mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup', 'displayInformationPopup', 'showInfoToast']);
@@ -184,7 +207,7 @@ describe('InGameService', () => {
 
         it('should deactivate action mode', () => {
             service.activateActionMode();
-            service.deactivateActionMode();
+            service.resetActions();
             expect(service.isActionModeActive()).toBe(false);
             expect(service.availableActions()).toEqual([]);
         });
@@ -338,6 +361,11 @@ describe('InGameService', () => {
             service.updateInGameSession({ inGamePlayers: { player2: { ...mockPlayer, id: 'player2' } } });
             const callback = mockInGameSocketService.onPlayerMoved.calls.mostRecent().args[0];
             const mockData = { playerId: 'player2', x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, speed: 3, boatSpeed: 0 };
+            Object.defineProperty(mockPlayerService, 'id', {
+                value: signal('player1'),
+                configurable: true,
+            });
+            mockPlayerService.updatePlayer.calls.reset();
             callback(mockData);
             expect(mockPlayerService.updatePlayer).not.toHaveBeenCalled();
         });
@@ -361,6 +389,7 @@ describe('InGameService', () => {
             const callback = mockInGameSocketService.onPlayerAvailableActions.calls.mostRecent().args[0];
             const mockActions: AvailableActionDto[] = [{ type: AvailableActionType.ATTACK, x: 1, y: 1 }];
             const mockData: AvailableActionsDto = { availableActions: mockActions };
+            mockPlayerService.updateActionsRemaining.calls.reset();
             callback(mockData);
             expect(service.availableActions()).toEqual(mockActions);
             expect(mockPlayerService.updateActionsRemaining).not.toHaveBeenCalled();

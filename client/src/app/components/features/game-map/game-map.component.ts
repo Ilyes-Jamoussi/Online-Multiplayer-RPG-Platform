@@ -106,4 +106,29 @@ export class GameMapComponent implements OnInit {
     isCurrentUser(player: Player): boolean {
         return player.id === this.playerService.id();
     }
+
+    getTeamColor(player: Player): string | undefined {
+        if (this.isCurrentUser(player)) return undefined;
+        return this.playerService.getTeamColor(player.teamNumber);
+    }
+
+    getPlayerBorderStyle(player: Player): { 'border-color'?: string; 'border-width'?: string; 'box-shadow'?: string } {
+        if (this.isCurrentUser(player)) {
+            return {};
+        }
+        const teamColor = this.getTeamColor(player);
+        if (!teamColor) {
+            return {};
+        }
+        return {
+            'border-color': teamColor,
+            'border-width': '3px',
+            'box-shadow': `0 0 15px ${teamColor}, 0 2px 4px rgba(0, 0, 0, 0.5)`,
+        };
+    }
+
+    hasFlag(player: Player): boolean {
+        const flagData = this.gameMapService.flagData();
+        return flagData?.holderPlayerId === player.id;
+    }
 }

@@ -83,6 +83,8 @@ export class GameMapTileComponent {
             this.gameMapService.fightPlayer(this.tile.x, this.tile.y);
         } else if (actionType === AvailableActionType.BOAT) {
             this.gameMapService.boatAction(this.tile.x, this.tile.y);
+        } else if (actionType === AvailableActionType.TRANSFER_FLAG) {
+            this.gameMapService.requestFlagTransfer(this.tile.x, this.tile.y);
         }
     }
 

@@ -56,4 +56,17 @@ export class PlayersListComponent {
     getPlayerAvatar(avatar: Avatar | null): string {
         return this.assetsService.getAvatarStaticImage(avatar);
     }
+
+    getTeamNumber(player: Player): number | undefined {
+        return player.teamNumber;
+    }
+
+    getTeamColor(teamNumber: number | undefined): string | undefined {
+        return this.playerService.getTeamColor(teamNumber);
+    }
+
+    hasFlag(player: Player): boolean {
+        const flagData = this.inGameService.flagData();
+        return flagData?.holderPlayerId === player.id;
+    }
 }

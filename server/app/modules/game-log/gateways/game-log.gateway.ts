@@ -18,6 +18,7 @@ import { GameLogService } from '@app/modules/game-log/services/game-log.service'
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { successResponse } from '@app/utils/socket-response/socket-response.util';
 import { GameLogEvents } from '@common/enums/game-log-events.enum';
+import { InGameSession } from '@common/interfaces/session.interface';
 import { generateGameLogId } from '@common/utils/game-log.util';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -149,6 +150,18 @@ export class GameLogGateway {
             destinationX: payload.destinationX,
             destinationY: payload.destinationY,
         });
+        this.emitLogEntry(payload.session.inGameId, entry);
+    }
+
+    @OnEvent(ServerEvents.FlagPickedUp)
+    handleFlagPickedUp(payload: { session: InGameSession; playerId: string }): void {
+        const entry = this.gameLogService.createFlagPickupEntry(payload.session.id, payload.playerId);
+        this.emitLogEntry(payload.session.inGameId, entry);
+    }
+
+    @OnEvent(ServerEvents.FlagTransferred)
+    handleFlagTransferred(payload: { session: InGameSession; fromPlayerId: string; toPlayerId: string }): void {
+        const entry = this.gameLogService.createFlagTransferEntry(payload.session.id, payload.fromPlayerId, payload.toPlayerId);
         this.emitLogEntry(payload.session.inGameId, entry);
     }
 

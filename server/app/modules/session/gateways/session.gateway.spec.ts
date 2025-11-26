@@ -12,7 +12,6 @@ import { validationExceptionFactory } from '@app/utils/validation/validation.uti
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
-import { MapSize } from '@common/enums/map-size.enum';
 import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { SessionEvents } from '@common/enums/session-events.enum';
 import { Player } from '@common/interfaces/player.interface';
@@ -640,7 +639,7 @@ describe('SessionGateway', () => {
 
             await gateway.startGameSession(mockSocket);
 
-            expect(inGameService.createInGameSession).toHaveBeenCalledWith(waitingSession, GameMode.CLASSIC, MapSize.SMALL);
+            expect(inGameService.createInGameSession).toHaveBeenCalledWith(waitingSession, GameMode.CLASSIC);
             expect(playerSocket1.join).toHaveBeenCalledWith(IN_GAME_ID);
             expect(playerSocket2.join).toHaveBeenCalledWith(IN_GAME_ID);
             expect(mockServer.to).toHaveBeenCalledWith(SESSION_ID);

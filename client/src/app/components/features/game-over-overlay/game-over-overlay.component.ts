@@ -5,6 +5,7 @@ import { ROUTES } from '@app/enums/routes.enum';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { TimerService } from '@app/services/timer/timer.service';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { PlayerStat } from '@common/interfaces/player-stat.interface';
 
 @Component({
@@ -43,7 +44,43 @@ export class GameOverOverlayComponent implements OnDestroy {
         return this.gameOverData?.winnerId === this.playerService.id();
     }
 
+    get isCTFMode(): boolean {
+        return this.inGameService.mode() === GameMode.CTF;
+    }
+
+    get winnerTeamNumber(): number | null {
+        if (!this.gameOverData || !this.isCTFMode) return null;
+        const winner = this.inGameService.getPlayerByPlayerId(this.gameOverData.winnerId);
+        return winner?.teamNumber ?? null;
+    }
+
+    get myTeamNumber(): number | null {
+        if (!this.isCTFMode) return null;
+        const player = this.inGameService.getPlayerByPlayerId(this.playerService.id());
+        return player?.teamNumber ?? null;
+    }
+
+    get winnerTeamPlayers(): string[] {
+        if (!this.winnerTeamNumber) return [];
+        const session = this.inGameService.inGameSession();
+        const team = session.teams[this.winnerTeamNumber];
+        if (!team) return [];
+        return team.playerIds
+            .map((playerId) => {
+                const player = session.inGamePlayers[playerId];
+                return player?.name || '';
+            })
+            .filter((name) => name !== '');
+    }
+
     get title(): string {
+        if (this.isCTFMode && this.winnerTeamNumber) {
+            if (this.myTeamNumber === this.winnerTeamNumber) {
+                return 'Votre équipe a gagné la partie !';
+            } else {
+                return `L'équipe ${this.winnerTeamNumber} a gagné la partie !`;
+            }
+        }
         return this.isWinner ? 'Tu as gagné la partie !' : `${this.gameOverData?.winnerName} a gagné la partie !`;
     }
     get playerStats(): PlayerStat[] {
