@@ -13,6 +13,22 @@
     background: transparent;
     overflow: hidden;
 
+    .chat-header {
+        padding: 1rem;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        flex-shrink: 0;
+
+        h3 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    }
+
     .messages {
         flex: 1;
         overflow-y: auto;
