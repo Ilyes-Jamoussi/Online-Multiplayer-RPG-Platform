@@ -1,225 +1,220 @@
 @if (combatData && combatData.userRole !== 'spectator') {
 <div class="combat-overlay" [class.victory-mode]="isVictoryNotificationVisible">
-    <div class="combat-modal">
-        @if (!isVictoryNotificationVisible) {
-        <app-combat-timer></app-combat-timer>
-        } @if (victoryData && isVictoryNotificationVisible) {
-        <div
-            class="victory-screen"
-            [class.victory]="isVictory"
-            [class.defeat]="!isVictory && victoryData.winnerId !== null"
-            (click)="closeVictoryOverlay()"
-        >
-            <div class="victory-icon">@if (victoryData.winnerId === null) { ⚔️ } @else if (isVictory) { 🏆 } @else { 💀 }</div>
-            <h1 class="victory-title">{{ victoryMessage }}</h1>
-            <p class="victory-subtitle">{{ victorySubtitle }}</p>
-            <button class="close-victory-btn" (click)="$event.stopPropagation(); closeVictoryOverlay()">✕</button>
-        </div>
+    <div class="combat-container">
+        @if (victoryData && isVictoryNotificationVisible) {
+        <app-combat-result [victoryData]="victoryData" [isVictory]="isVictory" [victoryMessage]="victoryMessage" [victorySubtitle]="victorySubtitle"></app-combat-result>
         } @else {
         <div class="combat-header">
-            <h2>Combat en cours</h2>
+            <div class="combat-title">
+                <span class="swords-icon">⚔️</span>
+                <h2>Combat</h2>
+                <span class="swords-icon">⚔️</span>
+            </div>
+            <app-combat-timer></app-combat-timer>
         </div>
         }
 
         <div class="combat-arena">
-            <!-- Player A -->
-            <div class="fighter player-a" [class.is-me]="combatData.userRole === 'attacker'">
-                <div class="fighter-container">
-                    @if (playerADamage) {
-                    <div class="damage-display">
-                        @if (playerADamage.damage > 0) {
-                        <span class="damage-value">-{{ playerADamage.damage }}</span>
-                        }
-                        <div class="combat-details" [class.no-damage]="playerADamage.damage === 0">
-                            <div class="stat-line attack-line">
-                                <span class="stat-icon">⚔️</span>
-                                <span class="stat-value">{{ playerADamage.totalAttack }}</span>
-                                <div class="dice-info">
-                                    <img [src]="getDiceImage(playerADamage.attackDice)" class="dice-image" />
-                                    <span class="dice-roll">{{ playerADamage.attackRoll }}</span>
-                                </div>
-                                @if (playerADamage.attackBonus > 0 || playerADamage.attackPostureBonus > 0) {
-                                <div class="bonus-info">
-                                    @if (playerADamage.attackBonus > 0) {
-                                    <span class="bonus-badge">+{{ playerADamage.attackBonus }}</span>
-                                    } @if (playerADamage.attackPostureBonus > 0) {
-                                    <span class="bonus-badge posture">+{{ playerADamage.attackPostureBonus }}</span>
-                                    }
-                                </div>
-                                }
-                            </div>
-                            <div class="stat-line defense-line">
-                                <span class="stat-icon">🛡️</span>
-                                <span class="stat-value">{{ playerADamage.totalDefense }}</span>
-                                <div class="dice-info">
-                                    <img [src]="getDiceImage(playerADamage.defenseDice)" class="dice-image" />
-                                    <span class="dice-roll">{{ playerADamage.defenseRoll }}</span>
-                                </div>
-                                @if (playerADamage.defenseBonus > 0 || playerADamage.defensePostureBonus > 0) {
-                                <div class="bonus-info">
-                                    @if (playerADamage.defenseBonus > 0) {
-                                    <span class="bonus-badge">+{{ playerADamage.defenseBonus }}</span>
-                                    } @if (playerADamage.defensePostureBonus > 0) {
-                                    <span class="bonus-badge posture">+{{ playerADamage.defensePostureBonus }}</span>
-                                    }
-                                </div>
-                                }
-                            </div>
-                            @if (playerADamage.tileEffect !== 0) {
-                            <div class="stat-line tile-effect-line">
-                                <span class="stat-icon">❄️</span>
-                                <span class="stat-label">Glace</span>
-                                <span class="stat-value tile-effect">{{ playerADamage.tileEffect }}</span>
-                            </div>
+            <div class="fighter player-a" [class.is-me]="combatData.userRole === 'attacker'" [class.has-damage]="playerADamage">
+                <div class="fighter-card">
+                    <div class="fighter-header">
+                        <div class="fighter-name">{{ playerAName }}</div>
+                        <div class="fighter-badges">
+                            @if (playerAPosture) {
+                            <span class="posture-badge" [class.offensive]="playerAPosture === 'offensive'" [class.defensive]="playerAPosture === 'defensive'">
+                                {{ playerAPosture === 'offensive' ? '⚔️' : '🛡️' }}
+                            </span>
+                            }
+                            @if (playerATileEffectLabel) {
+                            <span class="tile-effect-badge">❄️</span>
                             }
                         </div>
                     </div>
-                    }
-                    <div class="fighter-name">
-                        {{ playerAName }}
-                        @if (playerAPosture) {
-                        <span
-                            class="posture-badge"
-                            [class.offensive]="playerAPosture === 'offensive'"
-                            [class.defensive]="playerAPosture === 'defensive'"
-                        >
-                            {{ playerAPosture === 'offensive' ? '⚔️' : '🛡️' }}
-                        </span>
-                        } @if (playerATileEffectLabel) {
-                        <span class="tile-effect-badge"> ❄️ {{ playerATileEffectLabel }} </span>
+
+                    <div class="fighter-avatar-wrapper">
+                        <div class="avatar-glow" [class.active]="playerADamage"></div>
+                        <img [src]="playerAAvatar" [alt]="playerAName" class="fighter-avatar" />
+                        @if (playerADamage && playerADamage.damage > 0) {
+                        <div class="damage-splash">-{{ playerADamage.damage }}</div>
                         }
                     </div>
-                    <div class="fighter-avatar">
-                        <img [src]="playerAAvatar" [alt]="playerAName" />
-                    </div>
-                    <div class="health-bar-container">
+
+                    <div class="health-section">
                         <div class="health-bar">
-                            <div
-                                class="health-bar-fill"
-                                [style.width.%]="playerAHealth.percentage"
-                                [class.low-health]="playerAHealth.percentage <= 25"
-                                [class.medium-health]="playerAHealth.percentage > 25 && playerAHealth.percentage <= 50"
-                            ></div>
+                            <div class="health-bar-fill" [style.width.%]="playerAHealth.percentage" [class.low-health]="playerAHealth.percentage <= 25" [class.medium-health]="playerAHealth.percentage > 25 && playerAHealth.percentage <= 50"></div>
                         </div>
-                        <div class="health-text">{{ playerAHealth.current }} / {{ playerAHealth.max }}</div>
+                        <div class="health-text">{{ playerAHealth.current }} / {{ playerAHealth.max }} HP</div>
                     </div>
+
+                    @if (playerADamage) {
+                    <div class="combat-stats">
+                        <div class="stat-row attack">
+                            <div class="stat-label">
+                                <span class="stat-icon">⚔️</span>
+                                <span>Attaque</span>
+                            </div>
+                            <div class="stat-details">
+                                <img [src]="getDiceImage(playerADamage.attackDice)" class="dice-img" />
+                                <span class="dice-value">{{ playerADamage.attackRoll }}</span>
+                                @if (playerADamage.attackBonus > 0) {
+                                <span class="bonus">+{{ playerADamage.attackBonus }}</span>
+                                }
+                                @if (playerADamage.attackPostureBonus > 0) {
+                                <span class="bonus posture">+{{ playerADamage.attackPostureBonus }}</span>
+                                }
+                                <span class="total">= {{ playerADamage.totalAttack }}</span>
+                            </div>
+                        </div>
+                        <div class="stat-row defense">
+                            <div class="stat-label">
+                                <span class="stat-icon">🛡️</span>
+                                <span>Défense</span>
+                            </div>
+                            <div class="stat-details">
+                                <img [src]="getDiceImage(playerADamage.defenseDice)" class="dice-img" />
+                                <span class="dice-value">{{ playerADamage.defenseRoll }}</span>
+                                @if (playerADamage.defenseBonus > 0) {
+                                <span class="bonus">+{{ playerADamage.defenseBonus }}</span>
+                                }
+                                @if (playerADamage.defensePostureBonus > 0) {
+                                <span class="bonus posture">+{{ playerADamage.defensePostureBonus }}</span>
+                                }
+                                <span class="total">= {{ playerADamage.totalDefense }}</span>
+                            </div>
+                        </div>
+                        @if (playerADamage.tileEffect !== 0) {
+                        <div class="stat-row ice">
+                            <div class="stat-label">
+                                <span class="stat-icon">❄️</span>
+                                <span>Glace</span>
+                            </div>
+                            <div class="stat-details">
+                                <span class="total ice">{{ playerADamage.tileEffect }}</span>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    }
                 </div>
             </div>
 
-            <!-- VS -->
-            <div class="vs-section">
-                <div class="vs-text">VS</div>
-                <div class="combat-swords">⚔️</div>
+            <div class="vs-divider">
+                <div class="vs-circle">
+                    <span class="vs-text">VS</span>
+                </div>
+                <div class="lightning-effect"></div>
             </div>
 
-            <!-- Player B -->
-            <div class="fighter player-b" [class.is-me]="combatData.userRole === 'target'">
-                <div class="fighter-container">
-                    @if (playerBDamage) {
-                    <div class="damage-display">
-                        @if (playerBDamage.damage > 0) {
-                        <span class="damage-value">-{{ playerBDamage.damage }}</span>
-                        }
-                        <div class="combat-details" [class.no-damage]="playerBDamage.damage === 0">
-                            <div class="stat-line attack-line">
-                                <span class="stat-icon">⚔️</span>
-                                <span class="stat-value">{{ playerBDamage.totalAttack }}</span>
-                                <div class="dice-info">
-                                    <img [src]="getDiceImage(playerBDamage.attackDice)" class="dice-image" />
-                                    <span class="dice-roll">{{ playerBDamage.attackRoll }}</span>
-                                </div>
-                                @if (playerBDamage.attackBonus > 0 || playerBDamage.attackPostureBonus > 0) {
-                                <div class="bonus-info">
-                                    @if (playerBDamage.attackBonus > 0) {
-                                    <span class="bonus-badge">+{{ playerBDamage.attackBonus }}</span>
-                                    } @if (playerBDamage.attackPostureBonus > 0) {
-                                    <span class="bonus-badge posture">+{{ playerBDamage.attackPostureBonus }}</span>
-                                    }
-                                </div>
-                                }
-                            </div>
-                            <div class="stat-line defense-line">
-                                <span class="stat-icon">🛡️</span>
-                                <span class="stat-value">{{ playerBDamage.totalDefense }}</span>
-                                <div class="dice-info">
-                                    <img [src]="getDiceImage(playerBDamage.defenseDice)" class="dice-image" />
-                                    <span class="dice-roll">{{ playerBDamage.defenseRoll }}</span>
-                                </div>
-                                @if (playerBDamage.defenseBonus > 0 || playerBDamage.defensePostureBonus > 0) {
-                                <div class="bonus-info">
-                                    @if (playerBDamage.defenseBonus > 0) {
-                                    <span class="bonus-badge">+{{ playerBDamage.defenseBonus }}</span>
-                                    } @if (playerBDamage.defensePostureBonus > 0) {
-                                    <span class="bonus-badge posture">+{{ playerBDamage.defensePostureBonus }}</span>
-                                    }
-                                </div>
-                                }
-                            </div>
-                            @if (playerBDamage.tileEffect !== 0) {
-                            <div class="stat-line tile-effect-line">
-                                <span class="stat-icon">❄️</span>
-                                <span class="stat-label">Glace</span>
-                                <span class="stat-value tile-effect">{{ playerBDamage.tileEffect }}</span>
-                            </div>
+            <div class="fighter player-b" [class.is-me]="combatData.userRole === 'target'" [class.has-damage]="playerBDamage">
+                <div class="fighter-card">
+                    <div class="fighter-header">
+                        <div class="fighter-name">{{ playerBName }}</div>
+                        <div class="fighter-badges">
+                            @if (playerBPosture) {
+                            <span class="posture-badge" [class.offensive]="playerBPosture === 'offensive'" [class.defensive]="playerBPosture === 'defensive'">
+                                {{ playerBPosture === 'offensive' ? '⚔️' : '🛡️' }}
+                            </span>
+                            }
+                            @if (playerBTileEffectLabel) {
+                            <span class="tile-effect-badge">❄️</span>
                             }
                         </div>
                     </div>
-                    }
-                    <div class="fighter-name">
-                        {{ playerBName }}
-                        @if (playerBPosture) {
-                        <span
-                            class="posture-badge"
-                            [class.offensive]="playerBPosture === 'offensive'"
-                            [class.defensive]="playerBPosture === 'defensive'"
-                        >
-                            {{ playerBPosture === 'offensive' ? '⚔️' : '🛡️' }}
-                        </span>
-                        } @if (playerBTileEffectLabel) {
-                        <span class="tile-effect-badge"> ❄️ {{ playerBTileEffectLabel }} </span>
+
+                    <div class="fighter-avatar-wrapper">
+                        <div class="avatar-glow" [class.active]="playerBDamage"></div>
+                        <img [src]="playerBAvatar" [alt]="playerBName" class="fighter-avatar" />
+                        @if (playerBDamage && playerBDamage.damage > 0) {
+                        <div class="damage-splash">-{{ playerBDamage.damage }}</div>
                         }
                     </div>
-                    <div class="fighter-avatar">
-                        <img [src]="playerBAvatar" [alt]="playerBName" />
-                    </div>
-                    <div class="health-bar-container">
+
+                    <div class="health-section">
                         <div class="health-bar">
-                            <div
-                                class="health-bar-fill"
-                                [style.width.%]="playerBHealth.percentage"
-                                [class.low-health]="playerBHealth.percentage <= 25"
-                                [class.medium-health]="playerBHealth.percentage > 25 && playerBHealth.percentage <= 50"
-                            ></div>
+                            <div class="health-bar-fill" [style.width.%]="playerBHealth.percentage" [class.low-health]="playerBHealth.percentage <= 25" [class.medium-health]="playerBHealth.percentage > 25 && playerBHealth.percentage <= 50"></div>
                         </div>
-                        <div class="health-text">{{ playerBHealth.current }} / {{ playerBHealth.max }}</div>
+                        <div class="health-text">{{ playerBHealth.current }} / {{ playerBHealth.max }} HP</div>
                     </div>
+
+                    @if (playerBDamage) {
+                    <div class="combat-stats">
+                        <div class="stat-row attack">
+                            <div class="stat-label">
+                                <span class="stat-icon">⚔️</span>
+                                <span>Attaque</span>
+                            </div>
+                            <div class="stat-details">
+                                <img [src]="getDiceImage(playerBDamage.attackDice)" class="dice-img" />
+                                <span class="dice-value">{{ playerBDamage.attackRoll }}</span>
+                                @if (playerBDamage.attackBonus > 0) {
+                                <span class="bonus">+{{ playerBDamage.attackBonus }}</span>
+                                }
+                                @if (playerBDamage.attackPostureBonus > 0) {
+                                <span class="bonus posture">+{{ playerBDamage.attackPostureBonus }}</span>
+                                }
+                                <span class="total">= {{ playerBDamage.totalAttack }}</span>
+                            </div>
+                        </div>
+                        <div class="stat-row defense">
+                            <div class="stat-label">
+                                <span class="stat-icon">🛡️</span>
+                                <span>Défense</span>
+                            </div>
+                            <div class="stat-details">
+                                <img [src]="getDiceImage(playerBDamage.defenseDice)" class="dice-img" />
+                                <span class="dice-value">{{ playerBDamage.defenseRoll }}</span>
+                                @if (playerBDamage.defenseBonus > 0) {
+                                <span class="bonus">+{{ playerBDamage.defenseBonus }}</span>
+                                }
+                                @if (playerBDamage.defensePostureBonus > 0) {
+                                <span class="bonus posture">+{{ playerBDamage.defensePostureBonus }}</span>
+                                }
+                                <span class="total">= {{ playerBDamage.totalDefense }}</span>
+                            </div>
+                        </div>
+                        @if (playerBDamage.tileEffect !== 0) {
+                        <div class="stat-row ice">
+                            <div class="stat-label">
+                                <span class="stat-icon">❄️</span>
+                                <span>Glace</span>
+                            </div>
+                            <div class="stat-details">
+                                <span class="total ice">{{ playerBDamage.tileEffect }}</span>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    }
                 </div>
             </div>
         </div>
 
         @if (!victoryData) {
         <div class="combat-actions">
-            <p class="stance-instruction">
-                @if (isPostureSelected) { Posture sélectionnée : {{ selectedPosture === 'offensive' ? '⚔️ Offensive' : '🛡️ Défensive' }}
-                } @else { Choisissez votre posture : }
-            </p>
+            <div class="action-prompt">
+                @if (isPostureSelected) {
+                <span class="selected-posture">
+                    {{ selectedPosture === 'offensive' ? '⚔️ Offensive' : '🛡️ Défensive' }} sélectionnée
+                </span>
+                } @else {
+                <span class="prompt-text">Choisissez votre posture de combat</span>
+                }
+            </div>
 
             <div class="action-buttons">
-                <button
-                    class="combat-btn offensive"
-                    [class.selected]="selectedPosture === 'offensive'"
-                    [disabled]="isPostureSelected"
-                    (click)="chooseOffensive()"
-                >
-                    ⚔️ Offensive (+2 Attaque)
+                <button class="combat-btn offensive" [class.selected]="selectedPosture === 'offensive'" [disabled]="isPostureSelected" (click)="chooseOffensive()">
+                    <span class="btn-icon">⚔️</span>
+                    <span class="btn-content">
+                        <span class="btn-title">Offensive</span>
+                        <span class="btn-bonus">+2 Attaque</span>
+                    </span>
                 </button>
-                <button
-                    class="combat-btn defensive"
-                    [class.selected]="selectedPosture === 'defensive'"
-                    [disabled]="isPostureSelected"
-                    (click)="chooseDefensive()"
-                >
-                    🛡️ Défensive (+2 Défense)
+                <button class="combat-btn defensive" [class.selected]="selectedPosture === 'defensive'" [disabled]="isPostureSelected" (click)="chooseDefensive()">
+                    <span class="btn-icon">🛡️</span>
+                    <span class="btn-content">
+                        <span class="btn-title">Défensive</span>
+                        <span class="btn-bonus">+2 Défense</span>
+                    </span>
                 </button>
             </div>
         </div>

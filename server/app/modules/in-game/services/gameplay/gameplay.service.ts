@@ -250,6 +250,13 @@ export class GameplayService {
         this.actionService.selectCombatPosture(sessionId, playerId, posture);
     }
 
+    handleVPFlagTransferRequest(sessionId: string, toPlayerId: string, fromPlayerId: string): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const toPlayer = session.inGamePlayers[toPlayerId];
+        if (!toPlayer?.virtualPlayerType) return;
+        this.respondToFlagTransfer(sessionId, toPlayerId, fromPlayerId, true);
+    }
+
     handleVPCombat(sessionId: string, playerAId?: string, playerBId?: string): void {
         if (!playerAId || !playerBId) {
             const activeCombat = this.actionService.getActiveCombat(sessionId);
@@ -261,7 +268,7 @@ export class GameplayService {
         this.selectVPPosture(sessionId, playerBId);
     }
 
-    executeOffensiveTurn(sessionId: string, playerId: string): void {
+    classicOffensiveTurn(sessionId: string, playerId: string): void {
         this.executeOffensiveLoop(sessionId, playerId);
     }
 
@@ -323,7 +330,23 @@ export class GameplayService {
     }
 
     private waitAndAttemptAttack(sessionId: string, playerId: string): void {
-        setTimeout(() => this.attemptAttack(sessionId, playerId), VIRTUAL_PLAYER_ACTION_DELAY_MS);
+        setTimeout(() => {
+            this.attemptAttack(sessionId, playerId);
+            this.repositionAfterCombat(sessionId, playerId);
+        }, VIRTUAL_PLAYER_ACTION_DELAY_MS);
+    }
+
+    private repositionAfterCombat(sessionId: string, playerId: string): void {
+        setTimeout(() => {
+            const session = this.sessionRepository.findById(sessionId);
+            const player = session.inGamePlayers[playerId];
+            
+            if (player.speed > 0) {
+                this.moveToNearestPlayer(sessionId, playerId, () => this.endPlayerTurn(sessionId, playerId));
+            } else {
+                this.endPlayerTurn(sessionId, playerId);
+            }
+        }, VIRTUAL_PLAYER_ACTION_DELAY_MS);
     }
 
     private attemptAttack(sessionId: string, playerId: string): void {
@@ -335,31 +358,23 @@ export class GameplayService {
         const action = availableActions[0];
         try {
             if (action.type === AvailableActionType.ATTACK) this.actionService.attackPlayer(sessionId, playerId, { x: action.x, y: action.y });
-            this.waitAndContinueIfPossible(sessionId, playerId);
+            this.waitAndContinueAttacking(sessionId, playerId);
         } catch {
             // Action impossible
         }
     }
 
-    private waitAndContinueIfPossible(sessionId: string, playerId: string): void {
-        setTimeout(() => {
-            if (this.canContinueOffensive(sessionId, playerId)) this.executeOffensiveLoop(sessionId, playerId);
-        }, VIRTUAL_PLAYER_ACTION_DELAY_MS);
+    private waitAndContinueAttacking(sessionId: string, playerId: string): void {
+        setTimeout(() => this.attemptAttack(sessionId, playerId), VIRTUAL_PLAYER_ACTION_DELAY_MS);
     }
 
-    private canContinueOffensive(sessionId: string, playerId: string): boolean {
-        const session = this.sessionRepository.findById(sessionId);
-        const player = session.inGamePlayers[playerId];
-        return player.health > 0 && (player.speed > 0 || player.actionsRemaining > 0);
-    }
-
-    executeDefensiveTurn(sessionId: string, playerId: string): void {
+    classicDefensiveTurn(sessionId: string, playerId: string): void {
         this.executeDefensiveLoop(sessionId, playerId);
     }
 
     private executeDefensiveLoop(sessionId: string, playerId: string): void {
         if (!this.isPlayerAlive(sessionId, playerId)) return;
-        this.moveAwayFromPlayers(sessionId, playerId, () => this.waitAndContinueDefensive(sessionId, playerId));
+        this.moveAwayFromPlayers(sessionId, playerId, () => this.endPlayerTurn(sessionId, playerId));
     }
 
     private moveAwayFromPlayers(sessionId: string, playerId: string, onComplete: () => void): void {
@@ -420,15 +435,146 @@ export class GameplayService {
         }
     }
 
-    private waitAndContinueDefensive(sessionId: string, playerId: string): void {
+    ctfOffensiveTurn(sessionId: string, playerId: string): void {
+        this.executeCTFOffensiveLoop(sessionId, playerId);
+    }
+
+    ctfDefensiveTurn(sessionId: string, playerId: string): void {
+        this.executeCTFDefensiveLoop(sessionId, playerId);
+    }
+
+    private executeCTFOffensiveLoop(sessionId: string, playerId: string): void {
+        if (!this.isPlayerAlive(sessionId, playerId)) return;
+
+        if (this.sessionRepository.playerHasFlag(sessionId, playerId)) {
+            this.moveToStartPoint(sessionId, playerId, () => this.endPlayerTurn(sessionId, playerId));
+        } else {
+            const flagCarrier = this.findEnemyFlagCarrier(sessionId, playerId);
+            if (flagCarrier) {
+                this.moveToTarget(sessionId, playerId, flagCarrier, () => this.waitAndAttackThenEnd(sessionId, playerId));
+            } else {
+                this.moveToEnemyFlag(sessionId, playerId, () => this.waitAndPickUpFlagThenEnd(sessionId, playerId));
+            }
+        }
+    }
+
+    private executeCTFDefensiveLoop(sessionId: string, playerId: string): void {
+        if (!this.isPlayerAlive(sessionId, playerId)) return;
+
+        if (this.sessionRepository.playerHasFlag(sessionId, playerId)) {
+            this.moveToStartPoint(sessionId, playerId, () => this.endPlayerTurn(sessionId, playerId));
+        } else {
+            const flagCarrier = this.findEnemyFlagCarrier(sessionId, playerId);
+            if (flagCarrier) {
+                const carrierStartPoint = this.getPlayerStartPoint(sessionId, flagCarrier.id);
+                if (carrierStartPoint) {
+                    this.moveToTarget(sessionId, playerId, carrierStartPoint, () => this.waitAndAttackThenEnd(sessionId, playerId));
+                } else {
+                    this.moveToEnemyFlag(sessionId, playerId, () => this.waitAndPickUpFlagThenEnd(sessionId, playerId));
+                }
+            } else {
+                this.moveToEnemyFlag(sessionId, playerId, () => this.waitAndPickUpFlagThenEnd(sessionId, playerId));
+            }
+        }
+    }
+
+    private findEnemyFlagCarrier(sessionId: string, playerId: string): { id: string; x: number; y: number } | null {
+        const session = this.sessionRepository.findById(sessionId);
+        const playerTeam = this.getPlayerTeam(session, playerId);
+
+        for (const otherPlayer of Object.values(session.inGamePlayers)) {
+            if (otherPlayer.id === playerId) continue;
+            const otherTeam = this.getPlayerTeam(session, otherPlayer.id);
+            if (playerTeam === otherTeam) continue;
+            if (this.sessionRepository.playerHasFlag(sessionId, otherPlayer.id)) {
+                return { id: otherPlayer.id, x: otherPlayer.x, y: otherPlayer.y };
+            }
+        }
+        return null;
+    }
+
+    private getPlayerTeam(session: InGameSession, playerId: string): number | null {
+        for (const [teamNumber, team] of Object.entries(session.teams)) {
+            if (team.playerIds.includes(playerId)) {
+                return Number(teamNumber);
+            }
+        }
+        return null;
+    }
+
+    private moveToStartPoint(sessionId: string, playerId: string, onComplete: () => void): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        const startPoint = this.sessionRepository.findStartPointById(sessionId, player.startPointId);
+
+        if (!startPoint) {
+            onComplete();
+            return;
+        }
+
+        if (player.x === startPoint.x && player.y === startPoint.y) {
+            onComplete();
+            return;
+        }
+
+        this.moveProgressively(sessionId, playerId, startPoint, onComplete);
+    }
+
+    private moveToEnemyFlag(sessionId: string, playerId: string, onComplete: () => void): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const flagData = session.flagData;
+
+        if (!flagData) {
+            onComplete();
+            return;
+        }
+
+        if (flagData.holderPlayerId) {
+            const carrier = session.inGamePlayers[flagData.holderPlayerId];
+            if (carrier) {
+                this.moveToTarget(sessionId, playerId, carrier, onComplete);
+                return;
+            }
+        }
+
+        this.moveToTarget(sessionId, playerId, flagData.position, onComplete);
+    }
+
+    private moveToTarget(sessionId: string, playerId: string, target: Position, onComplete: () => void): void {
+        this.moveProgressively(sessionId, playerId, target, onComplete);
+    }
+
+    private getPlayerStartPoint(sessionId: string, playerId: string): Position | null {
+        const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player) return null;
+        return this.sessionRepository.findStartPointById(sessionId, player.startPointId);
+    }
+
+    private waitAndPickUpFlagThenEnd(sessionId: string, playerId: string): void {
         setTimeout(() => {
-            if (this.canContinueDefensive(sessionId, playerId)) this.executeDefensiveLoop(sessionId, playerId);
+            this.attemptPickUpFlag(sessionId, playerId);
+            this.endPlayerTurn(sessionId, playerId);
         }, VIRTUAL_PLAYER_ACTION_DELAY_MS);
     }
 
-    private canContinueDefensive(sessionId: string, playerId: string): boolean {
+    private waitAndAttackThenEnd(sessionId: string, playerId: string): void {
+        setTimeout(() => {
+            this.attemptAttack(sessionId, playerId);
+            this.endPlayerTurn(sessionId, playerId);
+        }, VIRTUAL_PLAYER_ACTION_DELAY_MS);
+    }
+
+    private attemptPickUpFlag(sessionId: string, playerId: string): void {
         const session = this.sessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
-        return player.health > 0 && player.speed > 0;
+        if (player.actionsRemaining === 0) return;
+
+        try {
+            const playerPosition = { x: player.x, y: player.y };
+            this.pickUpFlag(sessionId, playerId, playerPosition);
+        } catch {
+            // Action impossible
+        }
     }
 }

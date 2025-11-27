@@ -4,6 +4,8 @@ import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS, VIRTUAL_PLAYER_THINKING_DELAY_MAX_MS } from '@app/constants/virtual-player.constants';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { InGameSession } from '@common/interfaces/session.interface';
 
 @Injectable()
 export class VirtualPlayerService {
@@ -17,6 +19,11 @@ export class VirtualPlayerService {
     @OnEvent(ServerEvents.CombatTimerRestart)
     handleCombatTimerRestart(payload: { sessionId: string }): void {
         this.gameplayService.handleVPCombat(payload.sessionId);
+    }
+
+    @OnEvent(ServerEvents.FlagTransferRequested)
+    handleFlagTransferRequested(payload: { session: InGameSession; fromPlayerId: string; toPlayerId: string }): void {
+        this.gameplayService.handleVPFlagTransferRequest(payload.session.id, payload.toPlayerId, payload.fromPlayerId);
     }
 
     @OnEvent(ServerEvents.VirtualPlayerTurn)
@@ -34,10 +41,22 @@ export class VirtualPlayerService {
     }
 
     private executeVPTurn(sessionId: string, playerId: string, playerType: VirtualPlayerType): void {
-        if (playerType === VirtualPlayerType.Offensive) {
-            this.gameplayService.executeOffensiveTurn(sessionId, playerId);
+        const session = this.gameplayService.getSessionData(sessionId);
+        const isCtfMode = session.mode === GameMode.CTF;
+        const isOffensive = playerType === VirtualPlayerType.Offensive;
+
+        if (isCtfMode) {
+            if (isOffensive) {
+                this.gameplayService.ctfOffensiveTurn(sessionId, playerId);
+            } else {
+                this.gameplayService.ctfDefensiveTurn(sessionId, playerId);
+            }
         } else {
-            this.gameplayService.executeDefensiveTurn(sessionId, playerId);
+            if (isOffensive) {
+                this.gameplayService.classicOffensiveTurn(sessionId, playerId);
+            } else {
+                this.gameplayService.classicDefensiveTurn(sessionId, playerId);
+            }
         }
     }
 }
