@@ -17,7 +17,7 @@ import { MAX_CHAT_MESSAGE_LENGTH } from '@common/constants/chat';
 })
 export class ChatComponent implements AfterViewChecked {
     @ViewChild('messagesContainer') private readonly messagesContainer!: ElementRef;
-    @Input() showHeader: boolean = false;
+    @Input() showWrapper = false;
 
     messageInput = '';
     private shouldScrollToBottom = false;
