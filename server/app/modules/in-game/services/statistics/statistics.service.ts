@@ -133,7 +133,9 @@ export class StatisticsService {
             tilesVisitedPercentage: globalTilesVisitedPercentage,
             totalTeleportations: hasTeleportTiles ? trackingData?.teleportations || 0 : undefined,
             doorsManipulatedPercentage: Math.round((trackingData.toggledDoors.size / trackingData.totalDoors) * PERCENTAGE_MULTIPLIER),
-            sanctuariesUsedPercentage: hasSanctuaries ? Math.round((trackingData.usedSanctuaries.size / trackingData.totalSanctuaries) * PERCENTAGE_MULTIPLIER) : undefined,
+            sanctuariesUsedPercentage: hasSanctuaries
+                ? Math.round((trackingData.usedSanctuaries.size / trackingData.totalSanctuaries) * PERCENTAGE_MULTIPLIER)
+                : undefined,
             flagHoldersCount: isCTFMode ? trackingData?.flagHolders.size || 0 : undefined,
         };
     }

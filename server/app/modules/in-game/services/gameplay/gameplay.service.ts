@@ -1,9 +1,9 @@
+/* eslint-disable max-lines -- This file contains extensive gameplay business logic and requires more lines than the standard limit */
 import { VIRTUAL_PLAYER_ACTION_DELAY_MS, VIRTUAL_PLAYER_MOVEMENT_DELAY_MS } from '@app/constants/virtual-player.constants';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
 import { Game } from '@app/modules/game-store/entities/game.entity';
 import { ActionService } from '@app/modules/in-game/services/action/action.service';
-import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { TrackingService } from '@app/modules/in-game/services/tracking/tracking.service';
@@ -28,7 +28,6 @@ export class GameplayService {
         private readonly timerService: TimerService,
         private readonly eventEmitter: EventEmitter2,
         private readonly trackingService: TrackingService,
-        private readonly gameCache: GameCacheService,
     ) {}
 
     endPlayerTurn(sessionId: string, playerId: string): InGameSession {
@@ -145,7 +144,7 @@ export class GameplayService {
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
 
-        const tile = this.gameCache.getTileAtPosition(sessionId, position);
+        const tile = this.actionService.getTileAtPosition(sessionId, position);
         if (!tile) throw new NotFoundException('Tile not found');
 
         let finalPosition = position;
@@ -153,8 +152,8 @@ export class GameplayService {
 
         if (tile.kind === TileKind.TELEPORT) {
             try {
-                const destination = this.gameCache.getTeleportDestination(sessionId, position);
-                const destinationOccupant = this.gameCache.getTileOccupant(sessionId, destination);
+                const destination = this.actionService.getTeleportDestination(sessionId, position);
+                const destinationOccupant = this.actionService.getTileOccupant(sessionId, destination);
                 if (!destinationOccupant) {
                     finalPosition = destination;
                     this.eventEmitter.emit(ServerEvents.Teleported, {
@@ -179,7 +178,7 @@ export class GameplayService {
                 this.sessionRepository.updateFlagPosition(session, playerId, finalPosition);
                 this.checkCTFVictory(session, playerId, finalPosition);
             } else {
-                const placeable = this.gameCache.getPlaceableAtPosition(sessionId, finalPosition);
+                const placeable = this.actionService.getPlaceableAtPosition(sessionId, finalPosition);
                 if (placeable && placeable.kind === PlaceableKind.FLAG && placeable.placed) {
                     this.sessionRepository.pickUpFlag(session, playerId, finalPosition);
                 }
