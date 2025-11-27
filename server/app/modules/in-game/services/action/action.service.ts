@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- This file contains extensive action business logic and requires more lines than the standard limit */
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { ActiveCombat } from '@app/interfaces/active-combat.interface';
 import { PendingFlagTransfer } from '@app/interfaces/pending-flag-transfer.interface';
@@ -114,6 +115,18 @@ export class ActionService {
 
     getTileOccupant(sessionId: string, position: Position): string | null {
         return this.gameCache.getTileOccupant(sessionId, position);
+    }
+
+    getTileAtPosition(sessionId: string, position: Position): Tile | null {
+        return this.gameCache.getTileAtPosition(sessionId, position);
+    }
+
+    getTeleportDestination(sessionId: string, position: Position): Position {
+        return this.gameCache.getTeleportDestination(sessionId, position);
+    }
+
+    getPlaceableAtPosition(sessionId: string, position: Position): Placeable | null {
+        return this.gameCache.getPlaceableAtPosition(sessionId, position);
     }
 
     toggleDoor(session: InGameSession, playerId: string, position: Position): void {

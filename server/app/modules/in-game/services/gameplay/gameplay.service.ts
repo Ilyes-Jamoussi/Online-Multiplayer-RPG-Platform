@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- This file contains extensive gameplay business logic and requires more lines than the standard limit */
 import { VIRTUAL_PLAYER_ACTION_DELAY_MS, VIRTUAL_PLAYER_MOVEMENT_DELAY_MS } from '@app/constants/virtual-player.constants';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
@@ -11,6 +12,7 @@ import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { FlagData } from '@common/interfaces/flag-data.interface';
 import { Position } from '@common/interfaces/position.interface';
@@ -138,11 +140,69 @@ export class GameplayService {
         if (!session.isAdminModeActive) throw new BadRequestException('Admin mode not active');
         if (session.currentTurn.activePlayerId !== playerId) throw new BadRequestException('Not your turn');
         if (!this.actionService.isTileFree(sessionId, position)) throw new BadRequestException('Tile is not free');
-        this.sessionRepository.movePlayerPosition(sessionId, playerId, position.x, position.y, 0);
-        this.trackingService.trackTeleportation(sessionId);
-        this.trackingService.trackTileVisited(sessionId, playerId, position);
+
+        const player = session.inGamePlayers[playerId];
+        if (!player) throw new NotFoundException('Player not found');
+
+        const tile = this.actionService.getTileAtPosition(sessionId, position);
+        if (!tile) throw new NotFoundException('Tile not found');
+
+        let finalPosition = position;
+        const originPosition = { x: player.x, y: player.y };
+
+        if (tile.kind === TileKind.TELEPORT) {
+            try {
+                const destination = this.actionService.getTeleportDestination(sessionId, position);
+                const destinationOccupant = this.actionService.getTileOccupant(sessionId, destination);
+                if (!destinationOccupant) {
+                    finalPosition = destination;
+                    this.eventEmitter.emit(ServerEvents.Teleported, {
+                        session,
+                        playerId,
+                        originX: originPosition.x,
+                        originY: originPosition.y,
+                        destinationX: finalPosition.x,
+                        destinationY: finalPosition.y,
+                    });
+                }
+            } catch {
+                finalPosition = position;
+            }
+        }
+
+        this.sessionRepository.movePlayerPosition(sessionId, playerId, finalPosition.x, finalPosition.y, 0);
+        this.trackingService.trackTileVisited(sessionId, playerId, finalPosition);
+
+        if (session.mode === GameMode.CTF) {
+            if (this.sessionRepository.playerHasFlag(session.id, playerId)) {
+                this.sessionRepository.updateFlagPosition(session, playerId, finalPosition);
+                this.checkCTFVictory(session, playerId, finalPosition);
+            } else {
+                const placeable = this.actionService.getPlaceableAtPosition(sessionId, finalPosition);
+                if (placeable && placeable.kind === PlaceableKind.FLAG && placeable.placed) {
+                    this.sessionRepository.pickUpFlag(session, playerId, finalPosition);
+                }
+            }
+        }
+
         this.actionService.calculateReachableTiles(session, playerId);
         this.actionService.calculateAvailableActions(session, playerId);
+    }
+
+    private checkCTFVictory(session: InGameSession, playerId: string, position: Position): void {
+        const player = session.inGamePlayers[playerId];
+        if (!player) return;
+
+        const startPoint = this.sessionRepository.findStartPointById(session.id, player.startPointId);
+        if (!startPoint) return;
+
+        if (startPoint.x === position.x && startPoint.y === position.y && this.sessionRepository.playerHasFlag(session.id, playerId)) {
+            this.eventEmitter.emit(ServerEvents.GameOver, {
+                sessionId: session.id,
+                winnerId: playerId,
+                winnerName: player.name,
+            });
+        }
     }
 
     async fetchAndCacheGame(sessionId: string, gameId: string): Promise<Game> {

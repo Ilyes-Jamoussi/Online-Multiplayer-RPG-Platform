@@ -172,7 +172,7 @@ $classic-color: #3b82f6;
 
     &:hover {
         background: #f3f4f6;
-        border-color: darken($card-border, 5%);
+        border-color: color.adjust($card-border, $lightness: -5%);
     }
 
     .stat-icon {

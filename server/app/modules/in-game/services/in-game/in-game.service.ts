@@ -56,7 +56,16 @@ export class InGameService {
 
         const totalDoors = game.tiles.filter((tile) => tile.kind === TileKind.DOOR).length;
         const totalSanctuaries = game.objects.filter((p) => p.kind === PlaceableKind.HEAL || p.kind === PlaceableKind.FIGHT).length;
-        this.statisticsService.initializeTracking(id, game.size, totalDoors, totalSanctuaries);
+        let totalTeleportTiles = 0;
+        for (const channel of game.teleportChannels) {
+            if (channel.tiles?.entryA) {
+                totalTeleportTiles++;
+            }
+            if (channel.tiles?.entryB) {
+                totalTeleportTiles++;
+            }
+        }
+        this.statisticsService.initializeTracking(id, game.size, totalDoors, totalSanctuaries, totalTeleportTiles);
 
         const playerIdsOrder = this.initialization.makeTurnOrder(players);
         session.turnOrder = playerIdsOrder;
