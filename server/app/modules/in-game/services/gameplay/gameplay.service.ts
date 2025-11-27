@@ -338,14 +338,7 @@ export class GameplayService {
 
     private repositionAfterCombat(sessionId: string, playerId: string): void {
         setTimeout(() => {
-            const session = this.sessionRepository.findById(sessionId);
-            const player = session.inGamePlayers[playerId];
-            
-            if (player.speed > 0) {
-                this.moveToNearestPlayer(sessionId, playerId, () => this.endPlayerTurn(sessionId, playerId));
-            } else {
-                this.endPlayerTurn(sessionId, playerId);
-            }
+            this.endPlayerTurn(sessionId, playerId);
         }, VIRTUAL_PLAYER_ACTION_DELAY_MS);
     }
 
@@ -358,14 +351,9 @@ export class GameplayService {
         const action = availableActions[0];
         try {
             if (action.type === AvailableActionType.ATTACK) this.actionService.attackPlayer(sessionId, playerId, { x: action.x, y: action.y });
-            this.waitAndContinueAttacking(sessionId, playerId);
         } catch {
             // Action impossible
         }
-    }
-
-    private waitAndContinueAttacking(sessionId: string, playerId: string): void {
-        setTimeout(() => this.attemptAttack(sessionId, playerId), VIRTUAL_PLAYER_ACTION_DELAY_MS);
     }
 
     classicDefensiveTurn(sessionId: string, playerId: string): void {
