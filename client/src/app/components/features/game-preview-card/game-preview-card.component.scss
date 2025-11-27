@@ -8,7 +8,7 @@ $text-secondary: #6b7280;
 $text-muted: #9ca3af;
 $gold: #d4af37;
 $gold-light: #ffd700;
-$ctf-color: #ef4444;
+$ctf-color: #f97316;
 $classic-color: #3b82f6;
 
 .game-card {
@@ -57,31 +57,28 @@ $classic-color: #3b82f6;
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
-    background: rgba($classic-color, 0.1);
-    border: 1px solid rgba($classic-color, 0.3);
-    border-radius: 20px;
+    padding: 8px 16px;
+    background: rgba($classic-color, 0.95);
+    border: none;
+    border-radius: 8px;
     z-index: 10;
+    box-shadow: 0 2px 8px rgba($classic-color, 0.3);
 
     &.ctf {
-        background: rgba($ctf-color, 0.1);
-        border-color: rgba($ctf-color, 0.3);
+        background: rgba($ctf-color, 0.95);
+        box-shadow: 0 2px 8px rgba($ctf-color, 0.3);
 
         .mode-text {
-            color: $ctf-color;
+            color: white;
         }
     }
 
-    .mode-icon {
-        font-size: 14px;
-    }
-
     .mode-text {
-        font-size: 11px;
-        font-weight: 600;
+        font-size: 12px;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: $classic-color;
+        letter-spacing: 0.8px;
+        color: white;
     }
 }
 
@@ -158,27 +155,38 @@ $classic-color: #3b82f6;
 
 .game-stats {
     display: flex;
-    gap: 24px;
+    gap: 12px;
     margin-bottom: 20px;
-    padding: 14px 16px;
-    background: #f9fafb;
-    border-radius: 12px;
-    border: 1px solid $card-border;
 }
 
 .stat-item {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex: 1;
+    padding: 12px 14px;
+    background: #f9fafb;
+    border-radius: 10px;
+    border: 1px solid $card-border;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: #f3f4f6;
+        border-color: darken($card-border, 5%);
+    }
 
     .stat-icon {
-        font-size: 18px;
+        width: 20px;
+        height: 20px;
+        color: $text-secondary;
+        flex-shrink: 0;
     }
 
     .stat-content {
         display: flex;
         flex-direction: column;
         gap: 2px;
+        min-width: 0;
     }
 
     .stat-label {
@@ -186,7 +194,7 @@ $classic-color: #3b82f6;
         color: $text-muted;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        font-weight: 500;
+        font-weight: 600;
     }
 
     .stat-value {
