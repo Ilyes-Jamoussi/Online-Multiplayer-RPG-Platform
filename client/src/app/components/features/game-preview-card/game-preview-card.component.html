@@ -2,7 +2,6 @@
     <div class="card-glow"></div>
 
     <div class="mode-badge" [class.ctf]="isCTF">
-        <span class="mode-icon">{{ modeIcon }}</span>
         <span class="mode-text">{{ modeLabel }}</span>
     </div>
 
@@ -19,14 +18,20 @@
 
             <div class="game-stats">
                 <div class="stat-item">
-                    <span class="stat-icon">📐</span>
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <path d="M3 9h18M9 21V9" />
+                    </svg>
                     <div class="stat-content">
                         <span class="stat-label">Taille</span>
                         <span class="stat-value">{{ mapSizeLabel }}</span>
                     </div>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-icon">📅</span>
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
                     <div class="stat-content">
                         <span class="stat-label">Modifié</span>
                         <span class="stat-value">{{ formatDate(game.lastModified) }}</span>

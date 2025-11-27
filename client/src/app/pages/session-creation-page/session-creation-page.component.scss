@@ -1,83 +1,134 @@
 @use 'variables' as *;
 
 .games-section {
-    max-width: 1800px;
+    max-width: 1400px;
     width: 95%;
     margin: 0 auto;
     padding: 1rem;
     display: flex;
+    flex-direction: column;
     gap: 1.5rem;
     height: calc(100vh - 80px);
 }
 
 .tabs-container {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 0.75rem;
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-    width: 240px;
+    flex-direction: row;
+    gap: 0;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
     flex-shrink: 0;
     height: fit-content;
+    width: 100%;
+    max-width: 1200px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    margin: 0 auto;
 }
 
 .tab-button {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
-    padding: 1rem 1.25rem;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.25rem 1rem;
     background: transparent;
-    border: 2px solid transparent;
-    border-radius: 8px;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9rem;
-    font-weight: 500;
+    border: none;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: left;
+    transition: all 0.25s ease;
+    flex: 1;
+    position: relative;
+
+    &:last-child {
+        border-right: none;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #3b82f6, #60a5fa);
+        transform: scaleX(0);
+        transition: transform 0.25s ease;
+    }
 
     &:hover:not(.active) {
-        background: rgba(255, 255, 255, 0.1);
-        color: $white;
+        background: rgba(59, 130, 246, 0.05);
+        color: #3b82f6;
     }
 
     &.active {
-        background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(184, 134, 11, 0.2));
-        border-color: rgba(212, 175, 55, 0.6);
-        color: $white;
-        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+        background: linear-gradient(180deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.03));
+        color: #3b82f6;
+
+        &::after {
+            transform: scaleX(1);
+        }
 
         .tab-icon {
-            transform: scale(1.1);
+            transform: scale(1.15);
         }
 
         .tab-count {
-            background: rgba(212, 175, 55, 0.3);
-            color: #ffd700;
+            background: #3b82f6;
+            color: white;
+        }
+    }
+
+    &:nth-child(3) {
+        &::after {
+            background: linear-gradient(90deg, #f97316, #fb923c);
+        }
+
+        &:hover:not(.active) {
+            background: rgba(249, 115, 22, 0.05);
+            color: #f97316;
+        }
+
+        &.active {
+            background: linear-gradient(180deg, rgba(249, 115, 22, 0.08), rgba(249, 115, 22, 0.03));
+            color: #f97316;
+
+            .tab-count {
+                background: #f97316;
+            }
         }
     }
 }
 
 .tab-icon {
-    font-size: 1.5rem;
-    transition: transform 0.3s ease;
+    font-size: 2rem;
+    transition: transform 0.25s ease;
+    filter: grayscale(0.3);
+
+    .tab-button.active & {
+        filter: grayscale(0);
+    }
 }
 
 .tab-label {
     font-weight: 600;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
 }
 
 .tab-count {
-    padding: 0.2rem 0.5rem;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
+    padding: 0.25rem 0.625rem;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
     font-size: 0.75rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    margin-left: auto;
+    font-weight: 700;
+    transition: all 0.25s ease;
+    color: #6b7280;
 }
 
 .tab-content {
@@ -86,6 +137,7 @@
     min-height: 0;
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 @keyframes fadeIn {
@@ -102,11 +154,13 @@
 .games-grid {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 1.5rem;
     flex: 1;
     overflow-y: auto;
     padding: 4px;
     padding-right: 12px;
+    width: 100%;
 
     &::-webkit-scrollbar {
         width: 8px;
@@ -125,6 +179,11 @@
             background: rgba(255, 255, 255, 0.4);
         }
     }
+
+    app-game-preview-card {
+        width: 100%;
+        max-width: 1200px;
+    }
 }
 
 .no-games-message {
@@ -139,6 +198,9 @@
     background: rgba(0, 0, 0, 0.2);
     border-radius: 16px;
     border: 1px dashed rgba(255, 255, 255, 0.2);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
 
     .no-games-icon {
         font-size: 4rem;
@@ -173,19 +235,16 @@
 
 @media (max-width: 768px) {
     .games-section {
-        flex-direction: column;
         height: calc(100vh - 120px);
     }
 
     .tabs-container {
-        width: 100%;
-        flex-direction: row;
-        flex-shrink: 0;
+        flex-wrap: wrap;
     }
 
     .tab-button {
         flex: 1;
-        justify-content: center;
+        min-width: 150px;
         padding: 0.875rem 1rem;
     }
 

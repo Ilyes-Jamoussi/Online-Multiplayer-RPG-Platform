@@ -41,7 +41,7 @@ export class GamePreviewCardComponent {
     }
 
     get modeIcon(): string {
-        return this.isCTF ? '🚩' : '🎮';
+        return this.isCTF ? '🚩' : '⚔️';
     }
 
     onStartGame(): void {

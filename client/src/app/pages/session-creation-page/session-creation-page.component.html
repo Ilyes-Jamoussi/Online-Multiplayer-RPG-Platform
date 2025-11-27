@@ -7,7 +7,7 @@
                 <span class="tab-count">({{ allCount }})</span>
             </button>
             <button class="tab-button" [class.active]="activeTab() === 'classic'" (click)="setActiveTab('classic')">
-                <span class="tab-icon">🎮</span>
+                <span class="tab-icon">⚔️</span>
                 <span class="tab-label">Classique</span>
                 <span class="tab-count">({{ classicCount }})</span>
             </button>
@@ -27,7 +27,7 @@
             </div>
             } @else {
             <div class="no-games-message">
-                <span class="no-games-icon">{{ activeTab() === 'all' ? '📋' : activeTab() === 'classic' ? '🎮' : '🚩' }}</span>
+                <span class="no-games-icon">{{ activeTab() === 'all' ? '📋' : activeTab() === 'classic' ? '⚔️' : '🚩' }}</span>
                 <h2>Aucun jeu {{ activeTab() === 'all' ? '' : activeTab() === 'classic' ? 'classique' : 'CTF' }} disponible</h2>
                 <p>Il n'y a actuellement aucun jeu{{ activeTab() === 'all' ? '' : ' dans ce mode' }}.</p>
             </div>
