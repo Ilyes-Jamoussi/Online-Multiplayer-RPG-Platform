@@ -57,5 +57,24 @@ export interface VPConfig {
         // Bonus per tile of distance from nearest enemy (farther = better)
         distanceBonusPerTile: number;
     };
+
+    flag: {
+        // Priority to chase enemy flag carrier (offensive VP behavior)
+        chaseFlagCarrierPriority: number;
+        // Priority to guard enemy start point when flag is held (defensive VP behavior)
+        guardStartPointPriority: number;
+        // Distance penalty per tile when chasing flag carrier
+        chaseFlagCarrierPenaltyPerTile: number;
+        // Distance penalty per tile when going to guard start point
+        guardStartPointPenaltyPerTile: number;
+        // Bonus when chasing flag carrier (offensive VP)
+        chaseFlagCarrierBonus: number;
+        // Bonus when guarding start point (defensive VP)
+        guardStartPointBonus: number;
+        // Maximum distance to consider chasing flag carrier
+        maxChaseFlagCarrierDistance: number;
+        // Maximum distance to consider guarding start point
+        maxGuardStartPointDistance: number;
+    };
 }
 

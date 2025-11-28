@@ -68,6 +68,25 @@ export const OFFENSIVE_VP_CONFIG: VPConfig = {
         enemyProximityTiles: 0,
         distanceBonusPerTile: 0,
     },
+
+    flag: {
+        // Very high priority - will relentlessly chase flag carrier
+        chaseFlagCarrierPriority: 100,
+        // Not used for offensive VP
+        guardStartPointPriority: 0,
+        // Small penalty - will travel far to catch flag carrier
+        chaseFlagCarrierPenaltyPerTile: 2,
+        // Not used for offensive VP
+        guardStartPointPenaltyPerTile: 0,
+        // Big bonus to chase flag carrier
+        chaseFlagCarrierBonus: 60,
+        // Not used for offensive VP
+        guardStartPointBonus: 0,
+        // Will chase flag carrier anywhere on the map
+        maxChaseFlagCarrierDistance: 999,
+        // Not used for offensive VP
+        maxGuardStartPointDistance: 0,
+    },
 };
 
 /**
@@ -141,5 +160,24 @@ export const DEFENSIVE_VP_CONFIG: VPConfig = {
         enemyProximityTiles: 5,
         // Bonus per tile of distance from enemies (farther = better)
         distanceBonusPerTile: 3,
+    },
+
+    flag: {
+        // Not used for defensive VP
+        chaseFlagCarrierPriority: 0,
+        // High priority - will guard enemy start point when flag is held
+        guardStartPointPriority: 85,
+        // Not used for defensive VP
+        chaseFlagCarrierPenaltyPerTile: 0,
+        // Medium penalty - will travel to guard start point
+        guardStartPointPenaltyPerTile: 3,
+        // Not used for defensive VP
+        chaseFlagCarrierBonus: 0,
+        // Big bonus to guard start point
+        guardStartPointBonus: 50,
+        // Not used for defensive VP
+        maxChaseFlagCarrierDistance: 0,
+        // Will travel to guard start point
+        maxGuardStartPointDistance: 20,
     },
 };
