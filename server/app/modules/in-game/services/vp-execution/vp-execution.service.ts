@@ -44,9 +44,7 @@ export class VPExecutionService {
         const session = this.sessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
 
-        const canContinue = player.health > 0 && (player.speed > 0 || player.actionsRemaining > 0);
-
-        if (canContinue && player.virtualPlayerType) {
+        if (player.health > 0 && player.virtualPlayerType) {
             const vpType = player.virtualPlayerType;
             setTimeout(() => this.executeVPTurn(sessionId, playerId, vpType), VIRTUAL_PLAYER_ACTION_DELAY_MS);
         }

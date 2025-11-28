@@ -227,6 +227,10 @@ export class InGameSessionRepository {
         return this.getIngamePlayers(sessionId).length;
     }
 
+    realPlayersCount(sessionId: string): number {
+        return this.getIngamePlayers(sessionId).filter((p) => !p.virtualPlayerType).length;
+    }
+
     getIngamePlayers(sessionId: string): Player[] {
         const session = this.findById(sessionId);
         return Object.values(session.inGamePlayers).filter((p) => p.isInGame);
