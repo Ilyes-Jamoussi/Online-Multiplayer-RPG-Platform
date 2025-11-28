@@ -1,4 +1,4 @@
-import { Component, Signal, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, Signal, ViewChild, ElementRef, AfterViewChecked, Input } from '@angular/core';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiInputComponent } from '@app/components/ui/input/input.component';
 import { ChatService } from '@app/services/chat/chat.service';
@@ -17,6 +17,7 @@ import { MAX_CHAT_MESSAGE_LENGTH } from '@common/constants/chat';
 })
 export class ChatComponent implements AfterViewChecked {
     @ViewChild('messagesContainer') private readonly messagesContainer!: ElementRef;
+    @Input() showHeader: boolean = false;
 
     messageInput = '';
     private shouldScrollToBottom = false;

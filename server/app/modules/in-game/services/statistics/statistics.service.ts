@@ -8,11 +8,15 @@ import {
 } from '@app/constants/statistics.constants';
 import { GameStatisticsDto, PlayerStatisticsDto, GlobalStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
 import { TrackingService, GameTracker } from '@app/modules/in-game/services/tracking/tracking.service';
+import { ServerEvents } from '@app/enums/server-events.enum';
+import { TeleportedPayload } from '@app/modules/game-log/dto/game-log-payloads.dto';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { StoredStatistics } from '@common/interfaces/game-statistics.interface';
+import { OnEvent } from '@nestjs/event-emitter';
+import { GameMode } from '@common/enums/game-mode.enum';
 
 @Injectable()
 export class StatisticsService {
@@ -20,12 +24,28 @@ export class StatisticsService {
 
     constructor(private readonly trackingService: TrackingService) {}
 
-    initializeTracking(sessionId: string, mapSize: MapSize, totalDoors: number, totalSanctuaries: number): void {
-        this.trackingService.initializeTracking(sessionId, mapSize, totalDoors, totalSanctuaries);
+    initializeTracking(sessionId: string, mapSize: MapSize, totalDoors: number, totalSanctuaries: number, totalTeleportTiles: number): void {
+        this.trackingService.initializeTracking(sessionId, mapSize, totalDoors, totalSanctuaries, totalTeleportTiles);
     }
 
     trackTileVisited(sessionId: string, playerId: string, position: Position): void {
         this.trackingService.trackTileVisited(sessionId, playerId, position);
+    }
+
+    @OnEvent(ServerEvents.Teleported)
+    handleTeleported(payload: TeleportedPayload): void {
+        this.trackingService.trackTeleportation(payload.session.id);
+    }
+
+    @OnEvent(ServerEvents.FlagPickedUp)
+    handleFlagPickedUp(payload: { session: InGameSession; playerId: string }): void {
+        this.trackingService.trackFlagHolder(payload.session.id, payload.playerId);
+    }
+
+    @OnEvent(ServerEvents.FlagTransferred)
+    handleFlagTransferred(payload: { session: InGameSession; fromPlayerId: string; toPlayerId: string }): void {
+        this.trackingService.trackFlagHolder(payload.session.id, payload.fromPlayerId);
+        this.trackingService.trackFlagHolder(payload.session.id, payload.toPlayerId);
     }
 
     calculateAndStoreGameStatistics(session: InGameSession, winnerId: string, winnerName: string, gameStartTime: Date): GameStatisticsDto {
@@ -57,7 +77,7 @@ export class StatisticsService {
         winnerName: string,
         gameStartTime: Date,
     ): GameStatisticsDto {
-        const players = Object.values(session.inGamePlayers).filter((player) => player.isInGame);
+        const players = Object.values(session.inGamePlayers);
 
         const playersStatistics = players.map((player) => this.calculatePlayerStatistics(player, trackingData));
         const globalStatistics = this.calculateGlobalStatistics(session, trackingData, gameStartTime);
@@ -103,14 +123,20 @@ export class StatisticsService {
             globalTilesVisitedPercentage = Math.round((allVisitedTiles.size / trackingData.totalTiles) * PERCENTAGE_MULTIPLIER);
         }
 
+        const hasTeleportTiles = trackingData.totalTeleportTiles > 0;
+        const hasSanctuaries = trackingData.totalSanctuaries > 0;
+        const isCTFMode = session.mode === GameMode.CTF;
+
         return {
             gameDuration,
             totalTurns: session.currentTurn.turnNumber,
             tilesVisitedPercentage: globalTilesVisitedPercentage,
-            totalTeleportations: trackingData?.teleportations || 0,
+            totalTeleportations: hasTeleportTiles ? trackingData?.teleportations || 0 : undefined,
             doorsManipulatedPercentage: Math.round((trackingData.toggledDoors.size / trackingData.totalDoors) * PERCENTAGE_MULTIPLIER),
-            sanctuariesUsedPercentage: Math.round((trackingData.usedSanctuaries.size / trackingData.totalSanctuaries) * PERCENTAGE_MULTIPLIER),
-            flagHoldersCount: trackingData?.flagHolders.size || 0,
+            sanctuariesUsedPercentage: hasSanctuaries
+                ? Math.round((trackingData.usedSanctuaries.size / trackingData.totalSanctuaries) * PERCENTAGE_MULTIPLIER)
+                : undefined,
+            flagHoldersCount: isCTFMode ? trackingData?.flagHolders.size || 0 : undefined,
         };
     }
 

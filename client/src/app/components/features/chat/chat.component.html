@@ -1,4 +1,9 @@
 <div class="chat-section">
+    @if (showHeader) {
+    <div class="chat-header">
+        <h3>Clavardage</h3>
+    </div>
+    }
     <div class="messages" #messagesContainer>
         @for (message of messages(); track message.timestamp) {
         <div class="message" [class.my-message]="isMyMessage(message.authorId)" [class.other-message]="!isMyMessage(message.authorId)">
