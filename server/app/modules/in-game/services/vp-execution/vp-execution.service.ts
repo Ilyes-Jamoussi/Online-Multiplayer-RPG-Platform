@@ -108,6 +108,12 @@ export class VPExecutionService {
                     this.gameplayService.disembarkBoat(sessionId, playerId, action.position);
                     break;
 
+                case 'teleport':
+                    if (action.orientation) {
+                        this.gameplayService.movePlayer(sessionId, playerId, action.orientation);
+                    }
+                    break;
+
                 default:
                     return false;
             }

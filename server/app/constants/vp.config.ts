@@ -10,7 +10,7 @@ import { VPConfig } from '@app/interfaces/vp-config.interface';
 export const OFFENSIVE_VP_CONFIG: VPConfig = {
     health: {
         // Only heal if health drops below 40%
-        healThreshold: 0.4,
+        healThreshold: 0.5,
         // Emergency heal if below 20%
         criticalHealthThreshold: 0.2,
     },
@@ -79,8 +79,8 @@ export const OFFENSIVE_VP_CONFIG: VPConfig = {
  */
 export const DEFENSIVE_VP_CONFIG: VPConfig = {
     health: {
-        // Heal earlier - below 60%
-        healThreshold: 0.6,
+        // Heal earlier - below 65%
+        healThreshold: 0.65,
         // Critical earlier - below 35%
         criticalHealthThreshold: 0.35,
     },

@@ -147,6 +147,8 @@ export class VPPathfindingService {
 
         if (tile.kind === TileKind.DOOR) {
             this.addDoorNeighbor(neighbors, exp);
+        } else if (tile.kind === TileKind.TELEPORT) {
+            this.addTeleportNeighbor(neighbors, exp, session);
         } else {
             const tileCost = this.getTileCost(tile.kind);
             if (tileCost !== null) {
@@ -195,6 +197,38 @@ export class VPPathfindingService {
                     extraActions: 1,
                 }),
             );
+        }
+    }
+
+    private addTeleportNeighbor(neighbors: PathNode[], exp: TileExploration, session: InGameSession): void {
+        const { current, nextPos, tile, orientation, goal } = exp;
+
+        const tileCost = this.getTileCost(tile.kind);
+        if (tileCost === null) return;
+
+        try {
+            const destination = this.gameCache.getTeleportDestination(session.id, nextPos);
+            const destinationOccupant = this.gameCache.getTileOccupant(session.id, destination);
+
+            if (destinationOccupant && !(destination.x === goal.x && destination.y === goal.y)) {
+                return;
+            }
+
+            const costFromStart = current.costFromStart + tileCost;
+            const estimatedCostToGoal = this.heuristic(destination, goal);
+
+            neighbors.push({
+                position: destination,
+                costFromStart,
+                estimatedCostToGoal,
+                totalCost: costFromStart + estimatedCostToGoal,
+                parent: current,
+                actionToReach: { type: 'teleport', orientation, position: nextPos },
+                isOnBoat: false,
+                actionsUsed: current.actionsUsed,
+            });
+        } catch {
+            return;
         }
     }
 
