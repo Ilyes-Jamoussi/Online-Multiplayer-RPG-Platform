@@ -3,13 +3,14 @@ import { ServerEvents } from '@app/enums/server-events.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 
 @Injectable()
 export class CombatTimerService {
     private readonly combatTimers = new Map<string, NodeJS.Timeout>();
     private readonly activeCombats = new Set<string>();
 
-    constructor(private readonly eventEmitter: EventEmitter2) {}
+    constructor(private readonly eventEmitter: EventEmitter2, private readonly sessionRepository: InGameSessionRepository) {}
 
     startCombatTimer(session: InGameSession, attackerId: string, targetId: string, attackerTileEffect?: number, targetTileEffect?: number): void {
         this.activeCombats.add(session.id);
@@ -21,6 +22,10 @@ export class CombatTimerService {
             attackerTileEffect,
             targetTileEffect,
         });
+
+        if(this.sessionRepository.isVirtualPlayer(session.id, attackerId) || this.sessionRepository.isVirtualPlayer(session.id, targetId)) {
+            this.eventEmitter.emit(ServerEvents.VirtualPlayerCombatStarted, { sessionId: session.id, attackerId, targetId });
+        }
 
         this.scheduleCombatLoop(session);
         this.eventEmitter.emit(ServerEvents.CombatTimerRestart, { sessionId: session.id });

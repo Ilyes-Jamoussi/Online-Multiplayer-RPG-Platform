@@ -56,4 +56,6 @@ export enum ServerEvents {
     FlagTransferResult = 'flag-transfer-result',
     FlagTransferred = 'flag-transferred',
     FlagTransferRequestsCleared = 'flag-transfer-requests-cleared',
+
+    VirtualPlayerCombatStarted = 'virtual-player-combat-started',
 }

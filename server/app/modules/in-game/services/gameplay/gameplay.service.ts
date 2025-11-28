@@ -197,8 +197,14 @@ export class GameplayService {
             playerAId = activeCombat.playerAId;
             playerBId = activeCombat.playerBId;
         }
-        this.selectVPPosture(sessionId, playerAId);
-        this.selectVPPosture(sessionId, playerBId);
+
+        if (this.sessionRepository.isVirtualPlayer(sessionId, playerAId)) {
+            this.selectVPPosture(sessionId, playerAId);
+        }
+
+        else if (this.sessionRepository.isVirtualPlayer(sessionId, playerBId)) {
+            this.selectVPPosture(sessionId, playerBId);
+        }
     }
 
     executeOffensiveTurn(sessionId: string, playerId: string): void {

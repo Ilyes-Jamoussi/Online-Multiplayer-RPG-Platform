@@ -9,7 +9,7 @@ import { VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS, VIRTUAL_PLAYER_THINKING_DELAY_MAX
 export class VirtualPlayerService {
     constructor(private readonly gameplayService: GameplayService) {}
 
-    @OnEvent(ServerEvents.CombatStarted)
+    @OnEvent(ServerEvents.VirtualPlayerCombatStarted)
     handleCombatStarted(payload: { sessionId: string; attackerId: string; targetId: string }): void {
         this.gameplayService.handleVPCombat(payload.sessionId, payload.attackerId, payload.targetId);
     }
