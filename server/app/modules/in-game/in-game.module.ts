@@ -17,6 +17,9 @@ import { TimerService } from '@app/modules/in-game/services/timer/timer.service'
 import { TrackingService } from '@app/modules/in-game/services/tracking/tracking.service';
 import { TurnTimerService } from '@app/modules/in-game/services/turn-timer/turn-timer.service';
 import { VirtualPlayerService } from '@app/modules/in-game/services/virtual-player/virtual-player.service';
+import { VPExecutionService } from '@app/modules/in-game/services/vp-execution/vp-execution.service';
+import { VPGameplayService } from '@app/modules/in-game/services/vp-gameplay/vp-gameplay.service';
+import { VPPathfindingService } from '@app/modules/in-game/services/vp-pathfinding/vp-pathfinding.service';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
@@ -38,6 +41,9 @@ import { MongooseModule } from '@nestjs/mongoose';
         ActionService,
         CombatService,
         VirtualPlayerService,
+        VPExecutionService,
+        VPGameplayService,
+        VPPathfindingService,
         StatisticsService,
         TrackingService,
     ],
