@@ -16,6 +16,7 @@ import {
 } from '@app/modules/game-log/dto/game-log-payloads.dto';
 import { GameLogService } from '@app/modules/game-log/services/game-log.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { successResponse } from '@app/utils/socket-response/socket-response.util';
 import { GameLogEvents } from '@common/enums/game-log-events.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -35,6 +36,7 @@ export class GameLogGateway {
     constructor(
         private readonly gameLogService: GameLogService,
         private readonly inGameSessionRepository: InGameSessionRepository,
+        private readonly inGameService: InGameService,
     ) {}
 
     @OnEvent(ServerEvents.TurnStarted)
@@ -111,6 +113,7 @@ export class GameLogGateway {
 
         const entry = this.gameLogService.createGameOverEntry(payload.sessionId);
         this.emitLogEntry(session.inGameId, entry);
+        this.inGameService.removeSession(payload.sessionId);
     }
 
     @OnEvent(ServerEvents.PlayerBoardedBoat)
