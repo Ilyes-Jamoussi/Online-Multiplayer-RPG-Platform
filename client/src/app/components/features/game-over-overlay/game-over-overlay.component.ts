@@ -81,7 +81,7 @@ export class GameOverOverlayComponent implements OnDestroy {
                 return `L'équipe ${this.winnerTeamNumber} a gagné la partie !`;
             }
         }
-        return this.isWinner ? 'Vous avez gagné la partie !' : `${this.gameOverData?.winnerName} a gagné la partie !`;
+        return this.isWinner ? 'Tu as gagné la partie !' : `${this.gameOverData?.winnerName} a gagné la partie !`;
     }
     get playerStats(): PlayerStat[] {
         if (!this.gameOverData) return [];

@@ -2,7 +2,12 @@
 <div class="combat-overlay" [class.victory-mode]="isVictoryNotificationVisible">
     <div class="combat-container">
         @if (victoryData && isVictoryNotificationVisible) {
-        <app-combat-result [victoryData]="victoryData" [isVictory]="isVictory" [victoryMessage]="victoryMessage" [victorySubtitle]="victorySubtitle"></app-combat-result>
+        <app-combat-result
+            [victoryData]="victoryData"
+            [isVictory]="isVictory"
+            [victoryMessage]="victoryMessage"
+            [victorySubtitle]="victorySubtitle"
+        ></app-combat-result>
         } @else {
         <div class="combat-header">
             <app-combat-timer></app-combat-timer>
@@ -16,11 +21,14 @@
                         <div class="fighter-name">{{ playerAName }}</div>
                         <div class="fighter-badges">
                             @if (playerAPosture) {
-                            <span class="posture-badge" [class.offensive]="playerAPosture === 'offensive'" [class.defensive]="playerAPosture === 'defensive'">
+                            <span
+                                class="posture-badge"
+                                [class.offensive]="playerAPosture === 'offensive'"
+                                [class.defensive]="playerAPosture === 'defensive'"
+                            >
                                 {{ playerAPosture === 'offensive' ? '⚔️' : '🛡️' }}
                             </span>
-                            }
-                            @if (playerATileEffectLabel) {
+                            } @if (playerATileEffectLabel) {
                             <span class="tile-effect-badge">❄️</span>
                             }
                         </div>
@@ -36,7 +44,12 @@
 
                     <div class="health-section">
                         <div class="health-bar">
-                            <div class="health-bar-fill" [style.width.%]="playerAHealth.percentage" [class.low-health]="playerAHealth.percentage <= 25" [class.medium-health]="playerAHealth.percentage > 25 && playerAHealth.percentage <= 50"></div>
+                            <div
+                                class="health-bar-fill"
+                                [style.width.%]="playerAHealth.percentage"
+                                [class.low-health]="playerAHealth.percentage <= 25"
+                                [class.medium-health]="playerAHealth.percentage > 25 && playerAHealth.percentage <= 50"
+                            ></div>
                         </div>
                         <div class="health-text">{{ playerAHealth.current }} / {{ playerAHealth.max }} HP</div>
                     </div>
@@ -53,8 +66,7 @@
                                 <span class="dice-value">{{ playerADamage.attackRoll }}</span>
                                 @if (playerADamage.attackBonus > 0) {
                                 <span class="bonus">+{{ playerADamage.attackBonus }}</span>
-                                }
-                                @if (playerADamage.attackPostureBonus > 0) {
+                                } @if (playerADamage.attackPostureBonus > 0) {
                                 <span class="bonus posture">+{{ playerADamage.attackPostureBonus }}</span>
                                 }
                                 <span class="total">= {{ playerADamage.totalAttack }}</span>
@@ -70,8 +82,7 @@
                                 <span class="dice-value">{{ playerADamage.defenseRoll }}</span>
                                 @if (playerADamage.defenseBonus > 0) {
                                 <span class="bonus">+{{ playerADamage.defenseBonus }}</span>
-                                }
-                                @if (playerADamage.defensePostureBonus > 0) {
+                                } @if (playerADamage.defensePostureBonus > 0) {
                                 <span class="bonus posture">+{{ playerADamage.defensePostureBonus }}</span>
                                 }
                                 <span class="total">= {{ playerADamage.totalDefense }}</span>
@@ -106,11 +117,14 @@
                         <div class="fighter-name">{{ playerBName }}</div>
                         <div class="fighter-badges">
                             @if (playerBPosture) {
-                            <span class="posture-badge" [class.offensive]="playerBPosture === 'offensive'" [class.defensive]="playerBPosture === 'defensive'">
+                            <span
+                                class="posture-badge"
+                                [class.offensive]="playerBPosture === 'offensive'"
+                                [class.defensive]="playerBPosture === 'defensive'"
+                            >
                                 {{ playerBPosture === 'offensive' ? '⚔️' : '🛡️' }}
                             </span>
-                            }
-                            @if (playerBTileEffectLabel) {
+                            } @if (playerBTileEffectLabel) {
                             <span class="tile-effect-badge">❄️</span>
                             }
                         </div>
@@ -126,7 +140,12 @@
 
                     <div class="health-section">
                         <div class="health-bar">
-                            <div class="health-bar-fill" [style.width.%]="playerBHealth.percentage" [class.low-health]="playerBHealth.percentage <= 25" [class.medium-health]="playerBHealth.percentage > 25 && playerBHealth.percentage <= 50"></div>
+                            <div
+                                class="health-bar-fill"
+                                [style.width.%]="playerBHealth.percentage"
+                                [class.low-health]="playerBHealth.percentage <= 25"
+                                [class.medium-health]="playerBHealth.percentage > 25 && playerBHealth.percentage <= 50"
+                            ></div>
                         </div>
                         <div class="health-text">{{ playerBHealth.current }} / {{ playerBHealth.max }} HP</div>
                     </div>
@@ -143,8 +162,7 @@
                                 <span class="dice-value">{{ playerBDamage.attackRoll }}</span>
                                 @if (playerBDamage.attackBonus > 0) {
                                 <span class="bonus">+{{ playerBDamage.attackBonus }}</span>
-                                }
-                                @if (playerBDamage.attackPostureBonus > 0) {
+                                } @if (playerBDamage.attackPostureBonus > 0) {
                                 <span class="bonus posture">+{{ playerBDamage.attackPostureBonus }}</span>
                                 }
                                 <span class="total">= {{ playerBDamage.totalAttack }}</span>
@@ -160,8 +178,7 @@
                                 <span class="dice-value">{{ playerBDamage.defenseRoll }}</span>
                                 @if (playerBDamage.defenseBonus > 0) {
                                 <span class="bonus">+{{ playerBDamage.defenseBonus }}</span>
-                                }
-                                @if (playerBDamage.defensePostureBonus > 0) {
+                                } @if (playerBDamage.defensePostureBonus > 0) {
                                 <span class="bonus posture">+{{ playerBDamage.defensePostureBonus }}</span>
                                 }
                                 <span class="total">= {{ playerBDamage.totalDefense }}</span>
@@ -188,23 +205,31 @@
         <div class="combat-actions">
             <div class="action-prompt">
                 @if (isPostureSelected) {
-                <span class="selected-posture">
-                    {{ selectedPosture === 'offensive' ? '⚔️ Offensive' : '🛡️ Défensive' }} sélectionnée
-                </span>
+                <span class="selected-posture"> {{ selectedPosture === 'offensive' ? '⚔️ Offensive' : '🛡️ Défensive' }} sélectionnée </span>
                 } @else {
                 <span class="prompt-text">Choisissez votre posture de combat</span>
                 }
             </div>
 
             <div class="action-buttons">
-                <button class="combat-btn offensive" [class.selected]="selectedPosture === 'offensive'" [disabled]="isPostureSelected" (click)="chooseOffensive()">
+                <button
+                    class="combat-btn offensive"
+                    [class.selected]="selectedPosture === 'offensive'"
+                    [disabled]="isPostureSelected"
+                    (click)="chooseOffensive()"
+                >
                     <span class="btn-icon">⚔️</span>
                     <span class="btn-content">
                         <span class="btn-title">Offensive</span>
                         <span class="btn-bonus">+2 Attaque</span>
                     </span>
                 </button>
-                <button class="combat-btn defensive" [class.selected]="selectedPosture === 'defensive'" [disabled]="isPostureSelected" (click)="chooseDefensive()">
+                <button
+                    class="combat-btn defensive"
+                    [class.selected]="selectedPosture === 'defensive'"
+                    [disabled]="isPostureSelected"
+                    (click)="chooseDefensive()"
+                >
                     <span class="btn-icon">🛡️</span>
                     <span class="btn-content">
                         <span class="btn-title">Défensive</span>

@@ -482,7 +482,8 @@ $text-dim: rgba(255, 255, 255, 0.7);
 }
 
 @keyframes vsPulse {
-    0%, 100% {
+    0%,
+    100% {
         transform: scale(1);
         box-shadow:
             0 0 40px rgba(255, 215, 0, 0.6),
@@ -517,7 +518,8 @@ $text-dim: rgba(255, 255, 255, 0.7);
 }
 
 @keyframes lightningClash {
-    0%, 100% {
+    0%,
+    100% {
         transform: translate(-50%, -50%) scale(1);
         opacity: 0.4;
     }
@@ -857,4 +859,3 @@ $text-dim: rgba(255, 255, 255, 0.7);
         max-width: 100%;
     }
 }
-

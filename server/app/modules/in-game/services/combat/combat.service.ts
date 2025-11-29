@@ -21,6 +21,7 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 export class CombatService {
     private readonly activeCombats = new Map<string, CombatState>();
 
+    // eslint-disable-next-line max-params -- This is a constructor with a lot of dependencies
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly timerService: TimerService,

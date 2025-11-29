@@ -103,9 +103,9 @@ export class CombatOverlayComponent {
         const player = this.inGameService.getPlayerByPlayerId(this.combatData.attackerId);
         const isOpponent = this.combatData.userRole === 'target';
         const isVirtual = player.virtualPlayerType !== undefined;
-        
+
         if (isOpponent && !isVirtual) return null;
-        
+
         return this.combatService.playerPostures()[this.combatData.attackerId] || null;
     }
 
@@ -114,9 +114,9 @@ export class CombatOverlayComponent {
         const player = this.inGameService.getPlayerByPlayerId(this.combatData.targetId);
         const isOpponent = this.combatData.userRole === 'attacker';
         const isVirtual = player.virtualPlayerType !== undefined;
-        
+
         if (isOpponent && !isVirtual) return null;
-        
+
         return this.combatService.playerPostures()[this.combatData.targetId] || null;
     }
 
