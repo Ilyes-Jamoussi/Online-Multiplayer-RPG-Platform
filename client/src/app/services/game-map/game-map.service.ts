@@ -3,6 +3,7 @@ import { AvailableActionDto } from '@app/dto/available-action-dto';
 import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { PlaceableDisabledUpdatedDto } from '@app/dto/placeable-disabled-updated-dto';
 import { PlaceablePositionUpdatedDto } from '@app/dto/placeable-position-updated-dto';
 import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
 import { AssetsService } from '@app/services/assets/assets.service';
@@ -39,6 +40,7 @@ export class GameMapService {
     private readonly _mode = signal<GameMode>(this.initialState.mode);
     private readonly _activeTileCoords = signal<Position | null>(null);
     private readonly _teleportChannels = signal<TeleportChannelDto[]>([]);
+    private readonly _disabledPlaceables = signal<Map<string, { turnCount: number; positions: Position[] }>>(new Map());
 
     readonly visibleObjects: Signal<GameEditorPlaceableDto[]> = computed(() => {
         const visibleObjects = this._objects().filter((obj) => obj.placed);
@@ -62,8 +64,11 @@ export class GameMapService {
         this.inGameSocketService.onDoorToggled((data) => {
             this.updateTileState(data.x, data.y, data.isOpen);
         });
-        this.inGameSocketService.onPlaceablePositionUpdated((data) => {
+        this.inGameSocketService.onPlaceableUpdated((data) => {
             this.updateObjectState(data);
+        });
+        this.inGameSocketService.onPlaceableDisabledUpdated((data) => {
+            this.updateDisabledPlaceable(data);
         });
     }
 
@@ -115,13 +120,20 @@ export class GameMapService {
 
     private getActionClass(x: number, y: number): string {
         const action = this.availableActions.find((availableAction: AvailableActionDto) => availableAction.x === x && availableAction.y === y);
-        return action?.type === AvailableActionType.ATTACK ? 'action-attack' : 'action-door';
+        if (!action) return '';
+        if (action.type === AvailableActionType.ATTACK) return 'action-attack';
+        if (action.type === AvailableActionType.DOOR) return 'action-door';
+        if (action.type === AvailableActionType.HEAL) return 'action-heal';
+        if (action.type === AvailableActionType.FIGHT) return 'action-fight';
+        if (action.type === AvailableActionType.BOAT) return 'action-boat';
+        if (action.type === AvailableActionType.TRANSFER_FLAG) return 'action-transfer-flag';
+        return '';
     }
 
     getActionTypeAt(x: number, y: number): AvailableActionType | null {
         const action = this.availableActions.find((availableAction: AvailableActionDto) => availableAction.x === x && availableAction.y === y);
         if (action) {
-            this.inGameService.deactivateActionMode();
+            this.inGameService.resetActions();
         }
         return action?.type || null;
     }
@@ -264,5 +276,40 @@ export class GameMapService {
 
     boatAction(x: number, y: number): void {
         this.inGameService.boatAction(x, y);
+    }
+    requestFlagTransfer(x: number, y: number): void {
+        this.inGameService.requestFlagTransfer(x, y);
+    }
+
+    flagData() {
+        return this.inGameService.flagData();
+    }
+
+    private updateDisabledPlaceable(data: PlaceableDisabledUpdatedDto): void {
+        this._disabledPlaceables.update((map) => {
+            const newMap = new Map(map);
+            if (data.placeableId) {
+                if (data.turnCount > 0) {
+                    newMap.set(data.placeableId, { turnCount: data.turnCount, positions: data.positions });
+                } else {
+                    newMap.delete(data.placeableId);
+                }
+            }
+            return newMap;
+        });
+    }
+
+    getDisabledPlaceableInfo(placeableId: string): { turnCount: number; positions: Position[] } | undefined {
+        return this._disabledPlaceables().get(placeableId);
+    }
+
+    isPlaceableDisabled(placeableId: string): boolean {
+        const info = this.getDisabledPlaceableInfo(placeableId);
+        return info !== undefined && info.turnCount > 0;
+    }
+
+    getPlaceableTurnCount(placeableId: string): number | null {
+        const info = this.getDisabledPlaceableInfo(placeableId);
+        return info?.turnCount ?? null;
     }
 }

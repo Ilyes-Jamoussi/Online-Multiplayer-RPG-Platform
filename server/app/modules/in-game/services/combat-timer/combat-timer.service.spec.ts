@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { COMBAT_DURATION } from '@common/constants/in-game';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -6,6 +7,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CombatTimerService } from './combat-timer.service';
 import { MapSize } from '@common/enums/map-size.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 
 describe('CombatTimerService', () => {
     let service: CombatTimerService;
@@ -22,14 +24,19 @@ describe('CombatTimerService', () => {
         id: SESSION_ID_1,
         inGameId: 'in-game-1',
         gameId: 'game-1',
+        chatId: 'chat-1',
         maxPlayers: 4,
+        mode: GameMode.CLASSIC,
         isGameStarted: true,
         inGamePlayers: {},
+        teams: {
+            1: { number: 1, playerIds: [] }, // eslint-disable-line @typescript-eslint/naming-convention -- Test data
+        },
         currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
         startPoints: [],
         mapSize: MapSize.MEDIUM,
-        mode: GameMode.CLASSIC,
         turnOrder: [],
+        playerCount: 0,
         ...overrides,
     });
 
@@ -38,12 +45,20 @@ describe('CombatTimerService', () => {
             emit: jest.fn(),
         };
 
+        const mockSessionRepository = {
+            isVirtualPlayer: jest.fn().mockReturnValue(false),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 CombatTimerService,
                 {
                     provide: EventEmitter2,
                     useValue: mockEventEmitter,
+                },
+                {
+                    provide: InGameSessionRepository,
+                    useValue: mockSessionRepository,
                 },
             ],
         }).compile();

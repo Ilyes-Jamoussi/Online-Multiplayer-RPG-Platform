@@ -34,4 +34,5 @@ export interface Player {
     hasCombatBonus: boolean;
     onBoatId?: string;
     virtualPlayerType?: VirtualPlayerType;
+    teamNumber?: number;
 }

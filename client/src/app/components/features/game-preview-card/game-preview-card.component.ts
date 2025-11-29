@@ -1,7 +1,9 @@
+import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiIconComponent } from '@app/components/ui/icon/icon.component';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { MAP_SIZE_LABELS } from '@common/constants/game.constants';
 import { ENVIRONMENT } from '@src/environments/environment';
 
@@ -10,7 +12,7 @@ import { ENVIRONMENT } from '@src/environments/environment';
     templateUrl: './game-preview-card.component.html',
     styleUrls: ['./game-preview-card.component.scss'],
     standalone: true,
-    imports: [UiIconComponent, UiButtonComponent],
+    imports: [CommonModule, UiIconComponent, UiButtonComponent],
 })
 export class GamePreviewCardComponent {
     @Input({ required: true }) game: GamePreviewDto;
@@ -28,6 +30,18 @@ export class GamePreviewCardComponent {
 
     get mapSizeLabel(): string {
         return MAP_SIZE_LABELS[this.game.size] || `${this.game.size}x${this.game.size}`;
+    }
+
+    get isCTF(): boolean {
+        return this.game.mode === GameMode.CTF;
+    }
+
+    get modeLabel(): string {
+        return this.isCTF ? 'Capture du Drapeau' : 'Classique';
+    }
+
+    get modeIcon(): string {
+        return this.isCTF ? '🚩' : '⚔️';
     }
 
     onStartGame(): void {
@@ -51,8 +65,6 @@ export class GamePreviewCardComponent {
             day: '2-digit',
             month: 'short',
             year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
         });
     }
 }

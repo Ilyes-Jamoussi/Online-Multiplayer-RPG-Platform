@@ -2,9 +2,14 @@ import { Injectable } from '@angular/core';
 import { AdminModeToggledDto } from '@app/dto/admin-mode-toggled-dto';
 import { AvailableActionsDto } from '@app/dto/available-actions-dto';
 import { DoorToggledDto } from '@app/dto/door-toggled-dto';
+import { FlagPickedUpDto } from '@app/dto/flag-picked-up-dto';
+import { FlagTransferRequestDto } from '@app/dto/flag-transfer-request-dto';
+import { FlagTransferResultDto } from '@app/dto/flag-transfer-result-dto';
+import { FlagTransferredDto } from '@app/dto/flag-transferred-dto';
 import { GameOverDto } from '@app/dto/game-over-dto';
 import { GameStatisticsDto } from '@app/dto/game-statistics-dto';
 import { OpenSanctuaryDto } from '@app/dto/open-sanctuary-dto';
+import { PlaceableDisabledUpdatedDto } from '@app/dto/placeable-disabled-updated-dto';
 import { PlaceablePositionUpdatedDto } from '@app/dto/placeable-position-updated-dto';
 import { PlayerBoardedBoatDto } from '@app/dto/player-boarded-boat-dto';
 import { PlayerBonusesChangedDto } from '@app/dto/player-bonuses-changed-dto';
@@ -66,6 +71,14 @@ export class InGameSocketService {
 
     playerSanctuaryAction(data: { sessionId: string; x: number; y: number; kind: PlaceableKind; double?: boolean }): void {
         this.socket.emit(InGameEvents.PlayerSanctuaryAction, data);
+    }
+
+    requestFlagTransfer(data: { sessionId: string; x: number; y: number }): void {
+        this.socket.emit(InGameEvents.FlagTransferRequest, data);
+    }
+
+    respondToFlagTransfer(data: { sessionId: string; fromPlayerId: string; accepted: boolean }): void {
+        this.socket.emit(InGameEvents.FlagTransferResponse, data);
     }
 
     toggleAdminMode(sessionId: string): void {
@@ -176,7 +189,35 @@ export class InGameSocketService {
         this.socket.onSuccessEvent(InGameEvents.PlayerDisembarkedBoat, callback);
     }
 
-    onPlaceablePositionUpdated(callback: (data: PlaceablePositionUpdatedDto) => void): void {
-        this.socket.onSuccessEvent(InGameEvents.PlaceablePositionUpdated, callback);
+    onPlaceableUpdated(callback: (data: PlaceablePositionUpdatedDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlaceableUpdated, callback);
+    }
+
+    onPlaceableDisabledUpdated(callback: (data: PlaceableDisabledUpdatedDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlaceableDisabledUpdated, callback);
+    }
+
+    onSessionUpdated(callback: (data: InGameSession) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.SessionUpdated, callback);
+    }
+
+    onFlagPickedUp(callback: (data: FlagPickedUpDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.FlagPickedUp, callback);
+    }
+
+    onFlagTransferRequested(callback: (data: FlagTransferRequestDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.FlagTransferRequested, callback);
+    }
+
+    onFlagTransferResult(callback: (data: FlagTransferResultDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.FlagTransferResult, callback);
+    }
+
+    onFlagTransferred(callback: (data: FlagTransferredDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.FlagTransferred, callback);
+    }
+
+    onFlagTransferRequestsCleared(callback: () => void): void {
+        this.socket.onSuccessEvent(InGameEvents.FlagTransferRequestsCleared, callback);
     }
 }

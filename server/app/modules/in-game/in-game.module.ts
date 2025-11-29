@@ -1,6 +1,7 @@
 import { Game, gameSchema } from '@app/modules/game-store/entities/game.entity';
 import { InGameController } from '@app/modules/in-game/controllers/in-game.controller';
 import { CombatGateway } from '@app/modules/in-game/gateways/combat/combat.gateway';
+import { InGameActionGateway } from '@app/modules/in-game/gateways/in-game-action/in-game-action.gateway';
 import { InGameGateway } from '@app/modules/in-game/gateways/in-game/in-game.gateway';
 import { ActionService } from '@app/modules/in-game/services/action/action.service';
 import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
@@ -16,8 +17,11 @@ import { TimerService } from '@app/modules/in-game/services/timer/timer.service'
 import { TrackingService } from '@app/modules/in-game/services/tracking/tracking.service';
 import { TurnTimerService } from '@app/modules/in-game/services/turn-timer/turn-timer.service';
 import { VirtualPlayerService } from '@app/modules/in-game/services/virtual-player/virtual-player.service';
+import { VPCTFService } from '@app/modules/in-game/services/vp-ctf/vp-ctf.service';
+import { VPExecutionService } from '@app/modules/in-game/services/vp-execution/vp-execution.service';
+import { VPGameplayService } from '@app/modules/in-game/services/vp-gameplay/vp-gameplay.service';
+import { VPPathfindingService } from '@app/modules/in-game/services/vp-pathfinding/vp-pathfinding.service';
 import { Module } from '@nestjs/common';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
@@ -25,6 +29,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     providers: [
         InGameService,
         InGameGateway,
+        InGameActionGateway,
         CombatGateway,
         TimerService,
         TurnTimerService,
@@ -37,10 +42,14 @@ import { MongooseModule } from '@nestjs/mongoose';
         ActionService,
         CombatService,
         VirtualPlayerService,
+        VPCTFService,
+        VPExecutionService,
+        VPGameplayService,
+        VPPathfindingService,
         StatisticsService,
         TrackingService,
     ],
     exports: [InGameService, InGameSessionRepository, TrackingService],
-    imports: [MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }]), EventEmitterModule.forRoot()],
+    imports: [MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }])],
 })
 export class InGameModule {}

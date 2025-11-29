@@ -35,7 +35,6 @@ export class TimerService {
         this.combatTimerService.stopCombatTimer({ id: sessionId } as InGameSession);
     }
 
-    // Combat timer delegation
     startCombatTimer(session: InGameSession, attackerId: string, targetId: string, attackerTileEffect?: number, targetTileEffect?: number): void {
         this.combatTimerService.startCombatTimer(session, attackerId, targetId, attackerTileEffect, targetTileEffect);
     }
@@ -48,7 +47,6 @@ export class TimerService {
         this.combatTimerService.forceNextLoop(session);
     }
 
-    // Coordinated methods
     startCombat(session: InGameSession, attackerId: string, targetId: string, attackerTileEffect?: number, targetTileEffect?: number): void {
         this.turnTimerService.pauseTurnTimer(session.id);
         this.combatTimerService.startCombatTimer(session, attackerId, targetId, attackerTileEffect, targetTileEffect);

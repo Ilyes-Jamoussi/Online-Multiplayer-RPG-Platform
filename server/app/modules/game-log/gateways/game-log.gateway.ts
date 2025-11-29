@@ -16,8 +16,10 @@ import {
 } from '@app/modules/game-log/dto/game-log-payloads.dto';
 import { GameLogService } from '@app/modules/game-log/services/game-log.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { successResponse } from '@app/utils/socket-response/socket-response.util';
 import { GameLogEvents } from '@common/enums/game-log-events.enum';
+import { InGameSession } from '@common/interfaces/session.interface';
 import { generateGameLogId } from '@common/utils/game-log.util';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -34,6 +36,7 @@ export class GameLogGateway {
     constructor(
         private readonly gameLogService: GameLogService,
         private readonly inGameSessionRepository: InGameSessionRepository,
+        private readonly inGameService: InGameService,
     ) {}
 
     @OnEvent(ServerEvents.TurnStarted)
@@ -42,7 +45,7 @@ export class GameLogGateway {
         const activePlayerId = session.currentTurn.activePlayerId;
 
         const entry = this.gameLogService.createTurnStartEntry(session.id, activePlayerId);
-        this.emitLogEntry(session.inGameId, entry);
+        this.emitLogEntry(session.chatId, entry);
     }
 
     @OnEvent(ServerEvents.CombatStarted)
@@ -51,7 +54,7 @@ export class GameLogGateway {
         if (!session) return;
 
         const entry = this.gameLogService.createCombatStartEntry(payload.sessionId, payload.attackerId, payload.targetId);
-        this.emitLogEntry(session.inGameId, entry);
+        this.emitLogEntry(session.chatId, entry);
     }
 
     @OnEvent(ServerEvents.CombatVictory)
@@ -60,7 +63,7 @@ export class GameLogGateway {
         if (!session) return;
 
         const entry = this.gameLogService.createCombatEndEntry(payload.sessionId, payload.playerAId, payload.playerBId, payload.winnerId);
-        this.emitLogEntry(session.inGameId, entry);
+        this.emitLogEntry(session.chatId, entry);
     }
 
     @OnEvent(ServerEvents.PlayerCombatResult)
@@ -76,13 +79,13 @@ export class GameLogGateway {
             targetDefense: payload.playerBDefense,
             damage: payload.playerBDamage,
         });
-        this.emitLogEntry(session.inGameId, entryA);
+        this.emitLogEntry(session.chatId, entryA);
     }
 
     @OnEvent(ServerEvents.DoorToggled)
     handleDoorToggled(payload: DoorToggledPayload): void {
         const entry = this.gameLogService.createDoorToggleEntry(payload.session.id, payload.playerId, payload.x, payload.y, payload.isOpen);
-        this.emitLogEntry(payload.session.inGameId, entry);
+        this.emitLogEntry(payload.session.chatId, entry);
     }
 
     @OnEvent(ServerEvents.AdminModeToggled)
@@ -91,7 +94,7 @@ export class GameLogGateway {
         if (!session) return;
 
         const entry = this.gameLogService.createDebugModeToggleEntry(payload.sessionId, payload.playerId, payload.isAdminModeActive);
-        this.emitLogEntry(session.inGameId, entry);
+        this.emitLogEntry(session.chatId, entry);
     }
 
     @OnEvent(ServerEvents.PlayerAbandon)
@@ -100,7 +103,7 @@ export class GameLogGateway {
         if (!session) return;
 
         const entry = this.gameLogService.createPlayerAbandonEntry(payload.sessionId, payload.playerId);
-        this.emitLogEntry(session.inGameId, entry);
+        this.emitLogEntry(session.chatId, entry);
     }
 
     @OnEvent(ServerEvents.GameOver)
@@ -109,19 +112,20 @@ export class GameLogGateway {
         if (!session) return;
 
         const entry = this.gameLogService.createGameOverEntry(payload.sessionId);
-        this.emitLogEntry(session.inGameId, entry);
+        this.emitLogEntry(session.chatId, entry);
+        this.inGameService.removeSession(payload.sessionId);
     }
 
     @OnEvent(ServerEvents.PlayerBoardedBoat)
     handlePlayerBoardedBoat(payload: PlayerBoardedBoatPayload): void {
         const entry = this.gameLogService.createBoatEmbarkEntry(payload.session.id, payload.playerId);
-        this.emitLogEntry(payload.session.inGameId, entry);
+        this.emitLogEntry(payload.session.chatId, entry);
     }
 
     @OnEvent(ServerEvents.PlayerDisembarkedBoat)
     handlePlayerDisembarkedBoat(payload: PlayerDisembarkedBoatPayload): void {
         const entry = this.gameLogService.createBoatDisembarkEntry(payload.session.id, payload.playerId);
-        this.emitLogEntry(payload.session.inGameId, entry);
+        this.emitLogEntry(payload.session.chatId, entry);
     }
 
     @OnEvent(ServerEvents.SanctuaryActionSuccess)
@@ -136,7 +140,7 @@ export class GameLogGateway {
             addedDefense: payload.addedDefense,
             addedAttack: payload.addedAttack,
         });
-        this.emitLogEntry(payload.session.inGameId, entry);
+        this.emitLogEntry(payload.session.chatId, entry);
     }
 
     @OnEvent(ServerEvents.Teleported)
@@ -149,15 +153,27 @@ export class GameLogGateway {
             destinationX: payload.destinationX,
             destinationY: payload.destinationY,
         });
-        this.emitLogEntry(payload.session.inGameId, entry);
+        this.emitLogEntry(payload.session.chatId, entry);
     }
 
-    private emitLogEntry(inGameId: string, entry: Omit<GameLogEntryDto, 'id' | 'timestamp'>): void {
+    @OnEvent(ServerEvents.FlagPickedUp)
+    handleFlagPickedUp(payload: { session: InGameSession; playerId: string }): void {
+        const entry = this.gameLogService.createFlagPickupEntry(payload.session.id, payload.playerId);
+        this.emitLogEntry(payload.session.chatId, entry);
+    }
+
+    @OnEvent(ServerEvents.FlagTransferred)
+    handleFlagTransferred(payload: { session: InGameSession; fromPlayerId: string; toPlayerId: string }): void {
+        const entry = this.gameLogService.createFlagTransferEntry(payload.session.id, payload.fromPlayerId, payload.toPlayerId);
+        this.emitLogEntry(payload.session.chatId, entry);
+    }
+
+    private emitLogEntry(chatId: string, entry: Omit<GameLogEntryDto, 'id' | 'timestamp'>): void {
         const logEntry: GameLogEntryDto = {
             ...entry,
             id: generateGameLogId(),
             timestamp: new Date().toISOString(),
         };
-        this.server.to(inGameId).emit(GameLogEvents.LogEntry, successResponse<GameLogEntryDto>(logEntry));
+        this.server.to(chatId).emit(GameLogEvents.LogEntry, successResponse<GameLogEntryDto>(logEntry));
     }
 }

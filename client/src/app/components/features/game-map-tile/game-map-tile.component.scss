@@ -91,3 +91,27 @@ $border-color: rgba(255, 255, 255, 0.1);
         pointer-events: none;
     }
 }
+
+.map-tile.action-attack {
+    border: 2px solid #dc2626 !important;
+}
+
+.map-tile.action-door {
+    border: 2px solid #8b5cf6 !important;
+}
+
+.map-tile.action-heal {
+    border: 2px solid #ec4899 !important;
+}
+
+.map-tile.action-fight {
+    border: 2px solid #f97316 !important;
+}
+
+.map-tile.action-boat {
+    border: 2px solid #e28000 !important;
+}
+
+.map-tile.action-transfer-flag {
+    border: 2px solid #000000 !important;
+}

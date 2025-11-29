@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { AvailableActionDto } from '@app/dto/available-action-dto';
+import { FlagTransferRequestDto } from '@app/dto/flag-transfer-request-dto';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationService } from '@app/services/notification/notification.service';
@@ -35,6 +36,7 @@ export class InGameService {
         addedDefense?: number;
         addedAttack?: number;
     } | null>(null);
+    private readonly _pendingFlagTransferRequest = signal<FlagTransferRequestDto | null>(null);
 
     readonly isMyTurn = computed(() => this._inGameSession().currentTurn.activePlayerId === this.playerService.id());
     private readonly currentTurn = computed(() => this._inGameSession().currentTurn);
@@ -54,6 +56,8 @@ export class InGameService {
     readonly isActionModeActive = this._isActionModeActive.asReadonly();
     readonly gameOverData = this._gameOverData.asReadonly();
     readonly openedSanctuary = this._openedSanctuary.asReadonly();
+    readonly flagData = computed(() => this._inGameSession().flagData);
+    readonly pendingFlagTransferRequest = this._pendingFlagTransferRequest.asReadonly();
 
     sessionId(): string {
         return this.sessionService.id();
@@ -79,6 +83,10 @@ export class InGameService {
     }
 
     deactivateActionMode(): void {
+        this._isActionModeActive.set(false);
+    }
+
+    resetActions(): void {
         this._isActionModeActive.set(false);
         this._availableActions.set([]);
     }
@@ -138,6 +146,13 @@ export class InGameService {
 
     updateInGameSession(data: Partial<InGameSession>): void {
         this._inGameSession.update((inGameSession) => ({ ...inGameSession, ...data }));
+        if (data.inGamePlayers) {
+            const currentPlayerId = this.playerService.id();
+            const updatedPlayer = data.inGamePlayers[currentPlayerId];
+            if (updatedPlayer) {
+                this.playerService.updatePlayer(updatedPlayer);
+            }
+        }
     }
 
     healPlayer(x: number, y: number): void {
@@ -173,14 +188,43 @@ export class InGameService {
         this.stopTurnTimer();
         this.startTurnTransitionTimer();
         this._isTransitioning.set(true);
+        this.resetActions();
     }
 
     private turnTransitionEnded(): void {
         this._isTransitioning.set(false);
     }
 
+    private updatePlayerInSession(playerId: string, updates: Partial<Player>, updatePlayerService: boolean = false): void {
+        this.updateInGameSession({
+            inGamePlayers: {
+                ...this.inGameSession().inGamePlayers,
+                [playerId]: {
+                    ...this.inGameSession().inGamePlayers[playerId],
+                    ...updates,
+                },
+            },
+        });
+        if (updatePlayerService && this.playerService.id() === playerId) {
+            this.playerService.updatePlayer(updates);
+        }
+    }
+
     boatAction(x: number, y: number): void {
         this.playerService.boatAction(x, y);
+    }
+
+    requestFlagTransfer(x: number, y: number): void {
+        this.inGameSocketService.requestFlagTransfer({ sessionId: this.sessionService.id(), x, y });
+    }
+
+    respondToFlagTransfer(fromPlayerId: string, accepted: boolean): void {
+        this.inGameSocketService.respondToFlagTransfer({
+            sessionId: this.sessionService.id(),
+            fromPlayerId,
+            accepted,
+        });
+        this._pendingFlagTransferRequest.set(null);
     }
 
     reset(): void {
@@ -192,6 +236,7 @@ export class InGameService {
         this._gameOverData.set(null);
         this._isActionModeActive.set(false);
         this._availableActions.set([]);
+        this._pendingFlagTransferRequest.set(null);
     }
 
     private initListeners(): void {
@@ -229,26 +274,8 @@ export class InGameService {
         });
 
         this.inGameSocketService.onPlayerMoved((data) => {
-            this.updateInGameSession({
-                inGamePlayers: {
-                    ...this.inGameSession().inGamePlayers,
-                    [data.playerId]: {
-                        ...this.inGameSession().inGamePlayers[data.playerId],
-                        x: data.x,
-                        y: data.y,
-                        speed: data.speed,
-                        boatSpeed: data.boatSpeed,
-                    },
-                },
-            });
-            if (this.playerService.id() === data.playerId) {
-                this.playerService.updatePlayer({
-                    x: data.x,
-                    y: data.y,
-                    speed: data.speed,
-                    boatSpeed: data.boatSpeed,
-                });
-            }
+            const isCurrentPlayer = this.playerService.id() === data.playerId;
+            this.updatePlayerInSession(data.playerId, { x: data.x, y: data.y, speed: data.speed, boatSpeed: data.boatSpeed }, isCurrentPlayer);
         });
 
         this.inGameSocketService.onPlayerAvailableActions((data) => {
@@ -281,27 +308,12 @@ export class InGameService {
         });
 
         this.inGameSocketService.onPlayerTeleported((data) => {
-            this.updateInGameSession({
-                inGamePlayers: {
-                    ...this.inGameSession().inGamePlayers,
-                    [data.playerId]: {
-                        ...this.inGameSession().inGamePlayers[data.playerId],
-                        x: data.x,
-                        y: data.y,
-                    },
-                },
-            });
-            if (this.playerService.id() === data.playerId) {
-                this.playerService.updatePlayer({
-                    x: data.x,
-                    y: data.y,
-                });
-            }
+            this.updatePlayerInSession(data.playerId, { x: data.x, y: data.y }, true);
         });
 
         this.inGameSocketService.onPlayerActionUsed(() => {
             this.playerActionUsed();
-            this.deactivateActionMode();
+            this.resetActions();
         });
 
         this.inGameSocketService.onGameOver((data) => {
@@ -340,32 +352,58 @@ export class InGameService {
         });
 
         this.inGameSocketService.onPlayerBoardedBoat((data) => {
-            this.updateInGameSession({
-                inGamePlayers: {
-                    ...this.inGameSession().inGamePlayers,
-                    [data.playerId]: {
-                        ...this.inGameSession().inGamePlayers[data.playerId],
-                        onBoatId: data.boatId,
-                    },
-                },
-            });
-            if (this.playerService.id() === data.playerId) {
-                this.playerService.updatePlayer({
-                    onBoatId: data.boatId,
+            this.updatePlayerInSession(data.playerId, { onBoatId: data.boatId }, true);
+        });
+
+        this.inGameSocketService.onPlayerDisembarkedBoat((data) => {
+            this.updatePlayerInSession(data.playerId, { onBoatId: undefined });
+        });
+
+        this.inGameSocketService.onSessionUpdated((data) => {
+            this.updateInGameSession(data);
+        });
+
+        this.inGameSocketService.onFlagPickedUp((data) => {
+            const currentFlagData = this.flagData();
+            if (currentFlagData) {
+                this.updateInGameSession({
+                    flagData: { ...currentFlagData, holderPlayerId: data.playerId },
                 });
             }
         });
 
-        this.inGameSocketService.onPlayerDisembarkedBoat((data) => {
-            this.updateInGameSession({
-                inGamePlayers: {
-                    ...this.inGameSession().inGamePlayers,
-                    [data.playerId]: {
-                        ...this.inGameSession().inGamePlayers[data.playerId],
-                        onBoatId: undefined,
+        this.inGameSocketService.onFlagTransferRequested((data) => {
+            if (this.playerService.id() === data.toPlayerId) {
+                this._pendingFlagTransferRequest.set(data);
+            }
+        });
+
+        this.inGameSocketService.onFlagTransferResult((data) => {
+            if (data.accepted) {
+                this.notificationCoordinatorService.showInfoToast(`Transfert de drapeau accepté`);
+            } else {
+                this.notificationCoordinatorService.showInfoToast(`Transfert de drapeau refusé`);
+            }
+        });
+
+        this.inGameSocketService.onFlagTransferred((data) => {
+            const currentFlagData = this.flagData();
+            if (currentFlagData) {
+                const toPlayer = this.inGamePlayers()[data.toPlayerId];
+                this.updateInGameSession({
+                    flagData: {
+                        ...currentFlagData,
+                        holderPlayerId: data.toPlayerId,
+                        position: toPlayer ? { x: toPlayer.x, y: toPlayer.y } : currentFlagData.position,
                     },
-                },
-            });
+                });
+            }
+        });
+
+        this.inGameSocketService.onFlagTransferRequestsCleared(() => {
+            if (this._pendingFlagTransferRequest()) {
+                this._pendingFlagTransferRequest.set(null);
+            }
         });
     }
 }

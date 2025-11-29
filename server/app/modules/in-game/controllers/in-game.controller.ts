@@ -9,6 +9,11 @@ import { CombatStartedDto } from '@app/modules/in-game/dto/combat-started.dto';
 import { CombatVictoryDto } from '@app/modules/in-game/dto/combat-victory.dto';
 import { DoorToggledDto } from '@app/modules/in-game/dto/door-toggled.dto';
 import { EmptyResponseDto } from '@app/modules/in-game/dto/empty-response.dto';
+import { FlagPickedUpDto } from '@app/modules/in-game/dto/flag-picked-up.dto';
+import { FlagTransferRequestDto } from '@app/modules/in-game/dto/flag-transfer-request.dto';
+import { FlagTransferResponseDto } from '@app/modules/in-game/dto/flag-transfer-response.dto';
+import { FlagTransferResultDto } from '@app/modules/in-game/dto/flag-transfer-result.dto';
+import { FlagTransferredDto } from '@app/modules/in-game/dto/flag-transferred.dto';
 import { GameOverDto } from '@app/modules/in-game/dto/game-over.dto';
 import { GameStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
 import { OpenSanctuaryDto } from '@app/modules/in-game/dto/open-sanctuary.dto';
@@ -30,6 +35,7 @@ import { SanctuaryActionFailedDto } from '@app/modules/in-game/dto/sanctuary-act
 import { SanctuaryActionSuccessDto } from '@app/modules/in-game/dto/sanctuary-action-success.dto';
 import { ToggleDoorActionDto } from '@app/modules/in-game/dto/toggle-door-action.dto';
 import { Body, Controller, Post } from '@nestjs/common';
+import { PlaceableDisabledUpdatedDto } from '@app/modules/in-game/dto/placeable-disabled-updated.dto';
 
 @Controller('in-game')
 export class InGameController {
@@ -122,4 +128,22 @@ export class InGameController {
 
     @Post('player-disembarked-boat')
     playerDisembarkedBoat(@Body() data: PlayerDisembarkedBoatDto): void {}
+
+    @Post('flag-picked-up')
+    flagPickedUp(@Body() data: FlagPickedUpDto): void {}
+
+    @Post('flag-transferred')
+    flagTransferred(@Body() data: FlagTransferredDto): void {}
+
+    @Post('flag-transfer-request')
+    flagTransferRequest(@Body() data: FlagTransferRequestDto): void {}
+
+    @Post('flag-transfer-response')
+    flagTransferResponse(@Body() data: FlagTransferResponseDto): void {}
+
+    @Post('flag-transfer-result')
+    flagTransferResult(@Body() data: FlagTransferResultDto): void {}
+
+    @Post('placeable-disabled-updated')
+    placeableDisabledUpdated(@Body() data: PlaceableDisabledUpdatedDto): void {}
 }

@@ -7,6 +7,7 @@ import { GameDocument } from '@app/types/mongoose-documents.types';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileCost, TileKind } from '@common/enums/tile.enum';
+import { FlagData } from '@common/interfaces/flag-data.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -24,6 +25,36 @@ export class GameCacheService {
         private readonly eventEmitter: EventEmitter2,
     ) {}
 
+    hidePlaceable(sessionId: string, position: Position): void {
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        const placeable = this.getPlaceableAtPosition(sessionId, position);
+        if (!placeable) throw new NotFoundException('Placeable not found');
+        placeable.placed = false;
+        this.eventEmitter.emit(ServerEvents.PlaceableUpdated, {
+            sessionId,
+            placeable: {
+                ...placeable,
+                id: placeable._id?.toString() || '',
+            },
+        });
+    }
+
+    showPlaceable(sessionId: string, position: Position): void {
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        const placeable = this.getPlaceableAtPosition(sessionId, position, false);
+        if (!placeable) throw new NotFoundException('Placeable not found');
+        placeable.placed = true;
+        this.eventEmitter.emit(ServerEvents.PlaceableUpdated, {
+            sessionId,
+            placeable: {
+                ...placeable,
+                id: placeable._id?.toString() || '',
+            },
+        });
+    }
+
     async fetchAndCacheGame(sessionId: string, gameId: string): Promise<Game> {
         const game = await this.gameModel.findById(gameId).lean();
         if (!game) throw new NotFoundException('Game not found');
@@ -35,14 +66,15 @@ export class GameCacheService {
                 continue;
             }
 
-            const footprint = PlaceableFootprint[obj.kind];
+            const footprint = PlaceableFootprint[obj.kind] || 1;
             for (let offsetY = 0; offsetY < footprint; offsetY++) {
                 for (let offsetX = 0; offsetX < footprint; offsetX++) {
-                    expandedObjects.push({
+                    const expanded = {
                         ...obj,
                         x: obj.x + offsetX,
                         y: obj.y + offsetY,
-                    });
+                    };
+                    expandedObjects.push(expanded);
                 }
             }
         }
@@ -156,26 +188,47 @@ export class GameCacheService {
         return { x: nextX, y: nextY };
     }
 
-    private getPlaceablesById(sessionId: string, id: string): Placeable[] {
+    getPlaceablesById(sessionId: string, id: string, placedOnly: boolean = true): Placeable[] {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
-        return gameMap.objects.filter((obj) => obj.placed && obj._id?.toString() === id);
+        return gameMap.objects.filter((obj) => (placedOnly ? obj.placed : true) && obj._id?.toString() === id);
     }
 
-    getPlaceablesAtPosition(sessionId: string, position: Position): Placeable[] {
+    getPlaceablesAtPosition(sessionId: string, position: Position, placedOnly: boolean = true): Placeable[] {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
-        return gameMap.objects.filter((obj) => obj.placed && obj.x === position.x && obj.y === position.y);
+        return gameMap.objects.filter((obj) => (placedOnly ? obj.placed : true) && obj.x === position.x && obj.y === position.y);
     }
 
-    getPlaceableAtPosition(sessionId: string, position: Position): Placeable | undefined {
+    getPlaceableAtPosition(sessionId: string, position: Position, placedOnly: boolean = true): Placeable | undefined {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
-        return gameMap.objects.find((obj) => obj.placed && obj.x === position.x && obj.y === position.y);
+        const found = gameMap.objects.find((obj) => (placedOnly ? obj.placed : true) && obj.x === position.x && obj.y === position.y);
+        return found;
+    }
+
+    getPlaceablePositions(sessionId: string, placeableId: string, placedOnly: boolean = true): Position[] {
+        const placeables = this.getPlaceablesById(sessionId, placeableId, placedOnly);
+        return placeables.map((placeable) => ({ x: placeable.x, y: placeable.y }));
+    }
+
+    getFlagPlaceable(sessionId: string, placedOnly: boolean = true): Placeable | undefined {
+        const gameMap = this.sessionsGameMaps.get(sessionId);
+        if (!gameMap) throw new NotFoundException('Game map not found');
+        return gameMap.objects.find((obj) => (placedOnly ? obj.placed : true) && obj.kind === PlaceableKind.FLAG);
     }
 
     private getPlaceableKey(placeable: Placeable): string {
         return `${placeable._id?.toString()}-${placeable.x}-${placeable.y}`;
+    }
+
+    private parsePlaceableKey(key: string): { placeableId: string; x: number; y: number } {
+        const lastDashIndex = key.lastIndexOf('-');
+        const secondLastDashIndex = key.lastIndexOf('-', lastDashIndex - 1);
+        const placeableId = key.substring(0, secondLastDashIndex);
+        const x = parseInt(key.substring(secondLastDashIndex + 1, lastDashIndex), 10);
+        const y = parseInt(key.substring(lastDashIndex + 1), 10);
+        return { placeableId, x, y };
     }
 
     getMapSize(sessionId: string): number {
@@ -218,10 +271,19 @@ export class GameCacheService {
         const sessionDisabled = this.disabledPlaceables.get(sessionId);
         if (!sessionDisabled) throw new NotFoundException('Session disabled map not found');
 
+        const turnCount = 2;
         for (const placeable of placeables) {
             const key = this.getPlaceableKey(placeable);
-            sessionDisabled.set(key, { playerId, turnCount: 2 });
+            sessionDisabled.set(key, { playerId, turnCount });
         }
+
+        const positions = placeables.map((p) => ({ x: p.x, y: p.y }));
+        this.eventEmitter.emit(ServerEvents.PlaceableDisabledUpdated, {
+            sessionId,
+            placeableId: object._id?.toString(),
+            positions,
+            turnCount,
+        });
     }
 
     isPlaceableDisabled(sessionId: string, position: Position): boolean {
@@ -240,11 +302,30 @@ export class GameCacheService {
         const sessionDisabled = this.disabledPlaceables.get(sessionId);
         if (!sessionDisabled) return;
 
+        const updatedPlaceables = new Map<string, { positions: Position[]; turnCount: number }>();
+
         for (const [key, disabledInfo] of sessionDisabled.entries()) {
             disabledInfo.turnCount--;
+
+            const { placeableId, x, y } = this.parsePlaceableKey(key);
+
+            if (!updatedPlaceables.has(placeableId)) {
+                updatedPlaceables.set(placeableId, { positions: [], turnCount: disabledInfo.turnCount });
+            }
+            updatedPlaceables.get(placeableId)?.positions.push({ x, y });
+
             if (!disabledInfo.turnCount) {
                 sessionDisabled.delete(key);
             }
+        }
+
+        for (const [placeableId, data] of updatedPlaceables.entries()) {
+            this.eventEmitter.emit(ServerEvents.PlaceableDisabledUpdated, {
+                sessionId,
+                placeableId,
+                positions: data.positions,
+                turnCount: data.turnCount,
+            });
         }
     }
 
@@ -302,12 +383,23 @@ export class GameCacheService {
         placeable.x = toPosition.x;
         placeable.y = toPosition.y;
 
-        this.eventEmitter.emit(ServerEvents.PlaceablePositionUpdated, {
+        this.eventEmitter.emit(ServerEvents.PlaceableUpdated, {
             sessionId,
             placeable: {
                 ...placeable,
                 id: placeable._id?.toString() || '',
             },
         });
+    }
+
+    getInitialFlagData(sessionId: string): FlagData | undefined {
+        const session = this.sessionsGameMaps.get(sessionId);
+        if (!session) throw new NotFoundException('Session not found');
+        const flag = session.objects.find((obj) => obj.kind === PlaceableKind.FLAG);
+        if (!flag) return undefined;
+        return {
+            position: { x: flag.x, y: flag.y },
+            holderPlayerId: null,
+        };
     }
 }

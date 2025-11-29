@@ -1,18 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import {
-    DEFAULT_HEALTH_DEALT_MULTIPLIER,
-    MILLISECONDS_PER_SECOND,
-    PERCENTAGE_MULTIPLIER,
-    SECONDS_PER_MINUTE,
-    STATISTICS_DELETE_DELAY_MS,
-} from '@app/constants/statistics.constants';
+import { MILLISECONDS_PER_SECOND, PERCENTAGE_MULTIPLIER, SECONDS_PER_MINUTE, STATISTICS_DELETE_DELAY_MS } from '@app/constants/statistics.constants';
 import { GameStatisticsDto, PlayerStatisticsDto, GlobalStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
 import { TrackingService, GameTracker } from '@app/modules/in-game/services/tracking/tracking.service';
+import { ServerEvents } from '@app/enums/server-events.enum';
+import { TeleportedPayload } from '@app/modules/game-log/dto/game-log-payloads.dto';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { StoredStatistics } from '@common/interfaces/game-statistics.interface';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class StatisticsService {
@@ -20,12 +17,28 @@ export class StatisticsService {
 
     constructor(private readonly trackingService: TrackingService) {}
 
-    initializeTracking(sessionId: string, mapSize: MapSize, totalDoors: number, totalSanctuaries: number): void {
-        this.trackingService.initializeTracking(sessionId, mapSize, totalDoors, totalSanctuaries);
+    initializeTracking(sessionId: string, mapSize: MapSize, totalDoors: number, totalSanctuaries: number, totalTeleportTiles: number): void {
+        this.trackingService.initializeTracking(sessionId, mapSize, totalDoors, totalSanctuaries, totalTeleportTiles);
     }
 
     trackTileVisited(sessionId: string, playerId: string, position: Position): void {
         this.trackingService.trackTileVisited(sessionId, playerId, position);
+    }
+
+    @OnEvent(ServerEvents.Teleported)
+    handleTeleported(payload: TeleportedPayload): void {
+        this.trackingService.trackTeleportation(payload.session.id);
+    }
+
+    @OnEvent(ServerEvents.FlagPickedUp)
+    handleFlagPickedUp(payload: { session: InGameSession; playerId: string }): void {
+        this.trackingService.trackFlagHolder(payload.session.id, payload.playerId);
+    }
+
+    @OnEvent(ServerEvents.FlagTransferred)
+    handleFlagTransferred(payload: { session: InGameSession; fromPlayerId: string; toPlayerId: string }): void {
+        this.trackingService.trackFlagHolder(payload.session.id, payload.fromPlayerId);
+        this.trackingService.trackFlagHolder(payload.session.id, payload.toPlayerId);
     }
 
     calculateAndStoreGameStatistics(session: InGameSession, winnerId: string, winnerName: string, gameStartTime: Date): GameStatisticsDto {
@@ -57,7 +70,7 @@ export class StatisticsService {
         winnerName: string,
         gameStartTime: Date,
     ): GameStatisticsDto {
-        const players = Object.values(session.inGamePlayers).filter((player) => player.isInGame);
+        const players = Object.values(session.inGamePlayers);
 
         const playersStatistics = players.map((player) => this.calculatePlayerStatistics(player, trackingData));
         const globalStatistics = this.calculateGlobalStatistics(session, trackingData, gameStartTime);
@@ -71,8 +84,9 @@ export class StatisticsService {
     }
 
     private calculatePlayerStatistics(player: Player, trackingData: GameTracker): PlayerStatisticsDto {
-        const healthLost = player.maxHealth - player.health;
-        const healthDealt = player.combatWins * DEFAULT_HEALTH_DEALT_MULTIPLIER;
+        const playerDamage = trackingData?.playerDamage?.get(player.id);
+        const healthLost = playerDamage?.healthLost || 0;
+        const healthDealt = playerDamage?.healthDealt || 0;
 
         let tilesVisitedPercentage = 0;
         if (trackingData?.playerTiles?.has(player.id)) {
@@ -103,13 +117,21 @@ export class StatisticsService {
             globalTilesVisitedPercentage = Math.round((allVisitedTiles.size / trackingData.totalTiles) * PERCENTAGE_MULTIPLIER);
         }
 
+        const doorsManipulatedPercentage =
+            trackingData.totalDoors > 0 ? Math.round((trackingData.toggledDoors.size / trackingData.totalDoors) * PERCENTAGE_MULTIPLIER) : 0;
+
+        const sanctuariesUsedPercentage =
+            trackingData.totalSanctuaries > 0
+                ? Math.round((trackingData.usedSanctuaries.size / trackingData.totalSanctuaries) * PERCENTAGE_MULTIPLIER)
+                : 0;
+
         return {
             gameDuration,
             totalTurns: session.currentTurn.turnNumber,
             tilesVisitedPercentage: globalTilesVisitedPercentage,
             totalTeleportations: trackingData?.teleportations || 0,
-            doorsManipulatedPercentage: Math.round((trackingData.toggledDoors.size / trackingData.totalDoors) * PERCENTAGE_MULTIPLIER),
-            sanctuariesUsedPercentage: Math.round((trackingData.usedSanctuaries.size / trackingData.totalSanctuaries) * PERCENTAGE_MULTIPLIER),
+            doorsManipulatedPercentage,
+            sanctuariesUsedPercentage,
             flagHoldersCount: trackingData?.flagHolders.size || 0,
         };
     }

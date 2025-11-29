@@ -2,6 +2,7 @@ import { Injectable, Signal, WritableSignal, computed, inject, signal } from '@a
 import { Router } from '@angular/router';
 import { BASE_STAT_VALUE, BONUS_STAT_VALUE, DEFAULT_PLAYER } from '@app/constants/player.constants';
 import { BonusType } from '@app/enums/character-creation.enum';
+import { TeamColor } from '@app/enums/team-color.enum';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationService } from '@app/services/notification/notification.service';
@@ -39,6 +40,7 @@ export class PlayerService {
     readonly combatWins = computed(() => this.player().combatWins);
     readonly combatLosses = computed(() => this.player().combatLosses);
     readonly combatDraws = computed(() => this.player().combatDraws);
+    readonly teamNumber = computed(() => this.player().teamNumber);
 
     constructor(
         private readonly sessionService: SessionService,
@@ -166,6 +168,13 @@ export class PlayerService {
 
     private disembarkBoat(x: number, y: number): void {
         this.inGameSocketService.playerDisembarkBoat(this.sessionService.id(), x, y);
+    }
+
+    getTeamColor(teamNumber: number | undefined): string | undefined {
+        if (teamNumber === undefined) return undefined;
+        const myTeamNumber = this.teamNumber();
+        if (myTeamNumber === undefined) return undefined;
+        return teamNumber === myTeamNumber ? TeamColor.MyTeam : TeamColor.EnemyTeam;
     }
 
     private initListeners(): void {

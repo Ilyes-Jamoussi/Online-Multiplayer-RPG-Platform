@@ -77,18 +77,23 @@ describe('InGameSessionRepository', () => {
         id: SESSION_ID,
         inGameId: `${SESSION_ID}-game-456`,
         gameId: 'game-456',
+        chatId: `${SESSION_ID}-chat`,
         maxPlayers: ORIENTATIONS_COUNT,
+        mode: GameMode.CLASSIC,
         isGameStarted: false,
         inGamePlayers: {
             [PLAYER_A_ID]: createMockPlayer({ id: PLAYER_A_ID }),
             [PLAYER_B_ID]: createMockPlayer({ id: PLAYER_B_ID }),
         },
+        teams: {
+            1: { number: 1, playerIds: [PLAYER_A_ID, PLAYER_B_ID] }, // eslint-disable-line @typescript-eslint/naming-convention -- Test data
+        },
         currentTurn: { turnNumber: 1, activePlayerId: PLAYER_A_ID, hasUsedAction: false },
         startPoints: [{ id: START_POINT_ID, playerId: PLAYER_A_ID, x: POS_X_1, y: POS_Y_1 }],
         mapSize: MapSize.MEDIUM,
-        mode: GameMode.CLASSIC,
         turnOrder: [PLAYER_A_ID, PLAYER_B_ID],
         isAdminModeActive: false,
+        playerCount: 2,
         ...overrides,
     });
 

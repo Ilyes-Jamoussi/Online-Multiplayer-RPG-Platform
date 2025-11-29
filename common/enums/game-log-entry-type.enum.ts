@@ -11,5 +11,8 @@ export enum GameLogEntryType {
     DebugModeToggle = 'debug-mode-toggle',
     GameAbandon = 'game-abandon',
     GameOver = 'game-over',
+    FlagPickup = 'flag-pickup',
+    FlagTransfer = 'flag-transfer',
+    FlagDrop = 'flag-drop',
 }
 

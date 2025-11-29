@@ -5,11 +5,13 @@ import { SessionModule } from '@app/modules/session/session.module';
 
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env.local', '.env'] }),
+        EventEmitterModule.forRoot(),
         MongooseModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],

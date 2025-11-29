@@ -4,4 +4,5 @@ export enum AvailableActionType {
     HEAL = 'HEAL',
     FIGHT = 'FIGHT',
     BOAT = 'BOAT',
+    TRANSFER_FLAG = 'TRANSFER_FLAG',
 }

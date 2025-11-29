@@ -5,6 +5,37 @@
     min-height: 0;
 }
 
+.chat-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+
+    .wrapper-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.75rem;
+        flex-shrink: 0;
+
+        h2 {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+    }
+
+    .wrapper-content {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+    }
+}
+
 .chat-section {
     width: 100%;
     height: 100%;

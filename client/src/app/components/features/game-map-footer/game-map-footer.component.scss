@@ -134,6 +134,11 @@ $text-secondary: rgba(255, 255, 255, 0.7);
         transform: translateY(0);
     }
 
+    &.active {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+    }
+
     @media (max-width: 768px) {
         flex: 1 1 auto;
         padding: 0.35rem 0.6rem;

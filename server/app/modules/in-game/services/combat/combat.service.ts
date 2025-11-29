@@ -6,8 +6,10 @@ import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
+import { TrackingService } from '@app/modules/in-game/services/tracking/tracking.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatState } from '@common/interfaces/combat.interface';
 import { Position } from '@common/interfaces/position.interface';
@@ -19,12 +21,14 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 export class CombatService {
     private readonly activeCombats = new Map<string, CombatState>();
 
+    // eslint-disable-next-line max-params -- This is a constructor with a lot of dependencies
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly timerService: TimerService,
         private readonly sessionRepository: InGameSessionRepository,
         private readonly inGameMovementService: MovementService,
         private readonly gameCacheService: GameCacheService,
+        private readonly trackingService: TrackingService,
     ) {}
 
     combatAbandon(sessionId: string, playerId: string): void {
@@ -138,7 +142,22 @@ export class CombatService {
             abandon,
         });
 
+        this.emitVirtualPlayerCombatVictoryIfNeeded(session.id, playerAId, playerBId, winnerId);
+
         this.inGameMovementService.calculateReachableTiles(session, session.currentTurn.activePlayerId);
+    }
+
+    private emitVirtualPlayerCombatVictoryIfNeeded(sessionId: string, playerAId: string, playerBId: string, winnerId: string | null): void {
+        const isPlayerAVirtual = this.sessionRepository.isVirtualPlayer(sessionId, playerAId);
+        const isPlayerBVirtual = this.sessionRepository.isVirtualPlayer(sessionId, playerBId);
+
+        if (!isPlayerAVirtual && !isPlayerBVirtual) return;
+
+        this.eventEmitter.emit(ServerEvents.VirtualPlayerCombatVictory, {
+            sessionId,
+            winnerId,
+            attackerId: playerAId,
+        });
     }
 
     private combatRound(sessionId: string): void {
@@ -161,6 +180,16 @@ export class CombatService {
 
         const playerAHealth = this.sessionRepository.decreasePlayerHealth(sessionId, playerAId, playerADamage);
         const playerBHealth = this.sessionRepository.decreasePlayerHealth(sessionId, playerBId, playerBDamage);
+
+        if (playerADamage > 0) {
+            this.trackingService.trackDamageReceived(sessionId, playerAId, playerADamage);
+            this.trackingService.trackDamageDealt(sessionId, playerBId, playerADamage);
+        }
+
+        if (playerBDamage > 0) {
+            this.trackingService.trackDamageReceived(sessionId, playerBId, playerBDamage);
+            this.trackingService.trackDamageDealt(sessionId, playerAId, playerBDamage);
+        }
 
         this.eventEmitter.emit(ServerEvents.PlayerHealthChanged, {
             sessionId,
@@ -198,13 +227,11 @@ export class CombatService {
             }
 
             if (playerADead) {
-                this.inGameMovementService.movePlayerToStartPosition(session, playerAId);
-                this.sessionRepository.resetPlayerHealth(sessionId, playerAId);
+                this.handlePlayerDeath(sessionId, session, playerAId);
             }
 
             if (playerBDead) {
-                this.inGameMovementService.movePlayerToStartPosition(session, playerBId);
-                this.sessionRepository.resetPlayerHealth(sessionId, playerBId);
+                this.handlePlayerDeath(sessionId, session, playerBId);
             }
 
             if (isDraw) {
@@ -230,6 +257,15 @@ export class CombatService {
 
         combat.playerAPosture = null;
         combat.playerBPosture = null;
+    }
+
+    private handlePlayerDeath(sessionId: string, session: InGameSession, playerId: string): void {
+        const player = session.inGamePlayers[playerId];
+        this.inGameMovementService.movePlayerToStartPosition(session, playerId);
+        this.sessionRepository.resetPlayerHealth(sessionId, playerId);
+        if (player && this.sessionRepository.playerHasFlag(sessionId, playerId)) {
+            this.sessionRepository.dropFlag(sessionId, playerId);
+        }
     }
 
     private getPlayerDefense(
@@ -339,7 +375,7 @@ export class CombatService {
         const session = this.sessionRepository.findById(sessionId);
         const winner = session.inGamePlayers[winnerId];
 
-        if (winner && winner.combatWins >= COMBAT_WINS_TO_WIN_GAME) {
+        if (session.mode !== GameMode.CTF && winner && winner.combatWins >= COMBAT_WINS_TO_WIN_GAME) {
             this.timerService.clearTimerForSession(sessionId);
             this.eventEmitter.emit(ServerEvents.GameOver, {
                 sessionId,
