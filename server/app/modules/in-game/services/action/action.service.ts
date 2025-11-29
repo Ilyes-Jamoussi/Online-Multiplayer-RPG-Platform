@@ -299,7 +299,7 @@ export class ActionService {
         this.addAttackAction(actions, occupantId, playerId, pos, session);
         this.addTransferFlagAction(actions, occupantId, playerId, pos, session);
         this.addDoorAction(actions, tile, pos);
-        this.addPlaceableActions(actions, object, pos);
+        this.addPlaceableActions(actions, object, pos, session.id);
         this.addDisembarkAction(actions, player, tile, occupantId, pos);
     }
 
@@ -334,11 +334,21 @@ export class ActionService {
         }
     }
 
-    private addPlaceableActions(actions: AvailableAction[], object: Placeable | null, pos: Position): void {
+    private addPlaceableActions(actions: AvailableAction[], object: Placeable | null, pos: Position, sessionId: string): void {
         if (!object) return;
-        if (object.kind === PlaceableKind.HEAL) actions.push({ type: AvailableActionType.HEAL, x: pos.x, y: pos.y });
-        if (object.kind === PlaceableKind.FIGHT) actions.push({ type: AvailableActionType.FIGHT, x: pos.x, y: pos.y });
-        if (object.kind === PlaceableKind.BOAT) actions.push({ type: AvailableActionType.BOAT, x: pos.x, y: pos.y });
+        
+        if (object.kind === PlaceableKind.HEAL || object.kind === PlaceableKind.FIGHT) {
+            const placeableId = object._id?.toString();
+            if (placeableId) {
+                const positions = this.gameCache.getPlaceablePositions(sessionId, placeableId);
+                const actionType = object.kind === PlaceableKind.HEAL ? AvailableActionType.HEAL : AvailableActionType.FIGHT;
+                for (const position of positions) {
+                    actions.push({ type: actionType, x: position.x, y: position.y });
+                }
+            }
+        } else if (object.kind === PlaceableKind.BOAT) {
+            actions.push({ type: AvailableActionType.BOAT, x: pos.x, y: pos.y });
+        }
     }
 
     private addDisembarkAction(actions: AvailableAction[], player: Player, tile: Tile | null, occupantId: string | null, pos: Position): void {

@@ -188,7 +188,7 @@ export class GameCacheService {
         return { x: nextX, y: nextY };
     }
 
-    private getPlaceablesById(sessionId: string, id: string, placedOnly: boolean = true): Placeable[] {
+    getPlaceablesById(sessionId: string, id: string, placedOnly: boolean = true): Placeable[] {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
         return gameMap.objects.filter((obj) => (placedOnly ? obj.placed : true) && obj._id?.toString() === id);
@@ -205,6 +205,11 @@ export class GameCacheService {
         if (!gameMap) throw new NotFoundException('Game map not found');
         const found = gameMap.objects.find((obj) => (placedOnly ? obj.placed : true) && obj.x === position.x && obj.y === position.y);
         return found;
+    }
+
+    getPlaceablePositions(sessionId: string, placeableId: string, placedOnly: boolean = true): Position[] {
+        const placeables = this.getPlaceablesById(sessionId, placeableId, placedOnly);
+        return placeables.map((placeable) => ({ x: placeable.x, y: placeable.y }));
     }
 
     getFlagPlaceable(sessionId: string, placedOnly: boolean = true): Placeable | undefined {
