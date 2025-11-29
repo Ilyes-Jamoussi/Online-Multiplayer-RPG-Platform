@@ -26,4 +26,3 @@ export interface EscapePoint {
 export interface EnemyPosition {
     position: Position;
 }
-

@@ -77,4 +77,3 @@ export interface VPConfig {
         maxGuardStartPointDistance: number;
     };
 }
-

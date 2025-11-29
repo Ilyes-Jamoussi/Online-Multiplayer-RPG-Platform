@@ -10,7 +10,10 @@ export class CombatTimerService {
     private readonly combatTimers = new Map<string, NodeJS.Timeout>();
     private readonly activeCombats = new Set<string>();
 
-    constructor(private readonly eventEmitter: EventEmitter2, private readonly sessionRepository: InGameSessionRepository) {}
+    constructor(
+        private readonly eventEmitter: EventEmitter2,
+        private readonly sessionRepository: InGameSessionRepository,
+    ) {}
 
     startCombatTimer(session: InGameSession, attackerId: string, targetId: string, attackerTileEffect?: number, targetTileEffect?: number): void {
         this.activeCombats.add(session.id);
@@ -23,7 +26,7 @@ export class CombatTimerService {
             targetTileEffect,
         });
 
-        if(this.sessionRepository.isVirtualPlayer(session.id, attackerId) || this.sessionRepository.isVirtualPlayer(session.id, targetId)) {
+        if (this.sessionRepository.isVirtualPlayer(session.id, attackerId) || this.sessionRepository.isVirtualPlayer(session.id, targetId)) {
             this.eventEmitter.emit(ServerEvents.VirtualPlayerCombatStarted, { sessionId: session.id, attackerId, targetId });
         }
 

@@ -39,4 +39,3 @@ export interface ExplorationContext {
     mapSize: number;
     goal: Position;
 }
-

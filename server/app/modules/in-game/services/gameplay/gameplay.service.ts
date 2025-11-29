@@ -253,9 +253,7 @@ export class GameplayService {
 
         if (this.sessionRepository.isVirtualPlayer(sessionId, playerAId)) {
             this.selectVPPosture(sessionId, playerAId);
-        }
-
-        else if (this.sessionRepository.isVirtualPlayer(sessionId, playerBId)) {
+        } else if (this.sessionRepository.isVirtualPlayer(sessionId, playerBId)) {
             this.selectVPPosture(sessionId, playerBId);
         }
     }

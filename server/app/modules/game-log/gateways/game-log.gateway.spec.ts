@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GameLogGateway } from './game-log.gateway';
 import { GameLogService } from '@app/modules/game-log/services/game-log.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 
 describe('GameLogGateway', () => {
     let gateway: GameLogGateway;
@@ -16,6 +17,10 @@ describe('GameLogGateway', () => {
                 },
                 {
                     provide: InGameSessionRepository,
+                    useValue: {},
+                },
+                {
+                    provide: InGameService,
                     useValue: {},
                 },
             ],

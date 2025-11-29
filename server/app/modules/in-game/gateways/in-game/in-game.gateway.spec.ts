@@ -101,6 +101,7 @@ describe('InGameGateway', () => {
             maxPlayers: 4,
             mode: GameMode.CLASSIC,
             inGameId: IN_GAME_ID,
+            chatId: `${SESSION_ID}-chat`,
             isGameStarted: false,
             isAdminModeActive: false,
             currentTurn: {

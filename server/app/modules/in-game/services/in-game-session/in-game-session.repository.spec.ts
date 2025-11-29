@@ -77,6 +77,7 @@ describe('InGameSessionRepository', () => {
         id: SESSION_ID,
         inGameId: `${SESSION_ID}-game-456`,
         gameId: 'game-456',
+        chatId: `${SESSION_ID}-chat`,
         maxPlayers: ORIENTATIONS_COUNT,
         mode: GameMode.CLASSIC,
         isGameStarted: false,
