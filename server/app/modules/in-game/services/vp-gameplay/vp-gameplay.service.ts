@@ -283,7 +283,6 @@ export class VPGameplayService {
             return this.createUnreachableResult(targetPosition);
         }
 
-        // Check if we're already adjacent to the target
         if (this.isAdjacent({ x: player.x, y: player.y }, targetPosition)) {
             return {
                 reachable: true,
@@ -303,13 +302,23 @@ export class VPGameplayService {
             const path = this.pathfindingService.findPath(session, vpPlayerId, adjPos);
 
             if (path.reachable) {
-                if (!bestPath || path.totalCost < bestPath.totalCost) {
+                if (!bestPath || this.isPathBetter(path, bestPath, player.actionsRemaining)) {
                     bestPath = path;
                 }
             }
         }
 
         return bestPath || this.createUnreachableResult(targetPosition);
+    }
+
+    private isPathBetter(newPath: PathResult, currentBest: PathResult, actionsRemaining: number): boolean {
+        const newAllowsAction = newPath.actionsRequired < actionsRemaining;
+        const currentAllowsAction = currentBest.actionsRequired < actionsRemaining;
+
+        if (newAllowsAction && !currentAllowsAction) return true;
+        if (!newAllowsAction && currentAllowsAction) return false;
+
+        return newPath.totalCost < currentBest.totalCost;
     }
 
     private getAdjacentPositions(position: Position): Position[] {
