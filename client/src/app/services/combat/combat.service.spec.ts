@@ -85,6 +85,7 @@ describe('CombatService', () => {
         maxPlayers: 4,
         isRoomLocked: false,
         inGameId: 'ingame1',
+        chatId: 'chat1',
         isGameStarted: true,
         inGamePlayers: {
             player1: mockPlayer,

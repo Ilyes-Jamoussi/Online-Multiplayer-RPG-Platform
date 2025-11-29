@@ -131,4 +131,12 @@ export class GameMapComponent implements OnInit {
         const flagData = this.gameMapService.flagData();
         return flagData?.holderPlayerId === player.id;
     }
+
+    isPlaceableDisabled(placeableId: string): boolean {
+        return this.gameMapService.isPlaceableDisabled(placeableId);
+    }
+
+    getPlaceableTurnCount(placeableId: string): number | null {
+        return this.gameMapService.getPlaceableTurnCount(placeableId);
+    }
 }

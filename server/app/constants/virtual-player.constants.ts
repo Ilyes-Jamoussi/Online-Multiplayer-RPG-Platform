@@ -8,3 +8,7 @@ export const BONUS_VALUE = 2;
 export const RANDOM_THRESHOLD = 0.5;
 
 export const VIRTUAL_PLAYER_NAMES = ['Bot Alpha', 'Bot Beta', 'Bot Gamma', 'Bot Delta', 'Bot Epsilon', 'Bot Zeta'];
+
+export const ESCAPE_MAX_DISTANCE = 5;
+export const ESCAPE_NEARBY_RADIUS = 3;
+export const RETURN_FLAG_SEARCH_RADIUS = 3;

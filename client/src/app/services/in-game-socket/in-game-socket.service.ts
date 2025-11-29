@@ -9,6 +9,7 @@ import { FlagTransferredDto } from '@app/dto/flag-transferred-dto';
 import { GameOverDto } from '@app/dto/game-over-dto';
 import { GameStatisticsDto } from '@app/dto/game-statistics-dto';
 import { OpenSanctuaryDto } from '@app/dto/open-sanctuary-dto';
+import { PlaceableDisabledUpdatedDto } from '@app/dto/placeable-disabled-updated-dto';
 import { PlaceablePositionUpdatedDto } from '@app/dto/placeable-position-updated-dto';
 import { PlayerBoardedBoatDto } from '@app/dto/player-boarded-boat-dto';
 import { PlayerBonusesChangedDto } from '@app/dto/player-bonuses-changed-dto';
@@ -190,6 +191,10 @@ export class InGameSocketService {
 
     onPlaceableUpdated(callback: (data: PlaceablePositionUpdatedDto) => void): void {
         this.socket.onSuccessEvent(InGameEvents.PlaceableUpdated, callback);
+    }
+
+    onPlaceableDisabledUpdated(callback: (data: PlaceableDisabledUpdatedDto) => void): void {
+        this.socket.onSuccessEvent(InGameEvents.PlaceableDisabledUpdated, callback);
     }
 
     onSessionUpdated(callback: (data: InGameSession) => void): void {

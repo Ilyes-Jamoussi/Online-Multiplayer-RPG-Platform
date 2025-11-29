@@ -5,10 +5,12 @@ import { ActionService } from '@app/modules/in-game/services/action/action.servi
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { TrackingService } from '@app/modules/in-game/services/tracking/tracking.service';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
+import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { FlagData } from '@common/interfaces/flag-data.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -231,5 +233,28 @@ export class GameplayService {
         if (!player.onBoatId) throw new BadRequestException('Player is not on a boat');
         this.actionService.disembarkBoat(session, playerId, position);
         player.actionsRemaining--;
+    }
+
+    selectVPPosture(sessionId: string, playerId: string): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        if (!player?.virtualPlayerType) return;
+        const posture = player.virtualPlayerType === VirtualPlayerType.Offensive ? CombatPosture.OFFENSIVE : CombatPosture.DEFENSIVE;
+        this.actionService.selectCombatPosture(sessionId, playerId, posture);
+    }
+
+    handleVPCombat(sessionId: string, playerAId?: string, playerBId?: string): void {
+        if (!playerAId || !playerBId) {
+            const activeCombat = this.actionService.getActiveCombat(sessionId);
+            if (!activeCombat) return;
+            playerAId = activeCombat.playerAId;
+            playerBId = activeCombat.playerBId;
+        }
+
+        if (this.sessionRepository.isVirtualPlayer(sessionId, playerAId)) {
+            this.selectVPPosture(sessionId, playerAId);
+        } else if (this.sessionRepository.isVirtualPlayer(sessionId, playerBId)) {
+            this.selectVPPosture(sessionId, playerBId);
+        }
     }
 }

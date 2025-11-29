@@ -3,6 +3,7 @@ import { AvailableActionDto } from '@app/dto/available-action-dto';
 import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { PlaceableDisabledUpdatedDto } from '@app/dto/placeable-disabled-updated-dto';
 import { PlaceablePositionUpdatedDto } from '@app/dto/placeable-position-updated-dto';
 import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
 import { AssetsService } from '@app/services/assets/assets.service';
@@ -39,6 +40,7 @@ export class GameMapService {
     private readonly _mode = signal<GameMode>(this.initialState.mode);
     private readonly _activeTileCoords = signal<Position | null>(null);
     private readonly _teleportChannels = signal<TeleportChannelDto[]>([]);
+    private readonly _disabledPlaceables = signal<Map<string, { turnCount: number; positions: Position[] }>>(new Map());
 
     readonly visibleObjects: Signal<GameEditorPlaceableDto[]> = computed(() => {
         const visibleObjects = this._objects().filter((obj) => obj.placed);
@@ -64,6 +66,9 @@ export class GameMapService {
         });
         this.inGameSocketService.onPlaceableUpdated((data) => {
             this.updateObjectState(data);
+        });
+        this.inGameSocketService.onPlaceableDisabledUpdated((data) => {
+            this.updateDisabledPlaceable(data);
         });
     }
 
@@ -278,5 +283,33 @@ export class GameMapService {
 
     flagData() {
         return this.inGameService.flagData();
+    }
+
+    private updateDisabledPlaceable(data: PlaceableDisabledUpdatedDto): void {
+        this._disabledPlaceables.update((map) => {
+            const newMap = new Map(map);
+            if (data.placeableId) {
+                if (data.turnCount > 0) {
+                    newMap.set(data.placeableId, { turnCount: data.turnCount, positions: data.positions });
+                } else {
+                    newMap.delete(data.placeableId);
+                }
+            }
+            return newMap;
+        });
+    }
+
+    getDisabledPlaceableInfo(placeableId: string): { turnCount: number; positions: Position[] } | undefined {
+        return this._disabledPlaceables().get(placeableId);
+    }
+
+    isPlaceableDisabled(placeableId: string): boolean {
+        const info = this.getDisabledPlaceableInfo(placeableId);
+        return info !== undefined && info.turnCount > 0;
+    }
+
+    getPlaceableTurnCount(placeableId: string): number | null {
+        const info = this.getDisabledPlaceableInfo(placeableId);
+        return info?.turnCount ?? null;
     }
 }

@@ -11,8 +11,14 @@
 
         <div class="objects-overlay" [ngStyle]="gridStyle">
             @for (obj of visibleObjects; track obj.id) { @if (obj.placed) {
-            <div class="map-object" [ngStyle]="getObjectStyle(obj)">
+            <div class="map-object" [ngStyle]="getObjectStyle(obj)" [class.disabled]="isPlaceableDisabled(obj.id)">
                 <img [src]="getPlaceableImage(obj.kind)" [alt]="obj.kind" class="object-image" draggable="false" />
+                @if (isPlaceableDisabled(obj.id)) {
+                <div class="disabled-overlay">
+                    <span class="disabled-icon">✕</span>
+                    <span class="turn-count">{{ getPlaceableTurnCount(obj.id) }}</span>
+                </div>
+                }
             </div>
             } }
         </div>

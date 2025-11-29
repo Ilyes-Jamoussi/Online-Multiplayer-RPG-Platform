@@ -142,7 +142,22 @@ export class CombatService {
             abandon,
         });
 
+        this.emitVirtualPlayerCombatVictoryIfNeeded(session.id, playerAId, playerBId, winnerId);
+
         this.inGameMovementService.calculateReachableTiles(session, session.currentTurn.activePlayerId);
+    }
+
+    private emitVirtualPlayerCombatVictoryIfNeeded(sessionId: string, playerAId: string, playerBId: string, winnerId: string | null): void {
+        const isPlayerAVirtual = this.sessionRepository.isVirtualPlayer(sessionId, playerAId);
+        const isPlayerBVirtual = this.sessionRepository.isVirtualPlayer(sessionId, playerBId);
+
+        if (!isPlayerAVirtual && !isPlayerBVirtual) return;
+
+        this.eventEmitter.emit(ServerEvents.VirtualPlayerCombatVictory, {
+            sessionId,
+            winnerId,
+            attackerId: playerAId,
+        });
     }
 
     private combatRound(sessionId: string): void {

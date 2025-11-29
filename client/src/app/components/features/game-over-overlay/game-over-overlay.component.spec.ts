@@ -101,6 +101,7 @@ describe('GameOverOverlayComponent', () => {
             maxPlayers: 4,
             mode: GameMode.CLASSIC,
             inGameId: 'ingame1',
+            chatId: 'chat1',
             isGameStarted: true,
             inGamePlayers: inGamePlayersRecord,
             teams: {
