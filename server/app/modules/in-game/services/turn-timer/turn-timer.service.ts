@@ -261,7 +261,7 @@ export class TurnTimerService {
                 });
             }
         } catch {
-            // Silent fail - session may have been deleted
+            this.clearTimerForSession(session.id);
         }
     }
 }
