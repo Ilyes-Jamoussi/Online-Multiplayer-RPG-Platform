@@ -158,12 +158,6 @@ export class ActionService {
                 playerId,
                 message: 'Vous ne pouvez pas utiliser cette action car vous avez des bonus de combat',
             });
-        } else if (kind === PlaceableKind.HEAL && player.health === player.maxHealth) {
-            this.eventEmitter.emit(ServerEvents.OpenSanctuaryDenied, {
-                session,
-                playerId,
-                message: 'Vous ne pouvez pas utiliser cette action car vous avez atteint votre santé maximale',
-            });
         } else if (object && this.gameCache.isPlaceableDisabled(session.id, position)) {
             this.eventEmitter.emit(ServerEvents.OpenSanctuaryDenied, {
                 session,
@@ -336,7 +330,7 @@ export class ActionService {
 
     private addPlaceableActions(actions: AvailableAction[], object: Placeable | null, pos: Position, sessionId: string): void {
         if (!object) return;
-        
+
         if (object.kind === PlaceableKind.HEAL || object.kind === PlaceableKind.FIGHT) {
             const placeableId = object._id?.toString();
             if (placeableId) {
