@@ -33,17 +33,17 @@ export class GlobalStatisticsDto {
     @ApiProperty()
     tilesVisitedPercentage: number;
 
-    @ApiProperty({ required: false })
-    totalTeleportations?: number;
+    @ApiProperty()
+    totalTeleportations: number;
 
-    @ApiProperty({ required: false })
-    doorsManipulatedPercentage?: number;
+    @ApiProperty()
+    doorsManipulatedPercentage: number;
 
-    @ApiProperty({ required: false })
-    sanctuariesUsedPercentage?: number;
+    @ApiProperty()
+    sanctuariesUsedPercentage: number;
 
-    @ApiProperty({ required: false })
-    flagHoldersCount?: number;
+    @ApiProperty()
+    flagHoldersCount: number;
 }
 
 export class GameStatisticsDto {

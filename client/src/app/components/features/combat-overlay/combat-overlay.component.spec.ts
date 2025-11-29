@@ -10,6 +10,7 @@ import { Avatar } from '@common/enums/avatar.enum';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
+import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { CombatOverlayComponent } from './combat-overlay.component';
 
@@ -265,6 +266,10 @@ describe('CombatOverlayComponent', () => {
 
         it('should return posture from service', () => {
             mockCombatService._playerPosturesSignal.set({ player1: CombatPosture.OFFENSIVE, player2: CombatPosture.DEFENSIVE });
+            mockInGameService.getPlayerByPlayerId.and.callFake((id: string) => {
+                const player = id === 'player1' ? mockPlayerA : mockPlayerB;
+                return { ...player, virtualPlayerType: VirtualPlayerType.Offensive };
+            });
             expect(component.playerAPosture).toBe(CombatPosture.OFFENSIVE);
             expect(component.playerBPosture).toBe(CombatPosture.DEFENSIVE);
         });
@@ -297,12 +302,12 @@ describe('CombatOverlayComponent', () => {
         });
 
         it('should return victory subtitle for win', () => {
-            expect(component.victorySubtitle).toBe('Tu as gagné le combat !');
+            expect(component.victorySubtitle).toBe('Vous avez gagné le combat !');
         });
 
         it('should return victory subtitle for loss', () => {
             mockCombatService._victoryDataSignal.set({ ...mockVictoryData, winnerId: 'player2' });
-            expect(component.victorySubtitle).toBe('Tu as perdu le combat...');
+            expect(component.victorySubtitle).toBe('Vous avez perdu le combat...');
         });
 
         it('should return spectator victory title for match nul', () => {

@@ -1,11 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-    DEFAULT_HEALTH_DEALT_MULTIPLIER,
-    MILLISECONDS_PER_SECOND,
-    PERCENTAGE_MULTIPLIER,
-    SECONDS_PER_MINUTE,
-    STATISTICS_DELETE_DELAY_MS,
-} from '@app/constants/statistics.constants';
+import { MILLISECONDS_PER_SECOND, PERCENTAGE_MULTIPLIER, SECONDS_PER_MINUTE, STATISTICS_DELETE_DELAY_MS } from '@app/constants/statistics.constants';
 import { GameStatisticsDto, PlayerStatisticsDto, GlobalStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
 import { TrackingService, GameTracker } from '@app/modules/in-game/services/tracking/tracking.service';
 import { ServerEvents } from '@app/enums/server-events.enum';
@@ -16,7 +10,6 @@ import { InGameSession } from '@common/interfaces/session.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { StoredStatistics } from '@common/interfaces/game-statistics.interface';
 import { OnEvent } from '@nestjs/event-emitter';
-import { GameMode } from '@common/enums/game-mode.enum';
 
 @Injectable()
 export class StatisticsService {
@@ -91,8 +84,9 @@ export class StatisticsService {
     }
 
     private calculatePlayerStatistics(player: Player, trackingData: GameTracker): PlayerStatisticsDto {
-        const healthLost = player.maxHealth - player.health;
-        const healthDealt = player.combatWins * DEFAULT_HEALTH_DEALT_MULTIPLIER;
+        const playerDamage = trackingData?.playerDamage?.get(player.id);
+        const healthLost = playerDamage?.healthLost || 0;
+        const healthDealt = playerDamage?.healthDealt || 0;
 
         let tilesVisitedPercentage = 0;
         if (trackingData?.playerTiles?.has(player.id)) {
@@ -123,20 +117,22 @@ export class StatisticsService {
             globalTilesVisitedPercentage = Math.round((allVisitedTiles.size / trackingData.totalTiles) * PERCENTAGE_MULTIPLIER);
         }
 
-        const hasTeleportTiles = trackingData.totalTeleportTiles > 0;
-        const hasSanctuaries = trackingData.totalSanctuaries > 0;
-        const isCTFMode = session.mode === GameMode.CTF;
+        const doorsManipulatedPercentage =
+            trackingData.totalDoors > 0 ? Math.round((trackingData.toggledDoors.size / trackingData.totalDoors) * PERCENTAGE_MULTIPLIER) : 0;
+
+        const sanctuariesUsedPercentage =
+            trackingData.totalSanctuaries > 0
+                ? Math.round((trackingData.usedSanctuaries.size / trackingData.totalSanctuaries) * PERCENTAGE_MULTIPLIER)
+                : 0;
 
         return {
             gameDuration,
             totalTurns: session.currentTurn.turnNumber,
             tilesVisitedPercentage: globalTilesVisitedPercentage,
-            totalTeleportations: hasTeleportTiles ? trackingData?.teleportations || 0 : undefined,
-            doorsManipulatedPercentage: Math.round((trackingData.toggledDoors.size / trackingData.totalDoors) * PERCENTAGE_MULTIPLIER),
-            sanctuariesUsedPercentage: hasSanctuaries
-                ? Math.round((trackingData.usedSanctuaries.size / trackingData.totalSanctuaries) * PERCENTAGE_MULTIPLIER)
-                : undefined,
-            flagHoldersCount: isCTFMode ? trackingData?.flagHolders.size || 0 : undefined,
+            totalTeleportations: trackingData?.teleportations || 0,
+            doorsManipulatedPercentage,
+            sanctuariesUsedPercentage,
+            flagHoldersCount: trackingData?.flagHolders.size || 0,
         };
     }
 

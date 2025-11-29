@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { CombatTimerComponent } from '@app/components/features/combat-timer/combat-timer.component';
+import { CombatResultComponent } from '@app/components/features/combat-result/combat-result.component';
 import { PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
@@ -13,7 +14,7 @@ import { TileCombatEffect } from '@common/enums/tile.enum';
 @Component({
     selector: 'app-combat-overlay',
     standalone: true,
-    imports: [CommonModule, CombatTimerComponent],
+    imports: [CommonModule, CombatTimerComponent, CombatResultComponent],
     templateUrl: './combat-overlay.component.html',
     styleUrls: ['./combat-overlay.component.scss'],
 })
@@ -99,11 +100,23 @@ export class CombatOverlayComponent {
 
     get playerAPosture(): CombatPosture | null {
         if (!this.combatData) return null;
+        const player = this.inGameService.getPlayerByPlayerId(this.combatData.attackerId);
+        const isOpponent = this.combatData.userRole === 'target';
+        const isVirtual = player.virtualPlayerType !== undefined;
+
+        if (isOpponent && !isVirtual) return null;
+
         return this.combatService.playerPostures()[this.combatData.attackerId] || null;
     }
 
     get playerBPosture(): CombatPosture | null {
         if (!this.combatData) return null;
+        const player = this.inGameService.getPlayerByPlayerId(this.combatData.targetId);
+        const isOpponent = this.combatData.userRole === 'attacker';
+        const isVirtual = player.virtualPlayerType !== undefined;
+
+        if (isOpponent && !isVirtual) return null;
+
         return this.combatService.playerPostures()[this.combatData.targetId] || null;
     }
 
@@ -146,10 +159,10 @@ export class CombatOverlayComponent {
         }
 
         if (this.victoryData.winnerId === myId) {
-            return 'Tu as gagné le combat !';
+            return 'Vous avez gagné le combat !';
         }
 
-        return 'Tu as perdu le combat...';
+        return 'Vous avez perdu le combat...';
     }
 
     get isVictory(): boolean {
