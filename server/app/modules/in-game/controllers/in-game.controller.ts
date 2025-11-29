@@ -35,7 +35,7 @@ import { SanctuaryActionFailedDto } from '@app/modules/in-game/dto/sanctuary-act
 import { SanctuaryActionSuccessDto } from '@app/modules/in-game/dto/sanctuary-action-success.dto';
 import { ToggleDoorActionDto } from '@app/modules/in-game/dto/toggle-door-action.dto';
 import { Body, Controller, Post } from '@nestjs/common';
-import { PlaceableDisabledUpdatedDto } from '../dto/placeable-disabled-updated.dto';
+import { PlaceableDisabledUpdatedDto } from '@app/modules/in-game/dto/placeable-disabled-updated.dto';
 
 @Controller('in-game')
 export class InGameController {
