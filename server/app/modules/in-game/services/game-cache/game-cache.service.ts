@@ -222,6 +222,15 @@ export class GameCacheService {
         return `${placeable._id?.toString()}-${placeable.x}-${placeable.y}`;
     }
 
+    private parsePlaceableKey(key: string): { placeableId: string; x: number; y: number } {
+        const lastDashIndex = key.lastIndexOf('-');
+        const secondLastDashIndex = key.lastIndexOf('-', lastDashIndex - 1);
+        const placeableId = key.substring(0, secondLastDashIndex);
+        const x = parseInt(key.substring(secondLastDashIndex + 1, lastDashIndex), 10);
+        const y = parseInt(key.substring(lastDashIndex + 1), 10);
+        return { placeableId, x, y };
+    }
+
     getMapSize(sessionId: string): number {
         return this.getGameForSession(sessionId).size;
     }
@@ -262,10 +271,19 @@ export class GameCacheService {
         const sessionDisabled = this.disabledPlaceables.get(sessionId);
         if (!sessionDisabled) throw new NotFoundException('Session disabled map not found');
 
+        const turnCount = 2;
         for (const placeable of placeables) {
             const key = this.getPlaceableKey(placeable);
-            sessionDisabled.set(key, { playerId, turnCount: 2 });
+            sessionDisabled.set(key, { playerId, turnCount });
         }
+
+        const positions = placeables.map((p) => ({ x: p.x, y: p.y }));
+        this.eventEmitter.emit(ServerEvents.PlaceableDisabledUpdated, {
+            sessionId,
+            placeableId: object._id?.toString(),
+            positions,
+            turnCount,
+        });
     }
 
     isPlaceableDisabled(sessionId: string, position: Position): boolean {
@@ -284,11 +302,30 @@ export class GameCacheService {
         const sessionDisabled = this.disabledPlaceables.get(sessionId);
         if (!sessionDisabled) return;
 
+        const updatedPlaceables = new Map<string, { positions: Position[]; turnCount: number }>();
+
         for (const [key, disabledInfo] of sessionDisabled.entries()) {
             disabledInfo.turnCount--;
+
+            const { placeableId, x, y } = this.parsePlaceableKey(key);
+
+            if (!updatedPlaceables.has(placeableId)) {
+                updatedPlaceables.set(placeableId, { positions: [], turnCount: disabledInfo.turnCount });
+            }
+            updatedPlaceables.get(placeableId)?.positions.push({ x, y });
+
             if (!disabledInfo.turnCount) {
                 sessionDisabled.delete(key);
             }
+        }
+
+        for (const [placeableId, data] of updatedPlaceables.entries()) {
+            this.eventEmitter.emit(ServerEvents.PlaceableDisabledUpdated, {
+                sessionId,
+                placeableId,
+                positions: data.positions,
+                turnCount: data.turnCount,
+            });
         }
     }
 

@@ -7,6 +7,7 @@ import { FlagTransferRequestDto } from '@app/modules/in-game/dto/flag-transfer-r
 import { FlagTransferResultDto } from '@app/modules/in-game/dto/flag-transfer-result.dto';
 import { FlagTransferredDto } from '@app/modules/in-game/dto/flag-transferred.dto';
 import { OpenSanctuaryDto } from '@app/modules/in-game/dto/open-sanctuary.dto';
+import { PlaceableDisabledUpdatedDto } from '@app/modules/in-game/dto/placeable-disabled-updated.dto';
 import { PlaceablePositionUpdatedDto } from '@app/modules/in-game/dto/placeable-position-updated.dto';
 import { PlayerBoardedBoatDto } from '@app/modules/in-game/dto/player-boarded-boat.dto';
 import { PlayerBonusesChangedDto } from '@app/modules/in-game/dto/player-bonuses-changed.dto';
@@ -24,6 +25,7 @@ import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
+import { Position } from '@common/interfaces/position.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
@@ -214,6 +216,17 @@ export class InGameActionGateway {
             _id: payload.placeable._id?.toString(),
         };
         this.server.to(session.inGameId).emit(InGameEvents.PlaceableUpdated, successResponse<PlaceablePositionUpdatedDto>(placeableDto));
+    }
+
+    @OnEvent(ServerEvents.PlaceableDisabledUpdated)
+    handlePlaceableDisabledUpdated(payload: { sessionId: string; placeableId: string; positions: Position[]; turnCount: number }): void {
+        const session = this.inGameService.getSession(payload.sessionId);
+        const dto: PlaceableDisabledUpdatedDto = {
+            placeableId: payload.placeableId,
+            positions: payload.positions,
+            turnCount: payload.turnCount,
+        };
+        this.server.to(session.inGameId).emit(InGameEvents.PlaceableDisabledUpdated, successResponse<PlaceableDisabledUpdatedDto>(dto));
     }
 
     @OnEvent(ServerEvents.OpenSanctuaryDenied)
