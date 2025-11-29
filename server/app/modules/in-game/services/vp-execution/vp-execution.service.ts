@@ -5,9 +5,8 @@ import { ActionService } from '@app/modules/in-game/services/action/action.servi
 import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { VPGameplayService } from '@app/modules/in-game/services/vp-gameplay/vp-gameplay.service';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
-import { Position } from '@common/interfaces/position.interface';
+import { Player } from '@common/interfaces/player.interface';
 import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
@@ -22,96 +21,105 @@ export class VPExecutionService {
     ) {}
 
     executeVPTurn(sessionId: string, playerId: string, playerType: VirtualPlayerType): void {
-        if (!this.isPlayerValid(sessionId, playerId)) return;
-        if (this.isInCombat(sessionId)) return;
+        if (!this.canAct(sessionId, playerId)) {
+            this.endVPTurn(sessionId, playerId);
+            return;
+        }
 
         const session = this.sessionRepository.findById(sessionId);
         const decision = this.vpGameplayService.makeDecision(session, playerId, playerType);
 
         this.logPath(decision);
 
-        if (decision.target && decision.target.path.reachable) {
-            this.executeDecision(sessionId, playerId, decision);
-        } else {
+        if (!decision.target || !decision.target.path.reachable) {
             this.endVPTurn(sessionId, playerId);
+            return;
         }
+
+        const pathActions = [...decision.target.path.actions];
+        this.executePathActions(sessionId, playerId, pathActions, decision.target, decision.useDoubleAction);
     }
 
     continueOrEndTurn(sessionId: string, playerId: string): void {
-        if (!this.isPlayerValid(sessionId, playerId)) return;
+        const player = this.getValidPlayer(sessionId, playerId);
+
+        if (!player) return;
+        if (!player.virtualPlayerType) return;
         if (this.isInCombat(sessionId)) return;
 
-        const session = this.sessionRepository.findById(sessionId);
-        const player = session.inGamePlayers[playerId];
-
-        if (player.health > 0 && player.virtualPlayerType) {
-            const vpType = player.virtualPlayerType;
-            setTimeout(() => this.executeVPTurn(sessionId, playerId, vpType), VIRTUAL_PLAYER_ACTION_DELAY_MS);
+        const hasResources = player.speed > 0 || player.boatSpeed > 0 || player.actionsRemaining > 0;
+        if (!hasResources) {
+            this.endVPTurn(sessionId, playerId);
+            return;
         }
+
+        const vpType = player.virtualPlayerType;
+        setTimeout(() => this.executeVPTurn(sessionId, playerId, vpType), VIRTUAL_PLAYER_ACTION_DELAY_MS);
     }
 
-    private executeDecision(sessionId: string, playerId: string, decision: VPDecision): void {
-        if (!decision.target) return;
-
-        const pathActions = [...decision.target.path.actions];
-        this.executeNextPathAction(sessionId, playerId, pathActions, decision.target, decision.useDoubleAction);
-    }
-
-    private executeNextPathAction(
+    private executePathActions(
         sessionId: string,
         playerId: string,
         remainingActions: PathAction[],
         target: EvaluatedTarget,
         useDoubleAction: boolean,
     ): void {
-        if (!this.isPlayerValid(sessionId, playerId)) return;
-        if (this.isInCombat(sessionId)) return;
+        const player = this.getValidPlayer(sessionId, playerId);
+        if (!player || this.isInCombat(sessionId)) return;
 
         if (remainingActions.length === 0) {
             this.performTargetAction(sessionId, playerId, target, useDoubleAction);
             return;
         }
 
-        const action = remainingActions.shift();
-        if (!action) return;
+        const nextAction = remainingActions[0];
 
-        const success = this.executeSingleAction(sessionId, playerId, action);
-
-        if (success) {
-            const delay = action.type === 'move' ? VIRTUAL_PLAYER_MOVEMENT_DELAY_MS : VIRTUAL_PLAYER_ACTION_DELAY_MS;
-            setTimeout(() => this.executeNextPathAction(sessionId, playerId, remainingActions, target, useDoubleAction), delay);
-        } else {
-            this.continueOrEndTurn(sessionId, playerId);
+        if (!this.canExecutePathAction(player, nextAction)) {
+            this.endVPTurn(sessionId, playerId);
+            return;
         }
+
+        remainingActions.shift();
+        const success = this.executeSingleAction(sessionId, playerId, nextAction);
+
+        if (!success) {
+            this.endVPTurn(sessionId, playerId);
+            return;
+        }
+
+        const delay =
+            nextAction.type === 'move' || nextAction.type === 'teleport' ? VIRTUAL_PLAYER_MOVEMENT_DELAY_MS : VIRTUAL_PLAYER_ACTION_DELAY_MS;
+        setTimeout(() => this.executePathActions(sessionId, playerId, remainingActions, target, useDoubleAction), delay);
+    }
+
+    private canExecutePathAction(player: Player, action: PathAction): boolean {
+        const isMoveAction = action.type === 'move' || action.type === 'teleport';
+        const isActionAction = action.type === 'openDoor' || action.type === 'boardBoat' || action.type === 'disembarkBoat';
+
+        if (isMoveAction && player.speed <= 0 && player.boatSpeed <= 0) return false;
+        if (isActionAction && player.actionsRemaining <= 0) return false;
+
+        return true;
     }
 
     private executeSingleAction(sessionId: string, playerId: string, action: PathAction): boolean {
         try {
             switch (action.type) {
                 case 'move':
-                    if (action.orientation) {
-                        this.gameplayService.movePlayer(sessionId, playerId, action.orientation);
-                    }
-                    break;
-
-                case 'openDoor':
-                    this.gameplayService.toggleDoorAction(sessionId, playerId, action.position);
-                    break;
-
-                case 'boardBoat':
-                    this.gameplayService.boardBoat(sessionId, playerId, action.position);
-                    break;
-
-                case 'disembarkBoat':
-                    this.gameplayService.disembarkBoat(sessionId, playerId, action.position);
-                    break;
-
                 case 'teleport':
                     if (action.orientation) {
                         this.gameplayService.movePlayer(sessionId, playerId, action.orientation);
                     }
                     break;
-
+                case 'openDoor':
+                    this.gameplayService.toggleDoorAction(sessionId, playerId, action.position);
+                    break;
+                case 'boardBoat':
+                    this.gameplayService.boardBoat(sessionId, playerId, action.position);
+                    break;
+                case 'disembarkBoat':
+                    this.gameplayService.disembarkBoat(sessionId, playerId, action.position);
+                    break;
                 default:
                     return false;
             }
@@ -122,85 +130,69 @@ export class VPExecutionService {
     }
 
     private performTargetAction(sessionId: string, playerId: string, target: EvaluatedTarget, useDoubleAction: boolean): void {
-        if (!this.isPlayerValid(sessionId, playerId)) return;
-        if (this.isInCombat(sessionId)) return;
+        const player = this.getValidPlayer(sessionId, playerId);
+        if (!player || this.isInCombat(sessionId)) return;
 
-        const session = this.sessionRepository.findById(sessionId);
-        const player = session.inGamePlayers[playerId];
-
-        if (player.actionsRemaining === 0) {
+        const requiresAction = ['enemy', 'flagCarrier', 'healSanctuary', 'fightSanctuary', 'flag'].includes(target.type);
+        if (requiresAction && player.actionsRemaining === 0) {
             this.endVPTurn(sessionId, playerId);
             return;
         }
 
         try {
             switch (target.type) {
-                case 'enemy': {
-                    const attacked = this.attackEnemy(sessionId, playerId, target.position);
-                    if (attacked) return;
-                    break;
-                }
+                case 'enemy':
+                case 'flagCarrier':
+                    this.actionService.attackPlayer(sessionId, playerId, target.position);
+                    return;
 
                 case 'healSanctuary':
-                    this.useSanctuary(sessionId, playerId, target.position, PlaceableKind.HEAL, false);
-                    break;
+                    this.gameplayService.performSanctuaryAction(sessionId, playerId, target.position, false);
+                    this.endVPTurn(sessionId, playerId);
+                    return;
 
                 case 'fightSanctuary':
-                    this.useSanctuary(sessionId, playerId, target.position, PlaceableKind.FIGHT, useDoubleAction);
-                    break;
+                    this.gameplayService.performSanctuaryAction(sessionId, playerId, target.position, useDoubleAction);
+                    this.endVPTurn(sessionId, playerId);
+                    return;
 
                 case 'flag':
-                    this.pickUpFlag(sessionId, playerId, target.position);
-                    break;
+                    this.gameplayService.pickUpFlag(sessionId, playerId, target.position);
+                    this.continueOrEndTurn(sessionId, playerId);
+                    return;
+
+                case 'escape':
+                case 'guardPoint':
+                case 'returnFlag':
+                    this.continueOrEndTurn(sessionId, playerId);
+                    return;
             }
         } catch {
-            // Silent fail
+            this.endVPTurn(sessionId, playerId);
         }
-
-        setTimeout(() => this.endVPTurn(sessionId, playerId), VIRTUAL_PLAYER_ACTION_DELAY_MS);
     }
 
-    private attackEnemy(sessionId: string, playerId: string, targetPosition: Position): boolean {
-        const session = this.sessionRepository.findById(sessionId);
-        const player = session?.inGamePlayers?.[playerId];
-
-        if (!player || player.actionsRemaining === 0) return false;
-
-        this.actionService.attackPlayer(sessionId, playerId, targetPosition);
-        return true;
-    }
-
-    private useSanctuary(
-        sessionId: string,
-        playerId: string,
-        position: Position,
-        kind: PlaceableKind.HEAL | PlaceableKind.FIGHT,
-        double: boolean,
-    ): void {
-        this.gameplayService.performSanctuaryAction(sessionId, playerId, position, double);
-    }
-
-    private pickUpFlag(sessionId: string, playerId: string, position: Position): void {
-        this.gameplayService.pickUpFlag(sessionId, playerId, position);
-    }
-
-    private isPlayerValid(sessionId: string, playerId: string): boolean {
+    private getValidPlayer(sessionId: string, playerId: string): Player | null {
         try {
             const session = this.sessionRepository.findById(sessionId);
             const player = session?.inGamePlayers?.[playerId];
 
-            if (!session || !player) return false;
-            if (player.health <= 0) return false;
+            if (!session || !player) return null;
+            if (player.health <= 0 || !player.isInGame) return null;
+            if (session.currentTurn.activePlayerId !== playerId) return null;
 
-            return true;
+            return player;
         } catch {
-            return false;
+            return null;
         }
     }
 
+    private canAct(sessionId: string, playerId: string): boolean {
+        return this.getValidPlayer(sessionId, playerId) !== null && !this.isInCombat(sessionId);
+    }
+
     private isInCombat(sessionId: string): boolean {
-        const activeCombat = this.actionService.getActiveCombat(sessionId);
-        return activeCombat !== null;
+        return this.actionService.getActiveCombat(sessionId) !== null;
     }
 
     private endVPTurn(sessionId: string, playerId: string): void {
@@ -213,9 +205,7 @@ export class VPExecutionService {
 
     private logPath(decision: VPDecision): void {
         if (decision.target?.path.actions.length) {
-            const actionSequence = decision.target.path.actions
-                .map((a) => (a.type === 'move' ? a.orientation : a.type.toUpperCase()))
-                .join(' ');
+            const actionSequence = decision.target.path.actions.map((a) => (a.type === 'move' ? a.orientation : a.type.toUpperCase())).join(' ');
             this.logger.debug(`VP Path: ${actionSequence}`);
         }
     }

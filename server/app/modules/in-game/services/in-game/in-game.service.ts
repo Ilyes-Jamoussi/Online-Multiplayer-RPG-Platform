@@ -183,7 +183,6 @@ export class InGameService {
         let sessionEnded = false;
 
         if (inGamePlayers < 2 || !realPlayers) {
-            console.log('Session ended because no players are in game');
             this.timerService.forceStopTimer(sessionId);
             sessionEnded = true;
         } else if (playerId === session.currentTurn.activePlayerId) {

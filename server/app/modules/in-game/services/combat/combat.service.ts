@@ -153,6 +153,7 @@ export class CombatService {
         this.eventEmitter.emit(ServerEvents.VirtualPlayerCombatVictory, {
             sessionId,
             winnerId,
+            attackerId: playerAId,
         });
     }
 

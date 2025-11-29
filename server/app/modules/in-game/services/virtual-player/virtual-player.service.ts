@@ -32,25 +32,24 @@ export class VirtualPlayerService {
     }
 
     @OnEvent(ServerEvents.VirtualPlayerCombatVictory)
-    handleCombatVictory(payload: { sessionId: string; winnerId: string | null }): void {
-        const { sessionId, winnerId } = payload;
+    handleCombatVictory(payload: { sessionId: string; winnerId: string | null; attackerId: string }): void {
+        const { sessionId, winnerId, attackerId } = payload;
 
-        if (!winnerId) {
-            this.logger.debug(`Combat was a draw`);
-            return;
-        }
+        const isAttackerVirtual = this.sessionRepository.isVirtualPlayer(sessionId, attackerId);
+        if (!isAttackerVirtual) return;
 
         const session = this.sessionRepository.findById(sessionId);
         if (!session) return;
 
-        const isWinnerCurrentTurn = session.currentTurn.activePlayerId === winnerId;
-        const isWinnerVirtual = this.sessionRepository.isVirtualPlayer(sessionId, winnerId);
+        const isAttackerStillCurrentTurn = session.currentTurn.activePlayerId === attackerId;
+        if (!isAttackerStillCurrentTurn) {
+            this.logger.debug(`VP ${attackerId} lost combat or turn ended, not continuing`);
+            return;
+        }
 
-        if (isWinnerCurrentTurn && isWinnerVirtual) {
-            this.logger.debug(`VP ${winnerId} won combat and is current turn, continuing turn`);
-            setTimeout(() => this.vpExecutionService.continueOrEndTurn(sessionId, winnerId), VIRTUAL_PLAYER_ACTION_DELAY_MS);
-        } else {
-            this.logger.debug(`Combat ended, winner ${winnerId} is not current VP turn`);
+        if (!winnerId || winnerId === attackerId) {
+            this.logger.debug(`VP ${attackerId} won or drew combat, continuing turn`);
+            setTimeout(() => this.vpExecutionService.continueOrEndTurn(sessionId, attackerId), VIRTUAL_PLAYER_ACTION_DELAY_MS);
         }
     }
 

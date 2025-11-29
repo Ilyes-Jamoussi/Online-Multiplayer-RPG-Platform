@@ -108,6 +108,7 @@ export class InGameGateway {
         // Faire quitter tous les sockets des rooms
         this.server.socketsLeave(session.inGameId);
         this.server.socketsLeave(session.id);
+        this.inGameService.removeSession(payload.sessionId);
     }
 
     handleDisconnect(socket: Socket) {

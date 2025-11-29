@@ -10,6 +10,7 @@ import {
 } from '@app/interfaces/vp-gameplay.interface';
 import { PathResult } from '@app/interfaces/vp-pathfinding.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { VPCTFService } from '@app/modules/in-game/services/vp-ctf/vp-ctf.service';
 import { VPPathfindingService } from '@app/modules/in-game/services/vp-pathfinding/vp-pathfinding.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
@@ -17,7 +18,7 @@ import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 
 export { EvaluatedTarget, MapScanResult, MapScanWithDistances, PointOfInterest, PointOfInterestWithPath, VPDecision };
 
@@ -26,6 +27,7 @@ export class VPGameplayService {
     constructor(
         private readonly gameCache: GameCacheService,
         private readonly pathfindingService: VPPathfindingService,
+        @Inject(forwardRef(() => VPCTFService)) private readonly ctfService: VPCTFService,
     ) {}
 
     getConfigForType(vpType: VirtualPlayerType): VPConfig {
@@ -47,11 +49,12 @@ export class VPGameplayService {
         this.evaluateHealSanctuaries(pointsWithDistances.healSanctuaries, player, evaluatedTargets, config);
         this.evaluateFightSanctuaries(pointsWithDistances.fightSanctuaries, player, evaluatedTargets, config);
 
+        let ctfObjectiveActive = false;
         if (session.mode === GameMode.CTF) {
-            this.evaluateFlags(pointsWithDistances.flags, evaluatedTargets, config);
+            ctfObjectiveActive = this.ctfService.evaluateCTFObjectives(session, vpPlayerId, pointsWithDistances, evaluatedTargets, config);
         }
 
-        if (config.priorities.escape > 0) {
+        if (config.priorities.escape > 0 && !ctfObjectiveActive) {
             this.evaluateEscape(session, vpPlayerId, pointsWithDistances.enemies, evaluatedTargets, config);
         }
 
@@ -140,26 +143,6 @@ export class VPGameplayService {
             reason += `, No current buffs bonus: +${config.bonuses.noBonusFightSanctuaryBonus}`;
 
             results.push({ ...sanctuary, priorityScore: Math.max(0, score), reason });
-        }
-    }
-
-    private evaluateFlags(flags: PointOfInterestWithPath[], results: EvaluatedTarget[], config: VPConfig): void {
-        for (const flag of flags) {
-            if (!flag.path.reachable) continue;
-            if (flag.isHeld) continue;
-
-            const distance = flag.path.totalCost;
-
-            if (distance > config.maxDistances.maxFlagDistance) continue;
-
-            let score = config.priorities.flag;
-            let reason = `Base flag priority: ${score}`;
-
-            const distancePenalty = distance * config.distanceWeights.flagPenaltyPerTile;
-            score -= distancePenalty;
-            reason += `, Distance penalty: -${distancePenalty.toFixed(1)}`;
-
-            results.push({ ...flag, priorityScore: Math.max(0, score), reason });
         }
     }
 

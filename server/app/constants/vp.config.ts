@@ -22,8 +22,8 @@ export const OFFENSIVE_VP_CONFIG: VPConfig = {
         heal: 50,
         // Good priority - boost stats for combat
         fightSanctuary: 60,
-        // High priority in CTF
-        flag: 70,
+        // VERY HIGH priority - dropped flag is top priority in CTF
+        flag: 150,
         // No escape - offensive VP doesn't run away
         escape: 0,
     },
@@ -111,8 +111,8 @@ export const DEFENSIVE_VP_CONFIG: VPConfig = {
         heal: 80,
         // Low priority - doesn't seek combat buffs
         fightSanctuary: 30,
-        // Medium priority in CTF
-        flag: 50,
+        // VERY HIGH priority - dropped flag is top priority in CTF
+        flag: 150,
         // High priority - wants to stay far from enemies
         escape: 70,
     },
@@ -165,19 +165,19 @@ export const DEFENSIVE_VP_CONFIG: VPConfig = {
     flag: {
         // Not used for defensive VP
         chaseFlagCarrierPriority: 0,
-        // High priority - will guard enemy start point when flag is held
-        guardStartPointPriority: 85,
+        // VERY HIGH priority - will guard enemy start point when flag is held
+        guardStartPointPriority: 140,
         // Not used for defensive VP
         chaseFlagCarrierPenaltyPerTile: 0,
-        // Medium penalty - will travel to guard start point
-        guardStartPointPenaltyPerTile: 3,
+        // Small penalty - will travel far to guard start point
+        guardStartPointPenaltyPerTile: 1,
         // Not used for defensive VP
         chaseFlagCarrierBonus: 0,
         // Big bonus to guard start point
-        guardStartPointBonus: 50,
+        guardStartPointBonus: 60,
         // Not used for defensive VP
         maxChaseFlagCarrierDistance: 0,
-        // Will travel to guard start point
-        maxGuardStartPointDistance: 20,
+        // Will travel anywhere to guard start point
+        maxGuardStartPointDistance: 999,
     },
 };

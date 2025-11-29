@@ -105,6 +105,8 @@ export class VPPathfindingService {
             const occupant = this.gameCache.getTileOccupant(context.session.id, nextPos);
             if (occupant && !(nextPos.x === context.goal.x && nextPos.y === context.goal.y)) continue;
 
+            if (this.hasBlockingPlaceable(context.session.id, nextPos)) continue;
+
             const exploration: TileExploration = { current, nextPos, tile, orientation: dir.orientation, goal: context.goal };
 
             if (current.isOnBoat) {
@@ -166,7 +168,9 @@ export class VPPathfindingService {
             }
         }
 
-        this.addBoatBoardingOption(neighbors, exp, session);
+        if (tile.kind === TileKind.WATER) {
+            this.addBoatBoardingOption(neighbors, exp, session);
+        }
     }
 
     private addDoorNeighbor(neighbors: PathNode[], exp: TileExploration): void {
@@ -272,6 +276,13 @@ export class VPPathfindingService {
 
     private isValidPosition(pos: Position, mapSize: number): boolean {
         return pos.x >= 0 && pos.x < mapSize && pos.y >= 0 && pos.y < mapSize;
+    }
+
+    private hasBlockingPlaceable(sessionId: string, position: Position): boolean {
+        const placeable = this.gameCache.getPlaceableAtPosition(sessionId, position);
+        if (!placeable) return false;
+
+        return placeable.kind === PlaceableKind.HEAL || placeable.kind === PlaceableKind.FIGHT;
     }
 
     private getTileCost(kind: TileKind): number | null {

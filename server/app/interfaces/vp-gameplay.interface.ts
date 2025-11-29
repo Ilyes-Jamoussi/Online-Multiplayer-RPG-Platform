@@ -1,7 +1,16 @@
 import { PathResult } from './vp-pathfinding.interface';
 import { Position } from '@common/interfaces/position.interface';
 
-export type PointOfInterestType = 'enemy' | 'healSanctuary' | 'fightSanctuary' | 'boat' | 'flag' | 'escape';
+export type PointOfInterestType =
+    | 'enemy'
+    | 'healSanctuary'
+    | 'fightSanctuary'
+    | 'boat'
+    | 'flag'
+    | 'escape'
+    | 'flagCarrier'
+    | 'guardPoint'
+    | 'returnFlag';
 
 export interface PointOfInterest {
     type: PointOfInterestType;
@@ -42,4 +51,3 @@ export interface VPDecision {
     allEvaluatedTargets: EvaluatedTarget[];
     useDoubleAction: boolean;
 }
-
