@@ -39,68 +39,97 @@ export class TurnTimerService {
         this.setGameTimerState(session.id, TurnTimerStates.TurnTransition);
 
         setTimeout(() => {
-            const activePlayer = session.inGamePlayers[newTurn.activePlayerId];
-            if (activePlayer) {
-                activePlayer.hasCombatBonus = activePlayer.attackBonus > 0 || activePlayer.defenseBonus > 0;
+            try {
+                const currentSession = this.sessionRepository.findById(session.id);
+                if (!currentSession) return;
+
+                const activePlayer = currentSession.inGamePlayers[newTurn.activePlayerId];
+                if (activePlayer) {
+                    activePlayer.hasCombatBonus = activePlayer.attackBonus > 0 || activePlayer.defenseBonus > 0;
+                }
+
+                this.sessionRepository.updatePlayer(currentSession.id, newTurn.activePlayerId, { actionsRemaining: 1 });
+                this.scheduleTurnTimeout(currentSession.id, timeoutMs, () => this.autoEndTurn(currentSession));
+
+                this.eventEmitter.emit(ServerEvents.TurnTransition, { session: currentSession });
+                this.eventEmitter.emit(ServerEvents.TurnStarted, { session: currentSession });
+                this.setGameTimerState(currentSession.id, TurnTimerStates.PlayerTurn);
+
+                this.triggerVirtualPlayerTurn(currentSession, newTurn.activePlayerId);
+            } catch {
+                this.clearTimerForSession(session.id);
             }
-
-            this.sessionRepository.updatePlayer(session.id, newTurn.activePlayerId, { actionsRemaining: 1 });
-            this.scheduleTurnTimeout(session.id, timeoutMs, () => this.autoEndTurn(session));
-
-            this.eventEmitter.emit(ServerEvents.TurnTransition, { session });
-            this.eventEmitter.emit(ServerEvents.TurnStarted, { session });
-            this.setGameTimerState(session.id, TurnTimerStates.PlayerTurn);
-
-            this.triggerVirtualPlayerTurn(session, newTurn.activePlayerId);
         }, DEFAULT_TURN_TRANSITION_DURATION);
 
         return newTurn;
     }
 
     private nextTurn(session: InGameSession, timeoutMs = DEFAULT_TURN_DURATION): TurnState {
-        const prev = session.currentTurn;
-
-        this.clearTurnTimer(session.id);
-        session.inGamePlayers[prev.activePlayerId].speed = 0;
-        if (session.inGamePlayers[prev.activePlayerId].hasCombatBonus) {
-            this.sessionRepository.resetPlayerBonuses(session.id, prev.activePlayerId);
-        }
-        this.gameCache.decrementDisabledPlaceablesTurnCount(session.id);
-        this.eventEmitter.emit(ServerEvents.PlayerReachableTiles, {
-            playerId: prev.activePlayerId,
-            reachable: [],
-        });
-
-        const nextPlayerId = this.getNextPlayer(session, prev.activePlayerId);
-        const newTurn: TurnState = {
-            turnNumber: prev.turnNumber + 1,
-            activePlayerId: nextPlayerId,
-            hasUsedAction: false,
-        };
-
-        session.currentTurn = newTurn;
-        session.inGamePlayers[nextPlayerId].speed = session.inGamePlayers[nextPlayerId].baseSpeed + session.inGamePlayers[nextPlayerId].speedBonus;
-        session.inGamePlayers[nextPlayerId].boatSpeed = session.inGamePlayers[nextPlayerId].boatSpeedBonus;
-        this.eventEmitter.emit(ServerEvents.TurnEnded, { session });
-        this.setGameTimerState(session.id, TurnTimerStates.TurnTransition);
-
-        setTimeout(() => {
-            const activePlayer = session.inGamePlayers[newTurn.activePlayerId];
-            if (activePlayer) {
-                activePlayer.hasCombatBonus = activePlayer.attackBonus > 0 || activePlayer.defenseBonus > 0;
+        try {
+            const currentSession = this.sessionRepository.findById(session.id);
+            if (!currentSession) {
+                this.clearTimerForSession(session.id);
+                throw new Error('Session not found');
             }
 
-            this.sessionRepository.updatePlayer(session.id, newTurn.activePlayerId, { actionsRemaining: 1 });
-            this.scheduleTurnTimeout(session.id, timeoutMs, () => this.autoEndTurn(session));
+            const prev = currentSession.currentTurn;
 
-            this.eventEmitter.emit(ServerEvents.TurnTransition, { session });
-            this.eventEmitter.emit(ServerEvents.TurnStarted, { session });
-            this.setGameTimerState(session.id, TurnTimerStates.PlayerTurn);
+            this.clearTurnTimer(currentSession.id);
+            currentSession.inGamePlayers[prev.activePlayerId].speed = 0;
+            if (currentSession.inGamePlayers[prev.activePlayerId].hasCombatBonus) {
+                this.sessionRepository.resetPlayerBonuses(currentSession.id, prev.activePlayerId);
+            }
+            this.gameCache.decrementDisabledPlaceablesTurnCount(currentSession.id);
+            this.eventEmitter.emit(ServerEvents.PlayerReachableTiles, {
+                playerId: prev.activePlayerId,
+                reachable: [],
+            });
 
-            this.triggerVirtualPlayerTurn(session, newTurn.activePlayerId);
-        }, DEFAULT_TURN_TRANSITION_DURATION);
+            const nextPlayerId = this.getNextPlayer(currentSession, prev.activePlayerId);
+            const newTurn: TurnState = {
+                turnNumber: prev.turnNumber + 1,
+                activePlayerId: nextPlayerId,
+                hasUsedAction: false,
+            };
 
-        return newTurn;
+            currentSession.currentTurn = newTurn;
+            const nextPlayer = currentSession.inGamePlayers[nextPlayerId];
+            nextPlayer.speed = nextPlayer.baseSpeed + nextPlayer.speedBonus;
+            nextPlayer.boatSpeed = nextPlayer.boatSpeedBonus;
+            this.eventEmitter.emit(ServerEvents.TurnEnded, { session: currentSession });
+            this.setGameTimerState(currentSession.id, TurnTimerStates.TurnTransition);
+
+            setTimeout(() => {
+                try {
+                    const sessionInTimeout = this.sessionRepository.findById(currentSession.id);
+                    if (!sessionInTimeout) {
+                        this.clearTimerForSession(currentSession.id);
+                        return;
+                    }
+
+                    const activePlayer = sessionInTimeout.inGamePlayers[newTurn.activePlayerId];
+                    if (activePlayer) {
+                        activePlayer.hasCombatBonus = activePlayer.attackBonus > 0 || activePlayer.defenseBonus > 0;
+                    }
+
+                    this.sessionRepository.updatePlayer(sessionInTimeout.id, newTurn.activePlayerId, { actionsRemaining: 1 });
+                    this.scheduleTurnTimeout(sessionInTimeout.id, timeoutMs, () => this.autoEndTurn(sessionInTimeout));
+
+                    this.eventEmitter.emit(ServerEvents.TurnTransition, { session: sessionInTimeout });
+                    this.eventEmitter.emit(ServerEvents.TurnStarted, { session: sessionInTimeout });
+                    this.setGameTimerState(sessionInTimeout.id, TurnTimerStates.PlayerTurn);
+
+                    this.triggerVirtualPlayerTurn(sessionInTimeout, newTurn.activePlayerId);
+                } catch {
+                    this.clearTimerForSession(currentSession.id);
+                }
+            }, DEFAULT_TURN_TRANSITION_DURATION);
+
+            return newTurn;
+        } catch {
+            this.clearTimerForSession(session.id);
+            throw new Error('Failed to proceed to next turn');
+        }
     }
 
     endTurnManual(session: InGameSession): void {
@@ -118,7 +147,16 @@ export class TurnTimerService {
     }
 
     private autoEndTurn(session: InGameSession): void {
-        this.nextTurn(session);
+        try {
+            const currentSession = this.sessionRepository.findById(session.id);
+            if (!currentSession) {
+                this.clearTimerForSession(session.id);
+                return;
+            }
+            this.nextTurn(currentSession);
+        } catch {
+            this.clearTimerForSession(session.id);
+        }
     }
 
     private getNextPlayer(session: InGameSession, currentId: string): string {
@@ -200,7 +238,7 @@ export class TurnTimerService {
 
     forceStopTimer(sessionId: string): void {
         const timerData = this.turnTimers.get(sessionId);
-        if (timerData?.timeout) clearTimeout(timerData.timeout);
+        if (timerData && timerData?.timeout) clearTimeout(timerData.timeout);
         this.turnTimers.delete(sessionId);
     }
 
@@ -210,13 +248,20 @@ export class TurnTimerService {
     }
 
     private triggerVirtualPlayerTurn(session: InGameSession, activePlayerId: string): void {
-        const activePlayer = session.inGamePlayers[activePlayerId];
-        if (activePlayer?.virtualPlayerType) {
-            this.eventEmitter.emit(ServerEvents.VirtualPlayerTurn, {
-                sessionId: session.id,
-                playerId: activePlayerId,
-                playerType: activePlayer.virtualPlayerType,
-            });
+        try {
+            const currentSession = this.sessionRepository.findById(session.id);
+            if (!currentSession) return;
+
+            const activePlayer = currentSession.inGamePlayers[activePlayerId];
+            if (activePlayer?.virtualPlayerType) {
+                this.eventEmitter.emit(ServerEvents.VirtualPlayerTurn, {
+                    sessionId: currentSession.id,
+                    playerId: activePlayerId,
+                    playerType: activePlayer.virtualPlayerType,
+                });
+            }
+        } catch {
+            // Silent fail - session may have been deleted
         }
     }
 }
