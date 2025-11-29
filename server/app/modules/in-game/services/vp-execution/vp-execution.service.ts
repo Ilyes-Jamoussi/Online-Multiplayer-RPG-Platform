@@ -148,12 +148,12 @@ export class VPExecutionService {
 
                 case 'healSanctuary':
                     this.gameplayService.performSanctuaryAction(sessionId, playerId, target.position, false);
-                    this.endVPTurn(sessionId, playerId);
+                    this.continueOrEndTurn(sessionId, playerId);
                     return;
 
                 case 'fightSanctuary':
                     this.gameplayService.performSanctuaryAction(sessionId, playerId, target.position, useDoubleAction);
-                    this.endVPTurn(sessionId, playerId);
+                    this.continueOrEndTurn(sessionId, playerId);
                     return;
 
                 case 'flag':

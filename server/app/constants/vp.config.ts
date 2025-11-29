@@ -157,7 +157,7 @@ export const DEFENSIVE_VP_CONFIG: VPConfig = {
 
     escape: {
         // Escape if enemy is within 5 tiles
-        enemyProximityTiles: 5,
+        enemyProximityTiles: 7,
         // Bonus per tile of distance from enemies (farther = better)
         distanceBonusPerTile: 3,
     },

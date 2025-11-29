@@ -1,3 +1,4 @@
+import { ESCAPE_MAX_DISTANCE, ESCAPE_NEARBY_RADIUS } from '@app/constants/virtual-player.constants';
 import { ExplorationContext, NeighborParams, PathNode, TileExploration } from '@app/interfaces/vp-pathfinding-internal.interface';
 import { EnemyPosition, EscapePoint, PathAction, PathResult } from '@app/interfaces/vp-pathfinding.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
@@ -7,7 +8,6 @@ import { TileCost, TileKind } from '@common/enums/tile.enum';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Injectable } from '@nestjs/common';
-
 
 const DIRECTIONS: { orientation: Orientation; dx: number; dy: number }[] = [
     { orientation: Orientation.N, dx: 0, dy: -1 },
@@ -355,51 +355,51 @@ export class VPPathfindingService {
         if (!player) return null;
 
         const mapSize = this.gameCache.getMapSize(session.id);
-        let bestEscape: EscapePoint | null = null;
+        const playerPos: Position = { x: player.x, y: player.y };
+        const currentDist = this.calculateMinDistanceFromEnemies(playerPos, enemies);
+        const samplePositions = this.getSampleEscapePositions(mapSize, playerPos, enemies);
 
-        const samplePositions = this.getSampleEscapePositions(mapSize);
+        let bestEscape: EscapePoint | null = null;
+        let fallbackEscape: EscapePoint | null = null;
 
         for (const pos of samplePositions) {
+            if (pos.x === player.x && pos.y === player.y) continue;
             const path = this.findPath(session, vpPlayerId, pos);
-            if (!path.reachable) continue;
+            if (!path.reachable || path.totalCost === 0) continue;
 
-            const minDistanceFromEnemies = this.calculateMinDistanceFromEnemies(pos, enemies);
+            const dist = this.calculateMinDistanceFromEnemies(pos, enemies);
 
-            if (!bestEscape || minDistanceFromEnemies > bestEscape.distanceFromEnemies) {
-                bestEscape = { position: pos, path, distanceFromEnemies: minDistanceFromEnemies };
+            if (dist > currentDist && (!bestEscape || dist > bestEscape.distanceFromEnemies)) {
+                bestEscape = { position: pos, path, distanceFromEnemies: dist };
+            } else if (!bestEscape && dist >= currentDist && (!fallbackEscape || dist > fallbackEscape.distanceFromEnemies)) {
+                fallbackEscape = { position: pos, path, distanceFromEnemies: dist };
             }
         }
-
-        return bestEscape;
+        return bestEscape || fallbackEscape;
     }
 
-    private getSampleEscapePositions(mapSize: number): Position[] {
+    private getSampleEscapePositions(mapSize: number, playerPos: Position, enemies: EnemyPosition[]): Position[] {
         const positions: Position[] = [];
-        const margin = 1;
-        const gridDivisor = 5;
-        const minStep = 2;
-        const step = Math.max(minStep, Math.floor(mapSize / gridDivisor));
+        const avgX = enemies.reduce((sum, e) => sum + e.position.x, 0) / enemies.length;
+        const avgY = enemies.reduce((sum, e) => sum + e.position.y, 0) / enemies.length;
+        const mag = Math.sqrt((playerPos.x - avgX) ** 2 + (playerPos.y - avgY) ** 2) || 1;
+        const nX = (playerPos.x - avgX) / mag;
+        const nY = (playerPos.y - avgY) / mag;
 
-        // Corners
-        positions.push({ x: margin, y: margin });
-        positions.push({ x: mapSize - 1 - margin, y: margin });
-        positions.push({ x: margin, y: mapSize - 1 - margin });
-        positions.push({ x: mapSize - 1 - margin, y: mapSize - 1 - margin });
+        const add = (x: number, y: number) => {
+            if (x >= 1 && x < mapSize - 1 && y >= 1 && y < mapSize - 1) positions.push({ x, y });
+        };
 
-        // Edges midpoints
-        const midPoint = Math.floor(mapSize / 2);
-        positions.push({ x: midPoint, y: margin });
-        positions.push({ x: midPoint, y: mapSize - 1 - margin });
-        positions.push({ x: margin, y: midPoint });
-        positions.push({ x: mapSize - 1 - margin, y: midPoint });
-
-        // Grid sample
-        for (let x = margin; x < mapSize - margin; x += step) {
-            for (let y = margin; y < mapSize - margin; y += step) {
-                positions.push({ x, y });
+        for (let d = 1; d <= ESCAPE_MAX_DISTANCE; d++) {
+            add(Math.round(playerPos.x + nX * d), Math.round(playerPos.y + nY * d));
+            add(Math.round(playerPos.x - nY * d), Math.round(playerPos.y + nX * d));
+            add(Math.round(playerPos.x + nY * d), Math.round(playerPos.y - nX * d));
+        }
+        for (let dx = -ESCAPE_NEARBY_RADIUS; dx <= ESCAPE_NEARBY_RADIUS; dx++) {
+            for (let dy = -ESCAPE_NEARBY_RADIUS; dy <= ESCAPE_NEARBY_RADIUS; dy++) {
+                if (dx !== 0 || dy !== 0) add(playerPos.x + dx, playerPos.y + dy);
             }
         }
-
         return positions;
     }
 

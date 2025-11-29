@@ -25,7 +25,6 @@ export interface PointOfInterestWithPath extends PointOfInterest {
 
 export interface EvaluatedTarget extends PointOfInterestWithPath {
     priorityScore: number;
-    reason: string;
 }
 
 export interface MapScanResult {

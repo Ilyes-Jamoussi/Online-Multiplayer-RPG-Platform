@@ -73,52 +73,25 @@ export class VPGameplayService {
     private evaluateEnemies(enemies: PointOfInterestWithPath[], results: EvaluatedTarget[], config: VPConfig): void {
         for (const enemy of enemies) {
             if (!enemy.path.reachable) continue;
-
             const distance = enemy.path.totalCost;
-            let score = config.priorities.attack;
-            let reason = `Base attack priority: ${score}`;
-
-            const distancePenalty = distance * config.distanceWeights.attackPenaltyPerTile;
-            score -= distancePenalty;
-            reason += `, Distance penalty: -${distancePenalty.toFixed(1)}`;
-
-            if (distance === 0) {
-                score += config.bonuses.adjacentAttackBonus;
-                reason += `, Adjacent bonus: +${config.bonuses.adjacentAttackBonus}`;
-            }
-
-            results.push({ ...enemy, priorityScore: Math.max(0, score), reason });
+            let score = config.priorities.attack - distance * config.distanceWeights.attackPenaltyPerTile;
+            if (distance === 0) score += config.bonuses.adjacentAttackBonus;
+            results.push({ ...enemy, priorityScore: Math.max(0, score) });
         }
     }
 
     private evaluateHealSanctuaries(sanctuaries: PointOfInterestWithPath[], player: Player, results: EvaluatedTarget[], config: VPConfig): void {
         const healthPercent = player.health / player.maxHealth;
-
         if (healthPercent >= config.health.healThreshold) return;
 
         for (const sanctuary of sanctuaries) {
             if (!sanctuary.path.reachable) continue;
-
             const distance = sanctuary.path.totalCost;
-
             if (distance > config.maxDistances.maxHealDistance) continue;
 
-            let score = config.priorities.heal;
-            let reason = `Base heal priority: ${score}`;
-
-            const distancePenalty = distance * config.distanceWeights.healPenaltyPerTile;
-            score -= distancePenalty;
-            reason += `, Distance penalty: -${distancePenalty.toFixed(1)}`;
-
-            score += config.bonuses.lowHealthHealBonus;
-            reason += `, Low health bonus: +${config.bonuses.lowHealthHealBonus}`;
-
-            if (healthPercent < config.health.criticalHealthThreshold) {
-                score += config.bonuses.criticalHealthHealBonus;
-                reason += `, CRITICAL health bonus: +${config.bonuses.criticalHealthHealBonus}`;
-            }
-
-            results.push({ ...sanctuary, priorityScore: Math.max(0, score), reason });
+            let score = config.priorities.heal - distance * config.distanceWeights.healPenaltyPerTile + config.bonuses.lowHealthHealBonus;
+            if (healthPercent < config.health.criticalHealthThreshold) score += config.bonuses.criticalHealthHealBonus;
+            results.push({ ...sanctuary, priorityScore: Math.max(0, score) });
         }
     }
 
@@ -127,22 +100,14 @@ export class VPGameplayService {
 
         for (const sanctuary of sanctuaries) {
             if (!sanctuary.path.reachable) continue;
-
             const distance = sanctuary.path.totalCost;
-
             if (distance > config.maxDistances.maxFightSanctuaryDistance) continue;
 
-            let score = config.priorities.fightSanctuary;
-            let reason = `Base fight sanctuary priority: ${score}`;
-
-            const distancePenalty = distance * config.distanceWeights.fightSanctuaryPenaltyPerTile;
-            score -= distancePenalty;
-            reason += `, Distance penalty: -${distancePenalty.toFixed(1)}`;
-
-            score += config.bonuses.noBonusFightSanctuaryBonus;
-            reason += `, No current buffs bonus: +${config.bonuses.noBonusFightSanctuaryBonus}`;
-
-            results.push({ ...sanctuary, priorityScore: Math.max(0, score), reason });
+            const score =
+                config.priorities.fightSanctuary -
+                distance * config.distanceWeights.fightSanctuaryPenaltyPerTile +
+                config.bonuses.noBonusFightSanctuaryBonus;
+            results.push({ ...sanctuary, priorityScore: Math.max(0, score) });
         }
     }
 
@@ -159,31 +124,16 @@ export class VPGameplayService {
             (nearest, enemy) => (enemy.path.reachable && enemy.path.totalCost < nearest ? enemy.path.totalCost : nearest),
             Infinity,
         );
-
         if (nearestEnemy > config.escape.enemyProximityTiles) return;
 
         const escapePoint = this.pathfindingService.findBestEscapePoint(session, vpPlayerId, enemies);
         if (!escapePoint) return;
 
-        let score = config.priorities.escape;
-        let reason = `Base escape priority: ${score}`;
-
-        score += config.bonuses.escapeWhenEnemyCloseBonus;
-        reason += `, Enemy close bonus: +${config.bonuses.escapeWhenEnemyCloseBonus}`;
-
-        const distanceBonus = escapePoint.distanceFromEnemies * config.escape.distanceBonusPerTile;
-        score += distanceBonus;
-        reason += `, Distance from enemies bonus: +${distanceBonus.toFixed(1)}`;
-
-        const escapeTarget: EvaluatedTarget = {
-            type: 'escape',
-            position: escapePoint.position,
-            path: escapePoint.path,
-            priorityScore: Math.max(0, score),
-            reason,
-        };
-
-        results.push(escapeTarget);
+        const score =
+            config.priorities.escape +
+            config.bonuses.escapeWhenEnemyCloseBonus +
+            escapePoint.distanceFromEnemies * config.escape.distanceBonusPerTile;
+        results.push({ type: 'escape', position: escapePoint.position, path: escapePoint.path, priorityScore: Math.max(0, score) });
     }
 
     scanMapForPointsOfInterest(session: InGameSession, vpPlayerId: string): MapScanResult {

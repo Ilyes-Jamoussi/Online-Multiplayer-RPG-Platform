@@ -1,3 +1,4 @@
+import { RETURN_FLAG_SEARCH_RADIUS } from '@app/constants/virtual-player.constants';
 import { VPConfig } from '@app/interfaces/vp-config.interface';
 import { EvaluatedTarget, MapScanWithDistances, PointOfInterestWithPath } from '@app/interfaces/vp-gameplay.interface';
 import { PathResult } from '@app/interfaces/vp-pathfinding.interface';
@@ -57,12 +58,7 @@ export class VPCTFService {
         return true;
     }
 
-    private evaluateReturnFlag(
-        session: InGameSession,
-        vpPlayerId: string,
-        results: EvaluatedTarget[],
-        config: VPConfig,
-    ): void {
+    private evaluateReturnFlag(session: InGameSession, vpPlayerId: string, results: EvaluatedTarget[], config: VPConfig): void {
         const vpPlayer = session.inGamePlayers[vpPlayerId];
         if (!vpPlayer) return;
 
@@ -70,128 +66,88 @@ export class VPCTFService {
         if (!startPoint) return;
 
         const returnPosition: Position = { x: startPoint.x, y: startPoint.y };
-        const path = this.pathfindingService.findPath(session, vpPlayerId, returnPosition);
+        let path = this.pathfindingService.findPath(session, vpPlayerId, returnPosition);
 
-        if (!path.reachable) return;
+        if (!path.reachable) {
+            path = this.findBestPathToAdjacent(session, vpPlayerId, returnPosition);
+        }
 
-        const distance = path.totalCost;
+        if (!path.reachable) {
+            path = this.findClosestReachableTowards(session, vpPlayerId, returnPosition);
+        }
+
+        if (!path.reachable || path.actions.length === 0) return;
+
         const returnFlagPriority = 200;
+        const score = returnFlagPriority - path.totalCost * config.distanceWeights.flagPenaltyPerTile;
+        results.push({ type: 'returnFlag', position: path.destination, path, priorityScore: Math.max(1, score) });
+    }
 
-        let score = returnFlagPriority;
-        let reason = `HOLDING FLAG - Return to start point priority: ${score}`;
+    private findClosestReachableTowards(session: InGameSession, vpPlayerId: string, target: Position): PathResult {
+        const player = session.inGamePlayers[vpPlayerId];
+        if (!player) return this.createUnreachableResult(target);
 
-        const distancePenalty = distance * config.distanceWeights.flagPenaltyPerTile;
-        score -= distancePenalty;
-        reason += `, Distance penalty: -${distancePenalty.toFixed(1)}`;
+        const playerPos: Position = { x: player.x, y: player.y };
+        let bestPath: PathResult | null = null;
+        let bestDistanceToTarget = Infinity;
 
-        const target: EvaluatedTarget = {
-            type: 'returnFlag',
-            position: returnPosition,
-            path,
-            priorityScore: Math.max(0, score),
-            reason,
-        };
+        for (let dx = -RETURN_FLAG_SEARCH_RADIUS; dx <= RETURN_FLAG_SEARCH_RADIUS; dx++) {
+            for (let dy = -RETURN_FLAG_SEARCH_RADIUS; dy <= RETURN_FLAG_SEARCH_RADIUS; dy++) {
+                if (dx === 0 && dy === 0) continue;
+                const pos: Position = { x: playerPos.x + dx, y: playerPos.y + dy };
+                const path = this.pathfindingService.findPath(session, vpPlayerId, pos);
+                if (!path.reachable || path.actions.length === 0) continue;
 
-        results.push(target);
+                const distToTarget = Math.abs(pos.x - target.x) + Math.abs(pos.y - target.y);
+                const currentDist = Math.abs(playerPos.x - target.x) + Math.abs(playerPos.y - target.y);
+
+                if (distToTarget < currentDist && distToTarget < bestDistanceToTarget) {
+                    bestDistanceToTarget = distToTarget;
+                    bestPath = path;
+                }
+            }
+        }
+
+        return bestPath || this.createUnreachableResult(target);
     }
 
     private evaluateDroppedFlag(flags: PointOfInterestWithPath[], results: EvaluatedTarget[], config: VPConfig): void {
         for (const flag of flags) {
-            if (!flag.path.reachable) continue;
-            if (flag.isHeld) continue;
-
+            if (!flag.path.reachable || flag.isHeld) continue;
             const distance = flag.path.totalCost;
             if (distance > config.maxDistances.maxFlagDistance) continue;
-
-            let score = config.priorities.flag;
-            let reason = `Base dropped flag priority: ${score}`;
-
-            const distancePenalty = distance * config.distanceWeights.flagPenaltyPerTile;
-            score -= distancePenalty;
-            reason += `, Distance penalty: -${distancePenalty.toFixed(1)}`;
-
-            results.push({ ...flag, priorityScore: Math.max(0, score), reason });
+            const score = config.priorities.flag - distance * config.distanceWeights.flagPenaltyPerTile;
+            results.push({ ...flag, priorityScore: Math.max(0, score) });
         }
     }
 
-    private evaluateFlagCarrier(
-        session: InGameSession,
-        vpPlayerId: string,
-        flagCarrier: Player,
-        results: EvaluatedTarget[],
-        config: VPConfig,
-    ): void {
+    private evaluateFlagCarrier(session: InGameSession, vpPlayerId: string, flagCarrier: Player, results: EvaluatedTarget[], config: VPConfig): void {
         const carrierPosition: Position = { x: flagCarrier.x, y: flagCarrier.y };
         const path = this.findBestPathToAdjacent(session, vpPlayerId, carrierPosition);
-
         if (!path.reachable) return;
 
         const distance = path.totalCost;
         if (distance > config.flag.maxChaseFlagCarrierDistance) return;
 
-        let score = config.flag.chaseFlagCarrierPriority;
-        let reason = `Base chase flag carrier priority: ${score}`;
-
-        const distancePenalty = distance * config.flag.chaseFlagCarrierPenaltyPerTile;
-        score -= distancePenalty;
-        reason += `, Distance penalty: -${distancePenalty.toFixed(1)}`;
-
-        score += config.flag.chaseFlagCarrierBonus;
-        reason += `, Chase bonus: +${config.flag.chaseFlagCarrierBonus}`;
-
-        const target: EvaluatedTarget = {
-            type: 'flagCarrier',
-            position: carrierPosition,
-            playerId: flagCarrier.id,
-            path,
-            priorityScore: Math.max(0, score),
-            reason,
-        };
-
-        results.push(target);
+        const score =
+            config.flag.chaseFlagCarrierPriority - distance * config.flag.chaseFlagCarrierPenaltyPerTile + config.flag.chaseFlagCarrierBonus;
+        results.push({ type: 'flagCarrier', position: carrierPosition, playerId: flagCarrier.id, path, priorityScore: Math.max(0, score) });
     }
 
-    private evaluateGuardPoint(
-        session: InGameSession,
-        vpPlayerId: string,
-        flagCarrier: Player,
-        results: EvaluatedTarget[],
-        config: VPConfig,
-    ): void {
+    private evaluateGuardPoint(session: InGameSession, vpPlayerId: string, flagCarrier: Player, results: EvaluatedTarget[], config: VPConfig): void {
         const startPoint = session.startPoints.find((sp) => sp.playerId === flagCarrier.id);
         if (!startPoint) return;
 
         const guardPosition: Position = { x: startPoint.x, y: startPoint.y };
         let path = this.pathfindingService.findPath(session, vpPlayerId, guardPosition);
-
-        if (!path.reachable) {
-            path = this.findBestPathToAdjacent(session, vpPlayerId, guardPosition);
-        }
-
+        if (!path.reachable) path = this.findBestPathToAdjacent(session, vpPlayerId, guardPosition);
         if (!path.reachable) return;
 
         const distance = path.totalCost;
         if (distance > config.flag.maxGuardStartPointDistance) return;
 
-        let score = config.flag.guardStartPointPriority;
-        let reason = `Base guard start point priority: ${score}`;
-
-        const distancePenalty = distance * config.flag.guardStartPointPenaltyPerTile;
-        score -= distancePenalty;
-        reason += `, Distance penalty: -${distancePenalty.toFixed(1)}`;
-
-        score += config.flag.guardStartPointBonus;
-        reason += `, Guard bonus: +${config.flag.guardStartPointBonus}`;
-
-        const target: EvaluatedTarget = {
-            type: 'guardPoint',
-            position: guardPosition,
-            path,
-            priorityScore: Math.max(0, score),
-            reason,
-        };
-
-        results.push(target);
+        const score = config.flag.guardStartPointPriority - distance * config.flag.guardStartPointPenaltyPerTile + config.flag.guardStartPointBonus;
+        results.push({ type: 'guardPoint', position: guardPosition, path, priorityScore: Math.max(0, score) });
     }
 
     private findBestPathToAdjacent(session: InGameSession, vpPlayerId: string, targetPosition: Position): PathResult {
@@ -269,4 +225,3 @@ export class VPCTFService {
         };
     }
 }
-
