@@ -24,7 +24,7 @@ export class InGameService {
     ) {}
 
     async createInGameSession(waiting: WaitingRoomSession, mode: GameMode): Promise<InGameSession> {
-        const { id, gameId, maxPlayers, players } = waiting;
+        const { id, gameId, maxPlayers, players, chatId } = waiting;
         const isCtf = mode === GameMode.CTF;
         const game = await this.gameplayService.fetchAndCacheGame(id, gameId);
 
@@ -52,6 +52,7 @@ export class InGameService {
             isAdminModeActive: false,
             teams,
             flagData: isCtf ? this.gameplayService.getInitialFlagData(id) : undefined,
+            chatId,
         };
 
         const totalDoors = game.tiles.filter((tile) => tile.kind === TileKind.DOOR).length;

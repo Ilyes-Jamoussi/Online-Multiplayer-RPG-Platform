@@ -17,13 +17,13 @@ export interface BaseSession {
     gameId: string;
     maxPlayers: number;
     mode: GameMode;
+    chatId: string;
 }
 
 export interface WaitingRoomSession extends BaseSession {
     players: Player[];
     avatarAssignments: AvatarAssignment[];
     isRoomLocked: boolean;
-    chatId: string;
 }
 
 export interface InGameSession extends BaseSession {
