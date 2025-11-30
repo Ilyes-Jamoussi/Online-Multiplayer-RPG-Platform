@@ -14,7 +14,6 @@ import { Player } from '@common/interfaces/player.interface';
 import { AvatarAssignment } from '@common/interfaces/session.interface';
 import { CharacterCreationPageComponent } from './character-creation-page.component';
 
-// Test constants
 const TEST_PLAYER_ID = 'test-player-id';
 const TEST_PLAYER_NAME = 'Test Player';
 const TEST_PLAYER_HEALTH = 4;

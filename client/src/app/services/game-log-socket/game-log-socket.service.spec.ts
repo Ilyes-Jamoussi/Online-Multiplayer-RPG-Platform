@@ -1,13 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { SocketService } from '@app/services/socket/socket.service';
-import { GameLogEventType } from '@common/enums/game-log-event-type.enum';
+import { GameLogEntryType } from '@common/enums/game-log-entry-type.enum';
 import { GameLogEvents } from '@common/enums/game-log-events.enum';
 import { GameLogEntry } from '@common/interfaces/game-log-entry.interface';
 import { SocketResponse } from '@common/types/socket-response.type';
 import { of } from 'rxjs';
 import { GameLogSocketService } from './game-log-socket.service';
 
-// Test constants
 const TEST_LOG_ENTRY_ID = 'test-log-entry-id';
 const TEST_TIMESTAMP = '2024-01-01T00:00:00Z';
 const TEST_MESSAGE = 'Test log message';
@@ -23,7 +22,7 @@ type MockSocketService = {
 const createMockGameLogEntry = (): GameLogEntry => ({
     id: TEST_LOG_ENTRY_ID,
     timestamp: TEST_TIMESTAMP,
-    type: GameLogEventType.TurnStart,
+    type: GameLogEntryType.TurnStart,
     message: TEST_MESSAGE,
     involvedPlayerIds: [TEST_INVOLVED_PLAYER_ID_1, TEST_INVOLVED_PLAYER_ID_2],
     involvedPlayerNames: [TEST_INVOLVED_PLAYER_NAME_1, TEST_INVOLVED_PLAYER_NAME_2],
@@ -94,7 +93,7 @@ describe('GameLogSocketService', () => {
             const differentLogEntry: GameLogEntry = {
                 id: 'different-log-entry-id',
                 timestamp: '2024-01-02T00:00:00Z',
-                type: GameLogEventType.CombatStart,
+                type: GameLogEntryType.CombatStart,
                 message: 'Different message',
                 involvedPlayerIds: [TEST_INVOLVED_PLAYER_ID_1],
                 involvedPlayerNames: [TEST_INVOLVED_PLAYER_NAME_1],

@@ -2,11 +2,10 @@ import { signal, Signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FaIcons } from '@app/enums/fa-icons.enum';
 import { GameLogService } from '@app/services/game-log/game-log.service';
-import { GameLogEventType } from '@common/enums/game-log-event-type.enum';
+import { GameLogEntryType } from '@common/enums/game-log-entry-type.enum';
 import { GameLogEntry } from '@common/interfaces/game-log-entry.interface';
 import { GameLogComponent } from './game-log.component';
 
-// Test constants
 const TEST_ENTRY_ID_1 = 'entry-id-1';
 const TEST_ENTRY_ID_2 = 'entry-id-2';
 const TEST_TIMESTAMP_1 = '2024-01-01T12:30:45.000Z';
@@ -34,7 +33,7 @@ const createMockGameLogEntry = (
 ): GameLogEntry => ({
     id,
     timestamp,
-    type: GameLogEventType.TurnStart,
+    type: GameLogEntryType.TurnStart,
     message,
     involvedPlayerIds: TEST_INVOLVED_PLAYER_IDS,
     involvedPlayerNames: TEST_INVOLVED_PLAYER_NAMES,

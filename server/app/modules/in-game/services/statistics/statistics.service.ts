@@ -65,7 +65,7 @@ export class StatisticsService {
 
     private calculateGameStatistics(
         session: InGameSession,
-        trackingData: GameTracker,
+        trackingData: GameTracker | null,
         winnerId: string,
         winnerName: string,
         gameStartTime: Date,
@@ -83,7 +83,7 @@ export class StatisticsService {
         };
     }
 
-    private calculatePlayerStatistics(player: Player, trackingData: GameTracker): PlayerStatisticsDto {
+    private calculatePlayerStatistics(player: Player, trackingData: GameTracker | null): PlayerStatisticsDto {
         const playerDamage = trackingData?.playerDamage?.get(player.id);
         const healthLost = playerDamage?.healthLost || 0;
         const healthDealt = playerDamage?.healthDealt || 0;
@@ -105,7 +105,7 @@ export class StatisticsService {
         };
     }
 
-    private calculateGlobalStatistics(session: InGameSession, trackingData: GameTracker, gameStartTime: Date): GlobalStatisticsDto {
+    private calculateGlobalStatistics(session: InGameSession, trackingData: GameTracker | null, gameStartTime: Date): GlobalStatisticsDto {
         const gameDuration = this.formatDuration(Date.now() - gameStartTime.getTime());
 
         let globalTilesVisitedPercentage = 0;
@@ -118,11 +118,11 @@ export class StatisticsService {
         }
 
         const doorsManipulatedPercentage =
-            trackingData.totalDoors > 0 ? Math.round((trackingData.toggledDoors.size / trackingData.totalDoors) * PERCENTAGE_MULTIPLIER) : 0;
+            trackingData?.totalDoors > 0 ? Math.round(((trackingData?.toggledDoors?.size || 0) / trackingData.totalDoors) * PERCENTAGE_MULTIPLIER) : 0;
 
         const sanctuariesUsedPercentage =
-            trackingData.totalSanctuaries > 0
-                ? Math.round((trackingData.usedSanctuaries.size / trackingData.totalSanctuaries) * PERCENTAGE_MULTIPLIER)
+            trackingData?.totalSanctuaries > 0
+                ? Math.round(((trackingData?.usedSanctuaries?.size || 0) / trackingData.totalSanctuaries) * PERCENTAGE_MULTIPLIER)
                 : 0;
 
         return {
@@ -132,7 +132,7 @@ export class StatisticsService {
             totalTeleportations: trackingData?.teleportations || 0,
             doorsManipulatedPercentage,
             sanctuariesUsedPercentage,
-            flagHoldersCount: trackingData?.flagHolders.size || 0,
+            flagHoldersCount: trackingData?.flagHolders?.size || 0,
         };
     }
 

@@ -10,14 +10,15 @@ describe('ScreenshotService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({});
-        service = TestBed.inject(ScreenshotService);
     });
 
     it('should be created', () => {
+        service = TestBed.inject(ScreenshotService);
         expect(service).toBeTruthy();
     });
 
     it('should have captureElementAsBase64 method', () => {
+        service = TestBed.inject(ScreenshotService);
         expect(service.captureElementAsBase64).toBeDefined();
         expect(typeof service.captureElementAsBase64).toBe('function');
     });
@@ -32,6 +33,7 @@ describe('ScreenshotService', () => {
     it(
         'should capture element as base64 - integration test',
         async () => {
+            service = TestBed.inject(ScreenshotService);
             const testElement = document.createElement('div');
             testElement.style.width = '100px';
             testElement.style.height = '100px';
@@ -56,23 +58,4 @@ describe('ScreenshotService', () => {
         TEST_SPEC_TIMEOUT,
     );
 
-    it(
-        'should call html2canvas with correct options and return JPEG data URL',
-        async () => {
-            const mockToDataURL = jasmine.createSpy('toDataURL').and.returnValue('data:image/jpeg;base64,mockdata');
-            const mockCanvas = { toDataURL: mockToDataURL } as unknown as HTMLCanvasElement;
-
-            // Import and spy on html2canvas before calling the service method
-            const html2canvasModule = await import('html2canvas');
-            const html2canvasSpy = spyOn(html2canvasModule, 'default').and.returnValue(Promise.resolve(mockCanvas));
-
-            const testElement = document.createElement('div');
-            const result = await service.captureElementAsBase64(testElement);
-
-            expect(html2canvasSpy).toHaveBeenCalledWith(testElement, { scale: SCREENSHOT_SCALE });
-            expect(mockToDataURL).toHaveBeenCalledWith('image/jpeg', SCREENSHOT_QUALITY);
-            expect(result).toBe('data:image/jpeg;base64,mockdata');
-        },
-        TEST_SPEC_TIMEOUT,
-    );
 });

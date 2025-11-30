@@ -65,7 +65,11 @@ describe('EditorPageComponent', () => {
         mockGameEditorCheckService = jasmine.createSpyObj('GameEditorCheckService', ['canSave']);
         mockNotificationService = jasmine.createSpyObj('NotificationService', ['displaySuccessPopup', 'displayErrorPopup']);
 
-        mockGameEditorInteractionsService = jasmine.createSpyObj('GameEditorInteractionsService', ['removeObject', 'dragEnd']);
+        mockGameEditorInteractionsService = jasmine.createSpyObj('GameEditorInteractionsService', [
+            'removeObject',
+            'dragEnd',
+            'cancelTeleportPlacement',
+        ]);
         Object.defineProperty(mockGameEditorInteractionsService, 'activeTool', {
             value: null,
             writable: true,
@@ -322,5 +326,114 @@ describe('EditorPageComponent', () => {
         component.onMouseOver(evt);
 
         expect(mockGameEditorInteractionsService.dragEnd).not.toHaveBeenCalled();
+    });
+
+    describe('onKeyDown', () => {
+        const ESCAPE_KEY = 'Escape';
+        const OTHER_KEY = 'Enter';
+
+        it('should cancel teleport placement when Escape key is pressed and TeleportTileTool is active', () => {
+            mockGameEditorInteractionsService.activeTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } },
+            };
+            const mockEvent = {
+                key: ESCAPE_KEY,
+            } as KeyboardEvent;
+
+            component.onKeyDown(mockEvent);
+
+            expect(mockGameEditorInteractionsService.cancelTeleportPlacement).toHaveBeenCalled();
+        });
+
+        it('should not cancel teleport placement when Escape key is pressed but TeleportTileTool is not active', () => {
+            mockGameEditorInteractionsService.activeTool = {
+                type: ToolType.TileBrushTool,
+                tileKind: TileKind.BASE,
+                leftDrag: false,
+                rightDrag: false,
+            };
+            const mockEvent = {
+                key: ESCAPE_KEY,
+            } as KeyboardEvent;
+
+            component.onKeyDown(mockEvent);
+
+            expect(mockGameEditorInteractionsService.cancelTeleportPlacement).not.toHaveBeenCalled();
+        });
+
+        it('should not cancel teleport placement when other key is pressed and TeleportTileTool is active', () => {
+            mockGameEditorInteractionsService.activeTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } },
+            };
+            const mockEvent = {
+                key: OTHER_KEY,
+            } as KeyboardEvent;
+
+            component.onKeyDown(mockEvent);
+
+            expect(mockGameEditorInteractionsService.cancelTeleportPlacement).not.toHaveBeenCalled();
+        });
+
+        it('should not cancel teleport placement when activeTool is null', () => {
+            mockGameEditorInteractionsService.activeTool = null;
+            const mockEvent = {
+                key: ESCAPE_KEY,
+            } as KeyboardEvent;
+
+            component.onKeyDown(mockEvent);
+
+            expect(mockGameEditorInteractionsService.cancelTeleportPlacement).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('onRightClick', () => {
+        it('should prevent default and cancel teleport placement when TeleportTileTool is active', () => {
+            mockGameEditorInteractionsService.activeTool = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } },
+            };
+            const mockEvent = {
+                preventDefault: jasmine.createSpy(),
+            } as unknown as MouseEvent;
+
+            component.onRightClick(mockEvent);
+
+            expect(mockEvent.preventDefault).toHaveBeenCalled();
+            expect(mockGameEditorInteractionsService.cancelTeleportPlacement).toHaveBeenCalled();
+        });
+
+        it('should prevent default but not cancel teleport placement when TeleportTileTool is not active', () => {
+            mockGameEditorInteractionsService.activeTool = {
+                type: ToolType.TileBrushTool,
+                tileKind: TileKind.BASE,
+                leftDrag: false,
+                rightDrag: false,
+            };
+            const mockEvent = {
+                preventDefault: jasmine.createSpy(),
+            } as unknown as MouseEvent;
+
+            component.onRightClick(mockEvent);
+
+            expect(mockEvent.preventDefault).toHaveBeenCalled();
+            expect(mockGameEditorInteractionsService.cancelTeleportPlacement).not.toHaveBeenCalled();
+        });
+
+        it('should prevent default but not cancel teleport placement when activeTool is null', () => {
+            mockGameEditorInteractionsService.activeTool = null;
+            const mockEvent = {
+                preventDefault: jasmine.createSpy(),
+            } as unknown as MouseEvent;
+
+            component.onRightClick(mockEvent);
+
+            expect(mockEvent.preventDefault).toHaveBeenCalled();
+            expect(mockGameEditorInteractionsService.cancelTeleportPlacement).not.toHaveBeenCalled();
+        });
     });
 });

@@ -3,17 +3,29 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { TeamColor } from '@app/enums/team-color.enum';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { GameMapComponent } from './game-map.component';
-
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { FlagData } from '@common/interfaces/flag-data.interface';
 import { Player } from '@common/interfaces/player.interface';
+import { GameMapComponent } from './game-map.component';
 
 const TEST_MAP_SIZE = 10;
+const MOCK_TEAM_NUMBER_2 = 2;
+const MOCK_PLACEABLE_ID = 'placeable1';
+const MOCK_TURN_COUNT = 3;
+const MOCK_BORDER_WIDTH = '3px';
+const MOCK_BOX_SHADOW_BLUR = 15;
+const MOCK_BOX_SHADOW_OFFSET_Y_SECOND = 2;
+const MOCK_BOX_SHADOW_BLUR_SECOND = 4;
+const MOCK_RGBA_R = 0;
+const MOCK_RGBA_G = 0;
+const MOCK_RGBA_B = 0;
+const MOCK_RGBA_A = 0.5;
 
 describe('GameMapComponent', () => {
     let component: GameMapComponent;
@@ -64,17 +76,21 @@ describe('GameMapComponent', () => {
     };
 
     beforeEach(async () => {
-        mockGameMapService = jasmine.createSpyObj('GameMapService', ['loadGameMap', 'getTileClass', 'getAvatarByPlayerId'], {
-            currentlyPlayers: [mockPlayer],
-            tiles: signal([]),
-            objects: signal([mockObject]),
-            size: signal(TEST_MAP_SIZE),
-            visibleObjects: signal([mockObject]),
-        });
+        mockGameMapService = jasmine.createSpyObj(
+            'GameMapService',
+            ['loadGameMap', 'getTileClass', 'getAvatarByPlayerId', 'flagData', 'isPlaceableDisabled', 'getPlaceableTurnCount'],
+            {
+                currentlyPlayers: [mockPlayer],
+                tiles: signal([]),
+                objects: signal([mockObject]),
+                size: signal(TEST_MAP_SIZE),
+                visibleObjects: signal([mockObject]),
+            },
+        );
 
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getTileImage', 'getPlaceableImage']);
 
-        mockPlayerService = jasmine.createSpyObj('PlayerService', [], {
+        mockPlayerService = jasmine.createSpyObj('PlayerService', ['getTeamColor'], {
             id: signal('player1'),
         });
 
@@ -210,6 +226,106 @@ describe('GameMapComponent', () => {
         it('should return false when player is not current user', () => {
             const otherPlayer = { ...mockPlayer, id: 'player2' };
             expect(component.isCurrentUser(otherPlayer)).toBe(false);
+        });
+    });
+
+    describe('getTeamColor', () => {
+        it('should return undefined when player is current user', () => {
+            const result = component.getTeamColor(mockPlayer);
+            expect(result).toBeUndefined();
+        });
+
+        it('should return team color when player is not current user', () => {
+            const otherPlayer = { ...mockPlayer, id: 'player2', teamNumber: MOCK_TEAM_NUMBER_2 };
+            mockPlayerService.getTeamColor.and.returnValue(TeamColor.EnemyTeam);
+            const result = component.getTeamColor(otherPlayer);
+            expect(result).toBe(TeamColor.EnemyTeam);
+            expect(mockPlayerService.getTeamColor).toHaveBeenCalledWith(MOCK_TEAM_NUMBER_2);
+        });
+    });
+
+    describe('getPlayerBorderStyle', () => {
+        it('should return empty object when player is current user', () => {
+            const result = component.getPlayerBorderStyle(mockPlayer);
+            expect(result).toEqual({});
+        });
+
+        it('should return empty object when team color is undefined', () => {
+            const otherPlayer = { ...mockPlayer, id: 'player2', teamNumber: MOCK_TEAM_NUMBER_2 };
+            mockPlayerService.getTeamColor.and.returnValue(undefined);
+            const result = component.getPlayerBorderStyle(otherPlayer);
+            expect(result).toEqual({});
+        });
+
+        it('should return border style when team color exists', () => {
+            const otherPlayer = { ...mockPlayer, id: 'player2', teamNumber: MOCK_TEAM_NUMBER_2 };
+            mockPlayerService.getTeamColor.and.returnValue(TeamColor.EnemyTeam);
+            const result = component.getPlayerBorderStyle(otherPlayer);
+            expect(result).toEqual({
+                'border-color': TeamColor.EnemyTeam,
+                'border-width': MOCK_BORDER_WIDTH,
+                'box-shadow': `0 0 ${MOCK_BOX_SHADOW_BLUR}px ${TeamColor.EnemyTeam}, 0 ${MOCK_BOX_SHADOW_OFFSET_Y_SECOND}px ${MOCK_BOX_SHADOW_BLUR_SECOND}px rgba(${MOCK_RGBA_R}, ${MOCK_RGBA_G}, ${MOCK_RGBA_B}, ${MOCK_RGBA_A})`,
+            });
+        });
+    });
+
+    describe('hasFlag', () => {
+        it('should return false when flag data is null', () => {
+            mockGameMapService.flagData.and.returnValue(undefined);
+            const result = component.hasFlag(mockPlayer);
+            expect(result).toBe(false);
+        });
+
+        it('should return false when flag holder is different player', () => {
+            const flagData: FlagData = {
+                position: { x: 0, y: 0 },
+                holderPlayerId: 'player2',
+            };
+            mockGameMapService.flagData.and.returnValue(flagData);
+            const result = component.hasFlag(mockPlayer);
+            expect(result).toBe(false);
+        });
+
+        it('should return true when flag holder matches player', () => {
+            const flagData: FlagData = {
+                position: { x: 0, y: 0 },
+                holderPlayerId: mockPlayer.id,
+            };
+            mockGameMapService.flagData.and.returnValue(flagData);
+            const result = component.hasFlag(mockPlayer);
+            expect(result).toBe(true);
+        });
+    });
+
+    describe('isPlaceableDisabled', () => {
+        it('should return false when placeable is not disabled', () => {
+            mockGameMapService.isPlaceableDisabled.and.returnValue(false);
+            const result = component.isPlaceableDisabled(MOCK_PLACEABLE_ID);
+            expect(result).toBe(false);
+            expect(mockGameMapService.isPlaceableDisabled).toHaveBeenCalledWith(MOCK_PLACEABLE_ID);
+        });
+
+        it('should return true when placeable is disabled', () => {
+            mockGameMapService.isPlaceableDisabled.and.returnValue(true);
+            const result = component.isPlaceableDisabled(MOCK_PLACEABLE_ID);
+            expect(result).toBe(true);
+            expect(mockGameMapService.isPlaceableDisabled).toHaveBeenCalledWith(MOCK_PLACEABLE_ID);
+        });
+    });
+
+    describe('getPlaceableTurnCount', () => {
+        it('should return null when placeable has no turn count', () => {
+            mockGameMapService.getPlaceableTurnCount.and.returnValue(null);
+            const result = component.getPlaceableTurnCount(MOCK_PLACEABLE_ID);
+            expect(result).toBeNull();
+            expect(mockGameMapService.getPlaceableTurnCount).toHaveBeenCalledWith(MOCK_PLACEABLE_ID);
+        });
+
+        it('should return turn count when placeable has turn count', () => {
+            mockGameMapService.getPlaceableTurnCount.and.returnValue(MOCK_TURN_COUNT);
+            const result = component.getPlaceableTurnCount(MOCK_PLACEABLE_ID);
+            expect(result).toBe(MOCK_TURN_COUNT);
+            expect(mockGameMapService.getPlaceableTurnCount).toHaveBeenCalledWith(MOCK_PLACEABLE_ID);
         });
     });
 });

@@ -8,7 +8,6 @@ import { GameEditorStoreService } from '@app/services/game-editor-store/game-edi
 import { TileKind } from '@common/enums/tile.enum';
 import { GameEditorTeleportService } from './game-editor-teleport.service';
 
-// Test constants
 const TEST_CHANNEL_NUMBER_1 = 1;
 const TEST_CHANNEL_NUMBER_2 = 2;
 const TEST_CHANNEL_NUMBER_3 = 3;

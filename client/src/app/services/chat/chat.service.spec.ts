@@ -7,7 +7,6 @@ import { ResetService } from '@app/services/reset/reset.service';
 import { SessionService } from '@app/services/session/session.service';
 import { ChatService } from './chat.service';
 
-// Test constants
 const TEST_CHAT_ID = 'test-chat-id';
 const TEST_PLAYER_NAME = 'Test Player';
 const TEST_MESSAGE_CONTENT_1 = 'Hello, world!';

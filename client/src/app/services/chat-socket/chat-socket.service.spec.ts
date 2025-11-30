@@ -6,7 +6,6 @@ import { ChatEvents } from '@common/enums/chat-events.enum';
 import { ChatMessage } from '@common/interfaces/chat-message.interface';
 import { ChatSocketService } from './chat-socket.service';
 
-// Test constants
 const TEST_CHAT_ID = 'test-chat-id';
 const TEST_AUTHOR_NAME = 'Test Author';
 const TEST_MESSAGE_CONTENT = 'Test message content';

@@ -1,877 +1,1321 @@
-/* eslint-disable max-lines -- Test file with comprehensive test coverage */
+import { ServerEvents } from '@app/enums/server-events.enum';
 import { Game } from '@app/modules/game-store/entities/game.entity';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { Tile } from '@app/modules/game-store/entities/tile.entity';
-import { GameDocument } from '@app/types/mongoose-documents.types';
+import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { Position } from '@common/interfaces/position.interface';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { getModelToken } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Model, Types } from 'mongoose';
 import { GameCacheService } from './game-cache.service';
 
-describe('GameCacheService', () => {
-    let service: GameCacheService;
-    const mockModel: Record<string, unknown> = {};
-    const mockEventEmitter = {
-        emit: jest.fn(),
-    } as unknown as EventEmitter2;
+const MOCK_SESSION_ID = 'session-123';
+const MOCK_GAME_ID = 'game-123';
+const MOCK_PLAYER_ID = 'player-123';
+const MOCK_PLACEABLE_ID = 'placeable-123';
+const MOCK_X = 5;
+const MOCK_Y = 10;
+const MOCK_X_2 = 6;
+const MOCK_Y_2 = 11;
+const MOCK_TELEPORT_CHANNEL = 1;
+const MOCK_TURN_COUNT = 2;
+const MOCK_DECREMENTED_TURN_COUNT = 1;
+const MOCK_OFFSET_X = 0;
+const MOCK_OFFSET_Y = 0;
+const MOCK_OFFSET_X_2 = 1;
+const MOCK_OFFSET_Y_2 = 1;
+const MOCK_INDEX = 155;
+const MOCK_TELEPORT_INDEX_A = 10;
+const MOCK_TELEPORT_INDEX_B = 20;
+const MOCK_TELEPORT_X_A = 0;
+const MOCK_TELEPORT_Y_A = 0;
+const MOCK_TELEPORT_X_B = 1;
+const MOCK_TELEPORT_Y_B = 1;
+const MOCK_PLAYER_NAME = 'Test Player';
+const MOCK_GAME_NAME = 'Test Game';
+const MOCK_GAME_DESCRIPTION = 'Test Description';
 
-    const mockSessionId = 'session-123';
-    const mockGameId = new Types.ObjectId().toString();
+const createMockPlayer = (overrides: Partial<Player> = {}): Player => ({
+    id: MOCK_PLAYER_ID,
+    name: MOCK_PLAYER_NAME,
+    avatar: Avatar.Avatar1,
+    isAdmin: false,
+    baseHealth: 100,
+    healthBonus: 0,
+    health: 100,
+    maxHealth: 100,
+    baseSpeed: 3,
+    speedBonus: 0,
+    speed: 3,
+    boatSpeedBonus: 0,
+    boatSpeed: 0,
+    baseAttack: 10,
+    attackBonus: 0,
+    baseDefense: 5,
+    defenseBonus: 0,
+    attackDice: Dice.D6,
+    defenseDice: Dice.D4,
+    x: MOCK_X,
+    y: MOCK_Y,
+    isInGame: true,
+    startPointId: '',
+    actionsRemaining: 1,
+    combatCount: 0,
+    combatWins: 0,
+    combatLosses: 0,
+    combatDraws: 0,
+    hasCombatBonus: false,
+    ...overrides,
+});
+
+const createMockTile = (overrides: Partial<Tile> = {}): Tile => ({
+    x: MOCK_X,
+    y: MOCK_Y,
+    kind: TileKind.BASE,
+    open: false,
+    ...overrides,
+});
+
+const createMockPlaceable = (overrides: Partial<Placeable> = {}): Placeable => {
     const mockObjectId = new Types.ObjectId();
-
-    const POS_X_0 = 0;
-    const POS_Y_0 = 0;
-    const POS_X_1 = 1;
-    const POS_Y_1 = 1;
-    const POS_X_2 = 2;
-    const POS_Y_2 = 2;
-    const POS_X_3 = 3;
-    const POS_Y_3 = 3;
-    const POS_X_4 = 4;
-    const POS_FAR_OUT_OF_BOUNDS = 99;
-    const NEGATIVE_POS = -1;
-    const BASE_HEALTH = 100;
-    const BASE_SPEED = 3;
-    const BASE_ATTACK = 10;
-    const BASE_DEFENSE = 5;
-    const NO_BONUS = 0;
-    const ACTIONS_REMAINING = 1;
-    const NO_COMBAT_STATS = 0;
-    const TILE_INDEX_1 = 1;
-    const EXPECTED_PLACEABLES_COUNT = 2;
-    const EXPECTED_PLACEABLES_COUNT_ONE = 1;
-
-    const createMockPlayer = (overrides: Partial<Player> = {}): Player => ({
-        id: 'player-123',
-        name: 'Test Player',
-        avatar: null,
-        isAdmin: false,
-        baseHealth: BASE_HEALTH,
-        healthBonus: NO_BONUS,
-        health: BASE_HEALTH,
-        maxHealth: BASE_HEALTH,
-        baseSpeed: BASE_SPEED,
-        speedBonus: NO_BONUS,
-        speed: BASE_SPEED,
-        boatSpeedBonus: NO_BONUS,
-        boatSpeed: NO_BONUS,
-        baseAttack: BASE_ATTACK,
-        attackBonus: NO_BONUS,
-        baseDefense: BASE_DEFENSE,
-        defenseBonus: NO_BONUS,
-        attackDice: Dice.D6,
-        defenseDice: Dice.D4,
-        x: POS_X_0,
-        y: POS_Y_0,
-        isInGame: true,
-        startPointId: '',
-        actionsRemaining: ACTIONS_REMAINING,
-        combatCount: NO_COMBAT_STATS,
-        combatWins: NO_COMBAT_STATS,
-        combatLosses: NO_COMBAT_STATS,
-        combatDraws: NO_COMBAT_STATS,
-        hasCombatBonus: false,
-        ...overrides,
+    Object.defineProperty(mockObjectId, 'toString', {
+        value: jest.fn().mockReturnValue(MOCK_PLACEABLE_ID),
+        writable: true,
     });
-
-    const createMockGame = (overrides: Partial<Game> = {}): Game => ({
+    return {
         _id: mockObjectId,
-        name: 'Test Game',
-        description: 'Test Description',
+        kind: PlaceableKind.START,
+        x: MOCK_X,
+        y: MOCK_Y,
+        placed: true,
+        ...overrides,
+    };
+};
+
+const createMockGame = (overrides: Partial<Game> = {}): Game => {
+    const mockObjectId = new Types.ObjectId();
+    Object.defineProperty(mockObjectId, 'toString', {
+        value: jest.fn().mockReturnValue(MOCK_GAME_ID),
+        writable: true,
+    });
+    return {
+        _id: mockObjectId,
+        name: MOCK_GAME_NAME,
+        description: MOCK_GAME_DESCRIPTION,
         size: MapSize.MEDIUM,
         mode: GameMode.CLASSIC,
-        tiles: [],
-        objects: [],
         visibility: true,
         lastModified: new Date(),
         createdAt: new Date(),
         gridPreviewUrl: '',
+        tiles: [],
+        objects: [],
         draft: false,
         teleportChannels: [],
         ...overrides,
-    });
+    };
+};
 
-    beforeEach(() => {
-        Object.keys(mockModel).forEach((k) => delete mockModel[k]);
-        service = new GameCacheService(mockModel as unknown as Model<GameDocument>, mockEventEmitter);
+const createMockGameMapTiles = (size: number, tileAtPosition?: { x: number; y: number; tile: Tile & { playerId: string | null } }): (Tile & { playerId: string | null })[] => {
+    const tiles: (Tile & { playerId: string | null })[] = [];
+    for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+            if (tileAtPosition && tileAtPosition.x === x && tileAtPosition.y === y) {
+                tiles.push(tileAtPosition.tile);
+            } else {
+                tiles.push({ ...createMockTile({ x, y }), playerId: null });
+            }
+        }
+    }
+    return tiles;
+};
+
+describe('GameCacheService', () => {
+    let service: GameCacheService;
+    let mockGameModel: jest.Mocked<Model<Game>>;
+    let mockEventEmitter: jest.Mocked<EventEmitter2>;
+
+    beforeEach(async () => {
+        mockEventEmitter = {
+            emit: jest.fn(),
+        } as unknown as jest.Mocked<EventEmitter2>;
+
+        mockGameModel = {
+            findById: jest.fn(),
+        } as unknown as jest.Mocked<Model<Game>>;
+
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                GameCacheService,
+                { provide: getModelToken(Game.name), useValue: mockGameModel },
+                { provide: EventEmitter2, useValue: mockEventEmitter },
+            ],
+        }).compile();
+
+        service = module.get<GameCacheService>(GameCacheService);
     });
 
     it('should be defined', () => {
         expect(service).toBeDefined();
     });
 
+    describe('hidePlaceable', () => {
+        it('should hide placeable and emit PlaceableUpdated event', () => {
+            const gameMap = {
+                tiles: [],
+                objects: [createMockPlaceable({ x: MOCK_X, y: MOCK_Y })],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            service.hidePlaceable(MOCK_SESSION_ID, position);
+
+            expect(gameMap.objects[0].placed).toBe(false);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.PlaceableUpdated,
+                expect.objectContaining({
+                    sessionId: MOCK_SESSION_ID,
+                    placeable: expect.objectContaining({
+                        id: MOCK_PLACEABLE_ID,
+                    }),
+                }),
+            );
+        });
+
+        it('should throw NotFoundException when game map not found', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.hidePlaceable(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
+        });
+
+        it('should throw NotFoundException when placeable not found', () => {
+            const gameMap = {
+                tiles: [],
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.hidePlaceable(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('showPlaceable', () => {
+        it('should show placeable and emit PlaceableUpdated event', () => {
+            const placeable = createMockPlaceable({ x: MOCK_X, y: MOCK_Y, placed: false });
+            const gameMap = {
+                tiles: [],
+                objects: [placeable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            service.showPlaceable(MOCK_SESSION_ID, position);
+
+            expect(placeable.placed).toBe(true);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.PlaceableUpdated,
+                expect.objectContaining({
+                    sessionId: MOCK_SESSION_ID,
+                    placeable: expect.objectContaining({
+                        id: MOCK_PLACEABLE_ID,
+                    }),
+                }),
+            );
+        });
+
+        it('should throw NotFoundException when game map not found', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.showPlaceable(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
+        });
+
+        it('should throw NotFoundException when placeable not found', () => {
+            const gameMap = {
+                tiles: [],
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.showPlaceable(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
+        });
+    });
+
     describe('fetchAndCacheGame', () => {
-        it('should fetch game from database and cache it', async () => {
-            const mockGame = createMockGame();
-            mockModel.findById = jest.fn().mockReturnValue({
+        it('should fetch and cache game successfully', async () => {
+            const mockGame = createMockGame({
+                tiles: [createMockTile()],
+                objects: [createMockPlaceable({ placed: true })],
+                size: MapSize.MEDIUM,
+            });
+            mockGameModel.findById = jest.fn().mockReturnValue({
                 lean: jest.fn().mockResolvedValue(mockGame),
             });
 
-            const result = await service.fetchAndCacheGame(mockSessionId, mockGameId);
+            const result = await service.fetchAndCacheGame(MOCK_SESSION_ID, MOCK_GAME_ID);
 
-            expect(mockModel.findById).toHaveBeenCalledWith(mockGameId);
             expect(result).toEqual(mockGame);
+            expect(mockGameModel.findById).toHaveBeenCalledWith(MOCK_GAME_ID);
         });
 
-        it('should cache the fetched game', async () => {
-            const mockGame = createMockGame();
-            mockModel.findById = jest.fn().mockReturnValue({
+        it('should expand placeables with footprint 2', async () => {
+            const placeable = createMockPlaceable({
+                kind: PlaceableKind.HEAL,
+                x: MOCK_X,
+                y: MOCK_Y,
+                placed: true,
+            });
+            const mockGame = createMockGame({
+                tiles: [createMockTile()],
+                objects: [placeable],
+                size: MapSize.MEDIUM,
+            });
+            mockGameModel.findById = jest.fn().mockReturnValue({
                 lean: jest.fn().mockResolvedValue(mockGame),
             });
 
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
+            await service.fetchAndCacheGame(MOCK_SESSION_ID, MOCK_GAME_ID);
 
-            const cachedGame = service.getGameForSession(mockSessionId);
-            expect(cachedGame).toEqual(mockGame);
+            const gameMap = (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.get(MOCK_SESSION_ID);
+            expect((gameMap as { objects: Placeable[] }).objects.length).toBe(PlaceableFootprint[PlaceableKind.HEAL] * PlaceableFootprint[PlaceableKind.HEAL]);
         });
 
-        it('should throw NotFoundException when game is not found', async () => {
-            mockModel.findById = jest.fn().mockReturnValue({
+        it('should skip unplaced placeables', async () => {
+            const placedPlaceable = createMockPlaceable({ placed: true });
+            const unplacedPlaceable = createMockPlaceable({ placed: false });
+            const mockGame = createMockGame({
+                tiles: [createMockTile()],
+                objects: [placedPlaceable, unplacedPlaceable],
+                size: MapSize.MEDIUM,
+            });
+            mockGameModel.findById = jest.fn().mockReturnValue({
+                lean: jest.fn().mockResolvedValue(mockGame),
+            });
+
+            await service.fetchAndCacheGame(MOCK_SESSION_ID, MOCK_GAME_ID);
+
+            const gameMap = (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.get(MOCK_SESSION_ID);
+            const objects = (gameMap as { objects: Placeable[] }).objects;
+            expect(objects.every((obj) => obj.placed)).toBe(true);
+        });
+
+        it('should set teleport tiles correctly', async () => {
+            const mockGame = createMockGame({
+                tiles: Array.from({ length: MapSize.MEDIUM * MapSize.MEDIUM }, (_, i) =>
+                    createMockTile({ x: i % MapSize.MEDIUM, y: Math.floor(i / MapSize.MEDIUM) }),
+                ),
+                objects: [],
+                size: MapSize.MEDIUM,
+                teleportChannels: [
+                    {
+                        channelNumber: MOCK_TELEPORT_CHANNEL,
+                        tiles: {
+                            entryA: { x: MOCK_TELEPORT_X_A, y: MOCK_TELEPORT_Y_A },
+                            entryB: { x: MOCK_TELEPORT_X_B, y: MOCK_TELEPORT_Y_B },
+                        },
+                    },
+                ],
+            });
+            mockGameModel.findById = jest.fn().mockReturnValue({
+                lean: jest.fn().mockResolvedValue(mockGame),
+            });
+
+            await service.fetchAndCacheGame(MOCK_SESSION_ID, MOCK_GAME_ID);
+
+            const gameMap = (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.get(MOCK_SESSION_ID);
+            const tiles = (gameMap as { tiles: (Tile & { playerId: string | null })[] }).tiles;
+            const tileA = tiles[MOCK_TELEPORT_Y_A * MapSize.MEDIUM + MOCK_TELEPORT_X_A];
+            const tileB = tiles[MOCK_TELEPORT_Y_B * MapSize.MEDIUM + MOCK_TELEPORT_X_B];
+            expect(tileA.kind).toBe(TileKind.TELEPORT);
+            expect(tileA.teleportChannel).toBe(MOCK_TELEPORT_CHANNEL);
+            expect(tileB.kind).toBe(TileKind.TELEPORT);
+            expect(tileB.teleportChannel).toBe(MOCK_TELEPORT_CHANNEL);
+        });
+
+        it('should throw NotFoundException when game not found', async () => {
+            mockGameModel.findById = jest.fn().mockReturnValue({
                 lean: jest.fn().mockResolvedValue(null),
             });
 
-            await expect(service.fetchAndCacheGame(mockSessionId, mockGameId)).rejects.toThrow(NotFoundException);
-            await expect(service.fetchAndCacheGame(mockSessionId, mockGameId)).rejects.toThrow('Game not found');
-        });
-
-        it('should not cache when game is not found', async () => {
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(null),
-            });
-
-            await expect(service.fetchAndCacheGame(mockSessionId, mockGameId)).rejects.toThrow(NotFoundException);
-
-            expect(() => service.getGameForSession(mockSessionId)).toThrow(NotFoundException);
-        });
-
-        it('should override existing cached game when called multiple times', async () => {
-            const mockGame1 = createMockGame({ name: 'Game 1' });
-            const mockGame2 = createMockGame({ name: 'Game 2' });
-
-            mockModel.findById = jest
-                .fn()
-                .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(mockGame1) })
-                .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(mockGame2) });
-
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-
-            const cachedGame = service.getGameForSession(mockSessionId);
-            expect(cachedGame.name).toBe('Game 2');
-        });
-
-        it('should cache games for different sessions independently', async () => {
-            const mockGame1 = createMockGame({ name: 'Game 1' });
-            const mockGame2 = createMockGame({ name: 'Game 2' });
-
-            mockModel.findById = jest
-                .fn()
-                .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(mockGame1) })
-                .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(mockGame2) });
-
-            await service.fetchAndCacheGame('session-1', 'game-1');
-            await service.fetchAndCacheGame('session-2', 'game-2');
-
-            expect(service.getGameForSession('session-1').name).toBe('Game 1');
-            expect(service.getGameForSession('session-2').name).toBe('Game 2');
-        });
-    });
-
-    describe('getGameForSession', () => {
-        it('should return cached game for a session', async () => {
-            const mockGame = createMockGame();
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-
-            const result = service.getGameForSession(mockSessionId);
-
-            expect(result).toEqual(mockGame);
-        });
-
-        it('should throw NotFoundException when session has no cached game', () => {
-            expect(() => service.getGameForSession('non-existent-session')).toThrow(NotFoundException);
-            expect(() => service.getGameForSession('non-existent-session')).toThrow('Game not found');
-        });
-
-        it('should return correct game when multiple sessions are cached', async () => {
-            const mockGame1 = createMockGame({ name: 'Game 1' });
-            const mockGame2 = createMockGame({ name: 'Game 2' });
-            const mockGame3 = createMockGame({ name: 'Game 3' });
-
-            mockModel.findById = jest
-                .fn()
-                .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(mockGame1) })
-                .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(mockGame2) })
-                .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(mockGame3) });
-
-            await service.fetchAndCacheGame('session-1', 'game-1');
-            await service.fetchAndCacheGame('session-2', 'game-2');
-            await service.fetchAndCacheGame('session-3', 'game-3');
-
-            expect(service.getGameForSession('session-2').name).toBe('Game 2');
-        });
-    });
-
-    describe('integration', () => {
-        it('should handle complete lifecycle', async () => {
-            const mockGame = createMockGame();
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-
-            const fetchedGame = await service.fetchAndCacheGame(mockSessionId, mockGameId);
-            expect(fetchedGame).toEqual(mockGame);
-
-            const cachedGame = service.getGameForSession(mockSessionId);
-            expect(cachedGame).toEqual(mockGame);
-        });
-
-        it('should handle multiple sessions independently', async () => {
-            const mockGame1 = createMockGame({ name: 'Game 1' });
-            const mockGame2 = createMockGame({ name: 'Game 2' });
-
-            mockModel.findById = jest
-                .fn()
-                .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(mockGame1) })
-                .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(mockGame2) });
-
-            await service.fetchAndCacheGame('session-1', 'game-1');
-            await service.fetchAndCacheGame('session-2', 'game-2');
-
-            expect(service.getGameForSession('session-1').name).toBe('Game 1');
-            expect(service.getGameForSession('session-2').name).toBe('Game 2');
+            await expect(service.fetchAndCacheGame(MOCK_SESSION_ID, MOCK_GAME_ID)).rejects.toThrow(NotFoundException);
         });
     });
 
     describe('getTileByPlayerId', () => {
-        it('should return tile with matching playerId', async () => {
-            const mockGame = createMockGame({
-                tiles: [
-                    { x: POS_X_0, y: POS_Y_0, kind: TileKind.BASE },
-                    { x: POS_X_1, y: POS_Y_1, kind: TileKind.BASE },
-                ],
-            });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
+        it('should return tile with matching playerId', () => {
+            const tile = createMockTile();
+            const gameMap = {
+                tiles: [{ ...tile, playerId: MOCK_PLAYER_ID }],
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
 
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-            const gameMap = service.getGameMapForSession(mockSessionId);
-            gameMap.tiles[TILE_INDEX_1].playerId = 'player-123';
+            const result = service.getTileByPlayerId(MOCK_SESSION_ID, MOCK_PLAYER_ID);
 
-            const result = service.getTileByPlayerId(mockSessionId, 'player-123');
-
-            expect(result).toBeDefined();
-            expect(result?.x).toBe(POS_X_1);
-            expect(result?.y).toBe(POS_Y_1);
-            expect(result?.playerId).toBe('player-123');
+            expect(result?.playerId).toBe(MOCK_PLAYER_ID);
         });
 
-        it('should return undefined when no tile matches playerId', async () => {
-            const mockGame = createMockGame({
-                tiles: [{ x: POS_X_0, y: POS_Y_0, kind: TileKind.BASE }],
-            });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
+        it('should return undefined when tile not found', () => {
+            const gameMap = {
+                tiles: [{ ...createMockTile(), playerId: null }],
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
 
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-
-            const result = service.getTileByPlayerId(mockSessionId, 'non-existent-player');
+            const result = service.getTileByPlayerId(MOCK_SESSION_ID, MOCK_PLAYER_ID);
 
             expect(result).toBeUndefined();
         });
 
         it('should throw NotFoundException when game map not found', () => {
-            expect(() => service.getTileByPlayerId('non-existent-session', 'player-123')).toThrow(NotFoundException);
-            expect(() => service.getTileByPlayerId('non-existent-session', 'player-123')).toThrow('Game map not found');
+            expect(() => service.getTileByPlayerId(MOCK_SESSION_ID, MOCK_PLAYER_ID)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('getGameForSession', () => {
+        it('should return cached game', () => {
+            const mockGame = createMockGame();
+            (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
+
+            const result = service.getGameForSession(MOCK_SESSION_ID);
+
+            expect(result).toEqual(mockGame);
+        });
+
+        it('should throw NotFoundException when game not found', () => {
+            expect(() => service.getGameForSession(MOCK_SESSION_ID)).toThrow(NotFoundException);
         });
     });
 
     describe('getGameMapForSession', () => {
-        it('should return cached game map for a session', async () => {
-            const mockGame = createMockGame({
-                tiles: [{ x: POS_X_0, y: POS_Y_0, kind: TileKind.BASE }],
+        it('should return cached game map', () => {
+            const gameMap = {
+                tiles: [],
                 objects: [],
-            });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
 
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
+            const result = service.getGameMapForSession(MOCK_SESSION_ID);
 
-            const result = service.getGameMapForSession(mockSessionId);
-
-            expect(result).toBeDefined();
-            expect(result.tiles).toHaveLength(1);
-            expect(result.tiles[0].playerId).toBeNull();
-            expect(result.objects).toEqual([]);
-            expect(result.size).toBe(MapSize.MEDIUM);
+            expect(result).toEqual(gameMap);
         });
 
-        it('should throw NotFoundException when session has no cached game map', () => {
-            expect(() => service.getGameMapForSession('non-existent-session')).toThrow(NotFoundException);
-            expect(() => service.getGameMapForSession('non-existent-session')).toThrow('Game map not found');
-        });
-
-        it('should initialize tiles with playerId as null', async () => {
-            const mockGame = createMockGame({
-                tiles: [
-                    { x: POS_X_0, y: POS_Y_0, kind: TileKind.BASE },
-                    { x: POS_X_1, y: POS_Y_1, kind: TileKind.ICE },
-                ],
-            });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-
-            const result = service.getGameMapForSession(mockSessionId);
-
-            expect(result.tiles.every((tile) => tile.playerId === null)).toBe(true);
+        it('should throw NotFoundException when game map not found', () => {
+            expect(() => service.getGameMapForSession(MOCK_SESSION_ID)).toThrow(NotFoundException);
         });
     });
 
     describe('getTileAtPosition', () => {
-        const MAP_SIZE = MapSize.MEDIUM;
-        const MAP_SIZE_NUM = 15;
+        it('should return tile at position', () => {
+            const tile = createMockTile({ x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: createMockGameMapTiles(MapSize.MEDIUM, { x: MOCK_X, y: MOCK_Y, tile: { ...tile, playerId: null } }),
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-        it('should return tile at specified position', async () => {
-            const tiles: Tile[] = [];
-            for (let y = 0; y < MAP_SIZE_NUM; y++) {
-                for (let x = 0; x < MAP_SIZE_NUM; x++) {
-                    tiles.push({ x, y, kind: TileKind.BASE });
-                }
-            }
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-
-            const result = service.getTileAtPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 });
+            const result = service.getTileAtPosition(MOCK_SESSION_ID, position);
 
             expect(result).toBeDefined();
-            expect(result?.x).toBe(POS_X_2);
-            expect(result?.y).toBe(POS_Y_3);
+            expect(result?.x).toBe(MOCK_X);
+            expect(result?.y).toBe(MOCK_Y);
         });
 
-        it('should return undefined for out of bounds position', async () => {
-            const tiles: Tile[] = [];
-            for (let y = 0; y < MAP_SIZE_NUM; y++) {
-                for (let x = 0; x < MAP_SIZE_NUM; x++) {
-                    tiles.push({ x, y, kind: TileKind.BASE });
-                }
-            }
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
+        it('should throw NotFoundException when game map not found', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.getTileAtPosition(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('getTeleportDestination', () => {
+        it('should return destination when at entryA', () => {
+            const mockGame = createMockGame({
+                teleportChannels: [
+                    {
+                        channelNumber: MOCK_TELEPORT_CHANNEL,
+                        tiles: {
+                            entryA: { x: MOCK_X, y: MOCK_Y },
+                            entryB: { x: MOCK_X_2, y: MOCK_Y_2 },
+                        },
+                    },
+                ],
             });
+            (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
+            const result = service.getTeleportDestination(MOCK_SESSION_ID, position);
 
-            const result = service.getTileAtPosition(mockSessionId, { x: MAP_SIZE_NUM, y: MAP_SIZE_NUM });
+            expect(result).toEqual({ x: MOCK_X_2, y: MOCK_Y_2 });
+        });
+
+        it('should return destination when at entryB', () => {
+            const mockGame = createMockGame({
+                teleportChannels: [
+                    {
+                        channelNumber: MOCK_TELEPORT_CHANNEL,
+                        tiles: {
+                            entryA: { x: MOCK_X, y: MOCK_Y },
+                            entryB: { x: MOCK_X_2, y: MOCK_Y_2 },
+                        },
+                    },
+                ],
+            });
+            (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
+            const position: Position = { x: MOCK_X_2, y: MOCK_Y_2 };
+
+            const result = service.getTeleportDestination(MOCK_SESSION_ID, position);
+
+            expect(result).toEqual({ x: MOCK_X, y: MOCK_Y });
+        });
+
+        it('should throw NotFoundException when entryB is undefined', () => {
+            const mockGame = createMockGame({
+                teleportChannels: [
+                    {
+                        channelNumber: MOCK_TELEPORT_CHANNEL,
+                        tiles: {
+                            entryA: { x: MOCK_X, y: MOCK_Y },
+                            entryB: undefined,
+                        },
+                    },
+                ],
+            });
+            (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.getTeleportDestination(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
+        });
+
+        it('should throw NotFoundException when entryA is undefined', () => {
+            const mockGame = createMockGame({
+                teleportChannels: [
+                    {
+                        channelNumber: MOCK_TELEPORT_CHANNEL,
+                        tiles: {
+                            entryA: undefined,
+                            entryB: { x: MOCK_X_2, y: MOCK_Y_2 },
+                        },
+                    },
+                ],
+            });
+            (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
+            const position: Position = { x: MOCK_X_2, y: MOCK_Y_2 };
+
+            expect(() => service.getTeleportDestination(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
+        });
+
+        it('should throw NotFoundException when teleport channel not found', () => {
+            const mockGame = createMockGame();
+            (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.getTeleportDestination(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
+        });
+
+        it('should throw NotFoundException when game not found', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.getTeleportDestination(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('getNextPosition', () => {
+        it('should return next position for Orientation.N', () => {
+            const mockGame = createMockGame({ size: MapSize.MEDIUM });
+            (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            const result = service.getNextPosition(MOCK_SESSION_ID, position, Orientation.N);
+
+            expect(result).toEqual({ x: MOCK_X, y: MOCK_Y - 1 });
+        });
+
+        it('should return next position for Orientation.E', () => {
+            const mockGame = createMockGame({ size: MapSize.MEDIUM });
+            (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            const result = service.getNextPosition(MOCK_SESSION_ID, position, Orientation.E);
+
+            expect(result).toEqual({ x: MOCK_X + 1, y: MOCK_Y });
+        });
+
+        it('should return next position for Orientation.S', () => {
+            const mockGame = createMockGame({ size: MapSize.MEDIUM });
+            (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            const result = service.getNextPosition(MOCK_SESSION_ID, position, Orientation.S);
+
+            expect(result).toEqual({ x: MOCK_X, y: MOCK_Y + 1 });
+        });
+
+        it('should return next position for Orientation.W', () => {
+            const mockGame = createMockGame({ size: MapSize.MEDIUM });
+            (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            const result = service.getNextPosition(MOCK_SESSION_ID, position, Orientation.W);
+
+            expect(result).toEqual({ x: MOCK_X - 1, y: MOCK_Y });
+        });
+
+        it('should throw BadRequestException when position is invalid', () => {
+            const mockGame = createMockGame({ size: MapSize.MEDIUM });
+            (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
+            const position: Position = { x: -1, y: MOCK_Y };
+
+            expect(() => service.getNextPosition(MOCK_SESSION_ID, position, Orientation.N)).toThrow(BadRequestException);
+        });
+
+        it('should throw BadRequestException when next position is out of bounds', () => {
+            const mockGame = createMockGame({ size: MapSize.MEDIUM });
+            (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
+            const position: Position = { x: 0, y: 0 };
+
+            expect(() => service.getNextPosition(MOCK_SESSION_ID, position, Orientation.N)).toThrow(BadRequestException);
+        });
+
+        it('should throw NotFoundException when game not found', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.getNextPosition(MOCK_SESSION_ID, position, Orientation.N)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('getPlaceablesById', () => {
+        it('should return placeables with matching id', () => {
+            const placeable = createMockPlaceable();
+            const gameMap = {
+                tiles: [],
+                objects: [placeable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+
+            const result = service.getPlaceablesById(MOCK_SESSION_ID, MOCK_PLACEABLE_ID);
+
+            expect(result.length).toBeGreaterThan(0);
+            expect(result[0]._id?.toString()).toBe(MOCK_PLACEABLE_ID);
+        });
+
+        it('should filter by placedOnly when true', () => {
+            const placedPlaceable = createMockPlaceable({ placed: true });
+            const unplacedPlaceable = createMockPlaceable({ placed: false });
+            const gameMap = {
+                tiles: [],
+                objects: [placedPlaceable, unplacedPlaceable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+
+            const result = service.getPlaceablesById(MOCK_SESSION_ID, MOCK_PLACEABLE_ID, true);
+
+            expect(result.every((p) => p.placed)).toBe(true);
+        });
+
+        it('should include unplaced when placedOnly is false', () => {
+            const placedPlaceable = createMockPlaceable({ placed: true });
+            const unplacedPlaceable = createMockPlaceable({ placed: false });
+            const gameMap = {
+                tiles: [],
+                objects: [placedPlaceable, unplacedPlaceable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+
+            const result = service.getPlaceablesById(MOCK_SESSION_ID, MOCK_PLACEABLE_ID, false);
+
+            expect(result.length).toBeGreaterThan(1);
+        });
+
+        it('should throw NotFoundException when game map not found', () => {
+            expect(() => service.getPlaceablesById(MOCK_SESSION_ID, MOCK_PLACEABLE_ID)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('getPlaceablesAtPosition', () => {
+        it('should return placeables at position', () => {
+            const placeable = createMockPlaceable({ x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: [],
+                objects: [placeable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            const result = service.getPlaceablesAtPosition(MOCK_SESSION_ID, position);
+
+            expect(result.length).toBeGreaterThan(0);
+            expect(result[0].x).toBe(MOCK_X);
+            expect(result[0].y).toBe(MOCK_Y);
+        });
+
+        it('should throw NotFoundException when game map not found', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.getPlaceablesAtPosition(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('getPlaceableAtPosition', () => {
+        it('should return placeable at position', () => {
+            const placeable = createMockPlaceable({ x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: [],
+                objects: [placeable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            const result = service.getPlaceableAtPosition(MOCK_SESSION_ID, position);
+
+            expect(result).toBeDefined();
+            expect(result?.x).toBe(MOCK_X);
+            expect(result?.y).toBe(MOCK_Y);
+        });
+
+        it('should return undefined when placeable not found', () => {
+            const gameMap = {
+                tiles: [],
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            const result = service.getPlaceableAtPosition(MOCK_SESSION_ID, position);
 
             expect(result).toBeUndefined();
         });
 
         it('should throw NotFoundException when game map not found', () => {
-            expect(() => service.getTileAtPosition('non-existent-session', { x: POS_X_0, y: POS_Y_0 })).toThrow(NotFoundException);
-        });
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-        it('should calculate correct index for different positions', async () => {
-            const tiles: Tile[] = [];
-            for (let y = 0; y < MAP_SIZE; y++) {
-                for (let x = 0; x < MAP_SIZE; x++) {
-                    tiles.push({ x, y, kind: y === POS_Y_2 && x === POS_X_3 ? TileKind.ICE : TileKind.BASE });
-                }
-            }
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-
-            const result = service.getTileAtPosition(mockSessionId, { x: POS_X_3, y: POS_Y_2 });
-
-            expect(result?.kind).toBe(TileKind.ICE);
+            expect(() => service.getPlaceableAtPosition(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
         });
     });
 
-    describe('getNextPosition', () => {
-        const MAP_SIZE = MapSize.MEDIUM;
-        const MAP_SIZE_NUM = 15;
+    describe('getPlaceablePositions', () => {
+        it('should return positions of placeables with matching id', () => {
+            const placeable1 = createMockPlaceable({ x: MOCK_X, y: MOCK_Y });
+            const placeable2 = createMockPlaceable({ x: MOCK_X_2, y: MOCK_Y_2 });
+            const gameMap = {
+                tiles: [],
+                objects: [placeable1, placeable2],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
 
-        beforeEach(async () => {
-            const tiles: Tile[] = [];
-            for (let y = 0; y < MAP_SIZE_NUM; y++) {
-                for (let x = 0; x < MAP_SIZE_NUM; x++) {
-                    tiles.push({ x, y, kind: TileKind.BASE });
-                }
-            }
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-        });
+            const result = service.getPlaceablePositions(MOCK_SESSION_ID, MOCK_PLACEABLE_ID);
 
-        it('should return position north of current position', () => {
-            const result = service.getNextPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, Orientation.N);
-
-            expect(result.x).toBe(POS_X_2);
-            expect(result.y).toBe(POS_Y_2);
-        });
-
-        it('should return position east of current position', () => {
-            const result = service.getNextPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, Orientation.E);
-
-            expect(result.x).toBe(POS_X_3);
-            expect(result.y).toBe(POS_Y_3);
-        });
-
-        it('should return position south of current position', () => {
-            const result = service.getNextPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, Orientation.S);
-
-            expect(result.x).toBe(POS_X_2);
-            expect(result.y).toBe(POS_X_4);
-        });
-
-        it('should return position west of current position', () => {
-            const result = service.getNextPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, Orientation.W);
-
-            expect(result.x).toBe(POS_X_1);
-            expect(result.y).toBe(POS_Y_3);
-        });
-
-        it('should throw BadRequestException for invalid current position (negative x)', () => {
-            expect(() => service.getNextPosition(mockSessionId, { x: NEGATIVE_POS, y: POS_Y_0 }, Orientation.N)).toThrow(BadRequestException);
-            expect(() => service.getNextPosition(mockSessionId, { x: NEGATIVE_POS, y: POS_Y_0 }, Orientation.N)).toThrow('Invalid position');
-        });
-
-        it('should throw BadRequestException for invalid current position (negative y)', () => {
-            expect(() => service.getNextPosition(mockSessionId, { x: POS_X_0, y: NEGATIVE_POS }, Orientation.N)).toThrow(BadRequestException);
-        });
-
-        it('should throw BadRequestException for invalid current position (x >= mapSize)', () => {
-            expect(() => service.getNextPosition(mockSessionId, { x: MAP_SIZE_NUM, y: 0 }, Orientation.N)).toThrow(BadRequestException);
-        });
-
-        it('should throw BadRequestException for invalid current position (y >= mapSize)', () => {
-            expect(() => service.getNextPosition(mockSessionId, { x: 0, y: MAP_SIZE_NUM }, Orientation.N)).toThrow(BadRequestException);
-        });
-
-        it('should throw BadRequestException when next position is out of bounds (north)', () => {
-            expect(() => service.getNextPosition(mockSessionId, { x: POS_X_0, y: POS_Y_0 }, Orientation.N)).toThrow(BadRequestException);
-            expect(() => service.getNextPosition(mockSessionId, { x: POS_X_0, y: POS_Y_0 }, Orientation.N)).toThrow('Next position is out of bounds');
-        });
-
-        it('should throw BadRequestException when next position is out of bounds (east)', () => {
-            const LAST_POSITION = MAP_SIZE_NUM - 1;
-            expect(() => service.getNextPosition(mockSessionId, { x: LAST_POSITION, y: POS_Y_0 }, Orientation.E)).toThrow(BadRequestException);
-        });
-
-        it('should throw BadRequestException when next position is out of bounds (south)', () => {
-            const LAST_POSITION = MAP_SIZE_NUM - 1;
-            expect(() => service.getNextPosition(mockSessionId, { x: POS_X_0, y: LAST_POSITION }, Orientation.S)).toThrow(BadRequestException);
-        });
-
-        it('should throw BadRequestException when next position is out of bounds (west)', () => {
-            expect(() => service.getNextPosition(mockSessionId, { x: POS_X_0, y: POS_Y_0 }, Orientation.W)).toThrow(BadRequestException);
-        });
-
-        it('should throw NotFoundException when game not found', () => {
-            expect(() => service.getNextPosition('non-existent-session', { x: POS_X_0, y: POS_Y_0 }, Orientation.N)).toThrow(NotFoundException);
-        });
-    });
-
-    describe('getPlaceablesAtPosition', () => {
-        it('should return placed placeables at position', async () => {
-            const placeables: Placeable[] = [
-                { _id: new Types.ObjectId(), kind: PlaceableKind.FLAG, x: POS_X_2, y: POS_Y_3, placed: true },
-                { _id: new Types.ObjectId(), kind: PlaceableKind.HEAL, x: POS_X_2, y: POS_Y_3, placed: true },
-                { _id: new Types.ObjectId(), kind: PlaceableKind.BOAT, x: POS_X_1, y: POS_Y_1, placed: true },
-            ];
-            const mockGame = createMockGame({ objects: placeables });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-
-            const result = service.getPlaceablesAtPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 });
-
-            expect(result).toHaveLength(EXPECTED_PLACEABLES_COUNT);
-            expect(result.every((obj) => obj.x === POS_X_2 && obj.y === POS_Y_3 && obj.placed)).toBe(true);
-        });
-
-        it('should not return unplaced placeables', async () => {
-            const placeables: Placeable[] = [
-                { _id: new Types.ObjectId(), kind: PlaceableKind.FLAG, x: POS_X_2, y: POS_Y_3, placed: false },
-                { _id: new Types.ObjectId(), kind: PlaceableKind.HEAL, x: POS_X_2, y: POS_Y_3, placed: true },
-            ];
-            const mockGame = createMockGame({ objects: placeables });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-
-            const result = service.getPlaceablesAtPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 });
-
-            expect(result).toHaveLength(EXPECTED_PLACEABLES_COUNT_ONE);
-            expect(result[0].kind).toBe(PlaceableKind.HEAL);
-        });
-
-        it('should return empty array when no placeables at position', async () => {
-            const mockGame = createMockGame();
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-
-            const result = service.getPlaceablesAtPosition(mockSessionId, { x: POS_FAR_OUT_OF_BOUNDS, y: POS_FAR_OUT_OF_BOUNDS });
-
-            expect(result).toEqual([]);
+            expect(result.length).toBeGreaterThan(0);
+            expect(result).toContainEqual({ x: MOCK_X, y: MOCK_Y });
         });
 
         it('should throw NotFoundException when game map not found', () => {
-            expect(() => service.getPlaceablesAtPosition('non-existent-session', { x: POS_X_0, y: POS_Y_0 })).toThrow(NotFoundException);
+            expect(() => service.getPlaceablePositions(MOCK_SESSION_ID, MOCK_PLACEABLE_ID)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('getFlagPlaceable', () => {
+        it('should return flag placeable', () => {
+            const flagPlaceable = createMockPlaceable({ kind: PlaceableKind.FLAG });
+            const gameMap = {
+                tiles: [],
+                objects: [flagPlaceable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+
+            const result = service.getFlagPlaceable(MOCK_SESSION_ID);
+
+            expect(result).toBeDefined();
+            expect(result?.kind).toBe(PlaceableKind.FLAG);
+        });
+
+        it('should return undefined when flag not found', () => {
+            const gameMap = {
+                tiles: [],
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+
+            const result = service.getFlagPlaceable(MOCK_SESSION_ID);
+
+            expect(result).toBeUndefined();
+        });
+
+        it('should throw NotFoundException when game map not found', () => {
+            expect(() => service.getFlagPlaceable(MOCK_SESSION_ID)).toThrow(NotFoundException);
         });
     });
 
     describe('getMapSize', () => {
-        it('should return map size from cached game', async () => {
-            const mockGame = createMockGame({ size: MapSize.LARGE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
+        it('should return map size', () => {
+            const mockGame = createMockGame({ size: MapSize.MEDIUM });
+            (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
 
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
+            const result = service.getMapSize(MOCK_SESSION_ID);
 
-            const result = service.getMapSize(mockSessionId);
-
-            expect(result).toBe(MapSize.LARGE);
+            expect(result).toBe(MapSize.MEDIUM);
         });
 
         it('should throw NotFoundException when game not found', () => {
-            expect(() => service.getMapSize('non-existent-session')).toThrow(NotFoundException);
+            expect(() => service.getMapSize(MOCK_SESSION_ID)).toThrow(NotFoundException);
         });
     });
 
     describe('setTileOccupant', () => {
-        const MAP_SIZE = MapSize.MEDIUM;
-        const MAP_SIZE_NUM = 15;
+        it('should set tile occupant', () => {
+            const tile = createMockTile({ x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: createMockGameMapTiles(MapSize.MEDIUM, { x: MOCK_X, y: MOCK_Y, tile: { ...tile, playerId: null } }),
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const player = createMockPlayer();
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-        beforeEach(async () => {
-            const tiles: Tile[] = [];
-            for (let y = 0; y < MAP_SIZE_NUM; y++) {
-                for (let x = 0; x < MAP_SIZE_NUM; x++) {
-                    tiles.push({ x, y, kind: TileKind.BASE });
-                }
-            }
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-        });
+            service.setTileOccupant(MOCK_SESSION_ID, position, player);
 
-        it('should set playerId on tile at position', () => {
-            const player = createMockPlayer({ x: POS_X_2, y: POS_Y_3 });
-
-            service.setTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, player);
-
-            const tile = service.getTileAtPosition(mockSessionId, { x: POS_X_2, y: POS_Y_3 });
-            expect(tile?.playerId).toBe('player-123');
+            expect(gameMap.tiles[MOCK_Y * MapSize.MEDIUM + MOCK_X].playerId).toBe(MOCK_PLAYER_ID);
         });
 
         it('should throw NotFoundException when game map not found', () => {
             const player = createMockPlayer();
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-            expect(() => service.setTileOccupant('non-existent-session', { x: POS_X_0, y: POS_Y_0 }, player)).toThrow(NotFoundException);
+            expect(() => service.setTileOccupant(MOCK_SESSION_ID, position, player)).toThrow(NotFoundException);
         });
     });
 
     describe('moveTileOccupant', () => {
-        const MAP_SIZE = MapSize.MEDIUM;
-        const MAP_SIZE_NUM = 15;
-
-        beforeEach(async () => {
-            const tiles: Tile[] = [];
-            for (let y = 0; y < MAP_SIZE_NUM; y++) {
-                for (let x = 0; x < MAP_SIZE_NUM; x++) {
-                    tiles.push({ x, y, kind: TileKind.BASE });
-                }
-            }
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-        });
-
-        it('should clear old position and set new position', () => {
-            const player = createMockPlayer({ x: POS_X_1, y: POS_Y_1 });
-
-            service.setTileOccupant(mockSessionId, { x: POS_X_1, y: POS_Y_1 }, player);
-            service.moveTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, player);
-
-            expect(service.getTileOccupant(mockSessionId, { x: POS_X_1, y: POS_Y_1 })).toBeNull();
-            expect(service.getTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 })).toBe('player-123');
-        });
-
-        it('should throw NotFoundException when game map not found (in clearTileOccupant)', () => {
-            const player = createMockPlayer();
-
-            expect(() => service.moveTileOccupant('non-existent-session', { x: POS_X_1, y: POS_Y_1 }, player)).toThrow(NotFoundException);
-        });
-
-        it('should throw NotFoundException when game map not found (after clearTileOccupant)', () => {
-            const player = createMockPlayer({ x: POS_X_1, y: POS_Y_1 });
-            service.setTileOccupant(mockSessionId, { x: POS_X_1, y: POS_Y_1 }, player);
-
-            type ServiceWithPrivateMap = {
-                sessionsGameMaps: Map<string, unknown>;
-                clearTileOccupant: (sessionId: string, x: number, y: number) => void;
+        it('should move tile occupant', () => {
+            const oldTile = createMockTile({ x: MOCK_X, y: MOCK_Y });
+            const newTile = createMockTile({ x: MOCK_X_2, y: MOCK_Y_2 });
+            const tiles = createMockGameMapTiles(MapSize.MEDIUM);
+            tiles[MOCK_Y * MapSize.MEDIUM + MOCK_X] = { ...oldTile, playerId: MOCK_PLAYER_ID };
+            tiles[MOCK_Y_2 * MapSize.MEDIUM + MOCK_X_2] = { ...newTile, playerId: null };
+            const gameMap = {
+                tiles,
+                objects: [],
+                size: MapSize.MEDIUM,
             };
-            const servicePrivate = service as unknown as ServiceWithPrivateMap;
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const player = createMockPlayer({ x: MOCK_X, y: MOCK_Y });
+            const position: Position = { x: MOCK_X_2, y: MOCK_Y_2 };
 
-            const clearTileOccupantSpy = jest.spyOn(servicePrivate, 'clearTileOccupant').mockImplementation(() => {
-                servicePrivate.sessionsGameMaps.delete(mockSessionId);
-            });
+            service.moveTileOccupant(MOCK_SESSION_ID, position, player);
 
-            expect(() => service.moveTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, player)).toThrow(NotFoundException);
-            expect(() => service.moveTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, player)).toThrow('Game map not found');
-            expect(clearTileOccupantSpy).toHaveBeenCalled();
+            expect(gameMap.tiles[MOCK_Y * MapSize.MEDIUM + MOCK_X].playerId).toBeNull();
+            expect(gameMap.tiles[MOCK_Y_2 * MapSize.MEDIUM + MOCK_X_2].playerId).toBe(MOCK_PLAYER_ID);
+        });
 
-            clearTileOccupantSpy.mockRestore();
+        it('should throw NotFoundException when game map not found', () => {
+            const player = createMockPlayer();
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.moveTileOccupant(MOCK_SESSION_ID, position, player)).toThrow(NotFoundException);
         });
     });
 
     describe('clearTileOccupant', () => {
-        const MAP_SIZE = MapSize.MEDIUM;
-        const MAP_SIZE_NUM = 15;
+        it('should clear tile occupant', () => {
+            const tile = createMockTile({ x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: createMockGameMapTiles(MapSize.MEDIUM, { x: MOCK_X, y: MOCK_Y, tile: { ...tile, playerId: MOCK_PLAYER_ID } }),
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-        beforeEach(async () => {
-            const tiles: Tile[] = [];
-            for (let y = 0; y < MAP_SIZE_NUM; y++) {
-                for (let x = 0; x < MAP_SIZE_NUM; x++) {
-                    tiles.push({ x, y, kind: TileKind.BASE });
-                }
-            }
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-        });
+            service.clearTileOccupant(MOCK_SESSION_ID, position);
 
-        it('should set playerId to null on tile at position', () => {
-            const player = createMockPlayer({ x: POS_X_2, y: POS_Y_3 });
-
-            service.setTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, player);
-            expect(service.getTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 })).toBe('player-123');
-
-            service.clearTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 });
-
-            expect(service.getTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 })).toBeNull();
+            expect(gameMap.tiles[MOCK_Y * MapSize.MEDIUM + MOCK_X].playerId).toBeNull();
         });
 
         it('should throw NotFoundException when game map not found', () => {
-            expect(() => service.clearTileOccupant('non-existent-session', { x: POS_X_0, y: POS_Y_0 })).toThrow(NotFoundException);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.clearTileOccupant(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
         });
     });
 
     describe('getTileOccupant', () => {
-        const MAP_SIZE = MapSize.MEDIUM;
-        const MAP_SIZE_NUM = 15;
+        it('should return tile occupant', () => {
+            const tile = createMockTile({ x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: createMockGameMapTiles(MapSize.MEDIUM, { x: MOCK_X, y: MOCK_Y, tile: { ...tile, playerId: MOCK_PLAYER_ID } }),
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-        beforeEach(async () => {
-            const tiles: Tile[] = [];
-            for (let y = 0; y < MAP_SIZE_NUM; y++) {
-                for (let x = 0; x < MAP_SIZE_NUM; x++) {
-                    tiles.push({ x, y, kind: TileKind.BASE });
-                }
-            }
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
+            const result = service.getTileOccupant(MOCK_SESSION_ID, position);
+
+            expect(result).toBe(MOCK_PLAYER_ID);
         });
 
-        it('should return playerId when tile is occupied', () => {
-            const player = createMockPlayer({ x: POS_X_2, y: POS_Y_3 });
+        it('should return null when no occupant', () => {
+            const tile = createMockTile({ x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: createMockGameMapTiles(MapSize.MEDIUM, { x: MOCK_X, y: MOCK_Y, tile: { ...tile, playerId: null } }),
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-            service.setTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 }, player);
-
-            const result = service.getTileOccupant(mockSessionId, { x: POS_X_2, y: POS_Y_3 });
-
-            expect(result).toBe('player-123');
-        });
-
-        it('should return null when tile is not occupied', () => {
-            const result = service.getTileOccupant(mockSessionId, { x: POS_X_0, y: POS_Y_0 });
+            const result = service.getTileOccupant(MOCK_SESSION_ID, position);
 
             expect(result).toBeNull();
         });
 
         it('should throw NotFoundException when game map not found', () => {
-            expect(() => service.getTileOccupant('non-existent-session', { x: POS_X_0, y: POS_Y_0 })).toThrow(NotFoundException);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.getTileOccupant(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('disablePlaceable', () => {
+        it('should disable placeable and emit event', () => {
+            const placeable = createMockPlaceable({ x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: [],
+                objects: [placeable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            service.disablePlaceable(MOCK_SESSION_ID, position, MOCK_PLAYER_ID);
+
+            const disabledMap = (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.get(MOCK_SESSION_ID);
+            expect(disabledMap).toBeDefined();
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.PlaceableDisabledUpdated,
+                expect.objectContaining({
+                    sessionId: MOCK_SESSION_ID,
+                    placeableId: MOCK_PLACEABLE_ID,
+                    turnCount: MOCK_TURN_COUNT,
+                }),
+            );
+        });
+
+        it('should disable all placeables with same id', () => {
+            const placeable1 = createMockPlaceable({ x: MOCK_X, y: MOCK_Y });
+            const placeable2 = createMockPlaceable({ x: MOCK_X_2, y: MOCK_Y_2 });
+            const gameMap = {
+                tiles: [],
+                objects: [placeable1, placeable2],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            service.disablePlaceable(MOCK_SESSION_ID, position, MOCK_PLAYER_ID);
+
+            const disabledMap = (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.get(MOCK_SESSION_ID);
+            expect(disabledMap?.size).toBeGreaterThan(1);
+        });
+
+        it('should throw NotFoundException when object not found', () => {
+            const gameMap = {
+                tiles: [],
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.disablePlaceable(MOCK_SESSION_ID, position, MOCK_PLAYER_ID)).toThrow(NotFoundException);
+        });
+
+        it('should throw NotFoundException when game map not found', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            expect(() => service.disablePlaceable(MOCK_SESSION_ID, position, MOCK_PLAYER_ID)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('isPlaceableDisabled', () => {
+        it('should return true when placeable is disabled', () => {
+            const placeable = createMockPlaceable({ x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: [],
+                objects: [placeable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const disabledMap = new Map<string, { playerId: string; turnCount: number }>();
+            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, { playerId: MOCK_PLAYER_ID, turnCount: MOCK_TURN_COUNT });
+            (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            const result = service.isPlaceableDisabled(MOCK_SESSION_ID, position);
+
+            expect(result).toBe(true);
+        });
+
+        it('should return false when placeable is not disabled', () => {
+            const placeable = createMockPlaceable({ x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: [],
+                objects: [placeable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            const result = service.isPlaceableDisabled(MOCK_SESSION_ID, position);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when placeable not found', () => {
+            const gameMap = {
+                tiles: [],
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            const result = service.isPlaceableDisabled(MOCK_SESSION_ID, position);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when turnCount is 0', () => {
+            const placeable = createMockPlaceable({ x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: [],
+                objects: [placeable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const disabledMap = new Map<string, { playerId: string; turnCount: number }>();
+            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, { playerId: MOCK_PLAYER_ID, turnCount: 0 });
+            (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            const result = service.isPlaceableDisabled(MOCK_SESSION_ID, position);
+
+            expect(result).toBe(false);
+        });
+    });
+
+    describe('decrementDisabledPlaceablesTurnCount', () => {
+        it('should decrement turn count and emit event', () => {
+            const disabledMap = new Map<string, { playerId: string; turnCount: number }>();
+            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, { playerId: MOCK_PLAYER_ID, turnCount: MOCK_TURN_COUNT });
+            (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
+
+            service.decrementDisabledPlaceablesTurnCount(MOCK_SESSION_ID);
+
+            expect(disabledMap.get(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`)?.turnCount).toBe(MOCK_DECREMENTED_TURN_COUNT);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.PlaceableDisabledUpdated,
+                expect.objectContaining({
+                    sessionId: MOCK_SESSION_ID,
+                    placeableId: MOCK_PLACEABLE_ID,
+                    turnCount: MOCK_DECREMENTED_TURN_COUNT,
+                }),
+            );
+        });
+
+        it('should remove placeable when turnCount reaches 0', () => {
+            const disabledMap = new Map<string, { playerId: string; turnCount: number }>();
+            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, { playerId: MOCK_PLAYER_ID, turnCount: 1 });
+            (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
+
+            service.decrementDisabledPlaceablesTurnCount(MOCK_SESSION_ID);
+
+            expect(disabledMap.has(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`)).toBe(false);
+        });
+
+        it('should do nothing when no disabled placeables', () => {
+            service.decrementDisabledPlaceablesTurnCount(MOCK_SESSION_ID);
+
+            expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('reenablePlaceablesForPlayer', () => {
+        it('should reenable placeables for player', () => {
+            const disabledMap = new Map<string, { playerId: string; turnCount: number }>();
+            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, { playerId: MOCK_PLAYER_ID, turnCount: MOCK_TURN_COUNT });
+            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X_2}-${MOCK_Y_2}`, { playerId: 'other-player', turnCount: MOCK_TURN_COUNT });
+            (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
+
+            service.reenablePlaceablesForPlayer(MOCK_SESSION_ID, MOCK_PLAYER_ID);
+
+            expect(disabledMap.has(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`)).toBe(false);
+            expect(disabledMap.has(`${MOCK_PLACEABLE_ID}-${MOCK_X_2}-${MOCK_Y_2}`)).toBe(true);
+        });
+
+        it('should do nothing when no disabled placeables', () => {
+            service.reenablePlaceablesForPlayer(MOCK_SESSION_ID, MOCK_PLAYER_ID);
+
+            expect(true).toBe(true);
         });
     });
 
     describe('isTileFree', () => {
-        const MAP_SIZE = MapSize.MEDIUM;
-        const MAP_SIZE_NUM = 15;
+        it('should return false when tile has occupant', () => {
+            const tile = createMockTile({ x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: createMockGameMapTiles(MapSize.MEDIUM, { x: MOCK_X, y: MOCK_Y, tile: { ...tile, playerId: MOCK_PLAYER_ID } }),
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-        beforeEach(async () => {
-            const tiles: Tile[] = [];
-            for (let y = 0; y < MAP_SIZE_NUM; y++) {
-                for (let x = 0; x < MAP_SIZE_NUM; x++) {
-                    tiles.push({ x, y, kind: TileKind.BASE });
-                }
-            }
-            tiles[POS_Y_2 * MAP_SIZE_NUM + POS_X_2] = { x: POS_X_2, y: POS_Y_2, kind: TileKind.DOOR, open: false };
-            tiles[POS_Y_2 * MAP_SIZE_NUM + POS_X_3] = { x: POS_X_3, y: POS_Y_2, kind: TileKind.DOOR, open: true };
-            tiles[POS_Y_2 * MAP_SIZE_NUM + POS_X_4] = { x: POS_X_4, y: POS_Y_2, kind: TileKind.WALL };
-            tiles[POS_Y_3 * MAP_SIZE_NUM + POS_X_0] = { x: POS_X_0, y: POS_Y_3, kind: TileKind.WATER };
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
-        });
-
-        it('should return true for free base tile', () => {
-            const result = service.isTileFree(mockSessionId, { x: POS_X_0, y: POS_Y_0 });
-
-            expect(result).toBe(true);
-        });
-
-        it('should return false when tile is occupied', () => {
-            const player = createMockPlayer({ x: POS_X_1, y: POS_Y_1 });
-
-            service.setTileOccupant(mockSessionId, { x: POS_X_1, y: POS_Y_1 }, player);
-
-            const result = service.isTileFree(mockSessionId, { x: POS_X_1, y: POS_Y_1 });
+            const result = service.isTileFree(MOCK_SESSION_ID, position);
 
             expect(result).toBe(false);
         });
 
-        it('should return false when tile does not exist (empty array)', async () => {
-            const tiles: Tile[] = [];
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-            await service.fetchAndCacheGame('session-empty', mockGameId);
+        it('should return false when tile is WALL', () => {
+            const tile = createMockTile({ x: MOCK_X, y: MOCK_Y, kind: TileKind.WALL });
+            const gameMap = {
+                tiles: createMockGameMapTiles(MapSize.MEDIUM, { x: MOCK_X, y: MOCK_Y, tile: { ...tile, playerId: null } }),
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-            expect(() => service.isTileFree('session-empty', { x: POS_X_0, y: POS_Y_0 })).toThrow();
+            const result = service.isTileFree(MOCK_SESSION_ID, position);
+
+            expect(result).toBe(false);
         });
 
-        it('should return false when tile is out of bounds (getTileAtPosition returns undefined)', async () => {
-            const tiles: Tile[] = [];
-            for (let y = 0; y < MAP_SIZE_NUM; y++) {
-                for (let x = 0; x < MAP_SIZE_NUM; x++) {
-                    tiles.push({ x, y, kind: TileKind.BASE });
-                }
-            }
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-            await service.fetchAndCacheGame('session-out-of-bounds', mockGameId);
+        it('should return false when door is closed', () => {
+            const tile = createMockTile({ x: MOCK_X, y: MOCK_Y, kind: TileKind.DOOR, open: false });
+            const gameMap = {
+                tiles: createMockGameMapTiles(MapSize.MEDIUM, { x: MOCK_X, y: MOCK_Y, tile: { ...tile, playerId: null } }),
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
+            const result = service.isTileFree(MOCK_SESSION_ID, position);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return true when door is open', () => {
+            const tile = createMockTile({ x: MOCK_X, y: MOCK_Y, kind: TileKind.DOOR, open: true });
+            const gameMap = {
+                tiles: createMockGameMapTiles(MapSize.MEDIUM, { x: MOCK_X, y: MOCK_Y, tile: { ...tile, playerId: null } }),
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            const result = service.isTileFree(MOCK_SESSION_ID, position);
+
+            expect(result).toBe(true);
+        });
+
+        it('should return false when tile not found', () => {
+            const tiles = createMockGameMapTiles(MapSize.MEDIUM);
+            const gameMap = {
+                tiles,
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const invalidPosition: Position = { x: MapSize.MEDIUM, y: MapSize.MEDIUM };
             jest.spyOn(service, 'getTileOccupant').mockReturnValue(null);
             jest.spyOn(service, 'getTileAtPosition').mockReturnValue(undefined);
 
-            const result = service.isTileFree('session-out-of-bounds', { x: MAP_SIZE_NUM, y: MAP_SIZE_NUM });
+            const result = service.isTileFree(MOCK_SESSION_ID, invalidPosition);
 
             expect(result).toBe(false);
         });
 
-        it('should return false for door tile', () => {
-            const result = service.isTileFree(mockSessionId, { x: POS_X_2, y: POS_Y_2 });
+        it('should return false when placeable is HEAL', () => {
+            const tile = createMockTile({ x: MOCK_X, y: MOCK_Y });
+            const placeable = createMockPlaceable({ x: MOCK_X, y: MOCK_Y, kind: PlaceableKind.HEAL });
+            const gameMap = {
+                tiles: createMockGameMapTiles(MapSize.MEDIUM, { x: MOCK_X, y: MOCK_Y, tile: { ...tile, playerId: null } }),
+                objects: [placeable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            const result = service.isTileFree(MOCK_SESSION_ID, position);
 
             expect(result).toBe(false);
         });
 
-        it('should return false for wall tile', () => {
-            const result = service.isTileFree(mockSessionId, { x: POS_X_4, y: POS_Y_2 });
+        it('should return false when placeable is FIGHT', () => {
+            const tile = createMockTile({ x: MOCK_X, y: MOCK_Y });
+            const placeable = createMockPlaceable({ x: MOCK_X, y: MOCK_Y, kind: PlaceableKind.FIGHT });
+            const gameMap = {
+                tiles: createMockGameMapTiles(MapSize.MEDIUM, { x: MOCK_X, y: MOCK_Y, tile: { ...tile, playerId: null } }),
+                objects: [placeable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            const result = service.isTileFree(MOCK_SESSION_ID, position);
 
             expect(result).toBe(false);
         });
 
-        it('should return true for open door', () => {
-            const result = service.isTileFree(mockSessionId, { x: POS_X_3, y: POS_Y_2 });
+        it('should return true when tile is free', () => {
+            const tile = createMockTile({ x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: createMockGameMapTiles(MapSize.MEDIUM, { x: MOCK_X, y: MOCK_Y, tile: { ...tile, playerId: null } }),
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-            expect(result).toBe(true);
-        });
-
-        it('should return true for water tile', () => {
-            const result = service.isTileFree(mockSessionId, { x: POS_X_0, y: POS_Y_3 });
-
-            expect(result).toBe(true);
-        });
-
-        it('should return true for ice tile', async () => {
-            const tiles: Tile[] = [];
-            for (let y = 0; y < MAP_SIZE_NUM; y++) {
-                for (let x = 0; x < MAP_SIZE_NUM; x++) {
-                    tiles.push({ x, y, kind: TileKind.BASE });
-                }
-            }
-            tiles[POS_X_0] = { x: POS_X_0, y: POS_Y_0, kind: TileKind.ICE };
-            const mockGame = createMockGame({ tiles, size: MAP_SIZE });
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
-            await service.fetchAndCacheGame('session-ice', mockGameId);
-
-            const result = service.isTileFree('session-ice', { x: POS_X_0, y: POS_Y_0 });
+            const result = service.isTileFree(MOCK_SESSION_ID, position);
 
             expect(result).toBe(true);
         });
     });
 
     describe('clearSessionGameCache', () => {
-        beforeEach(() => {
+        it('should clear all caches for session', () => {
             const mockGame = createMockGame();
-            mockModel.findById = jest.fn().mockReturnValue({
-                lean: jest.fn().mockResolvedValue(mockGame),
-            });
+            const gameMap = {
+                tiles: [],
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.set(MOCK_SESSION_ID, new Map());
+
+            service.clearSessionGameCache(MOCK_SESSION_ID);
+
+            expect((service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.has(MOCK_SESSION_ID)).toBe(false);
+            expect((service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.has(MOCK_SESSION_ID)).toBe(false);
+            expect((service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.has(MOCK_SESSION_ID)).toBe(false);
+        });
+    });
+
+    describe('updatePlaceablePosition', () => {
+        it('should update placeable position and emit event', () => {
+            const placeable = createMockPlaceable({ x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: [],
+                objects: [placeable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const fromPosition: Position = { x: MOCK_X, y: MOCK_Y };
+            const toPosition: Position = { x: MOCK_X_2, y: MOCK_Y_2 };
+
+            service.updatePlaceablePosition(MOCK_SESSION_ID, fromPosition, toPosition);
+
+            expect(placeable.x).toBe(MOCK_X_2);
+            expect(placeable.y).toBe(MOCK_Y_2);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.PlaceableUpdated,
+                expect.objectContaining({
+                    sessionId: MOCK_SESSION_ID,
+                    placeable: expect.objectContaining({
+                        id: MOCK_PLACEABLE_ID,
+                    }),
+                }),
+            );
         });
 
-        it('should clear both sessionsGames and sessionsGameMaps for a session', async () => {
-            await service.fetchAndCacheGame(mockSessionId, mockGameId);
+        it('should throw NotFoundException when placeable not found', () => {
+            const gameMap = {
+                tiles: [],
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+            const fromPosition: Position = { x: MOCK_X, y: MOCK_Y };
+            const toPosition: Position = { x: MOCK_X_2, y: MOCK_Y_2 };
 
-            expect(service.getGameForSession(mockSessionId)).toBeDefined();
-            expect(service.getGameMapForSession(mockSessionId)).toBeDefined();
-
-            service.clearSessionGameCache(mockSessionId);
-
-            expect(() => service.getGameForSession(mockSessionId)).toThrow(NotFoundException);
-            expect(() => service.getGameMapForSession(mockSessionId)).toThrow(NotFoundException);
+            expect(() => service.updatePlaceablePosition(MOCK_SESSION_ID, fromPosition, toPosition)).toThrow(NotFoundException);
         });
 
-        it('should not throw error when clearing non-existent session cache', () => {
-            expect(() => service.clearSessionGameCache('non-existent-session')).not.toThrow();
+        it('should throw NotFoundException when game map not found', () => {
+            const fromPosition: Position = { x: MOCK_X, y: MOCK_Y };
+            const toPosition: Position = { x: MOCK_X_2, y: MOCK_Y_2 };
+
+            expect(() => service.updatePlaceablePosition(MOCK_SESSION_ID, fromPosition, toPosition)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('getInitialFlagData', () => {
+        it('should return flag data when flag exists', () => {
+            const flagPlaceable = createMockPlaceable({ kind: PlaceableKind.FLAG, x: MOCK_X, y: MOCK_Y });
+            const gameMap = {
+                tiles: [],
+                objects: [flagPlaceable],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+
+            const result = service.getInitialFlagData(MOCK_SESSION_ID);
+
+            expect(result).toBeDefined();
+            expect(result?.position).toEqual({ x: MOCK_X, y: MOCK_Y });
+            expect(result?.holderPlayerId).toBeNull();
+        });
+
+        it('should return undefined when flag not found', () => {
+            const gameMap = {
+                tiles: [],
+                objects: [],
+                size: MapSize.MEDIUM,
+            };
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
+
+            const result = service.getInitialFlagData(MOCK_SESSION_ID);
+
+            expect(result).toBeUndefined();
+        });
+
+        it('should throw NotFoundException when game map not found', () => {
+            expect(() => service.getInitialFlagData(MOCK_SESSION_ID)).toThrow(NotFoundException);
         });
     });
 });
+

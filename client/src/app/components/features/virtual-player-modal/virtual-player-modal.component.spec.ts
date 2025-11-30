@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { VirtualPlayerModalComponent } from './virtual-player-modal.component';
 
-// Test constants
 const TEST_CAN_ADD_VIRTUAL_PLAYER_TRUE = true;
 const TEST_CAN_ADD_VIRTUAL_PLAYER_FALSE = false;
 const TEST_DEFAULT_CAN_ADD_VIRTUAL_PLAYER = true;

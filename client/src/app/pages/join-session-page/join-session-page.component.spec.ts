@@ -7,7 +7,6 @@ import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { JoinSessionPageComponent } from './join-session-page.component';
 
-// Test constants
 const TEST_SESSION_ID_1 = 'test-session-id-1';
 const TEST_SESSION_ID_2 = 'test-session-id-2';
 const TEST_CURRENT_PLAYERS_2 = 2;

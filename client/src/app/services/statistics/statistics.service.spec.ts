@@ -6,7 +6,6 @@ import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket
 import { ResetService } from '@app/services/reset/reset.service';
 import { StatisticsService } from './statistics.service';
 
-// Test constants
 const TEST_SESSION_ID = 'test-session-id';
 const TEST_WINNER_ID = 'test-winner-id';
 const TEST_WINNER_NAME = 'Test Winner';

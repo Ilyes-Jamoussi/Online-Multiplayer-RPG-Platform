@@ -5,6 +5,7 @@ import { ActiveTool, GameEditorIssues, ToolType } from '@app/interfaces/game-edi
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { GameEditorInteractionsService } from '@app/services/game-editor-interactions/game-editor-interactions.service';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Position } from '@common/interfaces/position.interface';
 import { GameEditorTileComponent } from './game-editor-tile.component';
@@ -89,6 +90,7 @@ describe('GameEditorTileComponent', () => {
             'hasMime',
             'resolveHoveredTiles',
             'resolveDropAction',
+            'selectTeleportTileEraserTool',
         ]);
 
         assetsSpy = jasmine.createSpyObj<AssetsService>('AssetsService', ['getTileImage']);
@@ -190,29 +192,62 @@ describe('GameEditorTileComponent', () => {
         expect(component.isBrushHovered).toBeTrue();
     });
 
-    it('onRightClick should prevent default', () => {
-        let prevented = false;
-        const evt = makeMouseEvent({ preventDefault: () => (prevented = true) });
-        component.onRightClick(evt);
-        expect(prevented).toBeTrue();
+    describe('onRightClick', () => {
+        it('should prevent default', () => {
+            let prevented = false;
+            const evt = makeMouseEvent({ preventDefault: () => (prevented = true) });
+            component.onRightClick(evt);
+            expect(prevented).toBeTrue();
+        });
     });
 
-    it('onMouseDown left should start left drag', () => {
-        let prevented = false;
-        const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: 0 });
-        component.onMouseDown(evt);
-        expect(prevented).toBeTrue();
-        expect(interactionsSpy.dragStart).toHaveBeenCalledWith(tile.x, tile.y, 'left');
-    });
+    describe('onMouseDown', () => {
+        const MOCK_BUTTON_LEFT = 0;
+        const MOCK_BUTTON_RIGHT = 2;
 
-    it('onMouseDown right should set TileBrushTool BASE and start right drag', () => {
-        let prevented = false;
-        const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: 2 });
-        component.onMouseDown(evt);
-        expect(prevented).toBeTrue();
-        expect(activeToolState?.type).toBe(ToolType.TileBrushTool);
-        expect((activeToolState as ActiveTool & { tileKind: TileKind }).tileKind).toBe(TileKind.BASE);
-        expect(interactionsSpy.dragStart).toHaveBeenCalledWith(tile.x, tile.y, 'right');
+        beforeEach(() => {
+            interactionsSpy.dragStart.calls.reset();
+            interactionsSpy.selectTeleportTileEraserTool.calls.reset();
+        });
+
+        it('should prevent default', () => {
+            let prevented = false;
+            const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: MOCK_BUTTON_LEFT });
+            component.onMouseDown(evt);
+            expect(prevented).toBeTrue();
+        });
+
+        it('should start left drag when button is 0', () => {
+            let prevented = false;
+            const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: MOCK_BUTTON_LEFT });
+            component.onMouseDown(evt);
+            expect(prevented).toBeTrue();
+            expect(interactionsSpy.dragStart).toHaveBeenCalledWith(tile.x, tile.y, 'left');
+        });
+
+        it('should call selectTeleportTileEraserTool when right click on TELEPORT tile', () => {
+            component.tile = { ...tile, kind: TileKind.TELEPORT };
+            fixture.detectChanges();
+            let prevented = false;
+            const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: MOCK_BUTTON_RIGHT });
+            component.onMouseDown(evt);
+            expect(prevented).toBeTrue();
+            expect(interactionsSpy.selectTeleportTileEraserTool).toHaveBeenCalledTimes(1);
+            expect(interactionsSpy.dragStart).toHaveBeenCalledWith(tile.x, tile.y, 'right');
+        });
+
+        it('should set TileBrushTool BASE and start right drag when right click on non-TELEPORT tile', () => {
+            component.tile = { ...tile, kind: TileKind.BASE };
+            fixture.detectChanges();
+            let prevented = false;
+            const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: MOCK_BUTTON_RIGHT });
+            component.onMouseDown(evt);
+            expect(prevented).toBeTrue();
+            expect(activeToolState?.type).toBe(ToolType.TileBrushTool);
+            expect((activeToolState as ActiveTool & { tileKind: TileKind }).tileKind).toBe(TileKind.BASE);
+            expect(interactionsSpy.selectTeleportTileEraserTool).not.toHaveBeenCalled();
+            expect(interactionsSpy.dragStart).toHaveBeenCalledWith(tile.x, tile.y, 'right');
+        });
     });
 
     it('onMouseUp should call dragEnd always', () => {
@@ -334,5 +369,101 @@ describe('GameEditorTileComponent', () => {
     it('isDropHovered returns true when list includes tile', () => {
         hoveredTilesState = [{ x: tile.x, y: tile.y }];
         expect(component.isDropHovered).toBeTrue();
+    });
+
+    describe('teleportChannelNumber', () => {
+        const MOCK_TELEPORT_CHANNEL = 1;
+
+        it('should return null when tile kind is not TELEPORT', () => {
+            component.tile = { ...tile, kind: TileKind.BASE };
+            fixture.detectChanges();
+            expect(component.teleportChannelNumber).toBeNull();
+        });
+
+        it('should return null when tile kind is TELEPORT but teleportChannel is undefined', () => {
+            component.tile = { ...tile, kind: TileKind.TELEPORT };
+            fixture.detectChanges();
+            expect(component.teleportChannelNumber).toBeNull();
+        });
+
+        it('should return null when tile kind is TELEPORT but teleportChannel is 0', () => {
+            component.tile = { ...tile, kind: TileKind.TELEPORT, teleportChannel: 0 };
+            fixture.detectChanges();
+            expect(component.teleportChannelNumber).toBeNull();
+        });
+
+        it('should return teleportChannel when tile kind is TELEPORT and teleportChannel exists', () => {
+            component.tile = { ...tile, kind: TileKind.TELEPORT, teleportChannel: MOCK_TELEPORT_CHANNEL };
+            fixture.detectChanges();
+            expect(component.teleportChannelNumber).toBe(MOCK_TELEPORT_CHANNEL);
+        });
+    });
+
+    describe('activeTeleportChannelNumber', () => {
+        const MOCK_CHANNEL_NUMBER = 2;
+
+        it('should return null when activeTool is null', () => {
+            activeToolState = null;
+            fixture.detectChanges();
+            expect(component.activeTeleportChannelNumber).toBeNull();
+        });
+
+        it('should return null when activeTool type is not TeleportTileTool', () => {
+            activeToolState = { type: ToolType.TileBrushTool, tileKind: TileKind.BASE, leftDrag: false, rightDrag: false };
+            fixture.detectChanges();
+            expect(component.activeTeleportChannelNumber).toBeNull();
+        });
+
+        it('should return null when activeTool type is PlaceableTool', () => {
+            activeToolState = { type: ToolType.PlaceableTool, placeableKind: PlaceableKind.START };
+            fixture.detectChanges();
+            expect(component.activeTeleportChannelNumber).toBeNull();
+        });
+
+        it('should return channelNumber when activeTool type is TeleportTileTool', () => {
+            activeToolState = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: MOCK_CHANNEL_NUMBER,
+                teleportChannel: {
+                    channelNumber: MOCK_CHANNEL_NUMBER,
+                    tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } },
+                },
+            };
+            fixture.detectChanges();
+            expect(component.activeTeleportChannelNumber).toBe(MOCK_CHANNEL_NUMBER);
+        });
+    });
+
+    describe('isTeleportToolActive', () => {
+        it('should return false when activeTool is null', () => {
+            activeToolState = null;
+            fixture.detectChanges();
+            expect(component.isTeleportToolActive).toBeFalse();
+        });
+
+        it('should return false when activeTool type is not TeleportTileTool', () => {
+            activeToolState = { type: ToolType.TileBrushTool, tileKind: TileKind.BASE, leftDrag: false, rightDrag: false };
+            fixture.detectChanges();
+            expect(component.isTeleportToolActive).toBeFalse();
+        });
+
+        it('should return false when activeTool type is PlaceableTool', () => {
+            activeToolState = { type: ToolType.PlaceableTool, placeableKind: PlaceableKind.START };
+            fixture.detectChanges();
+            expect(component.isTeleportToolActive).toBeFalse();
+        });
+
+        it('should return true when activeTool type is TeleportTileTool', () => {
+            activeToolState = {
+                type: ToolType.TeleportTileTool,
+                channelNumber: 1,
+                teleportChannel: {
+                    channelNumber: 1,
+                    tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } },
+                },
+            };
+            fixture.detectChanges();
+            expect(component.isTeleportToolActive).toBeTrue();
+        });
     });
 });

@@ -9,7 +9,6 @@ import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { VirtualPlayerCardComponent } from './virtual-player-card.component';
 
-// Test constants
 const TEST_PLAYER_ID_1 = 'test-player-id-1';
 const TEST_PLAYER_ID_2 = 'test-player-id-2';
 const TEST_PLAYER_NAME_1 = 'Test Player 1';
