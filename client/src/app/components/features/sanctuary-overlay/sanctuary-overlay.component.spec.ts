@@ -7,7 +7,6 @@ import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { SanctuaryActionSuccessDto } from '@app/dto/sanctuary-action-success-dto';
 import { SanctuaryOverlayComponent } from './sanctuary-overlay.component';
 
-// Test constants
 const TEST_X_COORDINATE = 5;
 const TEST_Y_COORDINATE = 10;
 const TEST_ADDED_HEALTH = 3;
@@ -40,7 +39,7 @@ type MockAssetsService = {
     getPlaceableImage: jasmine.Spy;
 };
 
-const createMockSanctuary = (
+const CREATE_MOCK_SANCTUARY = (
     kind: PlaceableKind,
     success: boolean = TEST_SUCCESS_FALSE,
     addedHealth?: number,
@@ -98,7 +97,7 @@ describe('SanctuaryOverlayComponent', () => {
 
     describe('openedSanctuary', () => {
         it('should return openedSanctuary from inGameService', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.HEAL);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -122,7 +121,7 @@ describe('SanctuaryOverlayComponent', () => {
 
             expect(component.openedSanctuary).toBeNull();
 
-            const mockSanctuary = createMockSanctuary(PlaceableKind.FIGHT);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.FIGHT);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -142,7 +141,7 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should return image path for HEAL sanctuary', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.HEAL);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -153,7 +152,7 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should return image path for FIGHT sanctuary', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.FIGHT);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.FIGHT);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -175,7 +174,7 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should return label for HEAL sanctuary', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.HEAL);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -185,7 +184,7 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should return label for FIGHT sanctuary', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.FIGHT);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.FIGHT);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -197,7 +196,7 @@ describe('SanctuaryOverlayComponent', () => {
 
     describe('isHeal', () => {
         it('should return true when sanctuary kind is HEAL', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.HEAL);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -207,7 +206,7 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should return false when sanctuary kind is not HEAL', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.FIGHT);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.FIGHT);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -228,7 +227,7 @@ describe('SanctuaryOverlayComponent', () => {
 
     describe('isFight', () => {
         it('should return true when sanctuary kind is FIGHT', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.FIGHT);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.FIGHT);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -238,7 +237,7 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should return false when sanctuary kind is not FIGHT', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.HEAL);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -259,7 +258,7 @@ describe('SanctuaryOverlayComponent', () => {
 
     describe('hasResult', () => {
         it('should return true when success is true', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.HEAL, TEST_SUCCESS_TRUE);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL, TEST_SUCCESS_TRUE);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -269,7 +268,7 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should return false when success is false', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.HEAL, TEST_SUCCESS_FALSE);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL, TEST_SUCCESS_FALSE);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -290,7 +289,7 @@ describe('SanctuaryOverlayComponent', () => {
 
     describe('showActions', () => {
         it('should return true when success is false', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.HEAL, TEST_SUCCESS_FALSE);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL, TEST_SUCCESS_FALSE);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -300,7 +299,7 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should return false when success is true', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.HEAL, TEST_SUCCESS_TRUE);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL, TEST_SUCCESS_TRUE);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -330,7 +329,7 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should return empty string when hasResult is false', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.HEAL, TEST_SUCCESS_FALSE);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL, TEST_SUCCESS_FALSE);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -340,7 +339,7 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should return heal message when isHeal and addedHealth is present', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.HEAL, TEST_SUCCESS_TRUE, TEST_ADDED_HEALTH);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL, TEST_SUCCESS_TRUE, TEST_ADDED_HEALTH);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -350,7 +349,7 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should return empty string when isHeal but addedHealth is not present', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.HEAL, TEST_SUCCESS_TRUE);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL, TEST_SUCCESS_TRUE);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -360,7 +359,7 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should return fight message with attack only when isFight and addedAttack is present', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.FIGHT, TEST_SUCCESS_TRUE, undefined, TEST_ADDED_ATTACK);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.FIGHT, TEST_SUCCESS_TRUE, undefined, TEST_ADDED_ATTACK);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -370,7 +369,7 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should return fight message with defense only when isFight and addedDefense is present', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.FIGHT, TEST_SUCCESS_TRUE, undefined, undefined, TEST_ADDED_DEFENSE);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.FIGHT, TEST_SUCCESS_TRUE, undefined, undefined, TEST_ADDED_DEFENSE);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -380,19 +379,21 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should return fight message with both attack and defense when both are present', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.FIGHT, TEST_SUCCESS_TRUE, undefined, TEST_ADDED_ATTACK, TEST_ADDED_DEFENSE);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.FIGHT, TEST_SUCCESS_TRUE, undefined, TEST_ADDED_ATTACK, TEST_ADDED_DEFENSE);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
             const result = component.resultMessage;
 
-            expect(result).toBe(
-                `${FIGHT_ATTACK_PREFIX}${TEST_ADDED_ATTACK}${FIGHT_ATTACK_SUFFIX}${FIGHT_PARTS_SEPARATOR}${FIGHT_DEFENSE_PREFIX}${TEST_ADDED_DEFENSE}${FIGHT_DEFENSE_SUFFIX}`,
-            );
+            const expectedMessage =
+                `${FIGHT_ATTACK_PREFIX}${TEST_ADDED_ATTACK}${FIGHT_ATTACK_SUFFIX}` +
+                `${FIGHT_PARTS_SEPARATOR}` +
+                `${FIGHT_DEFENSE_PREFIX}${TEST_ADDED_DEFENSE}${FIGHT_DEFENSE_SUFFIX}`;
+            expect(result).toBe(expectedMessage);
         });
 
         it('should return empty string when isFight but neither addedAttack nor addedDefense is present', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.FIGHT, TEST_SUCCESS_TRUE);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.FIGHT, TEST_SUCCESS_TRUE);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -404,7 +405,7 @@ describe('SanctuaryOverlayComponent', () => {
 
     describe('performAction', () => {
         it('should call inGameService.performSanctuaryAction with correct parameters when double is false', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.HEAL);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 
@@ -420,7 +421,7 @@ describe('SanctuaryOverlayComponent', () => {
         });
 
         it('should call inGameService.performSanctuaryAction with correct parameters when double is true', () => {
-            const mockSanctuary = createMockSanctuary(PlaceableKind.FIGHT);
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.FIGHT);
             openedSanctuarySignal.set(mockSanctuary);
             fixture.detectChanges();
 

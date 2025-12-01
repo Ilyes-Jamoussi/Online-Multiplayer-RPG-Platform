@@ -58,7 +58,7 @@ type MockSessionService = {
     addVirtualPlayer: jasmine.Spy;
 };
 
-const createMockPlayer = (id: string, name: string, isAdmin: boolean = TEST_IS_NOT_ADMIN): Player => ({
+const CREATE_MOCK_PLAYER = (id: string, name: string, isAdmin: boolean = TEST_IS_NOT_ADMIN): Player => ({
     id,
     name,
     avatar: Avatar.Avatar1,
@@ -101,8 +101,8 @@ describe('WaitingRoomActionsComponent', () => {
     let maxPlayersSignal: ReturnType<typeof signal<number>>;
 
     beforeEach(async () => {
-        const mockPlayer1 = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
-        const mockPlayer2 = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2);
+        const mockPlayer1 = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
+        const mockPlayer2 = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2);
         const mockPlayers = [mockPlayer1, mockPlayer2];
 
         playersSignal = signal<Player[]>(mockPlayers);
@@ -145,8 +145,8 @@ describe('WaitingRoomActionsComponent', () => {
 
     describe('canAddVirtualPlayer', () => {
         it('should return true when players count is less than maxPlayers', () => {
-            const mockPlayer1 = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
-            const mockPlayer2 = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2);
+            const mockPlayer1 = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
+            const mockPlayer2 = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2);
             playersSignal.set([mockPlayer1, mockPlayer2]);
             maxPlayersSignal.set(TEST_MAX_PLAYERS);
             fixture.detectChanges();
@@ -155,10 +155,10 @@ describe('WaitingRoomActionsComponent', () => {
         });
 
         it('should return false when players count equals maxPlayers', () => {
-            const mockPlayer1 = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
-            const mockPlayer2 = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2);
-            const mockPlayer3 = createMockPlayer('player-3', 'Player 3');
-            const mockPlayer4 = createMockPlayer('player-4', 'Player 4');
+            const mockPlayer1 = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
+            const mockPlayer2 = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2);
+            const mockPlayer3 = CREATE_MOCK_PLAYER('player-3', 'Player 3');
+            const mockPlayer4 = CREATE_MOCK_PLAYER('player-4', 'Player 4');
             playersSignal.set([mockPlayer1, mockPlayer2, mockPlayer3, mockPlayer4]);
             maxPlayersSignal.set(TEST_MAX_PLAYERS);
             fixture.detectChanges();

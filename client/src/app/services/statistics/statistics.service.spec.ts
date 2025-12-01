@@ -36,25 +36,27 @@ type MockInGameSocketService = {
     onLoadGameStatistics: jasmine.Spy;
 };
 
-const createMockPlayerStatistics = (
-    name: string,
-    combatCount: number,
-    combatWins: number,
-    combatLosses: number,
-    healthLost: number,
-    healthDealt: number,
-    tilesVisitedPercentage: number,
-): PlayerStatisticsDto => ({
-    name,
-    combatCount,
-    combatWins,
-    combatLosses,
-    healthLost,
-    healthDealt,
-    tilesVisitedPercentage,
+interface PlayerStatisticsParams {
+    name: string;
+    combatCount: number;
+    combatWins: number;
+    combatLosses: number;
+    healthLost: number;
+    healthDealt: number;
+    tilesVisitedPercentage: number;
+}
+
+const CREATE_MOCK_PLAYER_STATISTICS = (params: PlayerStatisticsParams): PlayerStatisticsDto => ({
+    name: params.name,
+    combatCount: params.combatCount,
+    combatWins: params.combatWins,
+    combatLosses: params.combatLosses,
+    healthLost: params.healthLost,
+    healthDealt: params.healthDealt,
+    tilesVisitedPercentage: params.tilesVisitedPercentage,
 });
 
-const createMockGlobalStatistics = (): GlobalStatisticsDto => ({
+const CREATE_MOCK_GLOBAL_STATISTICS = (): GlobalStatisticsDto => ({
     gameDuration: TEST_GAME_DURATION,
     totalTurns: TEST_TOTAL_TURNS,
     tilesVisitedPercentage: TEST_GLOBAL_TILES_VISITED_PERCENTAGE,
@@ -64,7 +66,7 @@ const createMockGlobalStatistics = (): GlobalStatisticsDto => ({
     flagHoldersCount: TEST_FLAG_HOLDERS_COUNT,
 });
 
-const createMockGameStatistics = (playersStats: PlayerStatisticsDto[], globalStats: GlobalStatisticsDto): GameStatisticsDto => ({
+const CREATE_MOCK_GAME_STATISTICS = (playersStats: PlayerStatisticsDto[], globalStats: GlobalStatisticsDto): GameStatisticsDto => ({
     winnerId: TEST_WINNER_ID,
     winnerName: TEST_WINNER_NAME,
     playersStatistics: playersStats,
@@ -133,10 +135,18 @@ describe('StatisticsService', () => {
     describe('setGameStatistics', () => {
         it('should update gameStatistics signal', () => {
             const mockPlayersStats = [
-                createMockPlayerStatistics(TEST_PLAYER_NAME_1, TEST_COMBAT_COUNT_1, TEST_COMBAT_WINS_1, TEST_COMBAT_LOSSES_1, TEST_HEALTH_LOST_1, TEST_HEALTH_DEALT_1, TEST_TILES_VISITED_PERCENTAGE_1),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_1,
+                    combatCount: TEST_COMBAT_COUNT_1,
+                    combatWins: TEST_COMBAT_WINS_1,
+                    combatLosses: TEST_COMBAT_LOSSES_1,
+                    healthLost: TEST_HEALTH_LOST_1,
+                    healthDealt: TEST_HEALTH_DEALT_1,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_1,
+                }),
             ];
-            const mockGlobalStats = createMockGlobalStatistics();
-            const mockGameStats = createMockGameStatistics(mockPlayersStats, mockGlobalStats);
+            const mockGlobalStats = CREATE_MOCK_GLOBAL_STATISTICS();
+            const mockGameStats = CREATE_MOCK_GAME_STATISTICS(mockPlayersStats, mockGlobalStats);
 
             service.setGameStatistics(mockGameStats);
 
@@ -145,11 +155,27 @@ describe('StatisticsService', () => {
 
         it('should update gameStatistics signal with different statistics', () => {
             const mockPlayersStats = [
-                createMockPlayerStatistics(TEST_PLAYER_NAME_1, TEST_COMBAT_COUNT_1, TEST_COMBAT_WINS_1, TEST_COMBAT_LOSSES_1, TEST_HEALTH_LOST_1, TEST_HEALTH_DEALT_1, TEST_TILES_VISITED_PERCENTAGE_1),
-                createMockPlayerStatistics(TEST_PLAYER_NAME_2, TEST_COMBAT_COUNT_2, TEST_COMBAT_WINS_2, TEST_COMBAT_LOSSES_2, TEST_HEALTH_LOST_2, TEST_HEALTH_DEALT_2, TEST_TILES_VISITED_PERCENTAGE_2),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_1,
+                    combatCount: TEST_COMBAT_COUNT_1,
+                    combatWins: TEST_COMBAT_WINS_1,
+                    combatLosses: TEST_COMBAT_LOSSES_1,
+                    healthLost: TEST_HEALTH_LOST_1,
+                    healthDealt: TEST_HEALTH_DEALT_1,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_1,
+                }),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_2,
+                    combatCount: TEST_COMBAT_COUNT_2,
+                    combatWins: TEST_COMBAT_WINS_2,
+                    combatLosses: TEST_COMBAT_LOSSES_2,
+                    healthLost: TEST_HEALTH_LOST_2,
+                    healthDealt: TEST_HEALTH_DEALT_2,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_2,
+                }),
             ];
-            const mockGlobalStats = createMockGlobalStatistics();
-            const mockGameStats = createMockGameStatistics(mockPlayersStats, mockGlobalStats);
+            const mockGlobalStats = CREATE_MOCK_GLOBAL_STATISTICS();
+            const mockGameStats = CREATE_MOCK_GAME_STATISTICS(mockPlayersStats, mockGlobalStats);
 
             service.setGameStatistics(mockGameStats);
 
@@ -167,10 +193,18 @@ describe('StatisticsService', () => {
             expect(service.gameStatistics()).toBeNull();
 
             const mockPlayersStats = [
-                createMockPlayerStatistics(TEST_PLAYER_NAME_1, TEST_COMBAT_COUNT_1, TEST_COMBAT_WINS_1, TEST_COMBAT_LOSSES_1, TEST_HEALTH_LOST_1, TEST_HEALTH_DEALT_1, TEST_TILES_VISITED_PERCENTAGE_1),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_1,
+                    combatCount: TEST_COMBAT_COUNT_1,
+                    combatWins: TEST_COMBAT_WINS_1,
+                    combatLosses: TEST_COMBAT_LOSSES_1,
+                    healthLost: TEST_HEALTH_LOST_1,
+                    healthDealt: TEST_HEALTH_DEALT_1,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_1,
+                }),
             ];
-            const mockGlobalStats = createMockGlobalStatistics();
-            const mockGameStats = createMockGameStatistics(mockPlayersStats, mockGlobalStats);
+            const mockGlobalStats = CREATE_MOCK_GLOBAL_STATISTICS();
+            const mockGameStats = CREATE_MOCK_GAME_STATISTICS(mockPlayersStats, mockGlobalStats);
 
             if (loadGameStatisticsCallback) {
                 loadGameStatisticsCallback(mockGameStats);
@@ -181,10 +215,18 @@ describe('StatisticsService', () => {
 
         it('should update gameStatistics with different data when callback is invoked multiple times', () => {
             const mockPlayersStats1 = [
-                createMockPlayerStatistics(TEST_PLAYER_NAME_1, TEST_COMBAT_COUNT_1, TEST_COMBAT_WINS_1, TEST_COMBAT_LOSSES_1, TEST_HEALTH_LOST_1, TEST_HEALTH_DEALT_1, TEST_TILES_VISITED_PERCENTAGE_1),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_1,
+                    combatCount: TEST_COMBAT_COUNT_1,
+                    combatWins: TEST_COMBAT_WINS_1,
+                    combatLosses: TEST_COMBAT_LOSSES_1,
+                    healthLost: TEST_HEALTH_LOST_1,
+                    healthDealt: TEST_HEALTH_DEALT_1,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_1,
+                }),
             ];
-            const mockGlobalStats1 = createMockGlobalStatistics();
-            const mockGameStats1 = createMockGameStatistics(mockPlayersStats1, mockGlobalStats1);
+            const mockGlobalStats1 = CREATE_MOCK_GLOBAL_STATISTICS();
+            const mockGameStats1 = CREATE_MOCK_GAME_STATISTICS(mockPlayersStats1, mockGlobalStats1);
 
             if (loadGameStatisticsCallback) {
                 loadGameStatisticsCallback(mockGameStats1);
@@ -193,10 +235,18 @@ describe('StatisticsService', () => {
             expect(service.gameStatistics()).toEqual(mockGameStats1);
 
             const mockPlayersStats2 = [
-                createMockPlayerStatistics(TEST_PLAYER_NAME_2, TEST_COMBAT_COUNT_2, TEST_COMBAT_WINS_2, TEST_COMBAT_LOSSES_2, TEST_HEALTH_LOST_2, TEST_HEALTH_DEALT_2, TEST_TILES_VISITED_PERCENTAGE_2),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_2,
+                    combatCount: TEST_COMBAT_COUNT_2,
+                    combatWins: TEST_COMBAT_WINS_2,
+                    combatLosses: TEST_COMBAT_LOSSES_2,
+                    healthLost: TEST_HEALTH_LOST_2,
+                    healthDealt: TEST_HEALTH_DEALT_2,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_2,
+                }),
             ];
-            const mockGlobalStats2 = createMockGlobalStatistics();
-            const mockGameStats2 = createMockGameStatistics(mockPlayersStats2, mockGlobalStats2);
+            const mockGlobalStats2 = CREATE_MOCK_GLOBAL_STATISTICS();
+            const mockGameStats2 = CREATE_MOCK_GAME_STATISTICS(mockPlayersStats2, mockGlobalStats2);
 
             if (loadGameStatisticsCallback) {
                 loadGameStatisticsCallback(mockGameStats2);
@@ -209,10 +259,18 @@ describe('StatisticsService', () => {
     describe('ResetService integration', () => {
         it('should reset gameStatistics when ResetService triggers reset', () => {
             const mockPlayersStats = [
-                createMockPlayerStatistics(TEST_PLAYER_NAME_1, TEST_COMBAT_COUNT_1, TEST_COMBAT_WINS_1, TEST_COMBAT_LOSSES_1, TEST_HEALTH_LOST_1, TEST_HEALTH_DEALT_1, TEST_TILES_VISITED_PERCENTAGE_1),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_1,
+                    combatCount: TEST_COMBAT_COUNT_1,
+                    combatWins: TEST_COMBAT_WINS_1,
+                    combatLosses: TEST_COMBAT_LOSSES_1,
+                    healthLost: TEST_HEALTH_LOST_1,
+                    healthDealt: TEST_HEALTH_DEALT_1,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_1,
+                }),
             ];
-            const mockGlobalStats = createMockGlobalStatistics();
-            const mockGameStats = createMockGameStatistics(mockPlayersStats, mockGlobalStats);
+            const mockGlobalStats = CREATE_MOCK_GLOBAL_STATISTICS();
+            const mockGameStats = CREATE_MOCK_GAME_STATISTICS(mockPlayersStats, mockGlobalStats);
 
             service.setGameStatistics(mockGameStats);
             expect(service.gameStatistics()).toEqual(mockGameStats);
@@ -224,10 +282,18 @@ describe('StatisticsService', () => {
 
         it('should reset gameStatistics multiple times when ResetService triggers reset multiple times', () => {
             const mockPlayersStats = [
-                createMockPlayerStatistics(TEST_PLAYER_NAME_1, TEST_COMBAT_COUNT_1, TEST_COMBAT_WINS_1, TEST_COMBAT_LOSSES_1, TEST_HEALTH_LOST_1, TEST_HEALTH_DEALT_1, TEST_TILES_VISITED_PERCENTAGE_1),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_1,
+                    combatCount: TEST_COMBAT_COUNT_1,
+                    combatWins: TEST_COMBAT_WINS_1,
+                    combatLosses: TEST_COMBAT_LOSSES_1,
+                    healthLost: TEST_HEALTH_LOST_1,
+                    healthDealt: TEST_HEALTH_DEALT_1,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_1,
+                }),
             ];
-            const mockGlobalStats = createMockGlobalStatistics();
-            const mockGameStats = createMockGameStatistics(mockPlayersStats, mockGlobalStats);
+            const mockGlobalStats = CREATE_MOCK_GLOBAL_STATISTICS();
+            const mockGameStats = CREATE_MOCK_GAME_STATISTICS(mockPlayersStats, mockGlobalStats);
 
             service.setGameStatistics(mockGameStats);
             expect(service.gameStatistics()).toEqual(mockGameStats);

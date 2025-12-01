@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file */
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
@@ -27,12 +28,12 @@ type MockGameEditorStoreService = {
     getTileAt: jasmine.Spy;
 };
 
-const createMockTeleportTileCoordinates = (x: number, y: number): TeleportTileCoordinatesDto => ({
+const CREATE_MOCK_TELEPORT_TILE_COORDINATES = (x: number, y: number): TeleportTileCoordinatesDto => ({
     x,
     y,
 });
 
-const createMockTeleportTiles = (
+const CREATE_MOCK_TELEPORT_TILES = (
     entryA?: TeleportTileCoordinatesDto,
     entryB?: TeleportTileCoordinatesDto,
 ): TeleportTilesDto => ({
@@ -40,7 +41,7 @@ const createMockTeleportTiles = (
     entryB,
 });
 
-const createMockTeleportChannel = (
+const CREATE_MOCK_TELEPORT_CHANNEL = (
     channelNumber: number,
     tiles?: TeleportTilesDto,
 ): TeleportChannelDto => ({
@@ -48,7 +49,7 @@ const createMockTeleportChannel = (
     tiles: tiles || { entryA: undefined, entryB: undefined },
 });
 
-const createMockTile = (x: number, y: number, kind: TileKind, teleportChannel?: number): GameEditorTileDto => ({
+const CREATE_MOCK_TILE = (x: number, y: number, kind: TileKind, teleportChannel?: number): GameEditorTileDto => ({
     kind,
     x,
     y,
@@ -93,8 +94,13 @@ describe('GameEditorTeleportService', () => {
         });
 
         it('should return channels with missing entryA', () => {
-            const channel1 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1, createMockTeleportTiles(undefined, createMockTeleportTileCoordinates(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2)));
-            const channel2 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_2, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), createMockTeleportTileCoordinates(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2)));
+            const tiles1 = CREATE_MOCK_TELEPORT_TILES(undefined, CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2));
+            const channel1 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1, tiles1);
+            const tiles2 = CREATE_MOCK_TELEPORT_TILES(
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1),
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2),
+            );
+            const channel2 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_2, tiles2);
             teleportChannelsSignal.set([channel1, channel2]);
 
             const available = service.availableTeleportChannels();
@@ -104,8 +110,13 @@ describe('GameEditorTeleportService', () => {
         });
 
         it('should return channels with missing entryB', () => {
-            const channel1 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), undefined));
-            const channel2 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_2, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), createMockTeleportTileCoordinates(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2)));
+            const tiles1 = CREATE_MOCK_TELEPORT_TILES(CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), undefined);
+            const channel1 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1, tiles1);
+            const tiles2 = CREATE_MOCK_TELEPORT_TILES(
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1),
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2),
+            );
+            const channel2 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_2, tiles2);
             teleportChannelsSignal.set([channel1, channel2]);
 
             const available = service.availableTeleportChannels();
@@ -115,8 +126,12 @@ describe('GameEditorTeleportService', () => {
         });
 
         it('should return channels with missing tiles', () => {
-            const channel1 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1);
-            const channel2 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_2, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), createMockTeleportTileCoordinates(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2)));
+            const channel1 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1);
+            const tiles2 = CREATE_MOCK_TELEPORT_TILES(
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1),
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2),
+            );
+            const channel2 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_2, tiles2);
             teleportChannelsSignal.set([channel1, channel2]);
 
             const available = service.availableTeleportChannels();
@@ -126,7 +141,11 @@ describe('GameEditorTeleportService', () => {
         });
 
         it('should not return channels with both entryA and entryB', () => {
-            const channel1 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), createMockTeleportTileCoordinates(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2)));
+            const tiles1 = CREATE_MOCK_TELEPORT_TILES(
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1),
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2),
+            );
+            const channel1 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1, tiles1);
             teleportChannelsSignal.set([channel1]);
 
             const available = service.availableTeleportChannels();
@@ -138,8 +157,8 @@ describe('GameEditorTeleportService', () => {
     describe('teleportChannels', () => {
         it('should return teleportChannels from gameEditorStoreService', () => {
             const channels = [
-                createMockTeleportChannel(TEST_CHANNEL_NUMBER_1),
-                createMockTeleportChannel(TEST_CHANNEL_NUMBER_2),
+                CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1),
+                CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_2),
             ];
             teleportChannelsSignal.set(channels);
 
@@ -153,8 +172,12 @@ describe('GameEditorTeleportService', () => {
 
     describe('getAvailableTeleportChannels', () => {
         it('should return available teleport channels', () => {
-            const channel1 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1);
-            const channel2 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_2, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), createMockTeleportTileCoordinates(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2)));
+            const channel1 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1);
+            const tiles2 = CREATE_MOCK_TELEPORT_TILES(
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1),
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2),
+            );
+            const channel2 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_2, tiles2);
             teleportChannelsSignal.set([channel1, channel2]);
 
             const available = service.getAvailableTeleportChannels();
@@ -174,7 +197,11 @@ describe('GameEditorTeleportService', () => {
         });
 
         it('should return undefined when all channels are complete', () => {
-            const channel1 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), createMockTeleportTileCoordinates(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2)));
+            const tiles1 = CREATE_MOCK_TELEPORT_TILES(
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1),
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2),
+            );
+            const channel1 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1, tiles1);
             teleportChannelsSignal.set([channel1]);
 
             const result = service.getNextAvailableTeleportChannel();
@@ -183,8 +210,8 @@ describe('GameEditorTeleportService', () => {
         });
 
         it('should return channel with lowest channelNumber', () => {
-            const channel1 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_2);
-            const channel2 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1);
+            const channel1 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_2);
+            const channel2 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1);
             teleportChannelsSignal.set([channel1, channel2]);
 
             const result = service.getNextAvailableTeleportChannel();
@@ -194,9 +221,9 @@ describe('GameEditorTeleportService', () => {
         });
 
         it('should return sorted channel by channelNumber', () => {
-            const channel1 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_3);
-            const channel2 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1);
-            const channel3 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_2);
+            const channel1 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_3);
+            const channel2 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1);
+            const channel3 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_2);
             teleportChannelsSignal.set([channel1, channel2, channel3]);
 
             const result = service.getNextAvailableTeleportChannel();
@@ -214,14 +241,18 @@ describe('GameEditorTeleportService', () => {
         });
 
         it('should return true when all channels are complete', () => {
-            const channel1 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), createMockTeleportTileCoordinates(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2)));
+            const tiles1 = CREATE_MOCK_TELEPORT_TILES(
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1),
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2),
+            );
+            const channel1 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1, tiles1);
             teleportChannelsSignal.set([channel1]);
 
             expect(service.isTeleportDisabled()).toBe(true);
         });
 
         it('should return false when available channels exist', () => {
-            const channel1 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1);
+            const channel1 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1);
             teleportChannelsSignal.set([channel1]);
 
             expect(service.isTeleportDisabled()).toBe(false);
@@ -230,35 +261,37 @@ describe('GameEditorTeleportService', () => {
 
     describe('placeTeleportTile', () => {
         it('should create tiles object when placing first tile and tiles does not exist', () => {
-            const channel = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1);
+            const channel = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1);
             teleportChannelsSignal.set([channel]);
 
             service.placeTeleportTile(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1, TEST_CHANNEL_NUMBER_1, TEST_IS_FIRST_TILE);
 
             const updatedChannels = teleportChannelsSignal();
             expect(updatedChannels[0].tiles).toBeDefined();
-            expect(updatedChannels[0].tiles?.entryA).toEqual(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1));
+            expect(updatedChannels[0].tiles?.entryA).toEqual(CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1));
             expect(updatedChannels[0].tiles?.entryB).toBeUndefined();
         });
 
         it('should update entryA when placing first tile and tiles exists', () => {
-            const channel = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2), undefined));
+            const tiles = CREATE_MOCK_TELEPORT_TILES(CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2), undefined);
+            const channel = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1, tiles);
             teleportChannelsSignal.set([channel]);
 
             service.placeTeleportTile(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1, TEST_CHANNEL_NUMBER_1, TEST_IS_FIRST_TILE);
 
             const updatedChannels = teleportChannelsSignal();
-            expect(updatedChannels[0].tiles?.entryA).toEqual(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1));
+            expect(updatedChannels[0].tiles?.entryA).toEqual(CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1));
         });
 
         it('should update entryB when placing second tile', () => {
-            const channel = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), undefined));
+            const tiles = CREATE_MOCK_TELEPORT_TILES(CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), undefined);
+            const channel = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1, tiles);
             teleportChannelsSignal.set([channel]);
 
             service.placeTeleportTile(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2, TEST_CHANNEL_NUMBER_1, TEST_IS_NOT_FIRST_TILE);
 
             const updatedChannels = teleportChannelsSignal();
-            expect(updatedChannels[0].tiles?.entryB).toEqual(createMockTeleportTileCoordinates(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2));
+            expect(updatedChannels[0].tiles?.entryB).toEqual(CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2));
         });
 
         it('should not update when channel does not exist', () => {
@@ -290,7 +323,11 @@ describe('GameEditorTeleportService', () => {
 
     describe('cancelTeleportPlacement', () => {
         it('should clear tiles when channel exists and has tiles', () => {
-            const channel = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), createMockTeleportTileCoordinates(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2)));
+            const tiles = CREATE_MOCK_TELEPORT_TILES(
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1),
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2),
+            );
+            const channel = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1, tiles);
             teleportChannelsSignal.set([channel]);
 
             service.cancelTeleportPlacement(TEST_CHANNEL_NUMBER_1);
@@ -301,7 +338,8 @@ describe('GameEditorTeleportService', () => {
         });
 
         it('should not update when channel does not exist', () => {
-            const channel = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), undefined));
+            const tiles = CREATE_MOCK_TELEPORT_TILES(CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), undefined);
+            const channel = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1, tiles);
             teleportChannelsSignal.set([channel]);
 
             service.cancelTeleportPlacement(TEST_CHANNEL_NUMBER_2);
@@ -326,9 +364,15 @@ describe('GameEditorTeleportService', () => {
 
     describe('removeTeleportPair', () => {
         it('should clear tiles when tile exists and is teleport kind', () => {
-            const channel = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), createMockTeleportTileCoordinates(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2)));
+            const tiles = CREATE_MOCK_TELEPORT_TILES(
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1),
+                CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2),
+            );
+            const channel = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1, tiles);
             teleportChannelsSignal.set([channel]);
-            mockGameEditorStoreService.getTileAt.and.returnValue(createMockTile(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1, TileKind.TELEPORT, TEST_CHANNEL_NUMBER_1));
+            mockGameEditorStoreService.getTileAt.and.returnValue(
+                CREATE_MOCK_TILE(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1, TileKind.TELEPORT, TEST_CHANNEL_NUMBER_1),
+            );
 
             service.removeTeleportPair(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1);
 
@@ -338,7 +382,13 @@ describe('GameEditorTeleportService', () => {
         });
 
         it('should not update when tile does not exist', () => {
-            const channel = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), undefined));
+            const channel = CREATE_MOCK_TELEPORT_CHANNEL(
+                TEST_CHANNEL_NUMBER_1,
+                CREATE_MOCK_TELEPORT_TILES(
+                    CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1),
+                    undefined,
+                ),
+            );
             teleportChannelsSignal.set([channel]);
             mockGameEditorStoreService.getTileAt.and.returnValue(null);
 
@@ -349,9 +399,17 @@ describe('GameEditorTeleportService', () => {
         });
 
         it('should not update when tile is not teleport kind', () => {
-            const channel = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), undefined));
+            const channel = CREATE_MOCK_TELEPORT_CHANNEL(
+                TEST_CHANNEL_NUMBER_1,
+                CREATE_MOCK_TELEPORT_TILES(
+                    CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1),
+                    undefined,
+                ),
+            );
             teleportChannelsSignal.set([channel]);
-            mockGameEditorStoreService.getTileAt.and.returnValue(createMockTile(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1, TileKind.BASE));
+            mockGameEditorStoreService.getTileAt.and.returnValue(
+                CREATE_MOCK_TILE(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1, TileKind.BASE),
+            );
 
             service.removeTeleportPair(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1);
 
@@ -360,9 +418,17 @@ describe('GameEditorTeleportService', () => {
         });
 
         it('should not update when tile has no teleportChannel', () => {
-            const channel = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), undefined));
+            const channel = CREATE_MOCK_TELEPORT_CHANNEL(
+                TEST_CHANNEL_NUMBER_1,
+                CREATE_MOCK_TELEPORT_TILES(
+                    CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1),
+                    undefined,
+                ),
+            );
             teleportChannelsSignal.set([channel]);
-            mockGameEditorStoreService.getTileAt.and.returnValue(createMockTile(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1, TileKind.TELEPORT));
+            mockGameEditorStoreService.getTileAt.and.returnValue(
+                CREATE_MOCK_TILE(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1, TileKind.TELEPORT),
+            );
 
             service.removeTeleportPair(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1);
 
@@ -371,9 +437,12 @@ describe('GameEditorTeleportService', () => {
         });
 
         it('should not update when channel does not exist', () => {
-            const channel = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1, createMockTeleportTiles(createMockTeleportTileCoordinates(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), undefined));
+            const tiles = CREATE_MOCK_TELEPORT_TILES(CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1), undefined);
+            const channel = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1, tiles);
             teleportChannelsSignal.set([channel]);
-            mockGameEditorStoreService.getTileAt.and.returnValue(createMockTile(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1, TileKind.TELEPORT, TEST_CHANNEL_NUMBER_2));
+            mockGameEditorStoreService.getTileAt.and.returnValue(
+                CREATE_MOCK_TILE(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1, TileKind.TELEPORT, TEST_CHANNEL_NUMBER_2),
+            );
 
             service.removeTeleportPair(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1);
 
@@ -387,7 +456,9 @@ describe('GameEditorTeleportService', () => {
                 tiles: undefined as unknown as TeleportTilesDto,
             };
             teleportChannelsSignal.set([channel]);
-            mockGameEditorStoreService.getTileAt.and.returnValue(createMockTile(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1, TileKind.TELEPORT, TEST_CHANNEL_NUMBER_1));
+            mockGameEditorStoreService.getTileAt.and.returnValue(
+                CREATE_MOCK_TILE(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1, TileKind.TELEPORT, TEST_CHANNEL_NUMBER_1),
+            );
 
             service.removeTeleportPair(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1);
 

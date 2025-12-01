@@ -17,6 +17,7 @@ import { GameMapTileComponent } from './game-map-tile.component';
 
 const TEST_TILE_X = 5;
 const TEST_TILE_Y = 3;
+const TEST_TELEPORT_CHANNEL_NUMBER = 3;
 
 type MockGameMapService = Partial<Omit<GameMapService, 'currentlyPlayers' | 'isActionModeActive'>> & {
     _objectsSignal: WritableSignal<GameEditorPlaceableDto[]>;
@@ -184,9 +185,9 @@ describe('GameMapTileComponent', () => {
                 kind: TileKind.TELEPORT,
                 x: TEST_TILE_X,
                 y: TEST_TILE_Y,
-                teleportChannel: 3,
+                teleportChannel: TEST_TELEPORT_CHANNEL_NUMBER,
             };
-            expect(component.teleportChannelNumber).toBe(3);
+            expect(component.teleportChannelNumber).toBe(TEST_TELEPORT_CHANNEL_NUMBER);
         });
 
         it('should return null when tile is TELEPORT but has no teleportChannel', () => {

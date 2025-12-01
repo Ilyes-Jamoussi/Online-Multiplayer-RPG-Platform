@@ -34,7 +34,7 @@ type MockSessionService = {
     chatId: Signal<string>;
 };
 
-const createMockChatMessage = (
+const CREATE_MOCK_CHAT_MESSAGE = (
     authorId: string,
     authorName: string,
     content: string,
@@ -157,9 +157,8 @@ describe('ChatService', () => {
 
     describe('reset', () => {
         it('should clear all messages', () => {
-            // Add a message first
             if (messageReceivedCallback) {
-                const message = createMockChatMessage(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
+                const message = CREATE_MOCK_CHAT_MESSAGE(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
                 messageReceivedCallback(message);
             }
 
@@ -171,10 +170,9 @@ describe('ChatService', () => {
         });
 
         it('should clear multiple messages', () => {
-            // Add multiple messages first
             if (messageReceivedCallback) {
-                const message1 = createMockChatMessage(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
-                const message2 = createMockChatMessage(TEST_AUTHOR_ID_2, TEST_AUTHOR_NAME_2, TEST_MESSAGE_CONTENT_2, TEST_TIMESTAMP_2);
+                const message1 = CREATE_MOCK_CHAT_MESSAGE(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
+                const message2 = CREATE_MOCK_CHAT_MESSAGE(TEST_AUTHOR_ID_2, TEST_AUTHOR_NAME_2, TEST_MESSAGE_CONTENT_2, TEST_TIMESTAMP_2);
                 messageReceivedCallback(message1);
                 messageReceivedCallback(message2);
             }
@@ -196,7 +194,7 @@ describe('ChatService', () => {
             expect(service.messages().length).toBe(TEST_MESSAGES_COUNT_ZERO);
 
             if (messageReceivedCallback) {
-                const message = createMockChatMessage(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
+                const message = CREATE_MOCK_CHAT_MESSAGE(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
                 messageReceivedCallback(message);
             }
 
@@ -213,8 +211,8 @@ describe('ChatService', () => {
             expect(service.messages().length).toBe(TEST_MESSAGES_COUNT_ZERO);
 
             if (messageReceivedCallback) {
-                const message1 = createMockChatMessage(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
-                const message2 = createMockChatMessage(TEST_AUTHOR_ID_2, TEST_AUTHOR_NAME_2, TEST_MESSAGE_CONTENT_2, TEST_TIMESTAMP_2);
+                const message1 = CREATE_MOCK_CHAT_MESSAGE(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
+                const message2 = CREATE_MOCK_CHAT_MESSAGE(TEST_AUTHOR_ID_2, TEST_AUTHOR_NAME_2, TEST_MESSAGE_CONTENT_2, TEST_TIMESTAMP_2);
                 messageReceivedCallback(message1);
                 messageReceivedCallback(message2);
             }
@@ -236,14 +234,14 @@ describe('ChatService', () => {
 
         it('should preserve existing messages when adding new ones', () => {
             if (messageReceivedCallback) {
-                const message1 = createMockChatMessage(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
+                const message1 = CREATE_MOCK_CHAT_MESSAGE(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
                 messageReceivedCallback(message1);
             }
 
             expect(service.messages().length).toBe(TEST_MESSAGES_COUNT_ONE);
 
             if (messageReceivedCallback) {
-                const message2 = createMockChatMessage(TEST_AUTHOR_ID_2, TEST_AUTHOR_NAME_2, TEST_MESSAGE_CONTENT_2, TEST_TIMESTAMP_2);
+                const message2 = CREATE_MOCK_CHAT_MESSAGE(TEST_AUTHOR_ID_2, TEST_AUTHOR_NAME_2, TEST_MESSAGE_CONTENT_2, TEST_TIMESTAMP_2);
                 messageReceivedCallback(message2);
             }
 
@@ -255,9 +253,8 @@ describe('ChatService', () => {
 
     describe('ResetService integration', () => {
         it('should reset messages when ResetService triggers reset', () => {
-            // Add a message first
             if (messageReceivedCallback) {
-                const message = createMockChatMessage(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
+                const message = CREATE_MOCK_CHAT_MESSAGE(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
                 messageReceivedCallback(message);
             }
 
@@ -269,10 +266,9 @@ describe('ChatService', () => {
         });
 
         it('should reset messages multiple times when ResetService triggers reset multiple times', () => {
-            // Add messages
             if (messageReceivedCallback) {
-                const message1 = createMockChatMessage(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
-                const message2 = createMockChatMessage(TEST_AUTHOR_ID_2, TEST_AUTHOR_NAME_2, TEST_MESSAGE_CONTENT_2, TEST_TIMESTAMP_2);
+                const message1 = CREATE_MOCK_CHAT_MESSAGE(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
+                const message2 = CREATE_MOCK_CHAT_MESSAGE(TEST_AUTHOR_ID_2, TEST_AUTHOR_NAME_2, TEST_MESSAGE_CONTENT_2, TEST_TIMESTAMP_2);
                 messageReceivedCallback(message1);
                 messageReceivedCallback(message2);
             }
@@ -283,9 +279,8 @@ describe('ChatService', () => {
 
             expect(service.messages().length).toBe(TEST_MESSAGES_COUNT_ZERO);
 
-            // Add message again
             if (messageReceivedCallback) {
-                const message3 = createMockChatMessage(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
+                const message3 = CREATE_MOCK_CHAT_MESSAGE(TEST_AUTHOR_ID_1, TEST_AUTHOR_NAME_1, TEST_MESSAGE_CONTENT_1, TEST_TIMESTAMP_1);
                 messageReceivedCallback(message3);
             }
 

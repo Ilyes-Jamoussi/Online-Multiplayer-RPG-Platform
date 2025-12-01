@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { signal, Signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -63,43 +64,47 @@ type MockStatisticsService = {
     setGameStatistics: jasmine.Spy;
 };
 
-const createMockPlayerStatistics = (
-    name: string,
-    combatCount: number,
-    combatWins: number,
-    combatLosses: number,
-    healthLost: number,
-    healthDealt: number,
-    tilesVisitedPercentage: number,
-): PlayerStatisticsDto => ({
-    name,
-    combatCount,
-    combatWins,
-    combatLosses,
-    healthLost,
-    healthDealt,
-    tilesVisitedPercentage,
+interface PlayerStatisticsParams {
+    name: string;
+    combatCount: number;
+    combatWins: number;
+    combatLosses: number;
+    healthLost: number;
+    healthDealt: number;
+    tilesVisitedPercentage: number;
+}
+
+const CREATE_MOCK_PLAYER_STATISTICS = (params: PlayerStatisticsParams): PlayerStatisticsDto => ({
+    name: params.name,
+    combatCount: params.combatCount,
+    combatWins: params.combatWins,
+    combatLosses: params.combatLosses,
+    healthLost: params.healthLost,
+    healthDealt: params.healthDealt,
+    tilesVisitedPercentage: params.tilesVisitedPercentage,
 });
 
-const createMockGlobalStatistics = (
-    gameDuration: string = TEST_GAME_DURATION,
-    totalTurns: number = TEST_TOTAL_TURNS,
-    tilesVisitedPercentage: number = TEST_GLOBAL_TILES_VISITED_PERCENTAGE,
-    totalTeleportations: number = TEST_TOTAL_TELEPORTATIONS,
-    doorsManipulatedPercentage: number = TEST_DOORS_MANIPULATED_PERCENTAGE,
-    sanctuariesUsedPercentage: number = TEST_SANCTUARIES_USED_PERCENTAGE,
-    flagHoldersCount: number = TEST_FLAG_HOLDERS_COUNT,
-): GlobalStatisticsDto => ({
-    gameDuration,
-    totalTurns,
-    tilesVisitedPercentage,
-    totalTeleportations,
-    doorsManipulatedPercentage,
-    sanctuariesUsedPercentage,
-    flagHoldersCount,
+interface GlobalStatisticsParams {
+    gameDuration?: string;
+    totalTurns?: number;
+    tilesVisitedPercentage?: number;
+    totalTeleportations?: number;
+    doorsManipulatedPercentage?: number;
+    sanctuariesUsedPercentage?: number;
+    flagHoldersCount?: number;
+}
+
+const CREATE_MOCK_GLOBAL_STATISTICS = (params: GlobalStatisticsParams = {}): GlobalStatisticsDto => ({
+    gameDuration: params.gameDuration ?? TEST_GAME_DURATION,
+    totalTurns: params.totalTurns ?? TEST_TOTAL_TURNS,
+    tilesVisitedPercentage: params.tilesVisitedPercentage ?? TEST_GLOBAL_TILES_VISITED_PERCENTAGE,
+    totalTeleportations: params.totalTeleportations ?? TEST_TOTAL_TELEPORTATIONS,
+    doorsManipulatedPercentage: params.doorsManipulatedPercentage ?? TEST_DOORS_MANIPULATED_PERCENTAGE,
+    sanctuariesUsedPercentage: params.sanctuariesUsedPercentage ?? TEST_SANCTUARIES_USED_PERCENTAGE,
+    flagHoldersCount: params.flagHoldersCount ?? TEST_FLAG_HOLDERS_COUNT,
 });
 
-const createMockGameStatistics = (
+const CREATE_MOCK_GAME_STATISTICS = (
     playersStatistics: PlayerStatisticsDto[],
     globalStatistics: GlobalStatisticsDto,
 ): GameStatisticsDto => ({
@@ -202,11 +207,19 @@ describe('StatisticsPageComponent', () => {
 
     describe('gameStatistics', () => {
         it('should return gameStatistics from statisticsService', () => {
-            const mockGlobalStats = createMockGlobalStatistics();
+            const mockGlobalStats = CREATE_MOCK_GLOBAL_STATISTICS();
             const mockPlayersStats = [
-                createMockPlayerStatistics(TEST_PLAYER_NAME_1, TEST_COMBAT_COUNT_1, TEST_COMBAT_WINS_1, TEST_COMBAT_LOSSES_1, TEST_HEALTH_LOST_1, TEST_HEALTH_DEALT_1, TEST_TILES_VISITED_PERCENTAGE_1),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_1,
+                    combatCount: TEST_COMBAT_COUNT_1,
+                    combatWins: TEST_COMBAT_WINS_1,
+                    combatLosses: TEST_COMBAT_LOSSES_1,
+                    healthLost: TEST_HEALTH_LOST_1,
+                    healthDealt: TEST_HEALTH_DEALT_1,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_1,
+                }),
             ];
-            const mockGameStats = createMockGameStatistics(mockPlayersStats, mockGlobalStats);
+            const mockGameStats = CREATE_MOCK_GAME_STATISTICS(mockPlayersStats, mockGlobalStats);
             gameStatisticsSignal.set(mockGameStats);
             fixture.detectChanges();
 
@@ -227,12 +240,28 @@ describe('StatisticsPageComponent', () => {
 
     describe('playersStatistics', () => {
         it('should return playersStatistics from gameStatistics', () => {
-            const mockGlobalStats = createMockGlobalStatistics();
+            const mockGlobalStats = CREATE_MOCK_GLOBAL_STATISTICS();
             const mockPlayersStats = [
-                createMockPlayerStatistics(TEST_PLAYER_NAME_1, TEST_COMBAT_COUNT_1, TEST_COMBAT_WINS_1, TEST_COMBAT_LOSSES_1, TEST_HEALTH_LOST_1, TEST_HEALTH_DEALT_1, TEST_TILES_VISITED_PERCENTAGE_1),
-                createMockPlayerStatistics(TEST_PLAYER_NAME_2, TEST_COMBAT_COUNT_2, TEST_COMBAT_WINS_2, TEST_COMBAT_LOSSES_2, TEST_HEALTH_LOST_2, TEST_HEALTH_DEALT_2, TEST_TILES_VISITED_PERCENTAGE_2),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_1,
+                    combatCount: TEST_COMBAT_COUNT_1,
+                    combatWins: TEST_COMBAT_WINS_1,
+                    combatLosses: TEST_COMBAT_LOSSES_1,
+                    healthLost: TEST_HEALTH_LOST_1,
+                    healthDealt: TEST_HEALTH_DEALT_1,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_1,
+                }),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_2,
+                    combatCount: TEST_COMBAT_COUNT_2,
+                    combatWins: TEST_COMBAT_WINS_2,
+                    combatLosses: TEST_COMBAT_LOSSES_2,
+                    healthLost: TEST_HEALTH_LOST_2,
+                    healthDealt: TEST_HEALTH_DEALT_2,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_2,
+                }),
             ];
-            const mockGameStats = createMockGameStatistics(mockPlayersStats, mockGlobalStats);
+            const mockGameStats = CREATE_MOCK_GAME_STATISTICS(mockPlayersStats, mockGlobalStats);
             gameStatisticsSignal.set(mockGameStats);
             fixture.detectChanges();
 
@@ -253,8 +282,8 @@ describe('StatisticsPageComponent', () => {
         });
 
         it('should return empty array when gameStatistics has no playersStatistics', () => {
-            const mockGlobalStats = createMockGlobalStatistics();
-            const mockGameStats = createMockGameStatistics([], mockGlobalStats);
+            const mockGlobalStats = CREATE_MOCK_GLOBAL_STATISTICS();
+            const mockGameStats = CREATE_MOCK_GAME_STATISTICS([], mockGlobalStats);
             gameStatisticsSignal.set(mockGameStats);
             fixture.detectChanges();
 
@@ -266,11 +295,19 @@ describe('StatisticsPageComponent', () => {
 
     describe('globalStatistics', () => {
         it('should return globalStatistics from gameStatistics', () => {
-            const mockGlobalStats = createMockGlobalStatistics();
+            const mockGlobalStats = CREATE_MOCK_GLOBAL_STATISTICS();
             const mockPlayersStats = [
-                createMockPlayerStatistics(TEST_PLAYER_NAME_1, TEST_COMBAT_COUNT_1, TEST_COMBAT_WINS_1, TEST_COMBAT_LOSSES_1, TEST_HEALTH_LOST_1, TEST_HEALTH_DEALT_1, TEST_TILES_VISITED_PERCENTAGE_1),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_1,
+                    combatCount: TEST_COMBAT_COUNT_1,
+                    combatWins: TEST_COMBAT_WINS_1,
+                    combatLosses: TEST_COMBAT_LOSSES_1,
+                    healthLost: TEST_HEALTH_LOST_1,
+                    healthDealt: TEST_HEALTH_DEALT_1,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_1,
+                }),
             ];
-            const mockGameStats = createMockGameStatistics(mockPlayersStats, mockGlobalStats);
+            const mockGameStats = CREATE_MOCK_GAME_STATISTICS(mockPlayersStats, mockGlobalStats);
             gameStatisticsSignal.set(mockGameStats);
             fixture.detectChanges();
 
@@ -299,13 +336,37 @@ describe('StatisticsPageComponent', () => {
 
     describe('sortBy', () => {
         beforeEach(() => {
-            const mockGlobalStats = createMockGlobalStatistics();
+            const mockGlobalStats = CREATE_MOCK_GLOBAL_STATISTICS();
             const mockPlayersStats = [
-                createMockPlayerStatistics(TEST_PLAYER_NAME_1, TEST_COMBAT_COUNT_1, TEST_COMBAT_WINS_1, TEST_COMBAT_LOSSES_1, TEST_HEALTH_LOST_1, TEST_HEALTH_DEALT_1, TEST_TILES_VISITED_PERCENTAGE_1),
-                createMockPlayerStatistics(TEST_PLAYER_NAME_2, TEST_COMBAT_COUNT_2, TEST_COMBAT_WINS_2, TEST_COMBAT_LOSSES_2, TEST_HEALTH_LOST_2, TEST_HEALTH_DEALT_2, TEST_TILES_VISITED_PERCENTAGE_2),
-                createMockPlayerStatistics(TEST_PLAYER_NAME_3, TEST_COMBAT_COUNT_3, TEST_COMBAT_WINS_3, TEST_COMBAT_LOSSES_3, TEST_HEALTH_LOST_3, TEST_HEALTH_DEALT_3, TEST_TILES_VISITED_PERCENTAGE_3),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_1,
+                    combatCount: TEST_COMBAT_COUNT_1,
+                    combatWins: TEST_COMBAT_WINS_1,
+                    combatLosses: TEST_COMBAT_LOSSES_1,
+                    healthLost: TEST_HEALTH_LOST_1,
+                    healthDealt: TEST_HEALTH_DEALT_1,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_1,
+                }),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_2,
+                    combatCount: TEST_COMBAT_COUNT_2,
+                    combatWins: TEST_COMBAT_WINS_2,
+                    combatLosses: TEST_COMBAT_LOSSES_2,
+                    healthLost: TEST_HEALTH_LOST_2,
+                    healthDealt: TEST_HEALTH_DEALT_2,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_2,
+                }),
+                CREATE_MOCK_PLAYER_STATISTICS({
+                    name: TEST_PLAYER_NAME_3,
+                    combatCount: TEST_COMBAT_COUNT_3,
+                    combatWins: TEST_COMBAT_WINS_3,
+                    combatLosses: TEST_COMBAT_LOSSES_3,
+                    healthLost: TEST_HEALTH_LOST_3,
+                    healthDealt: TEST_HEALTH_DEALT_3,
+                    tilesVisitedPercentage: TEST_TILES_VISITED_PERCENTAGE_3,
+                }),
             ];
-            const mockGameStats = createMockGameStatistics(mockPlayersStats, mockGlobalStats);
+            const mockGameStats = CREATE_MOCK_GAME_STATISTICS(mockPlayersStats, mockGlobalStats);
             gameStatisticsSignal.set(mockGameStats);
             fixture.detectChanges();
         });
@@ -347,7 +408,6 @@ describe('StatisticsPageComponent', () => {
         });
 
         it('should sort playersStatistics by name ascending', () => {
-            // Set sortColumn to a different column so the call sets it to 'name' with 'asc'
             component.sortColumn = 'combatCount';
             component.sortDirection = DEFAULT_SORT_DIRECTION_ASC;
             fixture.detectChanges();
@@ -361,14 +421,11 @@ describe('StatisticsPageComponent', () => {
         });
 
         it('should sort playersStatistics by name descending', () => {
-            // Set sortColumn to a different column so first call sets it to 'name' with 'asc'
             component.sortColumn = 'combatCount';
             component.sortDirection = DEFAULT_SORT_DIRECTION_ASC;
             fixture.detectChanges();
 
-            // First call sets the column to 'name' and direction to 'asc'
             component.sortBy('name');
-            // Second call toggles direction to 'desc'
             component.sortBy('name');
 
             const callArgs = mockStatisticsService.setGameStatistics.calls.mostRecent().args[0];
@@ -391,14 +448,11 @@ describe('StatisticsPageComponent', () => {
         });
 
         it('should sort playersStatistics by combatCount descending', () => {
-            // Set sortColumn to a different column so first call sets it to 'combatCount' with 'asc'
             component.sortColumn = DEFAULT_SORT_COLUMN;
             component.sortDirection = DEFAULT_SORT_DIRECTION_ASC;
             fixture.detectChanges();
 
-            // First call sets the column to 'combatCount' and direction to 'asc'
             component.sortBy('combatCount');
-            // Second call toggles direction to 'desc'
             component.sortBy('combatCount');
 
             const callArgs = mockStatisticsService.setGameStatistics.calls.mostRecent().args[0];

@@ -60,7 +60,7 @@ type MockSessionService = {
     kickPlayer: jasmine.Spy;
 };
 
-const createMockPlayer = (
+const CREATE_MOCK_PLAYER = (
     id: string,
     name: string,
     virtualPlayerType: VirtualPlayerType,
@@ -148,7 +148,7 @@ describe('VirtualPlayerCardComponent', () => {
         });
 
         it('should return avatar image path from assetsService', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive, TEST_AVATAR);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive, TEST_AVATAR);
             component.player = player;
             fixture.detectChanges();
 
@@ -159,7 +159,7 @@ describe('VirtualPlayerCardComponent', () => {
         });
 
         it('should return different avatar image path for different avatar', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive, TEST_AVATAR_2);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive, TEST_AVATAR_2);
             component.player = player;
             fixture.detectChanges();
 
@@ -170,7 +170,7 @@ describe('VirtualPlayerCardComponent', () => {
         });
 
         it('should return empty string when avatar is null', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive, null);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive, null);
             component.player = player;
             fixture.detectChanges();
 
@@ -184,7 +184,7 @@ describe('VirtualPlayerCardComponent', () => {
     describe('showRemoveButton', () => {
         it('should return true when player is admin', () => {
             isAdminSignal.set(TEST_IS_ADMIN);
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive);
             component.player = player;
             fixture.detectChanges();
 
@@ -195,7 +195,7 @@ describe('VirtualPlayerCardComponent', () => {
 
         it('should return false when player is not admin', () => {
             isAdminSignal.set(TEST_IS_NOT_ADMIN);
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive);
             component.player = player;
             fixture.detectChanges();
 
@@ -207,7 +207,7 @@ describe('VirtualPlayerCardComponent', () => {
 
     describe('removeVirtualPlayer', () => {
         it('should call sessionService.kickPlayer with player id', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive);
             component.player = player;
             fixture.detectChanges();
 
@@ -218,7 +218,7 @@ describe('VirtualPlayerCardComponent', () => {
         });
 
         it('should call sessionService.kickPlayer with different player id', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2, VirtualPlayerType.Defensive);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2, VirtualPlayerType.Defensive);
             component.player = player;
             fixture.detectChanges();
 
@@ -231,7 +231,7 @@ describe('VirtualPlayerCardComponent', () => {
 
     describe('getTypeIcon', () => {
         it('should return "local_fire_department" for Offensive type', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive);
             component.player = player;
             fixture.detectChanges();
 
@@ -241,7 +241,7 @@ describe('VirtualPlayerCardComponent', () => {
         });
 
         it('should return "security" for Defensive type', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Defensive);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Defensive);
             component.player = player;
             fixture.detectChanges();
 
@@ -253,7 +253,7 @@ describe('VirtualPlayerCardComponent', () => {
 
     describe('getTypeLabel', () => {
         it('should return "Attaquant" for Offensive type', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive);
             component.player = player;
             fixture.detectChanges();
 
@@ -263,7 +263,7 @@ describe('VirtualPlayerCardComponent', () => {
         });
 
         it('should return "Défenseur" for Defensive type', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Defensive);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Defensive);
             component.player = player;
             fixture.detectChanges();
 

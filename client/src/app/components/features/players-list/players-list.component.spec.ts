@@ -191,31 +191,31 @@ describe('PlayersListComponent', () => {
     });
 
     describe('getPlayerAvatar', () => {
-        const MOCK_AVATAR_PATH = './assets/images/avatars/static/avatar1.png';
-        const MOCK_EMPTY_STRING = '';
+        const mockAvatarPath = './assets/images/avatars/static/avatar1.png';
+        const mockEmptyString = '';
 
         it('should return avatar path from assets service', () => {
-            mockAssetsService.getAvatarStaticImage.and.returnValue(MOCK_AVATAR_PATH);
+            mockAssetsService.getAvatarStaticImage.and.returnValue(mockAvatarPath);
             const result = component.getPlayerAvatar(Avatar.Avatar1);
-            expect(result).toBe(MOCK_AVATAR_PATH);
+            expect(result).toBe(mockAvatarPath);
             expect(mockAssetsService.getAvatarStaticImage).toHaveBeenCalledWith(Avatar.Avatar1);
         });
 
         it('should return empty string when avatar is null', () => {
-            mockAssetsService.getAvatarStaticImage.and.returnValue(MOCK_EMPTY_STRING);
+            mockAssetsService.getAvatarStaticImage.and.returnValue(mockEmptyString);
             const result = component.getPlayerAvatar(null);
-            expect(result).toBe(MOCK_EMPTY_STRING);
+            expect(result).toBe(mockEmptyString);
             expect(mockAssetsService.getAvatarStaticImage).toHaveBeenCalledWith(null);
         });
     });
 
     describe('getTeamNumber', () => {
-        const MOCK_TEAM_NUMBER = 1;
+        const mockTeamNumber = 1;
 
         it('should return teamNumber when player has teamNumber', () => {
-            const playerWithTeam = { ...mockPlayers.player1, teamNumber: MOCK_TEAM_NUMBER };
+            const playerWithTeam = { ...mockPlayers.player1, teamNumber: mockTeamNumber };
             const result = component.getTeamNumber(playerWithTeam);
-            expect(result).toBe(MOCK_TEAM_NUMBER);
+            expect(result).toBe(mockTeamNumber);
         });
 
         it('should return undefined when player has no teamNumber', () => {
@@ -225,13 +225,13 @@ describe('PlayersListComponent', () => {
     });
 
     describe('getTeamColor', () => {
-        const MOCK_TEAM_NUMBER = 2;
+        const mockTeamNumber = 2;
 
         it('should return team color from player service', () => {
             mockPlayerService.getTeamColor.and.returnValue(TeamColor.EnemyTeam);
-            const result = component.getTeamColor(MOCK_TEAM_NUMBER);
+            const result = component.getTeamColor(mockTeamNumber);
             expect(result).toBe(TeamColor.EnemyTeam);
-            expect(mockPlayerService.getTeamColor).toHaveBeenCalledWith(MOCK_TEAM_NUMBER);
+            expect(mockPlayerService.getTeamColor).toHaveBeenCalledWith(mockTeamNumber);
         });
 
         it('should return undefined when teamNumber is undefined', () => {
@@ -243,8 +243,8 @@ describe('PlayersListComponent', () => {
     });
 
     describe('hasFlag', () => {
-        const MOCK_PLAYER_ID = 'player1';
-        const MOCK_OTHER_PLAYER_ID = 'player2';
+        const mockPlayerId = 'player1';
+        const mockOtherPlayerId = 'player2';
 
         it('should return false when flagData is undefined', () => {
             Object.defineProperty(mockInGameService, 'flagData', {
@@ -271,7 +271,7 @@ describe('PlayersListComponent', () => {
         it('should return false when flag holder is different player', () => {
             const flagData: FlagData = {
                 position: { x: 0, y: 0 },
-                holderPlayerId: MOCK_OTHER_PLAYER_ID,
+                holderPlayerId: mockOtherPlayerId,
             };
             Object.defineProperty(mockInGameService, 'flagData', {
                 value: signal(flagData),
@@ -284,7 +284,7 @@ describe('PlayersListComponent', () => {
         it('should return true when flag holder matches player', () => {
             const flagData: FlagData = {
                 position: { x: 0, y: 0 },
-                holderPlayerId: MOCK_PLAYER_ID,
+                holderPlayerId: mockPlayerId,
             };
             Object.defineProperty(mockInGameService, 'flagData', {
                 value: signal(flagData),

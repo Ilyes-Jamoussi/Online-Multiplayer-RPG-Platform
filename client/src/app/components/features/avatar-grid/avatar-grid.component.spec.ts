@@ -7,7 +7,6 @@ import { Avatar } from '@common/enums/avatar.enum';
 import { AvatarAssignment } from '@common/interfaces/session.interface';
 import { AvatarGridComponent } from './avatar-grid.component';
 
-// Test constants
 const TEST_AVATAR_ANIMATED_PATH = './assets/images/avatars/animated/avatar1.gif';
 const TEST_AVATAR_ANIMATED_PATH_2 = './assets/images/avatars/animated/avatar2.gif';
 const TEST_AVATAR_STATIC_PATH = './assets/images/avatars/static/avatar1.png';

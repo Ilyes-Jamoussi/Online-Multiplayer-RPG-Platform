@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file */
 import { Location } from '@angular/common';
 import { signal, Signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -74,7 +75,7 @@ type MockSessionService = {
     avatarAssignments: Signal<AvatarAssignment[]>;
 };
 
-const createMockPlayer = (hasBonus: boolean = true): Player => ({
+const CREATE_MOCK_PLAYER = (hasBonus: boolean = true): Player => ({
     id: TEST_PLAYER_ID,
     name: TEST_PLAYER_NAME,
     avatar: Avatar.Avatar1,
@@ -127,7 +128,7 @@ describe('CharacterCreationPageComponent', () => {
     let avatarAssignmentsSignal: ReturnType<typeof signal<AvatarAssignment[]>>;
 
     beforeEach(async () => {
-        const mockPlayer = createMockPlayer(true);
+        const mockPlayer = CREATE_MOCK_PLAYER(true);
         playerSignal = signal<Player>(mockPlayer);
         avatarSignal = signal<Avatar | null>(Avatar.Avatar1);
         isAdminSignal = signal<boolean>(TEST_IS_NOT_ADMIN);
@@ -337,7 +338,7 @@ describe('CharacterCreationPageComponent', () => {
 
     describe('canCreateCharacter', () => {
         it('should return true when player has valid name, avatar, and bonus', () => {
-            const validPlayer = createMockPlayer(true);
+            const validPlayer = CREATE_MOCK_PLAYER(true);
             playerSignal.set(validPlayer);
             fixture.detectChanges();
 
@@ -345,7 +346,7 @@ describe('CharacterCreationPageComponent', () => {
         });
 
         it('should return false when player has no bonus selected', () => {
-            const invalidPlayer = createMockPlayer(false);
+            const invalidPlayer = CREATE_MOCK_PLAYER(false);
             playerSignal.set(invalidPlayer);
             fixture.detectChanges();
 
@@ -353,7 +354,7 @@ describe('CharacterCreationPageComponent', () => {
         });
 
         it('should return false when player has no avatar selected', () => {
-            const invalidPlayer = createMockPlayer(true);
+            const invalidPlayer = CREATE_MOCK_PLAYER(true);
             invalidPlayer.avatar = null;
             playerSignal.set(invalidPlayer);
             fixture.detectChanges();
@@ -362,7 +363,7 @@ describe('CharacterCreationPageComponent', () => {
         });
 
         it('should return false when player has invalid name', () => {
-            const invalidPlayer = createMockPlayer(true);
+            const invalidPlayer = CREATE_MOCK_PLAYER(true);
             invalidPlayer.name = 'AB';
             playerSignal.set(invalidPlayer);
             fixture.detectChanges();

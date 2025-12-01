@@ -221,21 +221,21 @@ describe('GameStoreService', () => {
 
     describe('setActiveTab', () => {
         it('should set active tab to classic', () => {
-            const MOCK_TAB: GameTab = 'classic';
-            service.setActiveTab(MOCK_TAB);
-            expect(service.activeTab()).toBe(MOCK_TAB);
+            const mockTab: GameTab = 'classic';
+            service.setActiveTab(mockTab);
+            expect(service.activeTab()).toBe(mockTab);
         });
 
         it('should set active tab to ctf', () => {
-            const MOCK_TAB: GameTab = 'ctf';
-            service.setActiveTab(MOCK_TAB);
-            expect(service.activeTab()).toBe(MOCK_TAB);
+            const mockTab: GameTab = 'ctf';
+            service.setActiveTab(mockTab);
+            expect(service.activeTab()).toBe(mockTab);
         });
 
         it('should set active tab to all', () => {
-            const MOCK_TAB: GameTab = 'all';
-            service.setActiveTab(MOCK_TAB);
-            expect(service.activeTab()).toBe(MOCK_TAB);
+            const mockTab: GameTab = 'all';
+            service.setActiveTab(mockTab);
+            expect(service.activeTab()).toBe(mockTab);
         });
     });
 

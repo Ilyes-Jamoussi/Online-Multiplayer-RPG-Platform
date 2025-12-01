@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
@@ -202,8 +203,8 @@ describe('GameEditorTileComponent', () => {
     });
 
     describe('onMouseDown', () => {
-        const MOCK_BUTTON_LEFT = 0;
-        const MOCK_BUTTON_RIGHT = 2;
+        const mockButtonLeft = 0;
+        const mockButtonRight = 2;
 
         beforeEach(() => {
             interactionsSpy.dragStart.calls.reset();
@@ -212,14 +213,14 @@ describe('GameEditorTileComponent', () => {
 
         it('should prevent default', () => {
             let prevented = false;
-            const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: MOCK_BUTTON_LEFT });
+            const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: mockButtonLeft });
             component.onMouseDown(evt);
             expect(prevented).toBeTrue();
         });
 
         it('should start left drag when button is 0', () => {
             let prevented = false;
-            const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: MOCK_BUTTON_LEFT });
+            const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: mockButtonLeft });
             component.onMouseDown(evt);
             expect(prevented).toBeTrue();
             expect(interactionsSpy.dragStart).toHaveBeenCalledWith(tile.x, tile.y, 'left');
@@ -229,7 +230,7 @@ describe('GameEditorTileComponent', () => {
             component.tile = { ...tile, kind: TileKind.TELEPORT };
             fixture.detectChanges();
             let prevented = false;
-            const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: MOCK_BUTTON_RIGHT });
+            const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: mockButtonRight });
             component.onMouseDown(evt);
             expect(prevented).toBeTrue();
             expect(interactionsSpy.selectTeleportTileEraserTool).toHaveBeenCalledTimes(1);
@@ -240,7 +241,7 @@ describe('GameEditorTileComponent', () => {
             component.tile = { ...tile, kind: TileKind.BASE };
             fixture.detectChanges();
             let prevented = false;
-            const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: MOCK_BUTTON_RIGHT });
+            const evt = makeMouseEvent({ preventDefault: () => (prevented = true), button: mockButtonRight });
             component.onMouseDown(evt);
             expect(prevented).toBeTrue();
             expect(activeToolState?.type).toBe(ToolType.TileBrushTool);
@@ -372,7 +373,7 @@ describe('GameEditorTileComponent', () => {
     });
 
     describe('teleportChannelNumber', () => {
-        const MOCK_TELEPORT_CHANNEL = 1;
+        const mockTeleportChannel = 1;
 
         it('should return null when tile kind is not TELEPORT', () => {
             component.tile = { ...tile, kind: TileKind.BASE };
@@ -393,14 +394,14 @@ describe('GameEditorTileComponent', () => {
         });
 
         it('should return teleportChannel when tile kind is TELEPORT and teleportChannel exists', () => {
-            component.tile = { ...tile, kind: TileKind.TELEPORT, teleportChannel: MOCK_TELEPORT_CHANNEL };
+            component.tile = { ...tile, kind: TileKind.TELEPORT, teleportChannel: mockTeleportChannel };
             fixture.detectChanges();
-            expect(component.teleportChannelNumber).toBe(MOCK_TELEPORT_CHANNEL);
+            expect(component.teleportChannelNumber).toBe(mockTeleportChannel);
         });
     });
 
     describe('activeTeleportChannelNumber', () => {
-        const MOCK_CHANNEL_NUMBER = 2;
+        const mockChannelNumber = 2;
 
         it('should return null when activeTool is null', () => {
             activeToolState = null;
@@ -423,14 +424,14 @@ describe('GameEditorTileComponent', () => {
         it('should return channelNumber when activeTool type is TeleportTileTool', () => {
             activeToolState = {
                 type: ToolType.TeleportTileTool,
-                channelNumber: MOCK_CHANNEL_NUMBER,
+                channelNumber: mockChannelNumber,
                 teleportChannel: {
-                    channelNumber: MOCK_CHANNEL_NUMBER,
+                    channelNumber: mockChannelNumber,
                     tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } },
                 },
             };
             fixture.detectChanges();
-            expect(component.activeTeleportChannelNumber).toBe(MOCK_CHANNEL_NUMBER);
+            expect(component.activeTeleportChannelNumber).toBe(mockChannelNumber);
         });
     });
 

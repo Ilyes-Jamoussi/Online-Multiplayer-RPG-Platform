@@ -19,7 +19,7 @@ type MockSocketService = {
     onEvent: jasmine.Spy;
 };
 
-const createMockGameLogEntry = (): GameLogEntry => ({
+const CREATE_MOCK_GAME_LOG_ENTRY = (): GameLogEntry => ({
     id: TEST_LOG_ENTRY_ID,
     timestamp: TEST_TIMESTAMP,
     type: GameLogEntryType.TurnStart,
@@ -28,12 +28,12 @@ const createMockGameLogEntry = (): GameLogEntry => ({
     involvedPlayerNames: [TEST_INVOLVED_PLAYER_NAME_1, TEST_INVOLVED_PLAYER_NAME_2],
 });
 
-const createMockSuccessResponse = (data: GameLogEntry): SocketResponse<GameLogEntry> => ({
+const CREATE_MOCK_SUCCESS_RESPONSE = (data: GameLogEntry): SocketResponse<GameLogEntry> => ({
     success: true,
     data,
 });
 
-const createMockErrorResponse = (): SocketResponse<GameLogEntry> => ({
+const CREATE_MOCK_ERROR_RESPONSE = (): SocketResponse<GameLogEntry> => ({
     success: false,
     message: 'Error message',
 });
@@ -60,7 +60,7 @@ describe('GameLogSocketService', () => {
 
     describe('onLogEntry', () => {
         it('should call socketService.onEvent with LogEntry event', () => {
-            mockSocketService.onEvent.and.returnValue(of(createMockSuccessResponse(createMockGameLogEntry())));
+            mockSocketService.onEvent.and.returnValue(of(CREATE_MOCK_SUCCESS_RESPONSE(CREATE_MOCK_GAME_LOG_ENTRY())));
 
             const callback = jasmine.createSpy('callback');
             service.onLogEntry(callback);
@@ -70,8 +70,8 @@ describe('GameLogSocketService', () => {
         });
 
         it('should invoke callback with log entry data when success response is received', () => {
-            const logEntry = createMockGameLogEntry();
-            mockSocketService.onEvent.and.returnValue(of(createMockSuccessResponse(logEntry)));
+            const logEntry = CREATE_MOCK_GAME_LOG_ENTRY();
+            mockSocketService.onEvent.and.returnValue(of(CREATE_MOCK_SUCCESS_RESPONSE(logEntry)));
 
             const callback = jasmine.createSpy('callback');
             service.onLogEntry(callback);
@@ -81,7 +81,7 @@ describe('GameLogSocketService', () => {
         });
 
         it('should not invoke callback when error response is received', () => {
-            mockSocketService.onEvent.and.returnValue(of(createMockErrorResponse()));
+            mockSocketService.onEvent.and.returnValue(of(CREATE_MOCK_ERROR_RESPONSE()));
 
             const callback = jasmine.createSpy('callback');
             service.onLogEntry(callback);
@@ -99,7 +99,7 @@ describe('GameLogSocketService', () => {
                 involvedPlayerNames: [TEST_INVOLVED_PLAYER_NAME_1],
             };
 
-            mockSocketService.onEvent.and.returnValue(of(createMockSuccessResponse(differentLogEntry)));
+            mockSocketService.onEvent.and.returnValue(of(CREATE_MOCK_SUCCESS_RESPONSE(differentLogEntry)));
 
             const callback = jasmine.createSpy('callback');
             service.onLogEntry(callback);
@@ -108,7 +108,7 @@ describe('GameLogSocketService', () => {
         });
 
         it('should invoke callback multiple times for multiple success responses', () => {
-            const logEntry1 = createMockGameLogEntry();
+            const logEntry1 = CREATE_MOCK_GAME_LOG_ENTRY();
             const logEntry2: GameLogEntry = {
                 ...logEntry1,
                 id: 'second-log-entry-id',
@@ -116,7 +116,7 @@ describe('GameLogSocketService', () => {
             };
 
             mockSocketService.onEvent.and.returnValue(
-                of(createMockSuccessResponse(logEntry1), createMockSuccessResponse(logEntry2)),
+                of(CREATE_MOCK_SUCCESS_RESPONSE(logEntry1), CREATE_MOCK_SUCCESS_RESPONSE(logEntry2)),
             );
 
             const callback = jasmine.createSpy('callback');
@@ -128,9 +128,9 @@ describe('GameLogSocketService', () => {
         });
 
         it('should handle mixed success and error responses', () => {
-            const logEntry = createMockGameLogEntry();
+            const logEntry = CREATE_MOCK_GAME_LOG_ENTRY();
             mockSocketService.onEvent.and.returnValue(
-                of(createMockSuccessResponse(logEntry), createMockErrorResponse(), createMockSuccessResponse(logEntry)),
+                of(CREATE_MOCK_SUCCESS_RESPONSE(logEntry), CREATE_MOCK_ERROR_RESPONSE(), CREATE_MOCK_SUCCESS_RESPONSE(logEntry)),
             );
 
             const callback = jasmine.createSpy('callback');

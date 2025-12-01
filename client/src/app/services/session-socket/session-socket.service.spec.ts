@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { TestBed } from '@angular/core/testing';
 import { AddVirtualPlayerDto } from '@app/dto/add-virtual-player-dto';
 import { AvailableSessionsUpdatedDto } from '@app/dto/available-sessions-updated-dto';
@@ -23,7 +24,6 @@ import { SessionEvents } from '@common/enums/session-events.enum';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { SessionSocketService } from './session-socket.service';
 
-// Test constants
 const TEST_SESSION_ID = 'test-session-id';
 const TEST_SESSION_ID_2 = 'test-session-id-2';
 const TEST_GAME_ID = 'test-game-id';
@@ -62,7 +62,7 @@ type MockSocketService = {
     onSuccessEvent: jasmine.Spy;
 };
 
-const createMockPlayerDto = (): PlayerDto => ({
+const CREATE_MOCK_PLAYER_DTO = (): PlayerDto => ({
     id: TEST_PLAYER_ID,
     name: TEST_PLAYER_NAME,
     avatar: Avatar.Avatar1,
@@ -86,68 +86,68 @@ const createMockPlayerDto = (): PlayerDto => ({
     boatSpeed: TEST_BOAT_SPEED,
 });
 
-const createMockCreateSessionDto = (): CreateSessionDto => ({
+const CREATE_MOCK_CREATE_SESSION_DTO = (): CreateSessionDto => ({
     gameId: TEST_GAME_ID,
     maxPlayers: TEST_MAX_PLAYERS,
     mode: GameMode.CLASSIC,
-    player: createMockPlayerDto(),
+    player: CREATE_MOCK_PLAYER_DTO(),
 });
 
-const createMockJoinAvatarSelectionDto = (): JoinAvatarSelectionDto => ({
+const CREATE_MOCK_JOIN_AVATAR_SELECTION_DTO = (): JoinAvatarSelectionDto => ({
     sessionId: TEST_SESSION_ID,
 });
 
-const createMockJoinSessionDto = (): JoinSessionDto => ({
+const CREATE_MOCK_JOIN_SESSION_DTO = (): JoinSessionDto => ({
     sessionId: TEST_SESSION_ID,
-    player: createMockPlayerDto(),
+    player: CREATE_MOCK_PLAYER_DTO(),
 });
 
-const createMockKickPlayerDto = (): KickPlayerDto => ({
+const CREATE_MOCK_KICK_PLAYER_DTO = (): KickPlayerDto => ({
     playerId: TEST_PLAYER_ID,
 });
 
-const createMockAddVirtualPlayerDto = (): AddVirtualPlayerDto => ({
+const CREATE_MOCK_ADD_VIRTUAL_PLAYER_DTO = (): AddVirtualPlayerDto => ({
     sessionId: TEST_SESSION_ID,
     virtualPlayerType: VirtualPlayerType.Offensive,
 });
 
-const createMockUpdateAvatarAssignmentsDto = (): UpdateAvatarAssignmentsDto => ({
+const CREATE_MOCK_UPDATE_AVATAR_ASSIGNMENTS_DTO = (): UpdateAvatarAssignmentsDto => ({
     sessionId: TEST_SESSION_ID,
     avatar: TEST_AVATAR_STRING,
 });
 
-const createMockSessionCreatedDto = (): SessionCreatedDto => ({
+const CREATE_MOCK_SESSION_CREATED_DTO = (): SessionCreatedDto => ({
     sessionId: TEST_SESSION_ID,
     playerId: TEST_PLAYER_ID,
     chatId: TEST_CHAT_ID,
 });
 
-const createMockAvatarSelectionJoinedDto = (): AvatarSelectionJoinedDto => ({
+const CREATE_MOCK_AVATAR_SELECTION_JOINED_DTO = (): AvatarSelectionJoinedDto => ({
     playerId: TEST_PLAYER_ID,
     sessionId: TEST_SESSION_ID,
 });
 
-const createMockSessionJoinedDto = (): SessionJoinedDto => ({
+const CREATE_MOCK_SESSION_JOINED_DTO = (): SessionJoinedDto => ({
     gameId: TEST_GAME_ID,
     maxPlayers: TEST_MAX_PLAYERS,
     chatId: TEST_CHAT_ID,
     mode: GameMode.CLASSIC,
 });
 
-const createMockAvatarAssignmentDto = (): AvatarAssignmentDto => ({
+const CREATE_MOCK_AVATAR_ASSIGNMENT_DTO = (): AvatarAssignmentDto => ({
     avatar: Avatar.Avatar1,
     chosenBy: TEST_PLAYER_ID,
 });
 
-const createMockAvatarAssignmentsUpdatedDto = (): AvatarAssignmentsUpdatedDto => ({
-    avatarAssignments: [createMockAvatarAssignmentDto()],
+const CREATE_MOCK_AVATAR_ASSIGNMENTS_UPDATED_DTO = (): AvatarAssignmentsUpdatedDto => ({
+    avatarAssignments: [CREATE_MOCK_AVATAR_ASSIGNMENT_DTO()],
 });
 
-const createMockSessionPlayersUpdatedDto = (): SessionPlayersUpdatedDto => ({
-    players: [createMockPlayerDto()],
+const CREATE_MOCK_SESSION_PLAYERS_UPDATED_DTO = (): SessionPlayersUpdatedDto => ({
+    players: [CREATE_MOCK_PLAYER_DTO()],
 });
 
-const createMockSessionPreviewDto = (): SessionPreviewDto => ({
+const CREATE_MOCK_SESSION_PREVIEW_DTO = (): SessionPreviewDto => ({
     id: TEST_SESSION_ID,
     currentPlayers: TEST_CURRENT_PLAYERS,
     maxPlayers: TEST_MAX_PLAYERS,
@@ -157,8 +157,8 @@ const createMockSessionPreviewDto = (): SessionPreviewDto => ({
     gameMode: GameMode.CLASSIC,
 });
 
-const createMockAvailableSessionsUpdatedDto = (): AvailableSessionsUpdatedDto => ({
-    sessions: [createMockSessionPreviewDto()],
+const CREATE_MOCK_AVAILABLE_SESSIONS_UPDATED_DTO = (): AvailableSessionsUpdatedDto => ({
+    sessions: [CREATE_MOCK_SESSION_PREVIEW_DTO()],
 });
 
 describe('SessionSocketService', () => {
@@ -184,7 +184,7 @@ describe('SessionSocketService', () => {
 
     describe('createSession', () => {
         it('should call socket.emit with CreateSession event and data', () => {
-            const data = createMockCreateSessionDto();
+            const data = CREATE_MOCK_CREATE_SESSION_DTO();
 
             service.createSession(data);
 
@@ -197,7 +197,7 @@ describe('SessionSocketService', () => {
                 gameId: 'different-game-id',
                 maxPlayers: TEST_MAX_PLAYERS_2,
                 mode: GameMode.CTF,
-                player: createMockPlayerDto(),
+                player: CREATE_MOCK_PLAYER_DTO(),
             };
 
             service.createSession(differentData);
@@ -208,7 +208,7 @@ describe('SessionSocketService', () => {
 
     describe('joinAvatarSelection', () => {
         it('should call socket.emit with JoinAvatarSelection event and data', () => {
-            const data = createMockJoinAvatarSelectionDto();
+            const data = CREATE_MOCK_JOIN_AVATAR_SELECTION_DTO();
 
             service.joinAvatarSelection(data);
 
@@ -229,7 +229,7 @@ describe('SessionSocketService', () => {
 
     describe('leaveAvatarSelection', () => {
         it('should call socket.emit with LeaveAvatarSelection event and data', () => {
-            const data = createMockJoinAvatarSelectionDto();
+            const data = CREATE_MOCK_JOIN_AVATAR_SELECTION_DTO();
 
             service.leaveAvatarSelection(data);
 
@@ -250,7 +250,7 @@ describe('SessionSocketService', () => {
 
     describe('joinSession', () => {
         it('should call socket.emit with JoinSession event and data', () => {
-            const data = createMockJoinSessionDto();
+            const data = CREATE_MOCK_JOIN_SESSION_DTO();
 
             service.joinSession(data);
 
@@ -261,7 +261,7 @@ describe('SessionSocketService', () => {
         it('should call socket.emit with different JoinSession data', () => {
             const differentData: JoinSessionDto = {
                 sessionId: TEST_SESSION_ID_2,
-                player: createMockPlayerDto(),
+                player: CREATE_MOCK_PLAYER_DTO(),
             };
 
             service.joinSession(differentData);
@@ -308,7 +308,7 @@ describe('SessionSocketService', () => {
 
     describe('kickPlayer', () => {
         it('should call socket.emit with KickPlayer event and data', () => {
-            const data = createMockKickPlayerDto();
+            const data = CREATE_MOCK_KICK_PLAYER_DTO();
 
             service.kickPlayer(data);
 
@@ -329,7 +329,7 @@ describe('SessionSocketService', () => {
 
     describe('addVirtualPlayer', () => {
         it('should call socket.emit with AddVirtualPlayer event and data', () => {
-            const data = createMockAddVirtualPlayerDto();
+            const data = CREATE_MOCK_ADD_VIRTUAL_PLAYER_DTO();
 
             service.addVirtualPlayer(data);
 
@@ -351,7 +351,7 @@ describe('SessionSocketService', () => {
 
     describe('updateAvatarsAssignment', () => {
         it('should call socket.emit with UpdateAvatarAssignments event and data', () => {
-            const data = createMockUpdateAvatarAssignmentsDto();
+            const data = CREATE_MOCK_UPDATE_AVATAR_ASSIGNMENTS_DTO();
 
             service.updateAvatarsAssignment(data);
 
@@ -394,13 +394,13 @@ describe('SessionSocketService', () => {
             const callback = jasmine.createSpy('callback');
             let eventCallback: ((data: SessionCreatedDto) => void) | undefined;
 
-            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, cb: (data: SessionCreatedDto) => void) => {
-                eventCallback = cb;
+            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, handler: (data: SessionCreatedDto) => void) => {
+                eventCallback = handler;
             });
 
             service.onSessionCreated(callback);
 
-            const data = createMockSessionCreatedDto();
+            const data = CREATE_MOCK_SESSION_CREATED_DTO();
             if (eventCallback) {
                 eventCallback(data);
             }
@@ -424,13 +424,13 @@ describe('SessionSocketService', () => {
             const callback = jasmine.createSpy('callback');
             let eventCallback: ((data: AvatarSelectionJoinedDto) => void) | undefined;
 
-            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, cb: (data: AvatarSelectionJoinedDto) => void) => {
-                eventCallback = cb;
+            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, handler: (data: AvatarSelectionJoinedDto) => void) => {
+                eventCallback = handler;
             });
 
             service.onAvatarSelectionJoined(callback);
 
-            const data = createMockAvatarSelectionJoinedDto();
+            const data = CREATE_MOCK_AVATAR_SELECTION_JOINED_DTO();
             if (eventCallback) {
                 eventCallback(data);
             }
@@ -453,13 +453,13 @@ describe('SessionSocketService', () => {
             const callback = jasmine.createSpy('callback');
             let eventCallback: ((data: SessionJoinedDto) => void) | undefined;
 
-            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, cb: (data: SessionJoinedDto) => void) => {
-                eventCallback = cb;
+            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, handler: (data: SessionJoinedDto) => void) => {
+                eventCallback = handler;
             });
 
             service.onSessionJoined(callback);
 
-            const data = createMockSessionJoinedDto();
+            const data = CREATE_MOCK_SESSION_JOINED_DTO();
             if (eventCallback) {
                 eventCallback(data);
             }
@@ -471,14 +471,14 @@ describe('SessionSocketService', () => {
             const callback = jasmine.createSpy('callback');
             let eventCallback: ((data: SessionJoinedDto) => void) | undefined;
 
-            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, cb: (data: SessionJoinedDto) => void) => {
-                eventCallback = cb;
+            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, handler: (data: SessionJoinedDto) => void) => {
+                eventCallback = handler;
             });
 
             service.onSessionJoined(callback);
 
             const data: SessionJoinedDto = {
-                ...createMockSessionJoinedDto(),
+                ...CREATE_MOCK_SESSION_JOINED_DTO(),
                 modifiedPlayerName: TEST_MODIFIED_PLAYER_NAME,
             };
             if (eventCallback) {
@@ -503,8 +503,8 @@ describe('SessionSocketService', () => {
             const callback = jasmine.createSpy('callback');
             let eventCallback: ((data: { message: string }) => void) | undefined;
 
-            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, cb: (data: { message: string }) => void) => {
-                eventCallback = cb;
+            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, handler: (data: { message: string }) => void) => {
+                eventCallback = handler;
             });
 
             service.onSessionEnded(callback);
@@ -522,8 +522,8 @@ describe('SessionSocketService', () => {
             const callback = jasmine.createSpy('callback');
             let eventCallback: ((data: { message: string }) => void) | undefined;
 
-            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, cb: (data: { message: string }) => void) => {
-                eventCallback = cb;
+            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, handler: (data: { message: string }) => void) => {
+                eventCallback = handler;
             });
 
             service.onSessionEnded(callback);
@@ -552,13 +552,13 @@ describe('SessionSocketService', () => {
             const callback = jasmine.createSpy('callback');
             let eventCallback: ((data: AvatarAssignmentsUpdatedDto) => void) | undefined;
 
-            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, cb: (data: AvatarAssignmentsUpdatedDto) => void) => {
-                eventCallback = cb;
+            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, handler: (data: AvatarAssignmentsUpdatedDto) => void) => {
+                eventCallback = handler;
             });
 
             service.onAvatarAssignmentsUpdated(callback);
 
-            const data = createMockAvatarAssignmentsUpdatedDto();
+            const data = CREATE_MOCK_AVATAR_ASSIGNMENTS_UPDATED_DTO();
             if (eventCallback) {
                 eventCallback(data);
             }
@@ -581,13 +581,13 @@ describe('SessionSocketService', () => {
             const callback = jasmine.createSpy('callback');
             let eventCallback: ((data: SessionPlayersUpdatedDto) => void) | undefined;
 
-            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, cb: (data: SessionPlayersUpdatedDto) => void) => {
-                eventCallback = cb;
+            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, handler: (data: SessionPlayersUpdatedDto) => void) => {
+                eventCallback = handler;
             });
 
             service.onSessionPlayersUpdated(callback);
 
-            const data = createMockSessionPlayersUpdatedDto();
+            const data = CREATE_MOCK_SESSION_PLAYERS_UPDATED_DTO();
             if (eventCallback) {
                 eventCallback(data);
             }
@@ -610,8 +610,8 @@ describe('SessionSocketService', () => {
             const callback = jasmine.createSpy('callback');
             let eventCallback: (() => void) | undefined;
 
-            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, cb: () => void) => {
-                eventCallback = cb;
+            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, handler: () => void) => {
+                eventCallback = handler;
             });
 
             service.onGameSessionStarted(callback);
@@ -638,13 +638,13 @@ describe('SessionSocketService', () => {
             const callback = jasmine.createSpy('callback');
             let eventCallback: ((data: AvailableSessionsUpdatedDto) => void) | undefined;
 
-            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, cb: (data: AvailableSessionsUpdatedDto) => void) => {
-                eventCallback = cb;
+            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, handler: (data: AvailableSessionsUpdatedDto) => void) => {
+                eventCallback = handler;
             });
 
             service.onAvailableSessionsUpdated(callback);
 
-            const data = createMockAvailableSessionsUpdatedDto();
+            const data = CREATE_MOCK_AVAILABLE_SESSIONS_UPDATED_DTO();
             if (eventCallback) {
                 eventCallback(data);
             }
@@ -667,8 +667,8 @@ describe('SessionSocketService', () => {
             const callback = jasmine.createSpy('callback');
             let eventCallback: (() => void) | undefined;
 
-            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, cb: () => void) => {
-                eventCallback = cb;
+            mockSocketService.onSuccessEvent.and.callFake((event: SessionEvents, handler: () => void) => {
+                eventCallback = handler;
             });
 
             service.onSessionAutoLocked(callback);

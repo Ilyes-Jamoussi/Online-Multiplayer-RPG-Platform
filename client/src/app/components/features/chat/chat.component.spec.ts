@@ -29,7 +29,7 @@ type MockPlayerService = {
     id: Signal<string>;
 };
 
-const createMockChatMessage = (
+const CREATE_MOCK_CHAT_MESSAGE = (
     authorId: string,
     authorName: string,
     content: string,
@@ -88,7 +88,7 @@ describe('ChatComponent', () => {
     describe('messages', () => {
         it('should return messages from chatService', () => {
             const mockMessages = [
-                createMockChatMessage(TEST_PLAYER_ID, TEST_AUTHOR_NAME, TEST_MESSAGE_CONTENT, TEST_TIMESTAMP),
+                CREATE_MOCK_CHAT_MESSAGE(TEST_PLAYER_ID, TEST_AUTHOR_NAME, TEST_MESSAGE_CONTENT, TEST_TIMESTAMP),
             ];
             messagesSignal.set(mockMessages);
             fixture.detectChanges();
@@ -110,15 +110,13 @@ describe('ChatComponent', () => {
 
         it('should set shouldScrollToBottom to true when messages getter is accessed', () => {
             const mockMessages = [
-                createMockChatMessage(TEST_PLAYER_ID, TEST_AUTHOR_NAME, TEST_MESSAGE_CONTENT, TEST_TIMESTAMP),
+                CREATE_MOCK_CHAT_MESSAGE(TEST_PLAYER_ID, TEST_AUTHOR_NAME, TEST_MESSAGE_CONTENT, TEST_TIMESTAMP),
             ];
             messagesSignal.set(mockMessages);
             fixture.detectChanges();
 
-            // Access messages getter
-            component.messages;
+            void component.messages;
 
-            // shouldScrollToBottom should be set to true, which will trigger scroll in ngAfterViewChecked
             fixture.detectChanges();
             expect(component.messages()).toEqual(mockMessages);
         });
@@ -191,7 +189,6 @@ describe('ChatComponent', () => {
 
             component.sendMessage();
 
-            // shouldScrollToBottom should be set to true, which will trigger scroll in ngAfterViewChecked
             fixture.detectChanges();
             expect(mockChatService.sendMessage).toHaveBeenCalled();
         });
@@ -203,7 +200,6 @@ describe('ChatComponent', () => {
 
             expect(formatted).toBeDefined();
             expect(typeof formatted).toBe('string');
-            // The exact format depends on locale, but should contain time components
             expect(formatted.length).toBeGreaterThan(0);
         });
 
@@ -264,29 +260,23 @@ describe('ChatComponent', () => {
 
     describe('ngAfterViewChecked', () => {
         it('should call scrollToBottom when shouldScrollToBottom is true', () => {
-            // Create a mock element for messagesContainer
             const mockElement = {
                 scrollTop: 0,
                 scrollHeight: SCROLL_HEIGHT_VALUE,
             };
 
-            // Access messages getter to set shouldScrollToBottom to true
-            component.messages;
+            void component.messages;
 
-            // Manually set the messagesContainer to our mock element
             (component as unknown as { messagesContainer: { nativeElement: typeof mockElement } }).messagesContainer = {
                 nativeElement: mockElement,
             };
 
-            // Trigger ngAfterViewChecked
             component.ngAfterViewChecked();
 
-            // Verify that scrollTop was set to scrollHeight
             expect(mockElement.scrollTop).toBe(SCROLL_HEIGHT_VALUE);
         });
 
         it('should not call scrollToBottom when shouldScrollToBottom is false', () => {
-            // Create a fresh component instance to ensure shouldScrollToBottom is false
             const freshFixture = TestBed.createComponent(ChatComponent);
             const freshComponent = freshFixture.componentInstance;
 
@@ -299,21 +289,12 @@ describe('ChatComponent', () => {
                 nativeElement: mockElement,
             };
 
-            // Note: We don't call detectChanges() here because it would trigger the template
-            // to access messages() getter, which would set shouldScrollToBottom to true.
-            // Instead, we directly test ngAfterViewChecked with shouldScrollToBottom = false.
-
-            // Call ngAfterViewChecked once to reset any potential true state
-            // (if it was set by previous tests or initialization)
             freshComponent.ngAfterViewChecked();
 
-            // Reset scrollTop to ensure we can detect if scrollToBottom is called
             mockElement.scrollTop = 0;
 
-            // shouldScrollToBottom should be false now, so scrollToBottom should not be called
             freshComponent.ngAfterViewChecked();
 
-            // scrollTop should remain unchanged
             expect(mockElement.scrollTop).toBe(0);
         });
 
@@ -327,17 +308,12 @@ describe('ChatComponent', () => {
                 nativeElement: mockElement,
             };
 
-            // Set shouldScrollToBottom to true by accessing messages
-            component.messages;
+            void component.messages;
 
-            // Trigger ngAfterViewChecked
             component.ngAfterViewChecked();
 
-            // Verify scroll happened
             expect(mockElement.scrollTop).toBe(SCROLL_HEIGHT_VALUE);
 
-            // Verify that shouldScrollToBottom was reset to false
-            // (we can't directly access it, but if we call ngAfterViewChecked again, it shouldn't scroll)
             mockElement.scrollTop = 0;
             component.ngAfterViewChecked();
             expect(mockElement.scrollTop).toBe(0);
@@ -355,24 +331,18 @@ describe('ChatComponent', () => {
                 nativeElement: mockElement,
             };
 
-            // Access messages to set shouldScrollToBottom to true
-            component.messages;
+            void component.messages;
 
-            // Trigger ngAfterViewChecked which calls scrollToBottom
             component.ngAfterViewChecked();
 
-            // Verify scrollTop was set to scrollHeight
             expect(mockElement.scrollTop).toBe(SCROLL_HEIGHT_VALUE);
         });
 
         it('should not throw error when messagesContainer is undefined', () => {
-            // Set messagesContainer to undefined
             (component as unknown as { messagesContainer: undefined }).messagesContainer = undefined;
 
-            // Access messages to set shouldScrollToBottom to true
-            component.messages;
+            void component.messages;
 
-            // Should not throw error
             expect(() => component.ngAfterViewChecked()).not.toThrow();
         });
     });

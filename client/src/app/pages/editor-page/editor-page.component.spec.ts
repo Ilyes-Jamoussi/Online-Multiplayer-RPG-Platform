@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file */
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ElementRef } from '@angular/core';
@@ -329,8 +330,8 @@ describe('EditorPageComponent', () => {
     });
 
     describe('onKeyDown', () => {
-        const ESCAPE_KEY = 'Escape';
-        const OTHER_KEY = 'Enter';
+        const escapeKey = 'Escape';
+        const otherKey = 'Enter';
 
         it('should cancel teleport placement when Escape key is pressed and TeleportTileTool is active', () => {
             mockGameEditorInteractionsService.activeTool = {
@@ -339,7 +340,7 @@ describe('EditorPageComponent', () => {
                 teleportChannel: { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } },
             };
             const mockEvent = {
-                key: ESCAPE_KEY,
+                key: escapeKey,
             } as KeyboardEvent;
 
             component.onKeyDown(mockEvent);
@@ -355,7 +356,7 @@ describe('EditorPageComponent', () => {
                 rightDrag: false,
             };
             const mockEvent = {
-                key: ESCAPE_KEY,
+                key: escapeKey,
             } as KeyboardEvent;
 
             component.onKeyDown(mockEvent);
@@ -370,7 +371,7 @@ describe('EditorPageComponent', () => {
                 teleportChannel: { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } },
             };
             const mockEvent = {
-                key: OTHER_KEY,
+                key: otherKey,
             } as KeyboardEvent;
 
             component.onKeyDown(mockEvent);
@@ -381,7 +382,7 @@ describe('EditorPageComponent', () => {
         it('should not cancel teleport placement when activeTool is null', () => {
             mockGameEditorInteractionsService.activeTool = null;
             const mockEvent = {
-                key: ESCAPE_KEY,
+                key: escapeKey,
             } as KeyboardEvent;
 
             component.onKeyDown(mockEvent);

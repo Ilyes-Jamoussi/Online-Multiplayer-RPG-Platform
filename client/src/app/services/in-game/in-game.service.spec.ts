@@ -478,11 +478,11 @@ describe('InGameService', () => {
         it('should handle sanctuary action failed', () => {
             service['_openedSanctuary'].set({ kind: PlaceableKind.HEAL, x: TEST_X_COORDINATE, y: TEST_Y_COORDINATE, success: false });
             const callback = mockInGameSocketService.onSanctuaryActionFailed.calls.mostRecent().args[0];
-            const MOCK_MESSAGE = "L'action de sanctuaire a échouée";
-            callback({ message: MOCK_MESSAGE });
+            const mockMessage = "L'action de sanctuaire a échouée";
+            callback({ message: mockMessage });
             expect(mockNotificationService.displayErrorPopup).toHaveBeenCalledWith({
                 title: 'Action de sanctuaire échouée',
-                message: MOCK_MESSAGE,
+                message: mockMessage,
             });
             expect(service.openedSanctuary()).toBeNull();
         });
@@ -690,14 +690,14 @@ describe('InGameService', () => {
         });
 
         it('should perform sanctuary action with double', () => {
-            const DOUBLE_VALUE = true;
-            service.performSanctuaryAction(TEST_X_COORDINATE, TEST_Y_COORDINATE, PlaceableKind.HEAL, DOUBLE_VALUE);
+            const doubleValue = true;
+            service.performSanctuaryAction(TEST_X_COORDINATE, TEST_Y_COORDINATE, PlaceableKind.HEAL, doubleValue);
             expect(mockInGameSocketService.playerSanctuaryAction).toHaveBeenCalledWith({
                 sessionId: 'session1',
                 x: TEST_X_COORDINATE,
                 y: TEST_Y_COORDINATE,
                 kind: PlaceableKind.HEAL,
-                double: DOUBLE_VALUE,
+                double: doubleValue,
             });
         });
     });
@@ -713,18 +713,18 @@ describe('InGameService', () => {
         });
 
         it('should respond to flag transfer', () => {
-            const MOCK_FROM_PLAYER_ID = 'player2';
-            const MOCK_ACCEPTED = true;
+            const mockFromPlayerId = 'player2';
+            const mockAccepted = true;
             service['_pendingFlagTransferRequest'].set({
-                fromPlayerId: MOCK_FROM_PLAYER_ID,
+                fromPlayerId: mockFromPlayerId,
                 toPlayerId: 'player1',
                 fromPlayerName: 'Player 2',
             });
-            service.respondToFlagTransfer(MOCK_FROM_PLAYER_ID, MOCK_ACCEPTED);
+            service.respondToFlagTransfer(mockFromPlayerId, mockAccepted);
             expect(mockInGameSocketService.respondToFlagTransfer).toHaveBeenCalledWith({
                 sessionId: 'session1',
-                fromPlayerId: MOCK_FROM_PLAYER_ID,
-                accepted: MOCK_ACCEPTED,
+                fromPlayerId: mockFromPlayerId,
+                accepted: mockAccepted,
             });
             expect(service.pendingFlagTransferRequest()).toBeNull();
         });
@@ -739,43 +739,43 @@ describe('InGameService', () => {
 
     describe('Computed Properties', () => {
         it('should return turn number', () => {
-            const MOCK_TURN_NUMBER = 5;
+            const mockTurnNumber = 5;
             service.updateInGameSession({
-                currentTurn: { turnNumber: MOCK_TURN_NUMBER, activePlayerId: 'player1', hasUsedAction: false },
+                currentTurn: { turnNumber: mockTurnNumber, activePlayerId: 'player1', hasUsedAction: false },
             });
-            expect(service.turnNumber()).toBe(MOCK_TURN_NUMBER);
+            expect(service.turnNumber()).toBe(mockTurnNumber);
         });
 
         it('should return turn order', () => {
-            const MOCK_TURN_ORDER = ['player1', 'player2'];
+            const mockTurnOrder = ['player1', 'player2'];
             service.updateInGameSession({
-                turnOrder: MOCK_TURN_ORDER,
+                turnOrder: mockTurnOrder,
             });
-            expect(service.turnOrder()).toEqual(MOCK_TURN_ORDER);
+            expect(service.turnOrder()).toEqual(mockTurnOrder);
         });
 
         it('should return start points', () => {
-            const MOCK_START_POINTS = [{ id: 'start1', playerId: 'player1', x: 0, y: 0 }];
+            const mockStartPoints = [{ id: 'start1', playerId: 'player1', x: 0, y: 0 }];
             service.updateInGameSession({
-                startPoints: MOCK_START_POINTS,
+                startPoints: mockStartPoints,
             });
-            expect(service.startPoints()).toEqual(MOCK_START_POINTS);
+            expect(service.startPoints()).toEqual(mockStartPoints);
         });
 
         it('should return map size', () => {
-            const MOCK_MAP_SIZE = 10;
+            const mockMapSize = 10;
             service.updateInGameSession({
-                mapSize: MOCK_MAP_SIZE,
+                mapSize: mockMapSize,
             });
-            expect(service.mapSize()).toBe(MOCK_MAP_SIZE);
+            expect(service.mapSize()).toBe(mockMapSize);
         });
 
         it('should return mode', () => {
-            const MOCK_MODE = GameMode.CLASSIC;
+            const mockMode = GameMode.CLASSIC;
             service.updateInGameSession({
-                mode: MOCK_MODE,
+                mode: mockMode,
             });
-            expect(service.mode()).toBe(MOCK_MODE);
+            expect(service.mode()).toBe(mockMode);
         });
 
         it('should return time remaining', () => {
@@ -783,11 +783,11 @@ describe('InGameService', () => {
         });
 
         it('should return flag data', () => {
-            const MOCK_FLAG_DATA = { position: { x: 1, y: 1 }, holderPlayerId: 'player1' };
+            const mockFlagData = { position: { x: 1, y: 1 }, holderPlayerId: 'player1' };
             service.updateInGameSession({
-                flagData: MOCK_FLAG_DATA,
+                flagData: mockFlagData,
             });
-            expect(service.flagData()).toEqual(MOCK_FLAG_DATA);
+            expect(service.flagData()).toEqual(mockFlagData);
         });
     });
 });

@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
 import { TeleportTilesDto } from '@app/dto/teleport-tiles-dto';
@@ -33,13 +34,13 @@ type MockGameEditorTeleportService = {
     getAvailableTeleportChannels: jasmine.Spy;
 };
 
-const createMockToolbarItem = (tileKind: TileKind, image: string, className: string): ToolbarItem => ({
+const CREATE_MOCK_TOOLBAR_ITEM = (tileKind: TileKind, image: string, className: string): ToolbarItem => ({
     image,
     tileKind,
     class: className,
 });
 
-const createMockTeleportChannel = (
+const CREATE_MOCK_TELEPORT_CHANNEL = (
     channelNumber: number,
     tiles?: TeleportTilesDto,
 ): TeleportChannelDto => ({
@@ -55,9 +56,9 @@ describe('GameEditorToolbarComponent', () => {
 
     beforeEach(async () => {
         const mockBrushes: ToolbarItem[] = [
-            createMockToolbarItem(TileKind.WATER, TEST_TILE_IMAGE_WATER, TEST_TILE_CLASS_WATER),
-            createMockToolbarItem(TileKind.WALL, TEST_TILE_IMAGE_WALL, TEST_TILE_CLASS_WALL),
-            createMockToolbarItem(TileKind.TELEPORT, TEST_TILE_IMAGE_TELEPORT, TEST_TILE_CLASS_TELEPORT),
+            CREATE_MOCK_TOOLBAR_ITEM(TileKind.WATER, TEST_TILE_IMAGE_WATER, TEST_TILE_CLASS_WATER),
+            CREATE_MOCK_TOOLBAR_ITEM(TileKind.WALL, TEST_TILE_IMAGE_WALL, TEST_TILE_CLASS_WALL),
+            CREATE_MOCK_TOOLBAR_ITEM(TileKind.TELEPORT, TEST_TILE_IMAGE_TELEPORT, TEST_TILE_CLASS_TELEPORT),
         ];
 
         mockGameEditorInteractionsService = {
@@ -108,8 +109,9 @@ describe('GameEditorToolbarComponent', () => {
         it('should return brushes from gameEditorInteractionsService', () => {
             const result = component.brushes;
 
+            const expectedBrushesCount = 3;
             expect(mockGameEditorInteractionsService.getToolbarBrushes).toHaveBeenCalled();
-            expect(result.length).toBe(3);
+            expect(result.length).toBe(expectedBrushesCount);
             expect(result[0].tileKind).toBe(TileKind.WATER);
             expect(result[1].tileKind).toBe(TileKind.WALL);
             expect(result[2].tileKind).toBe(TileKind.TELEPORT);
@@ -217,7 +219,7 @@ describe('GameEditorToolbarComponent', () => {
 
     describe('isTeleportSelected', () => {
         it('should return true when activeTool is TeleportTileTool', () => {
-            const teleportChannel = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1);
+            const teleportChannel = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1);
             const teleportTool: ActiveTool = {
                 type: ToolType.TeleportTileTool,
                 channelNumber: TEST_CHANNEL_NUMBER_1,
@@ -266,7 +268,7 @@ describe('GameEditorToolbarComponent', () => {
     });
 
     describe('isBrushSelected', () => {
-        const brush: ToolbarItem = createMockToolbarItem(TileKind.WATER, TEST_TILE_IMAGE_WATER, TEST_TILE_CLASS_WATER);
+        const brush: ToolbarItem = CREATE_MOCK_TOOLBAR_ITEM(TileKind.WATER, TEST_TILE_IMAGE_WATER, TEST_TILE_CLASS_WATER);
 
         it('should return true when activeTool is TileBrushTool with matching tileKind', () => {
             const brushTool: ActiveTool = {
@@ -305,7 +307,7 @@ describe('GameEditorToolbarComponent', () => {
         });
 
         it('should return false when activeTool is TeleportTileTool', () => {
-            const teleportChannel = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1);
+            const teleportChannel = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1);
             const teleportTool: ActiveTool = {
                 type: ToolType.TeleportTileTool,
                 channelNumber: TEST_CHANNEL_NUMBER_1,
@@ -344,7 +346,7 @@ describe('GameEditorToolbarComponent', () => {
 
     describe('getActiveTeleportChannelNumber', () => {
         it('should return channelNumber when activeTool is TeleportTileTool', () => {
-            const teleportChannel = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1);
+            const teleportChannel = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1);
             const teleportTool: ActiveTool = {
                 type: ToolType.TeleportTileTool,
                 channelNumber: TEST_CHANNEL_NUMBER_1,
@@ -358,7 +360,7 @@ describe('GameEditorToolbarComponent', () => {
         });
 
         it('should return different channelNumber when activeTool is TeleportTileTool with different channel', () => {
-            const teleportChannel = createMockTeleportChannel(TEST_CHANNEL_NUMBER_2);
+            const teleportChannel = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_2);
             const teleportTool: ActiveTool = {
                 type: ToolType.TeleportTileTool,
                 channelNumber: TEST_CHANNEL_NUMBER_2,
@@ -421,7 +423,7 @@ describe('GameEditorToolbarComponent', () => {
         });
 
         it('should return one when one available teleport channel', () => {
-            const channel1 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1);
+            const channel1 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1);
             mockGameEditorTeleportService.getAvailableTeleportChannels.and.returnValue([channel1]);
 
             const result = component.getAvailableTeleportCount();
@@ -431,8 +433,8 @@ describe('GameEditorToolbarComponent', () => {
         });
 
         it('should return two when two available teleport channels', () => {
-            const channel1 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_1);
-            const channel2 = createMockTeleportChannel(TEST_CHANNEL_NUMBER_2);
+            const channel1 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1);
+            const channel2 = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_2);
             mockGameEditorTeleportService.getAvailableTeleportChannels.and.returnValue([channel1, channel2]);
 
             const result = component.getAvailableTeleportCount();

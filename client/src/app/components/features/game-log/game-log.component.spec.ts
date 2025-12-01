@@ -25,7 +25,7 @@ type MockGameLogService = {
     toggleFilter: jasmine.Spy;
 };
 
-const createMockGameLogEntry = (
+const CREATE_MOCK_GAME_LOG_ENTRY = (
     id: string,
     timestamp: string,
     message: string,
@@ -139,7 +139,6 @@ describe('GameLogComponent', () => {
         });
 
         it('should return icon name when icon is a valid FaIcons key', () => {
-            // The method checks if icon is a key in FaIcons enum
             const validIconKey = 'User';
 
             const result = component.getIconName(validIconKey);
@@ -161,8 +160,7 @@ describe('GameLogComponent', () => {
         });
 
         it('should return undefined when icon is a FaIcons value but not a key', () => {
-            // FaIcons.User = 'user', but 'user' is not a key, it's a value
-            const iconValue = FaIcons.User; // This is 'user'
+            const iconValue = FaIcons.User;
             const result = component.getIconName(iconValue);
             expect(result).toBeUndefined();
         });
@@ -170,7 +168,6 @@ describe('GameLogComponent', () => {
 
     describe('ngAfterViewChecked', () => {
         it('should call scrollToBottom when entries length changes', () => {
-            // Create a fresh component instance to ensure clean state
             const freshFixture = TestBed.createComponent(GameLogComponent);
             const freshComponent = freshFixture.componentInstance;
 
@@ -183,29 +180,19 @@ describe('GameLogComponent', () => {
                 nativeElement: mockElement,
             };
 
-            // Initially entries is empty - this initializes previousEntriesLength to 0
             entriesSignal.set([]);
-            // Don't call detectChanges() here to avoid triggering ngAfterViewChecked prematurely
-            // Instead, call ngAfterViewChecked manually to initialize previousEntriesLength
             freshComponent.ngAfterViewChecked();
-            // Now previousEntriesLength should be 0
 
-            // Reset scrollTop to ensure we can detect the change
             mockElement.scrollTop = 0;
 
-            // Add an entry to change the length from 0 to 1
-            const entry = createMockGameLogEntry(TEST_ENTRY_ID_1, TEST_TIMESTAMP_1, TEST_MESSAGE_1);
+            const entry = CREATE_MOCK_GAME_LOG_ENTRY(TEST_ENTRY_ID_1, TEST_TIMESTAMP_1, TEST_MESSAGE_1);
             entriesSignal.set([entry]);
-            // Now call ngAfterViewChecked manually to detect the change
-            // Since previousEntriesLength (0) !== currentLength (1), scrollToBottom should be called
             freshComponent.ngAfterViewChecked();
 
-            // Verify scroll happened
             expect(mockElement.scrollTop).toBe(SCROLL_HEIGHT_VALUE);
         });
 
         it('should not call scrollToBottom when entries length does not change', () => {
-            // Create a fresh component instance to ensure clean state
             const freshFixture = TestBed.createComponent(GameLogComponent);
             const freshComponent = freshFixture.componentInstance;
 
@@ -218,44 +205,31 @@ describe('GameLogComponent', () => {
                 nativeElement: mockElement,
             };
 
-            // Initialize with empty entries - set previousEntriesLength to 0
             entriesSignal.set([]);
             freshComponent.ngAfterViewChecked();
-            // Now previousEntriesLength should be 0
 
-            // Add an entry to change length from 0 to 1
-            const entry = createMockGameLogEntry(TEST_ENTRY_ID_1, TEST_TIMESTAMP_1, TEST_MESSAGE_1);
+            const entry = CREATE_MOCK_GAME_LOG_ENTRY(TEST_ENTRY_ID_1, TEST_TIMESTAMP_1, TEST_MESSAGE_1);
             entriesSignal.set([entry]);
             freshComponent.ngAfterViewChecked();
-            // This should detect the change (0 -> 1) and call scrollToBottom(), setting previousEntriesLength to 1
 
-            // Verify scroll happened on first change
             expect(mockElement.scrollTop).toBe(SCROLL_HEIGHT_VALUE);
 
-            // Now test that calling ngAfterViewChecked again without changing entries doesn't scroll
-            // Reset scrollTop to a known value
             mockElement.scrollTop = 0;
 
-            // Ensure entries length hasn't changed - it should still be 1
             expect(entriesSignal().length).toBe(1);
 
-            // Call ngAfterViewChecked multiple times to ensure it doesn't scroll when length hasn't changed
-            // Since previousEntriesLength (1) === currentLength (1), scrollToBottom should not be called
             freshComponent.ngAfterViewChecked();
             const scrollTopAfterFirstCall = mockElement.scrollTop;
 
             freshComponent.ngAfterViewChecked();
             const scrollTopAfterSecondCall = mockElement.scrollTop;
 
-            // scrollTop should remain unchanged (still 0, not SCROLL_HEIGHT_VALUE)
-            // Both calls should result in the same scrollTop value
             expect(scrollTopAfterFirstCall).toBe(0);
             expect(scrollTopAfterSecondCall).toBe(0);
             expect(mockElement.scrollTop).toBe(0);
         });
 
         it('should update previousEntriesLength when entries length changes', () => {
-            // Create a fresh component instance to ensure clean state
             const freshFixture = TestBed.createComponent(GameLogComponent);
             const freshComponent = freshFixture.componentInstance;
 
@@ -268,37 +242,27 @@ describe('GameLogComponent', () => {
                 nativeElement: mockElement,
             };
 
-            // Start with one entry - initialize previousEntriesLength to 0 first
             entriesSignal.set([]);
             freshComponent.ngAfterViewChecked();
-            // Now previousEntriesLength should be 0
 
-            // Add first entry to change length from 0 to 1
-            const entry1 = createMockGameLogEntry(TEST_ENTRY_ID_1, TEST_TIMESTAMP_1, TEST_MESSAGE_1);
+            const entry1 = CREATE_MOCK_GAME_LOG_ENTRY(TEST_ENTRY_ID_1, TEST_TIMESTAMP_1, TEST_MESSAGE_1);
             entriesSignal.set([entry1]);
             freshComponent.ngAfterViewChecked();
-            // This should detect the change (0 -> 1) and call scrollToBottom(), setting previousEntriesLength to 1
 
-            // Verify scroll happened on first change
             expect(mockElement.scrollTop).toBe(SCROLL_HEIGHT_VALUE);
 
-            // Reset scrollTop
             mockElement.scrollTop = 0;
 
-            // Add another entry to change length from 1 to 2
-            const entry2 = createMockGameLogEntry(TEST_ENTRY_ID_2, TEST_TIMESTAMP_2, TEST_MESSAGE_2);
+            const entry2 = CREATE_MOCK_GAME_LOG_ENTRY(TEST_ENTRY_ID_2, TEST_TIMESTAMP_2, TEST_MESSAGE_2);
             entriesSignal.set([entry1, entry2]);
-            // Call ngAfterViewChecked manually to detect the change (1 -> 2)
             freshComponent.ngAfterViewChecked();
 
-            // Should scroll again because length changed from 1 to 2
             expect(mockElement.scrollTop).toBe(SCROLL_HEIGHT_VALUE);
         });
     });
 
     describe('scrollToBottom', () => {
         it('should scroll to bottom when entriesContainer exists', () => {
-            // Create a fresh component instance to ensure clean state
             const freshFixture = TestBed.createComponent(GameLogComponent);
             const freshComponent = freshFixture.componentInstance;
 
@@ -311,33 +275,25 @@ describe('GameLogComponent', () => {
                 nativeElement: mockElement,
             };
 
-            // Start with empty entries - initialize previousEntriesLength to 0
             entriesSignal.set([]);
             freshComponent.ngAfterViewChecked();
-            // Now previousEntriesLength should be 0
 
-            // Reset scrollTop to ensure we can detect the change
             mockElement.scrollTop = 0;
 
-            // Now add an entry to change the length from 0 to 1
-            const entry = createMockGameLogEntry(TEST_ENTRY_ID_1, TEST_TIMESTAMP_1, TEST_MESSAGE_1);
+            const entry = CREATE_MOCK_GAME_LOG_ENTRY(TEST_ENTRY_ID_1, TEST_TIMESTAMP_1, TEST_MESSAGE_1);
             entriesSignal.set([entry]);
-            // Call ngAfterViewChecked manually to detect the change (0 -> 1)
             freshComponent.ngAfterViewChecked();
 
-            // Verify scroll happened
             expect(mockElement.scrollTop).toBe(SCROLL_HEIGHT_VALUE);
         });
 
         it('should not throw error when entriesContainer is undefined', () => {
             (component as unknown as { entriesContainer: undefined }).entriesContainer = undefined;
 
-            // Trigger scroll attempt by changing entries length
-            const entry = createMockGameLogEntry(TEST_ENTRY_ID_1, TEST_TIMESTAMP_1, TEST_MESSAGE_1);
+            const entry = CREATE_MOCK_GAME_LOG_ENTRY(TEST_ENTRY_ID_1, TEST_TIMESTAMP_1, TEST_MESSAGE_1);
             entriesSignal.set([entry]);
             fixture.detectChanges();
 
-            // Should not throw error
             expect(() => component.ngAfterViewChecked()).not.toThrow();
         });
     });

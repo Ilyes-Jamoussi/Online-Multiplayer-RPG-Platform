@@ -8,7 +8,6 @@ import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { PlayerCardComponent } from './player-card.component';
 
-// Test constants
 const TEST_PLAYER_ID_1 = 'test-player-id-1';
 const TEST_PLAYER_ID_2 = 'test-player-id-2';
 const TEST_PLAYER_NAME_1 = 'Test Player 1';
@@ -51,7 +50,7 @@ type MockPlayerService = {
     isAdmin: Signal<boolean>;
 };
 
-const createMockPlayer = (id: string, name: string, isAdmin: boolean = TEST_IS_NOT_ADMIN, avatar: Avatar | null = TEST_AVATAR): Player => ({
+const CREATE_MOCK_PLAYER = (id: string, name: string, isAdmin: boolean = TEST_IS_NOT_ADMIN, avatar: Avatar | null = TEST_AVATAR): Player => ({
     id,
     name,
     avatar,
@@ -129,7 +128,7 @@ describe('PlayerCardComponent', () => {
 
     describe('isMe', () => {
         it('should return true when player id matches current player id', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
             component.player = player;
             fixture.detectChanges();
 
@@ -137,7 +136,7 @@ describe('PlayerCardComponent', () => {
         });
 
         it('should return false when player id does not match current player id', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2);
             component.player = player;
             fixture.detectChanges();
 
@@ -147,7 +146,7 @@ describe('PlayerCardComponent', () => {
 
     describe('isAdmin', () => {
         it('should return true when player is admin', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, TEST_IS_ADMIN);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, TEST_IS_ADMIN);
             component.player = player;
             fixture.detectChanges();
 
@@ -155,7 +154,7 @@ describe('PlayerCardComponent', () => {
         });
 
         it('should return false when player is not admin', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, TEST_IS_NOT_ADMIN);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, TEST_IS_NOT_ADMIN);
             component.player = player;
             fixture.detectChanges();
 
@@ -165,7 +164,7 @@ describe('PlayerCardComponent', () => {
 
     describe('cardClasses', () => {
         it('should return is-me class when player is current player', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
             component.player = player;
             fixture.detectChanges();
 
@@ -175,7 +174,7 @@ describe('PlayerCardComponent', () => {
         });
 
         it('should return admin class when player is admin', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2, TEST_IS_ADMIN);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2, TEST_IS_ADMIN);
             component.player = player;
             fixture.detectChanges();
 
@@ -185,7 +184,7 @@ describe('PlayerCardComponent', () => {
         });
 
         it('should return both classes when player is current player and admin', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, TEST_IS_ADMIN);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, TEST_IS_ADMIN);
             component.player = player;
             fixture.detectChanges();
 
@@ -195,7 +194,7 @@ describe('PlayerCardComponent', () => {
         });
 
         it('should return no classes when player is neither current player nor admin', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2, TEST_IS_NOT_ADMIN);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2, TEST_IS_NOT_ADMIN);
             component.player = player;
             fixture.detectChanges();
 
@@ -208,7 +207,7 @@ describe('PlayerCardComponent', () => {
     describe('showKickButton', () => {
         it('should return true when current player is admin and target player is not admin', () => {
             isAdminSignal.set(TEST_IS_ADMIN);
-            const player = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2, TEST_IS_NOT_ADMIN);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2, TEST_IS_NOT_ADMIN);
             component.player = player;
             fixture.detectChanges();
 
@@ -217,7 +216,7 @@ describe('PlayerCardComponent', () => {
 
         it('should return false when current player is not admin', () => {
             isAdminSignal.set(TEST_IS_NOT_ADMIN);
-            const player = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2, TEST_IS_NOT_ADMIN);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2, TEST_IS_NOT_ADMIN);
             component.player = player;
             fixture.detectChanges();
 
@@ -226,7 +225,7 @@ describe('PlayerCardComponent', () => {
 
         it('should return false when target player is admin', () => {
             isAdminSignal.set(TEST_IS_ADMIN);
-            const player = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2, TEST_IS_ADMIN);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2, TEST_IS_ADMIN);
             component.player = player;
             fixture.detectChanges();
 
@@ -235,7 +234,7 @@ describe('PlayerCardComponent', () => {
 
         it('should return false when current player is admin and target player is also admin', () => {
             isAdminSignal.set(TEST_IS_ADMIN);
-            const player = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2, TEST_IS_ADMIN);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2, TEST_IS_ADMIN);
             component.player = player;
             fixture.detectChanges();
 
@@ -245,7 +244,7 @@ describe('PlayerCardComponent', () => {
 
     describe('kickPlayer', () => {
         it('should call sessionService.kickPlayer with player id', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2);
             component.player = player;
             fixture.detectChanges();
 
@@ -261,7 +260,7 @@ describe('PlayerCardComponent', () => {
         });
 
         it('should return avatar image path from assetsService', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, TEST_IS_NOT_ADMIN, TEST_AVATAR);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, TEST_IS_NOT_ADMIN, TEST_AVATAR);
             component.player = player;
             fixture.detectChanges();
 
@@ -272,7 +271,7 @@ describe('PlayerCardComponent', () => {
         });
 
         it('should return different avatar image path for different avatar', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, TEST_IS_NOT_ADMIN, TEST_AVATAR_2);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, TEST_IS_NOT_ADMIN, TEST_AVATAR_2);
             component.player = player;
             fixture.detectChanges();
 
@@ -283,7 +282,7 @@ describe('PlayerCardComponent', () => {
         });
 
         it('should return empty string when avatar is null', () => {
-            const player = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, TEST_IS_NOT_ADMIN, null);
+            const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, TEST_IS_NOT_ADMIN, null);
             component.player = player;
             fixture.detectChanges();
 

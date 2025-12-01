@@ -84,7 +84,7 @@ describe('SessionCreationPageComponent', () => {
     });
 
     it('should return classic games for active tab classic', () => {
-        const MOCK_CLASSIC_GAMES: GamePreviewDto[] = [
+        const mockClassicGames: GamePreviewDto[] = [
             {
                 id: '3',
                 name: 'Classic Game',
@@ -97,15 +97,15 @@ describe('SessionCreationPageComponent', () => {
                 draft: false,
             },
         ];
-        classicGamesSignal.set(MOCK_CLASSIC_GAMES);
+        classicGamesSignal.set(mockClassicGames);
         activeTabSignal.set('classic');
         fixture.detectChanges();
         const signalRef = component.visibleGames;
-        expect(signalRef()).toEqual(MOCK_CLASSIC_GAMES);
+        expect(signalRef()).toEqual(mockClassicGames);
     });
 
     it('should return ctf games for active tab ctf', () => {
-        const MOCK_CTF_GAMES: GamePreviewDto[] = [
+        const mockCtfGames: GamePreviewDto[] = [
             {
                 id: '2',
                 name: 'CTF Game',
@@ -118,17 +118,17 @@ describe('SessionCreationPageComponent', () => {
                 draft: false,
             },
         ];
-        ctfGamesSignal.set(MOCK_CTF_GAMES);
+        ctfGamesSignal.set(mockCtfGames);
         activeTabSignal.set('ctf');
         fixture.detectChanges();
         const signalRef = component.visibleGames;
-        expect(signalRef()).toEqual(MOCK_CTF_GAMES);
+        expect(signalRef()).toEqual(mockCtfGames);
     });
 
     it('should set active tab', () => {
-        const MOCK_TAB: GameTab = 'classic';
-        component.setActiveTab(MOCK_TAB);
-        expect(gameStoreServiceSpy.setActiveTab).toHaveBeenCalledWith(MOCK_TAB);
+        const mockTab: GameTab = 'classic';
+        component.setActiveTab(mockTab);
+        expect(gameStoreServiceSpy.setActiveTab).toHaveBeenCalledWith(mockTab);
     });
 
     it('should navigate back to home when back is clicked', () => {

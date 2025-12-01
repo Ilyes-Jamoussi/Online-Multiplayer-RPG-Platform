@@ -6,7 +6,6 @@ import { Avatar } from '@common/enums/avatar.enum';
 import { AvatarAssignment } from '@common/interfaces/session.interface';
 import { AvatarCardComponent } from './avatar-card.component';
 
-// Test constants
 const TEST_PLAYER_ID = 'test-player-id';
 const TEST_OTHER_PLAYER_ID = 'other-player-id';
 const TEST_AVATAR_IMAGE_PATH = './assets/images/avatars/static/avatar1.png';

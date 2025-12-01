@@ -66,7 +66,7 @@ type MockSessionService = {
     kickPlayer: jasmine.Spy;
 };
 
-const createMockPlayer = (id: string, name: string, isAdmin: boolean = TEST_IS_NOT_ADMIN): Player => ({
+const CREATE_MOCK_PLAYER = (id: string, name: string, isAdmin: boolean = TEST_IS_NOT_ADMIN): Player => ({
     id,
     name,
     avatar: Avatar.Avatar1,
@@ -113,8 +113,8 @@ describe('WaitingRoomPageComponent', () => {
     let isAdminSignal: ReturnType<typeof signal<boolean>>;
 
     beforeEach(async () => {
-        const mockPlayer1 = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
-        const mockPlayer2 = createMockPlayer(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2);
+        const mockPlayer1 = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
+        const mockPlayer2 = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_2, TEST_PLAYER_NAME_2);
         const mockPlayers = [mockPlayer1, mockPlayer2];
 
         playersSignal = signal<Player[]>(mockPlayers);
@@ -201,7 +201,7 @@ describe('WaitingRoomPageComponent', () => {
             const initialPlayers = component.players();
             expect(initialPlayers.length).toBe(2);
 
-            const newPlayer = createMockPlayer('new-player-id', 'New Player');
+            const newPlayer = CREATE_MOCK_PLAYER('new-player-id', 'New Player');
             playersSignal.set([newPlayer]);
             fixture.detectChanges();
 
@@ -302,7 +302,7 @@ describe('WaitingRoomPageComponent', () => {
 
     describe('isVirtualPlayer', () => {
         it('should return true when player has virtualPlayerType', () => {
-            const virtualPlayer = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
+            const virtualPlayer = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
             virtualPlayer.virtualPlayerType = VirtualPlayerType.Offensive;
             fixture.detectChanges();
 
@@ -310,14 +310,14 @@ describe('WaitingRoomPageComponent', () => {
         });
 
         it('should return false when player does not have virtualPlayerType', () => {
-            const regularPlayer = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
+            const regularPlayer = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
             fixture.detectChanges();
 
             expect(component.isVirtualPlayer(regularPlayer)).toBe(false);
         });
 
         it('should return false when player has undefined virtualPlayerType', () => {
-            const regularPlayer = createMockPlayer(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
+            const regularPlayer = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1);
             regularPlayer.virtualPlayerType = undefined;
             fixture.detectChanges();
 

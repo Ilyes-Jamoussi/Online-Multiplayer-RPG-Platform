@@ -910,8 +910,10 @@ describe('GameEditorInteractionsService', () => {
                 firstTilePlaced: { x: 5, y: 6 },
             };
 
-            // Call the private method directly to test this branch
-            (service as any).handleTeleportTileRightClick(7, 8);
+            type ServiceWithPrivateMethod = {
+                handleTeleportTileRightClick: (x: number, y: number) => void;
+            };
+            (service as unknown as ServiceWithPrivateMethod).handleTeleportTileRightClick(7, 8);
 
             expect(teleportService.cancelTeleportPlacement).toHaveBeenCalledWith(1);
         });
@@ -945,15 +947,16 @@ describe('GameEditorInteractionsService', () => {
             tiles[idx] = { x: 3, y: 4, kind: TileKind.TELEPORT, teleportChannel: 1 };
             store.setTiles(tiles);
 
-            // Tool without firstTilePlaced so it doesn't cancel immediately
             service.activeTool = {
                 type: ToolType.TeleportTileTool,
                 channelNumber: 1,
                 teleportChannel: { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } },
             };
 
-            // Call the private method directly to test this branch
-            (service as any).handleTeleportTileRightClick(3, 4);
+            type ServiceWithPrivateMethod = {
+                handleTeleportTileRightClick: (x: number, y: number) => void;
+            };
+            (service as unknown as ServiceWithPrivateMethod).handleTeleportTileRightClick(3, 4);
 
             expect(teleportService.removeTeleportPair).toHaveBeenCalledWith(3, 4);
             expect(service.activeTool).toEqual(
@@ -974,15 +977,16 @@ describe('GameEditorInteractionsService', () => {
             tiles[idx] = { x: 3, y: 4, kind: TileKind.TELEPORT, teleportChannel: 1 };
             store.setTiles(tiles);
 
-            // Tool without firstTilePlaced so it doesn't cancel immediately
             service.activeTool = {
                 type: ToolType.TeleportTileTool,
                 channelNumber: 1,
                 teleportChannel: { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } },
             };
 
-            // Call the private method directly to test this branch
-            (service as any).handleTeleportTileRightClick(3, 4);
+            type ServiceWithPrivateMethod = {
+                handleTeleportTileRightClick: (x: number, y: number) => void;
+            };
+            (service as unknown as ServiceWithPrivateMethod).handleTeleportTileRightClick(3, 4);
 
             expect(teleportService.removeTeleportPair).toHaveBeenCalledWith(3, 4);
             expect(service.activeTool).toBeNull();

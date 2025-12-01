@@ -17,20 +17,20 @@ type MockSocketService = {
     onSuccessEvent: jasmine.Spy;
 };
 
-const createMockChatMessage = (): ChatMessage => ({
+const CREATE_MOCK_CHAT_MESSAGE = (): ChatMessage => ({
     authorId: TEST_AUTHOR_ID,
     authorName: TEST_AUTHOR_NAME,
     content: TEST_MESSAGE_CONTENT,
     timestamp: TEST_TIMESTAMP,
 });
 
-const createMockSendMessageDto = (): SendMessageDto => ({
+const CREATE_MOCK_SEND_MESSAGE_DTO = (): SendMessageDto => ({
     chatId: TEST_CHAT_ID,
     authorName: TEST_AUTHOR_NAME,
     content: TEST_MESSAGE_CONTENT,
 });
 
-const createMockLeaveChatDto = (): LeaveChatDto => ({
+const CREATE_MOCK_LEAVE_CHAT_DTO = (): LeaveChatDto => ({
     chatId: TEST_CHAT_ID,
 });
 
@@ -57,7 +57,7 @@ describe('ChatSocketService', () => {
 
     describe('sendMessage', () => {
         it('should call socketService.emit with SendMessage event and data', () => {
-            const data = createMockSendMessageDto();
+            const data = CREATE_MOCK_SEND_MESSAGE_DTO();
 
             service.sendMessage(data);
 
@@ -92,13 +92,13 @@ describe('ChatSocketService', () => {
             const callback = jasmine.createSpy('callback');
             let eventCallback: ((data: ChatMessage) => void) | undefined;
 
-            mockSocketService.onSuccessEvent.and.callFake((event: ChatEvents, cb: (data: ChatMessage) => void) => {
-                eventCallback = cb;
+            mockSocketService.onSuccessEvent.and.callFake((event: ChatEvents, callbackHandler: (data: ChatMessage) => void) => {
+                eventCallback = callbackHandler;
             });
 
             service.onMessageReceived(callback);
 
-            const message = createMockChatMessage();
+            const message = CREATE_MOCK_CHAT_MESSAGE();
             if (eventCallback) {
                 eventCallback(message);
             }
@@ -111,8 +111,8 @@ describe('ChatSocketService', () => {
             const callback = jasmine.createSpy('callback');
             let eventCallback: ((data: ChatMessage) => void) | undefined;
 
-            mockSocketService.onSuccessEvent.and.callFake((event: ChatEvents, cb: (data: ChatMessage) => void) => {
-                eventCallback = cb;
+            mockSocketService.onSuccessEvent.and.callFake((event: ChatEvents, callbackHandler: (data: ChatMessage) => void) => {
+                eventCallback = callbackHandler;
             });
 
             service.onMessageReceived(callback);
@@ -134,7 +134,7 @@ describe('ChatSocketService', () => {
 
     describe('leaveChatRoom', () => {
         it('should call socketService.emit with LeaveChatRoom event and data', () => {
-            const data = createMockLeaveChatDto();
+            const data = CREATE_MOCK_LEAVE_CHAT_DTO();
 
             service.leaveChatRoom(data);
 

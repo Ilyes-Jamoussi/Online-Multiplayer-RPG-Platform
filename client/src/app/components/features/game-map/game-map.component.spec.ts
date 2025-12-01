@@ -264,7 +264,9 @@ describe('GameMapComponent', () => {
             expect(result).toEqual({
                 'border-color': TeamColor.EnemyTeam,
                 'border-width': MOCK_BORDER_WIDTH,
-                'box-shadow': `0 0 ${MOCK_BOX_SHADOW_BLUR}px ${TeamColor.EnemyTeam}, 0 ${MOCK_BOX_SHADOW_OFFSET_Y_SECOND}px ${MOCK_BOX_SHADOW_BLUR_SECOND}px rgba(${MOCK_RGBA_R}, ${MOCK_RGBA_G}, ${MOCK_RGBA_B}, ${MOCK_RGBA_A})`,
+                'box-shadow': `0 0 ${MOCK_BOX_SHADOW_BLUR}px ${TeamColor.EnemyTeam}, ` +
+                    `0 ${MOCK_BOX_SHADOW_OFFSET_Y_SECOND}px ${MOCK_BOX_SHADOW_BLUR_SECOND}px ` +
+                    `rgba(${MOCK_RGBA_R}, ${MOCK_RGBA_G}, ${MOCK_RGBA_B}, ${MOCK_RGBA_A})`,
             });
         });
     });

@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -268,7 +269,7 @@ describe('GameOverOverlayComponent', () => {
     });
 
     describe('winnerTeamNumber', () => {
-        const MOCK_TEAM_NUMBER = 1;
+        const mockTeamNumber = 1;
 
         it('should return null when gameOverData is null', () => {
             Object.defineProperty(mockInGameService, 'gameOverData', {
@@ -308,7 +309,7 @@ describe('GameOverOverlayComponent', () => {
         });
 
         it('should return teamNumber when winner exists and has teamNumber', () => {
-            const winnerPlayer = { ...mockPlayers[0], teamNumber: MOCK_TEAM_NUMBER };
+            const winnerPlayer = { ...mockPlayers[0], teamNumber: mockTeamNumber };
             Object.defineProperty(mockInGameService, 'gameOverData', {
                 value: signal(mockGameOverData),
                 configurable: true,
@@ -318,12 +319,12 @@ describe('GameOverOverlayComponent', () => {
                 configurable: true,
             });
             mockInGameService.getPlayerByPlayerId.and.returnValue(winnerPlayer);
-            expect(component.winnerTeamNumber).toBe(MOCK_TEAM_NUMBER);
+            expect(component.winnerTeamNumber).toBe(mockTeamNumber);
         });
     });
 
     describe('myTeamNumber', () => {
-        const MOCK_TEAM_NUMBER = 2;
+        const mockTeamNumber = 2;
 
         it('should return null when not in CTF mode', () => {
             Object.defineProperty(mockInGameService, 'mode', {
@@ -343,23 +344,23 @@ describe('GameOverOverlayComponent', () => {
         });
 
         it('should return teamNumber when player exists and has teamNumber', () => {
-            const myPlayer = { ...mockPlayers[0], teamNumber: MOCK_TEAM_NUMBER };
+            const myPlayer = { ...mockPlayers[0], teamNumber: mockTeamNumber };
             Object.defineProperty(mockInGameService, 'mode', {
                 value: () => GameMode.CTF,
                 configurable: true,
             });
             mockInGameService.getPlayerByPlayerId.and.returnValue(myPlayer);
-            expect(component.myTeamNumber).toBe(MOCK_TEAM_NUMBER);
+            expect(component.myTeamNumber).toBe(mockTeamNumber);
         });
     });
 
     describe('winnerTeamPlayers', () => {
-        const MOCK_TEAM_NUMBER = 1;
-        const MOCK_PLAYER_NAME_1 = 'Player One';
-        const MOCK_PLAYER_NAME_2 = 'Player Two';
-        const MOCK_PLAYER_ID_1 = 'player1';
-        const MOCK_PLAYER_ID_2 = 'player2';
-        const MOCK_PLAYER_ID_3 = 'player3';
+        const mockTeamNumber = 1;
+        const mockPlayerName1 = 'Player One';
+        const mockPlayerName2 = 'Player Two';
+        const mockPlayerId1 = 'player1';
+        const mockPlayerId2 = 'player2';
+        const mockPlayerId3 = 'player3';
 
         it('should return empty array when winnerTeamNumber is null', () => {
             Object.defineProperty(mockInGameService, 'gameOverData', {
@@ -390,7 +391,7 @@ describe('GameOverOverlayComponent', () => {
                 value: signal(sessionWithoutTeam),
                 configurable: true,
             });
-            const winnerPlayer = { ...mockPlayers[0], teamNumber: MOCK_TEAM_NUMBER };
+            const winnerPlayer = { ...mockPlayers[0], teamNumber: mockTeamNumber };
             mockInGameService.getPlayerByPlayerId.and.returnValue(winnerPlayer);
             expect(component.winnerTeamPlayers).toEqual([]);
         });
@@ -399,11 +400,11 @@ describe('GameOverOverlayComponent', () => {
             const sessionWithTeam: InGameSession = {
                 ...mockInGameService.inGameSession(),
                 teams: {
-                    [MOCK_TEAM_NUMBER]: { number: MOCK_TEAM_NUMBER, playerIds: [MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2] },
+                    [mockTeamNumber]: { number: mockTeamNumber, playerIds: [mockPlayerId1, mockPlayerId2] },
                 },
                 inGamePlayers: {
-                    [MOCK_PLAYER_ID_1]: { ...mockPlayers[0], name: MOCK_PLAYER_NAME_1 },
-                    [MOCK_PLAYER_ID_2]: { ...mockPlayers[1], name: MOCK_PLAYER_NAME_2 },
+                    [mockPlayerId1]: { ...mockPlayers[0], name: mockPlayerName1 },
+                    [mockPlayerId2]: { ...mockPlayers[1], name: mockPlayerName2 },
                 },
             };
             Object.defineProperty(mockInGameService, 'gameOverData', {
@@ -418,20 +419,20 @@ describe('GameOverOverlayComponent', () => {
                 value: signal(sessionWithTeam),
                 configurable: true,
             });
-            const winnerPlayer = { ...mockPlayers[0], teamNumber: MOCK_TEAM_NUMBER };
+            const winnerPlayer = { ...mockPlayers[0], teamNumber: mockTeamNumber };
             mockInGameService.getPlayerByPlayerId.and.returnValue(winnerPlayer);
-            expect(component.winnerTeamPlayers).toEqual([MOCK_PLAYER_NAME_1, MOCK_PLAYER_NAME_2]);
+            expect(component.winnerTeamPlayers).toEqual([mockPlayerName1, mockPlayerName2]);
         });
 
         it('should filter out empty names', () => {
             const sessionWithTeam: InGameSession = {
                 ...mockInGameService.inGameSession(),
                 teams: {
-                    [MOCK_TEAM_NUMBER]: { number: MOCK_TEAM_NUMBER, playerIds: [MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_3] },
+                    [mockTeamNumber]: { number: mockTeamNumber, playerIds: [mockPlayerId1, mockPlayerId3] },
                 },
                 inGamePlayers: {
-                    [MOCK_PLAYER_ID_1]: { ...mockPlayers[0], name: MOCK_PLAYER_NAME_1 },
-                    [MOCK_PLAYER_ID_3]: undefined as unknown as Player,
+                    [mockPlayerId1]: { ...mockPlayers[0], name: mockPlayerName1 },
+                    [mockPlayerId3]: undefined as unknown as Player,
                 },
             };
             Object.defineProperty(mockInGameService, 'gameOverData', {
@@ -446,20 +447,20 @@ describe('GameOverOverlayComponent', () => {
                 value: signal(sessionWithTeam),
                 configurable: true,
             });
-            const winnerPlayer = { ...mockPlayers[0], teamNumber: MOCK_TEAM_NUMBER };
+            const winnerPlayer = { ...mockPlayers[0], teamNumber: mockTeamNumber };
             mockInGameService.getPlayerByPlayerId.and.returnValue(winnerPlayer);
-            expect(component.winnerTeamPlayers).toEqual([MOCK_PLAYER_NAME_1]);
+            expect(component.winnerTeamPlayers).toEqual([mockPlayerName1]);
         });
     });
 
     describe('title', () => {
-        const MOCK_TEAM_NUMBER = 1;
-        const MOCK_MY_TEAM_NUMBER = 1;
-        const MOCK_OTHER_TEAM_NUMBER = 2;
+        const mockTeamNumber = 1;
+        const mockMyTeamNumber = 1;
+        const mockOtherTeamNumber = 2;
 
         it('should return team win message when CTF mode and my team wins', () => {
-            const winnerPlayer = { ...mockPlayers[0], teamNumber: MOCK_TEAM_NUMBER };
-            const myPlayer = { ...mockPlayers[0], teamNumber: MOCK_MY_TEAM_NUMBER };
+            const winnerPlayer = { ...mockPlayers[0], teamNumber: mockTeamNumber };
+            const myPlayer = { ...mockPlayers[0], teamNumber: mockMyTeamNumber };
             Object.defineProperty(mockInGameService, 'gameOverData', {
                 value: signal(mockGameOverData),
                 configurable: true,
@@ -477,11 +478,11 @@ describe('GameOverOverlayComponent', () => {
         });
 
         it('should return other team win message when CTF mode and other team wins', () => {
-            const MOCK_MY_PLAYER_ID = 'player2';
-            const winnerPlayer = { ...mockPlayers[0], teamNumber: MOCK_TEAM_NUMBER };
-            const myPlayer = { ...mockPlayers[1], id: MOCK_MY_PLAYER_ID, teamNumber: MOCK_OTHER_TEAM_NUMBER };
+            const mockMyPlayerId = 'player2';
+            const winnerPlayer = { ...mockPlayers[0], teamNumber: mockTeamNumber };
+            const myPlayer = { ...mockPlayers[1], id: mockMyPlayerId, teamNumber: mockOtherTeamNumber };
             Object.defineProperty(mockPlayerService, 'id', {
-                value: signal(MOCK_MY_PLAYER_ID),
+                value: signal(mockMyPlayerId),
                 configurable: true,
             });
             Object.defineProperty(mockInGameService, 'gameOverData', {
@@ -494,17 +495,17 @@ describe('GameOverOverlayComponent', () => {
             });
             mockInGameService.getPlayerByPlayerId.and.callFake((playerId: string) => {
                 if (playerId === mockGameOverData.winnerId) return winnerPlayer;
-                if (playerId === MOCK_MY_PLAYER_ID) return myPlayer;
+                if (playerId === mockMyPlayerId) return myPlayer;
                 return undefined as unknown as Player;
             });
-            expect(component.title).toBe(`L'équipe ${MOCK_TEAM_NUMBER} a gagné la partie !`);
+            expect(component.title).toBe(`L'équipe ${mockTeamNumber} a gagné la partie !`);
         });
     });
 
     describe('playerStats', () => {
-        const MOCK_COMBAT_WINS_1 = 5;
-        const MOCK_COMBAT_WINS_2 = 2;
-        const MOCK_COMBAT_WINS_3 = 8;
+        const mockCombatWins1 = 5;
+        const mockCombatWins2 = 2;
+        const mockCombatWins3 = 8;
 
         it('should return empty array when gameOverData is null', () => {
             Object.defineProperty(mockInGameService, 'gameOverData', {
@@ -516,13 +517,13 @@ describe('GameOverOverlayComponent', () => {
 
         it('should return sorted player stats by wins descending', () => {
             const playersWithWins: Record<string, Player> = {
-                player1: { ...mockPlayers[0], combatWins: MOCK_COMBAT_WINS_1 },
-                player2: { ...mockPlayers[1], combatWins: MOCK_COMBAT_WINS_2 },
+                player1: { ...mockPlayers[0], combatWins: mockCombatWins1 },
+                player2: { ...mockPlayers[1], combatWins: mockCombatWins2 },
                 player3: {
                     ...mockPlayers[0],
                     id: 'player3',
                     name: 'Third Player',
-                    combatWins: MOCK_COMBAT_WINS_3,
+                    combatWins: mockCombatWins3,
                 },
             };
             Object.defineProperty(mockInGameService, 'inGamePlayers', {
@@ -530,9 +531,9 @@ describe('GameOverOverlayComponent', () => {
                 configurable: true,
             });
             const stats = component.playerStats;
-            expect(stats[0].wins).toBe(MOCK_COMBAT_WINS_3);
-            expect(stats[1].wins).toBe(MOCK_COMBAT_WINS_1);
-            expect(stats[2].wins).toBe(MOCK_COMBAT_WINS_2);
+            expect(stats[0].wins).toBe(mockCombatWins3);
+            expect(stats[1].wins).toBe(mockCombatWins1);
+            expect(stats[2].wins).toBe(mockCombatWins2);
         });
 
         it('should mark winner correctly in player stats', () => {
