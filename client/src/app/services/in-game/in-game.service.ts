@@ -111,7 +111,7 @@ export class InGameService {
     }
 
     get turnTransitionMessage(): string {
-        return this.isMyTurn() ? "C'est ton tour !" : `C'est le tour de ${this.activePlayer?.name} !`;
+        return this.isMyTurn() ? "C'est votre tour !" : `C'est le tour de ${this.activePlayer?.name} !`;
     }
 
     getPlayerByPlayerId(playerId: string): Player {
