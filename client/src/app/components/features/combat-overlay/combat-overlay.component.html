@@ -8,6 +8,9 @@
             [victoryMessage]="victoryMessage"
             [victorySubtitle]="victorySubtitle"
         ></app-combat-result>
+        <div class="victory-actions">
+            <button class="close-btn" (click)="closeVictoryOverlay()">✕</button>
+        </div>
         } @else {
         <div class="combat-header">
             <app-combat-timer></app-combat-timer>
