@@ -1,4 +1,5 @@
 import { DEFENSIVE_VP_CONFIG, OFFENSIVE_VP_CONFIG } from '@app/constants/vp.config';
+import { PointOfInterestType } from '@app/enums/point-of-interest-type.enum';
 import { VPConfig } from '@app/interfaces/vp-config.interface';
 import {
     EvaluatedTarget,
@@ -54,14 +55,14 @@ export class VPGameplayService {
             ctfObjectiveActive = this.ctfService.evaluateCTFObjectives(session, vpPlayerId, pointsWithDistances, evaluatedTargets, config);
         }
 
-        if (config.priorities.escape > 0 && !ctfObjectiveActive) {
+        if (config.priorities.escape && !ctfObjectiveActive) {
             this.evaluateEscape(session, vpPlayerId, pointsWithDistances.enemies, evaluatedTargets, config);
         }
 
         evaluatedTargets.sort((a, b) => b.priorityScore - a.priorityScore);
 
-        const bestTarget = evaluatedTargets.length > 0 && evaluatedTargets[0].priorityScore > 0 ? evaluatedTargets[0] : null;
-        const useDoubleAction = bestTarget?.type === 'fightSanctuary' && Math.random() < config.fightSanctuary.doubleActionRate;
+        const bestTarget = evaluatedTargets.length && evaluatedTargets[0].priorityScore ? evaluatedTargets[0] : null;
+        const useDoubleAction = bestTarget?.type === PointOfInterestType.FIGHTSANCTUARY && Math.random() < config.fightSanctuary.doubleActionRate;
 
         return {
             target: bestTarget,
@@ -96,7 +97,7 @@ export class VPGameplayService {
     }
 
     private evaluateFightSanctuaries(sanctuaries: PointOfInterestWithPath[], player: Player, results: EvaluatedTarget[], config: VPConfig): void {
-        if (player.attackBonus > 0 || player.defenseBonus > 0) return;
+        if (player.attackBonus || player.defenseBonus) return;
 
         for (const sanctuary of sanctuaries) {
             if (!sanctuary.path.reachable) continue;
@@ -118,7 +119,7 @@ export class VPGameplayService {
         results: EvaluatedTarget[],
         config: VPConfig,
     ): void {
-        if (enemies.length === 0) return;
+        if (!enemies.length) return;
 
         const nearestEnemy = enemies.reduce(
             (nearest, enemy) => (enemy.path.reachable && enemy.path.totalCost < nearest ? enemy.path.totalCost : nearest),
@@ -133,7 +134,7 @@ export class VPGameplayService {
             config.priorities.escape +
             config.bonuses.escapeWhenEnemyCloseBonus +
             escapePoint.distanceFromEnemies * config.escape.distanceBonusPerTile;
-        results.push({ type: 'escape', position: escapePoint.position, path: escapePoint.path, priorityScore: Math.max(0, score) });
+        results.push({ type: PointOfInterestType.ESCAPE, position: escapePoint.position, path: escapePoint.path, priorityScore: Math.max(0, score) });
     }
 
     scanMapForPointsOfInterest(session: InGameSession, vpPlayerId: string): MapScanResult {
@@ -159,11 +160,11 @@ export class VPGameplayService {
 
         for (const [playerId, player] of Object.entries(session.inGamePlayers)) {
             if (playerId === vpPlayerId) continue;
-            if (player.health <= 0) continue;
+            if (!player.health) continue;
             if (session.mode === GameMode.CTF && player.teamNumber === vpPlayer.teamNumber) continue;
 
             result.enemies.push({
-                type: 'enemy',
+                type: PointOfInterestType.ENEMY,
                 position: { x: player.x, y: player.y },
                 playerId,
             });
@@ -181,16 +182,16 @@ export class VPGameplayService {
 
             switch (placeable.kind) {
                 case PlaceableKind.HEAL:
-                    result.healSanctuaries.push({ type: 'healSanctuary', position });
+                    result.healSanctuaries.push({ type: PointOfInterestType.HEALSANCTUARY, position });
                     break;
                 case PlaceableKind.FIGHT:
-                    result.fightSanctuaries.push({ type: 'fightSanctuary', position });
+                    result.fightSanctuaries.push({ type: PointOfInterestType.FIGHTSANCTUARY, position });
                     break;
                 case PlaceableKind.BOAT:
-                    result.boats.push({ type: 'boat', position });
+                    result.boats.push({ type: PointOfInterestType.BOAT, position });
                     break;
                 case PlaceableKind.FLAG:
-                    result.flags.push({ type: 'flag', position, isHeld: session.flagData?.holderPlayerId !== null });
+                    result.flags.push({ type: PointOfInterestType.FLAG, position, isHeld: session.flagData?.holderPlayerId !== null });
                     break;
             }
         }
@@ -314,7 +315,7 @@ export class VPGameplayService {
 
     findNearestPoint(pointsWithPath: PointOfInterestWithPath[]): PointOfInterestWithPath | null {
         const reachable = pointsWithPath.filter((p) => p.path.reachable);
-        if (reachable.length === 0) return null;
+        if (!reachable.length) return null;
 
         reachable.sort((a, b) => a.path.totalCost - b.path.totalCost);
         return reachable[0];
