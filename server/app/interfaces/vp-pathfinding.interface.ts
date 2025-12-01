@@ -1,7 +1,6 @@
+import { PathActionType } from '@app/enums/path-action-type.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { Position } from '@common/interfaces/position.interface';
-
-export type PathActionType = 'move' | 'openDoor' | 'boardBoat' | 'disembarkBoat' | 'teleport';
 
 export interface PathAction {
     type: PathActionType;

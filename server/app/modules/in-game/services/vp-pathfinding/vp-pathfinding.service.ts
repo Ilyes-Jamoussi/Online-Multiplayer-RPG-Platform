@@ -1,20 +1,13 @@
-import { ESCAPE_MAX_DISTANCE, ESCAPE_NEARBY_RADIUS } from '@app/constants/virtual-player.constants';
+import { ESCAPE_MAX_DISTANCE, ESCAPE_NEARBY_RADIUS, VP_DIRECTIONS } from '@app/constants/virtual-player.constants';
+import { PathActionType } from '@app/enums/path-action-type.enum';
 import { ExplorationContext, NeighborParams, PathNode, TileExploration } from '@app/interfaces/vp-pathfinding-internal.interface';
 import { EnemyPosition, EscapePoint, PathAction, PathResult } from '@app/interfaces/vp-pathfinding.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileCost, TileKind } from '@common/enums/tile.enum';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { Injectable } from '@nestjs/common';
-
-const DIRECTIONS: { orientation: Orientation; dx: number; dy: number }[] = [
-    { orientation: Orientation.N, dx: 0, dy: -1 },
-    { orientation: Orientation.E, dx: 1, dy: 0 },
-    { orientation: Orientation.S, dx: 0, dy: 1 },
-    { orientation: Orientation.W, dx: -1, dy: 0 },
-];
 
 @Injectable()
 export class VPPathfindingService {
@@ -55,7 +48,7 @@ export class VPPathfindingService {
 
         openSet.push(startNode);
 
-        while (openSet.length > 0) {
+        while (openSet.length) {
             openSet.sort((a, b) => a.totalCost - b.totalCost);
             const current = openSet.shift();
             if (!current) continue;
@@ -94,7 +87,7 @@ export class VPPathfindingService {
     private getNeighbors(current: PathNode, context: ExplorationContext): PathNode[] {
         const neighbors: PathNode[] = [];
 
-        for (const dir of DIRECTIONS) {
+        for (const dir of VP_DIRECTIONS) {
             const nextPos: Position = { x: current.position.x + dir.dx, y: current.position.y + dir.dy };
 
             if (!this.isValidPosition(nextPos, context.mapSize)) continue;
@@ -124,7 +117,15 @@ export class VPPathfindingService {
 
         if (tile.kind === TileKind.WATER) {
             neighbors.push(
-                this.createNeighborNode({ current, position: nextPos, moveCost: 1, orientation, actionType: 'move', isOnBoat: true, goal }),
+                this.createNeighborNode({
+                    current,
+                    position: nextPos,
+                    moveCost: 1,
+                    orientation,
+                    actionType: PathActionType.MOVE,
+                    isOnBoat: true,
+                    goal,
+                }),
             );
         }
 
@@ -135,7 +136,7 @@ export class VPPathfindingService {
                     position: nextPos,
                     moveCost: 0,
                     orientation,
-                    actionType: 'disembarkBoat',
+                    actionType: PathActionType.DISEMBARKBOAT,
                     isOnBoat: false,
                     goal,
                     extraActions: 1,
@@ -160,7 +161,7 @@ export class VPPathfindingService {
                         position: nextPos,
                         moveCost: tileCost,
                         orientation,
-                        actionType: 'move',
+                        actionType: PathActionType.MOVE,
                         isOnBoat: false,
                         goal,
                     }),
@@ -183,7 +184,7 @@ export class VPPathfindingService {
                     position: nextPos,
                     moveCost: TileCost.DOOR_OPEN,
                     orientation,
-                    actionType: 'move',
+                    actionType: PathActionType.MOVE,
                     isOnBoat: false,
                     goal,
                 }),
@@ -195,7 +196,7 @@ export class VPPathfindingService {
                     position: nextPos,
                     moveCost: TileCost.DOOR_OPEN,
                     orientation,
-                    actionType: 'openDoor',
+                    actionType: PathActionType.OPENDOOR,
                     isOnBoat: false,
                     goal,
                     extraActions: 1,
@@ -227,7 +228,7 @@ export class VPPathfindingService {
                 estimatedCostToGoal,
                 totalCost: costFromStart + estimatedCostToGoal,
                 parent: current,
-                actionToReach: { type: 'teleport', orientation, position: nextPos },
+                actionToReach: { type: PathActionType.TELEPORT, orientation, position: nextPos },
                 isOnBoat: false,
                 actionsUsed: current.actionsUsed,
             });
@@ -249,7 +250,7 @@ export class VPPathfindingService {
                     position: nextPos,
                     moveCost: 1,
                     orientation,
-                    actionType: 'boardBoat',
+                    actionType: PathActionType.BOARDBOAT,
                     isOnBoat: true,
                     goal,
                     extraActions: 1,
@@ -327,14 +328,14 @@ export class VPPathfindingService {
         const expandedActions: PathAction[] = [];
 
         for (const action of rawActions) {
-            if (action.type === 'openDoor') {
+            if (action.type === PathActionType.OPENDOOR) {
                 expandedActions.push({
-                    type: 'openDoor',
+                    type: PathActionType.OPENDOOR,
                     orientation: action.orientation,
                     position: action.position,
                 });
                 expandedActions.push({
-                    type: 'move',
+                    type: PathActionType.MOVE,
                     orientation: action.orientation,
                     position: action.position,
                 });
