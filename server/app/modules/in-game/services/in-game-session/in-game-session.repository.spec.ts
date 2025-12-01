@@ -1,599 +1,1021 @@
-/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { Avatar } from '@common/enums/avatar.enum';
-import { Dice } from '@common/enums/dice.enum';
+import { BOAT_SPEED_BONUS } from '@common/constants/game.constants';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { NotFoundException } from '@nestjs/common';
+import { StartPoint } from '@common/interfaces/start-point.interface';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Types } from 'mongoose';
 import { InGameSessionRepository } from './in-game-session.repository';
 
 describe('InGameSessionRepository', () => {
-    let service: InGameSessionRepository;
-    let gameCache: jest.Mocked<GameCacheService>;
+    let repository: InGameSessionRepository;
     let eventEmitter: jest.Mocked<EventEmitter2>;
+    let gameCache: jest.Mocked<GameCacheService>;
 
     const SESSION_ID = 'session-123';
-    const PLAYER_A_ID = 'player-a';
-    const PLAYER_B_ID = 'player-b';
-    const START_POINT_ID = 'start-point-1';
-    const BASE_HEALTH = 100;
-    const BASE_SPEED = 3;
-    const BASE_ATTACK = 10;
-    const BASE_DEFENSE = 5;
-    const NO_BONUS = 0;
-    const ACTIONS_REMAINING = 1;
-    const NO_COMBAT_STATS = 0;
-    const POS_X_1 = 1;
-    const POS_Y_1 = 1;
-    const POS_X_2 = 2;
-    const POS_Y_3 = 3;
+    const PLAYER_ID_1 = 'player-1';
+    const PLAYER_ID_2 = 'player-2';
+    const START_POINT_ID = 'start-point-123';
+    const POSITION_X = 5;
+    const POSITION_Y = 10;
+    const NEW_X = 7;
+    const NEW_Y = 12;
+    const HEALTH = 100;
+    const MAX_HEALTH = 100;
     const HEALTH_DAMAGE = 20;
-    const HEALTH_AFTER_DAMAGE = 80;
-    const NEW_HEALTH = 90;
-    const MOVE_COST = 1;
-    const NEGATIVE_POS = -1;
-    const ZERO_HEALTH = 0;
-    const PLAYER_COUNT = 2;
-    const ORIENTATIONS_COUNT = 4;
+    const HEALTH_HEAL = 15;
+    const SPEED = 3;
+    const BOAT_SPEED = 2;
+    const COST = 1;
+    const ATTACK_BONUS = 5;
+    const DEFENSE_BONUS = 3;
+    const BONUS_VALUE_1 = 1;
+    const BONUS_VALUE_2 = 2;
+    const TEAM_1 = 1;
+    const TEAM_2 = 2;
+    const ZERO = 0;
+    const ONE = 1;
+    const TWO = 2;
+    const THREE = 3;
+    const FOUR = 4;
+
+    const createMockPosition = (overrides: Partial<Position> = {}): Position => ({
+        x: POSITION_X,
+        y: POSITION_Y,
+        ...overrides,
+    });
 
     const createMockPlayer = (overrides: Partial<Player> = {}): Player => ({
-        id: PLAYER_A_ID,
-        name: 'Player A',
-        avatar: Avatar.Avatar1,
+        id: PLAYER_ID_1,
+        name: 'Test Player',
+        avatar: null,
         isAdmin: false,
-        baseHealth: BASE_HEALTH,
-        healthBonus: NO_BONUS,
-        health: BASE_HEALTH,
-        maxHealth: BASE_HEALTH,
-        baseSpeed: BASE_SPEED,
-        speedBonus: NO_BONUS,
-        speed: BASE_SPEED,
-        boatSpeedBonus: NO_BONUS,
-        boatSpeed: NO_BONUS,
-        baseAttack: BASE_ATTACK,
-        attackBonus: NO_BONUS,
-        baseDefense: BASE_DEFENSE,
-        defenseBonus: NO_BONUS,
-        attackDice: Dice.D6,
-        defenseDice: Dice.D4,
-        x: POS_X_1,
-        y: POS_Y_1,
+        baseHealth: HEALTH,
+        healthBonus: ZERO,
+        health: HEALTH,
+        maxHealth: MAX_HEALTH,
+        baseSpeed: SPEED,
+        speedBonus: ZERO,
+        speed: SPEED,
+        boatSpeedBonus: ZERO,
+        boatSpeed: ZERO,
+        baseAttack: 10,
+        attackBonus: ZERO,
+        baseDefense: 5,
+        defenseBonus: ZERO,
+        attackDice: null,
+        defenseDice: null,
+        x: POSITION_X,
+        y: POSITION_Y,
         isInGame: true,
         startPointId: START_POINT_ID,
-        actionsRemaining: ACTIONS_REMAINING,
-        combatCount: NO_COMBAT_STATS,
-        combatWins: NO_COMBAT_STATS,
-        combatLosses: NO_COMBAT_STATS,
-        combatDraws: NO_COMBAT_STATS,
+        actionsRemaining: ONE,
+        combatCount: ZERO,
+        combatWins: ZERO,
+        combatLosses: ZERO,
+        combatDraws: ZERO,
         hasCombatBonus: false,
+        ...overrides,
+    });
+
+    const createMockStartPoint = (overrides: Partial<StartPoint> = {}): StartPoint => ({
+        id: START_POINT_ID,
+        playerId: PLAYER_ID_1,
+        x: POSITION_X,
+        y: POSITION_Y,
         ...overrides,
     });
 
     const createMockSession = (overrides: Partial<InGameSession> = {}): InGameSession => ({
         id: SESSION_ID,
-        inGameId: `${SESSION_ID}-game-456`,
-        gameId: 'game-456',
-        chatId: `${SESSION_ID}-chat`,
-        maxPlayers: ORIENTATIONS_COUNT,
+        inGameId: 'in-game-123',
+        gameId: 'game-123',
+        chatId: 'chat-123',
+        maxPlayers: FOUR,
         mode: GameMode.CLASSIC,
-        isGameStarted: false,
+        isGameStarted: true,
         inGamePlayers: {
-            [PLAYER_A_ID]: createMockPlayer({ id: PLAYER_A_ID }),
-            [PLAYER_B_ID]: createMockPlayer({ id: PLAYER_B_ID }),
+            [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1 }),
         },
         teams: {
-            1: { number: 1, playerIds: [PLAYER_A_ID, PLAYER_B_ID] }, // eslint-disable-line @typescript-eslint/naming-convention -- Test data
+            [TEAM_1]: { number: TEAM_1, playerIds: [PLAYER_ID_1] },
+            [TEAM_2]: { number: TEAM_2, playerIds: [] },
         },
-        currentTurn: { turnNumber: 1, activePlayerId: PLAYER_A_ID, hasUsedAction: false },
-        startPoints: [{ id: START_POINT_ID, playerId: PLAYER_A_ID, x: POS_X_1, y: POS_Y_1 }],
+        currentTurn: { turnNumber: ONE, activePlayerId: PLAYER_ID_1, hasUsedAction: false },
+        startPoints: [createMockStartPoint()],
         mapSize: MapSize.MEDIUM,
-        turnOrder: [PLAYER_A_ID, PLAYER_B_ID],
-        isAdminModeActive: false,
-        playerCount: 2,
+        turnOrder: [PLAYER_ID_1],
+        playerCount: ONE,
         ...overrides,
     });
 
-    beforeEach(() => {
-        const mockGameCache = {
-            clearTileOccupant: jest.fn(),
-            moveTileOccupant: jest.fn(),
-            reenablePlaceablesForPlayer: jest.fn(),
+    const createMockPlaceable = (overrides: Partial<Placeable> = {}): Placeable => {
+        const mockObjectId = new Types.ObjectId();
+        Object.defineProperty(mockObjectId, 'toString', {
+            value: jest.fn().mockReturnValue('placeable-id'),
+            writable: true,
+        });
+        return {
+            _id: mockObjectId,
+            kind: PlaceableKind.FLAG,
+            x: POSITION_X,
+            y: POSITION_Y,
+            placed: true,
+            ...overrides,
         };
+    };
 
+    beforeEach(async () => {
         const mockEventEmitter = {
             emit: jest.fn(),
         };
 
-        gameCache = mockGameCache as unknown as jest.Mocked<GameCacheService>;
-        eventEmitter = mockEventEmitter as unknown as jest.Mocked<EventEmitter2>;
+        const mockGameCache = {
+            hidePlaceable: jest.fn(),
+            showPlaceable: jest.fn(),
+            getFlagPlaceable: jest.fn(),
+            clearTileOccupant: jest.fn(),
+            reenablePlaceablesForPlayer: jest.fn(),
+            moveTileOccupant: jest.fn(),
+        };
 
-        service = new InGameSessionRepository(eventEmitter, gameCache);
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                InGameSessionRepository,
+                {
+                    provide: EventEmitter2,
+                    useValue: mockEventEmitter,
+                },
+                {
+                    provide: GameCacheService,
+                    useValue: mockGameCache,
+                },
+            ],
+        }).compile();
+
+        repository = module.get<InGameSessionRepository>(InGameSessionRepository);
+        eventEmitter = module.get(EventEmitter2);
+        gameCache = module.get(GameCacheService);
     });
 
-    it('should be defined', () => {
-        expect(service).toBeDefined();
-    });
+    describe('isVirtualPlayer', () => {
+        it('should return true when player has virtualPlayerType', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, virtualPlayerType: VirtualPlayerType.Offensive }),
+                },
+            });
+            repository.save(session);
 
-    describe('save', () => {
-        it('should save session', () => {
-            const session = createMockSession();
+            const result = repository.isVirtualPlayer(SESSION_ID, PLAYER_ID_1);
 
-            service.save(session);
-
-            expect(service.findById(SESSION_ID)).toBe(session);
+            expect(result).toBe(true);
         });
 
-        it('should overwrite existing session', () => {
-            const session1 = createMockSession({ isGameStarted: false });
-            const session2 = createMockSession({ isGameStarted: true });
-
-            service.save(session1);
-            service.save(session2);
-
-            expect(service.findById(SESSION_ID).isGameStarted).toBe(true);
-        });
-    });
-
-    describe('findById', () => {
-        it('should return session when found', () => {
+        it('should return false when player has no virtualPlayerType', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            const result = service.findById(SESSION_ID);
+            const result = repository.isVirtualPlayer(SESSION_ID, PLAYER_ID_1);
 
-            expect(result).toBe(session);
+            expect(result).toBe(false);
         });
 
         it('should throw NotFoundException when session not found', () => {
-            expect(() => service.findById('non-existent')).toThrow(NotFoundException);
-            expect(() => service.findById('non-existent')).toThrow('Session not found');
+            expect(() => repository.isVirtualPlayer('non-existent', PLAYER_ID_1)).toThrow(NotFoundException);
         });
     });
 
-    describe('update', () => {
-        it('should update session', () => {
+    describe('pickUpFlag', () => {
+        it('should pick up flag successfully', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: null },
+            });
+            const position = createMockPosition();
+
+            repository.pickUpFlag(session, PLAYER_ID_1, position);
+
+            expect(session.flagData?.holderPlayerId).toBe(PLAYER_ID_1);
+            expect(gameCache.hidePlaceable).toHaveBeenCalledWith(session.id, position);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.FlagPickedUp, { session, playerId: PLAYER_ID_1 });
+        });
+
+        it('should throw NotFoundException when flagData is missing', () => {
             const session = createMockSession();
-            service.save(session);
-            session.isGameStarted = true;
 
-            service.update(session);
+            expect(() => repository.pickUpFlag(session, PLAYER_ID_1, createMockPosition())).toThrow(NotFoundException);
+        });
 
-            expect(service.findById(SESSION_ID).isGameStarted).toBe(true);
+        it('should throw BadRequestException when flag already picked up', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_2 },
+            });
+
+            expect(() => repository.pickUpFlag(session, PLAYER_ID_1, createMockPosition())).toThrow(BadRequestException);
+        });
+
+        it('should throw NotFoundException when player not found', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: null },
+                inGamePlayers: {},
+            });
+
+            expect(() => repository.pickUpFlag(session, PLAYER_ID_1, createMockPosition())).toThrow(NotFoundException);
         });
     });
 
-    describe('delete', () => {
-        it('should delete session', () => {
-            const session = createMockSession();
-            service.save(session);
+    describe('updateFlagPosition', () => {
+        it('should update flag position successfully', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_1 },
+            });
+            const newPosition = createMockPosition({ x: NEW_X, y: NEW_Y });
 
-            service.delete(SESSION_ID);
+            repository.updateFlagPosition(session, PLAYER_ID_1, newPosition);
 
-            expect(() => service.findById(SESSION_ID)).toThrow(NotFoundException);
+            expect(session.flagData?.position).toEqual(newPosition);
         });
 
-        it('should not throw when deleting non-existent session', () => {
-            expect(() => service.delete('non-existent')).not.toThrow();
+        it('should throw NotFoundException when flagData is missing', () => {
+            const session = createMockSession();
+
+            expect(() => repository.updateFlagPosition(session, PLAYER_ID_1, createMockPosition())).toThrow(NotFoundException);
+        });
+
+        it('should throw BadRequestException when player does not hold flag', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_2 },
+            });
+
+            expect(() => repository.updateFlagPosition(session, PLAYER_ID_1, createMockPosition())).toThrow(BadRequestException);
+        });
+    });
+
+    describe('transferFlag', () => {
+        it('should transfer flag successfully', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_1 },
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1 }),
+                    [PLAYER_ID_2]: createMockPlayer({ id: PLAYER_ID_2, x: NEW_X, y: NEW_Y }),
+                },
+            });
+
+            repository.transferFlag(session, PLAYER_ID_1, PLAYER_ID_2);
+
+            expect(session.flagData?.holderPlayerId).toBe(PLAYER_ID_2);
+            expect(session.flagData?.position).toEqual({ x: NEW_X, y: NEW_Y });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.FlagTransferred, { session, fromPlayerId: PLAYER_ID_1, toPlayerId: PLAYER_ID_2 });
+        });
+
+        it('should throw NotFoundException when flagData is missing', () => {
+            const session = createMockSession();
+
+            expect(() => repository.transferFlag(session, PLAYER_ID_1, PLAYER_ID_2)).toThrow(NotFoundException);
+        });
+
+        it('should throw BadRequestException when player does not hold flag', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_2 },
+            });
+
+            expect(() => repository.transferFlag(session, PLAYER_ID_1, PLAYER_ID_2)).toThrow(BadRequestException);
+        });
+
+        it('should throw NotFoundException when fromPlayer not found', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_1 },
+                inGamePlayers: {
+                    [PLAYER_ID_2]: createMockPlayer({ id: PLAYER_ID_2 }),
+                },
+            });
+
+            expect(() => repository.transferFlag(session, PLAYER_ID_1, PLAYER_ID_2)).toThrow(NotFoundException);
+        });
+
+        it('should throw NotFoundException when toPlayer not found', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_1 },
+            });
+
+            expect(() => repository.transferFlag(session, PLAYER_ID_1, PLAYER_ID_2)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('playerHasFlag', () => {
+        it('should return true when player has flag', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_1 },
+            });
+            repository.save(session);
+
+            const result = repository.playerHasFlag(SESSION_ID, PLAYER_ID_1);
+
+            expect(result).toBe(true);
+        });
+
+        it('should return false when player does not have flag', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_2 },
+            });
+            repository.save(session);
+
+            const result = repository.playerHasFlag(SESSION_ID, PLAYER_ID_1);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when flagData is missing', () => {
+            const session = createMockSession();
+            repository.save(session);
+
+            const result = repository.playerHasFlag(SESSION_ID, PLAYER_ID_1);
+
+            expect(result).toBe(false);
+        });
+    });
+
+    describe('dropFlag', () => {
+        it('should drop flag successfully', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_1 },
+            });
+            repository.save(session);
+            const flagPlaceable = createMockPlaceable();
+            gameCache.getFlagPlaceable.mockReturnValue(flagPlaceable);
+
+            repository.dropFlag(SESSION_ID, PLAYER_ID_1);
+
+            expect(session.flagData?.holderPlayerId).toBeNull();
+            expect(flagPlaceable.x).toBe(POSITION_X);
+            expect(flagPlaceable.y).toBe(POSITION_Y);
+            expect(gameCache.showPlaceable).toHaveBeenCalledWith(SESSION_ID, createMockPosition());
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionUpdated, { session });
+        });
+
+        it('should throw NotFoundException when session not found', () => {
+            expect(() => repository.dropFlag('non-existent', PLAYER_ID_1)).toThrow(NotFoundException);
+        });
+
+        it('should throw NotFoundException when flagData is missing', () => {
+            const session = createMockSession();
+            repository.save(session);
+
+            expect(() => repository.dropFlag(SESSION_ID, PLAYER_ID_1)).toThrow(NotFoundException);
+        });
+
+        it('should throw BadRequestException when player does not hold flag', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_2 },
+            });
+            repository.save(session);
+
+            expect(() => repository.dropFlag(SESSION_ID, PLAYER_ID_1)).toThrow(BadRequestException);
+        });
+
+        it('should throw NotFoundException when flag placeable not found', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_1 },
+            });
+            repository.save(session);
+            gameCache.getFlagPlaceable.mockReturnValue(null);
+
+            expect(() => repository.dropFlag(SESSION_ID, PLAYER_ID_1)).toThrow(NotFoundException);
         });
     });
 
     describe('updatePlayer', () => {
-        it('should update player properties', () => {
+        it('should update player successfully', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
+            const updates = { health: HEALTH - HEALTH_DAMAGE };
 
-            service.updatePlayer(SESSION_ID, PLAYER_A_ID, { health: NEW_HEALTH });
+            repository.updatePlayer(SESSION_ID, PLAYER_ID_1, updates);
 
-            expect(service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID].health).toBe(NEW_HEALTH);
+            expect(session.inGamePlayers[PLAYER_ID_1].health).toBe(HEALTH - HEALTH_DAMAGE);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerUpdated, {
+                sessionId: SESSION_ID,
+                player: session.inGamePlayers[PLAYER_ID_1],
+            });
         });
 
         it('should throw NotFoundException when session not found', () => {
-            expect(() => service.updatePlayer('non-existent', PLAYER_A_ID, {})).toThrow(NotFoundException);
+            expect(() => repository.updatePlayer('non-existent', PLAYER_ID_1, {})).toThrow(NotFoundException);
         });
 
         it('should throw NotFoundException when player not found', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            expect(() => service.updatePlayer(SESSION_ID, 'non-existent', {})).toThrow(NotFoundException);
-            expect(() => service.updatePlayer(SESSION_ID, 'non-existent', {})).toThrow('Player not found');
-        });
-
-        it('should emit player.updated event', () => {
-            const session = createMockSession();
-            service.save(session);
-
-            service.updatePlayer(SESSION_ID, PLAYER_A_ID, { health: NEW_HEALTH });
-
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerUpdated, {
-                sessionId: SESSION_ID,
-                player: service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID],
-            });
+            expect(() => repository.updatePlayer(SESSION_ID, 'non-existent', {})).toThrow(NotFoundException);
         });
     });
 
     describe('decreasePlayerHealth', () => {
         it('should decrease player health', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            const result = service.decreasePlayerHealth(SESSION_ID, PLAYER_A_ID, HEALTH_DAMAGE);
+            const result = repository.decreasePlayerHealth(SESSION_ID, PLAYER_ID_1, HEALTH_DAMAGE);
 
-            expect(result).toBe(HEALTH_AFTER_DAMAGE);
-            expect(service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID].health).toBe(HEALTH_AFTER_DAMAGE);
+            expect(result).toBe(HEALTH - HEALTH_DAMAGE);
+            expect(session.inGamePlayers[PLAYER_ID_1].health).toBe(HEALTH - HEALTH_DAMAGE);
         });
 
-        it('should not set health below zero', () => {
+        it('should set health to zero when damage exceeds health', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            const result = service.decreasePlayerHealth(SESSION_ID, PLAYER_A_ID, BASE_HEALTH + HEALTH_DAMAGE);
+            const result = repository.decreasePlayerHealth(SESSION_ID, PLAYER_ID_1, HEALTH + ONE);
 
-            expect(result).toBe(ZERO_HEALTH);
-            expect(service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID].health).toBe(ZERO_HEALTH);
+            expect(result).toBe(ZERO);
+            expect(session.inGamePlayers[PLAYER_ID_1].health).toBe(ZERO);
         });
 
         it('should throw NotFoundException when session not found', () => {
-            expect(() => service.decreasePlayerHealth('non-existent', PLAYER_A_ID, HEALTH_DAMAGE)).toThrow(NotFoundException);
+            expect(() => repository.decreasePlayerHealth('non-existent', PLAYER_ID_1, HEALTH_DAMAGE)).toThrow(NotFoundException);
         });
 
         it('should throw NotFoundException when player not found', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            expect(() => service.decreasePlayerHealth(SESSION_ID, 'non-existent', HEALTH_DAMAGE)).toThrow(NotFoundException);
+            expect(() => repository.decreasePlayerHealth(SESSION_ID, 'non-existent', HEALTH_DAMAGE)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('increasePlayerHealth', () => {
+        it('should increase player health', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, health: HEALTH - HEALTH_HEAL }),
+                },
+            });
+            repository.save(session);
+
+            repository.increasePlayerHealth(SESSION_ID, PLAYER_ID_1, HEALTH_HEAL);
+
+            expect(session.inGamePlayers[PLAYER_ID_1].health).toBe(HEALTH);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerHealthChanged, {
+                sessionId: SESSION_ID,
+                playerId: PLAYER_ID_1,
+                newHealth: HEALTH,
+            });
+        });
+
+        it('should cap health at maxHealth', () => {
+            const session = createMockSession();
+            repository.save(session);
+
+            repository.increasePlayerHealth(SESSION_ID, PLAYER_ID_1, HEALTH_HEAL);
+
+            expect(session.inGamePlayers[PLAYER_ID_1].health).toBe(MAX_HEALTH);
+        });
+
+        it('should throw NotFoundException when session not found', () => {
+            expect(() => repository.increasePlayerHealth('non-existent', PLAYER_ID_1, HEALTH_HEAL)).toThrow(NotFoundException);
+        });
+
+        it('should throw NotFoundException when player not found', () => {
+            const session = createMockSession();
+            repository.save(session);
+
+            expect(() => repository.increasePlayerHealth(SESSION_ID, 'non-existent', HEALTH_HEAL)).toThrow(NotFoundException);
         });
     });
 
     describe('resetPlayerHealth', () => {
         it('should reset player health to maxHealth', () => {
-            const session = createMockSession();
-            session.inGamePlayers[PLAYER_A_ID].health = HEALTH_AFTER_DAMAGE;
-            service.save(session);
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, health: HEALTH - HEALTH_DAMAGE }),
+                },
+            });
+            repository.save(session);
 
-            service.resetPlayerHealth(SESSION_ID, PLAYER_A_ID);
+            repository.resetPlayerHealth(SESSION_ID, PLAYER_ID_1);
 
-            expect(service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID].health).toBe(BASE_HEALTH);
+            expect(session.inGamePlayers[PLAYER_ID_1].health).toBe(MAX_HEALTH);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerHealthChanged, {
+                sessionId: SESSION_ID,
+                playerId: PLAYER_ID_1,
+                newHealth: MAX_HEALTH,
+            });
         });
 
         it('should throw NotFoundException when session not found', () => {
-            expect(() => service.resetPlayerHealth('non-existent', PLAYER_A_ID)).toThrow(NotFoundException);
+            expect(() => repository.resetPlayerHealth('non-existent', PLAYER_ID_1)).toThrow(NotFoundException);
         });
 
         it('should throw NotFoundException when player not found', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            expect(() => service.resetPlayerHealth(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
+            expect(() => repository.resetPlayerHealth(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
+        });
+    });
+
+    describe('applyPlayerBonus', () => {
+        it('should apply bonus value 1', () => {
+            const session = createMockSession();
+            repository.save(session);
+
+            repository.applyPlayerBonus(SESSION_ID, PLAYER_ID_1, BONUS_VALUE_1);
+
+            expect(session.inGamePlayers[PLAYER_ID_1].attackBonus).toBe(BONUS_VALUE_1);
+            expect(session.inGamePlayers[PLAYER_ID_1].defenseBonus).toBe(BONUS_VALUE_1);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerBonusesChanged, {
+                sessionId: SESSION_ID,
+                playerId: PLAYER_ID_1,
+                attackBonus: BONUS_VALUE_1,
+                defenseBonus: BONUS_VALUE_1,
+            });
         });
 
-        it('should emit player.healthChanged event', () => {
+        it('should apply bonus value 2', () => {
             const session = createMockSession();
-            session.inGamePlayers[PLAYER_A_ID].health = HEALTH_AFTER_DAMAGE;
-            service.save(session);
+            repository.save(session);
 
-            service.resetPlayerHealth(SESSION_ID, PLAYER_A_ID);
+            repository.applyPlayerBonus(SESSION_ID, PLAYER_ID_1, BONUS_VALUE_2);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerHealthChanged, {
-                sessionId: SESSION_ID,
-                playerId: PLAYER_A_ID,
-                newHealth: BASE_HEALTH,
+            expect(session.inGamePlayers[PLAYER_ID_1].attackBonus).toBe(BONUS_VALUE_2);
+            expect(session.inGamePlayers[PLAYER_ID_1].defenseBonus).toBe(BONUS_VALUE_2);
+        });
+
+        it('should add to existing bonuses', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, attackBonus: BONUS_VALUE_1, defenseBonus: BONUS_VALUE_1 }),
+                },
             });
+            repository.save(session);
+
+            repository.applyPlayerBonus(SESSION_ID, PLAYER_ID_1, BONUS_VALUE_1);
+
+            expect(session.inGamePlayers[PLAYER_ID_1].attackBonus).toBe(BONUS_VALUE_1 + BONUS_VALUE_1);
+            expect(session.inGamePlayers[PLAYER_ID_1].defenseBonus).toBe(BONUS_VALUE_1 + BONUS_VALUE_1);
+        });
+
+        it('should throw NotFoundException when session not found', () => {
+            expect(() => repository.applyPlayerBonus('non-existent', PLAYER_ID_1, BONUS_VALUE_1)).toThrow(NotFoundException);
+        });
+
+        it('should throw NotFoundException when player not found', () => {
+            const session = createMockSession();
+            repository.save(session);
+
+            expect(() => repository.applyPlayerBonus(SESSION_ID, 'non-existent', BONUS_VALUE_1)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('applyPlayerBoatSpeedBonus', () => {
+        it('should apply boat speed bonus', () => {
+            const session = createMockSession();
+            repository.save(session);
+
+            repository.applyPlayerBoatSpeedBonus(SESSION_ID, PLAYER_ID_1);
+
+            expect(session.inGamePlayers[PLAYER_ID_1].boatSpeedBonus).toBe(BOAT_SPEED_BONUS);
+            expect(session.inGamePlayers[PLAYER_ID_1].boatSpeed).toBe(BOAT_SPEED_BONUS);
+        });
+
+        it('should throw NotFoundException when session not found', () => {
+            expect(() => repository.applyPlayerBoatSpeedBonus('non-existent', PLAYER_ID_1)).toThrow(NotFoundException);
+        });
+
+        it('should throw NotFoundException when player not found', () => {
+            const session = createMockSession();
+            repository.save(session);
+
+            expect(() => repository.applyPlayerBoatSpeedBonus(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
+        });
+    });
+
+    describe('resetPlayerBoatSpeedBonus', () => {
+        it('should reset boat speed bonus to zero', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, boatSpeedBonus: BOAT_SPEED_BONUS, boatSpeed: BOAT_SPEED_BONUS }),
+                },
+            });
+            repository.save(session);
+
+            repository.resetPlayerBoatSpeedBonus(SESSION_ID, PLAYER_ID_1);
+
+            expect(session.inGamePlayers[PLAYER_ID_1].boatSpeedBonus).toBe(ZERO);
+            expect(session.inGamePlayers[PLAYER_ID_1].boatSpeed).toBe(ZERO);
+        });
+
+        it('should throw NotFoundException when session not found', () => {
+            expect(() => repository.resetPlayerBoatSpeedBonus('non-existent', PLAYER_ID_1)).toThrow(NotFoundException);
+        });
+
+        it('should throw NotFoundException when player not found', () => {
+            const session = createMockSession();
+            repository.save(session);
+
+            expect(() => repository.resetPlayerBoatSpeedBonus(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
+        });
+    });
+
+    describe('resetPlayerBonuses', () => {
+        it('should reset player bonuses', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, attackBonus: ATTACK_BONUS, defenseBonus: DEFENSE_BONUS, hasCombatBonus: true }),
+                },
+            });
+            repository.save(session);
+
+            repository.resetPlayerBonuses(SESSION_ID, PLAYER_ID_1);
+
+            expect(session.inGamePlayers[PLAYER_ID_1].attackBonus).toBe(ZERO);
+            expect(session.inGamePlayers[PLAYER_ID_1].defenseBonus).toBe(ZERO);
+            expect(session.inGamePlayers[PLAYER_ID_1].hasCombatBonus).toBe(false);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerBonusesChanged, {
+                sessionId: SESSION_ID,
+                playerId: PLAYER_ID_1,
+                attackBonus: ZERO,
+                defenseBonus: ZERO,
+            });
+        });
+
+        it('should throw NotFoundException when session not found', () => {
+            expect(() => repository.resetPlayerBonuses('non-existent', PLAYER_ID_1)).toThrow(NotFoundException);
+        });
+
+        it('should throw NotFoundException when player not found', () => {
+            const session = createMockSession();
+            repository.save(session);
+
+            expect(() => repository.resetPlayerBonuses(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
         });
     });
 
     describe('incrementPlayerCombatCount', () => {
         it('should increment combat count', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            service.incrementPlayerCombatCount(SESSION_ID, PLAYER_A_ID);
+            repository.incrementPlayerCombatCount(SESSION_ID, PLAYER_ID_1);
 
-            expect(service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID].combatCount).toBe(1);
+            expect(session.inGamePlayers[PLAYER_ID_1].combatCount).toBe(ONE);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatCountChanged, {
+                sessionId: SESSION_ID,
+                playerId: PLAYER_ID_1,
+                combatCount: ONE,
+            });
         });
 
         it('should throw NotFoundException when session not found', () => {
-            expect(() => service.incrementPlayerCombatCount('non-existent', PLAYER_A_ID)).toThrow(NotFoundException);
+            expect(() => repository.incrementPlayerCombatCount('non-existent', PLAYER_ID_1)).toThrow(NotFoundException);
         });
 
         it('should throw NotFoundException when player not found', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            expect(() => service.incrementPlayerCombatCount(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
-        });
-
-        it('should emit player.combatCountChanged event', () => {
-            const session = createMockSession();
-            service.save(session);
-
-            service.incrementPlayerCombatCount(SESSION_ID, PLAYER_A_ID);
-
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatCountChanged, {
-                sessionId: SESSION_ID,
-                playerId: PLAYER_A_ID,
-                combatCount: 1,
-            });
+            expect(() => repository.incrementPlayerCombatCount(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
         });
     });
 
     describe('incrementPlayerCombatWins', () => {
         it('should increment combat wins', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            service.incrementPlayerCombatWins(SESSION_ID, PLAYER_A_ID);
+            repository.incrementPlayerCombatWins(SESSION_ID, PLAYER_ID_1);
 
-            expect(service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID].combatWins).toBe(1);
+            expect(session.inGamePlayers[PLAYER_ID_1].combatWins).toBe(ONE);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatWinsChanged, {
+                sessionId: SESSION_ID,
+                playerId: PLAYER_ID_1,
+                combatWins: ONE,
+            });
         });
 
         it('should throw NotFoundException when session not found', () => {
-            expect(() => service.incrementPlayerCombatWins('non-existent', PLAYER_A_ID)).toThrow(NotFoundException);
+            expect(() => repository.incrementPlayerCombatWins('non-existent', PLAYER_ID_1)).toThrow(NotFoundException);
         });
 
         it('should throw NotFoundException when player not found', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            expect(() => service.incrementPlayerCombatWins(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
-        });
-
-        it('should emit player.combatWinsChanged event', () => {
-            const session = createMockSession();
-            service.save(session);
-
-            service.incrementPlayerCombatWins(SESSION_ID, PLAYER_A_ID);
-
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatWinsChanged, {
-                sessionId: SESSION_ID,
-                playerId: PLAYER_A_ID,
-                combatWins: 1,
-            });
+            expect(() => repository.incrementPlayerCombatWins(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
         });
     });
 
     describe('incrementPlayerCombatLosses', () => {
         it('should increment combat losses', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            service.incrementPlayerCombatLosses(SESSION_ID, PLAYER_A_ID);
+            repository.incrementPlayerCombatLosses(SESSION_ID, PLAYER_ID_1);
 
-            expect(service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID].combatLosses).toBe(1);
+            expect(session.inGamePlayers[PLAYER_ID_1].combatLosses).toBe(ONE);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatLossesChanged, {
+                sessionId: SESSION_ID,
+                playerId: PLAYER_ID_1,
+                combatLosses: ONE,
+            });
         });
 
         it('should throw NotFoundException when session not found', () => {
-            expect(() => service.incrementPlayerCombatLosses('non-existent', PLAYER_A_ID)).toThrow(NotFoundException);
+            expect(() => repository.incrementPlayerCombatLosses('non-existent', PLAYER_ID_1)).toThrow(NotFoundException);
         });
 
         it('should throw NotFoundException when player not found', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            expect(() => service.incrementPlayerCombatLosses(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
-        });
-
-        it('should emit player.combatLossesChanged event', () => {
-            const session = createMockSession();
-            service.save(session);
-
-            service.incrementPlayerCombatLosses(SESSION_ID, PLAYER_A_ID);
-
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatLossesChanged, {
-                sessionId: SESSION_ID,
-                playerId: PLAYER_A_ID,
-                combatLosses: 1,
-            });
+            expect(() => repository.incrementPlayerCombatLosses(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
         });
     });
 
     describe('incrementPlayerCombatDraws', () => {
         it('should increment combat draws', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            service.incrementPlayerCombatDraws(SESSION_ID, PLAYER_A_ID);
+            repository.incrementPlayerCombatDraws(SESSION_ID, PLAYER_ID_1);
 
-            expect(service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID].combatDraws).toBe(1);
+            expect(session.inGamePlayers[PLAYER_ID_1].combatDraws).toBe(ONE);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatDrawsChanged, {
+                sessionId: SESSION_ID,
+                playerId: PLAYER_ID_1,
+                combatDraws: ONE,
+            });
         });
 
         it('should throw NotFoundException when session not found', () => {
-            expect(() => service.incrementPlayerCombatDraws('non-existent', PLAYER_A_ID)).toThrow(NotFoundException);
+            expect(() => repository.incrementPlayerCombatDraws('non-existent', PLAYER_ID_1)).toThrow(NotFoundException);
         });
 
         it('should throw NotFoundException when player not found', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            expect(() => service.incrementPlayerCombatDraws(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
-        });
-
-        it('should emit player.combatDrawsChanged event', () => {
-            const session = createMockSession();
-            service.save(session);
-
-            service.incrementPlayerCombatDraws(SESSION_ID, PLAYER_A_ID);
-
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatDrawsChanged, {
-                sessionId: SESSION_ID,
-                playerId: PLAYER_A_ID,
-                combatDraws: 1,
-            });
-        });
-    });
-
-    describe('getIngamePlayers', () => {
-        it('should return only in-game players', () => {
-            const session = createMockSession();
-            session.inGamePlayers[PLAYER_B_ID].isInGame = false;
-            service.save(session);
-
-            const result = service.getIngamePlayers(SESSION_ID);
-
-            expect(result).toHaveLength(1);
-            expect(result[0].id).toBe(PLAYER_A_ID);
-        });
-
-        it('should return empty array when no players in game', () => {
-            const session = createMockSession();
-            session.inGamePlayers[PLAYER_A_ID].isInGame = false;
-            session.inGamePlayers[PLAYER_B_ID].isInGame = false;
-            service.save(session);
-
-            const result = service.getIngamePlayers(SESSION_ID);
-
-            expect(result).toEqual([]);
-        });
-
-        it('should throw NotFoundException when session not found', () => {
-            expect(() => service.getIngamePlayers('non-existent')).toThrow(NotFoundException);
+            expect(() => repository.incrementPlayerCombatDraws(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
         });
     });
 
     describe('inGamePlayersCount', () => {
         it('should return count of in-game players', () => {
-            const session = createMockSession();
-            service.save(session);
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, isInGame: true }),
+                    [PLAYER_ID_2]: createMockPlayer({ id: PLAYER_ID_2, isInGame: true }),
+                },
+            });
+            repository.save(session);
 
-            const result = service.inGamePlayersCount(SESSION_ID);
+            const result = repository.inGamePlayersCount(SESSION_ID);
 
-            expect(result).toBe(PLAYER_COUNT);
+            expect(result).toBe(TWO);
         });
 
-        it('should return zero when no players in game', () => {
-            const session = createMockSession();
-            session.inGamePlayers[PLAYER_A_ID].isInGame = false;
-            session.inGamePlayers[PLAYER_B_ID].isInGame = false;
-            service.save(session);
+        it('should exclude players not in game', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, isInGame: true }),
+                    [PLAYER_ID_2]: createMockPlayer({ id: PLAYER_ID_2, isInGame: false }),
+                },
+            });
+            repository.save(session);
 
-            const result = service.inGamePlayersCount(SESSION_ID);
+            const result = repository.inGamePlayersCount(SESSION_ID);
 
-            expect(result).toBe(0);
+            expect(result).toBe(ONE);
         });
 
         it('should throw NotFoundException when session not found', () => {
-            expect(() => service.inGamePlayersCount('non-existent')).toThrow(NotFoundException);
+            expect(() => repository.inGamePlayersCount('non-existent')).toThrow(NotFoundException);
+        });
+    });
+
+    describe('realPlayersCount', () => {
+        it('should return count of real players', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, isInGame: true }),
+                    [PLAYER_ID_2]: createMockPlayer({ id: PLAYER_ID_2, isInGame: true, virtualPlayerType: VirtualPlayerType.Offensive }),
+                },
+            });
+            repository.save(session);
+
+            const result = repository.realPlayersCount(SESSION_ID);
+
+            expect(result).toBe(ONE);
+        });
+
+        it('should throw NotFoundException when session not found', () => {
+            expect(() => repository.realPlayersCount('non-existent')).toThrow(NotFoundException);
+        });
+    });
+
+    describe('getIngamePlayers', () => {
+        it('should return in-game players', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, isInGame: true }),
+                    [PLAYER_ID_2]: createMockPlayer({ id: PLAYER_ID_2, isInGame: false }),
+                },
+            });
+            repository.save(session);
+
+            const result = repository.getIngamePlayers(SESSION_ID);
+
+            expect(result.length).toBe(ONE);
+            expect(result[ZERO].id).toBe(PLAYER_ID_1);
+        });
+
+        it('should throw NotFoundException when session not found', () => {
+            expect(() => repository.getIngamePlayers('non-existent')).toThrow(NotFoundException);
+        });
+    });
+
+    describe('save', () => {
+        it('should save session', () => {
+            const session = createMockSession();
+
+            repository.save(session);
+
+            expect(repository.findById(SESSION_ID)).toBe(session);
+        });
+    });
+
+    describe('findById', () => {
+        it('should return session when found', () => {
+            const session = createMockSession();
+            repository.save(session);
+
+            const result = repository.findById(SESSION_ID);
+
+            expect(result).toBe(session);
+        });
+
+        it('should throw NotFoundException when session not found', () => {
+            expect(() => repository.findById('non-existent')).toThrow(NotFoundException);
+        });
+    });
+
+    describe('update', () => {
+        it('should update session without emitting event', () => {
+            const session = createMockSession();
+            repository.save(session);
+            session.mode = GameMode.CTF;
+
+            repository.update(session, false);
+
+            expect(repository.findById(SESSION_ID).mode).toBe(GameMode.CTF);
+            expect(eventEmitter.emit).not.toHaveBeenCalled();
+        });
+
+        it('should update session and emit event when emitEvent is true', () => {
+            const session = createMockSession();
+            repository.save(session);
+            session.mode = GameMode.CTF;
+
+            repository.update(session, true);
+
+            expect(repository.findById(SESSION_ID).mode).toBe(GameMode.CTF);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionUpdated, { session });
+        });
+    });
+
+    describe('delete', () => {
+        it('should delete session', () => {
+            const session = createMockSession();
+            repository.save(session);
+
+            repository.delete(SESSION_ID);
+
+            expect(() => repository.findById(SESSION_ID)).toThrow(NotFoundException);
         });
     });
 
     describe('playerLeave', () => {
-        it('should set player isInGame to false', () => {
+        it('should mark player as not in game', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            service.playerLeave(SESSION_ID, PLAYER_A_ID);
+            const result = repository.playerLeave(SESSION_ID, PLAYER_ID_1);
 
-            expect(service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID].isInGame).toBe(false);
+            expect(session.inGamePlayers[PLAYER_ID_1].isInGame).toBe(false);
+            expect(result).toBe(session.inGamePlayers[PLAYER_ID_1]);
         });
 
-        it('should clear tile occupant when player has valid position', () => {
+        it('should clear tile occupant when player position is valid', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            service.playerLeave(SESSION_ID, PLAYER_A_ID);
+            repository.playerLeave(SESSION_ID, PLAYER_ID_1);
 
-            expect(gameCache.clearTileOccupant).toHaveBeenCalledWith(SESSION_ID, { x: POS_X_1, y: POS_Y_1 });
+            expect(gameCache.clearTileOccupant).toHaveBeenCalledWith(SESSION_ID, { x: POSITION_X, y: POSITION_Y });
         });
 
-        it('should not clear tile occupant when player has negative position', () => {
-            const session = createMockSession();
-            session.inGamePlayers[PLAYER_A_ID].x = NEGATIVE_POS;
-            session.inGamePlayers[PLAYER_A_ID].y = NEGATIVE_POS;
-            service.save(session);
+        it('should not clear tile occupant when player position is invalid', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, x: -ONE, y: -ONE }),
+                },
+            });
+            repository.save(session);
 
-            service.playerLeave(SESSION_ID, PLAYER_A_ID);
+            repository.playerLeave(SESSION_ID, PLAYER_ID_1);
 
             expect(gameCache.clearTileOccupant).not.toHaveBeenCalled();
         });
 
+        it('should reenable placeables for player', () => {
+            const session = createMockSession();
+            repository.save(session);
+
+            repository.playerLeave(SESSION_ID, PLAYER_ID_1);
+
+            expect(gameCache.reenablePlaceablesForPlayer).toHaveBeenCalledWith(SESSION_ID, PLAYER_ID_1);
+        });
+
         it('should set player position to -1', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            service.playerLeave(SESSION_ID, PLAYER_A_ID);
+            repository.playerLeave(SESSION_ID, PLAYER_ID_1);
 
-            expect(service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID].x).toBe(NEGATIVE_POS);
-            expect(service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID].y).toBe(NEGATIVE_POS);
+            expect(session.inGamePlayers[PLAYER_ID_1].x).toBe(-ONE);
+            expect(session.inGamePlayers[PLAYER_ID_1].y).toBe(-ONE);
         });
 
         it('should remove start point', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            service.playerLeave(SESSION_ID, PLAYER_A_ID);
+            repository.playerLeave(SESSION_ID, PLAYER_ID_1);
 
-            expect(service.findById(SESSION_ID).startPoints.find((sp) => sp.id === START_POINT_ID)).toBeUndefined();
-        });
-
-        it('should return player', () => {
-            const session = createMockSession();
-            service.save(session);
-
-            const result = service.playerLeave(SESSION_ID, PLAYER_A_ID);
-
-            expect(result).toBe(session.inGamePlayers[PLAYER_A_ID]);
+            expect(session.startPoints.length).toBe(ZERO);
         });
 
         it('should throw NotFoundException when session not found', () => {
-            expect(() => service.playerLeave('non-existent', PLAYER_A_ID)).toThrow(NotFoundException);
+            expect(() => repository.playerLeave('non-existent', PLAYER_ID_1)).toThrow(NotFoundException);
         });
 
         it('should throw NotFoundException when player not found', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            expect(() => service.playerLeave(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
+            expect(() => repository.playerLeave(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
         });
     });
 
     describe('findSessionByPlayerId', () => {
         it('should return session when player is in game', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            const result = service.findSessionByPlayerId(PLAYER_A_ID);
+            const result = repository.findSessionByPlayerId(PLAYER_ID_1);
 
             expect(result).toBe(session);
         });
 
         it('should return null when player is not in game', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, isInGame: false }),
+                },
+            });
+            repository.save(session);
+
+            const result = repository.findSessionByPlayerId(PLAYER_ID_1);
+
+            expect(result).toBeNull();
+        });
+
+        it('should return null when player not found', () => {
             const session = createMockSession();
-            session.inGamePlayers[PLAYER_A_ID].isInGame = false;
-            service.save(session);
+            repository.save(session);
 
-            const result = service.findSessionByPlayerId(PLAYER_A_ID);
-
-            expect(result).toBeNull();
-        });
-
-        it('should return null when player not found in any session', () => {
-            const result = service.findSessionByPlayerId('non-existent');
+            const result = repository.findSessionByPlayerId('non-existent');
 
             expect(result).toBeNull();
-        });
-
-        it('should return first matching session when player in multiple sessions', () => {
-            const session1 = createMockSession({ id: 'session-1' });
-            const session2 = createMockSession({ id: 'session-2' });
-            service.save(session1);
-            service.save(session2);
-
-            const result = service.findSessionByPlayerId(PLAYER_A_ID);
-
-            expect(result).toBeDefined();
         });
     });
 
     describe('findStartPointById', () => {
         it('should return start point when found', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            const result = service.findStartPointById(SESSION_ID, START_POINT_ID);
+            const result = repository.findStartPointById(SESSION_ID, START_POINT_ID);
 
             expect(result).toBeDefined();
             expect(result?.id).toBe(START_POINT_ID);
@@ -601,65 +1023,155 @@ describe('InGameSessionRepository', () => {
 
         it('should return null when start point not found', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            const result = service.findStartPointById(SESSION_ID, 'non-existent');
+            const result = repository.findStartPointById(SESSION_ID, 'non-existent');
 
             expect(result).toBeUndefined();
         });
 
         it('should throw NotFoundException when session not found', () => {
-            expect(() => service.findStartPointById('non-existent', START_POINT_ID)).toThrow(NotFoundException);
+            expect(() => repository.findStartPointById('non-existent', START_POINT_ID)).toThrow(NotFoundException);
         });
     });
 
     describe('movePlayerPosition', () => {
-        it('should move player to new position', () => {
+        it('should move player position and decrease speed', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            const result = service.movePlayerPosition(SESSION_ID, PLAYER_A_ID, POS_X_2, POS_Y_3, MOVE_COST);
+            const result = repository.movePlayerPosition(SESSION_ID, PLAYER_ID_1, NEW_X, NEW_Y, COST);
 
-            expect(service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID].x).toBe(POS_X_2);
-            expect(service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID].y).toBe(POS_Y_3);
-            expect(service.findById(SESSION_ID).inGamePlayers[PLAYER_A_ID].speed).toBe(BASE_SPEED - MOVE_COST);
-            expect(result).toEqual({ oldX: POS_X_1, oldY: POS_Y_1, newX: POS_X_2, newY: POS_Y_3 });
-        });
-
-        it('should call gameCache.moveTileOccupant', () => {
-            const session = createMockSession();
-            service.save(session);
-
-            service.movePlayerPosition(SESSION_ID, PLAYER_A_ID, POS_X_2, POS_Y_3, MOVE_COST);
-
-            expect(gameCache.moveTileOccupant).toHaveBeenCalledWith(SESSION_ID, { x: POS_X_2, y: POS_Y_3 }, session.inGamePlayers[PLAYER_A_ID]);
-        });
-
-        it('should emit player.moved event', () => {
-            const session = createMockSession();
-            service.save(session);
-
-            service.movePlayerPosition(SESSION_ID, PLAYER_A_ID, POS_X_2, POS_Y_3, MOVE_COST);
-
+            expect(session.inGamePlayers[PLAYER_ID_1].x).toBe(NEW_X);
+            expect(session.inGamePlayers[PLAYER_ID_1].y).toBe(NEW_Y);
+            expect(session.inGamePlayers[PLAYER_ID_1].speed).toBe(SPEED - COST);
+            expect(gameCache.moveTileOccupant).toHaveBeenCalledWith(SESSION_ID, { x: NEW_X, y: NEW_Y }, session.inGamePlayers[PLAYER_ID_1]);
             expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerMoved, {
-                session: service.findById(SESSION_ID),
-                playerId: PLAYER_A_ID,
-                x: POS_X_2,
-                y: POS_Y_3,
-                speed: BASE_SPEED - MOVE_COST,
-                boatSpeed: NO_BONUS,
+                session,
+                playerId: PLAYER_ID_1,
+                x: NEW_X,
+                y: NEW_Y,
+                speed: SPEED - COST,
+                boatSpeed: ZERO,
+            });
+            expect(result).toEqual({ oldX: POSITION_X, oldY: POSITION_Y, newX: NEW_X, newY: NEW_Y });
+        });
+
+        it('should decrease boatSpeed when player is on boat', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, onBoatId: 'boat-123', boatSpeed: BOAT_SPEED }),
+                },
+            });
+            repository.save(session);
+
+            repository.movePlayerPosition(SESSION_ID, PLAYER_ID_1, NEW_X, NEW_Y, COST);
+
+            expect(session.inGamePlayers[PLAYER_ID_1].boatSpeed).toBe(BOAT_SPEED - COST);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerMoved, {
+                session,
+                playerId: PLAYER_ID_1,
+                x: NEW_X,
+                y: NEW_Y,
+                speed: SPEED,
+                boatSpeed: BOAT_SPEED - COST,
             });
         });
 
+        it('should decrease speed when player is on boat but boatSpeed is zero', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, onBoatId: 'boat-123', boatSpeed: ZERO }),
+                },
+            });
+            repository.save(session);
+
+            repository.movePlayerPosition(SESSION_ID, PLAYER_ID_1, NEW_X, NEW_Y, COST);
+
+            expect(session.inGamePlayers[PLAYER_ID_1].speed).toBe(SPEED - COST);
+        });
+
         it('should throw NotFoundException when session not found', () => {
-            expect(() => service.movePlayerPosition('non-existent', PLAYER_A_ID, POS_X_2, POS_Y_3, MOVE_COST)).toThrow(NotFoundException);
+            expect(() => repository.movePlayerPosition('non-existent', PLAYER_ID_1, NEW_X, NEW_Y, COST)).toThrow(NotFoundException);
         });
 
         it('should throw NotFoundException when player not found', () => {
             const session = createMockSession();
-            service.save(session);
+            repository.save(session);
 
-            expect(() => service.movePlayerPosition(SESSION_ID, 'non-existent', POS_X_2, POS_Y_3, MOVE_COST)).toThrow(NotFoundException);
+            expect(() => repository.movePlayerPosition(SESSION_ID, 'non-existent', NEW_X, NEW_Y, COST)).toThrow(NotFoundException);
+        });
+    });
+
+    describe('getNextFreeTeam', () => {
+        it('should return team with fewer players', () => {
+            const session = createMockSession({
+                playerCount: FOUR,
+                teams: {
+                    [TEAM_1]: { number: TEAM_1, playerIds: [PLAYER_ID_1, PLAYER_ID_2] },
+                    [TEAM_2]: { number: TEAM_2, playerIds: [] },
+                },
+            });
+            repository.save(session);
+
+            const result = repository.getNextFreeTeam(SESSION_ID);
+
+            expect(result).toBeDefined();
+            expect(result?.number).toBe(TEAM_2);
+        });
+
+        it('should return null when no team is free', () => {
+            const session = createMockSession({
+                playerCount: TWO,
+                teams: {
+                    [TEAM_1]: { number: TEAM_1, playerIds: [PLAYER_ID_1] },
+                    [TEAM_2]: { number: TEAM_2, playerIds: [PLAYER_ID_2] },
+                },
+            });
+            repository.save(session);
+
+            const result = repository.getNextFreeTeam(SESSION_ID);
+
+            expect(result).toBeNull();
+        });
+
+        it('should throw NotFoundException when session not found', () => {
+            expect(() => repository.getNextFreeTeam('non-existent')).toThrow(NotFoundException);
+        });
+    });
+
+    describe('assignPlayerToTeam', () => {
+        it('should assign player to team', () => {
+            const session = createMockSession({
+                playerCount: FOUR,
+                inGamePlayers: {
+                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1 }),
+                    [PLAYER_ID_2]: createMockPlayer({ id: PLAYER_ID_2 }),
+                },
+                teams: {
+                    [TEAM_1]: { number: TEAM_1, playerIds: [PLAYER_ID_1, 'other-player'] },
+                    [TEAM_2]: { number: TEAM_2, playerIds: [] },
+                },
+            });
+            repository.save(session);
+
+            repository.assignPlayerToTeam(SESSION_ID, PLAYER_ID_2);
+
+            expect(session.teams[TEAM_2].playerIds).toContain(PLAYER_ID_2);
+            expect(session.inGamePlayers[PLAYER_ID_2]?.teamNumber).toBe(TEAM_2);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionUpdated, { session });
+        });
+
+        it('should throw NotFoundException when session not found', () => {
+            expect(() => repository.assignPlayerToTeam('non-existent', PLAYER_ID_1)).toThrow(NotFoundException);
+        });
+
+        it('should throw NotFoundException when player not found', () => {
+            const session = createMockSession();
+            repository.save(session);
+
+            expect(() => repository.assignPlayerToTeam(SESSION_ID, 'non-existent')).toThrow(NotFoundException);
         });
     });
 });
+

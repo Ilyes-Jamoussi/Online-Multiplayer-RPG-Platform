@@ -18,6 +18,10 @@ describe('GameEditorService', () => {
     const mockImageService: Partial<ImageService> = {};
     const mockMapper: Partial<GameDtoMapper> = {};
 
+    const ZERO = 0;
+    const ONE = 1;
+    const TWO = 2;
+
     type PatchSet = {
         name: string;
         description: string;
@@ -26,6 +30,7 @@ describe('GameEditorService', () => {
         gridPreviewUrl: string;
         tiles: { kind: TileKind; x: number; y: number; open: boolean; teleportChannel: number }[];
         objects: { id: string; kind: PlaceableKind; x: number; y: number; placed: boolean; orientation: Orientation }[];
+        teleportChannels?: { channelNumber: number; tiles: unknown }[];
     };
 
     beforeEach(() => {
@@ -371,6 +376,128 @@ describe('GameEditorService', () => {
             expect(result2).toEqual([]);
 
             mapObjectsSpy.mockRestore();
+        });
+
+        it('should call mapTeleportChannels with valid array and return mapped channels', async () => {
+            const id = 'gameid';
+            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
+            mockModel.findById = jest.fn().mockReturnValue({ lean: () => Promise.resolve({ gridPreviewUrl: null }) });
+
+            const returnedDoc = {
+                _id: { toString: () => id },
+                name: 'n',
+            } as const;
+
+            let capturedSet: unknown = null;
+            mockModel.findByIdAndUpdate = jest.fn().mockImplementation((passedId: string, setArg: unknown) => {
+                capturedSet = setArg;
+                return { lean: (): { exec: jest.Mock } => ({ exec: jest.fn().mockResolvedValue(returnedDoc) }) };
+            });
+
+            const channelNumber = ONE;
+            const tiles = {
+                entryA: { x: ZERO, y: ZERO },
+                entryB: { x: ONE, y: ONE },
+            };
+            const body = {
+                teleportChannels: [
+                    {
+                        channelNumber,
+                        tiles,
+                    },
+                ],
+            };
+
+            await service.patchEditByGameId(id, body);
+
+            const setObj = (capturedSet as { $set?: PatchSet }).$set ?? (capturedSet as PatchSet);
+            expect(setObj.teleportChannels).toBeDefined();
+            expect(setObj.teleportChannels?.length).toBe(ONE);
+            expect(setObj.teleportChannels?.[ZERO]).toEqual({
+                channelNumber,
+                tiles,
+            });
+        });
+
+        it('should call mapTeleportChannels with null and return empty array', async () => {
+            const id = 'gameid';
+            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
+            mockModel.findById = jest.fn().mockReturnValue({ lean: () => Promise.resolve({ gridPreviewUrl: null }) });
+
+            const returnedDoc = {
+                _id: { toString: () => id },
+                name: 'n',
+            } as const;
+
+            mockModel.findByIdAndUpdate = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(returnedDoc) }) });
+
+            type ServiceWithPrivateMethod = {
+                mapTeleportChannels: (teleportChannels: unknown) => unknown[];
+            };
+            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+            const mapTeleportChannelsSpy = jest.spyOn(servicePrivate, 'mapTeleportChannels');
+
+            const body = { teleportChannels: [] };
+
+            await service.patchEditByGameId(id, body);
+
+            expect(mapTeleportChannelsSpy).toHaveBeenCalledWith([]);
+            const result = servicePrivate.mapTeleportChannels(null as unknown);
+            expect(result).toEqual([]);
+            const result2 = servicePrivate.mapTeleportChannels(undefined as unknown);
+            expect(result2).toEqual([]);
+
+            mapTeleportChannelsSpy.mockRestore();
+        });
+
+        it('should call mapTeleportChannels with valid channels and map them correctly', async () => {
+            const id = 'gameid';
+            mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
+            mockModel.findById = jest.fn().mockReturnValue({ lean: () => Promise.resolve({ gridPreviewUrl: null }) });
+
+            const returnedDoc = {
+                _id: { toString: () => id },
+                name: 'n',
+            } as const;
+
+            mockModel.findByIdAndUpdate = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(returnedDoc) }) });
+
+            type ServiceWithPrivateMethod = {
+                mapTeleportChannels: (teleportChannels: unknown) => unknown[];
+            };
+            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+
+            const channelNumber1 = ONE;
+            const channelNumber2 = TWO;
+            const tiles1 = {
+                entryA: { x: ZERO, y: ZERO },
+                entryB: { x: ONE, y: ONE },
+            };
+            const tiles2 = {
+                entryA: { x: TWO, y: TWO },
+            };
+            const teleportChannels = [
+                {
+                    channelNumber: channelNumber1,
+                    tiles: tiles1,
+                },
+                {
+                    channelNumber: channelNumber2,
+                    tiles: tiles2,
+                },
+            ];
+
+            const result = servicePrivate.mapTeleportChannels(teleportChannels);
+
+            expect(result).toHaveLength(TWO);
+            expect(result[ZERO]).toEqual({
+                channelNumber: channelNumber1,
+                tiles: tiles1,
+            });
+            expect(result[ONE]).toEqual({
+                channelNumber: channelNumber2,
+                tiles: tiles2,
+            });
         });
     });
 });
