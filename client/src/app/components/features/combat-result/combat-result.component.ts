@@ -10,8 +10,8 @@ import { VictoryData } from '@app/interfaces/victory-data.interface';
     styleUrl: './combat-result.component.scss',
 })
 export class CombatResultComponent {
-    @Input() victoryData!: VictoryData;
-    @Input() isVictory!: boolean;
-    @Input() victoryMessage!: string;
-    @Input() victorySubtitle!: string;
+    @Input({ required: true }) victoryData: VictoryData;
+    @Input({ required: true }) isVictory: boolean;
+    @Input({ required: true }) victoryMessage: string;
+    @Input({ required: true }) victorySubtitle: string;
 }
