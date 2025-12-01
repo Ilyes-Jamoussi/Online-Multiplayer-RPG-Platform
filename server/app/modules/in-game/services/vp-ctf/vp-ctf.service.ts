@@ -4,6 +4,7 @@ import { EvaluatedTarget, MapScanWithDistances, PointOfInterestWithPath } from '
 import { PathResult } from '@app/interfaces/vp-pathfinding.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { VPPathfindingService } from '@app/modules/in-game/services/vp-pathfinding/vp-pathfinding.service';
+import { Orientation } from '@common/enums/orientation.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
@@ -66,6 +67,13 @@ export class VPCTFService {
         if (!startPoint) return;
 
         const returnPosition: Position = { x: startPoint.x, y: startPoint.y };
+
+        const blockingEnemy = this.findEnemyBlockingDirectPath(session, vpPlayerId, returnPosition);
+        if (blockingEnemy) {
+            this.evaluateBlockingEnemyAttack(session, vpPlayerId, blockingEnemy, results, config);
+            return;
+        }
+
         let path = this.pathfindingService.findPath(session, vpPlayerId, returnPosition);
 
         if (!path.reachable) {
@@ -76,11 +84,135 @@ export class VPCTFService {
             path = this.findClosestReachableTowards(session, vpPlayerId, returnPosition);
         }
 
-        if (!path.reachable || path.actions.length === 0) return;
+        if (!path.reachable || path.actions.length === 0) {
+            this.evaluateAdjacentEnemiesForBlockedFlagCarrier(session, vpPlayerId, results, config);
+            return;
+        }
 
         const returnFlagPriority = 200;
         const score = returnFlagPriority - path.totalCost * config.distanceWeights.flagPenaltyPerTile;
         results.push({ type: 'returnFlag', position: path.destination, path, priorityScore: Math.max(1, score) });
+    }
+
+    private findEnemyBlockingDirectPath(
+        session: InGameSession,
+        vpPlayerId: string,
+        targetPosition: Position,
+    ): { id: string; position: Position } | null {
+        const vpPlayer = session.inGamePlayers[vpPlayerId];
+        if (!vpPlayer) return null;
+
+        const vpPosition: Position = { x: vpPlayer.x, y: vpPlayer.y };
+        const directDirections = this.getDirectDirectionsToTarget(vpPosition, targetPosition);
+
+        for (const orientation of directDirections) {
+            const adjacentPos = this.getNextPositionFromOrientation(vpPosition, orientation);
+            const occupantId = this.gameCache.getTileOccupant(session.id, adjacentPos);
+            if (!occupantId || occupantId === vpPlayerId) continue;
+
+            const occupant = session.inGamePlayers[occupantId];
+            if (!occupant || occupant.health <= 0) continue;
+            if (occupant.teamNumber === vpPlayer.teamNumber) continue;
+
+            return { id: occupantId, position: adjacentPos };
+        }
+
+        return null;
+    }
+
+    private getDirectDirectionsToTarget(from: Position, to: Position): Orientation[] {
+        const directions: Orientation[] = [];
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+
+        if (dx > 0) directions.push(Orientation.E);
+        if (dx < 0) directions.push(Orientation.W);
+        if (dy > 0) directions.push(Orientation.S);
+        if (dy < 0) directions.push(Orientation.N);
+
+        return directions;
+    }
+
+    private getNextPositionFromOrientation(currentPos: Position, orientation: Orientation): Position {
+        switch (orientation) {
+            case Orientation.N:
+                return { x: currentPos.x, y: currentPos.y - 1 };
+            case Orientation.E:
+                return { x: currentPos.x + 1, y: currentPos.y };
+            case Orientation.S:
+                return { x: currentPos.x, y: currentPos.y + 1 };
+            case Orientation.W:
+                return { x: currentPos.x - 1, y: currentPos.y };
+            default:
+                return currentPos;
+        }
+    }
+
+    private evaluateBlockingEnemyAttack(
+        session: InGameSession,
+        vpPlayerId: string,
+        blockingEnemy: { id: string; position: Position },
+        results: EvaluatedTarget[],
+        config: VPConfig,
+    ): void {
+        const vpPlayer = session.inGamePlayers[vpPlayerId];
+        if (!vpPlayer) return;
+
+        const blockedFlagCarrierAttackPriority = 180;
+        const score = blockedFlagCarrierAttackPriority + config.bonuses.adjacentAttackBonus;
+
+        results.push({
+            type: 'enemy',
+            position: blockingEnemy.position,
+            playerId: blockingEnemy.id,
+            path: {
+                reachable: true,
+                totalCost: 0,
+                actionsRequired: 0,
+                actions: [],
+                destination: { x: vpPlayer.x, y: vpPlayer.y },
+            },
+            priorityScore: score,
+        });
+    }
+
+    private evaluateAdjacentEnemiesForBlockedFlagCarrier(
+        session: InGameSession,
+        vpPlayerId: string,
+        results: EvaluatedTarget[],
+        config: VPConfig,
+    ): void {
+        const vpPlayer = session.inGamePlayers[vpPlayerId];
+        if (!vpPlayer) return;
+
+        const vpPosition: Position = { x: vpPlayer.x, y: vpPlayer.y };
+        const adjacentPositions = this.getAdjacentPositions(vpPosition);
+
+        for (const adjPos of adjacentPositions) {
+            const occupantId = this.gameCache.getTileOccupant(session.id, adjPos);
+            if (!occupantId || occupantId === vpPlayerId) continue;
+
+            const occupant = session.inGamePlayers[occupantId];
+            if (!occupant || occupant.health <= 0) continue;
+            if (occupant.teamNumber === vpPlayer.teamNumber) continue;
+
+            const blockedFlagCarrierAttackPriority = 180;
+            const score = blockedFlagCarrierAttackPriority + config.bonuses.adjacentAttackBonus;
+
+            results.push({
+                type: 'enemy',
+                position: adjPos,
+                playerId: occupantId,
+                path: {
+                    reachable: true,
+                    totalCost: 0,
+                    actionsRequired: 0,
+                    actions: [],
+                    destination: vpPosition,
+                },
+                priorityScore: score,
+            });
+        }
     }
 
     private findClosestReachableTowards(session: InGameSession, vpPlayerId: string, target: Position): PathResult {

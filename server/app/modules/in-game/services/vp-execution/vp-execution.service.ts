@@ -2,11 +2,14 @@ import { VIRTUAL_PLAYER_ACTION_DELAY_MS, VIRTUAL_PLAYER_MOVEMENT_DELAY_MS } from
 import { EvaluatedTarget, VPDecision } from '@app/interfaces/vp-gameplay.interface';
 import { PathAction } from '@app/interfaces/vp-pathfinding.interface';
 import { ActionService } from '@app/modules/in-game/services/action/action.service';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { VPGameplayService } from '@app/modules/in-game/services/vp-gameplay/vp-gameplay.service';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { Position } from '@common/interfaces/position.interface';
 import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
@@ -18,6 +21,7 @@ export class VPExecutionService {
         private readonly vpGameplayService: VPGameplayService,
         private readonly sessionRepository: InGameSessionRepository,
         private readonly actionService: ActionService,
+        private readonly gameCache: GameCacheService,
     ) {}
 
     executeVPTurn(sessionId: string, playerId: string, playerType: VirtualPlayerType): void {
@@ -83,6 +87,9 @@ export class VPExecutionService {
         const success = this.executeSingleAction(sessionId, playerId, nextAction);
 
         if (!success) {
+            if (this.tryAttackBlockingEnemy(sessionId, playerId, nextAction)) {
+                return;
+            }
             this.endVPTurn(sessionId, playerId);
             return;
         }
@@ -123,6 +130,34 @@ export class VPExecutionService {
                 default:
                     return false;
             }
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    private tryAttackBlockingEnemy(sessionId: string, playerId: string, failedAction: PathAction): boolean {
+        if (failedAction.type !== 'move' || !failedAction.orientation) return false;
+
+        const player = this.getValidPlayer(sessionId, playerId);
+        if (!player || player.actionsRemaining === 0) return false;
+
+        try {
+            const playerPosition: Position = { x: player.x, y: player.y };
+            const blockedPosition = this.gameCache.getNextPosition(sessionId, playerPosition, failedAction.orientation);
+            const occupantId = this.gameCache.getTileOccupant(sessionId, blockedPosition);
+            if (!occupantId) return false;
+
+            const session = this.sessionRepository.findById(sessionId);
+            if (!session) return false;
+
+            const occupant = session.inGamePlayers[occupantId];
+            if (!occupant || occupant.health <= 0) return false;
+
+            if (session.mode === GameMode.CTF && occupant.teamNumber === player.teamNumber) return false;
+
+            this.logger.debug(`VP ${playerId} attacking blocking enemy ${occupantId}`);
+            this.actionService.attackPlayer(sessionId, playerId, blockedPosition);
             return true;
         } catch {
             return false;
