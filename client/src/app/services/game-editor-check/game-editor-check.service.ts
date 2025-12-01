@@ -29,6 +29,7 @@ export class GameEditorCheckService {
             flagPlacement: { hasIssue: false },
             nameValidation: { hasIssue: false },
             descriptionValidation: { hasIssue: false },
+            teleportChannels: { hasIssue: false },
         };
         const tiles = this.gameEditorStoreService.tiles();
 
@@ -39,6 +40,7 @@ export class GameEditorCheckService {
         issues.flagPlacement = this.checkAllFlagPlaced();
         issues.nameValidation = this.checkNameValidation();
         issues.descriptionValidation = this.checkDescriptionValidation();
+        issues.teleportChannels = this.checkTeleportChannels();
         return issues;
     });
 
@@ -268,5 +270,23 @@ export class GameEditorCheckService {
             : { hasIssue: false };
 
         return result;
+    }
+
+    private checkTeleportChannels(): GameEditorIssue {
+        const problem: GameEditorIssue = { hasIssue: false };
+        const channels = this.gameEditorStoreService.teleportChannels;
+
+        for (const channel of channels) {
+            const hasEntryA = !!channel.tiles?.entryA;
+            const hasEntryB = !!channel.tiles?.entryB;
+
+            if (!hasEntryA || !hasEntryB) {
+                problem.hasIssue = true;
+                problem.message = `Le canal de téléportation ${channel.channelNumber} doit avoir deux points d'entrée (entryA et entryB).`;
+                break;
+            }
+        }
+
+        return problem;
     }
 }
