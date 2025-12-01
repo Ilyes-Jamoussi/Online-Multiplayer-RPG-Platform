@@ -1,16 +1,17 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { InitializationService } from './initialization.service';
-import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { Game } from '@app/modules/game-store/entities/game.entity';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { Player } from '@common/interfaces/player.interface';
-import { InGameSession } from '@common/interfaces/session.interface';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { Player } from '@common/interfaces/player.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Types } from 'mongoose';
+import { InitializationService } from './initialization.service';
 
 const MOCK_SESSION_ID = 'session-123';
 const MOCK_GAME_ID = 'game-123';
@@ -20,8 +21,6 @@ const MOCK_PLAYER_ID_1 = 'player-1';
 const MOCK_PLAYER_ID_2 = 'player-2';
 const MOCK_PLAYER_ID_3 = 'player-3';
 const MOCK_PLAYER_NAME_1 = 'Player 1';
-const MOCK_PLAYER_NAME_2 = 'Player 2';
-const MOCK_PLAYER_NAME_3 = 'Player 3';
 const MOCK_SPEED_1 = 5;
 const MOCK_SPEED_2 = 3;
 const MOCK_SPEED_3 = 1;
@@ -34,12 +33,13 @@ const MOCK_Y_3 = 2;
 const MOCK_START_POINT_ID_1 = 'start-point-1';
 const MOCK_START_POINT_ID_2 = 'start-point-2';
 const MOCK_START_POINT_ID_3 = 'start-point-3';
-const MOCK_ARRAY_LENGTH_MINUS_ONE = 1;
 const MOCK_ARRAY_INDEX_0 = 0;
 const MOCK_ARRAY_INDEX_1 = 1;
 const MOCK_ARRAY_INDEX_2 = 2;
 const MOCK_RANDOM_VALUE_1 = 0.3;
 const MOCK_RANDOM_VALUE_2 = 0.7;
+const MOCK_RANDOM_VALUE_MIDDLE = 0.5;
+const MOCK_RANDOM_VALUE_HIGH = 0.999;
 const MOCK_BASE_HEALTH = 100;
 const MOCK_HEALTH_BONUS = 0;
 const MOCK_MAX_HEALTH = 100;
@@ -61,8 +61,6 @@ const MOCK_PLAYER_COUNT = 2;
 describe('InitializationService', () => {
     const MOCK_ARRAY_LENGTH_2 = 2;
     const MOCK_ARRAY_LENGTH_3 = 3;
-    const MOCK_ARRAY_LENGTH_4 = 4;
-    const MOCK_SHUFFLE_ITERATIONS = 2;
 
     let service: InitializationService;
     let mockGameCacheService: jest.Mocked<GameCacheService>;
@@ -153,6 +151,7 @@ describe('InitializationService', () => {
             [MOCK_PLAYER_ID_2]: createMockPlayer({ id: MOCK_PLAYER_ID_2 }),
         },
         teams: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention -- Team number must be numeric
             1: { number: 1, playerIds: [MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2] },
         },
         currentTurn: { turnNumber: MOCK_TURN_NUMBER, activePlayerId: MOCK_PLAYER_ID_1, hasUsedAction: false },
@@ -245,7 +244,7 @@ describe('InitializationService', () => {
             jest.spyOn(Math, 'random').mockImplementation(() => {
                 callCount++;
                 if (callCount === 1) return 0.0;
-                return 0.5;
+                return MOCK_RANDOM_VALUE_MIDDLE;
             });
 
             const player1 = createMockPlayer({ id: MOCK_PLAYER_ID_1, speed: MOCK_SPEED_1 });
@@ -329,7 +328,7 @@ describe('InitializationService', () => {
 
         it('should call setTileOccupant for each player', () => {
             const originalRandom = Math.random;
-            jest.spyOn(Math, 'random').mockReturnValue(0.999);
+            jest.spyOn(Math, 'random').mockReturnValue(MOCK_RANDOM_VALUE_HIGH);
 
             const mockObjectId1 = new Types.ObjectId();
             Object.defineProperty(mockObjectId1, 'toString', {

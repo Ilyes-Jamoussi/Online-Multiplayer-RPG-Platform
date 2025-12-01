@@ -3,10 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ChatService } from './chat.service';
 
 const MOCK_CHAT_ID_1 = '123';
-const MOCK_CHAT_ID_2 = '456';
 const MOCK_RANDOM_VALUE_1 = 0.1;
 const MOCK_RANDOM_VALUE_2 = 0.2;
-const MOCK_RANDOM_VALUE_3 = 0.3;
 
 describe('ChatService', () => {
     let service: ChatService;
@@ -75,6 +73,3 @@ describe('ChatService', () => {
         });
     });
 });
-
-
-

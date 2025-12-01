@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
@@ -79,6 +80,7 @@ const createMockSession = (overrides: Partial<InGameSession> = {}): InGameSessio
         [MOCK_PLAYER_ID_2]: createMockPlayer({ id: MOCK_PLAYER_ID_2, name: MOCK_PLAYER_NAME_2 }),
     },
     teams: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention -- Team number must be numeric
         1: { number: 1, playerIds: [MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2] },
     },
     currentTurn: { turnNumber: 1, activePlayerId: MOCK_PLAYER_ID_1, hasUsedAction: false },

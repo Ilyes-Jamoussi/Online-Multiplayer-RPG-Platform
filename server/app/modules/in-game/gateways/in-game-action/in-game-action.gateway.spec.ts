@@ -1,26 +1,25 @@
-import { InGameActionGateway } from './in-game-action.gateway';
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
+import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
-import { ServerEvents } from '@app/enums/server-events.enum';
-import { InGameEvents } from '@common/enums/in-game-events.enum';
-import { NotificationEvents } from '@common/enums/notification-events.enum';
-import { Orientation } from '@common/enums/orientation.enum';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
+import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { NotificationEvents } from '@common/enums/notification-events.enum';
+import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
-import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Types } from 'mongoose';
 import 'reflect-metadata';
 import { Server, Socket } from 'socket.io';
+import { InGameActionGateway } from './in-game-action.gateway';
 
 const MOCK_SESSION_ID = 'session-123';
 const MOCK_IN_GAME_ID = 'in-game-123';
@@ -107,6 +106,7 @@ const createMockSession = (overrides: Partial<InGameSession> = {}): InGameSessio
         [MOCK_SOCKET_ID]: createMockPlayer({ id: MOCK_SOCKET_ID }),
     },
     teams: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention -- Team number must be numeric
         1: { number: 1, playerIds: [MOCK_SOCKET_ID] },
     },
     currentTurn: { turnNumber: 1, activePlayerId: MOCK_SOCKET_ID, hasUsedAction: false },
@@ -361,7 +361,12 @@ describe('InGameActionGateway', () => {
 
             gateway.playerSanctuaryRequest(mockSocket, payload);
 
-            expect(mockInGameService.sanctuaryRequest).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_SOCKET_ID, { x: MOCK_X, y: MOCK_Y }, PlaceableKind.HEAL);
+            expect(mockInGameService.sanctuaryRequest).toHaveBeenCalledWith(
+                MOCK_SESSION_ID,
+                MOCK_SOCKET_ID,
+                { x: MOCK_X, y: MOCK_Y },
+                PlaceableKind.HEAL,
+            );
             expect(mockSocket.emit).not.toHaveBeenCalled();
         });
 
@@ -370,7 +375,12 @@ describe('InGameActionGateway', () => {
 
             gateway.playerSanctuaryRequest(mockSocket, payload);
 
-            expect(mockInGameService.sanctuaryRequest).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_SOCKET_ID, { x: MOCK_X, y: MOCK_Y }, PlaceableKind.FIGHT);
+            expect(mockInGameService.sanctuaryRequest).toHaveBeenCalledWith(
+                MOCK_SESSION_ID,
+                MOCK_SOCKET_ID,
+                { x: MOCK_X, y: MOCK_Y },
+                PlaceableKind.FIGHT,
+            );
             expect(mockSocket.emit).not.toHaveBeenCalled();
         });
 
@@ -401,7 +411,12 @@ describe('InGameActionGateway', () => {
 
             gateway.playerSanctuaryAction(mockSocket, payload);
 
-            expect(mockInGameService.performSanctuaryAction).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_SOCKET_ID, { x: MOCK_X, y: MOCK_Y }, undefined);
+            expect(mockInGameService.performSanctuaryAction).toHaveBeenCalledWith(
+                MOCK_SESSION_ID,
+                MOCK_SOCKET_ID,
+                { x: MOCK_X, y: MOCK_Y },
+                undefined,
+            );
             expect(mockSocket.emit).not.toHaveBeenCalled();
         });
 
@@ -533,7 +548,10 @@ describe('InGameActionGateway', () => {
 
             expect(mockInGameService.getSession).toHaveBeenCalledWith(MOCK_SESSION_ID);
             expect(mockServer.to).toHaveBeenCalledWith(MOCK_IN_GAME_ID);
-            expect(mockServer.to(MOCK_IN_GAME_ID).emit).toHaveBeenCalledWith(InGameEvents.PlayerUpdated, expect.objectContaining({ success: true, data: player }));
+            expect(mockServer.to(MOCK_IN_GAME_ID).emit).toHaveBeenCalledWith(
+                InGameEvents.PlayerUpdated,
+                expect.objectContaining({ success: true, data: player }),
+            );
         });
     });
 
@@ -593,7 +611,10 @@ describe('InGameActionGateway', () => {
                 }),
             );
             expect(mockServer.to).toHaveBeenCalledWith(MOCK_PLAYER_ID);
-            expect(mockServer.to(MOCK_PLAYER_ID).emit).toHaveBeenCalledWith(InGameEvents.PlayerActionUsed, expect.objectContaining({ success: true }));
+            expect(mockServer.to(MOCK_PLAYER_ID).emit).toHaveBeenCalledWith(
+                InGameEvents.PlayerActionUsed,
+                expect.objectContaining({ success: true }),
+            );
         });
     });
 

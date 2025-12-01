@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { NAME_ALREADY_EXISTS } from '@app/constants/error-messages.constants';
 import { GamePreviewDto } from '@app/modules/game-store/dto/game-preview.dto';
 import { GameEditorService } from '@app/modules/game-store/services/game-editor/game-editor.service';
@@ -450,7 +451,7 @@ describe('GameEditorService', () => {
             mapTeleportChannelsSpy.mockRestore();
         });
 
-        it('should call mapTeleportChannels with valid channels and map them correctly', async () => {
+        it('should call mapTeleportChannels with valid channels and map them correctly', () => {
             const id = 'gameid';
             mockModel.findOne = jest.fn().mockReturnValue({ lean: () => ({ exec: jest.fn().mockResolvedValue(null) }) });
             mockModel.findById = jest.fn().mockReturnValue({ lean: () => Promise.resolve({ gridPreviewUrl: null }) });

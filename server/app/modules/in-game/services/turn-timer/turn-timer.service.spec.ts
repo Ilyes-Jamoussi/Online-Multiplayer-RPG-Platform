@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
@@ -25,7 +26,6 @@ describe('TurnTimerService', () => {
     const PLAYER_ID_3 = 'player-3';
     const TIMEOUT_MS = 5000;
     const TURN_NUMBER_1 = 1;
-    const TURN_NUMBER_2 = 2;
     const BASE_SPEED = 3;
     const SPEED_BONUS = 1;
     const BOAT_SPEED_BONUS = 2;
@@ -35,7 +35,6 @@ describe('TurnTimerService', () => {
     const ZERO = 0;
     const ONE = 1;
     const TWO = 2;
-    const THREE = 3;
     const FOUR = 4;
 
     const createMockPlayer = (overrides: Partial<Player> = {}): Player => ({
@@ -91,6 +90,7 @@ describe('TurnTimerService', () => {
             [PLAYER_ID_2]: createMockPlayer({ id: PLAYER_ID_2 }),
         },
         teams: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention -- Team number must be numeric
             1: { number: ONE, playerIds: [PLAYER_ID_1, PLAYER_ID_2] },
         },
         currentTurn: createMockTurnState(),
@@ -785,7 +785,9 @@ describe('TurnTimerService', () => {
         it('should return null when turnOrder is empty', () => {
             const session = createMockSession({ turnOrder: [] });
 
-            const result = (service as unknown as { getNextActivePlayer: (session: InGameSession, currentId: string | null) => string | null }).getNextActivePlayer(session, null);
+            const result = (service as unknown as {
+                getNextActivePlayer: (session: InGameSession, currentId: string | null) => string | null;
+            }).getNextActivePlayer(session, null);
 
             expect(result).toBeNull();
         });
@@ -795,7 +797,9 @@ describe('TurnTimerService', () => {
                 turnOrder: [PLAYER_ID_1, PLAYER_ID_2],
             });
 
-            const result = (service as unknown as { getNextActivePlayer: (session: InGameSession, currentId: string | null) => string | null }).getNextActivePlayer(session, 'non-existent-player');
+            const result = (service as unknown as {
+                getNextActivePlayer: (session: InGameSession, currentId: string | null) => string | null;
+            }).getNextActivePlayer(session, 'non-existent-player');
 
             expect(result).toBe(PLAYER_ID_1);
         });
@@ -809,7 +813,9 @@ describe('TurnTimerService', () => {
                 turnOrder: [PLAYER_ID_1, PLAYER_ID_2],
             });
 
-            const result = (service as unknown as { getNextActivePlayer: (session: InGameSession, currentId: string | null) => string | null }).getNextActivePlayer(session, PLAYER_ID_1);
+            const result = (service as unknown as {
+                getNextActivePlayer: (session: InGameSession, currentId: string | null) => string | null;
+            }).getNextActivePlayer(session, PLAYER_ID_1);
 
             expect(result).toBe(PLAYER_ID_2);
         });

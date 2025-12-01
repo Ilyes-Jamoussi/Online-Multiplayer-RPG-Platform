@@ -3,7 +3,11 @@ import { VirtualPlayerService } from './virtual-player.service';
 import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { VPExecutionService } from '@app/modules/in-game/services/vp-execution/vp-execution.service';
-import { VIRTUAL_PLAYER_ACTION_DELAY_MS, VIRTUAL_PLAYER_THINKING_DELAY_MAX_MS, VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS } from '@app/constants/virtual-player.constants';
+import {
+    VIRTUAL_PLAYER_ACTION_DELAY_MS,
+    VIRTUAL_PLAYER_THINKING_DELAY_MAX_MS,
+    VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS,
+} from '@app/constants/virtual-player.constants';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { TurnState } from '@common/interfaces/turn-state.interface';
@@ -43,6 +47,7 @@ describe('VirtualPlayerService', () => {
         isGameStarted: true,
         inGamePlayers: {},
         teams: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention -- Team number must be numeric
             1: { number: ONE, playerIds: [] },
         },
         currentTurn: createMockTurnState(),
@@ -251,7 +256,9 @@ describe('VirtualPlayerService', () => {
 
             const promise = service['simulateThinkingTime']();
 
-            const expectedMaxDelay = Math.floor(ONE * (VIRTUAL_PLAYER_THINKING_DELAY_MAX_MS - VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS + ONE)) + VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS;
+            const expectedMaxDelay =
+                Math.floor(ONE * (VIRTUAL_PLAYER_THINKING_DELAY_MAX_MS - VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS + ONE)) +
+                VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS;
             jest.advanceTimersByTime(expectedMaxDelay);
 
             await promise;
@@ -261,7 +268,9 @@ describe('VirtualPlayerService', () => {
 
         it('should resolve after delay within min and max range', async () => {
             const randomValue = 0.5;
-            const expectedDelay = Math.floor(randomValue * (VIRTUAL_PLAYER_THINKING_DELAY_MAX_MS - VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS + ONE)) + VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS;
+            const expectedDelay =
+                Math.floor(randomValue * (VIRTUAL_PLAYER_THINKING_DELAY_MAX_MS - VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS + ONE)) +
+                VIRTUAL_PLAYER_THINKING_DELAY_MIN_MS;
             jest.spyOn(Math, 'random').mockReturnValue(randomValue);
 
             const promise = service['simulateThinkingTime']();

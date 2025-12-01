@@ -27,6 +27,12 @@ describe('SessionService', () => {
     const ZERO = 0;
     const ONE = 1;
     const TWO = 2;
+    const RANDOM_OFFSET_ABOVE_THRESHOLD = 0.1;
+    const RANDOM_OFFSET_BELOW_THRESHOLD = 0.1;
+    const MOCK_DATE_NOW_1 = 1234567890;
+    const MOCK_DATE_NOW_2 = 1234567891;
+    const MOCK_RANDOM_VALUE_1 = 0.123;
+    const MOCK_RANDOM_VALUE_2 = 0.456;
 
     const createMockPlayerDto = (overrides: Partial<CreateSessionDto['player']> = {}) => ({
         id: '',
@@ -570,7 +576,11 @@ describe('SessionService', () => {
         it('should add virtual player to session', () => {
             const dto = createCreateSessionDto();
             const result = service.createSession(ADMIN_ID, dto);
-            jest.spyOn(Math, 'random').mockReturnValueOnce(ZERO).mockReturnValueOnce(ZERO).mockReturnValueOnce(RANDOM_THRESHOLD + 0.1).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
@@ -583,7 +593,11 @@ describe('SessionService', () => {
         it('should select avatar for virtual player', () => {
             const dto = createCreateSessionDto();
             const result = service.createSession(ADMIN_ID, dto);
-            jest.spyOn(Math, 'random').mockReturnValueOnce(ZERO).mockReturnValueOnce(ZERO).mockReturnValueOnce(RANDOM_THRESHOLD + 0.1).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
@@ -595,7 +609,11 @@ describe('SessionService', () => {
         it('should return updated players array', () => {
             const dto = createCreateSessionDto();
             const result = service.createSession(ADMIN_ID, dto);
-            jest.spyOn(Math, 'random').mockReturnValueOnce(ZERO).mockReturnValueOnce(ZERO).mockReturnValueOnce(RANDOM_THRESHOLD + 0.1).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Defensive);
 
@@ -606,7 +624,11 @@ describe('SessionService', () => {
         it('should create virtual player with available name from list', () => {
             const dto = createCreateSessionDto();
             const result = service.createSession(ADMIN_ID, dto);
-            jest.spyOn(Math, 'random').mockReturnValueOnce(ZERO).mockReturnValueOnce(ZERO).mockReturnValueOnce(RANDOM_THRESHOLD + 0.1).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
@@ -623,13 +645,17 @@ describe('SessionService', () => {
                     player: createMockPlayerDto({ name }),
                 }));
             });
-            jest.spyOn(Math, 'random').mockReturnValueOnce(ZERO).mockReturnValueOnce(ZERO).mockReturnValueOnce(RANDOM_THRESHOLD + 0.1).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1);
-            jest.spyOn(Date, 'now').mockReturnValue(1234567890);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+            jest.spyOn(Date, 'now').mockReturnValue(MOCK_DATE_NOW_1);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
             const virtualPlayer = players.find((p) => p.virtualPlayerType);
-            expect(virtualPlayer?.name).toBe('Bot-1234567890');
+            expect(virtualPlayer?.name).toBe(`Bot-${MOCK_DATE_NOW_1}`);
         });
 
         it('should select available avatar', () => {
@@ -640,7 +666,11 @@ describe('SessionService', () => {
                 service.joinSession(`player-${index}`, createJoinSessionDto(result.sessionId));
                 service.chooseAvatar(result.sessionId, `player-${index}`, avatar);
             });
-            jest.spyOn(Math, 'random').mockReturnValueOnce(ZERO).mockReturnValueOnce(ZERO).mockReturnValueOnce(RANDOM_THRESHOLD + 0.1).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
@@ -652,7 +682,11 @@ describe('SessionService', () => {
         it('should assign D4 attack dice when random is above threshold', () => {
             const dto = createCreateSessionDto();
             const result = service.createSession(ADMIN_ID, dto);
-            jest.spyOn(Math, 'random').mockReturnValueOnce(ZERO).mockReturnValueOnce(ZERO).mockReturnValueOnce(RANDOM_THRESHOLD + 0.1).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
@@ -664,7 +698,11 @@ describe('SessionService', () => {
         it('should assign D6 attack dice when random is below threshold', () => {
             const dto = createCreateSessionDto();
             const result = service.createSession(ADMIN_ID, dto);
-            jest.spyOn(Math, 'random').mockReturnValueOnce(ZERO).mockReturnValueOnce(ZERO).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
@@ -676,7 +714,11 @@ describe('SessionService', () => {
         it('should assign health bonus when random is above threshold', () => {
             const dto = createCreateSessionDto();
             const result = service.createSession(ADMIN_ID, dto);
-            jest.spyOn(Math, 'random').mockReturnValueOnce(ZERO).mockReturnValueOnce(ZERO).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1).mockReturnValueOnce(RANDOM_THRESHOLD + 0.1);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
@@ -690,7 +732,11 @@ describe('SessionService', () => {
         it('should assign speed bonus when health bonus is zero', () => {
             const dto = createCreateSessionDto();
             const result = service.createSession(ADMIN_ID, dto);
-            jest.spyOn(Math, 'random').mockReturnValueOnce(ZERO).mockReturnValueOnce(ZERO).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
@@ -703,7 +749,11 @@ describe('SessionService', () => {
         it('should create virtual player with correct base stats', () => {
             const dto = createCreateSessionDto();
             const result = service.createSession(ADMIN_ID, dto);
-            jest.spyOn(Math, 'random').mockReturnValueOnce(ZERO).mockReturnValueOnce(ZERO).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Defensive);
 
@@ -731,7 +781,11 @@ describe('SessionService', () => {
         it('should create virtual player with correct virtualPlayerType', () => {
             const dto = createCreateSessionDto();
             const result = service.createSession(ADMIN_ID, dto);
-            jest.spyOn(Math, 'random').mockReturnValueOnce(ZERO).mockReturnValueOnce(ZERO).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Defensive);
 
@@ -742,12 +796,22 @@ describe('SessionService', () => {
         it('should create virtual player with unique ID', () => {
             const dto = createCreateSessionDto();
             const result = service.createSession(ADMIN_ID, dto);
-            jest.spyOn(Date, 'now').mockReturnValue(1234567890);
-            jest.spyOn(Math, 'random').mockReturnValueOnce(ZERO).mockReturnValueOnce(ZERO).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1).mockReturnValueOnce(0.123);
+            jest.spyOn(Date, 'now').mockReturnValue(MOCK_DATE_NOW_1);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(MOCK_RANDOM_VALUE_1);
 
             const players1 = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
-            jest.spyOn(Date, 'now').mockReturnValue(1234567891);
-            jest.spyOn(Math, 'random').mockReturnValueOnce(ZERO).mockReturnValueOnce(ZERO).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1).mockReturnValueOnce(RANDOM_THRESHOLD - 0.1).mockReturnValueOnce(0.456);
+            jest.spyOn(Date, 'now').mockReturnValue(MOCK_DATE_NOW_2);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(MOCK_RANDOM_VALUE_2);
             const players2 = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Defensive);
 
             const virtualPlayer1 = players1.find((p) => p.virtualPlayerType === VirtualPlayerType.Offensive);

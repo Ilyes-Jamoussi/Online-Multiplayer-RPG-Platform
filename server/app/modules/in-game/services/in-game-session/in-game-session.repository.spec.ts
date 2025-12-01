@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
@@ -45,7 +46,6 @@ describe('InGameSessionRepository', () => {
     const ZERO = 0;
     const ONE = 1;
     const TWO = 2;
-    const THREE = 3;
     const FOUR = 4;
 
     const createMockPosition = (overrides: Partial<Position> = {}): Position => ({
@@ -274,7 +274,11 @@ describe('InGameSessionRepository', () => {
 
             expect(session.flagData?.holderPlayerId).toBe(PLAYER_ID_2);
             expect(session.flagData?.position).toEqual({ x: NEW_X, y: NEW_Y });
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.FlagTransferred, { session, fromPlayerId: PLAYER_ID_1, toPlayerId: PLAYER_ID_2 });
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.FlagTransferred, {
+                session,
+                fromPlayerId: PLAYER_ID_1,
+                toPlayerId: PLAYER_ID_2,
+            });
         });
 
         it('should throw NotFoundException when flagData is missing', () => {
@@ -631,7 +635,12 @@ describe('InGameSessionRepository', () => {
         it('should reset player bonuses', () => {
             const session = createMockSession({
                 inGamePlayers: {
-                    [PLAYER_ID_1]: createMockPlayer({ id: PLAYER_ID_1, attackBonus: ATTACK_BONUS, defenseBonus: DEFENSE_BONUS, hasCombatBonus: true }),
+                    [PLAYER_ID_1]: createMockPlayer({
+                        id: PLAYER_ID_1,
+                        attackBonus: ATTACK_BONUS,
+                        defenseBonus: DEFENSE_BONUS,
+                        hasCombatBonus: true,
+                    }),
                 },
             });
             repository.save(session);

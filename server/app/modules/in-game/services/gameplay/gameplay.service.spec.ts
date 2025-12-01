@@ -1,32 +1,33 @@
-import { GameplayService } from './gameplay.service';
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
+import { ServerEvents } from '@app/enums/server-events.enum';
+import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
+import { Game } from '@app/modules/game-store/entities/game.entity';
+import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
+import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { ActionService } from '@app/modules/in-game/services/action/action.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { TrackingService } from '@app/modules/in-game/services/tracking/tracking.service';
-import { ServerEvents } from '@app/enums/server-events.enum';
-import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
+import { Avatar } from '@common/enums/avatar.enum';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
+import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
-import { Avatar } from '@common/enums/avatar.enum';
-import { Dice } from '@common/enums/dice.enum';
-import { MapSize } from '@common/enums/map-size.enum';
 import { FlagData } from '@common/interfaces/flag-data.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { StartPoint } from '@common/interfaces/start-point.interface';
-import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
-import { Tile } from '@app/modules/game-store/entities/tile.entity';
-import { Game } from '@app/modules/game-store/entities/game.entity';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Types } from 'mongoose';
+import { GameplayService } from './gameplay.service';
 
 const MOCK_SESSION_ID = 'session-123';
 const MOCK_PLAYER_ID_1 = 'player-1';
@@ -90,6 +91,7 @@ const createMockSession = (overrides: Partial<InGameSession> = {}): InGameSessio
         [MOCK_PLAYER_ID_2]: createMockPlayer({ id: MOCK_PLAYER_ID_2, name: MOCK_PLAYER_NAME_2 }),
     },
     teams: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention -- Team number must be numeric
         1: { number: 1, playerIds: [MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2] },
     },
     currentTurn: { turnNumber: 1, activePlayerId: MOCK_PLAYER_ID_1, hasUsedAction: false },

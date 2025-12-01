@@ -1,19 +1,19 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { VPPathfindingService } from './vp-pathfinding.service';
-import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { ESCAPE_MAX_DISTANCE, ESCAPE_NEARBY_RADIUS } from '@app/constants/virtual-player.constants';
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { PathNode } from '@app/interfaces/vp-pathfinding-internal.interface';
-import { EnemyPosition, PathResult } from '@app/interfaces/vp-pathfinding.interface';
+import { EnemyPosition } from '@app/interfaces/vp-pathfinding.interface';
+import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileCost, TileKind } from '@common/enums/tile.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
-import { MapSize } from '@common/enums/map-size.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Types } from 'mongoose';
+import { VPPathfindingService } from './vp-pathfinding.service';
 
 describe('VPPathfindingService', () => {
     let service: VPPathfindingService;
@@ -32,7 +32,6 @@ describe('VPPathfindingService', () => {
     const TWO = 2;
     const THREE = 3;
     const FOUR = 4;
-    const FIVE = 5;
 
     const createMockPosition = (overrides: Partial<Position> = {}): Position => ({
         x: POSITION_X_1,
@@ -116,6 +115,7 @@ describe('VPPathfindingService', () => {
             [VP_PLAYER_ID]: createMockPlayer({ id: VP_PLAYER_ID }),
         },
         teams: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention -- Team number must be numeric
             1: { number: ONE, playerIds: [VP_PLAYER_ID] },
         },
         currentTurn: { turnNumber: ONE, activePlayerId: VP_PLAYER_ID, hasUsedAction: false },
@@ -1066,7 +1066,11 @@ describe('VPPathfindingService', () => {
                 estimatedCostToGoal: ZERO,
                 totalCost: ONE,
                 parent: null,
-                actionToReach: { type: 'move' as const, orientation: Orientation.N, position: createMockPosition({ x: POSITION_X_1, y: POSITION_Y_1 }) },
+                actionToReach: {
+                    type: 'move' as const,
+                    orientation: Orientation.N,
+                    position: createMockPosition({ x: POSITION_X_1, y: POSITION_Y_1 }),
+                },
                 isOnBoat: false,
                 actionsUsed: ZERO,
             };

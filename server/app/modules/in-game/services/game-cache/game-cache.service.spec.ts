@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { Game } from '@app/modules/game-store/entities/game.entity';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
@@ -29,13 +30,6 @@ const MOCK_Y_2 = 11;
 const MOCK_TELEPORT_CHANNEL = 1;
 const MOCK_TURN_COUNT = 2;
 const MOCK_DECREMENTED_TURN_COUNT = 1;
-const MOCK_OFFSET_X = 0;
-const MOCK_OFFSET_Y = 0;
-const MOCK_OFFSET_X_2 = 1;
-const MOCK_OFFSET_Y_2 = 1;
-const MOCK_INDEX = 155;
-const MOCK_TELEPORT_INDEX_A = 10;
-const MOCK_TELEPORT_INDEX_B = 20;
 const MOCK_TELEPORT_X_A = 0;
 const MOCK_TELEPORT_Y_A = 0;
 const MOCK_TELEPORT_X_B = 1;
@@ -125,7 +119,10 @@ const createMockGame = (overrides: Partial<Game> = {}): Game => {
     };
 };
 
-const createMockGameMapTiles = (size: number, tileAtPosition?: { x: number; y: number; tile: Tile & { playerId: string | null } }): (Tile & { playerId: string | null })[] => {
+const createMockGameMapTiles = (
+    size: number,
+    tileAtPosition?: { x: number; y: number; tile: Tile & { playerId: string | null } },
+): (Tile & { playerId: string | null })[] => {
     const tiles: (Tile & { playerId: string | null })[] = [];
     for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
@@ -290,8 +287,12 @@ describe('GameCacheService', () => {
 
             await service.fetchAndCacheGame(MOCK_SESSION_ID, MOCK_GAME_ID);
 
-            const gameMap = (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.get(MOCK_SESSION_ID);
-            expect((gameMap as { objects: Placeable[] }).objects.length).toBe(PlaceableFootprint[PlaceableKind.HEAL] * PlaceableFootprint[PlaceableKind.HEAL]);
+            const gameMap = (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.get(
+                MOCK_SESSION_ID,
+            );
+            expect((gameMap as { objects: Placeable[] }).objects.length).toBe(
+                PlaceableFootprint[PlaceableKind.HEAL] * PlaceableFootprint[PlaceableKind.HEAL],
+            );
         });
 
         it('should skip unplaced placeables', async () => {
@@ -918,7 +919,11 @@ describe('GameCacheService', () => {
 
             service.disablePlaceable(MOCK_SESSION_ID, position, MOCK_PLAYER_ID);
 
-            const disabledMap = (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.get(MOCK_SESSION_ID);
+            const disabledMap = (
+                service as unknown as {
+                    disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>>;
+                }
+            ).disabledPlaceables.get(MOCK_SESSION_ID);
             expect(disabledMap).toBeDefined();
             expect(mockEventEmitter.emit).toHaveBeenCalledWith(
                 ServerEvents.PlaceableDisabledUpdated,
@@ -943,7 +948,11 @@ describe('GameCacheService', () => {
 
             service.disablePlaceable(MOCK_SESSION_ID, position, MOCK_PLAYER_ID);
 
-            const disabledMap = (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.get(MOCK_SESSION_ID);
+            const disabledMap = (
+                service as unknown as {
+                    disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>>;
+                }
+            ).disabledPlaceables.get(MOCK_SESSION_ID);
             expect(disabledMap?.size).toBeGreaterThan(1);
         });
 
@@ -977,7 +986,9 @@ describe('GameCacheService', () => {
             (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
             const disabledMap = new Map<string, { playerId: string; turnCount: number }>();
             disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, { playerId: MOCK_PLAYER_ID, turnCount: MOCK_TURN_COUNT });
-            (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
+            (service as unknown as {
+                disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>>;
+            }).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
             const position: Position = { x: MOCK_X, y: MOCK_Y };
 
             const result = service.isPlaceableDisabled(MOCK_SESSION_ID, position);
@@ -1023,8 +1034,15 @@ describe('GameCacheService', () => {
             };
             (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
             const disabledMap = new Map<string, { playerId: string; turnCount: number }>();
-            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, { playerId: MOCK_PLAYER_ID, turnCount: 0 });
-            (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
+            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, {
+                playerId: MOCK_PLAYER_ID,
+                turnCount: 0,
+            });
+            (
+                service as unknown as {
+                    disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>>;
+                }
+            ).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
             const position: Position = { x: MOCK_X, y: MOCK_Y };
 
             const result = service.isPlaceableDisabled(MOCK_SESSION_ID, position);
@@ -1036,8 +1054,15 @@ describe('GameCacheService', () => {
     describe('decrementDisabledPlaceablesTurnCount', () => {
         it('should decrement turn count and emit event', () => {
             const disabledMap = new Map<string, { playerId: string; turnCount: number }>();
-            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, { playerId: MOCK_PLAYER_ID, turnCount: MOCK_TURN_COUNT });
-            (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
+            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, {
+                playerId: MOCK_PLAYER_ID,
+                turnCount: MOCK_TURN_COUNT,
+            });
+            (
+                service as unknown as {
+                    disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>>;
+                }
+            ).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
 
             service.decrementDisabledPlaceablesTurnCount(MOCK_SESSION_ID);
 
@@ -1054,8 +1079,15 @@ describe('GameCacheService', () => {
 
         it('should remove placeable when turnCount reaches 0', () => {
             const disabledMap = new Map<string, { playerId: string; turnCount: number }>();
-            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, { playerId: MOCK_PLAYER_ID, turnCount: 1 });
-            (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
+            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, {
+                playerId: MOCK_PLAYER_ID,
+                turnCount: 1,
+            });
+            (
+                service as unknown as {
+                    disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>>;
+                }
+            ).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
 
             service.decrementDisabledPlaceablesTurnCount(MOCK_SESSION_ID);
 
@@ -1072,9 +1104,19 @@ describe('GameCacheService', () => {
     describe('reenablePlaceablesForPlayer', () => {
         it('should reenable placeables for player', () => {
             const disabledMap = new Map<string, { playerId: string; turnCount: number }>();
-            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, { playerId: MOCK_PLAYER_ID, turnCount: MOCK_TURN_COUNT });
-            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X_2}-${MOCK_Y_2}`, { playerId: 'other-player', turnCount: MOCK_TURN_COUNT });
-            (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
+            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, {
+                playerId: MOCK_PLAYER_ID,
+                turnCount: MOCK_TURN_COUNT,
+            });
+            disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X_2}-${MOCK_Y_2}`, {
+                playerId: 'other-player',
+                turnCount: MOCK_TURN_COUNT,
+            });
+            (
+                service as unknown as {
+                    disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>>;
+                }
+            ).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
 
             service.reenablePlaceablesForPlayer(MOCK_SESSION_ID, MOCK_PLAYER_ID);
 
@@ -1224,14 +1266,31 @@ describe('GameCacheService', () => {
                 size: MapSize.MEDIUM,
             };
             (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
-            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
-            (service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.set(MOCK_SESSION_ID, new Map());
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(
+                MOCK_SESSION_ID,
+                gameMap,
+            );
+            (
+                service as unknown as {
+                    disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>>;
+                }
+            ).disabledPlaceables.set(MOCK_SESSION_ID, new Map());
 
             service.clearSessionGameCache(MOCK_SESSION_ID);
 
-            expect((service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.has(MOCK_SESSION_ID)).toBe(false);
-            expect((service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.has(MOCK_SESSION_ID)).toBe(false);
-            expect((service as unknown as { disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>> }).disabledPlaceables.has(MOCK_SESSION_ID)).toBe(false);
+            expect((service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.has(MOCK_SESSION_ID)).toBe(
+                false,
+            );
+            expect((service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.has(MOCK_SESSION_ID)).toBe(
+                false,
+            );
+            expect(
+                (
+                    service as unknown as {
+                        disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>>;
+                    }
+                ).disabledPlaceables.has(MOCK_SESSION_ID),
+            ).toBe(false);
         });
     });
 

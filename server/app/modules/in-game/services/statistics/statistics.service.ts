@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
 import { MILLISECONDS_PER_SECOND, PERCENTAGE_MULTIPLIER, SECONDS_PER_MINUTE, STATISTICS_DELETE_DELAY_MS } from '@app/constants/statistics.constants';
-import { GameStatisticsDto, PlayerStatisticsDto, GlobalStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
-import { TrackingService, GameTracker } from '@app/modules/in-game/services/tracking/tracking.service';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { TeleportedPayload } from '@app/modules/game-log/dto/game-log-payloads.dto';
+import { GameStatisticsDto, GlobalStatisticsDto, PlayerStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
+import { GameTracker, TrackingService } from '@app/modules/in-game/services/tracking/tracking.service';
 import { MapSize } from '@common/enums/map-size.enum';
+import { StoredStatistics } from '@common/interfaces/game-statistics.interface';
+import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { Player } from '@common/interfaces/player.interface';
-import { StoredStatistics } from '@common/interfaces/game-statistics.interface';
+import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -118,7 +118,9 @@ export class StatisticsService {
         }
 
         const doorsManipulatedPercentage =
-            trackingData?.totalDoors > 0 ? Math.round(((trackingData?.toggledDoors?.size || 0) / trackingData.totalDoors) * PERCENTAGE_MULTIPLIER) : 0;
+            trackingData?.totalDoors > 0
+                ? Math.round(((trackingData?.toggledDoors?.size || 0) / trackingData.totalDoors) * PERCENTAGE_MULTIPLIER)
+                : 0;
 
         const sanctuariesUsedPercentage =
             trackingData?.totalSanctuaries > 0

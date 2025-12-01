@@ -39,9 +39,7 @@ import { PlaceableDisabledUpdatedDto } from '@app/modules/in-game/dto/placeable-
 
 describe('InGameController', () => {
     let controller: InGameController;
-
-    const ZERO = 0;
-
+    
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             controllers: [InGameController],

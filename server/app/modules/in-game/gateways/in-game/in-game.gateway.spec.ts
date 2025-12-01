@@ -40,7 +40,6 @@ describe('InGameGateway', () => {
     const WINNER_ID = 'winner-123';
     const WINNER_NAME = 'Winner Player';
     const ZERO = 0;
-    const ONE = 1;
 
     const createMockSocket = (id: string = SOCKET_ID): jest.Mocked<Socket> => {
         return {

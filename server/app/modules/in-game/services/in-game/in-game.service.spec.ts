@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { Game } from '@app/modules/game-store/entities/game.entity';
 import { GameStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
 import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay.service';
@@ -33,7 +34,6 @@ const MOCK_PLAYER_NAME_2 = 'Player 2';
 const MOCK_X = 5;
 const MOCK_Y = 10;
 const MOCK_MAX_PLAYERS = 4;
-const MOCK_TEAM_COUNT = 2;
 const MOCK_TEAM_NUMBER_1 = 1;
 const MOCK_TEAM_NUMBER_2 = 2;
 const MOCK_TURN_NUMBER = 1;
@@ -113,7 +113,10 @@ const createMockWaitingRoomSession = (overrides: Partial<WaitingRoomSession> = {
     maxPlayers: MOCK_MAX_PLAYERS,
     mode: GameMode.CLASSIC,
     chatId: MOCK_CHAT_ID,
-    players: [createMockPlayer({ id: MOCK_PLAYER_ID_1 }), createMockPlayer({ id: MOCK_PLAYER_ID_2 })],
+    players: [
+        createMockPlayer({ id: MOCK_PLAYER_ID_1 }),
+        createMockPlayer({ id: MOCK_PLAYER_ID_2, name: MOCK_PLAYER_NAME_2 }),
+    ],
     avatarAssignments: [],
     isRoomLocked: false,
     ...overrides,
@@ -227,6 +230,7 @@ describe('InGameService', () => {
             const waitingSession = createMockWaitingRoomSession({ mode: GameMode.CLASSIC });
             const game = createMockGame();
             mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
             mockSessionRepository.save.mockImplementation(() => {});
 
             const result = await service.createInGameSession(waitingSession, GameMode.CLASSIC);
@@ -253,6 +257,7 @@ describe('InGameService', () => {
             const flagData = { position: { x: MOCK_X, y: MOCK_Y }, holderPlayerId: null };
             mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
             mockGameplayService.getInitialFlagData.mockReturnValue(flagData);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
             mockSessionRepository.save.mockImplementation(() => {});
             mockSessionRepository.findById.mockReturnValue(createMockInGameSession({ mode: GameMode.CTF }));
 
@@ -269,6 +274,7 @@ describe('InGameService', () => {
             const waitingSession = createMockWaitingRoomSession();
             const game = createMockGame();
             mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
             mockSessionRepository.save.mockImplementation(() => {});
 
             const result = await service.createInGameSession(waitingSession, GameMode.CLASSIC);
@@ -281,6 +287,7 @@ describe('InGameService', () => {
             const waitingSession = createMockWaitingRoomSession();
             const game = createMockGame();
             mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
             mockSessionRepository.save.mockImplementation(() => {});
 
             await service.createInGameSession(waitingSession, GameMode.CLASSIC);
@@ -293,6 +300,7 @@ describe('InGameService', () => {
             const waitingSession = createMockWaitingRoomSession({ players: [virtualPlayer] });
             const game = createMockGame();
             mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
             mockSessionRepository.save.mockImplementation(() => {});
             mockSessionRepository.findById.mockReturnValue(createMockInGameSession());
 
@@ -362,6 +370,7 @@ describe('InGameService', () => {
             const player = createMockPlayer({ id: MOCK_PLAYER_ID_1, isInGame: false });
             const session = createMockInGameSession({ mode: GameMode.CTF, inGamePlayers: { [MOCK_PLAYER_ID_1]: player } });
             mockSessionRepository.findById.mockReturnValue(session);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
             mockSessionRepository.updatePlayer.mockImplementation(() => {});
 
             service.joinInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
@@ -382,6 +391,7 @@ describe('InGameService', () => {
                 inGamePlayers: { [MOCK_PLAYER_ID_1]: { ...player1, isInGame: true }, [MOCK_PLAYER_ID_2]: player2 },
             });
             mockSessionRepository.findById.mockReturnValueOnce(session).mockReturnValueOnce(updatedSession).mockReturnValueOnce(updatedSession);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
             mockSessionRepository.updatePlayer.mockImplementation(() => {});
             mockTimerService.startFirstTurnWithTransition.mockReturnValue(updatedSession.currentTurn);
 
@@ -402,6 +412,7 @@ describe('InGameService', () => {
                 inGamePlayers: { [MOCK_PLAYER_ID_1]: { ...player1, isInGame: true }, [MOCK_PLAYER_ID_2]: player2 },
             });
             mockSessionRepository.findById.mockReturnValueOnce(session).mockReturnValueOnce(updatedSession).mockReturnValueOnce(updatedSession);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
             mockSessionRepository.updatePlayer.mockImplementation(() => {});
 
             service.joinInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
@@ -412,8 +423,12 @@ describe('InGameService', () => {
         it('should not start session when game already started', () => {
             const player = createMockPlayer({ id: MOCK_PLAYER_ID_1, isInGame: false });
             const session = createMockInGameSession({ isGameStarted: true, inGamePlayers: { [MOCK_PLAYER_ID_1]: player } });
-            const updatedSession = createMockInGameSession({ isGameStarted: true, inGamePlayers: { [MOCK_PLAYER_ID_1]: { ...player, isInGame: true } } });
+            const updatedSession = createMockInGameSession({
+                isGameStarted: true,
+                inGamePlayers: { [MOCK_PLAYER_ID_1]: { ...player, isInGame: true } },
+            });
             mockSessionRepository.findById.mockReturnValueOnce(session).mockReturnValueOnce(updatedSession).mockReturnValueOnce(updatedSession);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
             mockSessionRepository.updatePlayer.mockImplementation(() => {});
 
             service.joinInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
@@ -581,6 +596,7 @@ describe('InGameService', () => {
 
     describe('getAvailableActions', () => {
         it('should call gameplayService.getAvailableActions', () => {
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
             mockGameplayService.getAvailableActions.mockImplementation(() => {});
 
             service.getAvailableActions(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
@@ -672,7 +688,12 @@ describe('InGameService', () => {
 
             service.storeGameStatistics(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, MOCK_PLAYER_NAME_1);
 
-            expect(mockStatisticsService.calculateAndStoreGameStatistics).toHaveBeenCalledWith(session, MOCK_PLAYER_ID_1, MOCK_PLAYER_NAME_1, gameStartTime);
+            expect(mockStatisticsService.calculateAndStoreGameStatistics).toHaveBeenCalledWith(
+                session,
+                MOCK_PLAYER_ID_1,
+                MOCK_PLAYER_NAME_1,
+                gameStartTime,
+            );
         });
 
         it('should use current date when gameStartTime is undefined', () => {
@@ -685,7 +706,7 @@ describe('InGameService', () => {
             const afterCall = new Date();
             expect(mockStatisticsService.calculateAndStoreGameStatistics).toHaveBeenCalled();
             const callArgs = mockStatisticsService.calculateAndStoreGameStatistics.mock.calls[0];
-            const gameStartTime = callArgs[3] as Date;
+            const gameStartTime = callArgs[3];
             expect(gameStartTime.getTime()).toBeGreaterThanOrEqual(beforeCall.getTime());
             expect(gameStartTime.getTime()).toBeLessThanOrEqual(afterCall.getTime());
         });

@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { Test, TestingModule } from '@nestjs/testing';
 import { TrackingService } from './tracking.service';
 import { Position } from '@common/interfaces/position.interface';

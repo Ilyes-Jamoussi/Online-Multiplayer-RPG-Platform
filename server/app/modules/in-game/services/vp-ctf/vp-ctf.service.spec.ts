@@ -1,19 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { VPCTFService } from './vp-ctf.service';
-import { VPPathfindingService } from '@app/modules/in-game/services/vp-pathfinding/vp-pathfinding.service';
-import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { RETURN_FLAG_SEARCH_RADIUS } from '@app/constants/virtual-player.constants';
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { VPConfig } from '@app/interfaces/vp-config.interface';
 import { EvaluatedTarget, MapScanWithDistances, PointOfInterestWithPath } from '@app/interfaces/vp-gameplay.interface';
 import { PathResult } from '@app/interfaces/vp-pathfinding.interface';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { VPPathfindingService } from '@app/modules/in-game/services/vp-pathfinding/vp-pathfinding.service';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { FlagData } from '@common/interfaces/flag-data.interface';
 import { StartPoint } from '@common/interfaces/start-point.interface';
-import { GameMode } from '@common/enums/game-mode.enum';
-import { MapSize } from '@common/enums/map-size.enum';
+import { Test, TestingModule } from '@nestjs/testing';
+import { VPCTFService } from './vp-ctf.service';
 
 describe('VPCTFService', () => {
     let service: VPCTFService;
@@ -32,7 +31,6 @@ describe('VPCTFService', () => {
     const START_POINT_X = 0;
     const START_POINT_Y = 0;
     const MAP_SIZE = 15;
-    const RETURN_FLAG_PRIORITY = 200;
     const PATH_COST = 5;
     const ZERO = 0;
     const ONE = 1;
@@ -203,7 +201,14 @@ describe('VPCTFService', () => {
     describe('evaluateCTFObjectives', () => {
         it('should return false when flagData is missing', () => {
             const session = createMockSession({ flagData: undefined });
-            const pointsWithDistances: MapScanWithDistances = { enemies: [], healSanctuaries: [], fightSanctuaries: [], boats: [], flags: [], all: [] };
+            const pointsWithDistances: MapScanWithDistances = {
+                enemies: [],
+                healSanctuaries: [],
+                fightSanctuaries: [],
+                boats: [],
+                flags: [],
+                all: [],
+            };
             const results: EvaluatedTarget[] = [];
             const config = createMockVPConfig();
 
@@ -217,7 +222,14 @@ describe('VPCTFService', () => {
                 flagData: { position: createMockPosition(), holderPlayerId: null },
                 inGamePlayers: {},
             });
-            const pointsWithDistances: MapScanWithDistances = { enemies: [], healSanctuaries: [], fightSanctuaries: [], boats: [], flags: [], all: [] };
+            const pointsWithDistances: MapScanWithDistances = {
+                enemies: [],
+                healSanctuaries: [],
+                fightSanctuaries: [],
+                boats: [],
+                flags: [],
+                all: [],
+            };
             const results: EvaluatedTarget[] = [];
             const config = createMockVPConfig();
 
@@ -230,10 +242,19 @@ describe('VPCTFService', () => {
             const session = createMockSession({
                 flagData: { position: createMockPosition(), holderPlayerId: VP_PLAYER_ID },
             });
-            const pointsWithDistances: MapScanWithDistances = { enemies: [], healSanctuaries: [], fightSanctuaries: [], boats: [], flags: [], all: [] };
+            const pointsWithDistances: MapScanWithDistances = {
+                enemies: [],
+                healSanctuaries: [],
+                fightSanctuaries: [],
+                boats: [],
+                flags: [],
+                all: [],
+            };
             const results: EvaluatedTarget[] = [];
             const config = createMockVPConfig();
-            pathfindingService.findPath.mockReturnValue(createMockPathResult({ reachable: true, actions: [{ type: 'move', position: createMockPosition() }] }));
+            pathfindingService.findPath.mockReturnValue(
+                createMockPathResult({ reachable: true, actions: [{ type: 'move', position: createMockPosition() }] }),
+            );
 
             const result = service.evaluateCTFObjectives(session, VP_PLAYER_ID, pointsWithDistances, results, config);
 
@@ -251,7 +272,14 @@ describe('VPCTFService', () => {
             const session = createMockSession({
                 flagData: { position: createMockPosition(), holderPlayerId: null },
             });
-            const pointsWithDistances: MapScanWithDistances = { enemies: [], healSanctuaries: [], fightSanctuaries: [], boats: [], flags: [flag], all: [] };
+            const pointsWithDistances: MapScanWithDistances = {
+                enemies: [],
+                healSanctuaries: [],
+                fightSanctuaries: [],
+                boats: [],
+                flags: [flag],
+                all: [],
+            };
             const results: EvaluatedTarget[] = [];
             const config = createMockVPConfig();
 
@@ -267,7 +295,14 @@ describe('VPCTFService', () => {
                     [VP_PLAYER_ID]: createMockPlayer({ id: VP_PLAYER_ID }),
                 },
             });
-            const pointsWithDistances: MapScanWithDistances = { enemies: [], healSanctuaries: [], fightSanctuaries: [], boats: [], flags: [], all: [] };
+            const pointsWithDistances: MapScanWithDistances = {
+                enemies: [],
+                healSanctuaries: [],
+                fightSanctuaries: [],
+                boats: [],
+                flags: [],
+                all: [],
+            };
             const results: EvaluatedTarget[] = [];
             const config = createMockVPConfig();
 
@@ -284,7 +319,14 @@ describe('VPCTFService', () => {
                     [FLAG_CARRIER_ID]: createMockPlayer({ id: FLAG_CARRIER_ID, teamNumber: TEAM_1 }),
                 },
             });
-            const pointsWithDistances: MapScanWithDistances = { enemies: [], healSanctuaries: [], fightSanctuaries: [], boats: [], flags: [], all: [] };
+            const pointsWithDistances: MapScanWithDistances = {
+                enemies: [],
+                healSanctuaries: [],
+                fightSanctuaries: [],
+                boats: [],
+                flags: [],
+                all: [],
+            };
             const results: EvaluatedTarget[] = [];
             const config = createMockVPConfig();
 
@@ -301,9 +343,27 @@ describe('VPCTFService', () => {
                     [FLAG_CARRIER_ID]: createMockPlayer({ id: FLAG_CARRIER_ID, teamNumber: TEAM_2, x: POSITION_X_2, y: POSITION_Y_2 }),
                 },
             });
-            const pointsWithDistances: MapScanWithDistances = { enemies: [], healSanctuaries: [], fightSanctuaries: [], boats: [], flags: [], all: [] };
+            const pointsWithDistances: MapScanWithDistances = {
+                enemies: [],
+                healSanctuaries: [],
+                fightSanctuaries: [],
+                boats: [],
+                flags: [],
+                all: [],
+            };
             const results: EvaluatedTarget[] = [];
-            const config = createMockVPConfig({ flag: { chaseFlagCarrierPriority: 100, guardStartPointPriority: ZERO, chaseFlagCarrierPenaltyPerTile: TWO, guardStartPointPenaltyPerTile: ONE, chaseFlagCarrierBonus: 10, guardStartPointBonus: 5, maxChaseFlagCarrierDistance: 12, maxGuardStartPointDistance: 10 } });
+            const config = createMockVPConfig({
+                flag: {
+                    chaseFlagCarrierPriority: 100,
+                    guardStartPointPriority: ZERO,
+                    chaseFlagCarrierPenaltyPerTile: TWO,
+                    guardStartPointPenaltyPerTile: ONE,
+                    chaseFlagCarrierBonus: 10,
+                    guardStartPointBonus: 5,
+                    maxChaseFlagCarrierDistance: 12,
+                    maxGuardStartPointDistance: 10,
+                },
+            });
             pathfindingService.findPath.mockReturnValue(createMockPathResult());
 
             const result = service.evaluateCTFObjectives(session, VP_PLAYER_ID, pointsWithDistances, results, config);
@@ -322,9 +382,27 @@ describe('VPCTFService', () => {
                     createMockStartPoint({ playerId: FLAG_CARRIER_ID }),
                 ],
             });
-            const pointsWithDistances: MapScanWithDistances = { enemies: [], healSanctuaries: [], fightSanctuaries: [], boats: [], flags: [], all: [] };
+            const pointsWithDistances: MapScanWithDistances = {
+                enemies: [],
+                healSanctuaries: [],
+                fightSanctuaries: [],
+                boats: [],
+                flags: [],
+                all: [],
+            };
             const results: EvaluatedTarget[] = [];
-            const config = createMockVPConfig({ flag: { chaseFlagCarrierPriority: ZERO, guardStartPointPriority: 80, chaseFlagCarrierPenaltyPerTile: TWO, guardStartPointPenaltyPerTile: ONE, chaseFlagCarrierBonus: 10, guardStartPointBonus: 5, maxChaseFlagCarrierDistance: 12, maxGuardStartPointDistance: 10 } });
+            const config = createMockVPConfig({
+                flag: {
+                    chaseFlagCarrierPriority: ZERO,
+                    guardStartPointPriority: 80,
+                    chaseFlagCarrierPenaltyPerTile: TWO,
+                    guardStartPointPenaltyPerTile: ONE,
+                    chaseFlagCarrierBonus: 10,
+                    guardStartPointBonus: 5,
+                    maxChaseFlagCarrierDistance: 12,
+                    maxGuardStartPointDistance: 10,
+                },
+            });
             pathfindingService.findPath.mockReturnValue(createMockPathResult());
 
             const result = service.evaluateCTFObjectives(session, VP_PLAYER_ID, pointsWithDistances, results, config);
@@ -437,9 +515,11 @@ describe('VPCTFService', () => {
         it('should find closest reachable path towards target', () => {
             const session = createMockSession();
             const target = createMockPosition({ x: POSITION_X_2, y: POSITION_Y_2 });
-            pathfindingService.findPath.mockReturnValue(createMockPathResult({ reachable: true, actions: [{ type: 'move', position: createMockPosition() }] }));
+            pathfindingService.findPath.mockReturnValue(
+                createMockPathResult({ reachable: true, actions: [{ type: 'move', position: createMockPosition() }] }),
+            );
 
-            const result = service['findClosestReachableTowards'](session, VP_PLAYER_ID, target);
+            service['findClosestReachableTowards'](session, VP_PLAYER_ID, target);
 
             expect(pathfindingService.findPath).toHaveBeenCalled();
         });
@@ -542,7 +622,18 @@ describe('VPCTFService', () => {
             const session = createMockSession();
             const flagCarrier = createMockPlayer({ id: FLAG_CARRIER_ID, teamNumber: TEAM_2 });
             const results: EvaluatedTarget[] = [];
-            const config = createMockVPConfig({ flag: { chaseFlagCarrierPriority: 100, guardStartPointPriority: ZERO, chaseFlagCarrierPenaltyPerTile: TWO, guardStartPointPenaltyPerTile: ONE, chaseFlagCarrierBonus: 10, guardStartPointBonus: 5, maxChaseFlagCarrierDistance: 5, maxGuardStartPointDistance: 10 } });
+            const config = createMockVPConfig({
+                flag: {
+                    chaseFlagCarrierPriority: 100,
+                    guardStartPointPriority: ZERO,
+                    chaseFlagCarrierPenaltyPerTile: TWO,
+                    guardStartPointPenaltyPerTile: ONE,
+                    chaseFlagCarrierBonus: 10,
+                    guardStartPointBonus: 5,
+                    maxChaseFlagCarrierDistance: 5,
+                    maxGuardStartPointDistance: 10,
+                },
+            });
             pathfindingService.findPath.mockReturnValue(createMockPathResult({ reachable: true, totalCost: 10 }));
 
             service['evaluateFlagCarrier'](session, VP_PLAYER_ID, flagCarrier, results, config);
@@ -601,7 +692,18 @@ describe('VPCTFService', () => {
             });
             const flagCarrier = createMockPlayer({ id: FLAG_CARRIER_ID, teamNumber: TEAM_2 });
             const results: EvaluatedTarget[] = [];
-            const config = createMockVPConfig({ flag: { chaseFlagCarrierPriority: ZERO, guardStartPointPriority: 80, chaseFlagCarrierPenaltyPerTile: TWO, guardStartPointPenaltyPerTile: ONE, chaseFlagCarrierBonus: 10, guardStartPointBonus: 5, maxChaseFlagCarrierDistance: 12, maxGuardStartPointDistance: 5 } });
+            const config = createMockVPConfig({
+                flag: {
+                    chaseFlagCarrierPriority: ZERO,
+                    guardStartPointPriority: 80,
+                    chaseFlagCarrierPenaltyPerTile: TWO,
+                    guardStartPointPenaltyPerTile: ONE,
+                    chaseFlagCarrierBonus: 10,
+                    guardStartPointBonus: 5,
+                    maxChaseFlagCarrierDistance: 12,
+                    maxGuardStartPointDistance: 5,
+                },
+            });
             pathfindingService.findPath.mockReturnValue(createMockPathResult({ reachable: true, totalCost: 10 }));
 
             service['evaluateGuardPoint'](session, VP_PLAYER_ID, flagCarrier, results, config);

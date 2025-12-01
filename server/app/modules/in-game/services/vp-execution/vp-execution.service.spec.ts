@@ -1,19 +1,20 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { VPExecutionService } from './vp-execution.service';
-import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay.service';
-import { VPGameplayService } from '@app/modules/in-game/services/vp-gameplay/vp-gameplay.service';
-import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
-import { ActionService } from '@app/modules/in-game/services/action/action.service';
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { VIRTUAL_PLAYER_ACTION_DELAY_MS, VIRTUAL_PLAYER_MOVEMENT_DELAY_MS } from '@app/constants/virtual-player.constants';
 import { EvaluatedTarget, VPDecision } from '@app/interfaces/vp-gameplay.interface';
 import { PathAction, PathResult } from '@app/interfaces/vp-pathfinding.interface';
-import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
-import { Orientation } from '@common/enums/orientation.enum';
-import { Player } from '@common/interfaces/player.interface';
-import { InGameSession } from '@common/interfaces/session.interface';
-import { Position } from '@common/interfaces/position.interface';
+import { ActionService } from '@app/modules/in-game/services/action/action.service';
+import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay.service';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { VPGameplayService } from '@app/modules/in-game/services/vp-gameplay/vp-gameplay.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { Orientation } from '@common/enums/orientation.enum';
+import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
+import { Player } from '@common/interfaces/player.interface';
+import { Position } from '@common/interfaces/position.interface';
+import { InGameSession } from '@common/interfaces/session.interface';
+import { Test, TestingModule } from '@nestjs/testing';
+import { VPExecutionService } from './vp-execution.service';
 
 describe('VPExecutionService', () => {
     let service: VPExecutionService;
@@ -33,7 +34,6 @@ describe('VPExecutionService', () => {
     const TURN_NUMBER = 1;
     const ZERO = 0;
     const ONE = 1;
-    const TWO = 2;
     const FOUR = 4;
 
     const createMockPosition = (overrides: Partial<Position> = {}): Position => ({
@@ -100,13 +100,6 @@ describe('VPExecutionService', () => {
         ...overrides,
     });
 
-    const createMockVPDecision = (overrides: Partial<VPDecision> = {}): VPDecision => ({
-        target: createMockEvaluatedTarget(),
-        allEvaluatedTargets: [],
-        useDoubleAction: false,
-        ...overrides,
-    });
-
     const createMockSession = (overrides: Partial<InGameSession> = {}): InGameSession => ({
         id: SESSION_ID,
         inGameId: 'in-game-123',
@@ -119,6 +112,7 @@ describe('VPExecutionService', () => {
             [PLAYER_ID]: createMockPlayer({ id: PLAYER_ID }),
         },
         teams: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention -- Team number must be numeric
             1: { number: ONE, playerIds: [PLAYER_ID] },
         },
         currentTurn: { turnNumber: TURN_NUMBER, activePlayerId: PLAYER_ID, hasUsedAction: false },

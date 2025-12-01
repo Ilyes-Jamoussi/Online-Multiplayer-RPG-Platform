@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { GameLogService } from '@app/modules/game-log/services/game-log.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
@@ -10,10 +11,13 @@ import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
+import { generateGameLogId } from '@common/utils/game-log.util';
 import { Test, TestingModule } from '@nestjs/testing';
 import 'reflect-metadata';
 import { Server } from 'socket.io';
 import { GameLogGateway } from './game-log.gateway';
+
+jest.mock('@common/utils/game-log.util');
 
 const MOCK_SESSION_ID = 'session-123';
 const MOCK_CHAT_ID = 'chat-123';
@@ -32,8 +36,6 @@ const MOCK_DEFENSE_BONUS = 1;
 const MOCK_TOTAL_DEFENSE = 10;
 const MOCK_DAMAGE = 6;
 const MOCK_ADDED_HEALTH = 5;
-const MOCK_ADDED_DEFENSE = 3;
-const MOCK_ADDED_ATTACK = 2;
 const MOCK_ORIGIN_X = 1;
 const MOCK_ORIGIN_Y = 2;
 const MOCK_DESTINATION_X = 3;
@@ -41,6 +43,7 @@ const MOCK_DESTINATION_Y = 4;
 const MOCK_BOAT_ID = 'boat-123';
 const MOCK_TIMESTAMP = '2024-01-01T00:00:00.000Z';
 const MOCK_LOG_ID = 'log-123';
+const MOCK_DATE_NOW = 1234567890;
 
 const createMockPlayer = (overrides: Partial<Player> = {}): Player => ({
     id: MOCK_PLAYER_ID_1,
@@ -88,6 +91,7 @@ const createMockSession = (overrides: Partial<InGameSession> = {}): InGameSessio
         [MOCK_PLAYER_ID_2]: createMockPlayer({ id: MOCK_PLAYER_ID_2, name: MOCK_PLAYER_NAME_2 }),
     },
     teams: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention -- Team number must be numeric
         1: { number: 1, playerIds: [MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2] },
     },
     currentTurn: { turnNumber: 1, activePlayerId: MOCK_PLAYER_ID_1, hasUsedAction: false },
@@ -175,10 +179,15 @@ describe('GameLogGateway', () => {
         mockInGameService = module.get(InGameService);
 
         (gateway as unknown as { server: jest.Mocked<Server> }).server = mockServer;
+
+        jest.spyOn(Date, 'now').mockReturnValue(MOCK_DATE_NOW);
+        jest.spyOn(Date.prototype, 'toISOString').mockReturnValue(MOCK_TIMESTAMP);
+        (generateGameLogId as jest.Mock).mockReturnValue(MOCK_LOG_ID);
     });
 
     afterEach(() => {
         jest.clearAllMocks();
+        jest.restoreAllMocks();
     });
 
     it('should be defined', () => {
@@ -190,13 +199,6 @@ describe('GameLogGateway', () => {
             const session = createMockSession();
             const entry = createMockLogEntry();
             mockGameLogService.createTurnStartEntry.mockReturnValue(entry);
-
-            const originalDate = Date;
-            const originalGenerateId = require('@common/utils/game-log.util').generateGameLogId;
-            global.Date = jest.fn(() => ({
-                toISOString: jest.fn().mockReturnValue(MOCK_TIMESTAMP),
-            })) as unknown as DateConstructor;
-            jest.spyOn(require('@common/utils/game-log.util'), 'generateGameLogId').mockReturnValue(MOCK_LOG_ID);
 
             gateway.handleTurnStarted({ session });
 
@@ -213,9 +215,6 @@ describe('GameLogGateway', () => {
                     }),
                 }),
             );
-
-            global.Date = originalDate;
-            jest.restoreAllMocks();
         });
     });
 
@@ -226,13 +225,6 @@ describe('GameLogGateway', () => {
             mockRepository.findById.mockReturnValue(session);
             mockGameLogService.createCombatStartEntry.mockReturnValue(entry);
 
-            const originalDate = Date;
-            const originalGenerateId = require('@common/utils/game-log.util').generateGameLogId;
-            global.Date = jest.fn(() => ({
-                toISOString: jest.fn().mockReturnValue(MOCK_TIMESTAMP),
-            })) as unknown as DateConstructor;
-            jest.spyOn(require('@common/utils/game-log.util'), 'generateGameLogId').mockReturnValue(MOCK_LOG_ID);
-
             gateway.handleCombatStarted({
                 sessionId: MOCK_SESSION_ID,
                 attackerId: MOCK_PLAYER_ID_1,
@@ -242,9 +234,6 @@ describe('GameLogGateway', () => {
             expect(mockRepository.findById).toHaveBeenCalledWith(MOCK_SESSION_ID);
             expect(mockGameLogService.createCombatStartEntry).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2);
             expect(mockServer.to).toHaveBeenCalledWith(MOCK_CHAT_ID);
-
-            global.Date = originalDate;
-            jest.restoreAllMocks();
         });
 
         it('should not handle combat started event if session not found', () => {
@@ -275,7 +264,12 @@ describe('GameLogGateway', () => {
             });
 
             expect(mockRepository.findById).toHaveBeenCalledWith(MOCK_SESSION_ID);
-            expect(mockGameLogService.createCombatEndEntry).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2, MOCK_PLAYER_ID_1);
+            expect(mockGameLogService.createCombatEndEntry).toHaveBeenCalledWith(
+                MOCK_SESSION_ID,
+                MOCK_PLAYER_ID_1,
+                MOCK_PLAYER_ID_2,
+                MOCK_PLAYER_ID_1,
+            );
             expect(mockServer.to).toHaveBeenCalledWith(MOCK_CHAT_ID);
         });
 

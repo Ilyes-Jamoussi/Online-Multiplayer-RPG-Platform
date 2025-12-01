@@ -1,12 +1,14 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
+import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
-import { MovementService } from './movement.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
-import { TileCost, TileKind } from '@common/enums/tile.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -14,9 +16,8 @@ import { StartPoint } from '@common/interfaces/start-point.interface';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Tile } from '@app/modules/game-store/entities/tile.entity';
-import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
 import { Types } from 'mongoose';
+import { MovementService } from './movement.service';
 
 describe('MovementService', () => {
     let service: MovementService;
@@ -40,8 +41,6 @@ describe('MovementService', () => {
     const MAP_SIZE = 15;
     const ZERO = 0;
     const ONE = 1;
-    const TWO = 2;
-    const THREE = 3;
 
     const createMockPosition = (overrides: Partial<Position> = {}): Position => ({
         x: POSITION_X,
@@ -362,7 +361,11 @@ describe('MovementService', () => {
 
             service.movePlayer(session, PLAYER_ID, Orientation.E);
 
-            expect(gameCache.updatePlaceablePosition).toHaveBeenCalledWith(SESSION_ID, { x: POSITION_X, y: POSITION_Y }, { x: NEXT_X, y: POSITION_Y });
+            expect(gameCache.updatePlaceablePosition).toHaveBeenCalledWith(
+                SESSION_ID,
+                { x: POSITION_X, y: POSITION_Y },
+                { x: NEXT_X, y: POSITION_Y },
+            );
         });
 
         it('should handle CTF mode when player has flag', () => {
@@ -691,7 +694,9 @@ describe('MovementService', () => {
             const session = createMockSession();
             gameCache.getMapSize.mockReturnValue(MAP_SIZE);
             gameCache.getPlaceableAtPosition.mockReturnValue(null);
-            gameCache.getTileAtPosition.mockReturnValueOnce(createMockTile()).mockReturnValueOnce(createMockTile({ kind: TileKind.DOOR, open: true }));
+            gameCache.getTileAtPosition
+                .mockReturnValueOnce(createMockTile())
+                .mockReturnValueOnce(createMockTile({ kind: TileKind.DOOR, open: true }));
             gameCache.getTileOccupant.mockReturnValue(null);
 
             const result = service.calculateReachableTiles(session, PLAYER_ID);
@@ -703,7 +708,9 @@ describe('MovementService', () => {
             const session = createMockSession();
             gameCache.getMapSize.mockReturnValue(MAP_SIZE);
             gameCache.getPlaceableAtPosition.mockReturnValue(null);
-            gameCache.getTileAtPosition.mockReturnValueOnce(createMockTile()).mockReturnValueOnce(createMockTile({ kind: TileKind.DOOR, open: false }));
+            gameCache.getTileAtPosition
+                .mockReturnValueOnce(createMockTile())
+                .mockReturnValueOnce(createMockTile({ kind: TileKind.DOOR, open: false }));
             gameCache.getTileOccupant.mockReturnValue(null);
 
             const result = service.calculateReachableTiles(session, PLAYER_ID);

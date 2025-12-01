@@ -1,26 +1,26 @@
-import { CombatService } from './combat.service';
-import { COMBAT_WINS_TO_WIN_GAME } from '@app/constants/game-config.constants';
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { DiceSides } from '@app/enums/dice-sides.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { Tile } from '@app/modules/game-store/entities/tile.entity';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
 import { TrackingService } from '@app/modules/in-game/services/tracking/tracking.service';
+import { Avatar } from '@common/enums/avatar.enum';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { TileCombatEffect, TileKind } from '@common/enums/tile.enum';
 import { CombatState } from '@common/interfaces/combat.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { Tile } from '@app/modules/game-store/entities/tile.entity';
-import { Avatar } from '@common/enums/avatar.enum';
-import { MapSize } from '@common/enums/map-size.enum';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
+import { CombatService } from './combat.service';
 
 const MOCK_SESSION_ID = 'session-123';
 const MOCK_PLAYER_ID_1 = 'player-1';
@@ -33,14 +33,10 @@ const MOCK_X_2 = 6;
 const MOCK_Y_2 = 11;
 const MOCK_BASE_ATTACK = 10;
 const MOCK_BASE_DEFENSE = 5;
-const MOCK_ATTACK_BONUS = 2;
-const MOCK_DEFENSE_BONUS = 1;
-const MOCK_DICE_ROLL = 4;
 const MOCK_POSTURE_BONUS = 2;
-const MOCK_TILE_EFFECT = 1;
 const MOCK_HEALTH = 100;
-const MOCK_DAMAGE = 5;
 const MOCK_COMBAT_WINS = 3;
+const MOCK_RANDOM_VALUE = 0.5;
 
 const createMockPlayer = (overrides: Partial<Player> = {}): Player => ({
     id: MOCK_PLAYER_ID_1,
@@ -89,6 +85,7 @@ const createMockSession = (overrides: Partial<InGameSession> = {}): InGameSessio
         [MOCK_PLAYER_ID_2]: createMockPlayer({ id: MOCK_PLAYER_ID_2, name: MOCK_PLAYER_NAME_2 }),
     },
     teams: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention -- Team number must be numeric
         1: { number: 1, playerIds: [MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2] },
     },
     currentTurn: { turnNumber: 1, activePlayerId: MOCK_PLAYER_ID_1, hasUsedAction: false },
@@ -96,13 +93,6 @@ const createMockSession = (overrides: Partial<InGameSession> = {}): InGameSessio
     mapSize: MapSize.MEDIUM,
     turnOrder: [MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2],
     playerCount: 2,
-    ...overrides,
-});
-
-const createMockTile = (overrides: Partial<Tile> = {}): Tile => ({
-    kind: TileKind.BASE,
-    x: MOCK_X,
-    y: MOCK_Y,
     ...overrides,
 });
 
@@ -121,7 +111,6 @@ describe('CombatService', () => {
     let mockRepository: jest.Mocked<InGameSessionRepository>;
     let mockMovementService: jest.Mocked<MovementService>;
     let mockGameCacheService: jest.Mocked<GameCacheService>;
-    let mockTrackingService: jest.Mocked<TrackingService>;
 
     beforeEach(async () => {
         const mockEventEmitterValue = {
@@ -198,7 +187,6 @@ describe('CombatService', () => {
         mockRepository = module.get(InGameSessionRepository);
         mockMovementService = module.get(MovementService);
         mockGameCacheService = module.get(GameCacheService);
-        mockTrackingService = module.get(TrackingService);
     });
 
     afterEach(() => {
@@ -459,7 +447,7 @@ describe('CombatService', () => {
             mockRepository.findById.mockReturnValue(session);
             mockRepository.decreasePlayerHealth.mockReturnValue(MOCK_HEALTH);
             const originalRandom = Math.random;
-            Math.random = jest.fn().mockReturnValue(0.5);
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
             service['handleTimerLoop']({ sessionId: MOCK_SESSION_ID });
 
@@ -537,7 +525,7 @@ describe('CombatService', () => {
             mockRepository.findById.mockReturnValue(session);
             mockRepository.decreasePlayerHealth.mockReturnValue(MOCK_HEALTH);
             const originalRandom = Math.random;
-            Math.random = jest.fn().mockReturnValue(0.5);
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
             service['combatRound'](MOCK_SESSION_ID);
 
@@ -563,7 +551,7 @@ describe('CombatService', () => {
             mockRepository.decreasePlayerHealth.mockReturnValueOnce(0).mockReturnValueOnce(MOCK_HEALTH);
             mockRepository.playerHasFlag.mockReturnValue(false);
             const originalRandom = Math.random;
-            Math.random = jest.fn().mockReturnValue(0.5);
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
             service['combatRound'](MOCK_SESSION_ID);
 
@@ -591,7 +579,7 @@ describe('CombatService', () => {
             mockRepository.decreasePlayerHealth.mockReturnValueOnce(MOCK_HEALTH).mockReturnValueOnce(0);
             mockRepository.playerHasFlag.mockReturnValue(false);
             const originalRandom = Math.random;
-            Math.random = jest.fn().mockReturnValue(0.5);
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
             service['combatRound'](MOCK_SESSION_ID);
 
@@ -617,7 +605,7 @@ describe('CombatService', () => {
             mockRepository.decreasePlayerHealth.mockReturnValue(0);
             mockRepository.playerHasFlag.mockReturnValue(false);
             const originalRandom = Math.random;
-            Math.random = jest.fn().mockReturnValue(0.5);
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
             service['combatRound'](MOCK_SESSION_ID);
 
@@ -648,7 +636,7 @@ describe('CombatService', () => {
             mockRepository.decreasePlayerHealth.mockReturnValueOnce(0).mockReturnValueOnce(MOCK_HEALTH);
             mockRepository.playerHasFlag.mockReturnValue(true);
             const originalRandom = Math.random;
-            Math.random = jest.fn().mockReturnValue(0.5);
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
             service['combatRound'](MOCK_SESSION_ID);
 
@@ -704,7 +692,7 @@ describe('CombatService', () => {
         it('should return early when combat not found', () => {
             service['resetCombatPosture'](MOCK_SESSION_ID);
 
-        expect(true).toBe(true);
+            expect(true).toBe(true);
         });
     });
 
@@ -768,7 +756,7 @@ describe('CombatService', () => {
             const session = createMockSession();
             mockRepository.findById.mockReturnValue(session);
             const originalRandom = Math.random;
-            Math.random = jest.fn().mockReturnValue(0.5);
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
             const result = service['getPlayerDefense'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, CombatPosture.DEFENSIVE, TileCombatEffect.BASE);
 
@@ -827,7 +815,7 @@ describe('CombatService', () => {
             const session = createMockSession();
             mockRepository.findById.mockReturnValue(session);
             const originalRandom = Math.random;
-            Math.random = jest.fn().mockReturnValue(0.5);
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
             const result = service['getPlayerAttack'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, CombatPosture.OFFENSIVE, TileCombatEffect.BASE);
 
@@ -886,7 +874,7 @@ describe('CombatService', () => {
             const session = createMockSession({ isAdminModeActive: false });
             mockRepository.findById.mockReturnValue(session);
             const originalRandom = Math.random;
-            Math.random = jest.fn().mockReturnValue(0.5);
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
             const result = service['rollDice'](Dice.D6, MOCK_SESSION_ID, true);
 

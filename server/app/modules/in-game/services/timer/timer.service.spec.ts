@@ -1,13 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { TimerService } from './timer.service';
-import { TurnTimerService } from '@app/modules/in-game/services/turn-timer/turn-timer.service';
-import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
 import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
+import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
+import { TurnTimerService } from '@app/modules/in-game/services/turn-timer/turn-timer.service';
 import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
-import { InGameSession } from '@common/interfaces/session.interface';
-import { TurnState } from '@common/interfaces/turn-state.interface';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { InGameSession } from '@common/interfaces/session.interface';
+import { TurnState } from '@common/interfaces/turn-state.interface';
+import { Test, TestingModule } from '@nestjs/testing';
+import { TimerService } from './timer.service';
 
 describe('TimerService', () => {
     let service: TimerService;
@@ -24,7 +24,6 @@ describe('TimerService', () => {
     const TURN_NUMBER = 5;
     const ZERO = 0;
     const ONE = 1;
-    const TWO = 2;
     const FOUR = 4;
 
     const createMockTurnState = (overrides: Partial<TurnState> = {}): TurnState => ({
@@ -44,6 +43,7 @@ describe('TimerService', () => {
         isGameStarted: true,
         inGamePlayers: {},
         teams: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention -- Team number must be numeric
             1: { number: ONE, playerIds: [] },
         },
         currentTurn: createMockTurnState(),
@@ -169,7 +169,13 @@ describe('TimerService', () => {
 
             service.startCombatTimer(session, ATTACKER_ID, TARGET_ID, ATTACKER_TILE_EFFECT, TARGET_TILE_EFFECT);
 
-            expect(combatTimerService.startCombatTimer).toHaveBeenCalledWith(session, ATTACKER_ID, TARGET_ID, ATTACKER_TILE_EFFECT, TARGET_TILE_EFFECT);
+            expect(combatTimerService.startCombatTimer).toHaveBeenCalledWith(
+                session,
+                ATTACKER_ID,
+                TARGET_ID,
+                ATTACKER_TILE_EFFECT,
+                TARGET_TILE_EFFECT,
+            );
         });
     });
 
@@ -209,7 +215,13 @@ describe('TimerService', () => {
             service.startCombat(session, ATTACKER_ID, TARGET_ID, ATTACKER_TILE_EFFECT, TARGET_TILE_EFFECT);
 
             expect(turnTimerService.pauseTurnTimer).toHaveBeenCalledWith(SESSION_ID);
-            expect(combatTimerService.startCombatTimer).toHaveBeenCalledWith(session, ATTACKER_ID, TARGET_ID, ATTACKER_TILE_EFFECT, TARGET_TILE_EFFECT);
+            expect(combatTimerService.startCombatTimer).toHaveBeenCalledWith(
+                session,
+                ATTACKER_ID,
+                TARGET_ID,
+                ATTACKER_TILE_EFFECT,
+                TARGET_TILE_EFFECT,
+            );
         });
     });
 

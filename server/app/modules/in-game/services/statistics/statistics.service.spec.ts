@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { MILLISECONDS_PER_SECOND, PERCENTAGE_MULTIPLIER, SECONDS_PER_MINUTE, STATISTICS_DELETE_DELAY_MS } from '@app/constants/statistics.constants';
 import { TeleportedPayload } from '@app/modules/game-log/dto/game-log-payloads.dto';
 import { GameTracker, TrackingService } from '@app/modules/in-game/services/tracking/tracking.service';
@@ -41,9 +42,7 @@ describe('StatisticsService', () => {
     const COMBAT_LOSSES = 2;
     const GAME_START_TIME_MS = 1000000;
     const GAME_END_TIME_MS = 2000000;
-    const GAME_DURATION_MS = GAME_END_TIME_MS - GAME_START_TIME_MS;
     const MINUTES = 16;
-    const SECONDS = 40;
     const EXPECTED_DURATION = '16:40';
     const ZERO = 0;
     const ONE = 1;
@@ -52,8 +51,6 @@ describe('StatisticsService', () => {
     const FOUR = 4;
     const FIVE = 5;
     const TEN = 10;
-    const FIFTEEN = 15;
-    const TWENTY = 20;
     const THIRTY = 30;
     const HUNDRED = 100;
 
@@ -109,6 +106,7 @@ describe('StatisticsService', () => {
             [PLAYER_ID_2]: createMockPlayer({ id: PLAYER_ID_2, name: PLAYER_NAME_2 }),
         },
         teams: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention -- Team number must be numeric
             1: { number: ONE, playerIds: [PLAYER_ID_1, PLAYER_ID_2] },
         },
         currentTurn: { turnNumber: TURN_NUMBER, activePlayerId: PLAYER_ID_1, hasUsedAction: false },
@@ -196,7 +194,13 @@ describe('StatisticsService', () => {
         it('should call trackingService.initializeTracking with correct parameters', () => {
             service.initializeTracking(SESSION_ID, MAP_SIZE, TOTAL_DOORS, TOTAL_SANCTUARIES, TOTAL_TELEPORT_TILES);
 
-            expect(trackingService.initializeTracking).toHaveBeenCalledWith(SESSION_ID, MAP_SIZE, TOTAL_DOORS, TOTAL_SANCTUARIES, TOTAL_TELEPORT_TILES);
+            expect(trackingService.initializeTracking).toHaveBeenCalledWith(
+                SESSION_ID,
+                MAP_SIZE,
+                TOTAL_DOORS,
+                TOTAL_SANCTUARIES,
+                TOTAL_TELEPORT_TILES,
+            );
         });
     });
 
@@ -566,7 +570,8 @@ describe('StatisticsService', () => {
             const trackingData = createMockGameTracker();
             trackingService.getTrackingData.mockReturnValue(trackingData);
 
-            const singleDigitSecondsTime = GAME_START_TIME_MS + (MINUTES * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND) + (FIVE * MILLISECONDS_PER_SECOND);
+            const singleDigitSecondsTime =
+                GAME_START_TIME_MS + (MINUTES * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND) + (FIVE * MILLISECONDS_PER_SECOND);
             jest.spyOn(Date, 'now').mockReturnValue(singleDigitSecondsTime);
 
             const result = service.calculateAndStoreGameStatistics(session, WINNER_ID, WINNER_NAME, gameStartTime);

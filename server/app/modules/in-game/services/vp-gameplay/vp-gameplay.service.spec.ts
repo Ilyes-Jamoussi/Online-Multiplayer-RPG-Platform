@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { DEFENSIVE_VP_CONFIG, OFFENSIVE_VP_CONFIG } from '@app/constants/vp.config';
 import { EvaluatedTarget, PointOfInterestWithPath } from '@app/interfaces/vp-gameplay.interface';
 import { EscapePoint, PathResult } from '@app/interfaces/vp-pathfinding.interface';
@@ -377,7 +378,8 @@ describe('VPGameplayService', () => {
             gameCache.getGameMapForSession.mockReturnValue({ tiles: [], objects: [placeable], size: MapSize.MEDIUM });
             pathfindingService.findPath.mockReturnValue(createMockPathResult({ reachable: true, totalCost: THREE }));
             ctfService.evaluateCTFObjectives.mockReturnValue(false);
-            jest.spyOn(Math, 'random').mockReturnValue(0.3);
+            const MOCK_RANDOM_VALUE = 0.3;
+            jest.spyOn(Math, 'random').mockReturnValue(MOCK_RANDOM_VALUE);
 
             const result = service.makeDecision(session, VP_PLAYER_ID, VirtualPlayerType.Offensive);
 
@@ -820,7 +822,9 @@ describe('VPGameplayService', () => {
 
             const result = service.scanMapForPointsOfInterest(session, VP_PLAYER_ID);
 
-            expect(result.all.length).toBe(result.healSanctuaries.length + result.fightSanctuaries.length + result.boats.length + result.flags.length);
+            expect(result.all.length).toBe(
+                result.healSanctuaries.length + result.fightSanctuaries.length + result.boats.length + result.flags.length,
+            );
         });
     });
 
@@ -869,7 +873,11 @@ describe('VPGameplayService', () => {
             const fightPlaceable = createMockPlaceable({ kind: PlaceableKind.FIGHT });
             const boatPlaceable = createMockPlaceable({ kind: PlaceableKind.BOAT });
             const flagPlaceable = createMockPlaceable({ kind: PlaceableKind.FLAG });
-            gameCache.getGameMapForSession.mockReturnValue({ tiles: [], objects: [healPlaceable, fightPlaceable, boatPlaceable, flagPlaceable], size: MapSize.MEDIUM });
+            gameCache.getGameMapForSession.mockReturnValue({
+                tiles: [],
+                objects: [healPlaceable, fightPlaceable, boatPlaceable, flagPlaceable],
+                size: MapSize.MEDIUM,
+            });
             gameCache.getMapSize.mockReturnValue(MAP_SIZE);
             gameCache.getTileAtPosition.mockReturnValue({ kind: null, open: false, x: POSITION_X_1, y: POSITION_Y_1, playerId: null });
             gameCache.getTileOccupant.mockReturnValue(null);
