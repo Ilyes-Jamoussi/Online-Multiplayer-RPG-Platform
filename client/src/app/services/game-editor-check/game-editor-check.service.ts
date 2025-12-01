@@ -276,6 +276,10 @@ export class GameEditorCheckService {
         const problem: GameEditorIssue = { hasIssue: false };
         const channels = this.gameEditorStoreService.teleportChannels;
 
+        if (!channels || !Array.isArray(channels)) {
+            return problem;
+        }
+
         for (const channel of channels) {
             const hasEntryA = !!channel.tiles?.entryA;
             const hasEntryB = !!channel.tiles?.entryB;

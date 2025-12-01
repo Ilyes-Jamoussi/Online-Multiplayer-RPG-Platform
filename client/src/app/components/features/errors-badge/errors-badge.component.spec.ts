@@ -20,6 +20,7 @@ describe('ErrorsBadgeComponent', () => {
         [GameEditorIssuesEnum.FlagPlacement]: { hasIssue: true, message: 'Flag placement error' },
         [GameEditorIssuesEnum.NameValidation]: { hasIssue: false, message: '' },
         [GameEditorIssuesEnum.DescriptionValidation]: { hasIssue: false, message: '' },
+        [GameEditorIssuesEnum.TeleportChannels]: { hasIssue: false, message: '' },
     };
 
     beforeEach(async () => {
@@ -74,6 +75,7 @@ describe('ErrorsBadgeComponent', () => {
             [GameEditorIssuesEnum.FlagPlacement]: { hasIssue: false, message: '' },
             [GameEditorIssuesEnum.NameValidation]: { hasIssue: false, message: '' },
             [GameEditorIssuesEnum.DescriptionValidation]: { hasIssue: false, message: '' },
+            [GameEditorIssuesEnum.TeleportChannels]: { hasIssue: false, message: '' },
         };
         mockGameEditorCheckService.editorProblems.and.returnValue(noErrorsProblems);
 
@@ -112,6 +114,7 @@ describe('ErrorsBadgeComponent', () => {
             [GameEditorIssuesEnum.FlagPlacement]: { hasIssue: false, message: '' },
             [GameEditorIssuesEnum.NameValidation]: { hasIssue: false, message: '' },
             [GameEditorIssuesEnum.DescriptionValidation]: { hasIssue: false, message: '' },
+            [GameEditorIssuesEnum.TeleportChannels]: { hasIssue: false, message: '' },
         };
         mockGameEditorCheckService.editorProblems.and.returnValue(problemsWithNoMessage);
 

@@ -5,4 +5,3 @@ export function pickChangedProperties<T extends object>(current: T, initial: T):
     }
     return out;
 }
-
