@@ -1,12 +1,12 @@
 export enum PointOfInterestType {
     ENEMY = 'enemy',
-    FLAG_CARRIER = 'flagCarrier',
-    HEAL_SANCTUARY = 'healSanctuary',
-    FIGHT_SANCTUARY = 'fightSanctuary',
+    FLAGCARRIER = 'flagCarrier',
+    HEALSANCTUARY = 'healSanctuary',
+    FIGHTSANCTUARY = 'fightSanctuary',
     FLAG = 'flag',
     ESCAPE = 'escape',
-    RETURN_FLAG = 'returnFlag',
-    GUARD_POINT = 'guardPoint',
+    RETURNFLAG = 'returnFlag',
+    GUARDPOINT = 'guardPoint',
     BOAT = 'boat',
 }
 

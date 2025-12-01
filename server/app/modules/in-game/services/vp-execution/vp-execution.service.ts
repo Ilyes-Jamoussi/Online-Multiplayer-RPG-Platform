@@ -106,7 +106,7 @@ export class VPExecutionService {
     private canExecutePathAction(player: Player, action: PathAction): boolean {
         const isMoveAction = action.type === PathActionType.MOVE || action.type === PathActionType.TELEPORT;
         const isActionAction =
-            action.type === PathActionType.OPEN_DOOR || action.type === PathActionType.BOARD_BOAT || action.type === PathActionType.DISEMBARK_BOAT;
+            action.type === PathActionType.OPENDOOR || action.type === PathActionType.BOARDBOAT || action.type === PathActionType.DISEMBARKBOAT;
 
         if (isMoveAction && !player.speed && !player.boatSpeed) return false;
         if (isActionAction && !player.actionsRemaining) return false;
@@ -123,13 +123,13 @@ export class VPExecutionService {
                         this.gameplayService.movePlayer(sessionId, playerId, action.orientation);
                     }
                     break;
-                case PathActionType.OPEN_DOOR:
+                case PathActionType.OPENDOOR:
                     this.gameplayService.toggleDoorAction(sessionId, playerId, action.position);
                     break;
-                case PathActionType.BOARD_BOAT:
+                case PathActionType.BOARDBOAT:
                     this.gameplayService.boardBoat(sessionId, playerId, action.position);
                     break;
-                case PathActionType.DISEMBARK_BOAT:
+                case PathActionType.DISEMBARKBOAT:
                     this.gameplayService.disembarkBoat(sessionId, playerId, action.position);
                     break;
                 default:
@@ -175,9 +175,9 @@ export class VPExecutionService {
 
         const requiresAction = [
             PointOfInterestType.ENEMY,
-            PointOfInterestType.FLAG_CARRIER,
-            PointOfInterestType.HEAL_SANCTUARY,
-            PointOfInterestType.FIGHT_SANCTUARY,
+            PointOfInterestType.FLAGCARRIER,
+            PointOfInterestType.HEALSANCTUARY,
+            PointOfInterestType.FIGHTSANCTUARY,
             PointOfInterestType.FLAG,
         ].includes(target.type);
         if (requiresAction && !player.actionsRemaining) {
@@ -188,27 +188,27 @@ export class VPExecutionService {
         try {
             switch (target.type) {
                 case PointOfInterestType.ENEMY:
-                case PointOfInterestType.FLAG_CARRIER:
+                case PointOfInterestType.FLAGCARRIER:
                     this.actionService.attackPlayer(sessionId, playerId, target.position);
                     return;
 
-                case PointOfInterestType.HEAL_SANCTUARY:
+                case PointOfInterestType.HEALSANCTUARY:
                     this.gameplayService.performSanctuaryAction(sessionId, playerId, target.position, false);
                     this.continueOrEndTurn(sessionId, playerId);
                     return;
 
-                case PointOfInterestType.FIGHT_SANCTUARY:
+                case PointOfInterestType.FIGHTSANCTUARY:
                     this.gameplayService.performSanctuaryAction(sessionId, playerId, target.position, useDoubleAction);
                     this.continueOrEndTurn(sessionId, playerId);
                     return;
 
                 case PointOfInterestType.FLAG:
                 case PointOfInterestType.ESCAPE:
-                case PointOfInterestType.RETURN_FLAG:
+                case PointOfInterestType.RETURNFLAG:
                     this.continueOrEndTurn(sessionId, playerId);
                     return;
 
-                case PointOfInterestType.GUARD_POINT:
+                case PointOfInterestType.GUARDPOINT:
                     this.endVPTurn(sessionId, playerId);
                     return;
             }

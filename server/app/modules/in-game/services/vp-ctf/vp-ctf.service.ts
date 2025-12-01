@@ -92,7 +92,7 @@ export class VPCTFService {
 
         const returnFlagPriority = 200;
         const score = returnFlagPriority - path.totalCost * config.distanceWeights.flagPenaltyPerTile;
-        results.push({ type: PointOfInterestType.RETURN_FLAG, position: path.destination, path, priorityScore: Math.max(1, score) });
+        results.push({ type: PointOfInterestType.RETURNFLAG, position: path.destination, path, priorityScore: Math.max(1, score) });
     }
 
     private findEnemyBlockingDirectPath(
@@ -265,7 +265,7 @@ export class VPCTFService {
         const score =
             config.flag.chaseFlagCarrierPriority - distance * config.flag.chaseFlagCarrierPenaltyPerTile + config.flag.chaseFlagCarrierBonus;
         results.push({
-            type: PointOfInterestType.FLAG_CARRIER,
+            type: PointOfInterestType.FLAGCARRIER,
             position: carrierPosition,
             playerId: flagCarrier.id,
             path,
@@ -286,7 +286,7 @@ export class VPCTFService {
         if (distance > config.flag.maxGuardStartPointDistance) return;
 
         const score = config.flag.guardStartPointPriority - distance * config.flag.guardStartPointPenaltyPerTile + config.flag.guardStartPointBonus;
-        results.push({ type: PointOfInterestType.GUARD_POINT, position: guardPosition, path, priorityScore: Math.max(0, score) });
+        results.push({ type: PointOfInterestType.GUARDPOINT, position: guardPosition, path, priorityScore: Math.max(0, score) });
     }
 
     private findBestPathToAdjacent(session: InGameSession, vpPlayerId: string, targetPosition: Position): PathResult {

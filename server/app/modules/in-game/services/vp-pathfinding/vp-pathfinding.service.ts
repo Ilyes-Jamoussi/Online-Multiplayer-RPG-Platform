@@ -136,7 +136,7 @@ export class VPPathfindingService {
                     position: nextPos,
                     moveCost: 0,
                     orientation,
-                    actionType: PathActionType.DISEMBARK_BOAT,
+                    actionType: PathActionType.DISEMBARKBOAT,
                     isOnBoat: false,
                     goal,
                     extraActions: 1,
@@ -196,7 +196,7 @@ export class VPPathfindingService {
                     position: nextPos,
                     moveCost: TileCost.DOOR_OPEN,
                     orientation,
-                    actionType: PathActionType.OPEN_DOOR,
+                    actionType: PathActionType.OPENDOOR,
                     isOnBoat: false,
                     goal,
                     extraActions: 1,
@@ -250,7 +250,7 @@ export class VPPathfindingService {
                     position: nextPos,
                     moveCost: 1,
                     orientation,
-                    actionType: PathActionType.BOARD_BOAT,
+                    actionType: PathActionType.BOARDBOAT,
                     isOnBoat: true,
                     goal,
                     extraActions: 1,
@@ -328,9 +328,9 @@ export class VPPathfindingService {
         const expandedActions: PathAction[] = [];
 
         for (const action of rawActions) {
-            if (action.type === PathActionType.OPEN_DOOR) {
+            if (action.type === PathActionType.OPENDOOR) {
                 expandedActions.push({
-                    type: PathActionType.OPEN_DOOR,
+                    type: PathActionType.OPENDOOR,
                     orientation: action.orientation,
                     position: action.position,
                 });

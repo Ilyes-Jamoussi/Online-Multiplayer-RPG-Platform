@@ -62,7 +62,7 @@ export class VPGameplayService {
         evaluatedTargets.sort((a, b) => b.priorityScore - a.priorityScore);
 
         const bestTarget = evaluatedTargets.length && evaluatedTargets[0].priorityScore ? evaluatedTargets[0] : null;
-        const useDoubleAction = bestTarget?.type === PointOfInterestType.FIGHT_SANCTUARY && Math.random() < config.fightSanctuary.doubleActionRate;
+        const useDoubleAction = bestTarget?.type === PointOfInterestType.FIGHTSANCTUARY && Math.random() < config.fightSanctuary.doubleActionRate;
 
         return {
             target: bestTarget,
@@ -182,10 +182,10 @@ export class VPGameplayService {
 
             switch (placeable.kind) {
                 case PlaceableKind.HEAL:
-                    result.healSanctuaries.push({ type: PointOfInterestType.HEAL_SANCTUARY, position });
+                    result.healSanctuaries.push({ type: PointOfInterestType.HEALSANCTUARY, position });
                     break;
                 case PlaceableKind.FIGHT:
-                    result.fightSanctuaries.push({ type: PointOfInterestType.FIGHT_SANCTUARY, position });
+                    result.fightSanctuaries.push({ type: PointOfInterestType.FIGHTSANCTUARY, position });
                     break;
                 case PlaceableKind.BOAT:
                     result.boats.push({ type: PointOfInterestType.BOAT, position });
