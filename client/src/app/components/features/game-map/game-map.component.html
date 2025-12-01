@@ -23,6 +23,14 @@
             } }
         </div>
 
+        <div class="start-points-overlay" [ngStyle]="gridStyle">
+            @for (startPoint of startPoints; track startPoint.id) {
+            <div class="start-point-avatar" [ngStyle]="getStartPointStyle(startPoint)">
+                <img [src]="getStartPointAvatarImage(startPoint.playerId)" [alt]="'Start point'" class="start-avatar-image" draggable="false" />
+            </div>
+            }
+        </div>
+
         <div class="players-overlay" [ngStyle]="gridStyle">
             @for (player of players; track player.id) {
             <div class="map-player" [class.current-user]="isCurrentUser(player)" [ngStyle]="getPlayerStyle(player)">

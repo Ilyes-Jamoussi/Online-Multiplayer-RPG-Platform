@@ -178,7 +178,7 @@ describe('InGameService', () => {
             service.updateInGameSession({
                 currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
             });
-            expect(service.turnTransitionMessage).toBe("C'est ton tour !");
+            expect(service.turnTransitionMessage).toBe("C'est votre tour !");
         });
 
         it('should get turn transition message for other player turn', () => {

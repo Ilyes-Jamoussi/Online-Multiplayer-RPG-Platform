@@ -27,4 +27,22 @@ export class PopupNotificationDisplayComponent {
             void this.router.navigate([currentNotification.redirectRoute]);
         }
     }
+
+    onConfirm(): void {
+        const currentNotification = this.notification();
+        this.notificationCoordinatorService.resetPopup();
+
+        if (currentNotification?.onConfirm) {
+            currentNotification.onConfirm();
+        }
+    }
+
+    onCancel(): void {
+        const currentNotification = this.notification();
+        this.notificationCoordinatorService.resetPopup();
+
+        if (currentNotification?.onCancel) {
+            currentNotification.onCancel();
+        }
+    }
 }

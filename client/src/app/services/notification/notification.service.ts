@@ -43,6 +43,10 @@ export class NotificationService {
         this._popupNotification.set({ ...information, type: 'information' });
     }
 
+    displayConfirmationPopup(confirmation: Omit<NotificationMessage, 'type'>): void {
+        this._popupNotification.set({ ...confirmation, type: 'confirmation' });
+    }
+
     resetPopup(): void {
         this._popupNotification.set(null);
     }

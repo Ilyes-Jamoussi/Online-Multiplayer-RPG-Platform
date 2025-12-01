@@ -5,6 +5,7 @@ import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { Orientation } from '@common/enums/orientation.enum';
 
 @Component({
@@ -24,6 +25,7 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
         private readonly inGameService: InGameService,
         private readonly adminModeService: AdminModeService,
         private readonly combatService: CombatService,
+        private readonly notificationService: NotificationService,
     ) {}
 
     ngOnInit(): void {
@@ -137,7 +139,13 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
     }
 
     onLeaveGame(): void {
-        this.combatService.combatAbandon();
-        this.inGameService.leaveGame();
+        this.notificationService.displayConfirmationPopup({
+            title: 'Abandonner la partie',
+            message: 'Êtes-vous sûr de vouloir abandonner la partie ? Vous perdrez tous vos progrès.',
+            onConfirm: () => {
+                this.combatService.combatAbandon();
+                this.inGameService.leaveGame();
+            },
+        });
     }
 }
