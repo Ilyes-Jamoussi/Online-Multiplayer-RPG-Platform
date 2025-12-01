@@ -6,6 +6,7 @@ import { PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
@@ -24,6 +25,7 @@ export class CombatOverlayComponent {
         private readonly inGameService: InGameService,
         private readonly assetsService: AssetsService,
         private readonly timerCoordinatorService: TimerService,
+        private readonly notificationService: NotificationService,
     ) {}
 
     get combatData() {
@@ -247,5 +249,16 @@ export class CombatOverlayComponent {
 
     closeVictoryOverlay(): void {
         this.combatService.closeVictoryOverlay();
+    }
+
+    onLeaveGame(): void {
+        this.notificationService.displayConfirmationPopup({
+            title: 'Abandonner le combat',
+            message: 'Êtes-vous sûr de vouloir abandonner le combat ? Vous perdrez automatiquement.',
+            onConfirm: () => {
+                this.combatService.combatAbandon();
+                this.inGameService.leaveGame();
+            },
+        });
     }
 }
