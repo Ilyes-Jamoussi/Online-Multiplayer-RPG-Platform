@@ -192,10 +192,6 @@ export class VPExecutionService {
                     return;
 
                 case 'flag':
-                    this.gameplayService.pickUpFlag(sessionId, playerId, target.position);
-                    this.continueOrEndTurn(sessionId, playerId);
-                    return;
-
                 case 'escape':
                 case 'guardPoint':
                 case 'returnFlag':
