@@ -5,4 +5,3 @@ export enum PathActionType {
     BOARDBOAT = 'boardBoat',
     DISEMBARKBOAT = 'disembarkBoat',
 }
-
