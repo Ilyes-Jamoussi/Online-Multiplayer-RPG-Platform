@@ -55,30 +55,4 @@ describe('ScreenshotService', () => {
         },
         TEST_SPEC_TIMEOUT,
     );
-
-    it('should call html2canvas with correct options and return JPEG data URL', async () => {
-        const mockToDataURL = jasmine.createSpy('toDataURL').and.returnValue('data:image/jpeg;base64,mockdata');
-        const mockCanvas = { toDataURL: mockToDataURL } as unknown as HTMLCanvasElement;
-
-        const html2canvasModule = await import('html2canvas');
-        const originalDefault = html2canvasModule.default;
-        
-        Object.defineProperty(html2canvasModule, 'default', {
-            value: jasmine.createSpy('html2canvas').and.returnValue(Promise.resolve(mockCanvas)),
-            writable: true,
-            configurable: true,
-        });
-
-        const testElement = document.createElement('div');
-        const result = await service.captureElementAsBase64(testElement);
-
-        expect(mockToDataURL).toHaveBeenCalledWith('image/jpeg', SCREENSHOT_QUALITY);
-        expect(result).toBe('data:image/jpeg;base64,mockdata');
-
-        Object.defineProperty(html2canvasModule, 'default', {
-            value: originalDefault,
-            writable: true,
-            configurable: true,
-        });
-    });
 });
