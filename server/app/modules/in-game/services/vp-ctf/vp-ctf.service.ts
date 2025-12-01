@@ -1,4 +1,5 @@
 import { RETURN_FLAG_SEARCH_RADIUS } from '@app/constants/virtual-player.constants';
+import { PointOfInterestType } from '@app/enums/point-of-interest-type.enum';
 import { VPConfig } from '@app/interfaces/vp-config.interface';
 import { EvaluatedTarget, MapScanWithDistances, PointOfInterestWithPath } from '@app/interfaces/vp-gameplay.interface';
 import { PathResult } from '@app/interfaces/vp-pathfinding.interface';
@@ -48,11 +49,11 @@ export class VPCTFService {
         const isEnemyCarrier = flagCarrier.teamNumber !== vpPlayer.teamNumber;
         if (!isEnemyCarrier) return false;
 
-        if (config.flag.chaseFlagCarrierPriority > 0) {
+        if (config.flag.chaseFlagCarrierPriority) {
             this.evaluateFlagCarrier(session, vpPlayerId, flagCarrier, results, config);
         }
 
-        if (config.flag.guardStartPointPriority > 0) {
+        if (config.flag.guardStartPointPriority) {
             this.evaluateGuardPoint(session, vpPlayerId, flagCarrier, results, config);
         }
 
@@ -84,14 +85,14 @@ export class VPCTFService {
             path = this.findClosestReachableTowards(session, vpPlayerId, returnPosition);
         }
 
-        if (!path.reachable || path.actions.length === 0) {
+        if (!path.reachable || !path.actions.length) {
             this.evaluateAdjacentEnemiesForBlockedFlagCarrier(session, vpPlayerId, results, config);
             return;
         }
 
         const returnFlagPriority = 200;
         const score = returnFlagPriority - path.totalCost * config.distanceWeights.flagPenaltyPerTile;
-        results.push({ type: 'returnFlag', position: path.destination, path, priorityScore: Math.max(1, score) });
+        results.push({ type: PointOfInterestType.RETURN_FLAG, position: path.destination, path, priorityScore: Math.max(1, score) });
     }
 
     private findEnemyBlockingDirectPath(
@@ -111,7 +112,7 @@ export class VPCTFService {
             if (!occupantId || occupantId === vpPlayerId) continue;
 
             const occupant = session.inGamePlayers[occupantId];
-            if (!occupant || occupant.health <= 0) continue;
+            if (!occupant || !occupant.health) continue;
             if (occupant.teamNumber === vpPlayer.teamNumber) continue;
 
             return { id: occupantId, position: adjacentPos };
@@ -162,7 +163,7 @@ export class VPCTFService {
         const score = blockedFlagCarrierAttackPriority + config.bonuses.adjacentAttackBonus;
 
         results.push({
-            type: 'enemy',
+            type: PointOfInterestType.ENEMY,
             position: blockingEnemy.position,
             playerId: blockingEnemy.id,
             path: {
@@ -193,14 +194,14 @@ export class VPCTFService {
             if (!occupantId || occupantId === vpPlayerId) continue;
 
             const occupant = session.inGamePlayers[occupantId];
-            if (!occupant || occupant.health <= 0) continue;
+            if (!occupant || !occupant.health) continue;
             if (occupant.teamNumber === vpPlayer.teamNumber) continue;
 
             const blockedFlagCarrierAttackPriority = 180;
             const score = blockedFlagCarrierAttackPriority + config.bonuses.adjacentAttackBonus;
 
             results.push({
-                type: 'enemy',
+                type: PointOfInterestType.ENEMY,
                 position: adjPos,
                 playerId: occupantId,
                 path: {
@@ -228,7 +229,7 @@ export class VPCTFService {
                 if (dx === 0 && dy === 0) continue;
                 const pos: Position = { x: playerPos.x + dx, y: playerPos.y + dy };
                 const path = this.pathfindingService.findPath(session, vpPlayerId, pos);
-                if (!path.reachable || path.actions.length === 0) continue;
+                if (!path.reachable || !path.actions.length) continue;
 
                 const distToTarget = Math.abs(pos.x - target.x) + Math.abs(pos.y - target.y);
                 const currentDist = Math.abs(playerPos.x - target.x) + Math.abs(playerPos.y - target.y);
@@ -263,7 +264,13 @@ export class VPCTFService {
 
         const score =
             config.flag.chaseFlagCarrierPriority - distance * config.flag.chaseFlagCarrierPenaltyPerTile + config.flag.chaseFlagCarrierBonus;
-        results.push({ type: 'flagCarrier', position: carrierPosition, playerId: flagCarrier.id, path, priorityScore: Math.max(0, score) });
+        results.push({
+            type: PointOfInterestType.FLAG_CARRIER,
+            position: carrierPosition,
+            playerId: flagCarrier.id,
+            path,
+            priorityScore: Math.max(0, score),
+        });
     }
 
     private evaluateGuardPoint(session: InGameSession, vpPlayerId: string, flagCarrier: Player, results: EvaluatedTarget[], config: VPConfig): void {
@@ -279,7 +286,7 @@ export class VPCTFService {
         if (distance > config.flag.maxGuardStartPointDistance) return;
 
         const score = config.flag.guardStartPointPriority - distance * config.flag.guardStartPointPenaltyPerTile + config.flag.guardStartPointBonus;
-        results.push({ type: 'guardPoint', position: guardPosition, path, priorityScore: Math.max(0, score) });
+        results.push({ type: PointOfInterestType.GUARD_POINT, position: guardPosition, path, priorityScore: Math.max(0, score) });
     }
 
     private findBestPathToAdjacent(session: InGameSession, vpPlayerId: string, targetPosition: Position): PathResult {

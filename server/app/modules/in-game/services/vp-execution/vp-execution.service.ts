@@ -1,4 +1,6 @@
 import { VIRTUAL_PLAYER_ACTION_DELAY_MS, VIRTUAL_PLAYER_MOVEMENT_DELAY_MS } from '@app/constants/virtual-player.constants';
+import { PathActionType } from '@app/enums/path-action-type.enum';
+import { PointOfInterestType } from '@app/enums/point-of-interest-type.enum';
 import { EvaluatedTarget, VPDecision } from '@app/interfaces/vp-gameplay.interface';
 import { PathAction } from '@app/interfaces/vp-pathfinding.interface';
 import { ActionService } from '@app/modules/in-game/services/action/action.service';
@@ -51,7 +53,7 @@ export class VPExecutionService {
         if (!player.virtualPlayerType) return;
         if (this.isInCombat(sessionId)) return;
 
-        const hasResources = player.speed > 0 || player.boatSpeed > 0 || player.actionsRemaining > 0;
+        const hasResources = player.speed || player.boatSpeed || player.actionsRemaining;
         if (!hasResources) {
             this.endVPTurn(sessionId, playerId);
             return;
@@ -71,7 +73,7 @@ export class VPExecutionService {
         const player = this.getValidPlayer(sessionId, playerId);
         if (!player || this.isInCombat(sessionId)) return;
 
-        if (remainingActions.length === 0) {
+        if (!remainingActions.length) {
             this.performTargetAction(sessionId, playerId, target, useDoubleAction);
             return;
         }
@@ -95,16 +97,19 @@ export class VPExecutionService {
         }
 
         const delay =
-            nextAction.type === 'move' || nextAction.type === 'teleport' ? VIRTUAL_PLAYER_MOVEMENT_DELAY_MS : VIRTUAL_PLAYER_ACTION_DELAY_MS;
+            nextAction.type === PathActionType.MOVE || nextAction.type === PathActionType.TELEPORT
+                ? VIRTUAL_PLAYER_MOVEMENT_DELAY_MS
+                : VIRTUAL_PLAYER_ACTION_DELAY_MS;
         setTimeout(() => this.executePathActions(sessionId, playerId, remainingActions, target, useDoubleAction), delay);
     }
 
     private canExecutePathAction(player: Player, action: PathAction): boolean {
-        const isMoveAction = action.type === 'move' || action.type === 'teleport';
-        const isActionAction = action.type === 'openDoor' || action.type === 'boardBoat' || action.type === 'disembarkBoat';
+        const isMoveAction = action.type === PathActionType.MOVE || action.type === PathActionType.TELEPORT;
+        const isActionAction =
+            action.type === PathActionType.OPEN_DOOR || action.type === PathActionType.BOARD_BOAT || action.type === PathActionType.DISEMBARK_BOAT;
 
-        if (isMoveAction && player.speed <= 0 && player.boatSpeed <= 0) return false;
-        if (isActionAction && player.actionsRemaining <= 0) return false;
+        if (isMoveAction && !player.speed && !player.boatSpeed) return false;
+        if (isActionAction && !player.actionsRemaining) return false;
 
         return true;
     }
@@ -112,19 +117,19 @@ export class VPExecutionService {
     private executeSingleAction(sessionId: string, playerId: string, action: PathAction): boolean {
         try {
             switch (action.type) {
-                case 'move':
-                case 'teleport':
+                case PathActionType.MOVE:
+                case PathActionType.TELEPORT:
                     if (action.orientation) {
                         this.gameplayService.movePlayer(sessionId, playerId, action.orientation);
                     }
                     break;
-                case 'openDoor':
+                case PathActionType.OPEN_DOOR:
                     this.gameplayService.toggleDoorAction(sessionId, playerId, action.position);
                     break;
-                case 'boardBoat':
+                case PathActionType.BOARD_BOAT:
                     this.gameplayService.boardBoat(sessionId, playerId, action.position);
                     break;
-                case 'disembarkBoat':
+                case PathActionType.DISEMBARK_BOAT:
                     this.gameplayService.disembarkBoat(sessionId, playerId, action.position);
                     break;
                 default:
@@ -137,10 +142,10 @@ export class VPExecutionService {
     }
 
     private tryAttackBlockingEnemy(sessionId: string, playerId: string, failedAction: PathAction): boolean {
-        if (failedAction.type !== 'move' || !failedAction.orientation) return false;
+        if (failedAction.type !== PathActionType.MOVE || !failedAction.orientation) return false;
 
         const player = this.getValidPlayer(sessionId, playerId);
-        if (!player || player.actionsRemaining === 0) return false;
+        if (!player || !player.actionsRemaining) return false;
 
         try {
             const playerPosition: Position = { x: player.x, y: player.y };
@@ -152,7 +157,7 @@ export class VPExecutionService {
             if (!session) return false;
 
             const occupant = session.inGamePlayers[occupantId];
-            if (!occupant || occupant.health <= 0) return false;
+            if (!occupant || !occupant.health) return false;
 
             if (session.mode === GameMode.CTF && occupant.teamNumber === player.teamNumber) return false;
 
@@ -168,36 +173,42 @@ export class VPExecutionService {
         const player = this.getValidPlayer(sessionId, playerId);
         if (!player || this.isInCombat(sessionId)) return;
 
-        const requiresAction = ['enemy', 'flagCarrier', 'healSanctuary', 'fightSanctuary', 'flag'].includes(target.type);
-        if (requiresAction && player.actionsRemaining === 0) {
+        const requiresAction = [
+            PointOfInterestType.ENEMY,
+            PointOfInterestType.FLAG_CARRIER,
+            PointOfInterestType.HEAL_SANCTUARY,
+            PointOfInterestType.FIGHT_SANCTUARY,
+            PointOfInterestType.FLAG,
+        ].includes(target.type);
+        if (requiresAction && !player.actionsRemaining) {
             this.endVPTurn(sessionId, playerId);
             return;
         }
 
         try {
             switch (target.type) {
-                case 'enemy':
-                case 'flagCarrier':
+                case PointOfInterestType.ENEMY:
+                case PointOfInterestType.FLAG_CARRIER:
                     this.actionService.attackPlayer(sessionId, playerId, target.position);
                     return;
 
-                case 'healSanctuary':
+                case PointOfInterestType.HEAL_SANCTUARY:
                     this.gameplayService.performSanctuaryAction(sessionId, playerId, target.position, false);
                     this.continueOrEndTurn(sessionId, playerId);
                     return;
 
-                case 'fightSanctuary':
+                case PointOfInterestType.FIGHT_SANCTUARY:
                     this.gameplayService.performSanctuaryAction(sessionId, playerId, target.position, useDoubleAction);
                     this.continueOrEndTurn(sessionId, playerId);
                     return;
 
-                case 'flag':
-                case 'escape':
-                case 'returnFlag':
+                case PointOfInterestType.FLAG:
+                case PointOfInterestType.ESCAPE:
+                case PointOfInterestType.RETURN_FLAG:
                     this.continueOrEndTurn(sessionId, playerId);
                     return;
 
-                case 'guardPoint':
+                case PointOfInterestType.GUARD_POINT:
                     this.endVPTurn(sessionId, playerId);
                     return;
             }
@@ -212,7 +223,7 @@ export class VPExecutionService {
             const player = session?.inGamePlayers?.[playerId];
 
             if (!session || !player) return null;
-            if (player.health <= 0 || !player.isInGame) return null;
+            if (!player.health || !player.isInGame) return null;
             if (session.currentTurn.activePlayerId !== playerId) return null;
 
             return player;
@@ -239,7 +250,9 @@ export class VPExecutionService {
 
     private logPath(decision: VPDecision): void {
         if (decision.target?.path.actions.length) {
-            const actionSequence = decision.target.path.actions.map((a) => (a.type === 'move' ? a.orientation : a.type.toUpperCase())).join(' ');
+            const actionSequence = decision.target.path.actions
+                .map((a) => (a.type === PathActionType.MOVE ? a.orientation : a.type.toUpperCase()))
+                .join(' ');
             this.logger.debug(`VP Path: ${actionSequence}`);
         }
     }

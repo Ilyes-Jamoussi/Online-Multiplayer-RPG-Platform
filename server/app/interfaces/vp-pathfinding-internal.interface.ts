@@ -2,7 +2,8 @@ import { Orientation } from '@common/enums/orientation.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { PathAction, PathActionType } from './vp-pathfinding.interface';
+import { PathAction } from './vp-pathfinding.interface';
+import { PathActionType } from '@app/enums/path-action-type.enum';
 
 export interface PathNode {
     position: Position;
