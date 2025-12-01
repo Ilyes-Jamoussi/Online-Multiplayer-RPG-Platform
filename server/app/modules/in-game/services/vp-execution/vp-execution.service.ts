@@ -193,9 +193,12 @@ export class VPExecutionService {
 
                 case 'flag':
                 case 'escape':
-                case 'guardPoint':
                 case 'returnFlag':
                     this.continueOrEndTurn(sessionId, playerId);
+                    return;
+
+                case 'guardPoint':
+                    this.endVPTurn(sessionId, playerId);
                     return;
             }
         } catch {
