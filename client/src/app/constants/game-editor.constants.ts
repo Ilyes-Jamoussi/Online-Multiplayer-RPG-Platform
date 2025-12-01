@@ -1,3 +1,7 @@
+import { GameEditorDto } from '@app/dto/game-editor-dto';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
+
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 
 export const PLACEABLE_ORDER: PlaceableKind[] = [
@@ -7,3 +11,16 @@ export const PLACEABLE_ORDER: PlaceableKind[] = [
     PlaceableKind.HEAL,
     PlaceableKind.BOAT,
 ];
+
+export const DEFAULT_GAME_EDITOR_DTO: GameEditorDto = {
+    id: '',
+    name: '',
+    description: '',
+    size: MapSize.MEDIUM,
+    mode: GameMode.CLASSIC,
+    tiles: [],
+    objects: [],
+    lastModified: new Date().toISOString(),
+    gridPreviewUrl: '',
+    teleportChannels: [],
+};
