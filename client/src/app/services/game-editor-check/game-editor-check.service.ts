@@ -306,7 +306,7 @@ export class GameEditorCheckService {
             const hasEntryA = !!channel.tiles?.entryA;
             const hasEntryB = !!channel.tiles?.entryB;
 
-            if (!hasEntryA || !hasEntryB) {
+            if ((hasEntryA && !hasEntryB) || (!hasEntryA && hasEntryB)) {
                 problem.hasIssue = true;
                 problem.message = `Le canal de téléportation ${channel.channelNumber} doit avoir deux points d'entrée (entryA et entryB).`;
                 break;
