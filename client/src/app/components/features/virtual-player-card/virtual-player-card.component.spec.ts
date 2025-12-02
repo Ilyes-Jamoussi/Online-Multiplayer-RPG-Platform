@@ -45,8 +45,8 @@ const TEST_IS_NOT_ADMIN = false;
 const TEST_IS_IN_GAME = false;
 const TYPE_ICON_OFFENSIVE = 'local_fire_department';
 const TYPE_ICON_DEFENSIVE = 'security';
-const TYPE_LABEL_OFFENSIVE = 'Attaquant';
-const TYPE_LABEL_DEFENSIVE = 'Défenseur';
+const TYPE_LABEL_OFFENSIVE = 'Offensif';
+const TYPE_LABEL_DEFENSIVE = 'Défensif';
 
 type MockPlayerService = {
     isAdmin: Signal<boolean>;
@@ -247,7 +247,7 @@ describe('VirtualPlayerCardComponent', () => {
     });
 
     describe('getTypeLabel', () => {
-        it('should return "Attaquant" for Offensive type', () => {
+        it('should return "Offensif" for Offensive type', () => {
             const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Offensive);
             component.player = player;
             fixture.detectChanges();
@@ -257,7 +257,7 @@ describe('VirtualPlayerCardComponent', () => {
             expect(result).toBe(TYPE_LABEL_OFFENSIVE);
         });
 
-        it('should return "Défenseur" for Defensive type', () => {
+        it('should return "Défensif" for Defensive type', () => {
             const player = CREATE_MOCK_PLAYER(TEST_PLAYER_ID_1, TEST_PLAYER_NAME_1, VirtualPlayerType.Defensive);
             component.player = player;
             fixture.detectChanges();

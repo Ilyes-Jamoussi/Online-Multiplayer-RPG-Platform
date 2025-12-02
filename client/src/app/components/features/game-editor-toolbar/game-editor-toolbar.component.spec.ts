@@ -1,4 +1,3 @@
-/* eslint-disable max-lines -- Test file */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
 import { TeleportTilesDto } from '@app/dto/teleport-tiles-dto';
