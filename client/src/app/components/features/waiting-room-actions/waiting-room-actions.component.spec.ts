@@ -37,8 +37,6 @@ const TEST_COMBAT_DRAWS = 0;
 const TEST_IS_ADMIN = true;
 const TEST_IS_NOT_ADMIN = false;
 const TEST_IS_IN_GAME = false;
-const TEST_IS_LOCKED = true;
-const TEST_IS_UNLOCKED = false;
 const TEST_MAX_PLAYERS = 4;
 
 type MockPlayerService = {
@@ -48,12 +46,7 @@ type MockPlayerService = {
 type MockSessionService = {
     players: Signal<Player[]>;
     maxPlayers: Signal<number>;
-    isRoomLocked: Signal<boolean>;
-    canBeLocked: jasmine.Spy;
-    canBeUnlocked: jasmine.Spy;
     canStartGame: jasmine.Spy;
-    lock: jasmine.Spy;
-    unlock: jasmine.Spy;
     startGameSession: jasmine.Spy;
     addVirtualPlayer: jasmine.Spy;
 };
@@ -97,7 +90,6 @@ describe('WaitingRoomActionsComponent', () => {
     let mockSessionService: MockSessionService;
     let playersSignal: ReturnType<typeof signal<Player[]>>;
     let isAdminSignal: ReturnType<typeof signal<boolean>>;
-    let isRoomLockedSignal: ReturnType<typeof signal<boolean>>;
     let maxPlayersSignal: ReturnType<typeof signal<number>>;
 
     beforeEach(async () => {
@@ -107,7 +99,6 @@ describe('WaitingRoomActionsComponent', () => {
 
         playersSignal = signal<Player[]>(mockPlayers);
         isAdminSignal = signal<boolean>(TEST_IS_NOT_ADMIN);
-        isRoomLockedSignal = signal<boolean>(TEST_IS_UNLOCKED);
         maxPlayersSignal = signal<number>(TEST_MAX_PLAYERS);
 
         mockPlayerService = {
@@ -117,12 +108,7 @@ describe('WaitingRoomActionsComponent', () => {
         mockSessionService = {
             players: playersSignal.asReadonly(),
             maxPlayers: maxPlayersSignal.asReadonly(),
-            isRoomLocked: isRoomLockedSignal.asReadonly(),
-            canBeLocked: jasmine.createSpy('canBeLocked').and.returnValue(true),
-            canBeUnlocked: jasmine.createSpy('canBeUnlocked').and.returnValue(false),
             canStartGame: jasmine.createSpy('canStartGame').and.returnValue(false),
-            lock: jasmine.createSpy('lock'),
-            unlock: jasmine.createSpy('unlock'),
             startGameSession: jasmine.createSpy('startGameSession'),
             addVirtualPlayer: jasmine.createSpy('addVirtualPlayer'),
         };
@@ -183,48 +169,6 @@ describe('WaitingRoomActionsComponent', () => {
         });
     });
 
-    describe('isLocked', () => {
-        it('should return true when room is locked', () => {
-            isRoomLockedSignal.set(TEST_IS_LOCKED);
-            fixture.detectChanges();
-
-            expect(component.isLocked()).toBe(true);
-        });
-
-        it('should return false when room is not locked', () => {
-            isRoomLockedSignal.set(TEST_IS_UNLOCKED);
-            fixture.detectChanges();
-
-            expect(component.isLocked()).toBe(false);
-        });
-    });
-
-    describe('canToggleLock', () => {
-        it('should return true when canBeLocked returns true', () => {
-            mockSessionService.canBeLocked.and.returnValue(true);
-            mockSessionService.canBeUnlocked.and.returnValue(false);
-            fixture.detectChanges();
-
-            expect(component.canToggleLock()).toBe(true);
-        });
-
-        it('should return true when canBeUnlocked returns true', () => {
-            mockSessionService.canBeLocked.and.returnValue(false);
-            mockSessionService.canBeUnlocked.and.returnValue(true);
-            fixture.detectChanges();
-
-            expect(component.canToggleLock()).toBe(true);
-        });
-
-        it('should return false when both canBeLocked and canBeUnlocked return false', () => {
-            mockSessionService.canBeLocked.and.returnValue(false);
-            mockSessionService.canBeUnlocked.and.returnValue(false);
-            fixture.detectChanges();
-
-            expect(component.canToggleLock()).toBe(false);
-        });
-    });
-
     describe('canStartGame', () => {
         it('should return true when sessionService.canStartGame returns true', () => {
             mockSessionService.canStartGame.and.returnValue(true);
@@ -238,41 +182,6 @@ describe('WaitingRoomActionsComponent', () => {
             fixture.detectChanges();
 
             expect(component.canStartGame()).toBe(false);
-        });
-    });
-
-    describe('toggleLock', () => {
-        it('should call sessionService.lock when canBeLocked returns true', () => {
-            mockSessionService.canBeLocked.and.returnValue(true);
-            mockSessionService.canBeUnlocked.and.returnValue(false);
-            fixture.detectChanges();
-
-            component.toggleLock();
-
-            expect(mockSessionService.lock).toHaveBeenCalledTimes(1);
-            expect(mockSessionService.unlock).not.toHaveBeenCalled();
-        });
-
-        it('should call sessionService.unlock when canBeUnlocked returns true', () => {
-            mockSessionService.canBeLocked.and.returnValue(false);
-            mockSessionService.canBeUnlocked.and.returnValue(true);
-            fixture.detectChanges();
-
-            component.toggleLock();
-
-            expect(mockSessionService.unlock).toHaveBeenCalledTimes(1);
-            expect(mockSessionService.lock).not.toHaveBeenCalled();
-        });
-
-        it('should not call any method when both canBeLocked and canBeUnlocked return false', () => {
-            mockSessionService.canBeLocked.and.returnValue(false);
-            mockSessionService.canBeUnlocked.and.returnValue(false);
-            fixture.detectChanges();
-
-            component.toggleLock();
-
-            expect(mockSessionService.lock).not.toHaveBeenCalled();
-            expect(mockSessionService.unlock).not.toHaveBeenCalled();
         });
     });
 

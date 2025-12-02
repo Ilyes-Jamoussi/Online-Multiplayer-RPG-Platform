@@ -21,20 +21,6 @@ $classic-color: #3b82f6;
     transition: all 0.3s ease;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, $classic-color, color.adjust($classic-color, $lightness: 15%));
-    }
-
-    &.ctf-mode::before {
-        background: linear-gradient(90deg, $ctf-color, color.adjust($ctf-color, $lightness: 10%));
-    }
-
     .card-glow {
         display: none;
     }
@@ -56,29 +42,13 @@ $classic-color: #3b82f6;
     right: 16px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    background: rgba($classic-color, 0.95);
-    border: none;
-    border-radius: 8px;
+    justify-content: center;
     z-index: 10;
-    box-shadow: 0 2px 8px rgba($classic-color, 0.3);
 
-    &.ctf {
-        background: rgba($ctf-color, 0.95);
-        box-shadow: 0 2px 8px rgba($ctf-color, 0.3);
-
-        .mode-text {
-            color: white;
-        }
-    }
-
-    .mode-text {
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        color: white;
+    .mode-icon {
+        font-size: 24px;
+        line-height: 1;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
     }
 }
 
@@ -206,6 +176,8 @@ $classic-color: #3b82f6;
 
 .game-actions {
     margin-top: auto;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .play-btn {
@@ -245,6 +217,7 @@ $classic-color: #3b82f6;
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .action-btn {

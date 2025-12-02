@@ -141,7 +141,7 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
     onLeaveGame(): void {
         this.notificationService.displayConfirmationPopup({
             title: 'Abandonner la partie',
-            message: 'Êtes-vous sûr de vouloir abandonner la partie ? Vous perdrez tous vos progrès.',
+            message: 'Êtes-vous sûr de vouloir abandonner ?\nTous vos progrès seront perdus.',
             onConfirm: () => {
                 this.combatService.combatAbandon();
                 this.inGameService.leaveGame();

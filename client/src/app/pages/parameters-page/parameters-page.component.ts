@@ -32,17 +32,17 @@ export class ParametersPageComponent {
     readonly mapSizeOptions: MapSizeOption[] = [
         {
             value: MapSize.SMALL,
-            label: `Petite (${MapSize.SMALL}x${MapSize.SMALL})`,
+            label: `Petit (${MapSize.SMALL}x${MapSize.SMALL})`,
             maxPlayers: MAP_SIZE_TO_MAX_PLAYERS[MapSize.SMALL],
         },
         {
             value: MapSize.MEDIUM,
-            label: `Moyenne (${MapSize.MEDIUM}x${MapSize.MEDIUM})`,
+            label: `Moyen (${MapSize.MEDIUM}x${MapSize.MEDIUM})`,
             maxPlayers: MAP_SIZE_TO_MAX_PLAYERS[MapSize.MEDIUM],
         },
         {
             value: MapSize.LARGE,
-            label: `Grande (${MapSize.LARGE}x${MapSize.LARGE})`,
+            label: `Grand (${MapSize.LARGE}x${MapSize.LARGE})`,
             maxPlayers: MAP_SIZE_TO_MAX_PLAYERS[MapSize.LARGE],
         },
     ];
@@ -51,12 +51,14 @@ export class ParametersPageComponent {
         {
             value: GameMode.CLASSIC,
             label: 'Classique',
-            description: 'Mode de jeu standard',
+            description: 'Gagnez 3 combats pour remporter la partie',
+            icon: '⚔️',
         },
         {
             value: GameMode.CTF,
             label: 'Capture du Drapeau',
-            description: 'Capturez le drapeau ennemi',
+            description: 'Capturez le drapeau et ramenez-le à votre point de départ pour gagner en équipe',
+            icon: '🚩',
         },
     ];
 
