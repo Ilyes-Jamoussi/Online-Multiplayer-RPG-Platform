@@ -9,4 +9,3 @@ export enum PointOfInterestType {
     GUARDPOINT = 'guardPoint',
     BOAT = 'boat',
 }
-

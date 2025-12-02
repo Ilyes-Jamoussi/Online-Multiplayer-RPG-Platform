@@ -3,6 +3,7 @@ import { AdminModeToggledDto } from '@app/modules/in-game/dto/admin-mode-toggled
 import { EmptyResponseDto } from '@app/modules/in-game/dto/empty-response.dto';
 import { GameOverDto } from '@app/modules/in-game/dto/game-over.dto';
 import { GameStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
+import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { errorResponse, successResponse } from '@app/utils/socket-response/socket-response.util';
 import { validationExceptionFactory } from '@app/utils/validation/validation.util';
@@ -28,6 +29,7 @@ export class InGameGateway {
     constructor(
         private readonly inGameService: InGameService,
         private readonly eventEmitter: EventEmitter2,
+        private readonly combatService: CombatService,
     ) {}
 
     @SubscribeMessage(InGameEvents.PlayerJoinInGameSession)
@@ -114,6 +116,7 @@ export class InGameGateway {
         const session = this.inGameService.findSessionByPlayerId(socket.id);
         if (session) {
             this.playerLeaveSession(session.id, socket.id);
+            this.combatService.combatAbandon(session.id, socket.id);
         }
     }
 

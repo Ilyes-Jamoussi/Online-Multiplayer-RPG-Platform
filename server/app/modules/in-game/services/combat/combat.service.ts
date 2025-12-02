@@ -33,11 +33,11 @@ export class CombatService {
 
     combatAbandon(sessionId: string, playerId: string): void {
         const combat = this.activeCombats.get(sessionId);
-        if (!combat) throw new NotFoundException('Combat not found');
-        if (combat.playerAId !== playerId && combat.playerBId !== playerId) throw new BadRequestException('Player not in combat');
+        if (!combat) return;
+        if (combat.playerAId !== playerId && combat.playerBId !== playerId) return;
         const winnerId = combat.playerAId === playerId ? combat.playerBId : combat.playerAId;
         const session = this.sessionRepository.findById(sessionId);
-        if (!session) throw new NotFoundException('Session not found');
+        if (!session) return;
         this.sessionRepository.incrementPlayerCombatWins(sessionId, winnerId);
         this.endCombat(session, combat.playerAId, combat.playerBId, winnerId, true);
     }
