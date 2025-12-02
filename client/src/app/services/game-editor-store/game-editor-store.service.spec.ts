@@ -10,6 +10,11 @@ import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
+import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
+import { TeleportTileCoordinatesDto } from '@app/dto/teleport-tile-coordinates-dto';
+import { TeleportTilesDto } from '@app/dto/teleport-tiles-dto';
+import { AssetsService } from '@app/services/assets/assets.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
@@ -21,11 +26,26 @@ describe('GameEditorStoreService', () => {
     let gameHttpServiceSpy: jasmine.SpyObj<GameHttpService>;
     let gameStoreServiceSpy: jasmine.SpyObj<GameStoreService>;
     let screenshotServiceSpy: jasmine.SpyObj<ScreenshotService>;
+    let assetsServiceSpy: jasmine.SpyObj<AssetsService>;
+    let notificationServiceSpy: jasmine.SpyObj<NotificationService>;
+
+    const zero = 0;
+    const one = 1;
+    const channelNumber1 = 1;
+    const channelNumber2 = 2;
+    const teleportX1 = 1;
+    const teleportY1 = 1;
+    const teleportX2 = 2;
+    const teleportY2 = 2;
 
     beforeEach(() => {
         gameHttpServiceSpy = jasmine.createSpyObj('GameHttpService', ['getGameEditorById', 'patchGameEditorById', 'createGame']);
         gameStoreServiceSpy = jasmine.createSpyObj('GameStoreService', ['selectGame', 'deselectGame']);
         screenshotServiceSpy = jasmine.createSpyObj('ScreenshotService', ['captureElementAsBase64']);
+        assetsServiceSpy = jasmine.createSpyObj('AssetsService', ['getPlaceableImage']);
+        notificationServiceSpy = jasmine.createSpyObj('NotificationService', ['displaySuccessPopup', 'displayErrorPopup']);
+
+        assetsServiceSpy.getPlaceableImage.and.returnValue('/assets/test.png');
 
         TestBed.configureTestingModule({
             providers: [
@@ -33,6 +53,8 @@ describe('GameEditorStoreService', () => {
                 { provide: GameHttpService, useValue: gameHttpServiceSpy },
                 { provide: GameStoreService, useValue: gameStoreServiceSpy },
                 { provide: ScreenshotService, useValue: screenshotServiceSpy },
+                { provide: AssetsService, useValue: assetsServiceSpy },
+                { provide: NotificationService, useValue: notificationServiceSpy },
             ],
         });
 
@@ -416,8 +438,49 @@ describe('GameEditorStoreService', () => {
 
         it('should return early if currentTile is falsy (no tile at index)', () => {
             service['_tiles'].set([]);
-            service.setTileAt(0, 0, TileKind.WATER);
+            service.setTileAt(zero, zero, TileKind.WATER);
             expect(service.tiles()).toEqual([]);
+        });
+
+        it('should return early when setting same TELEPORT tile with same teleportChannel', () => {
+            service.setTileAt(zero, zero, TileKind.TELEPORT, channelNumber1);
+            const beforeTile = service.getTileAt(zero, zero);
+            expect(beforeTile?.kind).toBe(TileKind.TELEPORT);
+            expect(beforeTile?.teleportChannel).toBe(channelNumber1);
+
+            service.setTileAt(zero, zero, TileKind.TELEPORT, channelNumber1);
+            const afterTile = service.getTileAt(zero, zero);
+            expect(afterTile).toEqual(beforeTile);
+        });
+
+        it('should update TELEPORT tile when teleportChannel is different', () => {
+            service.setTileAt(zero, zero, TileKind.TELEPORT, channelNumber1);
+            const beforeTile = service.getTileAt(zero, zero);
+            expect(beforeTile?.teleportChannel).toBe(channelNumber1);
+
+            service.setTileAt(zero, zero, TileKind.TELEPORT, channelNumber2);
+            const afterTile = service.getTileAt(zero, zero);
+            expect(afterTile?.kind).toBe(TileKind.TELEPORT);
+            expect(afterTile?.teleportChannel).toBe(channelNumber2);
+        });
+
+        it('should set teleportChannel when setting TELEPORT tile with teleportChannel', () => {
+            service.setTileAt(zero, zero, TileKind.TELEPORT, channelNumber1);
+            const tile = service.getTileAt(zero, zero);
+            expect(tile?.kind).toBe(TileKind.TELEPORT);
+            expect(tile?.teleportChannel).toBe(channelNumber1);
+        });
+
+        it('should set teleportChannel to undefined when changing from TELEPORT to non-TELEPORT tile', () => {
+            service.setTileAt(zero, zero, TileKind.TELEPORT, channelNumber1);
+            const teleportTile = service.getTileAt(zero, zero);
+            expect(teleportTile?.kind).toBe(TileKind.TELEPORT);
+            expect(teleportTile?.teleportChannel).toBe(channelNumber1);
+
+            service.setTileAt(zero, zero, TileKind.WATER);
+            const waterTile = service.getTileAt(zero, zero);
+            expect(waterTile?.kind).toBe(TileKind.WATER);
+            expect(waterTile?.teleportChannel).toBeUndefined();
         });
     });
 
@@ -433,10 +496,10 @@ describe('GameEditorStoreService', () => {
             expect(service['_initial']().id).toBe('1');
             expect(service.tiles().length).toBe(mockEditorData.tiles.length);
 
-            service.setTileAt(0, 0, TileKind.WATER);
-            expect(service.getTileAt(0, 0)?.kind).toBe(TileKind.WATER);
-            service.setTileAt(1, 1, TileKind.WATER);
-            expect(service.getTileAt(1, 1)?.kind).toBe(TileKind.WATER);
+            service.setTileAt(zero, zero, TileKind.WATER);
+            expect(service.getTileAt(zero, zero)?.kind).toBe(TileKind.WATER);
+            service.setTileAt(one, one, TileKind.WATER);
+            expect(service.getTileAt(one, one)?.kind).toBe(TileKind.WATER);
             service.name = 'Modified Name';
             expect(service.name).toBe('Modified Name');
             service.description = 'Modified Description';
@@ -448,8 +511,27 @@ describe('GameEditorStoreService', () => {
             expect(service.name).toBe('Test Game');
             expect(service.description).toBe('A game for testing');
             expect(service.tiles().length).toBe(mockEditorData.tiles.length);
-            expect(service.getTileAt(0, 0)?.kind).toBe(TileKind.BASE);
-            expect(service.getTileAt(1, 1)?.kind).toBe(TileKind.BASE);
+            expect(service.getTileAt(zero, zero)?.kind).toBe(TileKind.BASE);
+            expect(service.getTileAt(one, one)?.kind).toBe(TileKind.BASE);
+        });
+
+        it('should reset teleportChannels to empty array when initial teleportChannels is null', () => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+            const editorDataWithNullChannels: GameEditorDto = {
+                ...mockEditorData,
+                teleportChannels: null as unknown as TeleportChannelDto[],
+            };
+            service.loadGameById('1');
+            subject.next(editorDataWithNullChannels);
+            subject.complete();
+
+            service['_teleportChannels'].set([{ channelNumber: channelNumber1, tiles: {} as TeleportTilesDto }]);
+            expect(service.teleportChannels.length).toBe(one);
+
+            service.reset();
+
+            expect(service.teleportChannels.length).toBe(zero);
         });
     });
 
@@ -700,8 +782,130 @@ describe('GameEditorStoreService', () => {
 
             service.removeObject('flag1');
             inventory = service.inventory();
-            expect(inventory.FLAG.remaining).toBe(1);
+            expect(inventory.FLAG.remaining).toBe(one);
             expect(inventory.FLAG.disabled).toBeFalse();
+        });
+    });
+
+    describe('visibleTiles', () => {
+        beforeEach(() => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+            service.loadGameById('1');
+            subject.next(mockEditorData);
+            subject.complete();
+        });
+
+        it('should update tiles with teleport channel information from entryA', () => {
+            const entryA: TeleportTileCoordinatesDto = { x: teleportX1, y: teleportY1 };
+            const teleportChannel: TeleportChannelDto = {
+                channelNumber: channelNumber1,
+                tiles: { entryA },
+            };
+            service['_teleportChannels'].set([teleportChannel]);
+
+            const tiles = service.tiles();
+            const tileAtEntryA = tiles.find((tile) => tile.x === teleportX1 && tile.y === teleportY1);
+            expect(tileAtEntryA).toBeDefined();
+            expect(tileAtEntryA?.kind).toBe(TileKind.TELEPORT);
+            expect(tileAtEntryA?.teleportChannel).toBe(channelNumber1);
+        });
+
+        it('should update tiles with teleport channel information from entryB', () => {
+            const entryB: TeleportTileCoordinatesDto = { x: teleportX2, y: teleportY2 };
+            const teleportChannel: TeleportChannelDto = {
+                channelNumber: channelNumber2,
+                tiles: { entryB },
+            };
+            service['_teleportChannels'].set([teleportChannel]);
+
+            const tiles = service.tiles();
+            const tileAtEntryB = tiles.find((tile) => tile.x === teleportX2 && tile.y === teleportY2);
+            expect(tileAtEntryB).toBeDefined();
+            expect(tileAtEntryB?.kind).toBe(TileKind.TELEPORT);
+            expect(tileAtEntryB?.teleportChannel).toBe(channelNumber2);
+        });
+
+        it('should update tiles with teleport channel information from both entryA and entryB', () => {
+            const entryA: TeleportTileCoordinatesDto = { x: teleportX1, y: teleportY1 };
+            const entryB: TeleportTileCoordinatesDto = { x: teleportX2, y: teleportY2 };
+            const teleportChannel: TeleportChannelDto = {
+                channelNumber: channelNumber1,
+                tiles: { entryA, entryB },
+            };
+            service['_teleportChannels'].set([teleportChannel]);
+
+            const tiles = service.tiles();
+            const tileAtEntryA = tiles.find((tile) => tile.x === teleportX1 && tile.y === teleportY1);
+            const tileAtEntryB = tiles.find((tile) => tile.x === teleportX2 && tile.y === teleportY2);
+            expect(tileAtEntryA?.kind).toBe(TileKind.TELEPORT);
+            expect(tileAtEntryA?.teleportChannel).toBe(channelNumber1);
+            expect(tileAtEntryB?.kind).toBe(TileKind.TELEPORT);
+            expect(tileAtEntryB?.teleportChannel).toBe(channelNumber1);
+        });
+
+        it('should handle multiple teleport channels', () => {
+            const entryA1: TeleportTileCoordinatesDto = { x: teleportX1, y: teleportY1 };
+            const entryA2: TeleportTileCoordinatesDto = { x: teleportX2, y: teleportY2 };
+            const channel1: TeleportChannelDto = {
+                channelNumber: channelNumber1,
+                tiles: { entryA: entryA1 },
+            };
+            const channel2: TeleportChannelDto = {
+                channelNumber: channelNumber2,
+                tiles: { entryA: entryA2 },
+            };
+            service['_teleportChannels'].set([channel1, channel2]);
+
+            const tiles = service.tiles();
+            const tile1 = tiles.find((tile) => tile.x === teleportX1 && tile.y === teleportY1);
+            const tile2 = tiles.find((tile) => tile.x === teleportX2 && tile.y === teleportY2);
+            expect(tile1?.teleportChannel).toBe(channelNumber1);
+            expect(tile2?.teleportChannel).toBe(channelNumber2);
+        });
+
+        it('should not update tile when index is out of bounds', () => {
+            const entryA: TeleportTileCoordinatesDto = { x: invalidTile, y: invalidTile };
+            const teleportChannel: TeleportChannelDto = {
+                channelNumber: channelNumber1,
+                tiles: { entryA },
+            };
+            service['_teleportChannels'].set([teleportChannel]);
+
+            const tiles = service.tiles();
+            const tileAtInvalid = tiles.find((tile) => tile.x === invalidTile && tile.y === invalidTile);
+            expect(tileAtInvalid).toBeUndefined();
+        });
+    });
+
+    describe('teleportChannelsSignal', () => {
+        it('should return the teleportChannels signal', () => {
+            const signal = service.teleportChannelsSignal;
+            expect(signal).toBeDefined();
+            expect(signal()).toEqual([]);
+        });
+    });
+
+    describe('teleportChannels', () => {
+        beforeEach(() => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+            service.loadGameById('1');
+            subject.next(mockEditorData);
+            subject.complete();
+        });
+
+        it('should return the teleportChannels array', () => {
+            expect(service.teleportChannels).toEqual([]);
+
+            const channel: TeleportChannelDto = {
+                channelNumber: channelNumber1,
+                tiles: { entryA: { x: teleportX1, y: teleportY1 } },
+            };
+            service['_teleportChannels'].set([channel]);
+
+            expect(service.teleportChannels.length).toBe(one);
+            expect(service.teleportChannels[zero]).toEqual(channel);
         });
     });
 });

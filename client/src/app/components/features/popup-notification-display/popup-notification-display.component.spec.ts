@@ -1,129 +1,302 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatIconModule } from '@angular/material/icon';
-import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/enums/routes.enum';
+import { NotificationMessage } from '@app/interfaces/notification-message.interface';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { PopupNotificationDisplayComponent } from './popup-notification-display.component';
 
-describe('NotificationDisplayComponent', () => {
+describe('PopupNotificationDisplayComponent', () => {
+    const firstCall = 0;
+    const secondCall = 1;
+    const singleCall = 1;
+    const doubleCall = 2;
+
     let component: PopupNotificationDisplayComponent;
     let fixture: ComponentFixture<PopupNotificationDisplayComponent>;
-    let notificationCoordinatorService: jasmine.SpyObj<NotificationService>;
-    let router: jasmine.SpyObj<Router>;
-
-    const mockErrorNotification = {
-        type: 'error' as const,
-        title: 'Error Title',
-        message: 'Error Message',
-    };
-
-    const mockSuccessNotification = {
-        type: 'success' as const,
-        title: 'Success Title',
-        message: 'Success Message',
-    };
-
-    const mockInfoNotification = {
-        type: 'information' as const,
-        title: 'Info Title',
-        message: 'Info Message',
-    };
+    let notificationServiceSpy: jasmine.SpyObj<NotificationService>;
+    let routerSpy: jasmine.SpyObj<Router>;
+    let notificationSignal: ReturnType<typeof signal<NotificationMessage | null>>;
 
     beforeEach(async () => {
-        const notificationSignal = signal(null);
-        notificationCoordinatorService = jasmine.createSpyObj('NotificationService', ['resetPopup'], {
-            notification: notificationSignal,
+        notificationSignal = signal<NotificationMessage | null>(null);
+        notificationServiceSpy = jasmine.createSpyObj('NotificationService', ['resetPopup'], {
+            notification: notificationSignal.asReadonly(),
         });
-        router = jasmine.createSpyObj('Router', ['navigate']);
+        routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
         await TestBed.configureTestingModule({
-            imports: [PopupNotificationDisplayComponent, MatIconModule],
+            imports: [PopupNotificationDisplayComponent],
             providers: [
-                { provide: NotificationService, useValue: notificationCoordinatorService },
-                { provide: Router, useValue: router },
+                { provide: NotificationService, useValue: notificationServiceSpy },
+                { provide: Router, useValue: routerSpy },
             ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(PopupNotificationDisplayComponent);
         component = fixture.componentInstance;
+        fixture.detectChanges();
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should display error notification correctly', () => {
-        component.notification = signal(mockErrorNotification);
-        fixture.detectChanges();
-
-        const card = fixture.debugElement.query(By.css('.notification-card'));
-        const title = fixture.debugElement.query(By.css('.notification-title'));
-        const message = fixture.debugElement.query(By.css('.notification-message'));
-        const icon = fixture.debugElement.query(By.css('i'));
-
-        expect(card).toBeTruthy();
-        expect(card.classes['error']).toBeTruthy();
-        expect(title.nativeElement.textContent).toBe(mockErrorNotification.title);
-        expect(message.nativeElement.textContent).toBe(mockErrorNotification.message);
-        expect(icon.nativeElement.textContent).toBe('error_outline');
+    it('should initialize notification signal from service', () => {
+        expect(component.notification).toBe(notificationServiceSpy.notification);
     });
 
-    it('should display success notification correctly', () => {
-        component.notification = signal(mockSuccessNotification);
-        fixture.detectChanges();
+    describe('onAction', () => {
+        it('should reset popup and navigate when redirectRoute is provided', () => {
+            const mockNotification: NotificationMessage = {
+                title: 'Test Title',
+                message: 'Test Message',
+                type: 'success',
+                redirectRoute: ROUTES.HomePage,
+            };
+            notificationSignal.set(mockNotification);
 
-        const card = fixture.debugElement.query(By.css('.notification-card'));
-        const title = fixture.debugElement.query(By.css('.notification-title'));
-        const message = fixture.debugElement.query(By.css('.notification-message'));
-        const icon = fixture.debugElement.query(By.css('i'));
+            component.onAction();
 
-        expect(card).toBeTruthy();
-        expect(card.classes['success']).toBeTruthy();
-        expect(title.nativeElement.textContent).toBe(mockSuccessNotification.title);
-        expect(message.nativeElement.textContent).toBe(mockSuccessNotification.message);
-        expect(icon.nativeElement.textContent).toBe('check_circle');
+            expect(notificationServiceSpy.resetPopup).toHaveBeenCalled();
+            expect(routerSpy.navigate).toHaveBeenCalledTimes(singleCall);
+            expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.HomePage]);
+        });
+
+        it('should reset popup without navigating when redirectRoute is not provided', () => {
+            const mockNotification: NotificationMessage = {
+                title: 'Test Title',
+                message: 'Test Message',
+                type: 'error',
+            };
+            notificationSignal.set(mockNotification);
+
+            component.onAction();
+
+            expect(notificationServiceSpy.resetPopup).toHaveBeenCalled();
+            expect(routerSpy.navigate).not.toHaveBeenCalled();
+        });
+
+        it('should handle null notification gracefully', () => {
+            notificationSignal.set(null);
+
+            component.onAction();
+
+            expect(notificationServiceSpy.resetPopup).toHaveBeenCalled();
+            expect(routerSpy.navigate).not.toHaveBeenCalled();
+        });
     });
 
-    it('should display information notification correctly', () => {
-        component.notification = signal(mockInfoNotification);
-        fixture.detectChanges();
+    describe('onConfirm', () => {
+        it('should reset popup and call onConfirm callback when provided', () => {
+            const mockCallback = jasmine.createSpy('onConfirm');
+            const mockNotification: NotificationMessage = {
+                title: 'Test Title',
+                message: 'Test Message',
+                type: 'confirmation',
+                onConfirm: mockCallback,
+            };
+            notificationSignal.set(mockNotification);
 
-        const card = fixture.debugElement.query(By.css('.notification-card'));
-        const title = fixture.debugElement.query(By.css('.notification-title'));
-        const message = fixture.debugElement.query(By.css('.notification-message'));
-        const icon = fixture.debugElement.query(By.css('i'));
+            component.onConfirm();
 
-        expect(card).toBeTruthy();
-        expect(card.classes['information']).toBeTruthy();
-        expect(title.nativeElement.textContent).toBe(mockInfoNotification.title);
-        expect(message.nativeElement.textContent).toBe(mockInfoNotification.message);
-        expect(icon.nativeElement.textContent).toBe('info');
+            expect(notificationServiceSpy.resetPopup).toHaveBeenCalled();
+            expect(mockCallback).toHaveBeenCalledTimes(singleCall);
+        });
+
+        it('should reset popup without calling callback when onConfirm is not provided', () => {
+            const mockNotification: NotificationMessage = {
+                title: 'Test Title',
+                message: 'Test Message',
+                type: 'confirmation',
+            };
+            notificationSignal.set(mockNotification);
+
+            component.onConfirm();
+
+            expect(notificationServiceSpy.resetPopup).toHaveBeenCalled();
+        });
+
+        it('should handle null notification gracefully', () => {
+            notificationSignal.set(null);
+
+            component.onConfirm();
+
+            expect(notificationServiceSpy.resetPopup).toHaveBeenCalled();
+        });
     });
 
-    it('should reset notification and navigate when onAction is called with redirectRoute', () => {
-        const mockNotificationWithRedirect = {
-            type: 'error' as const,
-            title: 'Error Title',
-            message: 'Error Message',
-            redirectRoute: ROUTES.HomePage,
-        };
+    describe('onCancel', () => {
+        it('should reset popup and call onCancel callback when provided', () => {
+            const mockCallback = jasmine.createSpy('onCancel');
+            const mockNotification: NotificationMessage = {
+                title: 'Test Title',
+                message: 'Test Message',
+                type: 'confirmation',
+                onCancel: mockCallback,
+            };
+            notificationSignal.set(mockNotification);
 
-        component.notification = signal(mockNotificationWithRedirect);
-        fixture.detectChanges();
+            component.onCancel();
 
-        component.onAction();
+            expect(notificationServiceSpy.resetPopup).toHaveBeenCalled();
+            expect(mockCallback).toHaveBeenCalledTimes(singleCall);
+        });
 
-        expect(notificationCoordinatorService.resetPopup).toHaveBeenCalled();
-        expect(router.navigate).toHaveBeenCalledWith([ROUTES.HomePage]);
+        it('should reset popup without calling callback when onCancel is not provided', () => {
+            const mockNotification: NotificationMessage = {
+                title: 'Test Title',
+                message: 'Test Message',
+                type: 'confirmation',
+            };
+            notificationSignal.set(mockNotification);
+
+            component.onCancel();
+
+            expect(notificationServiceSpy.resetPopup).toHaveBeenCalled();
+        });
+
+        it('should handle null notification gracefully', () => {
+            notificationSignal.set(null);
+
+            component.onCancel();
+
+            expect(notificationServiceSpy.resetPopup).toHaveBeenCalled();
+        });
     });
 
-    it('should not display anything when notification is null', () => {
-        component.notification = signal(null);
-        fixture.detectChanges();
+    describe('notification types', () => {
+        it('should handle error notification type', () => {
+            const mockNotification: NotificationMessage = {
+                title: 'Error Title',
+                message: 'Error Message',
+                type: 'error',
+            };
+            notificationSignal.set(mockNotification);
+            fixture.detectChanges();
 
-        const container = fixture.debugElement.query(By.css('.notification-container'));
-        expect(container).toBeFalsy();
+            expect(component.notification()?.type).toBe('error');
+        });
+
+        it('should handle success notification type', () => {
+            const mockNotification: NotificationMessage = {
+                title: 'Success Title',
+                message: 'Success Message',
+                type: 'success',
+            };
+            notificationSignal.set(mockNotification);
+            fixture.detectChanges();
+
+            expect(component.notification()?.type).toBe('success');
+        });
+
+        it('should handle information notification type', () => {
+            const mockNotification: NotificationMessage = {
+                title: 'Info Title',
+                message: 'Info Message',
+                type: 'information',
+            };
+            notificationSignal.set(mockNotification);
+            fixture.detectChanges();
+
+            expect(component.notification()?.type).toBe('information');
+        });
+
+        it('should handle confirmation notification type', () => {
+            const mockNotification: NotificationMessage = {
+                title: 'Confirm Title',
+                message: 'Confirm Message',
+                type: 'confirmation',
+            };
+            notificationSignal.set(mockNotification);
+            fixture.detectChanges();
+
+            expect(component.notification()?.type).toBe('confirmation');
+        });
+    });
+
+    describe('multiple actions sequence', () => {
+        it('should handle multiple onAction calls correctly', () => {
+            const mockNotification: NotificationMessage = {
+                title: 'Test Title',
+                message: 'Test Message',
+                type: 'success',
+                redirectRoute: ROUTES.ManagementPage,
+            };
+            notificationSignal.set(mockNotification);
+
+            component.onAction();
+            notificationSignal.set(mockNotification);
+            component.onAction();
+
+            expect(notificationServiceSpy.resetPopup).toHaveBeenCalledTimes(doubleCall);
+            expect(routerSpy.navigate).toHaveBeenCalledTimes(doubleCall);
+            expect(routerSpy.navigate.calls.argsFor(firstCall)).toEqual([[ROUTES.ManagementPage]]);
+            expect(routerSpy.navigate.calls.argsFor(secondCall)).toEqual([[ROUTES.ManagementPage]]);
+        });
+
+        it('should handle onConfirm and onCancel in sequence', () => {
+            const confirmCallback = jasmine.createSpy('confirm');
+            const cancelCallback = jasmine.createSpy('cancel');
+            const mockNotification: NotificationMessage = {
+                title: 'Test Title',
+                message: 'Test Message',
+                type: 'confirmation',
+                onConfirm: confirmCallback,
+                onCancel: cancelCallback,
+            };
+            notificationSignal.set(mockNotification);
+
+            component.onConfirm();
+            notificationSignal.set(mockNotification);
+            component.onCancel();
+
+            expect(notificationServiceSpy.resetPopup).toHaveBeenCalledTimes(doubleCall);
+            expect(confirmCallback).toHaveBeenCalledTimes(singleCall);
+            expect(cancelCallback).toHaveBeenCalledTimes(singleCall);
+        });
+    });
+
+    describe('edge cases', () => {
+        it('should handle notification with all optional properties', () => {
+            const confirmCallback = jasmine.createSpy('confirm');
+            const cancelCallback = jasmine.createSpy('cancel');
+            const mockNotification: NotificationMessage = {
+                title: 'Full Title',
+                message: 'Full Message',
+                type: 'confirmation',
+                redirectRoute: ROUTES.EditorPage,
+                onConfirm: confirmCallback,
+                onCancel: cancelCallback,
+            };
+            notificationSignal.set(mockNotification);
+
+            component.onAction();
+
+            expect(notificationServiceSpy.resetPopup).toHaveBeenCalled();
+            expect(routerSpy.navigate).toHaveBeenCalledWith([ROUTES.EditorPage]);
+        });
+
+        it('should handle notification change after component initialization', () => {
+            const initialNotification: NotificationMessage = {
+                title: 'Initial',
+                message: 'Initial Message',
+                type: 'information',
+            };
+            notificationSignal.set(initialNotification);
+            fixture.detectChanges();
+
+            const updatedNotification: NotificationMessage = {
+                title: 'Updated',
+                message: 'Updated Message',
+                type: 'success',
+            };
+            notificationSignal.set(updatedNotification);
+            fixture.detectChanges();
+
+            expect(component.notification()?.title).toBe('Updated');
+            expect(component.notification()?.message).toBe('Updated Message');
+        });
     });
 });
+

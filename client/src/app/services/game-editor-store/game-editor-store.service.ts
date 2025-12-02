@@ -10,10 +10,10 @@ import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
 import { ROUTES } from '@app/enums/routes.enum';
 import { ExtendedGameEditorPlaceableDto, Inventory } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
-import { pickChangedProperties } from '@app/utils/object.utils';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
+import { pickChangedProperties } from '@app/utils/object.utils';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
@@ -72,9 +72,10 @@ export class GameEditorStoreService {
 
         const cleanedTiles = tiles.map((tile) => {
             const key = `${tile.x},${tile.y}`;
-            return tile.kind === TileKind.TELEPORT && !activeTeleportPositions.has(key)
-                ? { ...tile, kind: tile.kind, teleportChannel: undefined }
-                : tile;
+            if (tile.kind === TileKind.TELEPORT && !activeTeleportPositions.has(key) && !tile.teleportChannel) {
+                return { ...tile, teleportChannel: undefined };
+            }
+            return tile;
         });
 
         for (const channel of channels) {
@@ -368,9 +369,9 @@ export class GameEditorStoreService {
             channelNumber: channel.channelNumber,
             tiles: channel.tiles
                 ? {
-                      entryA: channel.tiles.entryA ? { ...channel.tiles.entryA } : undefined,
-                      entryB: channel.tiles.entryB ? { ...channel.tiles.entryB } : undefined,
-                  }
+                    entryA: channel.tiles.entryA ? { ...channel.tiles.entryA } : undefined,
+                    entryB: channel.tiles.entryB ? { ...channel.tiles.entryB } : undefined,
+                }
                 : { entryA: undefined, entryB: undefined },
         }));
     }

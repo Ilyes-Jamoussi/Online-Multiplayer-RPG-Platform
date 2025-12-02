@@ -1,13 +1,14 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
+import { InGameActionGateway } from '@app/modules/in-game/gateways/in-game-action/in-game-action.gateway';
 import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { validationExceptionFactory } from '@app/utils/validation/validation.util';
 import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Avatar } from '@common/enums/avatar.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { MapSize } from '@common/enums/map-size.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
@@ -19,7 +20,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import 'reflect-metadata';
 import { Server, Socket } from 'socket.io';
-import { InGameActionGateway } from '@app/modules/in-game/gateways/in-game-action/in-game-action.gateway';
 import { InGameGateway } from './in-game.gateway';
 
 describe('InGameGateway', () => {
@@ -40,6 +40,7 @@ describe('InGameGateway', () => {
     const SPEED = 2;
     const WINNER_ID = 'winner-123';
     const WINNER_NAME = 'Winner Player';
+    const ZERO = 0;
 
     const createMockSocket = (id: string = SOCKET_ID): jest.Mocked<Socket> => {
         return {
@@ -157,6 +158,7 @@ describe('InGameGateway', () => {
             findSessionByPlayerId: jest.fn(),
             removeSession: jest.fn(),
             storeGameStatistics: jest.fn(),
+            getGameStatistics: jest.fn(),
             boardBoat: jest.fn(),
             disembarkBoat: jest.fn(),
             sanctuaryRequest: jest.fn(),
@@ -435,6 +437,68 @@ describe('InGameGateway', () => {
             expect(mockServer.to).toHaveBeenCalledWith(IN_GAME_ID);
             expect(mockServer.mockBroadcastOperator.emit).toHaveBeenCalledWith(
                 InGameEvents.TurnTransitionEnded,
+                expect.objectContaining({
+                    success: true,
+                    data: session,
+                }),
+            );
+        });
+    });
+
+    describe('handleLoadGameStatistics', () => {
+        it('should emit LoadGameStatistics with game statistics', () => {
+            const gameStatistics = {
+                winnerId: WINNER_ID,
+                winnerName: WINNER_NAME,
+                playersStatistics: [],
+                globalStatistics: {
+                    gameDuration: '00:00:00',
+                    totalTurns: ZERO,
+                    tilesVisitedPercentage: ZERO,
+                    totalTeleportations: ZERO,
+                    doorsManipulatedPercentage: ZERO,
+                    sanctuariesUsedPercentage: ZERO,
+                    flagHoldersCount: ZERO,
+                },
+            };
+            inGameService.getGameStatistics.mockReturnValue(gameStatistics);
+
+            gateway.handleLoadGameStatistics(mockSocket, SESSION_ID);
+
+            expect(inGameService.getGameStatistics).toHaveBeenCalledWith(SESSION_ID);
+            expect(mockSocket.emit).toHaveBeenCalledWith(
+                InGameEvents.LoadGameStatistics,
+                expect.objectContaining({
+                    success: true,
+                    data: gameStatistics,
+                }),
+            );
+        });
+
+        it('should emit error when getGameStatistics throws', () => {
+            inGameService.getGameStatistics.mockImplementation(() => {
+                throw new Error('Test error');
+            });
+
+            gateway.handleLoadGameStatistics(mockSocket, SESSION_ID);
+
+            expect(mockSocket.emit).toHaveBeenCalledWith(NotificationEvents.ErrorMessage, {
+                success: false,
+                message: 'Impossible de charger les statistiques de la partie',
+            });
+        });
+    });
+
+    describe('handleSessionUpdated', () => {
+        it('should emit SessionUpdated', () => {
+            const session = createMockInGameSession();
+            const payload = { session };
+
+            gateway.handleSessionUpdated(payload);
+
+            expect(mockServer.to).toHaveBeenCalledWith(IN_GAME_ID);
+            expect(mockServer.mockBroadcastOperator.emit).toHaveBeenCalledWith(
+                InGameEvents.SessionUpdated,
                 expect.objectContaining({
                     success: true,
                     data: session,

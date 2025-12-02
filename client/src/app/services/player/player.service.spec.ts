@@ -2,6 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { BonusType } from '@app/enums/character-creation.enum';
+import { TeamColor } from '@app/enums/team-color.enum';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationService } from '@app/services/notification/notification.service';
@@ -21,6 +22,11 @@ const TEST_HEALTH_10 = 10;
 const TEST_ACTIONS_3 = 3;
 const TEST_MAX_PLAYERS_4 = 4;
 const TEST_RANDOM_VALUE = 0.1;
+const TEST_X = 5;
+const TEST_Y = 10;
+const TEST_TEAM_NUMBER_1 = 1;
+const TEST_TEAM_NUMBER_2 = 2;
+const TEST_BOAT_ID = 'boat1';
 
 describe('PlayerService', () => {
     let service: PlayerService;
@@ -61,7 +67,7 @@ describe('PlayerService', () => {
             'onSessionJoined',
         ]);
 
-        mockInGameSocketService = jasmine.createSpyObj('InGameSocketService', ['onPlayerUpdated']);
+        mockInGameSocketService = jasmine.createSpyObj('InGameSocketService', ['onPlayerUpdated', 'playerBoardBoat', 'playerDisembarkBoat']);
         mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
@@ -254,6 +260,47 @@ describe('PlayerService', () => {
         it('should update actions remaining', () => {
             service.updateActionsRemaining(TEST_ACTIONS_3);
             expect(service.actionsRemaining()).toBe(TEST_ACTIONS_3);
+        });
+    });
+
+    describe('boatAction', () => {
+        it('should call boardBoat when player is not on boat', () => {
+            service.updatePlayer({ onBoatId: undefined });
+            service.boatAction(TEST_X, TEST_Y);
+            expect(mockInGameSocketService.playerBoardBoat).toHaveBeenCalledWith('session1', TEST_X, TEST_Y);
+            expect(mockInGameSocketService.playerDisembarkBoat).not.toHaveBeenCalled();
+        });
+
+        it('should call disembarkBoat when player is on boat', () => {
+            service.updatePlayer({ onBoatId: TEST_BOAT_ID });
+            service.boatAction(TEST_X, TEST_Y);
+            expect(mockInGameSocketService.playerDisembarkBoat).toHaveBeenCalledWith('session1', TEST_X, TEST_Y);
+            expect(mockInGameSocketService.playerBoardBoat).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('getTeamColor', () => {
+        it('should return undefined when teamNumber is undefined', () => {
+            const result = service.getTeamColor(undefined);
+            expect(result).toBeUndefined();
+        });
+
+        it('should return undefined when myTeamNumber is undefined', () => {
+            service.updatePlayer({ teamNumber: undefined });
+            const result = service.getTeamColor(TEST_TEAM_NUMBER_1);
+            expect(result).toBeUndefined();
+        });
+
+        it('should return MyTeam when teamNumber matches myTeamNumber', () => {
+            service.updatePlayer({ teamNumber: TEST_TEAM_NUMBER_1 });
+            const result = service.getTeamColor(TEST_TEAM_NUMBER_1);
+            expect(result).toBe(TeamColor.MyTeam);
+        });
+
+        it('should return EnemyTeam when teamNumber does not match myTeamNumber', () => {
+            service.updatePlayer({ teamNumber: TEST_TEAM_NUMBER_1 });
+            const result = service.getTeamColor(TEST_TEAM_NUMBER_2);
+            expect(result).toBe(TeamColor.EnemyTeam);
         });
     });
 
