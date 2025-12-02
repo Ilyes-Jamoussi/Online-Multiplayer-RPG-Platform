@@ -73,6 +73,47 @@ describe('SessionService', () => {
         ...overrides,
     });
 
+    const expectVirtualPlayerBaseStats = (virtualPlayer: ReturnType<typeof service.addVirtualPlayer>[number] | undefined): void => {
+        expectBaseStats(virtualPlayer);
+        expectBonusStats(virtualPlayer);
+        expectPositionStats(virtualPlayer);
+        expectCombatStats(virtualPlayer);
+        expectBoatStats(virtualPlayer);
+    };
+
+    const expectBaseStats = (virtualPlayer: ReturnType<typeof service.addVirtualPlayer>[number] | undefined): void => {
+        expect(virtualPlayer?.baseHealth).toBe(BASE_STAT_VALUE);
+        expect(virtualPlayer?.baseSpeed).toBe(BASE_STAT_VALUE);
+        expect(virtualPlayer?.baseAttack).toBe(BASE_STAT_VALUE);
+        expect(virtualPlayer?.baseDefense).toBe(BASE_STAT_VALUE);
+    };
+
+    const expectBonusStats = (virtualPlayer: ReturnType<typeof service.addVirtualPlayer>[number] | undefined): void => {
+        expect(virtualPlayer?.attackBonus).toBe(ZERO);
+        expect(virtualPlayer?.defenseBonus).toBe(ZERO);
+    };
+
+    const expectPositionStats = (virtualPlayer: ReturnType<typeof service.addVirtualPlayer>[number] | undefined): void => {
+        expect(virtualPlayer?.x).toBe(ZERO);
+        expect(virtualPlayer?.y).toBe(ZERO);
+        expect(virtualPlayer?.isInGame).toBe(false);
+        expect(virtualPlayer?.startPointId).toBe('');
+        expect(virtualPlayer?.actionsRemaining).toBe(ONE);
+    };
+
+    const expectCombatStats = (virtualPlayer: ReturnType<typeof service.addVirtualPlayer>[number] | undefined): void => {
+        expect(virtualPlayer?.combatCount).toBe(ZERO);
+        expect(virtualPlayer?.combatWins).toBe(ZERO);
+        expect(virtualPlayer?.combatLosses).toBe(ZERO);
+        expect(virtualPlayer?.combatDraws).toBe(ZERO);
+        expect(virtualPlayer?.hasCombatBonus).toBe(false);
+    };
+
+    const expectBoatStats = (virtualPlayer: ReturnType<typeof service.addVirtualPlayer>[number] | undefined): void => {
+        expect(virtualPlayer?.boatSpeedBonus).toBe(ZERO);
+        expect(virtualPlayer?.boatSpeed).toBe(ZERO);
+    };
+
     beforeEach(() => {
         mockEventEmitter = {
             emit: jest.fn(),
@@ -758,24 +799,7 @@ describe('SessionService', () => {
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Defensive);
 
             const virtualPlayer = players.find((p) => p.virtualPlayerType);
-            expect(virtualPlayer?.baseHealth).toBe(BASE_STAT_VALUE);
-            expect(virtualPlayer?.baseSpeed).toBe(BASE_STAT_VALUE);
-            expect(virtualPlayer?.baseAttack).toBe(BASE_STAT_VALUE);
-            expect(virtualPlayer?.baseDefense).toBe(BASE_STAT_VALUE);
-            expect(virtualPlayer?.attackBonus).toBe(ZERO);
-            expect(virtualPlayer?.defenseBonus).toBe(ZERO);
-            expect(virtualPlayer?.x).toBe(ZERO);
-            expect(virtualPlayer?.y).toBe(ZERO);
-            expect(virtualPlayer?.isInGame).toBe(false);
-            expect(virtualPlayer?.startPointId).toBe('');
-            expect(virtualPlayer?.actionsRemaining).toBe(ONE);
-            expect(virtualPlayer?.combatCount).toBe(ZERO);
-            expect(virtualPlayer?.combatWins).toBe(ZERO);
-            expect(virtualPlayer?.combatLosses).toBe(ZERO);
-            expect(virtualPlayer?.combatDraws).toBe(ZERO);
-            expect(virtualPlayer?.hasCombatBonus).toBe(false);
-            expect(virtualPlayer?.boatSpeedBonus).toBe(ZERO);
-            expect(virtualPlayer?.boatSpeed).toBe(ZERO);
+            expectVirtualPlayerBaseStats(virtualPlayer);
         });
 
         it('should create virtual player with correct virtualPlayerType', () => {

@@ -20,6 +20,7 @@ export enum GameEditorIssuesEnum {
     FlagPlacement = 'flagPlacement',
     NameValidation = 'nameValidation',
     DescriptionValidation = 'descriptionValidation',
+    TeleportChannels = 'teleportChannels',
 }
 
 export type GameEditorIssues = {
@@ -30,6 +31,7 @@ export type GameEditorIssues = {
     [GameEditorIssuesEnum.FlagPlacement]: GameEditorIssue;
     [GameEditorIssuesEnum.NameValidation]: GameEditorIssue;
     [GameEditorIssuesEnum.DescriptionValidation]: GameEditorIssue;
+    [GameEditorIssuesEnum.TeleportChannels]: GameEditorIssue;
 };
 export interface GameEditorIssue {
     message?: string;

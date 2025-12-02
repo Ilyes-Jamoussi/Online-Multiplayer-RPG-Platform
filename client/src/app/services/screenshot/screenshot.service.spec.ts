@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { SCREENSHOT_QUALITY, SCREENSHOT_SCALE } from '@app/constants/screenshot.constants';
 import { ScreenshotService } from './screenshot.service';
-import { SCREENSHOT_SCALE, SCREENSHOT_QUALITY } from '@app/constants/screenshot.constants';
 
 const TEST_TIMEOUT_DURATION = 5000;
 const TEST_SPEC_TIMEOUT = 10000;
@@ -57,5 +57,4 @@ describe('ScreenshotService', () => {
         },
         TEST_SPEC_TIMEOUT,
     );
-
 });

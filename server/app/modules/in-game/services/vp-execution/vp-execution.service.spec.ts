@@ -1,8 +1,11 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { VIRTUAL_PLAYER_ACTION_DELAY_MS, VIRTUAL_PLAYER_MOVEMENT_DELAY_MS } from '@app/constants/virtual-player.constants';
+import { PathActionType } from '@app/enums/path-action-type.enum';
+import { PointOfInterestType } from '@app/enums/point-of-interest-type.enum';
 import { EvaluatedTarget, VPDecision } from '@app/interfaces/vp-gameplay.interface';
 import { PathAction, PathResult } from '@app/interfaces/vp-pathfinding.interface';
 import { ActionService } from '@app/modules/in-game/services/action/action.service';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
 import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { VPGameplayService } from '@app/modules/in-game/services/vp-gameplay/vp-gameplay.service';
@@ -22,6 +25,7 @@ describe('VPExecutionService', () => {
     let vpGameplayService: jest.Mocked<VPGameplayService>;
     let sessionRepository: jest.Mocked<InGameSessionRepository>;
     let actionService: jest.Mocked<ActionService>;
+    let gameCache: jest.Mocked<GameCacheService>;
 
     const SESSION_ID = 'session-123';
     const PLAYER_ID = 'player-1';
@@ -35,6 +39,9 @@ describe('VPExecutionService', () => {
     const ZERO = 0;
     const ONE = 1;
     const FOUR = 4;
+    const ENEMY_PLAYER_ID = 'enemy-player-1';
+    const BLOCKED_POSITION_X = 6;
+    const BLOCKED_POSITION_Y = 10;
 
     const createMockPosition = (overrides: Partial<Position> = {}): Position => ({
         x: POSITION_X,
@@ -86,14 +93,14 @@ describe('VPExecutionService', () => {
     });
 
     const createMockPathAction = (overrides: Partial<PathAction> = {}): PathAction => ({
-        type: 'move',
+        type: PathActionType.MOVE,
         orientation: Orientation.N,
         position: createMockPosition(),
         ...overrides,
     });
 
     const createMockEvaluatedTarget = (overrides: Partial<EvaluatedTarget> = {}): EvaluatedTarget => ({
-        type: 'enemy',
+        type: PointOfInterestType.ENEMY,
         position: createMockPosition(),
         path: createMockPathResult(),
         priorityScore: 100,
@@ -147,6 +154,11 @@ describe('VPExecutionService', () => {
             getActiveCombat: jest.fn(),
         };
 
+        const mockGameCache = {
+            getNextPosition: jest.fn(),
+            getTileOccupant: jest.fn(),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 VPExecutionService,
@@ -166,6 +178,10 @@ describe('VPExecutionService', () => {
                     provide: ActionService,
                     useValue: mockActionService,
                 },
+                {
+                    provide: GameCacheService,
+                    useValue: mockGameCache,
+                },
             ],
         }).compile();
 
@@ -174,6 +190,7 @@ describe('VPExecutionService', () => {
         vpGameplayService = module.get(VPGameplayService);
         sessionRepository = module.get(InGameSessionRepository);
         actionService = module.get(ActionService);
+        gameCache = module.get(GameCacheService);
     });
 
     afterEach(() => {
@@ -357,7 +374,7 @@ describe('VPExecutionService', () => {
 
         it('should perform target action when no remaining actions', () => {
             const session = createMockSession();
-            const target = createMockEvaluatedTarget({ type: 'enemy' });
+            const target = createMockEvaluatedTarget({ type: PointOfInterestType.ENEMY });
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
 
@@ -372,7 +389,7 @@ describe('VPExecutionService', () => {
                     [PLAYER_ID]: createMockPlayer({ id: PLAYER_ID, speed: ZERO, boatSpeed: ZERO }),
                 },
             });
-            const action = createMockPathAction({ type: 'move' });
+            const action = createMockPathAction({ type: PathActionType.MOVE });
             const target = createMockEvaluatedTarget();
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
@@ -384,7 +401,7 @@ describe('VPExecutionService', () => {
 
         it('should end turn when action execution fails', () => {
             const session = createMockSession();
-            const action = createMockPathAction({ type: 'move' });
+            const action = createMockPathAction({ type: PathActionType.MOVE });
             const target = createMockEvaluatedTarget();
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
@@ -397,9 +414,50 @@ describe('VPExecutionService', () => {
             expect(gameplayService.endPlayerTurn).toHaveBeenCalledWith(SESSION_ID, PLAYER_ID);
         });
 
+        it('should return when tryAttackBlockingEnemy succeeds', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID]: createMockPlayer({ id: PLAYER_ID }),
+                    [ENEMY_PLAYER_ID]: createMockPlayer({ id: ENEMY_PLAYER_ID, teamNumber: 2 }),
+                },
+                mode: GameMode.CLASSIC,
+            });
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
+            const target = createMockEvaluatedTarget();
+            sessionRepository.findById.mockReturnValue(session);
+            actionService.getActiveCombat.mockReturnValue(null);
+            gameplayService.movePlayer.mockImplementation(() => {
+                throw new Error('Test error');
+            });
+            gameCache.getNextPosition.mockReturnValue({ x: BLOCKED_POSITION_X, y: BLOCKED_POSITION_Y });
+            gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
+
+            service['executePathActions'](SESSION_ID, PLAYER_ID, [action], target, false);
+
+            expect(actionService.attackPlayer).toHaveBeenCalledWith(SESSION_ID, PLAYER_ID, { x: BLOCKED_POSITION_X, y: BLOCKED_POSITION_Y });
+            expect(gameplayService.endPlayerTurn).not.toHaveBeenCalled();
+        });
+
+        it('should end turn when tryAttackBlockingEnemy fails', () => {
+            const session = createMockSession();
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
+            const target = createMockEvaluatedTarget();
+            sessionRepository.findById.mockReturnValue(session);
+            actionService.getActiveCombat.mockReturnValue(null);
+            gameplayService.movePlayer.mockImplementation(() => {
+                throw new Error('Test error');
+            });
+            gameCache.getNextPosition.mockReturnValue({ x: BLOCKED_POSITION_X, y: BLOCKED_POSITION_Y });
+            gameCache.getTileOccupant.mockReturnValue(null);
+
+            service['executePathActions'](SESSION_ID, PLAYER_ID, [action], target, false);
+
+            expect(gameplayService.endPlayerTurn).toHaveBeenCalledWith(SESSION_ID, PLAYER_ID);
+        });
+
         it('should execute move action with movement delay', () => {
             const session = createMockSession();
-            const action = createMockPathAction({ type: 'move' });
+            const action = createMockPathAction({ type: PathActionType.MOVE });
             const target = createMockEvaluatedTarget();
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
@@ -412,7 +470,7 @@ describe('VPExecutionService', () => {
 
         it('should execute teleport action with movement delay', () => {
             const session = createMockSession();
-            const action = createMockPathAction({ type: 'teleport' });
+            const action = createMockPathAction({ type: PathActionType.TELEPORT });
             const target = createMockEvaluatedTarget();
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
@@ -425,7 +483,7 @@ describe('VPExecutionService', () => {
 
         it('should execute openDoor action with action delay', () => {
             const session = createMockSession();
-            const action = createMockPathAction({ type: 'openDoor' });
+            const action = createMockPathAction({ type: PathActionType.OPENDOOR });
             const target = createMockEvaluatedTarget();
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
@@ -438,7 +496,7 @@ describe('VPExecutionService', () => {
 
         it('should execute boardBoat action with action delay', () => {
             const session = createMockSession();
-            const action = createMockPathAction({ type: 'boardBoat' });
+            const action = createMockPathAction({ type: PathActionType.BOARDBOAT });
             const target = createMockEvaluatedTarget();
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
@@ -451,7 +509,7 @@ describe('VPExecutionService', () => {
 
         it('should execute disembarkBoat action with action delay', () => {
             const session = createMockSession();
-            const action = createMockPathAction({ type: 'disembarkBoat' });
+            const action = createMockPathAction({ type: PathActionType.DISEMBARKBOAT });
             const target = createMockEvaluatedTarget();
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
@@ -466,7 +524,7 @@ describe('VPExecutionService', () => {
     describe('canExecutePathAction', () => {
         it('should return false when move action and no speed or boatSpeed', () => {
             const player = createMockPlayer({ speed: ZERO, boatSpeed: ZERO });
-            const action = createMockPathAction({ type: 'move' });
+            const action = createMockPathAction({ type: PathActionType.MOVE });
 
             const result = service['canExecutePathAction'](player, action);
 
@@ -475,7 +533,7 @@ describe('VPExecutionService', () => {
 
         it('should return true when move action and has speed', () => {
             const player = createMockPlayer({ speed: SPEED });
-            const action = createMockPathAction({ type: 'move' });
+            const action = createMockPathAction({ type: PathActionType.MOVE });
 
             const result = service['canExecutePathAction'](player, action);
 
@@ -484,7 +542,7 @@ describe('VPExecutionService', () => {
 
         it('should return true when move action and has boatSpeed', () => {
             const player = createMockPlayer({ speed: ZERO, boatSpeed: BOAT_SPEED });
-            const action = createMockPathAction({ type: 'move' });
+            const action = createMockPathAction({ type: PathActionType.MOVE });
 
             const result = service['canExecutePathAction'](player, action);
 
@@ -493,16 +551,25 @@ describe('VPExecutionService', () => {
 
         it('should return true when teleport action and has speed', () => {
             const player = createMockPlayer({ speed: SPEED });
-            const action = createMockPathAction({ type: 'teleport' });
+            const action = createMockPathAction({ type: PathActionType.TELEPORT });
 
             const result = service['canExecutePathAction'](player, action);
 
             expect(result).toBe(true);
         });
 
+        it('should return false when teleport action and no speed or boatSpeed', () => {
+            const player = createMockPlayer({ speed: ZERO, boatSpeed: ZERO });
+            const action = createMockPathAction({ type: PathActionType.TELEPORT });
+
+            const result = service['canExecutePathAction'](player, action);
+
+            expect(result).toBe(false);
+        });
+
         it('should return false when action action and no actionsRemaining', () => {
             const player = createMockPlayer({ actionsRemaining: ZERO });
-            const action = createMockPathAction({ type: 'openDoor' });
+            const action = createMockPathAction({ type: PathActionType.OPENDOOR });
 
             const result = service['canExecutePathAction'](player, action);
 
@@ -511,7 +578,7 @@ describe('VPExecutionService', () => {
 
         it('should return true when action action and has actionsRemaining', () => {
             const player = createMockPlayer({ actionsRemaining: ACTIONS_REMAINING });
-            const action = createMockPathAction({ type: 'openDoor' });
+            const action = createMockPathAction({ type: PathActionType.OPENDOOR });
 
             const result = service['canExecutePathAction'](player, action);
 
@@ -520,7 +587,7 @@ describe('VPExecutionService', () => {
 
         it('should return true when boardBoat action and has actionsRemaining', () => {
             const player = createMockPlayer({ actionsRemaining: ACTIONS_REMAINING });
-            const action = createMockPathAction({ type: 'boardBoat' });
+            const action = createMockPathAction({ type: PathActionType.BOARDBOAT });
 
             const result = service['canExecutePathAction'](player, action);
 
@@ -529,7 +596,7 @@ describe('VPExecutionService', () => {
 
         it('should return true when disembarkBoat action and has actionsRemaining', () => {
             const player = createMockPlayer({ actionsRemaining: ACTIONS_REMAINING });
-            const action = createMockPathAction({ type: 'disembarkBoat' });
+            const action = createMockPathAction({ type: PathActionType.DISEMBARKBOAT });
 
             const result = service['canExecutePathAction'](player, action);
 
@@ -539,7 +606,7 @@ describe('VPExecutionService', () => {
 
     describe('executeSingleAction', () => {
         it('should execute move action', () => {
-            const action = createMockPathAction({ type: 'move', orientation: Orientation.N });
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
 
             const result = service['executeSingleAction'](SESSION_ID, PLAYER_ID, action);
 
@@ -547,8 +614,26 @@ describe('VPExecutionService', () => {
             expect(gameplayService.movePlayer).toHaveBeenCalledWith(SESSION_ID, PLAYER_ID, Orientation.N);
         });
 
+        it('should execute move action without orientation', () => {
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: undefined });
+
+            const result = service['executeSingleAction'](SESSION_ID, PLAYER_ID, action);
+
+            expect(result).toBe(true);
+            expect(gameplayService.movePlayer).not.toHaveBeenCalled();
+        });
+
+        it('should execute teleport action without orientation', () => {
+            const action = createMockPathAction({ type: PathActionType.TELEPORT, orientation: undefined });
+
+            const result = service['executeSingleAction'](SESSION_ID, PLAYER_ID, action);
+
+            expect(result).toBe(true);
+            expect(gameplayService.movePlayer).not.toHaveBeenCalled();
+        });
+
         it('should execute teleport action', () => {
-            const action = createMockPathAction({ type: 'teleport', orientation: Orientation.S });
+            const action = createMockPathAction({ type: PathActionType.TELEPORT, orientation: Orientation.S });
 
             const result = service['executeSingleAction'](SESSION_ID, PLAYER_ID, action);
 
@@ -558,7 +643,7 @@ describe('VPExecutionService', () => {
 
         it('should execute openDoor action', () => {
             const position = createMockPosition();
-            const action = createMockPathAction({ type: 'openDoor', position });
+            const action = createMockPathAction({ type: PathActionType.OPENDOOR, position });
 
             const result = service['executeSingleAction'](SESSION_ID, PLAYER_ID, action);
 
@@ -568,7 +653,7 @@ describe('VPExecutionService', () => {
 
         it('should execute boardBoat action', () => {
             const position = createMockPosition();
-            const action = createMockPathAction({ type: 'boardBoat', position });
+            const action = createMockPathAction({ type: PathActionType.BOARDBOAT, position });
 
             const result = service['executeSingleAction'](SESSION_ID, PLAYER_ID, action);
 
@@ -578,7 +663,7 @@ describe('VPExecutionService', () => {
 
         it('should execute disembarkBoat action', () => {
             const position = createMockPosition();
-            const action = createMockPathAction({ type: 'disembarkBoat', position });
+            const action = createMockPathAction({ type: PathActionType.DISEMBARKBOAT, position });
 
             const result = service['executeSingleAction'](SESSION_ID, PLAYER_ID, action);
 
@@ -595,12 +680,175 @@ describe('VPExecutionService', () => {
         });
 
         it('should return false when action throws error', () => {
-            const action = createMockPathAction({ type: 'move', orientation: Orientation.N });
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
             gameplayService.movePlayer.mockImplementation(() => {
                 throw new Error('Test error');
             });
 
             const result = service['executeSingleAction'](SESSION_ID, PLAYER_ID, action);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when openDoor action throws error', () => {
+            const position = createMockPosition();
+            const action = createMockPathAction({ type: PathActionType.OPENDOOR, position });
+            gameplayService.toggleDoorAction.mockImplementation(() => {
+                throw new Error('Test error');
+            });
+
+            const result = service['executeSingleAction'](SESSION_ID, PLAYER_ID, action);
+
+            expect(result).toBe(false);
+        });
+    });
+
+    describe('tryAttackBlockingEnemy', () => {
+        it('should return false when action type is not MOVE', () => {
+            const action = createMockPathAction({ type: PathActionType.TELEPORT, orientation: Orientation.N });
+
+            const result = service['tryAttackBlockingEnemy'](SESSION_ID, PLAYER_ID, action);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when action has no orientation', () => {
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: undefined });
+
+            const result = service['tryAttackBlockingEnemy'](SESSION_ID, PLAYER_ID, action);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when player is not valid', () => {
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
+            sessionRepository.findById.mockReturnValue(null);
+
+            const result = service['tryAttackBlockingEnemy'](SESSION_ID, PLAYER_ID, action);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when player has no actions remaining', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID]: createMockPlayer({ id: PLAYER_ID, actionsRemaining: ZERO }),
+                },
+            });
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
+            sessionRepository.findById.mockReturnValue(session);
+
+            const result = service['tryAttackBlockingEnemy'](SESSION_ID, PLAYER_ID, action);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when no occupant found', () => {
+            const session = createMockSession();
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
+            sessionRepository.findById.mockReturnValue(session);
+            gameCache.getNextPosition.mockReturnValue({ x: BLOCKED_POSITION_X, y: BLOCKED_POSITION_Y });
+            gameCache.getTileOccupant.mockReturnValue(null);
+
+            const result = service['tryAttackBlockingEnemy'](SESSION_ID, PLAYER_ID, action);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when session is not found', () => {
+            const session = createMockSession();
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
+            sessionRepository.findById.mockReturnValueOnce(session).mockReturnValueOnce(null);
+            gameCache.getNextPosition.mockReturnValue({ x: BLOCKED_POSITION_X, y: BLOCKED_POSITION_Y });
+            gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
+
+            const result = service['tryAttackBlockingEnemy'](SESSION_ID, PLAYER_ID, action);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when occupant is not found', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID]: createMockPlayer({ id: PLAYER_ID }),
+                },
+            });
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
+            sessionRepository.findById.mockReturnValue(session);
+            gameCache.getNextPosition.mockReturnValue({ x: BLOCKED_POSITION_X, y: BLOCKED_POSITION_Y });
+            gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
+
+            const result = service['tryAttackBlockingEnemy'](SESSION_ID, PLAYER_ID, action);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when occupant has no health', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [PLAYER_ID]: createMockPlayer({ id: PLAYER_ID }),
+                    [ENEMY_PLAYER_ID]: createMockPlayer({ id: ENEMY_PLAYER_ID, health: ZERO }),
+                },
+            });
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
+            sessionRepository.findById.mockReturnValue(session);
+            gameCache.getNextPosition.mockReturnValue({ x: BLOCKED_POSITION_X, y: BLOCKED_POSITION_Y });
+            gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
+
+            const result = service['tryAttackBlockingEnemy'](SESSION_ID, PLAYER_ID, action);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when occupant is teammate in CTF mode', () => {
+            const session = createMockSession({
+                mode: GameMode.CTF,
+                inGamePlayers: {
+                    [PLAYER_ID]: createMockPlayer({ id: PLAYER_ID, teamNumber: 1 }),
+                    [ENEMY_PLAYER_ID]: createMockPlayer({ id: ENEMY_PLAYER_ID, teamNumber: 1 }),
+                },
+            });
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
+            sessionRepository.findById.mockReturnValue(session);
+            gameCache.getNextPosition.mockReturnValue({ x: BLOCKED_POSITION_X, y: BLOCKED_POSITION_Y });
+            gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
+
+            const result = service['tryAttackBlockingEnemy'](SESSION_ID, PLAYER_ID, action);
+
+            expect(result).toBe(false);
+        });
+
+        it('should attack blocking enemy and return true', () => {
+            const session = createMockSession({
+                mode: GameMode.CLASSIC,
+                inGamePlayers: {
+                    [PLAYER_ID]: createMockPlayer({ id: PLAYER_ID, teamNumber: 1 }),
+                    [ENEMY_PLAYER_ID]: createMockPlayer({ id: ENEMY_PLAYER_ID, teamNumber: 2 }),
+                },
+            });
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
+            const blockedPosition = { x: BLOCKED_POSITION_X, y: BLOCKED_POSITION_Y };
+            sessionRepository.findById.mockReturnValue(session);
+            gameCache.getNextPosition.mockReturnValue(blockedPosition);
+            gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
+            const loggerSpy = jest.spyOn(service['logger'], 'debug');
+
+            const result = service['tryAttackBlockingEnemy'](SESSION_ID, PLAYER_ID, action);
+
+            expect(result).toBe(true);
+            expect(actionService.attackPlayer).toHaveBeenCalledWith(SESSION_ID, PLAYER_ID, blockedPosition);
+            expect(loggerSpy).toHaveBeenCalled();
+        });
+
+        it('should return false when exception is thrown', () => {
+            const session = createMockSession();
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
+            sessionRepository.findById.mockReturnValue(session);
+            gameCache.getNextPosition.mockImplementation(() => {
+                throw new Error('Test error');
+            });
+
+            const result = service['tryAttackBlockingEnemy'](SESSION_ID, PLAYER_ID, action);
 
             expect(result).toBe(false);
         });
@@ -612,7 +860,7 @@ describe('VPExecutionService', () => {
         });
 
         it('should return early when player is not valid', () => {
-            const target = createMockEvaluatedTarget({ type: 'enemy' });
+            const target = createMockEvaluatedTarget({ type: PointOfInterestType.ENEMY });
             sessionRepository.findById.mockReturnValue(null);
 
             service['performTargetAction'](SESSION_ID, PLAYER_ID, target, false);
@@ -622,7 +870,7 @@ describe('VPExecutionService', () => {
 
         it('should return early when player is in combat', () => {
             const session = createMockSession();
-            const target = createMockEvaluatedTarget({ type: 'enemy' });
+            const target = createMockEvaluatedTarget({ type: PointOfInterestType.ENEMY });
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue({ playerAId: PLAYER_ID, playerBId: 'other-player' });
 
@@ -637,7 +885,7 @@ describe('VPExecutionService', () => {
                     [PLAYER_ID]: createMockPlayer({ id: PLAYER_ID, actionsRemaining: ZERO }),
                 },
             });
-            const target = createMockEvaluatedTarget({ type: 'enemy' });
+            const target = createMockEvaluatedTarget({ type: PointOfInterestType.ENEMY });
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
 
@@ -649,7 +897,7 @@ describe('VPExecutionService', () => {
         it('should attack enemy target', () => {
             const session = createMockSession();
             const position = createMockPosition();
-            const target = createMockEvaluatedTarget({ type: 'enemy', position });
+            const target = createMockEvaluatedTarget({ type: PointOfInterestType.ENEMY, position });
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
 
@@ -661,7 +909,7 @@ describe('VPExecutionService', () => {
         it('should attack flagCarrier target', () => {
             const session = createMockSession();
             const position = createMockPosition();
-            const target = createMockEvaluatedTarget({ type: 'flagCarrier', position });
+            const target = createMockEvaluatedTarget({ type: PointOfInterestType.FLAGCARRIER, position });
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
 
@@ -673,7 +921,7 @@ describe('VPExecutionService', () => {
         it('should perform healSanctuary action', () => {
             const session = createMockSession();
             const position = createMockPosition();
-            const target = createMockEvaluatedTarget({ type: 'healSanctuary', position });
+            const target = createMockEvaluatedTarget({ type: PointOfInterestType.HEALSANCTUARY, position });
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
             vpGameplayService.makeDecision.mockReturnValue({ target: null, allEvaluatedTargets: [], useDoubleAction: false });
@@ -687,7 +935,7 @@ describe('VPExecutionService', () => {
         it('should perform fightSanctuary action with useDoubleAction', () => {
             const session = createMockSession();
             const position = createMockPosition();
-            const target = createMockEvaluatedTarget({ type: 'fightSanctuary', position });
+            const target = createMockEvaluatedTarget({ type: PointOfInterestType.FIGHTSANCTUARY, position });
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
             vpGameplayService.makeDecision.mockReturnValue({ target: null, allEvaluatedTargets: [], useDoubleAction: false });
@@ -698,23 +946,21 @@ describe('VPExecutionService', () => {
             jest.advanceTimersByTime(VIRTUAL_PLAYER_ACTION_DELAY_MS);
         });
 
-        it('should pick up flag target', () => {
+        it('should continue turn for flag target', () => {
             const session = createMockSession();
-            const position = createMockPosition();
-            const target = createMockEvaluatedTarget({ type: 'flag', position });
+            const target = createMockEvaluatedTarget({ type: PointOfInterestType.FLAG });
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
             vpGameplayService.makeDecision.mockReturnValue({ target: null, allEvaluatedTargets: [], useDoubleAction: false });
 
             service['performTargetAction'](SESSION_ID, PLAYER_ID, target, false);
 
-            expect(gameplayService.pickUpFlag).toHaveBeenCalledWith(SESSION_ID, PLAYER_ID, position);
             jest.advanceTimersByTime(VIRTUAL_PLAYER_ACTION_DELAY_MS);
         });
 
         it('should continue turn for escape target', () => {
             const session = createMockSession();
-            const target = createMockEvaluatedTarget({ type: 'escape' });
+            const target = createMockEvaluatedTarget({ type: PointOfInterestType.ESCAPE });
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
             vpGameplayService.makeDecision.mockReturnValue({ target: null, allEvaluatedTargets: [], useDoubleAction: false });
@@ -726,7 +972,7 @@ describe('VPExecutionService', () => {
 
         it('should continue turn for guardPoint target', () => {
             const session = createMockSession();
-            const target = createMockEvaluatedTarget({ type: 'guardPoint' });
+            const target = createMockEvaluatedTarget({ type: PointOfInterestType.GUARDPOINT });
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
             vpGameplayService.makeDecision.mockReturnValue({ target: null, allEvaluatedTargets: [], useDoubleAction: false });
@@ -738,7 +984,7 @@ describe('VPExecutionService', () => {
 
         it('should continue turn for returnFlag target', () => {
             const session = createMockSession();
-            const target = createMockEvaluatedTarget({ type: 'returnFlag' });
+            const target = createMockEvaluatedTarget({ type: PointOfInterestType.RETURNFLAG });
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
             vpGameplayService.makeDecision.mockReturnValue({ target: null, allEvaluatedTargets: [], useDoubleAction: false });
@@ -750,7 +996,7 @@ describe('VPExecutionService', () => {
 
         it('should end turn when action throws error', () => {
             const session = createMockSession();
-            const target = createMockEvaluatedTarget({ type: 'enemy' });
+            const target = createMockEvaluatedTarget({ type: PointOfInterestType.ENEMY });
             sessionRepository.findById.mockReturnValue(session);
             actionService.getActiveCombat.mockReturnValue(null);
             actionService.attackPlayer.mockImplementation(() => {
@@ -907,7 +1153,7 @@ describe('VPExecutionService', () => {
 
     describe('logPath', () => {
         it('should log path when target has actions', () => {
-            const action = createMockPathAction({ type: 'move', orientation: Orientation.N });
+            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
             const target = createMockEvaluatedTarget({ path: createMockPathResult({ actions: [action] }) });
             const decision: VPDecision = { target, allEvaluatedTargets: [], useDoubleAction: false };
             const loggerSpy = jest.spyOn(service['logger'], 'debug');

@@ -104,6 +104,7 @@ describe('GameEditorTileComponent', () => {
             flagPlacement: { hasIssue: false },
             nameValidation: { hasIssue: false },
             descriptionValidation: { hasIssue: false },
+            teleportChannels: { hasIssue: false },
         };
 
         const editorProblemsSig = signal<GameEditorIssues>(problems);

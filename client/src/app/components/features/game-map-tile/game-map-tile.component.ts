@@ -45,6 +45,17 @@ export class GameMapTileComponent {
         return player ? this.gameMapService.getAvatarByPlayerId(player.id) : '';
     }
 
+    get startPointPlayer(): Player | undefined {
+        const startPoint = this.inGameService.startPoints().find((point) => point.x === this.tile.x && point.y === this.tile.y);
+        if (!startPoint) return undefined;
+        return this.gameMapService.currentlyPlayers.find((player) => player.id === startPoint.playerId);
+    }
+
+    get startPointAvatarSrc(): string {
+        const player = this.startPointPlayer;
+        return player ? this.gameMapService.getAvatarByPlayerId(player.id) : '';
+    }
+
     get objectImageSrc(): string {
         const obj = this.objectOnTile;
         return obj ? this.assetsService.getPlaceableImage(obj.kind) : '';

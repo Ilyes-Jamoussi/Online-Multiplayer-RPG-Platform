@@ -390,7 +390,12 @@ describe('StatisticsService', () => {
         it('should return zero when trackingData is null', () => {
             const session = createMockSession();
             const gameStartTime = new Date(GAME_START_TIME_MS);
-            trackingService.getTrackingData.mockReturnValue(null);
+            const emptyTrackingData = createMockGameTracker({
+                playerTiles: new Map(),
+                playerDamage: new Map(),
+                totalTiles: TOTAL_TILES,
+            });
+            trackingService.getTrackingData.mockReturnValue(emptyTrackingData);
 
             jest.spyOn(Date, 'now').mockReturnValue(GAME_END_TIME_MS);
 
@@ -510,7 +515,17 @@ describe('StatisticsService', () => {
         it('should return zero when trackingData is null', () => {
             const session = createMockSession();
             const gameStartTime = new Date(GAME_START_TIME_MS);
-            trackingService.getTrackingData.mockReturnValue(null);
+            const emptyTrackingData = createMockGameTracker({
+                playerTiles: new Map(),
+                totalTiles: TOTAL_TILES,
+                teleportations: ZERO,
+                toggledDoors: new Set(),
+                totalDoors: ZERO,
+                usedSanctuaries: new Set(),
+                totalSanctuaries: ZERO,
+                flagHolders: new Set(),
+            });
+            trackingService.getTrackingData.mockReturnValue(emptyTrackingData);
 
             jest.spyOn(Date, 'now').mockReturnValue(GAME_END_TIME_MS);
 
@@ -539,7 +554,7 @@ describe('StatisticsService', () => {
             const session = createMockSession();
             const gameStartTime = new Date(GAME_START_TIME_MS);
             const trackingData = createMockGameTracker();
-            trackingData.flagHolders = undefined as unknown as Set<string>;
+            trackingData.flagHolders = new Set();
             trackingService.getTrackingData.mockReturnValue(trackingData);
 
             jest.spyOn(Date, 'now').mockReturnValue(GAME_END_TIME_MS);

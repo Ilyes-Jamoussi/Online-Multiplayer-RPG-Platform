@@ -1,4 +1,6 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
+import { PathActionType } from '@app/enums/path-action-type.enum';
+import { PointOfInterestType } from '@app/enums/point-of-interest-type.enum';
 import { VPConfig } from '@app/interfaces/vp-config.interface';
 import { EvaluatedTarget, MapScanWithDistances, PointOfInterestWithPath } from '@app/interfaces/vp-gameplay.interface';
 import { PathResult } from '@app/interfaces/vp-pathfinding.interface';
@@ -6,6 +8,7 @@ import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-
 import { VPPathfindingService } from '@app/modules/in-game/services/vp-pathfinding/vp-pathfinding.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { Orientation } from '@common/enums/orientation.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
@@ -37,6 +40,9 @@ describe('VPCTFService', () => {
     const TWO = 2;
     const THREE = 3;
     const FOUR = 4;
+    const BLOCKED_FLAG_CARRIER_ATTACK_PRIORITY = 180;
+    const ENEMY_PLAYER_ID = 'enemy-player-1';
+    const ADJACENT_ATTACK_BONUS = 20;
 
     const createMockPosition = (overrides: Partial<Position> = {}): Position => ({
         x: POSITION_X_1,
@@ -253,7 +259,7 @@ describe('VPCTFService', () => {
             const results: EvaluatedTarget[] = [];
             const config = createMockVPConfig();
             pathfindingService.findPath.mockReturnValue(
-                createMockPathResult({ reachable: true, actions: [{ type: 'move', position: createMockPosition() }] }),
+                createMockPathResult({ reachable: true, actions: [{ type: PathActionType.MOVE, position: createMockPosition() }] }),
             );
 
             const result = service.evaluateCTFObjectives(session, VP_PLAYER_ID, pointsWithDistances, results, config);
@@ -264,7 +270,7 @@ describe('VPCTFService', () => {
 
         it('should evaluate dropped flag when flag has no holder', () => {
             const flag: PointOfInterestWithPath = {
-                type: 'flag',
+                type: PointOfInterestType.FLAG,
                 position: createMockPosition(),
                 path: createMockPathResult(),
                 isHeld: false,
@@ -444,7 +450,7 @@ describe('VPCTFService', () => {
             });
             const results: EvaluatedTarget[] = [];
             const config = createMockVPConfig();
-            const path = createMockPathResult({ reachable: true, actions: [{ type: 'move', position: createMockPosition() }] });
+            const path = createMockPathResult({ reachable: true, actions: [{ type: PathActionType.MOVE, position: createMockPosition() }] });
             pathfindingService.findPath.mockReturnValue(path);
 
             service['evaluateReturnFlag'](session, VP_PLAYER_ID, results, config);
@@ -465,7 +471,12 @@ describe('VPCTFService', () => {
             gameCache.getTileOccupant.mockReturnValue(null);
             pathfindingService.findPath
                 .mockReturnValueOnce(createMockPathResult({ reachable: false }))
-                .mockReturnValueOnce(createMockPathResult({ reachable: true, actions: [{ type: 'move', position: createMockPosition() }] }))
+                .mockReturnValueOnce(
+                    createMockPathResult({
+                        reachable: true,
+                        actions: [{ type: PathActionType.MOVE, position: createMockPosition() }],
+                    }),
+                )
                 .mockReturnValue(createMockPathResult({ reachable: false }));
 
             service['evaluateReturnFlag'](session, VP_PLAYER_ID, results, config);
@@ -498,6 +509,44 @@ describe('VPCTFService', () => {
 
             expect(results.length).toBe(ZERO);
         });
+
+        it('should evaluate blocking enemy attack when blocking enemy is found', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: VP_PLAYER_ID },
+                inGamePlayers: {
+                    [VP_PLAYER_ID]: createMockPlayer({ id: VP_PLAYER_ID }),
+                    [ENEMY_PLAYER_ID]: createMockPlayer({ id: ENEMY_PLAYER_ID, teamNumber: TEAM_2, x: POSITION_X_1 + ONE, y: POSITION_Y_1 }),
+                },
+            });
+            const results: EvaluatedTarget[] = [];
+            const config = createMockVPConfig();
+            gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
+
+            service['evaluateReturnFlag'](session, VP_PLAYER_ID, results, config);
+
+            expect(results.length).toBe(ONE);
+            expect(results[ZERO].type).toBe(PointOfInterestType.ENEMY);
+        });
+
+        it('should evaluate adjacent enemies when path is not reachable and has no actions', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: VP_PLAYER_ID },
+                inGamePlayers: {
+                    [VP_PLAYER_ID]: createMockPlayer({ id: VP_PLAYER_ID }),
+                    [ENEMY_PLAYER_ID]: createMockPlayer({ id: ENEMY_PLAYER_ID, teamNumber: TEAM_2, x: POSITION_X_1 + ONE, y: POSITION_Y_1 }),
+                },
+            });
+            const results: EvaluatedTarget[] = [];
+            const config = createMockVPConfig();
+            pathfindingService.findPath.mockReturnValue(createMockPathResult({ reachable: false }));
+            gameCache.getMapSize.mockReturnValue(MAP_SIZE);
+            gameCache.getTileAtPosition.mockReturnValue({ kind: TileKind.BASE, open: false, x: POSITION_X_1 + ONE, y: POSITION_Y_1, playerId: null });
+            gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
+
+            service['evaluateReturnFlag'](session, VP_PLAYER_ID, results, config);
+
+            expect(results.length).toBeGreaterThan(ZERO);
+        });
     });
 
     describe('findClosestReachableTowards', () => {
@@ -516,7 +565,7 @@ describe('VPCTFService', () => {
             const session = createMockSession();
             const target = createMockPosition({ x: POSITION_X_2, y: POSITION_Y_2 });
             pathfindingService.findPath.mockReturnValue(
-                createMockPathResult({ reachable: true, actions: [{ type: 'move', position: createMockPosition() }] }),
+                createMockPathResult({ reachable: true, actions: [{ type: PathActionType.MOVE, position: createMockPosition() }] }),
             );
 
             service['findClosestReachableTowards'](session, VP_PLAYER_ID, target);
@@ -539,7 +588,7 @@ describe('VPCTFService', () => {
         it('should skip flags that are held', () => {
             const flags: PointOfInterestWithPath[] = [
                 {
-                    type: 'flag',
+                    type: PointOfInterestType.FLAG,
                     position: createMockPosition(),
                     path: createMockPathResult(),
                     isHeld: true,
@@ -556,7 +605,7 @@ describe('VPCTFService', () => {
         it('should skip flags that are not reachable', () => {
             const flags: PointOfInterestWithPath[] = [
                 {
-                    type: 'flag',
+                    type: PointOfInterestType.FLAG,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: false }),
                     isHeld: false,
@@ -573,7 +622,7 @@ describe('VPCTFService', () => {
         it('should skip flags beyond max distance', () => {
             const flags: PointOfInterestWithPath[] = [
                 {
-                    type: 'flag',
+                    type: PointOfInterestType.FLAG,
                     position: createMockPosition(),
                     path: createMockPathResult({ totalCost: 20 }),
                     isHeld: false,
@@ -590,7 +639,7 @@ describe('VPCTFService', () => {
         it('should add dropped flag when conditions are met', () => {
             const flags: PointOfInterestWithPath[] = [
                 {
-                    type: 'flag',
+                    type: PointOfInterestType.FLAG,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: true, totalCost: 5 }),
                     isHeld: false,
@@ -909,6 +958,310 @@ describe('VPCTFService', () => {
             expect(result.reachable).toBe(false);
             expect(result.totalCost).toBe(Infinity);
             expect(result.destination).toEqual(targetPosition);
+        });
+    });
+
+    describe('findEnemyBlockingDirectPath', () => {
+        it('should return null when VP player is missing', () => {
+            const session = createMockSession({
+                inGamePlayers: {},
+            });
+            const targetPosition = createMockPosition();
+
+            const result = service['findEnemyBlockingDirectPath'](session, VP_PLAYER_ID, targetPosition);
+
+            expect(result).toBeNull();
+        });
+
+        it('should return null when no blocking enemy is found', () => {
+            const session = createMockSession();
+            const targetPosition = createMockPosition({ x: POSITION_X_2, y: POSITION_Y_2 });
+            gameCache.getTileOccupant.mockReturnValue(null);
+
+            const result = service['findEnemyBlockingDirectPath'](session, VP_PLAYER_ID, targetPosition);
+
+            expect(result).toBeNull();
+        });
+
+        it('should return blocking enemy when found in direct path', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [VP_PLAYER_ID]: createMockPlayer({ id: VP_PLAYER_ID }),
+                    [ENEMY_PLAYER_ID]: createMockPlayer({ id: ENEMY_PLAYER_ID, teamNumber: TEAM_2 }),
+                },
+            });
+            const targetPosition = createMockPosition({ x: POSITION_X_1 + ONE, y: POSITION_Y_1 });
+            gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
+
+            const result = service['findEnemyBlockingDirectPath'](session, VP_PLAYER_ID, targetPosition);
+
+            expect(result).not.toBeNull();
+            expect(result?.id).toBe(ENEMY_PLAYER_ID);
+        });
+
+        it('should skip when occupant is VP player', () => {
+            const session = createMockSession();
+            const targetPosition = createMockPosition({ x: POSITION_X_1 + ONE, y: POSITION_Y_1 });
+            gameCache.getTileOccupant.mockReturnValue(VP_PLAYER_ID);
+
+            const result = service['findEnemyBlockingDirectPath'](session, VP_PLAYER_ID, targetPosition);
+
+            expect(result).toBeNull();
+        });
+
+        it('should skip when occupant has no health', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [VP_PLAYER_ID]: createMockPlayer({ id: VP_PLAYER_ID }),
+                    [ENEMY_PLAYER_ID]: createMockPlayer({ id: ENEMY_PLAYER_ID, teamNumber: TEAM_2, health: ZERO }),
+                },
+            });
+            const targetPosition = createMockPosition({ x: POSITION_X_1 + ONE, y: POSITION_Y_1 });
+            gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
+
+            const result = service['findEnemyBlockingDirectPath'](session, VP_PLAYER_ID, targetPosition);
+
+            expect(result).toBeNull();
+        });
+
+        it('should skip when occupant is on same team', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [VP_PLAYER_ID]: createMockPlayer({ id: VP_PLAYER_ID, teamNumber: TEAM_1 }),
+                    [ENEMY_PLAYER_ID]: createMockPlayer({ id: ENEMY_PLAYER_ID, teamNumber: TEAM_1 }),
+                },
+            });
+            const targetPosition = createMockPosition({ x: POSITION_X_1 + ONE, y: POSITION_Y_1 });
+            gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
+
+            const result = service['findEnemyBlockingDirectPath'](session, VP_PLAYER_ID, targetPosition);
+
+            expect(result).toBeNull();
+        });
+    });
+
+    describe('getDirectDirectionsToTarget', () => {
+        it('should return east direction when target is to the east', () => {
+            const from = createMockPosition({ x: POSITION_X_1, y: POSITION_Y_1 });
+            const to = createMockPosition({ x: POSITION_X_2, y: POSITION_Y_1 });
+
+            const result = service['getDirectDirectionsToTarget'](from, to);
+
+            expect(result).toContain(Orientation.E);
+        });
+
+        it('should return west direction when target is to the west', () => {
+            const from = createMockPosition({ x: POSITION_X_2, y: POSITION_Y_1 });
+            const to = createMockPosition({ x: POSITION_X_1, y: POSITION_Y_1 });
+
+            const result = service['getDirectDirectionsToTarget'](from, to);
+
+            expect(result).toContain(Orientation.W);
+        });
+
+        it('should return south direction when target is to the south', () => {
+            const from = createMockPosition({ x: POSITION_X_1, y: POSITION_Y_1 });
+            const to = createMockPosition({ x: POSITION_X_1, y: POSITION_Y_2 });
+
+            const result = service['getDirectDirectionsToTarget'](from, to);
+
+            expect(result).toContain(Orientation.S);
+        });
+
+        it('should return north direction when target is to the north', () => {
+            const from = createMockPosition({ x: POSITION_X_1, y: POSITION_Y_2 });
+            const to = createMockPosition({ x: POSITION_X_1, y: POSITION_Y_1 });
+
+            const result = service['getDirectDirectionsToTarget'](from, to);
+
+            expect(result).toContain(Orientation.N);
+        });
+
+        it('should return multiple directions when target is diagonal', () => {
+            const from = createMockPosition({ x: POSITION_X_1, y: POSITION_Y_1 });
+            const to = createMockPosition({ x: POSITION_X_2, y: POSITION_Y_2 });
+
+            const result = service['getDirectDirectionsToTarget'](from, to);
+
+            expect(result.length).toBeGreaterThan(ONE);
+            expect(result).toContain(Orientation.E);
+            expect(result).toContain(Orientation.S);
+        });
+    });
+
+    describe('getNextPositionFromOrientation', () => {
+        it('should return north position for north orientation', () => {
+            const currentPos = createMockPosition();
+            const expectedPos = { x: currentPos.x, y: currentPos.y - ONE };
+
+            const result = service['getNextPositionFromOrientation'](currentPos, Orientation.N);
+
+            expect(result).toEqual(expectedPos);
+        });
+
+        it('should return east position for east orientation', () => {
+            const currentPos = createMockPosition();
+            const expectedPos = { x: currentPos.x + ONE, y: currentPos.y };
+
+            const result = service['getNextPositionFromOrientation'](currentPos, Orientation.E);
+
+            expect(result).toEqual(expectedPos);
+        });
+
+        it('should return south position for south orientation', () => {
+            const currentPos = createMockPosition();
+            const expectedPos = { x: currentPos.x, y: currentPos.y + ONE };
+
+            const result = service['getNextPositionFromOrientation'](currentPos, Orientation.S);
+
+            expect(result).toEqual(expectedPos);
+        });
+
+        it('should return west position for west orientation', () => {
+            const currentPos = createMockPosition();
+            const expectedPos = { x: currentPos.x - ONE, y: currentPos.y };
+
+            const result = service['getNextPositionFromOrientation'](currentPos, Orientation.W);
+
+            expect(result).toEqual(expectedPos);
+        });
+
+        it('should return current position for unknown orientation', () => {
+            const currentPos = createMockPosition();
+
+            const result = service['getNextPositionFromOrientation'](currentPos, 'unknown' as Orientation);
+
+            expect(result).toEqual(currentPos);
+        });
+    });
+
+    describe('evaluateBlockingEnemyAttack', () => {
+        it('should return early when VP player is missing', () => {
+            const session = createMockSession({
+                inGamePlayers: {},
+            });
+            const blockingEnemy = { id: ENEMY_PLAYER_ID, position: createMockPosition() };
+            const results: EvaluatedTarget[] = [];
+            const config = createMockVPConfig();
+
+            service['evaluateBlockingEnemyAttack'](session, VP_PLAYER_ID, blockingEnemy, results, config);
+
+            expect(results.length).toBe(ZERO);
+        });
+
+        it('should add blocking enemy attack to results', () => {
+            const session = createMockSession();
+            const blockingEnemy = { id: ENEMY_PLAYER_ID, position: createMockPosition() };
+            const results: EvaluatedTarget[] = [];
+            const config = createMockVPConfig({
+                bonuses: {
+                    adjacentAttackBonus: ADJACENT_ATTACK_BONUS,
+                    lowHealthHealBonus: ZERO,
+                    criticalHealthHealBonus: ZERO,
+                    noBonusFightSanctuaryBonus: ZERO,
+                    escapeWhenEnemyCloseBonus: ZERO,
+                },
+            });
+
+            service['evaluateBlockingEnemyAttack'](session, VP_PLAYER_ID, blockingEnemy, results, config);
+
+            expect(results.length).toBe(ONE);
+            expect(results[ZERO].type).toBe(PointOfInterestType.ENEMY);
+            expect(results[ZERO].playerId).toBe(ENEMY_PLAYER_ID);
+            expect(results[ZERO].priorityScore).toBe(BLOCKED_FLAG_CARRIER_ATTACK_PRIORITY + ADJACENT_ATTACK_BONUS);
+        });
+    });
+
+    describe('evaluateAdjacentEnemiesForBlockedFlagCarrier', () => {
+        it('should return early when VP player is missing', () => {
+            const session = createMockSession({
+                inGamePlayers: {},
+            });
+            const results: EvaluatedTarget[] = [];
+            const config = createMockVPConfig();
+
+            service['evaluateAdjacentEnemiesForBlockedFlagCarrier'](session, VP_PLAYER_ID, results, config);
+
+            expect(results.length).toBe(ZERO);
+        });
+
+        it('should skip when no occupant found', () => {
+            const session = createMockSession();
+            const results: EvaluatedTarget[] = [];
+            const config = createMockVPConfig();
+            gameCache.getTileOccupant.mockReturnValue(null);
+
+            service['evaluateAdjacentEnemiesForBlockedFlagCarrier'](session, VP_PLAYER_ID, results, config);
+
+            expect(results.length).toBe(ZERO);
+        });
+
+        it('should skip when occupant is VP player', () => {
+            const session = createMockSession();
+            const results: EvaluatedTarget[] = [];
+            const config = createMockVPConfig();
+            gameCache.getTileOccupant.mockReturnValue(VP_PLAYER_ID);
+
+            service['evaluateAdjacentEnemiesForBlockedFlagCarrier'](session, VP_PLAYER_ID, results, config);
+
+            expect(results.length).toBe(ZERO);
+        });
+
+        it('should skip when occupant has no health', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [VP_PLAYER_ID]: createMockPlayer({ id: VP_PLAYER_ID }),
+                    [ENEMY_PLAYER_ID]: createMockPlayer({ id: ENEMY_PLAYER_ID, teamNumber: TEAM_2, health: ZERO }),
+                },
+            });
+            const results: EvaluatedTarget[] = [];
+            const config = createMockVPConfig();
+            gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
+
+            service['evaluateAdjacentEnemiesForBlockedFlagCarrier'](session, VP_PLAYER_ID, results, config);
+
+            expect(results.length).toBe(ZERO);
+        });
+
+        it('should skip when occupant is on same team', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [VP_PLAYER_ID]: createMockPlayer({ id: VP_PLAYER_ID, teamNumber: TEAM_1 }),
+                    [ENEMY_PLAYER_ID]: createMockPlayer({ id: ENEMY_PLAYER_ID, teamNumber: TEAM_1 }),
+                },
+            });
+            const results: EvaluatedTarget[] = [];
+            const config = createMockVPConfig();
+            gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
+
+            service['evaluateAdjacentEnemiesForBlockedFlagCarrier'](session, VP_PLAYER_ID, results, config);
+
+            expect(results.length).toBe(ZERO);
+        });
+
+        it('should add adjacent enemy to results when found', () => {
+            const session = createMockSession({
+                inGamePlayers: {
+                    [VP_PLAYER_ID]: createMockPlayer({ id: VP_PLAYER_ID, teamNumber: TEAM_1 }),
+                    [ENEMY_PLAYER_ID]: createMockPlayer({ id: ENEMY_PLAYER_ID, teamNumber: TEAM_2 }),
+                },
+            });
+            const results: EvaluatedTarget[] = [];
+            const config = createMockVPConfig({
+                bonuses: {
+                    adjacentAttackBonus: ADJACENT_ATTACK_BONUS,
+                    lowHealthHealBonus: ZERO,
+                    criticalHealthHealBonus: ZERO,
+                    noBonusFightSanctuaryBonus: ZERO,
+                    escapeWhenEnemyCloseBonus: ZERO,
+                },
+            });
+            gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
+
+            service['evaluateAdjacentEnemiesForBlockedFlagCarrier'](session, VP_PLAYER_ID, results, config);
+
+            expect(results.length).toBeGreaterThan(ZERO);
+            expect(results.some((r) => r.type === PointOfInterestType.ENEMY && r.playerId === ENEMY_PLAYER_ID)).toBe(true);
         });
     });
 });

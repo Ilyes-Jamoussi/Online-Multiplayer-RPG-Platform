@@ -1,16 +1,6 @@
 import { PathResult } from './vp-pathfinding.interface';
 import { Position } from '@common/interfaces/position.interface';
-
-export type PointOfInterestType =
-    | 'enemy'
-    | 'healSanctuary'
-    | 'fightSanctuary'
-    | 'boat'
-    | 'flag'
-    | 'escape'
-    | 'flagCarrier'
-    | 'guardPoint'
-    | 'returnFlag';
+import { PointOfInterestType } from '@app/enums/point-of-interest-type.enum';
 
 export interface PointOfInterest {
     type: PointOfInterestType;

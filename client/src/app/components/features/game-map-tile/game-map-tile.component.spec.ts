@@ -18,11 +18,15 @@ import { GameMapTileComponent } from './game-map-tile.component';
 const TEST_TILE_X = 5;
 const TEST_TILE_Y = 3;
 const TEST_TELEPORT_CHANNEL_NUMBER = 3;
+const TEST_START_POINT_ID = 'start-1';
+const TEST_PLAYER_ID = 'player-1';
+const TEST_OTHER_PLAYER_ID = 'player-2';
 
 type MockGameMapService = Partial<Omit<GameMapService, 'currentlyPlayers' | 'isActionModeActive'>> & {
     _objectsSignal: WritableSignal<GameEditorPlaceableDto[]>;
     currentlyPlayers: Player[];
     isActionModeActive: boolean;
+    requestFlagTransfer: jasmine.Spy;
 };
 
 describe('GameMapTileComponent', () => {
@@ -33,6 +37,9 @@ describe('GameMapTileComponent', () => {
     let mockInGameService: Partial<InGameService>;
     let mockAdminModeService: jasmine.SpyObj<AdminModeService>;
     let mockCombatService: jasmine.SpyObj<CombatService>;
+    let startPointsSignal: WritableSignal<{ id: string; playerId: string; x: number; y: number }[]>;
+    let isMyTurnSignal: WritableSignal<boolean>;
+    let isGameStartedSignal: WritableSignal<boolean>;
 
     const mockTile: GameEditorTileDto = {
         kind: TileKind.BASE,
@@ -84,6 +91,10 @@ describe('GameMapTileComponent', () => {
     beforeEach(async () => {
         const objectsSignal = signal([mockObject]);
 
+        startPointsSignal = signal([]);
+        isMyTurnSignal = signal(true);
+        isGameStartedSignal = signal(true);
+
         mockGameMapService = {
             openTileModal: jasmine.createSpy('openTileModal'),
             closeTileModal: jasmine.createSpy('closeTileModal'),
@@ -94,6 +105,7 @@ describe('GameMapTileComponent', () => {
             healPlayer: jasmine.createSpy('healPlayer'),
             fightPlayer: jasmine.createSpy('fightPlayer'),
             boatAction: jasmine.createSpy('boatAction'),
+            requestFlagTransfer: jasmine.createSpy('requestFlagTransfer'),
             objects: objectsSignal.asReadonly(),
             currentlyPlayers: [mockPlayer],
             isActionModeActive: false,
@@ -104,8 +116,9 @@ describe('GameMapTileComponent', () => {
         mockAssetsService.getPlaceableImage.and.returnValue('flag-image.png');
 
         mockInGameService = {
-            isMyTurn: signal(true),
-            isGameStarted: signal(true),
+            isMyTurn: isMyTurnSignal.asReadonly(),
+            isGameStarted: isGameStartedSignal.asReadonly(),
+            startPoints: startPointsSignal.asReadonly(),
         };
 
         mockAdminModeService = jasmine.createSpyObj('AdminModeService', ['isAdminModeActivated', 'teleportPlayer']);
@@ -208,6 +221,33 @@ describe('GameMapTileComponent', () => {
             };
             expect(component.teleportChannelNumber).toBeNull();
         });
+
+        it('should return startPointPlayer when startPoint exists and player found', () => {
+            startPointsSignal.set([{ id: TEST_START_POINT_ID, playerId: TEST_PLAYER_ID, x: TEST_TILE_X, y: TEST_TILE_Y }]);
+            expect(component.startPointPlayer).toEqual(mockPlayer);
+        });
+
+        it('should return undefined when startPoint exists but player not found', () => {
+            startPointsSignal.set([{ id: TEST_START_POINT_ID, playerId: TEST_OTHER_PLAYER_ID, x: TEST_TILE_X, y: TEST_TILE_Y }]);
+            expect(component.startPointPlayer).toBeUndefined();
+        });
+
+        it('should return undefined when no startPoint at tile position', () => {
+            startPointsSignal.set([]);
+            expect(component.startPointPlayer).toBeUndefined();
+        });
+
+        it('should return startPointAvatarSrc when startPointPlayer exists', () => {
+            startPointsSignal.set([{ id: TEST_START_POINT_ID, playerId: TEST_PLAYER_ID, x: TEST_TILE_X, y: TEST_TILE_Y }]);
+            (mockGameMapService.getAvatarByPlayerId as jasmine.Spy).and.returnValue('start-avatar.png');
+            expect(component.startPointAvatarSrc).toBe('start-avatar.png');
+            expect(mockGameMapService.getAvatarByPlayerId).toHaveBeenCalledWith(TEST_PLAYER_ID);
+        });
+
+        it('should return empty string when startPointPlayer does not exist', () => {
+            startPointsSignal.set([]);
+            expect(component.startPointAvatarSrc).toBe('');
+        });
     });
 
     describe('onRightClick', () => {
@@ -236,6 +276,33 @@ describe('GameMapTileComponent', () => {
 
             component.onRightClick(mockEvent);
             expect(mockGameMapService.openTileModal).toHaveBeenCalledWith(mockTile);
+        });
+
+        it('should open tile modal when admin mode active but not my turn', () => {
+            mockAdminModeService.isAdminModeActivated.and.returnValue(true);
+            isMyTurnSignal.set(false);
+
+            component.onRightClick(mockEvent);
+            expect(mockGameMapService.openTileModal).toHaveBeenCalledWith(mockTile);
+            expect(mockAdminModeService.teleportPlayer).not.toHaveBeenCalled();
+        });
+
+        it('should open tile modal when admin mode active but game not started', () => {
+            mockAdminModeService.isAdminModeActivated.and.returnValue(true);
+            isGameStartedSignal.set(false);
+
+            component.onRightClick(mockEvent);
+            expect(mockGameMapService.openTileModal).toHaveBeenCalledWith(mockTile);
+            expect(mockAdminModeService.teleportPlayer).not.toHaveBeenCalled();
+        });
+
+        it('should not call any action when admin mode active and player exists on tile', () => {
+            mockAdminModeService.isAdminModeActivated.and.returnValue(true);
+            mockGameMapService.currentlyPlayers = [mockPlayer];
+
+            component.onRightClick(mockEvent);
+            expect(mockGameMapService.openTileModal).not.toHaveBeenCalled();
+            expect(mockAdminModeService.teleportPlayer).not.toHaveBeenCalled();
         });
     });
 
@@ -295,6 +362,14 @@ describe('GameMapTileComponent', () => {
 
             component.onTileClick(mockEvent);
             expect(mockGameMapService.boatAction).toHaveBeenCalledWith(TEST_TILE_X, TEST_TILE_Y);
+        });
+
+        it('should request flag transfer when action type is TRANSFER_FLAG', () => {
+            mockGameMapService.isActionModeActive = true;
+            (mockGameMapService.getActionTypeAt as jasmine.Spy).and.returnValue(AvailableActionType.TRANSFER_FLAG);
+
+            component.onTileClick(mockEvent);
+            expect(mockGameMapService.requestFlagTransfer).toHaveBeenCalledWith(TEST_TILE_X, TEST_TILE_Y);
         });
     });
 });

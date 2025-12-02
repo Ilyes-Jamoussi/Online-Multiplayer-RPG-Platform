@@ -150,6 +150,36 @@
     }
 }
 
+.start-points-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(100cqw, 100cqh);
+    height: min(100cqw, 100cqh);
+    display: grid;
+    pointer-events: none;
+    z-index: 12;
+    aspect-ratio: 1;
+}
+
+.start-point-avatar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    pointer-events: none;
+}
+
+.start-avatar-image {
+    width: 40%;
+    height: 40%;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+    opacity: 0.85;
+    pointer-events: none;
+}
+
 .players-overlay {
     position: absolute;
     top: 50%;

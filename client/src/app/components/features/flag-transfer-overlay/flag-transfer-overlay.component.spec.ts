@@ -228,6 +228,3 @@ describe('FlagTransferOverlayComponent', () => {
         });
     });
 });
-
-
-

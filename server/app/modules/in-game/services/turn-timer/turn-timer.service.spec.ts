@@ -719,6 +719,10 @@ describe('TurnTimerService', () => {
     });
 
     describe('getNextActivePlayer', () => {
+        beforeEach(() => {
+            jest.useFakeTimers();
+        });
+
         it('should return first active player when currentId is null', () => {
             const session = createMockSession();
 

@@ -1,5 +1,6 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { DEFENSIVE_VP_CONFIG, OFFENSIVE_VP_CONFIG } from '@app/constants/vp.config';
+import { PointOfInterestType } from '@app/enums/point-of-interest-type.enum';
 import { EvaluatedTarget, PointOfInterestWithPath } from '@app/interfaces/vp-gameplay.interface';
 import { EscapePoint, PathResult } from '@app/interfaces/vp-pathfinding.interface';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
@@ -395,7 +396,7 @@ describe('VPGameplayService', () => {
         it('should skip unreachable enemies', () => {
             const enemies: PointOfInterestWithPath[] = [
                 {
-                    type: 'enemy',
+                    type: PointOfInterestType.ENEMY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: false }),
                     playerId: ENEMY_PLAYER_ID,
@@ -412,7 +413,7 @@ describe('VPGameplayService', () => {
         it('should add adjacent attack bonus when distance is zero', () => {
             const enemies: PointOfInterestWithPath[] = [
                 {
-                    type: 'enemy',
+                    type: PointOfInterestType.ENEMY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: true, totalCost: ZERO }),
                     playerId: ENEMY_PLAYER_ID,
@@ -429,7 +430,7 @@ describe('VPGameplayService', () => {
         it('should calculate score correctly for reachable enemies', () => {
             const enemies: PointOfInterestWithPath[] = [
                 {
-                    type: 'enemy',
+                    type: PointOfInterestType.ENEMY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: true, totalCost: DISTANCE_TO_ENEMY }),
                     playerId: ENEMY_PLAYER_ID,
@@ -450,7 +451,7 @@ describe('VPGameplayService', () => {
             const player = createMockPlayer({ health: HEALTH, maxHealth: MAX_HEALTH });
             const sanctuaries: PointOfInterestWithPath[] = [
                 {
-                    type: 'healSanctuary',
+                    type: PointOfInterestType.HEALSANCTUARY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: true }),
                 },
@@ -467,7 +468,7 @@ describe('VPGameplayService', () => {
             const player = createMockPlayer({ health: HEALTH_LOW, maxHealth: MAX_HEALTH });
             const sanctuaries: PointOfInterestWithPath[] = [
                 {
-                    type: 'healSanctuary',
+                    type: PointOfInterestType.HEALSANCTUARY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: false }),
                 },
@@ -484,7 +485,7 @@ describe('VPGameplayService', () => {
             const player = createMockPlayer({ health: HEALTH_LOW, maxHealth: MAX_HEALTH });
             const sanctuaries: PointOfInterestWithPath[] = [
                 {
-                    type: 'healSanctuary',
+                    type: PointOfInterestType.HEALSANCTUARY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: true, totalCost: 20 }),
                 },
@@ -501,7 +502,7 @@ describe('VPGameplayService', () => {
             const player = createMockPlayer({ health: HEALTH_CRITICAL, maxHealth: MAX_HEALTH });
             const sanctuaries: PointOfInterestWithPath[] = [
                 {
-                    type: 'healSanctuary',
+                    type: PointOfInterestType.HEALSANCTUARY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: true, totalCost: THREE }),
                 },
@@ -521,7 +522,7 @@ describe('VPGameplayService', () => {
             const player = createMockPlayer({ attackBonus: ATTACK_BONUS });
             const sanctuaries: PointOfInterestWithPath[] = [
                 {
-                    type: 'fightSanctuary',
+                    type: PointOfInterestType.FIGHTSANCTUARY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: true }),
                 },
@@ -538,7 +539,7 @@ describe('VPGameplayService', () => {
             const player = createMockPlayer({ defenseBonus: DEFENSE_BONUS });
             const sanctuaries: PointOfInterestWithPath[] = [
                 {
-                    type: 'fightSanctuary',
+                    type: PointOfInterestType.FIGHTSANCTUARY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: true }),
                 },
@@ -555,7 +556,7 @@ describe('VPGameplayService', () => {
             const player = createMockPlayer({ attackBonus: ZERO, defenseBonus: ZERO });
             const sanctuaries: PointOfInterestWithPath[] = [
                 {
-                    type: 'fightSanctuary',
+                    type: PointOfInterestType.FIGHTSANCTUARY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: false }),
                 },
@@ -572,7 +573,7 @@ describe('VPGameplayService', () => {
             const player = createMockPlayer({ attackBonus: ZERO, defenseBonus: ZERO });
             const sanctuaries: PointOfInterestWithPath[] = [
                 {
-                    type: 'fightSanctuary',
+                    type: PointOfInterestType.FIGHTSANCTUARY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: true, totalCost: 20 }),
                 },
@@ -589,7 +590,7 @@ describe('VPGameplayService', () => {
             const player = createMockPlayer({ attackBonus: ZERO, defenseBonus: ZERO });
             const sanctuaries: PointOfInterestWithPath[] = [
                 {
-                    type: 'fightSanctuary',
+                    type: PointOfInterestType.FIGHTSANCTUARY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: true, totalCost: THREE }),
                 },
@@ -619,7 +620,7 @@ describe('VPGameplayService', () => {
             const session = createMockSession();
             const enemies: PointOfInterestWithPath[] = [
                 {
-                    type: 'enemy',
+                    type: PointOfInterestType.ENEMY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: true, totalCost: 10 }),
                     playerId: ENEMY_PLAYER_ID,
@@ -637,7 +638,7 @@ describe('VPGameplayService', () => {
             const session = createMockSession();
             const enemies: PointOfInterestWithPath[] = [
                 {
-                    type: 'enemy',
+                    type: PointOfInterestType.ENEMY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: true, totalCost: DISTANCE_TO_ENEMY }),
                     playerId: ENEMY_PLAYER_ID,
@@ -656,7 +657,7 @@ describe('VPGameplayService', () => {
             const session = createMockSession();
             const enemies: PointOfInterestWithPath[] = [
                 {
-                    type: 'enemy',
+                    type: PointOfInterestType.ENEMY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: true, totalCost: DISTANCE_TO_ENEMY }),
                     playerId: ENEMY_PLAYER_ID,
@@ -897,7 +898,7 @@ describe('VPGameplayService', () => {
             const session = createMockSession();
             const points = [
                 {
-                    type: 'healSanctuary' as const,
+                    type: PointOfInterestType.HEALSANCTUARY,
                     position: createMockPosition(),
                 },
             ];
@@ -915,7 +916,7 @@ describe('VPGameplayService', () => {
             const session = createMockSession();
             const points = [
                 {
-                    type: 'enemy' as const,
+                    type: PointOfInterestType.ENEMY,
                     position: createMockPosition({ x: POSITION_X_2, y: POSITION_Y_2 }),
                     playerId: ENEMY_PLAYER_ID,
                 },
@@ -1149,7 +1150,7 @@ describe('VPGameplayService', () => {
         it('should return null when no reachable points', () => {
             const points: PointOfInterestWithPath[] = [
                 {
-                    type: 'healSanctuary',
+                    type: PointOfInterestType.HEALSANCTUARY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: false }),
                 },
@@ -1163,12 +1164,12 @@ describe('VPGameplayService', () => {
         it('should return nearest reachable point', () => {
             const points: PointOfInterestWithPath[] = [
                 {
-                    type: 'healSanctuary',
+                    type: PointOfInterestType.HEALSANCTUARY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: true, totalCost: THREE }),
                 },
                 {
-                    type: 'healSanctuary',
+                    type: PointOfInterestType.HEALSANCTUARY,
                     position: createMockPosition({ x: POSITION_X_2, y: POSITION_Y_2 }),
                     path: createMockPathResult({ reachable: true, totalCost: ONE }),
                 },
@@ -1185,17 +1186,17 @@ describe('VPGameplayService', () => {
         it('should return only reachable points sorted by distance', () => {
             const points: PointOfInterestWithPath[] = [
                 {
-                    type: 'healSanctuary',
+                    type: PointOfInterestType.HEALSANCTUARY,
                     position: createMockPosition(),
                     path: createMockPathResult({ reachable: false }),
                 },
                 {
-                    type: 'healSanctuary',
+                    type: PointOfInterestType.HEALSANCTUARY,
                     position: createMockPosition({ x: POSITION_X_2, y: POSITION_Y_2 }),
                     path: createMockPathResult({ reachable: true, totalCost: THREE }),
                 },
                 {
-                    type: 'healSanctuary',
+                    type: PointOfInterestType.HEALSANCTUARY,
                     position: createMockPosition({ x: POSITION_X_1, y: POSITION_Y_2 }),
                     path: createMockPathResult({ reachable: true, totalCost: ONE }),
                 },

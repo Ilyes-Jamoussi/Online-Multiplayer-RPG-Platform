@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { VictoryData } from '@app/interfaces/victory-data.interface';
 
 @Component({
@@ -10,8 +10,8 @@ import { VictoryData } from '@app/interfaces/victory-data.interface';
     styleUrl: './combat-result.component.scss',
 })
 export class CombatResultComponent {
-    readonly victoryData = input.required<VictoryData>();
-    readonly isVictory = input.required<boolean>();
-    readonly victoryMessage = input.required<string>();
-    readonly victorySubtitle = input.required<string>();
+    @Input({ required: true }) victoryData: VictoryData;
+    @Input({ required: true }) isVictory: boolean;
+    @Input({ required: true }) victoryMessage: string;
+    @Input({ required: true }) victorySubtitle: string;
 }

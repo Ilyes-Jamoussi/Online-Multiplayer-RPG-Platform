@@ -1,4 +1,5 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
+import { PathActionType } from '@app/enums/path-action-type.enum';
 import { PathNode } from '@app/interfaces/vp-pathfinding-internal.interface';
 import { EnemyPosition } from '@app/interfaces/vp-pathfinding.interface';
 import { Placeable } from '@app/modules/game-store/entities/placeable.entity';
@@ -858,7 +859,7 @@ describe('VPPathfindingService', () => {
                 position: createMockPosition({ x: POSITION_X_1 + ONE, y: POSITION_Y_1 }),
                 moveCost: ONE,
                 orientation: Orientation.N,
-                actionType: 'move' as const,
+                actionType: PathActionType.MOVE,
                 isOnBoat: false,
                 goal: createMockPosition(),
             };
@@ -886,7 +887,7 @@ describe('VPPathfindingService', () => {
                 position: createMockPosition({ x: POSITION_X_1 + ONE, y: POSITION_Y_1 }),
                 moveCost: ONE,
                 orientation: Orientation.N,
-                actionType: 'openDoor' as const,
+                actionType: PathActionType.OPENDOOR,
                 isOnBoat: false,
                 goal: createMockPosition(),
                 extraActions: ONE,
@@ -1067,7 +1068,7 @@ describe('VPPathfindingService', () => {
                 totalCost: ONE,
                 parent: null,
                 actionToReach: {
-                    type: 'move' as const,
+                    type: PathActionType.MOVE,
                     orientation: Orientation.N,
                     position: createMockPosition({ x: POSITION_X_1, y: POSITION_Y_1 }),
                 },
@@ -1080,7 +1081,7 @@ describe('VPPathfindingService', () => {
                 estimatedCostToGoal: ZERO,
                 totalCost: TWO,
                 parent,
-                actionToReach: { type: 'move' as const, orientation: Orientation.N, position: destination },
+                actionToReach: { type: PathActionType.MOVE, orientation: Orientation.N, position: destination },
                 isOnBoat: false,
                 actionsUsed: ZERO,
             };
@@ -1115,7 +1116,7 @@ describe('VPPathfindingService', () => {
     describe('expandDoorActions', () => {
         it('should expand openDoor action to openDoor and move', () => {
             const rawActions = [
-                { type: 'openDoor' as const, orientation: Orientation.N, position: createMockPosition() },
+                { type: PathActionType.OPENDOOR, orientation: Orientation.N, position: createMockPosition() },
             ];
 
             const result = service['expandDoorActions'](rawActions);
@@ -1127,7 +1128,7 @@ describe('VPPathfindingService', () => {
 
         it('should keep non-door actions unchanged', () => {
             const rawActions = [
-                { type: 'move' as const, orientation: Orientation.N, position: createMockPosition() },
+                { type: PathActionType.MOVE, orientation: Orientation.N, position: createMockPosition() },
             ];
 
             const result = service['expandDoorActions'](rawActions);
@@ -1138,9 +1139,9 @@ describe('VPPathfindingService', () => {
 
         it('should handle mixed actions', () => {
             const rawActions = [
-                { type: 'move' as const, orientation: Orientation.N, position: createMockPosition() },
-                { type: 'openDoor' as const, orientation: Orientation.E, position: createMockPosition({ x: POSITION_X_1 + ONE }) },
-                { type: 'teleport' as const, orientation: Orientation.S, position: createMockPosition({ y: POSITION_Y_1 + ONE }) },
+                { type: PathActionType.MOVE, orientation: Orientation.N, position: createMockPosition() },
+                { type: PathActionType.OPENDOOR, orientation: Orientation.E, position: createMockPosition({ x: POSITION_X_1 + ONE }) },
+                { type: PathActionType.TELEPORT, orientation: Orientation.S, position: createMockPosition({ y: POSITION_Y_1 + ONE }) },
             ];
 
             const result = service['expandDoorActions'](rawActions);

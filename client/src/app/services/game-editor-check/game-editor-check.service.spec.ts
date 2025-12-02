@@ -3,6 +3,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
+import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
 import { Inventory } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameMode } from '@common/enums/game-mode.enum';
@@ -21,6 +22,7 @@ export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
     private readonly sizeSig = signal<MapSize>(MapSize.MEDIUM);
     private readonly modeSig = signal<GameMode>(GameMode.CLASSIC);
     private readonly inventorySig = signal<Inventory>({} as Inventory);
+    private readonly teleportChannelsSig = signal<TeleportChannelDto[]>([]);
 
     get name() {
         return this._name;
@@ -55,6 +57,9 @@ export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
     }
     get inventory() {
         return this.inventorySig.asReadonly();
+    }
+    get teleportChannels(): readonly TeleportChannelDto[] {
+        return this.teleportChannelsSig();
     }
 
     setTiles(value: GameEditorTileDto[]) {
