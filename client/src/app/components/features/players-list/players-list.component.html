@@ -12,7 +12,12 @@
             [style.background-color]="getTeamBackgroundColor(getTeamNumber(player), player)"
         >
             <div class="player-avatar">
-                <img [src]="getPlayerAvatar(player.avatar)" [alt]="player.name" class="avatar-image" [style.border-color]="getTeamColor(getTeamNumber(player), player)" />
+                <img
+                    [src]="getPlayerAvatar(player.avatar)"
+                    [alt]="player.name"
+                    class="avatar-image"
+                    [style.border-color]="getTeamColor(getTeamNumber(player), player)"
+                />
             </div>
             <div class="player-content">
                 <div class="player-main-info">

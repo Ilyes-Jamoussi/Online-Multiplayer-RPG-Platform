@@ -30,11 +30,14 @@
                         <span class="fighter-name">{{ playerAName }}</span>
                         <div class="badges">
                             @if (playerAPosture) {
-                            <span class="posture-badge" [class.offensive]="playerAPosture === 'offensive'" [class.defensive]="playerAPosture === 'defensive'">
+                            <span
+                                class="posture-badge"
+                                [class.offensive]="playerAPosture === 'offensive'"
+                                [class.defensive]="playerAPosture === 'defensive'"
+                            >
                                 {{ playerAPosture === 'offensive' ? '⚔️' : '🛡️' }}
                             </span>
-                            }
-                            @if (playerATileEffectLabel) {
+                            } @if (playerATileEffectLabel) {
                             <span class="tile-effect-badge">❄️</span>
                             }
                         </div>
@@ -63,8 +66,7 @@
                                 <span class="roll">{{ playerADamage.attackRoll }}</span>
                                 @if (playerADamage.attackBonus > 0) {
                                 <span class="bonus">+{{ playerADamage.attackBonus }}</span>
-                                }
-                                @if (playerADamage.attackPostureBonus > 0) {
+                                } @if (playerADamage.attackPostureBonus > 0) {
                                 <span class="bonus posture">+{{ playerADamage.attackPostureBonus }}</span>
                                 }
                                 <span class="equals">=</span>
@@ -78,8 +80,7 @@
                                 <span class="roll">{{ playerADamage.defenseRoll }}</span>
                                 @if (playerADamage.defenseBonus > 0) {
                                 <span class="bonus">+{{ playerADamage.defenseBonus }}</span>
-                                }
-                                @if (playerADamage.defensePostureBonus > 0) {
+                                } @if (playerADamage.defensePostureBonus > 0) {
                                 <span class="bonus posture">+{{ playerADamage.defensePostureBonus }}</span>
                                 }
                                 <span class="equals">=</span>
@@ -116,11 +117,14 @@
                         <span class="fighter-name">{{ playerBName }}</span>
                         <div class="badges">
                             @if (playerBPosture) {
-                            <span class="posture-badge" [class.offensive]="playerBPosture === 'offensive'" [class.defensive]="playerBPosture === 'defensive'">
+                            <span
+                                class="posture-badge"
+                                [class.offensive]="playerBPosture === 'offensive'"
+                                [class.defensive]="playerBPosture === 'defensive'"
+                            >
                                 {{ playerBPosture === 'offensive' ? '⚔️' : '🛡️' }}
                             </span>
-                            }
-                            @if (playerBTileEffectLabel) {
+                            } @if (playerBTileEffectLabel) {
                             <span class="tile-effect-badge">❄️</span>
                             }
                         </div>
@@ -149,8 +153,7 @@
                                 <span class="roll">{{ playerBDamage.attackRoll }}</span>
                                 @if (playerBDamage.attackBonus > 0) {
                                 <span class="bonus">+{{ playerBDamage.attackBonus }}</span>
-                                }
-                                @if (playerBDamage.attackPostureBonus > 0) {
+                                } @if (playerBDamage.attackPostureBonus > 0) {
                                 <span class="bonus posture">+{{ playerBDamage.attackPostureBonus }}</span>
                                 }
                                 <span class="equals">=</span>
@@ -164,8 +167,7 @@
                                 <span class="roll">{{ playerBDamage.defenseRoll }}</span>
                                 @if (playerBDamage.defenseBonus > 0) {
                                 <span class="bonus">+{{ playerBDamage.defenseBonus }}</span>
-                                }
-                                @if (playerBDamage.defensePostureBonus > 0) {
+                                } @if (playerBDamage.defensePostureBonus > 0) {
                                 <span class="bonus posture">+{{ playerBDamage.defensePostureBonus }}</span>
                                 }
                                 <span class="equals">=</span>
@@ -195,12 +197,22 @@
             } @else {
             <div class="posture-prompt">Choisissez une posture</div>
             <div class="posture-buttons">
-                <button class="posture-btn offensive" [class.selected]="selectedPosture === 'offensive'" [disabled]="isPostureSelected" (click)="chooseOffensive()">
+                <button
+                    class="posture-btn offensive"
+                    [class.selected]="selectedPosture === 'offensive'"
+                    [disabled]="isPostureSelected"
+                    (click)="chooseOffensive()"
+                >
                     <span class="btn-icon">⚔️</span>
                     <span class="btn-label">Offensive</span>
                     <span class="btn-bonus">+2 ATK</span>
                 </button>
-                <button class="posture-btn defensive" [class.selected]="selectedPosture === 'defensive'" [disabled]="isPostureSelected" (click)="chooseDefensive()">
+                <button
+                    class="posture-btn defensive"
+                    [class.selected]="selectedPosture === 'defensive'"
+                    [disabled]="isPostureSelected"
+                    (click)="chooseDefensive()"
+                >
                     <span class="btn-icon">🛡️</span>
                     <span class="btn-label">Défensive</span>
                     <span class="btn-bonus">+2 DEF</span>

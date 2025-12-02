@@ -35,20 +35,18 @@
                         </span>
                     </span>
                 </div>
-                }                 @if (activeTile.teleportChannel !== undefined) {
+                } @if (activeTile.teleportChannel !== undefined) {
                 <div class="info-item">
                     <span class="info-label">Téléportation</span>
                     <span class="info-value">Canal {{ activeTile.teleportChannel }}</span>
                 </div>
-                }
-                @if (startPointOnTile) {
+                } @if (startPointOnTile) {
                 <div class="info-item">
                     <span class="info-label">Point de départ de</span>
                     <span class="info-value">
                         @if (startPointOnTile.player) {
                         {{ startPointOnTile.player.name }}
-                        } @else {
-                        Joueur {{ startPointOnTile.playerId }}
+                        } @else { Joueur {{ startPointOnTile.playerId }}
                         }
                     </span>
                 </div>

@@ -128,16 +128,16 @@ export class GameMapComponent implements OnInit {
         if (this.isCurrentUser(player)) {
             return TeamColor.MyPlayer;
         }
-        
+
         const teamColor = this.playerService.getTeamColor(player.teamNumber);
         if (teamColor === TeamColor.MyTeam) {
             return TeamColor.MyTeam;
         }
-        
+
         if (!this.isCTFMode()) {
             return TeamColor.EnemyTeam;
         }
-        
+
         return teamColor;
     }
 

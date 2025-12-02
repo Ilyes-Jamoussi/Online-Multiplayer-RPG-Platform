@@ -81,20 +81,20 @@ export class PlayersListComponent {
     getTeamBackgroundColor(teamNumber: number | undefined, player?: Player): string | undefined {
         const teamColor = this.getTeamColor(teamNumber, player);
         if (!teamColor) return undefined;
-        
+
         const hex = teamColor.replace('#', '');
         const hexColorLength = 2;
         const blueStartIndex = 4;
         const red = parseInt(hex.substring(0, hexColorLength), 16);
         const green = parseInt(hex.substring(hexColorLength, hexColorLength + hexColorLength), 16);
         const blue = parseInt(hex.substring(blueStartIndex, blueStartIndex + hexColorLength), 16);
-        
+
         const baseWhite = 250;
         const colorMix = 0.12;
         const finalRed = Math.round(baseWhite - (baseWhite - red) * colorMix);
         const finalGreen = Math.round(baseWhite - (baseWhite - green) * colorMix);
         const finalBlue = Math.round(baseWhite - (baseWhite - blue) * colorMix);
-        
+
         return `rgb(${finalRed}, ${finalGreen}, ${finalBlue})`;
     }
 

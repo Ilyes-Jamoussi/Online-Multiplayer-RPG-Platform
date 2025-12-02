@@ -171,7 +171,9 @@
 }
 
 .start-point-avatar.my-start-point {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.8), inset 0 0 20px rgba(16, 185, 129, 0.3);
+    box-shadow:
+        0 0 20px rgba(16, 185, 129, 0.8),
+        inset 0 0 20px rgba(16, 185, 129, 0.3);
     border-radius: 4px;
 }
 

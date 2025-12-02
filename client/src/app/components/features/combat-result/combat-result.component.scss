@@ -94,8 +94,12 @@ $text-dim: rgba(255, 255, 255, 0.7);
 }
 
 @keyframes victoryOverlayFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes victoryScreenAppear {

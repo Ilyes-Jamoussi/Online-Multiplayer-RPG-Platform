@@ -44,8 +44,12 @@ $text-dim: rgba(255, 255, 255, 0.7);
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .combat-container {
@@ -106,7 +110,9 @@ $text-dim: rgba(255, 255, 255, 0.7);
     background: linear-gradient(135deg, $bg-card, rgba($bg-card, 0.9));
     border: 2px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transition:
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
     min-width: 380px;
 
     &.is-me {
@@ -120,9 +126,16 @@ $text-dim: rgba(255, 255, 255, 0.7);
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-8px); }
-    75% { transform: translateX(8px); }
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-8px);
+    }
+    75% {
+        transform: translateX(8px);
+    }
 }
 
 .fighter-identity {
@@ -149,7 +162,9 @@ $text-dim: rgba(255, 255, 255, 0.7);
     font-size: 3rem;
     font-weight: 900;
     color: $red;
-    text-shadow: 0 0 15px rgba($red, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.8);
+    text-shadow:
+        0 0 15px rgba($red, 0.8),
+        2px 2px 4px rgba(0, 0, 0, 0.8);
     animation: damageAnim 1.5s ease-out forwards;
     z-index: 2;
 }
@@ -266,8 +281,13 @@ $text-dim: rgba(255, 255, 255, 0.7);
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
 }
 
 .health-text {
@@ -422,7 +442,8 @@ $text-dim: rgba(255, 255, 255, 0.7);
 }
 
 @keyframes vsPulse {
-    0%, 100% {
+    0%,
+    100% {
         transform: scale(1);
         box-shadow: 0 0 40px rgba($gold, 0.5);
     }
@@ -469,8 +490,13 @@ $text-dim: rgba(255, 255, 255, 0.7);
 }
 
 @keyframes selectedPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.03); }
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.03);
+    }
 }
 
 .posture-buttons {
@@ -505,7 +531,9 @@ $text-dim: rgba(255, 255, 255, 0.7);
 
         &.selected {
             border-color: $text;
-            box-shadow: 0 10px 35px rgba($red, 0.6), 0 0 50px rgba($red, 0.6);
+            box-shadow:
+                0 10px 35px rgba($red, 0.6),
+                0 0 50px rgba($red, 0.6);
         }
     }
 
@@ -520,7 +548,9 @@ $text-dim: rgba(255, 255, 255, 0.7);
 
         &.selected {
             border-color: $text;
-            box-shadow: 0 10px 35px rgba($blue, 0.6), 0 0 50px rgba($blue, 0.6);
+            box-shadow:
+                0 10px 35px rgba($blue, 0.6),
+                0 0 50px rgba($blue, 0.6);
         }
     }
 
