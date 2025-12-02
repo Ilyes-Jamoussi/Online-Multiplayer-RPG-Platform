@@ -43,6 +43,7 @@
                     <label class="option-card" [class.selected]="selectedGameMode === option.value">
                         <input type="radio" name="gameMode" [value]="option.value" [(ngModel)]="selectedGameMode" />
                         <div class="option-header">
+                            <div class="option-icon">{{ option.icon }}</div>
                             <div class="selection-indicator">
                                 <app-ui-icon iconName="Check"></app-ui-icon>
                             </div>
@@ -60,12 +61,7 @@
 
     <div slot="footer">
         <div class="footer-content">
-            <app-ui-button variant="primary" size="lg" (buttonClick)="onCreate()">
-                <span class="button-content">
-                    <app-ui-icon iconName="ArrowRight" class="button-icon"></app-ui-icon>
-                    Continuer
-                </span>
-            </app-ui-button>
+            <app-ui-button variant="primary" size="lg" (buttonClick)="onCreate()"> Continuer </app-ui-button>
         </div>
     </div>
 </app-ui-page-layout>

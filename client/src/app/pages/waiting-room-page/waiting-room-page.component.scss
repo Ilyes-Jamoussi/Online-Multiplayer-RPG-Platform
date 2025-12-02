@@ -139,3 +139,9 @@
         max-height: 300px;
     }
 }
+
+:host ::ng-deep app-ui-footer {
+    background: transparent;
+    border-top: none;
+    box-shadow: none;
+}
