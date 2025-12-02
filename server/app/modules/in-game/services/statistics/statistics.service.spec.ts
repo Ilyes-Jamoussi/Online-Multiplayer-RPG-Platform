@@ -263,7 +263,6 @@ describe('StatisticsService', () => {
     });
 
     describe('calculateAndStoreGameStatistics', () => {
-
         it('should calculate and store game statistics', () => {
             const session = createMockSession();
             const gameStartTime = new Date(GAME_START_TIME_MS);
@@ -586,7 +585,7 @@ describe('StatisticsService', () => {
             trackingService.getTrackingData.mockReturnValue(trackingData);
 
             const singleDigitSecondsTime =
-                GAME_START_TIME_MS + (MINUTES * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND) + (FIVE * MILLISECONDS_PER_SECOND);
+                GAME_START_TIME_MS + MINUTES * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND + FIVE * MILLISECONDS_PER_SECOND;
             jest.spyOn(Date, 'now').mockReturnValue(singleDigitSecondsTime);
 
             const result = service.calculateAndStoreGameStatistics(session, WINNER_ID, WINNER_NAME, gameStartTime);
@@ -600,7 +599,7 @@ describe('StatisticsService', () => {
             const trackingData = createMockGameTracker();
             trackingService.getTrackingData.mockReturnValue(trackingData);
 
-            const zeroMinutesTime = GAME_START_TIME_MS + (THIRTY * MILLISECONDS_PER_SECOND);
+            const zeroMinutesTime = GAME_START_TIME_MS + THIRTY * MILLISECONDS_PER_SECOND;
             jest.spyOn(Date, 'now').mockReturnValue(zeroMinutesTime);
 
             const result = service.calculateAndStoreGameStatistics(session, WINNER_ID, WINNER_NAME, gameStartTime);
@@ -614,7 +613,7 @@ describe('StatisticsService', () => {
             const trackingData = createMockGameTracker();
             trackingService.getTrackingData.mockReturnValue(trackingData);
 
-            const zeroSecondsTime = GAME_START_TIME_MS + (MINUTES * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND);
+            const zeroSecondsTime = GAME_START_TIME_MS + MINUTES * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
             jest.spyOn(Date, 'now').mockReturnValue(zeroSecondsTime);
 
             const result = service.calculateAndStoreGameStatistics(session, WINNER_ID, WINNER_NAME, gameStartTime);

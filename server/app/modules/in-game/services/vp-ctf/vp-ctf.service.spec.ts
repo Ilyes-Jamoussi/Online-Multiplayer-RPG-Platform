@@ -384,9 +384,7 @@ describe('VPCTFService', () => {
                     [VP_PLAYER_ID]: createMockPlayer({ id: VP_PLAYER_ID, teamNumber: TEAM_1 }),
                     [FLAG_CARRIER_ID]: createMockPlayer({ id: FLAG_CARRIER_ID, teamNumber: TEAM_2 }),
                 },
-                startPoints: [
-                    createMockStartPoint({ playerId: FLAG_CARRIER_ID }),
-                ],
+                startPoints: [createMockStartPoint({ playerId: FLAG_CARRIER_ID })],
             });
             const pointsWithDistances: MapScanWithDistances = {
                 enemies: [],
@@ -1265,4 +1263,3 @@ describe('VPCTFService', () => {
         });
     });
 });
-

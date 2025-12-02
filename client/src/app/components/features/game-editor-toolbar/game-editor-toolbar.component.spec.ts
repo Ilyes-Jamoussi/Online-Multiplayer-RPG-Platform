@@ -40,10 +40,7 @@ const CREATE_MOCK_TOOLBAR_ITEM = (tileKind: TileKind, image: string, className: 
     class: className,
 });
 
-const CREATE_MOCK_TELEPORT_CHANNEL = (
-    channelNumber: number,
-    tiles?: TeleportTilesDto,
-): TeleportChannelDto => ({
+const CREATE_MOCK_TELEPORT_CHANNEL = (channelNumber: number, tiles?: TeleportTilesDto): TeleportChannelDto => ({
     channelNumber,
     tiles: tiles || { entryA: undefined, entryB: undefined },
 });
@@ -444,4 +441,3 @@ describe('GameEditorToolbarComponent', () => {
         });
     });
 });
-

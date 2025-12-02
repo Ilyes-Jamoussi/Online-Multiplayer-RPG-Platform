@@ -39,7 +39,7 @@ import { PlaceableDisabledUpdatedDto } from '@app/modules/in-game/dto/placeable-
 
 describe('InGameController', () => {
     let controller: InGameController;
-    
+
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             controllers: [InGameController],
@@ -232,4 +232,3 @@ describe('InGameController', () => {
         expect(() => controller.placeableDisabledUpdated(data)).not.toThrow();
     });
 });
-

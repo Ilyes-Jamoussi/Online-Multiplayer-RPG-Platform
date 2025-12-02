@@ -96,8 +96,12 @@ const createMockGame = (overrides: Partial<Game> = {}): Game => {
         lastModified: new Date(),
         createdAt: new Date(),
         gridPreviewUrl: '',
-        tiles: Array(MOCK_TOTAL_DOORS).fill(null).map(() => ({ kind: TileKind.DOOR, x: 0, y: 0, open: false })),
-        objects: Array(MOCK_TOTAL_SANCTUARIES).fill(null).map(() => ({ kind: PlaceableKind.HEAL, x: 0, y: 0, placed: true })),
+        tiles: Array(MOCK_TOTAL_DOORS)
+            .fill(null)
+            .map(() => ({ kind: TileKind.DOOR, x: 0, y: 0, open: false })),
+        objects: Array(MOCK_TOTAL_SANCTUARIES)
+            .fill(null)
+            .map(() => ({ kind: PlaceableKind.HEAL, x: 0, y: 0, placed: true })),
         draft: false,
         teleportChannels: [
             { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } },
@@ -113,10 +117,7 @@ const createMockWaitingRoomSession = (overrides: Partial<WaitingRoomSession> = {
     maxPlayers: MOCK_MAX_PLAYERS,
     mode: GameMode.CLASSIC,
     chatId: MOCK_CHAT_ID,
-    players: [
-        createMockPlayer({ id: MOCK_PLAYER_ID_1 }),
-        createMockPlayer({ id: MOCK_PLAYER_ID_2, name: MOCK_PLAYER_NAME_2 }),
-    ],
+    players: [createMockPlayer({ id: MOCK_PLAYER_ID_1 }), createMockPlayer({ id: MOCK_PLAYER_ID_2, name: MOCK_PLAYER_NAME_2 })],
     avatarAssignments: [],
     isRoomLocked: false,
     ...overrides,

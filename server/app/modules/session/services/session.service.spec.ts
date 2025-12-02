@@ -682,9 +682,12 @@ describe('SessionService', () => {
             const dto = createCreateSessionDto();
             const result = service.createSession(ADMIN_ID, dto);
             VIRTUAL_PLAYER_NAMES.forEach((name, index) => {
-                service.joinSession(`player-${index}`, createJoinSessionDto(result.sessionId, {
-                    player: createMockPlayerDto({ name }),
-                }));
+                service.joinSession(
+                    `player-${index}`,
+                    createJoinSessionDto(result.sessionId, {
+                        player: createMockPlayerDto({ name }),
+                    }),
+                );
             });
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)

@@ -43,13 +43,7 @@ describe('HomePageComponent', () => {
     });
 
     it('should initialize teamInfo with correct members', () => {
-        expect(component.teamInfo.members).toEqual([
-            MOCK_MEMBER_1,
-            MOCK_MEMBER_2,
-            MOCK_MEMBER_3,
-            MOCK_MEMBER_4,
-            MOCK_MEMBER_5,
-        ]);
+        expect(component.teamInfo.members).toEqual([MOCK_MEMBER_1, MOCK_MEMBER_2, MOCK_MEMBER_3, MOCK_MEMBER_4, MOCK_MEMBER_5]);
     });
 
     it('should have correct number of members', () => {

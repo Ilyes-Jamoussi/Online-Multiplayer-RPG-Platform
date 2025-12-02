@@ -369,9 +369,9 @@ export class GameEditorStoreService {
             channelNumber: channel.channelNumber,
             tiles: channel.tiles
                 ? {
-                    entryA: channel.tiles.entryA ? { ...channel.tiles.entryA } : undefined,
-                    entryB: channel.tiles.entryB ? { ...channel.tiles.entryB } : undefined,
-                }
+                      entryA: channel.tiles.entryA ? { ...channel.tiles.entryA } : undefined,
+                      entryB: channel.tiles.entryB ? { ...channel.tiles.entryB } : undefined,
+                  }
                 : { entryA: undefined, entryB: undefined },
         }));
     }

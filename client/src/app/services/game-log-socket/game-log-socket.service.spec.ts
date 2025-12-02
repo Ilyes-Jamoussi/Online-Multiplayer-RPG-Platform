@@ -115,9 +115,7 @@ describe('GameLogSocketService', () => {
                 message: 'Second message',
             };
 
-            mockSocketService.onEvent.and.returnValue(
-                of(CREATE_MOCK_SUCCESS_RESPONSE(logEntry1), CREATE_MOCK_SUCCESS_RESPONSE(logEntry2)),
-            );
+            mockSocketService.onEvent.and.returnValue(of(CREATE_MOCK_SUCCESS_RESPONSE(logEntry1), CREATE_MOCK_SUCCESS_RESPONSE(logEntry2)));
 
             const callback = jasmine.createSpy('callback');
             service.onLogEntry(callback);
@@ -141,4 +139,3 @@ describe('GameLogSocketService', () => {
         });
     });
 });
-

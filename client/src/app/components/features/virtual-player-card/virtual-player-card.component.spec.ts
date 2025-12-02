@@ -60,12 +60,7 @@ type MockSessionService = {
     kickPlayer: jasmine.Spy;
 };
 
-const CREATE_MOCK_PLAYER = (
-    id: string,
-    name: string,
-    virtualPlayerType: VirtualPlayerType,
-    avatar: Avatar | null = TEST_AVATAR,
-): Player => ({
+const CREATE_MOCK_PLAYER = (id: string, name: string, virtualPlayerType: VirtualPlayerType, avatar: Avatar | null = TEST_AVATAR): Player => ({
     id,
     name,
     avatar,
@@ -273,4 +268,3 @@ describe('VirtualPlayerCardComponent', () => {
         });
     });
 });
-

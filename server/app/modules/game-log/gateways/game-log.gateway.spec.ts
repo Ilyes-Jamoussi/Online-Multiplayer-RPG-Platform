@@ -604,4 +604,3 @@ describe('GameLogGateway', () => {
         });
     });
 });
-

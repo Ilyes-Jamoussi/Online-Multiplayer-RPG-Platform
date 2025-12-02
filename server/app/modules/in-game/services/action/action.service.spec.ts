@@ -497,9 +497,7 @@ describe('ActionService', () => {
         });
 
         it('should throw NotFoundException when request not found', () => {
-            expect(() => service.respondToFlagTransfer(MOCK_SESSION_ID, MOCK_PLAYER_ID_2, MOCK_PLAYER_ID_1, true)).toThrow(
-                NotFoundException,
-            );
+            expect(() => service.respondToFlagTransfer(MOCK_SESSION_ID, MOCK_PLAYER_ID_2, MOCK_PLAYER_ID_1, true)).toThrow(NotFoundException);
         });
     });
 

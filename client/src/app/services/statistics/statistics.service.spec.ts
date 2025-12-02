@@ -90,11 +90,7 @@ describe('StatisticsService', () => {
         };
 
         TestBed.configureTestingModule({
-            providers: [
-                StatisticsService,
-                ResetService,
-                { provide: InGameSocketService, useValue: mockInGameSocketService },
-            ],
+            providers: [StatisticsService, ResetService, { provide: InGameSocketService, useValue: mockInGameSocketService }],
         });
 
         service = TestBed.inject(StatisticsService);
@@ -309,4 +305,3 @@ describe('StatisticsService', () => {
         });
     });
 });
-

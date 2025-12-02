@@ -114,4 +114,3 @@ describe('SessionController', () => {
         expect(() => controller.avatarSelectionJoined(data)).not.toThrow();
     });
 });
-

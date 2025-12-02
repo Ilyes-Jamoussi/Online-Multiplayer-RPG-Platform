@@ -25,12 +25,7 @@ type MockGameLogService = {
     toggleFilter: jasmine.Spy;
 };
 
-const CREATE_MOCK_GAME_LOG_ENTRY = (
-    id: string,
-    timestamp: string,
-    message: string,
-    icon?: string,
-): GameLogEntry => ({
+const CREATE_MOCK_GAME_LOG_ENTRY = (id: string, timestamp: string, message: string, icon?: string): GameLogEntry => ({
     id,
     timestamp,
     type: GameLogEntryType.TurnStart,

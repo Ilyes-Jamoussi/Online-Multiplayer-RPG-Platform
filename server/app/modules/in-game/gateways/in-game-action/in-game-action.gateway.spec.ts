@@ -924,4 +924,3 @@ describe('InGameActionGateway', () => {
         });
     });
 });
-
