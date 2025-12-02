@@ -168,10 +168,7 @@ describe('InitializationService', () => {
         } as unknown as jest.Mocked<GameCacheService>;
 
         const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                InitializationService,
-                { provide: GameCacheService, useValue: mockGameCacheService },
-            ],
+            providers: [InitializationService, { provide: GameCacheService, useValue: mockGameCacheService }],
         }).compile();
 
         service = module.get<InitializationService>(InitializationService);

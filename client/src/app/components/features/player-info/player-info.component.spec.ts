@@ -94,15 +94,13 @@ describe('PlayerInfoComponent', () => {
 
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getAvatarStaticImage']);
 
-        mockInGameService = jasmine.createSpyObj('InGameService', [
-            'isMyTurn',
-            'isGameStarted',
-            'hasUsedAction',
-            'availableActions',
-            'activateActionMode',
-        ], {
-            flagData: signal(undefined),
-        });
+        mockInGameService = jasmine.createSpyObj(
+            'InGameService',
+            ['isMyTurn', 'isGameStarted', 'hasUsedAction', 'availableActions', 'activateActionMode'],
+            {
+                flagData: signal(undefined),
+            },
+        );
 
         await TestBed.configureTestingModule({
             imports: [PlayerInfoComponent],

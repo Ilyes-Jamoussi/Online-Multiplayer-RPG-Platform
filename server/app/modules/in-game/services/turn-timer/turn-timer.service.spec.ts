@@ -801,9 +801,11 @@ describe('TurnTimerService', () => {
         it('should return null when turnOrder is empty', () => {
             const session = createMockSession({ turnOrder: [] });
 
-            const result = (service as unknown as {
-                getNextActivePlayer: (session: InGameSession, currentId: string | null) => string | null;
-            }).getNextActivePlayer(session, null);
+            const result = (
+                service as unknown as {
+                    getNextActivePlayer: (session: InGameSession, currentId: string | null) => string | null;
+                }
+            ).getNextActivePlayer(session, null);
 
             expect(result).toBeNull();
         });
@@ -813,9 +815,11 @@ describe('TurnTimerService', () => {
                 turnOrder: [PLAYER_ID_1, PLAYER_ID_2],
             });
 
-            const result = (service as unknown as {
-                getNextActivePlayer: (session: InGameSession, currentId: string | null) => string | null;
-            }).getNextActivePlayer(session, 'non-existent-player');
+            const result = (
+                service as unknown as {
+                    getNextActivePlayer: (session: InGameSession, currentId: string | null) => string | null;
+                }
+            ).getNextActivePlayer(session, 'non-existent-player');
 
             expect(result).toBe(PLAYER_ID_1);
         });
@@ -829,9 +833,11 @@ describe('TurnTimerService', () => {
                 turnOrder: [PLAYER_ID_1, PLAYER_ID_2],
             });
 
-            const result = (service as unknown as {
-                getNextActivePlayer: (session: InGameSession, currentId: string | null) => string | null;
-            }).getNextActivePlayer(session, PLAYER_ID_1);
+            const result = (
+                service as unknown as {
+                    getNextActivePlayer: (session: InGameSession, currentId: string | null) => string | null;
+                }
+            ).getNextActivePlayer(session, PLAYER_ID_1);
 
             expect(result).toBe(PLAYER_ID_2);
         });

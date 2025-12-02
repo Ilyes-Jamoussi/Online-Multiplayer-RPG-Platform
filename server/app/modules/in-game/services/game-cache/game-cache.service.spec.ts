@@ -287,9 +287,7 @@ describe('GameCacheService', () => {
 
             await service.fetchAndCacheGame(MOCK_SESSION_ID, MOCK_GAME_ID);
 
-            const gameMap = (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.get(
-                MOCK_SESSION_ID,
-            );
+            const gameMap = (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.get(MOCK_SESSION_ID);
             expect((gameMap as { objects: Placeable[] }).objects.length).toBe(
                 PlaceableFootprint[PlaceableKind.HEAL] * PlaceableFootprint[PlaceableKind.HEAL],
             );
@@ -986,9 +984,11 @@ describe('GameCacheService', () => {
             (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
             const disabledMap = new Map<string, { playerId: string; turnCount: number }>();
             disabledMap.set(`${MOCK_PLACEABLE_ID}-${MOCK_X}-${MOCK_Y}`, { playerId: MOCK_PLAYER_ID, turnCount: MOCK_TURN_COUNT });
-            (service as unknown as {
-                disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>>;
-            }).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
+            (
+                service as unknown as {
+                    disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>>;
+                }
+            ).disabledPlaceables.set(MOCK_SESSION_ID, disabledMap);
             const position: Position = { x: MOCK_X, y: MOCK_Y };
 
             const result = service.isPlaceableDisabled(MOCK_SESSION_ID, position);
@@ -1266,10 +1266,7 @@ describe('GameCacheService', () => {
                 size: MapSize.MEDIUM,
             };
             (service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.set(MOCK_SESSION_ID, mockGame);
-            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(
-                MOCK_SESSION_ID,
-                gameMap,
-            );
+            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
             (
                 service as unknown as {
                     disabledPlaceables: Map<string, Map<string, { playerId: string; turnCount: number }>>;
@@ -1278,12 +1275,8 @@ describe('GameCacheService', () => {
 
             service.clearSessionGameCache(MOCK_SESSION_ID);
 
-            expect((service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.has(MOCK_SESSION_ID)).toBe(
-                false,
-            );
-            expect((service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.has(MOCK_SESSION_ID)).toBe(
-                false,
-            );
+            expect((service as unknown as { sessionsGames: Map<string, Game> }).sessionsGames.has(MOCK_SESSION_ID)).toBe(false);
+            expect((service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.has(MOCK_SESSION_ID)).toBe(false);
             expect(
                 (
                     service as unknown as {
@@ -1377,4 +1370,3 @@ describe('GameCacheService', () => {
         });
     });
 });
-

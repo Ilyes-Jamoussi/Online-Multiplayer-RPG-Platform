@@ -38,4 +38,3 @@ describe('ChatController', () => {
         expect(() => controller.leaveChat(leaveChatDto)).not.toThrow();
     });
 });
-

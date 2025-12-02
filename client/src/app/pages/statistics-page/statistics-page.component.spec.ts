@@ -104,10 +104,7 @@ const CREATE_MOCK_GLOBAL_STATISTICS = (params: GlobalStatisticsParams = {}): Glo
     flagHoldersCount: params.flagHoldersCount ?? TEST_FLAG_HOLDERS_COUNT,
 });
 
-const CREATE_MOCK_GAME_STATISTICS = (
-    playersStatistics: PlayerStatisticsDto[],
-    globalStatistics: GlobalStatisticsDto,
-): GameStatisticsDto => ({
+const CREATE_MOCK_GAME_STATISTICS = (playersStatistics: PlayerStatisticsDto[], globalStatistics: GlobalStatisticsDto): GameStatisticsDto => ({
     winnerId: TEST_WINNER_ID,
     winnerName: TEST_WINNER_NAME,
     playersStatistics,
@@ -585,4 +582,3 @@ describe('StatisticsPageComponent', () => {
         });
     });
 });
-

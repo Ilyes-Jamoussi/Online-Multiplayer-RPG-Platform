@@ -178,7 +178,6 @@ describe('CharacterCreationPageComponent', () => {
         mockAssetsService.getAvatarStaticImage.and.returnValue('./assets/images/avatars/static/avatar1.png');
         mockAssetsService.getAvatarAnimatedImage.and.returnValue('./assets/images/avatars/animated/avatar1.gif');
 
-
         mockNotificationCoordinatorService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
 
         mockLocation = jasmine.createSpyObj('Location', ['back']);
@@ -521,4 +520,3 @@ describe('CharacterCreationPageComponent', () => {
         });
     });
 });
-

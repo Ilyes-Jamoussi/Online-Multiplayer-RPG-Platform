@@ -184,9 +184,7 @@ describe('SessionCardComponent', () => {
 
             const infoItems = fixture.nativeElement.querySelectorAll('.info-item');
             expect(infoItems.length).toBeGreaterThan(0);
-            const mapSizeText = Array.from<Element>(infoItems).find((item: Element) =>
-                item.textContent?.includes('Petite')
-            );
+            const mapSizeText = Array.from<Element>(infoItems).find((item: Element) => item.textContent?.includes('Petite'));
             expect(mapSizeText).toBeTruthy();
         });
 
@@ -208,4 +206,3 @@ describe('SessionCardComponent', () => {
         });
     });
 });
-

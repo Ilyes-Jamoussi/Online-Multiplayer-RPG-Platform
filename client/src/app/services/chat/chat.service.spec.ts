@@ -34,12 +34,7 @@ type MockSessionService = {
     chatId: Signal<string>;
 };
 
-const CREATE_MOCK_CHAT_MESSAGE = (
-    authorId: string,
-    authorName: string,
-    content: string,
-    timestamp: string,
-): ChatMessage => ({
+const CREATE_MOCK_CHAT_MESSAGE = (authorId: string, authorName: string, content: string, timestamp: string): ChatMessage => ({
     authorId,
     authorName,
     content,
@@ -292,4 +287,3 @@ describe('ChatService', () => {
         });
     });
 });
-

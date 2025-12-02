@@ -73,7 +73,9 @@ describe('VPPathfindingService', () => {
         ...overrides,
     });
 
-    const createMockTile = (overrides: Partial<{ kind: TileKind; open: boolean; x: number; y: number; playerId: string | null }> = {}): {
+    const createMockTile = (
+        overrides: Partial<{ kind: TileKind; open: boolean; x: number; y: number; playerId: string | null }> = {},
+    ): {
         kind: TileKind;
         open: boolean;
         x: number;
@@ -1115,9 +1117,7 @@ describe('VPPathfindingService', () => {
 
     describe('expandDoorActions', () => {
         it('should expand openDoor action to openDoor and move', () => {
-            const rawActions = [
-                { type: PathActionType.OPENDOOR, orientation: Orientation.N, position: createMockPosition() },
-            ];
+            const rawActions = [{ type: PathActionType.OPENDOOR, orientation: Orientation.N, position: createMockPosition() }];
 
             const result = service['expandDoorActions'](rawActions);
 
@@ -1127,9 +1127,7 @@ describe('VPPathfindingService', () => {
         });
 
         it('should keep non-door actions unchanged', () => {
-            const rawActions = [
-                { type: PathActionType.MOVE, orientation: Orientation.N, position: createMockPosition() },
-            ];
+            const rawActions = [{ type: PathActionType.MOVE, orientation: Orientation.N, position: createMockPosition() }];
 
             const result = service['expandDoorActions'](rawActions);
 
@@ -1178,9 +1176,7 @@ describe('VPPathfindingService', () => {
 
         it('should return best escape point when found', () => {
             const session = createMockSession();
-            const enemies: EnemyPosition[] = [
-                { position: createMockPosition({ x: POSITION_X_1 + THREE, y: POSITION_Y_1 }) },
-            ];
+            const enemies: EnemyPosition[] = [{ position: createMockPosition({ x: POSITION_X_1 + THREE, y: POSITION_Y_1 }) }];
             gameCache.getMapSize.mockReturnValue(MAP_SIZE);
             gameCache.getTileAtPosition.mockReturnValue(createMockTile({ kind: TileKind.BASE }));
             gameCache.getTileOccupant.mockReturnValue(null);
@@ -1193,9 +1189,7 @@ describe('VPPathfindingService', () => {
 
         it('should return fallback escape point when no better found', () => {
             const session = createMockSession();
-            const enemies: EnemyPosition[] = [
-                { position: createMockPosition({ x: POSITION_X_1 + ONE, y: POSITION_Y_1 }) },
-            ];
+            const enemies: EnemyPosition[] = [{ position: createMockPosition({ x: POSITION_X_1 + ONE, y: POSITION_Y_1 }) }];
             gameCache.getMapSize.mockReturnValue(MAP_SIZE);
             gameCache.getTileAtPosition.mockReturnValue(createMockTile({ kind: TileKind.BASE }));
             gameCache.getTileOccupant.mockReturnValue(null);
@@ -1218,9 +1212,7 @@ describe('VPPathfindingService', () => {
 
         it('should skip unreachable paths', () => {
             const session = createMockSession();
-            const enemies: EnemyPosition[] = [
-                { position: createMockPosition({ x: POSITION_X_1 + THREE, y: POSITION_Y_1 }) },
-            ];
+            const enemies: EnemyPosition[] = [{ position: createMockPosition({ x: POSITION_X_1 + THREE, y: POSITION_Y_1 }) }];
             gameCache.getMapSize.mockReturnValue(MAP_SIZE);
             gameCache.getTileAtPosition.mockReturnValue(null);
 
@@ -1234,9 +1226,7 @@ describe('VPPathfindingService', () => {
         it('should generate sample positions', () => {
             const mapSize = MAP_SIZE;
             const playerPos = createMockPosition({ x: MAP_SIZE / TWO, y: MAP_SIZE / TWO });
-            const enemies: EnemyPosition[] = [
-                { position: createMockPosition({ x: POSITION_X_1, y: POSITION_Y_1 }) },
-            ];
+            const enemies: EnemyPosition[] = [{ position: createMockPosition({ x: POSITION_X_1, y: POSITION_Y_1 }) }];
 
             const result = service['getSampleEscapePositions'](mapSize, playerPos, enemies);
 
@@ -1246,9 +1236,7 @@ describe('VPPathfindingService', () => {
         it('should filter positions within bounds', () => {
             const mapSize = MAP_SIZE;
             const playerPos = createMockPosition({ x: ONE, y: ONE });
-            const enemies: EnemyPosition[] = [
-                { position: createMockPosition({ x: POSITION_X_1, y: POSITION_Y_1 }) },
-            ];
+            const enemies: EnemyPosition[] = [{ position: createMockPosition({ x: POSITION_X_1, y: POSITION_Y_1 }) }];
 
             const result = service['getSampleEscapePositions'](mapSize, playerPos, enemies);
 
@@ -1285,9 +1273,7 @@ describe('VPPathfindingService', () => {
 
         it('should handle single enemy', () => {
             const position = createMockPosition({ x: POSITION_X_1, y: POSITION_Y_1 });
-            const enemies: EnemyPosition[] = [
-                { position: createMockPosition({ x: POSITION_X_1 + TWO, y: POSITION_Y_1 + TWO }) },
-            ];
+            const enemies: EnemyPosition[] = [{ position: createMockPosition({ x: POSITION_X_1 + TWO, y: POSITION_Y_1 + TWO }) }];
 
             const result = service['calculateMinDistanceFromEnemies'](position, enemies);
 
@@ -1295,4 +1281,3 @@ describe('VPPathfindingService', () => {
         });
     });
 });
-

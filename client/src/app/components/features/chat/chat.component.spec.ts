@@ -29,12 +29,7 @@ type MockPlayerService = {
     id: Signal<string>;
 };
 
-const CREATE_MOCK_CHAT_MESSAGE = (
-    authorId: string,
-    authorName: string,
-    content: string,
-    timestamp: string,
-): ChatMessage => ({
+const CREATE_MOCK_CHAT_MESSAGE = (authorId: string, authorName: string, content: string, timestamp: string): ChatMessage => ({
     authorId,
     authorName,
     content,
@@ -87,9 +82,7 @@ describe('ChatComponent', () => {
 
     describe('messages', () => {
         it('should return messages from chatService', () => {
-            const mockMessages = [
-                CREATE_MOCK_CHAT_MESSAGE(TEST_PLAYER_ID, TEST_AUTHOR_NAME, TEST_MESSAGE_CONTENT, TEST_TIMESTAMP),
-            ];
+            const mockMessages = [CREATE_MOCK_CHAT_MESSAGE(TEST_PLAYER_ID, TEST_AUTHOR_NAME, TEST_MESSAGE_CONTENT, TEST_TIMESTAMP)];
             messagesSignal.set(mockMessages);
             fixture.detectChanges();
 
@@ -109,9 +102,7 @@ describe('ChatComponent', () => {
         });
 
         it('should set shouldScrollToBottom to true when messages getter is accessed', () => {
-            const mockMessages = [
-                CREATE_MOCK_CHAT_MESSAGE(TEST_PLAYER_ID, TEST_AUTHOR_NAME, TEST_MESSAGE_CONTENT, TEST_TIMESTAMP),
-            ];
+            const mockMessages = [CREATE_MOCK_CHAT_MESSAGE(TEST_PLAYER_ID, TEST_AUTHOR_NAME, TEST_MESSAGE_CONTENT, TEST_TIMESTAMP)];
             messagesSignal.set(mockMessages);
             fixture.detectChanges();
 
