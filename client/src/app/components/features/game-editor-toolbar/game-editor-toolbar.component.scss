@@ -4,7 +4,8 @@
 }
 
 .list {
-    display: grid;
+    display: flex;
+    flex-wrap: wrap;
     grid-template-columns: repeat(5, var(--tile-size));
     gap: var(--gap);
     justify-content: start;
