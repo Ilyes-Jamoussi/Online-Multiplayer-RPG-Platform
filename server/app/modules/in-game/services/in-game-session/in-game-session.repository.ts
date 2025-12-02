@@ -19,6 +19,12 @@ export class InGameSessionRepository {
         private readonly gameCache: GameCacheService,
     ) {}
 
+    isVirtualPlayer(sessionId: string, playerId: string): boolean {
+        const session = this.findById(sessionId);
+        const player = session.inGamePlayers[playerId];
+        return Boolean(player?.virtualPlayerType);
+    }
+
     pickUpFlag(session: InGameSession, playerId: string, position: Position): void {
         const flagData = session.flagData;
         if (!flagData) throw new NotFoundException('Flag data not found');
@@ -219,6 +225,10 @@ export class InGameSessionRepository {
 
     inGamePlayersCount(sessionId: string): number {
         return this.getIngamePlayers(sessionId).length;
+    }
+
+    realPlayersCount(sessionId: string): number {
+        return this.getIngamePlayers(sessionId).filter((p) => !p.virtualPlayerType).length;
     }
 
     getIngamePlayers(sessionId: string): Player[] {

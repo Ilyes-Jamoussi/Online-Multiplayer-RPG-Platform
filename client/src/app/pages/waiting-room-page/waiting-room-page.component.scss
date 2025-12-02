@@ -16,6 +16,7 @@
 .right-panel {
     flex: 1;
     height: 100%;
+    display: flex;
 }
 
 .players-section {
@@ -137,4 +138,10 @@
     .players-section {
         max-height: 300px;
     }
+}
+
+:host ::ng-deep app-ui-footer {
+    background: transparent;
+    border-top: none;
+    box-shadow: none;
 }

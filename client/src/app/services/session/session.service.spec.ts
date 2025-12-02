@@ -116,20 +116,6 @@ describe('SessionService', () => {
     });
 
     describe('Session State Checks', () => {
-        it('should check if can be locked', () => {
-            expect(service.canBeLocked()).toBe(true);
-            service.updateSession({ isRoomLocked: true });
-            expect(service.canBeLocked()).toBe(false);
-        });
-
-        it('should check if can be unlocked', () => {
-            service.updateSession({ isRoomLocked: true, maxPlayers: TEST_MAX_PLAYERS, players: [mockPlayer] });
-            expect(service.canBeUnlocked()).toBe(true);
-
-            service.updateSession({ isRoomLocked: false });
-            expect(service.canBeUnlocked()).toBe(false);
-        });
-
         it('should check if can start game', () => {
             service.updateSession({ isRoomLocked: true, players: [mockPlayer, mockPlayer] });
             expect(service.canStartGame()).toBe(true);

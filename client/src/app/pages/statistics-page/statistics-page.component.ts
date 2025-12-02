@@ -2,22 +2,27 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { ChatComponent } from '@app/components/features/chat/chat.component';
+import { GameLogComponent } from '@app/components/features/game-log/game-log.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { ROUTES } from '@app/enums/routes.enum';
 import { GlobalStatistics, SortColumn, SortDirection } from '@app/interfaces/game-statistics.interface';
 import { SessionService } from '@app/services/session/session.service';
 import { StatisticsService } from '@app/services/statistics/statistics.service';
+import { GameLogService } from '@app/services/game-log/game-log.service';
+
+type TabType = 'chat' | 'journal';
 
 @Component({
     selector: 'app-statistics-page',
     standalone: true,
-    imports: [CommonModule, UiPageLayoutComponent, ChatComponent],
+    imports: [CommonModule, UiPageLayoutComponent, ChatComponent, GameLogComponent],
     templateUrl: './statistics-page.component.html',
     styleUrl: './statistics-page.component.scss',
 })
 export class StatisticsPageComponent implements OnInit {
     sortColumn: SortColumn = 'name';
     sortDirection: SortDirection = 'asc';
+    activeTab: TabType = 'journal';
 
     readonly gameStatistics = computed(() => this.statisticsService.gameStatistics());
     readonly playersStatistics = computed(() => this.gameStatistics()?.playersStatistics || []);
@@ -27,6 +32,7 @@ export class StatisticsPageComponent implements OnInit {
         private readonly router: Router,
         private readonly statisticsService: StatisticsService,
         private readonly sessionService: SessionService,
+        readonly gameLogService: GameLogService,
     ) {}
 
     ngOnInit(): void {
@@ -40,6 +46,14 @@ export class StatisticsPageComponent implements OnInit {
 
     onBackClick(): void {
         void this.router.navigate([ROUTES.HomePage]);
+    }
+
+    setActiveTab(tab: TabType): void {
+        this.activeTab = tab;
+    }
+
+    isActiveTab(tab: TabType): boolean {
+        return this.activeTab === tab;
     }
 
     sortBy(column: SortColumn): void {

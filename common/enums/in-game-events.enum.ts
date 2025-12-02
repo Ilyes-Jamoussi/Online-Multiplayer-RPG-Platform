@@ -68,6 +68,7 @@ export enum InGameEvents {
     CombatTileEffect = 'combatTileEffect',
 
     PlaceableUpdated = 'placeable-updated',
+    PlaceableDisabledUpdated = 'placeable-disabled-updated',
 
     SessionUpdated = 'session-updated',
 

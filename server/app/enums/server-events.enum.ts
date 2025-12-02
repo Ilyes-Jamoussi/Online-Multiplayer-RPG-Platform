@@ -46,6 +46,7 @@ export enum ServerEvents {
     SanctuaryActionSuccess = 'sanctuary-action-success',
 
     PlaceableUpdated = 'placeable-updated',
+    PlaceableDisabledUpdated = 'placeable-disabled-updated',
 
     SessionUpdated = 'session-updated',
 
@@ -56,4 +57,7 @@ export enum ServerEvents {
     FlagTransferResult = 'flag-transfer-result',
     FlagTransferred = 'flag-transferred',
     FlagTransferRequestsCleared = 'flag-transfer-requests-cleared',
+
+    VirtualPlayerCombatStarted = 'virtual-player-combat-started',
+    VirtualPlayerCombatVictory = 'virtual-player-combat-victory',
 }

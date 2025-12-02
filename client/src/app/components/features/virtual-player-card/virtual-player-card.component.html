@@ -1,23 +1,17 @@
 <div class="virtual-player-card" [class]="player.virtualPlayerType">
-    <div class="type-indicator">
-        <i class="material-icons type-icon">{{ getTypeIcon() }}</i>
-    </div>
-
     <div class="avatar-wrapper">
         <img class="avatar-image" [src]="avatarImage" [alt]="player.name" />
-        <div class="virtual-badge">
-            <i class="material-icons">smart_toy</i>
-        </div>
     </div>
 
     <div class="player-info">
         <h4 class="player-name">{{ player.name }}</h4>
-        <span class="type-label">{{ getTypeLabel() }}</span>
+        <span class="type-label">
+            <i class="material-icons">{{ getTypeIcon() }}</i>
+            {{ getTypeLabel() }}
+        </span>
     </div>
 
     @if (showRemoveButton) {
-    <button class="remove-button" (click)="removeVirtualPlayer()" aria-label="Retirer ce joueur virtuel">
-        <i class="material-icons">close</i>
-    </button>
+    <button class="remove-button" (click)="removeVirtualPlayer()" aria-label="Retirer ce joueur virtuel">Expulser</button>
     }
 </div>

@@ -5,7 +5,7 @@
                 <div class="section-header">
                     <div class="section-info">
                         <h2>Taille de la carte</h2>
-                        <p>Choisissez la dimension de votre terrain de jeu</p>
+                        <p>Choisissez la dimension du terrain de jeu</p>
                     </div>
                 </div>
                 <div class="options-grid">
@@ -35,7 +35,7 @@
                 <div class="section-header">
                     <div class="section-info">
                         <h2>Mode de jeu</h2>
-                        <p>Sélectionnez le style de partie que vous souhaitez</p>
+                        <p>Sélectionnez le style de partie souhaité</p>
                     </div>
                 </div>
                 <div class="options-grid">
@@ -43,6 +43,7 @@
                     <label class="option-card" [class.selected]="selectedGameMode === option.value">
                         <input type="radio" name="gameMode" [value]="option.value" [(ngModel)]="selectedGameMode" />
                         <div class="option-header">
+                            <div class="option-icon">{{ option.icon }}</div>
                             <div class="selection-indicator">
                                 <app-ui-icon iconName="Check"></app-ui-icon>
                             </div>
@@ -60,12 +61,7 @@
 
     <div slot="footer">
         <div class="footer-content">
-            <app-ui-button variant="primary" size="lg" (buttonClick)="onCreate()">
-                <span class="button-content">
-                    <app-ui-icon iconName="ArrowRight" class="button-icon"></app-ui-icon>
-                    Continuer
-                </span>
-            </app-ui-button>
+            <app-ui-button variant="primary" size="lg" (buttonClick)="onCreate()"> Continuer </app-ui-button>
         </div>
     </div>
 </app-ui-page-layout>

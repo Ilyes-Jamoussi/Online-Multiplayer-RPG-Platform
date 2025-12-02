@@ -12,8 +12,8 @@ export interface GlobalStatisticsDto {
     gameDuration: string;
     totalTurns: number;
     tilesVisitedPercentage: number;
-    totalTeleportations?: number;
-    doorsManipulatedPercentage?: number;
-    sanctuariesUsedPercentage?: number;
-    flagHoldersCount?: number;
+    totalTeleportations: number;
+    doorsManipulatedPercentage: number;
+    sanctuariesUsedPercentage: number;
+    flagHoldersCount: number;
 }

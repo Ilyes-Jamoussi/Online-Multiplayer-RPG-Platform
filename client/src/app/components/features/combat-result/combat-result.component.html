@@ -1,0 +1,29 @@
+<div class="victory-overlay">
+    <div
+        class="victory-screen"
+        [class.victory]="isVictory"
+        [class.defeat]="!isVictory && victoryData.winnerId !== null"
+        [class.draw]="victoryData.winnerId === null"
+    >
+        <div class="victory-particles">
+            @for (particle of [1,2,3,4,5,6]; track particle) {
+            <div class="particle" [style.--delay]="particle * 0.15 + 's'"></div>
+            }
+        </div>
+
+        <div class="victory-glow"></div>
+
+        <div class="victory-content">
+            <div class="victory-icon-wrapper">
+                <div class="icon-ring"></div>
+                <div class="victory-icon">@if (victoryData.winnerId === null) { ⚔️ } @else if (isVictory) { 🏆 } @else { 💀 }</div>
+            </div>
+
+            <h1 class="victory-title">{{ victoryMessage }}</h1>
+
+            <div class="victory-divider"></div>
+
+            <p class="victory-subtitle">{{ victorySubtitle }}</p>
+        </div>
+    </div>
+</div>

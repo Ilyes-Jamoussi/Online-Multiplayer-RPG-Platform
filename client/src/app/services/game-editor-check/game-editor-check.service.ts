@@ -10,6 +10,7 @@ import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { AccesibilityIssue, GameEditorIssue, GameEditorIssues } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameMode } from '@common/enums/game-mode.enum';
+import { PlaceableKind, PlaceableReachable } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { ConnectedComponent } from '@common/interfaces/connected-component.interface';
 
@@ -29,6 +30,7 @@ export class GameEditorCheckService {
             flagPlacement: { hasIssue: false },
             nameValidation: { hasIssue: false },
             descriptionValidation: { hasIssue: false },
+            teleportChannels: { hasIssue: false },
         };
         const tiles = this.gameEditorStoreService.tiles();
 
@@ -39,6 +41,7 @@ export class GameEditorCheckService {
         issues.flagPlacement = this.checkAllFlagPlaced();
         issues.nameValidation = this.checkNameValidation();
         issues.descriptionValidation = this.checkDescriptionValidation();
+        issues.teleportChannels = this.checkTeleportChannels();
         return issues;
     });
 
@@ -139,14 +142,28 @@ export class GameEditorCheckService {
     private checkTerrainAccessibility(tiles: GameEditorTileDto[]): AccesibilityIssue {
         const size = this.gameEditorStoreService.size();
         const grid = this.buildTileKindGrid(tiles, size);
-        const components = this.connectedWalkableComponents(grid, size);
+        const blockedByPlaceables = this.buildBlockedPositions();
+        const components = this.connectedWalkableComponents(grid, size, blockedByPlaceables);
         if (components.length === 0) return { hasIssue: true, tiles: [] };
 
         let largest = components[0];
         for (const component of components) if (component.size > largest.size) largest = component;
 
         const visited = largest;
-        return this.findInaccessibleTiles(tiles, visited.set);
+        return this.findInaccessibleTiles(tiles, visited.set, blockedByPlaceables);
+    }
+
+    private buildBlockedPositions(): Set<string> {
+        const blocked = new Set<string>();
+        for (const placeable of this.gameEditorStoreService.placedObjects) {
+            const isBlocking = PlaceableReachable[PlaceableKind[placeable.kind] as keyof typeof PlaceableReachable] === 0;
+            if (isBlocking) {
+                for (let i = 0; i < placeable.xPositions.length; i++) {
+                    blocked.add(this.cellKey(placeable.xPositions[i], placeable.yPositions[i]));
+                }
+            }
+        }
+        return blocked;
     }
 
     private buildTileKindGrid(tiles: GameEditorTileDto[], size: number): TileKind[][] {
@@ -161,17 +178,17 @@ export class GameEditorCheckService {
         return kind === TileKind.BASE || kind === TileKind.ICE || kind === TileKind.WATER || kind === TileKind.DOOR || kind === TileKind.TELEPORT;
     }
 
-    private connectedWalkableComponents(grid: TileKind[][], size: number): ConnectedComponent[] {
+    private connectedWalkableComponents(grid: TileKind[][], size: number, blocked: Set<string>): ConnectedComponent[] {
         const seen = new Set<string>();
         const components: ConnectedComponent[] = [];
 
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
-                if (!this.isWalkableTile(grid[y][x])) continue;
-                const startKey = this.cellKey(x, y);
-                if (seen.has(startKey)) continue;
+                const cellKey = this.cellKey(x, y);
+                if (!this.isWalkableTile(grid[y][x]) || blocked.has(cellKey)) continue;
+                if (seen.has(cellKey)) continue;
 
-                const component = this.bfsComponent(x, y, grid, size, seen);
+                const component = this.bfsComponent(x, y, { grid, size, blocked }, seen);
                 components.push({ set: component, size: component.size });
             }
         }
@@ -187,7 +204,12 @@ export class GameEditorCheckService {
         return x >= 0 && y >= 0 && x < size && y < size;
     }
 
-    private bfsComponent(startX: number, startY: number, grid: TileKind[][], size: number, seen: Set<string>): Set<string> {
+    private bfsComponent(
+        startX: number,
+        startY: number,
+        ctx: { grid: TileKind[][]; size: number; blocked: Set<string> },
+        seen: Set<string>,
+    ): Set<string> {
         const queue: [number, number][] = [[startX, startY]];
         const component = new Set<string>();
         const directions = [
@@ -210,9 +232,10 @@ export class GameEditorCheckService {
             for (const [directionX, directionY] of directions) {
                 const neighborX = currentX + directionX;
                 const neighborY = currentY + directionY;
-                if (!this.isInBounds(neighborX, neighborY, size)) continue;
-                if (!this.isWalkableTile(grid[neighborY][neighborX])) continue;
+                if (!this.isInBounds(neighborX, neighborY, ctx.size)) continue;
+                if (!this.isWalkableTile(ctx.grid[neighborY][neighborX])) continue;
                 const neighborKey = this.cellKey(neighborX, neighborY);
+                if (ctx.blocked.has(neighborKey)) continue;
                 if (!seen.has(neighborKey)) queue.push([neighborX, neighborY]);
             }
         }
@@ -220,10 +243,11 @@ export class GameEditorCheckService {
         return component;
     }
 
-    private findInaccessibleTiles(tiles: GameEditorTileDto[], visited: Set<string>): AccesibilityIssue {
+    private findInaccessibleTiles(tiles: GameEditorTileDto[], visited: Set<string>, occupied: Set<string>): AccesibilityIssue {
         const inaccessibleTilesIssue: AccesibilityIssue = { hasIssue: false, tiles: [] };
         for (const tile of tiles) {
-            if (this.isWalkableTile(tile.kind) && !visited.has(`${tile.x}:${tile.y}`)) {
+            const key = `${tile.x}:${tile.y}`;
+            if (this.isWalkableTile(tile.kind) && !visited.has(key) && !occupied.has(key)) {
                 inaccessibleTilesIssue.hasIssue = true;
                 inaccessibleTilesIssue.tiles.push({
                     x: tile.x,
@@ -268,5 +292,27 @@ export class GameEditorCheckService {
             : { hasIssue: false };
 
         return result;
+    }
+
+    private checkTeleportChannels(): GameEditorIssue {
+        const problem: GameEditorIssue = { hasIssue: false };
+        const channels = this.gameEditorStoreService.teleportChannels;
+
+        if (!channels || !Array.isArray(channels)) {
+            return problem;
+        }
+
+        for (const channel of channels) {
+            const hasEntryA = !!channel.tiles?.entryA;
+            const hasEntryB = !!channel.tiles?.entryB;
+
+            if (!hasEntryA || !hasEntryB) {
+                problem.hasIssue = true;
+                problem.message = `Le canal de téléportation ${channel.channelNumber} doit avoir deux points d'entrée (entryA et entryB).`;
+                break;
+            }
+        }
+
+        return problem;
     }
 }

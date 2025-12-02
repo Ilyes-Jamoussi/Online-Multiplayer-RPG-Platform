@@ -13,7 +13,7 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
-    &.me {
+    &.is-me {
         background-color: #e3f2fd;
         border-color: #90caf9;
     }
@@ -25,15 +25,15 @@
 }
 
 .avatar-wrapper {
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
     border: 2px solid #e9ecef;
     transition: border-color 0.2s ease;
 
-    .me & {
+    .is-me & {
         border-color: #90caf9;
     }
 
@@ -68,7 +68,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 
-    .me & {
+    .is-me & {
         color: #1976d2;
     }
 
@@ -78,9 +78,13 @@
 }
 
 .badge {
-    font-size: 1.2rem;
-    line-height: 1;
+    display: flex;
+    align-items: center;
     color: #f57c00;
+
+    i {
+        font-size: 1.2rem;
+    }
 }
 
 .kick-button {

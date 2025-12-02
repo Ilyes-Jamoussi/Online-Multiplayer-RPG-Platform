@@ -13,6 +13,15 @@ $info-blue-dark: #1976d2;
 $info-blue-light: #64b5f6;
 $info-blue-transparent: rgba(33, 150, 243, 0.2);
 
+$warning-orange: #ff9800;
+$warning-orange-dark: #f57c00;
+$warning-orange-light: #ffb74d;
+$warning-orange-transparent: rgba(255, 152, 0, 0.2);
+
+$gray: #757575;
+$gray-dark: #616161;
+$gray-light: #9e9e9e;
+
 $white: #ffffff;
 $black-transparent: rgba(0, 0, 0, 0.7);
 $text-gray: #666;
@@ -98,6 +107,20 @@ $text-gray: #666;
             }
         }
     }
+
+    &.confirmation {
+        .icon-circle {
+            background: linear-gradient(135deg, $warning-orange-light, $warning-orange);
+            box-shadow: 0 12px 30px $warning-orange-transparent;
+        }
+        .notification-title {
+            color: $warning-orange;
+        }
+        .notification-actions {
+            flex-direction: row;
+            gap: 1rem;
+        }
+    }
 }
 
 .icon-circle {
@@ -139,7 +162,15 @@ $text-gray: #666;
     line-height: 1.6;
     margin: 0;
     opacity: 0;
+    white-space: pre-line;
     animation: fadeInUp 0.5s ease-out 0.4s forwards;
+}
+
+.notification-actions {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.8rem;
 }
 
 .notification-button {
@@ -150,7 +181,7 @@ $text-gray: #666;
     font-weight: 600;
     font-size: 1.1rem;
     cursor: pointer;
-    width: 100%;
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -170,6 +201,21 @@ $text-gray: #666;
 
     &:active {
         transform: translateY(-1px);
+    }
+
+    &.cancel {
+        background: linear-gradient(135deg, $gray-light, $gray);
+        &:hover {
+            background: linear-gradient(135deg, $gray, $gray-dark);
+        }
+    }
+
+    &.confirm {
+        background: linear-gradient(135deg, $warning-orange, $warning-orange-dark);
+        &:hover {
+            background: linear-gradient(135deg, $warning-orange-light, $warning-orange);
+            box-shadow: 0 8px 25px $warning-orange-transparent;
+        }
     }
 }
 

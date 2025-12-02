@@ -1,9 +1,12 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { AssetsService } from '@app/services/assets/assets.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { TeamColor } from '@app/enums/team-color.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { FlagData } from '@common/interfaces/flag-data.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { PlayersListComponent } from './players-list.component';
 
@@ -16,6 +19,7 @@ describe('PlayersListComponent', () => {
     let fixture: ComponentFixture<PlayersListComponent>;
     let mockInGameService: jasmine.SpyObj<InGameService>;
     let mockPlayerService: jasmine.SpyObj<PlayerService>;
+    let mockAssetsService: jasmine.SpyObj<AssetsService>;
 
     const mockPlayers: Record<string, Player> = {
         player1: {
@@ -89,17 +93,21 @@ describe('PlayersListComponent', () => {
             turnOrder: signal(mockTurnOrder),
             inGamePlayers: signal(mockPlayers),
             activePlayer: mockPlayers.player1,
+            flagData: signal(undefined),
         });
 
-        mockPlayerService = jasmine.createSpyObj('PlayerService', [], {
+        mockPlayerService = jasmine.createSpyObj('PlayerService', ['getTeamColor'], {
             id: signal('player1'),
         });
+
+        mockAssetsService = jasmine.createSpyObj('AssetsService', ['getAvatarStaticImage']);
 
         await TestBed.configureTestingModule({
             imports: [PlayersListComponent],
             providers: [
                 { provide: InGameService, useValue: mockInGameService },
                 { provide: PlayerService, useValue: mockPlayerService },
+                { provide: AssetsService, useValue: mockAssetsService },
             ],
         }).compileComponents();
 
@@ -180,5 +188,110 @@ describe('PlayersListComponent', () => {
         });
 
         expect(component.isActivePlayer(mockPlayers.player1)).toBe(false);
+    });
+
+    describe('getPlayerAvatar', () => {
+        const mockAvatarPath = './assets/images/avatars/static/avatar1.png';
+        const mockEmptyString = '';
+
+        it('should return avatar path from assets service', () => {
+            mockAssetsService.getAvatarStaticImage.and.returnValue(mockAvatarPath);
+            const result = component.getPlayerAvatar(Avatar.Avatar1);
+            expect(result).toBe(mockAvatarPath);
+            expect(mockAssetsService.getAvatarStaticImage).toHaveBeenCalledWith(Avatar.Avatar1);
+        });
+
+        it('should return empty string when avatar is null', () => {
+            mockAssetsService.getAvatarStaticImage.and.returnValue(mockEmptyString);
+            const result = component.getPlayerAvatar(null);
+            expect(result).toBe(mockEmptyString);
+            expect(mockAssetsService.getAvatarStaticImage).toHaveBeenCalledWith(null);
+        });
+    });
+
+    describe('getTeamNumber', () => {
+        const mockTeamNumber = 1;
+
+        it('should return teamNumber when player has teamNumber', () => {
+            const playerWithTeam = { ...mockPlayers.player1, teamNumber: mockTeamNumber };
+            const result = component.getTeamNumber(playerWithTeam);
+            expect(result).toBe(mockTeamNumber);
+        });
+
+        it('should return undefined when player has no teamNumber', () => {
+            const result = component.getTeamNumber(mockPlayers.player1);
+            expect(result).toBeUndefined();
+        });
+    });
+
+    describe('getTeamColor', () => {
+        const mockTeamNumber = 2;
+
+        it('should return team color from player service', () => {
+            mockPlayerService.getTeamColor.and.returnValue(TeamColor.EnemyTeam);
+            const result = component.getTeamColor(mockTeamNumber);
+            expect(result).toBe(TeamColor.EnemyTeam);
+            expect(mockPlayerService.getTeamColor).toHaveBeenCalledWith(mockTeamNumber);
+        });
+
+        it('should return undefined when teamNumber is undefined', () => {
+            mockPlayerService.getTeamColor.and.returnValue(undefined);
+            const result = component.getTeamColor(undefined);
+            expect(result).toBeUndefined();
+            expect(mockPlayerService.getTeamColor).toHaveBeenCalledWith(undefined);
+        });
+    });
+
+    describe('hasFlag', () => {
+        const mockPlayerId = 'player1';
+        const mockOtherPlayerId = 'player2';
+
+        it('should return false when flagData is undefined', () => {
+            Object.defineProperty(mockInGameService, 'flagData', {
+                value: signal(undefined),
+                configurable: true,
+            });
+            const result = component.hasFlag(mockPlayers.player1);
+            expect(result).toBe(false);
+        });
+
+        it('should return false when flagData holderPlayerId is null', () => {
+            const flagData: FlagData = {
+                position: { x: 0, y: 0 },
+                holderPlayerId: null,
+            };
+            Object.defineProperty(mockInGameService, 'flagData', {
+                value: signal(flagData),
+                configurable: true,
+            });
+            const result = component.hasFlag(mockPlayers.player1);
+            expect(result).toBe(false);
+        });
+
+        it('should return false when flag holder is different player', () => {
+            const flagData: FlagData = {
+                position: { x: 0, y: 0 },
+                holderPlayerId: mockOtherPlayerId,
+            };
+            Object.defineProperty(mockInGameService, 'flagData', {
+                value: signal(flagData),
+                configurable: true,
+            });
+            const result = component.hasFlag(mockPlayers.player1);
+            expect(result).toBe(false);
+        });
+
+        it('should return true when flag holder matches player', () => {
+            const flagData: FlagData = {
+                position: { x: 0, y: 0 },
+                holderPlayerId: mockPlayerId,
+            };
+            Object.defineProperty(mockInGameService, 'flagData', {
+                value: signal(flagData),
+                configurable: true,
+            });
+            const result = component.hasFlag(mockPlayers.player1);
+            expect(result).toBe(true);
+        });
     });
 });

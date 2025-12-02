@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
@@ -26,6 +27,10 @@ const TEST_COMBAT_LOSSES = 1;
 const TEST_COMBAT_DRAWS = 1;
 const TEST_HP_PERCENTAGE = 66.67;
 const TEST_PRECISION = 2;
+const TEST_BOAT_SPEED_BONUS = 3;
+const TEST_TEAM_NUMBER = 1;
+const TEST_TEAM_COLOR = '#3b82f6';
+const TEST_PLAYER_ID = 'test-id';
 
 describe('PlayerInfoComponent', () => {
     let component: PlayerInfoComponent;
@@ -62,8 +67,9 @@ describe('PlayerInfoComponent', () => {
         combatLosses: TEST_COMBAT_LOSSES,
         combatDraws: TEST_COMBAT_DRAWS,
         hasCombatBonus: false,
-        boatSpeedBonus: 0,
+        boatSpeedBonus: TEST_BOAT_SPEED_BONUS,
         boatSpeed: 0,
+        teamNumber: TEST_TEAM_NUMBER,
     };
 
     beforeEach(async () => {
@@ -81,17 +87,20 @@ describe('PlayerInfoComponent', () => {
             'combatWins',
             'combatLosses',
             'combatDraws',
+            'attackBonus',
+            'defenseBonus',
+            'getTeamColor',
         ]);
 
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getAvatarStaticImage']);
 
-        mockInGameService = jasmine.createSpyObj('InGameService', [
-            'isMyTurn',
-            'isGameStarted',
-            'hasUsedAction',
-            'availableActions',
-            'activateActionMode',
-        ]);
+        mockInGameService = jasmine.createSpyObj(
+            'InGameService',
+            ['isMyTurn', 'isGameStarted', 'hasUsedAction', 'availableActions', 'activateActionMode'],
+            {
+                flagData: signal(undefined),
+            },
+        );
 
         await TestBed.configureTestingModule({
             imports: [PlayerInfoComponent],
@@ -118,6 +127,12 @@ describe('PlayerInfoComponent', () => {
         mockPlayerService.combatWins.and.returnValue(mockPlayer.combatWins);
         mockPlayerService.combatLosses.and.returnValue(mockPlayer.combatLosses);
         mockPlayerService.combatDraws.and.returnValue(mockPlayer.combatDraws);
+        mockPlayerService.attackBonus.and.returnValue(TEST_ATTACK_BONUS);
+        mockPlayerService.defenseBonus.and.returnValue(TEST_DEFENSE_BONUS);
+        Object.defineProperty(mockPlayerService, 'id', {
+            value: signal(TEST_PLAYER_ID),
+            configurable: true,
+        });
         mockAssetsService.getAvatarStaticImage.and.returnValue('avatar-image.png');
         mockInGameService.isMyTurn.and.returnValue(true);
         mockInGameService.isGameStarted.and.returnValue(true);
@@ -309,5 +324,75 @@ describe('PlayerInfoComponent', () => {
     it('should activate action mode on action', () => {
         component.onAction();
         expect(mockInGameService.activateActionMode).toHaveBeenCalled();
+    });
+
+    it('should get attack bonus', () => {
+        expect(component.attackBonus).toBe(TEST_ATTACK_BONUS);
+        expect(mockPlayerService.attackBonus).toHaveBeenCalled();
+    });
+
+    it('should get defense bonus', () => {
+        expect(component.defenseBonus).toBe(TEST_DEFENSE_BONUS);
+        expect(mockPlayerService.defenseBonus).toHaveBeenCalled();
+    });
+
+    it('should get boat speed bonus', () => {
+        expect(component.boatSpeedBonus).toBe(TEST_BOAT_SPEED_BONUS);
+    });
+
+    it('should get team number when player has one', () => {
+        expect(component.teamNumber).toBe(TEST_TEAM_NUMBER);
+    });
+
+    it('should return undefined when player has no team number', () => {
+        const playerWithoutTeam = { ...mockPlayer, teamNumber: undefined };
+        mockPlayerService.player.and.returnValue(playerWithoutTeam);
+        expect(component.teamNumber).toBeUndefined();
+    });
+
+    it('should get team color from player service', () => {
+        mockPlayerService.getTeamColor.and.returnValue(TEST_TEAM_COLOR);
+        const result = component.getTeamColor(TEST_TEAM_NUMBER);
+        expect(mockPlayerService.getTeamColor).toHaveBeenCalledWith(TEST_TEAM_NUMBER);
+        expect(result).toBe(TEST_TEAM_COLOR);
+    });
+
+    it('should return undefined when teamNumber is undefined in getTeamColor', () => {
+        mockPlayerService.getTeamColor.and.returnValue(undefined);
+        const result = component.getTeamColor(undefined);
+        expect(mockPlayerService.getTeamColor).toHaveBeenCalledWith(undefined);
+        expect(result).toBeUndefined();
+    });
+
+    it('should return false for hasFlag when flagData is undefined', () => {
+        Object.defineProperty(mockInGameService, 'flagData', {
+            value: signal(undefined),
+            configurable: true,
+        });
+        expect(component.hasFlag).toBe(false);
+    });
+
+    it('should return false for hasFlag when holderPlayerId is null', () => {
+        Object.defineProperty(mockInGameService, 'flagData', {
+            value: signal({ position: { x: 0, y: 0 }, holderPlayerId: null }),
+            configurable: true,
+        });
+        expect(component.hasFlag).toBe(false);
+    });
+
+    it('should return false for hasFlag when holderPlayerId does not match player id', () => {
+        Object.defineProperty(mockInGameService, 'flagData', {
+            value: signal({ position: { x: 0, y: 0 }, holderPlayerId: 'other-player-id' }),
+            configurable: true,
+        });
+        expect(component.hasFlag).toBe(false);
+    });
+
+    it('should return true for hasFlag when holderPlayerId matches player id', () => {
+        Object.defineProperty(mockInGameService, 'flagData', {
+            value: signal({ position: { x: 0, y: 0 }, holderPlayerId: TEST_PLAYER_ID }),
+            configurable: true,
+        });
+        expect(component.hasFlag).toBe(true);
     });
 });

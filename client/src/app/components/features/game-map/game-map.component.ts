@@ -6,9 +6,11 @@ import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { StartPoint } from '@common/interfaces/start-point.interface';
 
 @Component({
     selector: 'app-game-map',
@@ -25,6 +27,7 @@ export class GameMapComponent implements OnInit {
         private readonly gameMapService: GameMapService,
         private readonly assetsService: AssetsService,
         private readonly playerService: PlayerService,
+        private readonly inGameService: InGameService,
     ) {}
 
     ngOnInit(): void {
@@ -62,6 +65,10 @@ export class GameMapComponent implements OnInit {
 
     get visibleObjects() {
         return this.gameMapService.visibleObjects();
+    }
+
+    get startPoints() {
+        return this.inGameService.startPoints();
     }
 
     getTileImage(tileKind: string, opened: boolean = false): string {
@@ -130,5 +137,24 @@ export class GameMapComponent implements OnInit {
     hasFlag(player: Player): boolean {
         const flagData = this.gameMapService.flagData();
         return flagData?.holderPlayerId === player.id;
+    }
+
+    isPlaceableDisabled(placeableId: string): boolean {
+        return this.gameMapService.isPlaceableDisabled(placeableId);
+    }
+
+    getPlaceableTurnCount(placeableId: string): number | null {
+        return this.gameMapService.getPlaceableTurnCount(placeableId);
+    }
+
+    getStartPointStyle(startPoint: StartPoint) {
+        return {
+            gridColumn: `${startPoint.x + 1}`,
+            gridRow: `${startPoint.y + 1}`,
+        };
+    }
+
+    getStartPointAvatarImage(playerId: string): string {
+        return this.gameMapService.getAvatarByPlayerId(playerId);
     }
 }

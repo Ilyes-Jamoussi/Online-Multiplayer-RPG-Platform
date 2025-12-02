@@ -3,11 +3,12 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
-import { Inventory } from '@app/interfaces/game-editor.interface';
+import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
+import { ExtendedGameEditorPlaceableDto, Inventory } from '@app/interfaces/game-editor.interface';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
-import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { GameEditorCheckService } from './game-editor-check.service';
 
@@ -21,6 +22,7 @@ export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
     private readonly sizeSig = signal<MapSize>(MapSize.MEDIUM);
     private readonly modeSig = signal<GameMode>(GameMode.CLASSIC);
     private readonly inventorySig = signal<Inventory>({} as Inventory);
+    private readonly teleportChannelsSig = signal<TeleportChannelDto[]>([]);
 
     get name() {
         return this._name;
@@ -55,6 +57,26 @@ export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
     }
     get inventory() {
         return this.inventorySig.asReadonly();
+    }
+    get teleportChannels(): readonly TeleportChannelDto[] {
+        return this.teleportChannelsSig();
+    }
+
+    get placedObjects(): ExtendedGameEditorPlaceableDto[] {
+        return this.objectsSig()
+            .filter((object) => object.placed)
+            .map((object) => {
+                const footprint = PlaceableFootprint[PlaceableKind[object.kind] as keyof typeof PlaceableFootprint];
+                const xPositions: number[] = [];
+                const yPositions: number[] = [];
+                for (let deltaX = 0; deltaX < footprint; deltaX++) {
+                    for (let deltaY = 0; deltaY < footprint; deltaY++) {
+                        xPositions.push(object.x + deltaX);
+                        yPositions.push(object.y + deltaY);
+                    }
+                }
+                return { ...object, xPositions, yPositions };
+            });
     }
 
     setTiles(value: GameEditorTileDto[]) {

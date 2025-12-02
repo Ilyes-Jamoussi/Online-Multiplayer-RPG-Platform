@@ -1,6 +1,6 @@
 @if (hasErrors) {
 <div class="errors-badge">
-    {{ errorCount }} erreur(s)
+    {{ errorCount }} {{ errorCount === 1 ? 'erreur' : 'erreurs' }}
     <div class="errors-tooltip">
         <ul>
             @for (msg of errorList; track $index) {

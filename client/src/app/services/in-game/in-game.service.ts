@@ -111,7 +111,7 @@ export class InGameService {
     }
 
     get turnTransitionMessage(): string {
-        return this.isMyTurn() ? "C'est ton tour !" : `C'est le tour de ${this.activePlayer?.name} !`;
+        return this.isMyTurn() ? "C'est votre tour !" : `C'est le tour de ${this.activePlayer?.name} !`;
     }
 
     getPlayerByPlayerId(playerId: string): Player {
@@ -289,7 +289,7 @@ export class InGameService {
             this.reset();
             this.notificationCoordinatorService.displayInformationPopup({
                 title: 'Départ réussi',
-                message: `Tu as quitté la partie avec succès`,
+                message: `Vous avez quitté la partie avec succès`,
                 redirectRoute: ROUTES.HomePage,
             });
         });

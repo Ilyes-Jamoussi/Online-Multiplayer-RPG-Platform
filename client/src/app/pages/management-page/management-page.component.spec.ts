@@ -5,6 +5,7 @@ import { GamePreviewCardComponent } from '@app/components/features/game-preview-
 import { ROUTES } from '@app/enums/routes.enum';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { of } from 'rxjs';
@@ -14,6 +15,7 @@ describe('ManagementPageComponent', () => {
     let component: ManagementPageComponent;
     let fixture: ComponentFixture<ManagementPageComponent>;
     let gameStoreServiceSpy: jasmine.SpyObj<GameStoreService>;
+    let notificationServiceSpy: jasmine.SpyObj<NotificationService>;
     let routerSpy: jasmine.SpyObj<Router>;
 
     const mockGames: GamePreviewDto[] = [
@@ -49,12 +51,15 @@ describe('ManagementPageComponent', () => {
         gameStoreServiceSpy.deleteGame.and.returnValue(of(undefined));
         gameStoreServiceSpy.toggleGameVisibility.and.returnValue(of(undefined));
 
+        notificationServiceSpy = jasmine.createSpyObj('NotificationService', ['displayConfirmationPopup']);
+
         routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
         await TestBed.configureTestingModule({
             imports: [ManagementPageComponent, GamePreviewCardComponent],
             providers: [
                 { provide: GameStoreService, useValue: gameStoreServiceSpy },
+                { provide: NotificationService, useValue: notificationServiceSpy },
                 { provide: Router, useValue: routerSpy },
             ],
         }).compileComponents();
@@ -88,7 +93,13 @@ describe('ManagementPageComponent', () => {
 
     it('should delete game', () => {
         const gameId = '1';
+        notificationServiceSpy.displayConfirmationPopup.and.callFake((config) => {
+            if (config.onConfirm) {
+                config.onConfirm();
+            }
+        });
         component.onDeleteGame(gameId);
+        expect(notificationServiceSpy.displayConfirmationPopup).toHaveBeenCalled();
         expect(gameStoreServiceSpy.deleteGame).toHaveBeenCalledWith(gameId);
     });
 

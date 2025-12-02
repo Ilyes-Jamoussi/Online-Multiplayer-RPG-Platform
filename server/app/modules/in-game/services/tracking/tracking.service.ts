@@ -2,6 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { Position } from '@common/interfaces/position.interface';
 import { MapSize } from '@common/enums/map-size.enum';
 
+interface PlayerDamageTracker {
+    healthLost: number;
+    healthDealt: number;
+}
+
 interface GameTracker {
     sessionId: string;
     playerTiles: Map<string, Set<string>>;
@@ -13,6 +18,7 @@ interface GameTracker {
     totalSanctuaries: number;
     totalTeleportTiles: number;
     flagHolders: Set<string>;
+    playerDamage: Map<string, PlayerDamageTracker>;
 }
 
 @Injectable()
@@ -31,6 +37,7 @@ export class TrackingService {
             totalSanctuaries,
             totalTeleportTiles,
             flagHolders: new Set(),
+            playerDamage: new Map(),
         });
     }
 
@@ -72,6 +79,32 @@ export class TrackingService {
         const tracker = this.gameTrackers.get(sessionId);
         if (tracker) {
             tracker.flagHolders.add(playerId);
+        }
+    }
+
+    trackDamageDealt(sessionId: string, playerId: string, damage: number): void {
+        const tracker = this.gameTrackers.get(sessionId);
+        if (tracker) {
+            if (!tracker.playerDamage.has(playerId)) {
+                tracker.playerDamage.set(playerId, { healthLost: 0, healthDealt: 0 });
+            }
+            const playerDamage = tracker.playerDamage.get(playerId);
+            if (playerDamage) {
+                playerDamage.healthDealt += damage;
+            }
+        }
+    }
+
+    trackDamageReceived(sessionId: string, playerId: string, damage: number): void {
+        const tracker = this.gameTrackers.get(sessionId);
+        if (tracker) {
+            if (!tracker.playerDamage.has(playerId)) {
+                tracker.playerDamage.set(playerId, { healthLost: 0, healthDealt: 0 });
+            }
+            const playerDamage = tracker.playerDamage.get(playerId);
+            if (playerDamage) {
+                playerDamage.healthLost += damage;
+            }
         }
     }
 

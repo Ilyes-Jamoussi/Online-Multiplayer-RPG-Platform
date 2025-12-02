@@ -7,6 +7,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CombatTimerService } from './combat-timer.service';
 import { MapSize } from '@common/enums/map-size.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 
 describe('CombatTimerService', () => {
     let service: CombatTimerService;
@@ -23,6 +24,7 @@ describe('CombatTimerService', () => {
         id: SESSION_ID_1,
         inGameId: 'in-game-1',
         gameId: 'game-1',
+        chatId: 'chat-1',
         maxPlayers: 4,
         mode: GameMode.CLASSIC,
         isGameStarted: true,
@@ -43,12 +45,20 @@ describe('CombatTimerService', () => {
             emit: jest.fn(),
         };
 
+        const mockSessionRepository = {
+            isVirtualPlayer: jest.fn().mockReturnValue(false),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 CombatTimerService,
                 {
                     provide: EventEmitter2,
                     useValue: mockEventEmitter,
+                },
+                {
+                    provide: InGameSessionRepository,
+                    useValue: mockSessionRepository,
                 },
             ],
         }).compile();
