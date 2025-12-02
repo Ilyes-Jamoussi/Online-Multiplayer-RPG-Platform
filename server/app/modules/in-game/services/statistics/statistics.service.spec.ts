@@ -167,6 +167,7 @@ describe('StatisticsService', () => {
     };
 
     beforeEach(async () => {
+        jest.useFakeTimers();
         const mockTrackingService = {
             initializeTracking: jest.fn(),
             trackTileVisited: jest.fn(),
@@ -188,6 +189,12 @@ describe('StatisticsService', () => {
 
         service = module.get<StatisticsService>(StatisticsService);
         trackingService = module.get(TrackingService);
+    });
+
+    afterEach(() => {
+        jest.clearAllTimers();
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
     });
 
     describe('initializeTracking', () => {
@@ -256,13 +263,6 @@ describe('StatisticsService', () => {
     });
 
     describe('calculateAndStoreGameStatistics', () => {
-        beforeEach(() => {
-            jest.useFakeTimers();
-        });
-
-        afterEach(() => {
-            jest.useRealTimers();
-        });
 
         it('should calculate and store game statistics', () => {
             const session = createMockSession();

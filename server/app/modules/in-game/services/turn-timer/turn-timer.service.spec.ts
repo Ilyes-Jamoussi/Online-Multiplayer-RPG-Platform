@@ -141,6 +141,12 @@ describe('TurnTimerService', () => {
     });
 
     afterEach(() => {
+        try {
+            jest.clearAllTimers();
+            jest.runOnlyPendingTimers();
+        } catch {
+            // Ignore if fake timers are not active
+        }
         jest.useRealTimers();
     });
 
@@ -346,6 +352,10 @@ describe('TurnTimerService', () => {
     });
 
     describe('getGameTimerState', () => {
+        beforeEach(() => {
+            jest.useFakeTimers();
+        });
+
         it('should return PlayerTurn as default when no state is set', () => {
             const state = service.getGameTimerState('non-existent-session');
 
@@ -361,6 +371,8 @@ describe('TurnTimerService', () => {
             const state = service.getGameTimerState(SESSION_ID);
 
             expect(state).toBe(TurnTimerStates.TurnTransition);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
         });
     });
 

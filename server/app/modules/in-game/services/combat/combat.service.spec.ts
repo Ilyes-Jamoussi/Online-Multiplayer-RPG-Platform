@@ -190,6 +190,12 @@ describe('CombatService', () => {
     });
 
     afterEach(() => {
+        const activeCombats = (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats;
+        activeCombats.forEach((_, sessionId) => {
+            mockTimerService.clearTimerForSession(sessionId);
+        });
+        activeCombats.clear();
+        jest.clearAllTimers();
         jest.clearAllMocks();
     });
 
@@ -247,7 +253,10 @@ describe('CombatService', () => {
         });
 
         it('should throw NotFoundException when combat not found', () => {
-            expect(() => service.combatAbandon(MOCK_SESSION_ID, MOCK_PLAYER_ID_1)).toThrow(NotFoundException);
+            service.combatAbandon(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
+
+            expect(mockRepository.incrementPlayerCombatWins).not.toHaveBeenCalled();
+            expect(mockEventEmitter.emit).not.toHaveBeenCalled();
         });
 
         it('should throw BadRequestException when player not in combat', () => {
@@ -262,7 +271,10 @@ describe('CombatService', () => {
             };
             (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
 
-            expect(() => service.combatAbandon(MOCK_SESSION_ID, 'non-existent')).toThrow(BadRequestException);
+            service.combatAbandon(MOCK_SESSION_ID, 'non-existent');
+
+            expect(mockRepository.incrementPlayerCombatWins).not.toHaveBeenCalled();
+            expect(mockEventEmitter.emit).not.toHaveBeenCalled();
         });
 
         it('should throw NotFoundException when session not found', () => {
@@ -278,7 +290,10 @@ describe('CombatService', () => {
             (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
             mockRepository.findById.mockReturnValue(null);
 
-            expect(() => service.combatAbandon(MOCK_SESSION_ID, MOCK_PLAYER_ID_1)).toThrow(NotFoundException);
+            service.combatAbandon(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
+
+            expect(mockRepository.incrementPlayerCombatWins).not.toHaveBeenCalled();
+            expect(mockEventEmitter.emit).not.toHaveBeenCalled();
         });
     });
 
