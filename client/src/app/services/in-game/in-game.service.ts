@@ -289,7 +289,7 @@ export class InGameService {
             this.reset();
             this.notificationCoordinatorService.displayInformationPopup({
                 title: 'Départ réussi',
-                message: `Tu as quitté la partie avec succès`,
+                message: `Vous avez quitté la partie avec succès`,
                 redirectRoute: ROUTES.HomePage,
             });
         });
