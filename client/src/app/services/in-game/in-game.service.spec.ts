@@ -420,7 +420,7 @@ describe('InGameService', () => {
             callback();
             expect(mockNotificationService.displayInformationPopup).toHaveBeenCalledWith({
                 title: 'Départ réussi',
-                message: 'Tu as quitté la partie avec succès',
+                message: 'Vous avez quitté la partie avec succès',
                 redirectRoute: ROUTES.HomePage,
             });
         });
