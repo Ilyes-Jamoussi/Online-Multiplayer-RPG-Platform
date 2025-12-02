@@ -9,6 +9,8 @@ import { PlayerService } from '@app/services/player/player.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { TeamColor } from '@app/enums/team-color.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { StartPoint } from '@common/interfaces/start-point.interface';
 
@@ -114,15 +116,32 @@ export class GameMapComponent implements OnInit {
         return player.id === this.playerService.id();
     }
 
-    getTeamColor(player: Player): string | undefined {
-        if (this.isCurrentUser(player)) return undefined;
-        return this.playerService.getTeamColor(player.teamNumber);
+    isActivePlayer(player: Player): boolean {
+        return player.id === this.inGameService.activePlayer?.id;
     }
 
-    getPlayerBorderStyle(player: Player): { 'border-color'?: string; 'border-width'?: string; 'box-shadow'?: string } {
+    isCTFMode(): boolean {
+        return this.inGameService.mode() === GameMode.CTF;
+    }
+
+    getTeamColor(player: Player): string | undefined {
         if (this.isCurrentUser(player)) {
-            return {};
+            return TeamColor.MyPlayer;
         }
+        
+        const teamColor = this.playerService.getTeamColor(player.teamNumber);
+        if (teamColor === TeamColor.MyTeam) {
+            return TeamColor.MyTeam;
+        }
+        
+        if (!this.isCTFMode()) {
+            return TeamColor.EnemyTeam;
+        }
+        
+        return teamColor;
+    }
+
+    getPlayerBorderStyle(player: Player): { 'border-color'?: string; 'border-width'?: string } {
         const teamColor = this.getTeamColor(player);
         if (!teamColor) {
             return {};
@@ -130,7 +149,6 @@ export class GameMapComponent implements OnInit {
         return {
             'border-color': teamColor,
             'border-width': '3px',
-            'box-shadow': `0 0 15px ${teamColor}, 0 2px 4px rgba(0, 0, 0, 0.5)`,
         };
     }
 
@@ -147,6 +165,10 @@ export class GameMapComponent implements OnInit {
         return this.gameMapService.getPlaceableTurnCount(placeableId);
     }
 
+    isMyStartPoint(startPoint: StartPoint): boolean {
+        return startPoint.playerId === this.playerService.id();
+    }
+
     getStartPointStyle(startPoint: StartPoint) {
         return {
             gridColumn: `${startPoint.x + 1}`,
@@ -156,5 +178,20 @@ export class GameMapComponent implements OnInit {
 
     getStartPointAvatarImage(playerId: string): string {
         return this.gameMapService.getAvatarByPlayerId(playerId);
+    }
+
+    getStartPointBorderStyle(startPoint: StartPoint): { 'border-color'?: string; 'border-width'?: string } {
+        const player = this.gameMapService.currentlyPlayers.find((playerItem) => playerItem.id === startPoint.playerId);
+        if (!player) {
+            return {};
+        }
+        const teamColor = this.getTeamColor(player);
+        if (!teamColor) {
+            return {};
+        }
+        return {
+            'border-color': teamColor,
+            'border-width': '3px',
+        };
     }
 }

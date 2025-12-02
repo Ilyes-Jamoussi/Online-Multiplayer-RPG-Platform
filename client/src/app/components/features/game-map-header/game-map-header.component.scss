@@ -1,10 +1,10 @@
 $primary-color: #6366f1;
 $primary-dark: #4f46e5;
 $success-color: #10b981;
-$bg-overlay: rgba(255, 255, 255, 0.05);
-$border-color: rgba(255, 255, 255, 0.1);
-$text-primary: #ffffff;
-$text-secondary: rgba(255, 255, 255, 0.7);
+$bg-overlay: #ffffff;
+$border-color: rgba(0, 0, 0, 0.15);
+$text-primary: #1f2937;
+$text-secondary: rgba(0, 0, 0, 0.6);
 
 .game-map-header {
     display: grid;
@@ -32,7 +32,7 @@ $text-secondary: rgba(255, 255, 255, 0.7);
     align-items: center;
     gap: 0.15rem;
     padding: 0.35rem 0.6rem;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(0, 0, 0, 0.03);
     border-radius: 4px;
     border: 1px solid $border-color;
     min-width: 50px;
