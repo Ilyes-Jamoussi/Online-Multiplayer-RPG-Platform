@@ -13,6 +13,7 @@ import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { Position } from '@common/interfaces/position.interface';
 import { GameMapService } from './game-map.service';
 
 import { signal } from '@angular/core';
@@ -99,7 +100,16 @@ describe('GameMapService', () => {
         mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
         mockInGameService = jasmine.createSpyObj(
             'InGameService',
-            ['deactivateActionMode', 'toggleDoorAction', 'getPlayerByPlayerId', 'resetActions'],
+            [
+                'deactivateActionMode',
+                'toggleDoorAction',
+                'getPlayerByPlayerId',
+                'resetActions',
+                'healPlayer',
+                'fightPlayer',
+                'boatAction',
+                'requestFlagTransfer',
+            ],
             {
                 inGamePlayers: signal({ player1: mockPlayer }),
                 startPoints: signal([{ id: 'start1', x: 0, y: 0 }]),
@@ -108,6 +118,7 @@ describe('GameMapService', () => {
                 isActionModeActive: signal(false),
                 availableActions: signal([]),
                 currentlyPlayers: [mockPlayer],
+                flagData: signal(undefined),
             },
         );
         mockAssetsService = jasmine.createSpyObj('AssetsService', ['getAvatarStaticImage']);
@@ -457,6 +468,422 @@ describe('GameMapService', () => {
             expect(visibleObjects).toContain(mockObject);
             expect(visibleObjects).toContain(startObject);
             expect(visibleObjects).not.toContain(hiddenStartObject);
+        });
+    });
+
+    describe('getActionClass', () => {
+        const mockX = 1;
+        const mockY = 1;
+
+        beforeEach(() => {
+            Object.defineProperty(mockInGameService, 'isActionModeActive', {
+                value: signal(true),
+                configurable: true,
+            });
+        });
+
+        it('should return action-heal class for HEAL action', () => {
+            Object.defineProperty(mockInGameService, 'availableActions', {
+                value: signal([{ x: mockX, y: mockY, type: AvailableActionType.HEAL }]),
+                configurable: true,
+            });
+            const tileClass = service.getTileClass(mockX, mockY);
+            expect(tileClass).toContain('action-heal');
+        });
+
+        it('should return action-fight class for FIGHT action', () => {
+            Object.defineProperty(mockInGameService, 'availableActions', {
+                value: signal([{ x: mockX, y: mockY, type: AvailableActionType.FIGHT }]),
+                configurable: true,
+            });
+            const tileClass = service.getTileClass(mockX, mockY);
+            expect(tileClass).toContain('action-fight');
+        });
+
+        it('should return action-boat class for BOAT action', () => {
+            Object.defineProperty(mockInGameService, 'availableActions', {
+                value: signal([{ x: mockX, y: mockY, type: AvailableActionType.BOAT }]),
+                configurable: true,
+            });
+            const tileClass = service.getTileClass(mockX, mockY);
+            expect(tileClass).toContain('action-boat');
+        });
+
+        it('should return action-transfer-flag class for TRANSFER_FLAG action', () => {
+            Object.defineProperty(mockInGameService, 'availableActions', {
+                value: signal([{ x: mockX, y: mockY, type: AvailableActionType.TRANSFER_FLAG }]),
+                configurable: true,
+            });
+            const tileClass = service.getTileClass(mockX, mockY);
+            expect(tileClass).toContain('action-transfer-flag');
+        });
+    });
+
+    describe('healPlayer', () => {
+        const mockX = 2;
+        const mockY = 3;
+
+        it('should call inGameService.healPlayer with coordinates', () => {
+            service.healPlayer(mockX, mockY);
+            expect(mockInGameService.healPlayer).toHaveBeenCalledWith(mockX, mockY);
+        });
+    });
+
+    describe('fightPlayer', () => {
+        const mockX = 4;
+        const mockY = 5;
+
+        it('should call inGameService.fightPlayer with coordinates', () => {
+            service.fightPlayer(mockX, mockY);
+            expect(mockInGameService.fightPlayer).toHaveBeenCalledWith(mockX, mockY);
+        });
+    });
+
+    describe('updateObjectState', () => {
+        const mockPlaceableId = 'placeable1';
+        const mockX = 3;
+        const mockY = 4;
+
+        it('should update object when _id matches', () => {
+            const existingObject = { ...mockObject, id: mockPlaceableId };
+            service['_objects'].set([existingObject]);
+            const callback = mockInGameSocketService.onPlaceableUpdated.calls.mostRecent().args[0];
+
+            const updatedPlaceable = {
+                _id: mockPlaceableId,
+                kind: PlaceableKind.FLAG,
+                x: mockX,
+                y: mockY,
+                placed: true,
+            };
+
+            callback(updatedPlaceable);
+
+            const objects = service.objects();
+            const updatedObject = objects.find((obj) => obj.id === mockPlaceableId);
+            expect(updatedObject).toBeDefined();
+            expect(updatedObject?.x).toBe(mockX);
+            expect(updatedObject?.y).toBe(mockY);
+            expect(updatedObject?.id).toBe(mockPlaceableId);
+        });
+
+        it('should not update object when _id does not match', () => {
+            const existingObject = { ...mockObject, id: mockPlaceableId };
+            service['_objects'].set([existingObject]);
+            const callback = mockInGameSocketService.onPlaceableUpdated.calls.mostRecent().args[0];
+
+            const updatedPlaceable = {
+                _id: 'other-id',
+                kind: PlaceableKind.FLAG,
+                x: mockX,
+                y: mockY,
+                placed: true,
+            };
+
+            callback(updatedPlaceable);
+
+            const objects = service.objects();
+            const existingObj = objects.find((obj) => obj.id === mockPlaceableId);
+            expect(existingObj?.x).not.toBe(mockX);
+        });
+
+        it('should not update object when _id is undefined', () => {
+            const existingObject = { ...mockObject, id: mockPlaceableId };
+            service['_objects'].set([existingObject]);
+            const callback = mockInGameSocketService.onPlaceableUpdated.calls.mostRecent().args[0];
+
+            const updatedPlaceable = {
+                kind: PlaceableKind.FLAG,
+                x: mockX,
+                y: mockY,
+                placed: true,
+            };
+
+            callback(updatedPlaceable);
+
+            const objects = service.objects();
+            const existingObj = objects.find((obj) => obj.id === mockPlaceableId);
+            expect(existingObj?.x).not.toBe(mockX);
+        });
+    });
+
+    describe('buildGameMap', () => {
+        const mockChannelNumber = 1;
+        const mockXA = 2;
+        const mockYA = 3;
+        const mockXB = 4;
+        const mockYB = 5;
+        const mockMapSize = 10;
+
+        it('should update tiles to TELEPORT when teleportChannels have entryA and entryB', () => {
+            const gameDataWithTeleports = {
+                ...mockGameData,
+                size: mockMapSize,
+                tiles: Array.from({ length: mockMapSize * mockMapSize }, (unused, i) => ({
+                    x: i % mockMapSize,
+                    y: Math.floor(i / mockMapSize),
+                    kind: TileKind.BASE,
+                })),
+                teleportChannels: [
+                    {
+                        channelNumber: mockChannelNumber,
+                        tiles: {
+                            entryA: { x: mockXA, y: mockYA },
+                            entryB: { x: mockXB, y: mockYB },
+                        },
+                    },
+                ],
+            };
+
+            mockGameHttpService.getGameEditorById.and.returnValue(of(gameDataWithTeleports));
+            service.loadGameMap('game1');
+
+            const tiles = service.tiles();
+            const tileA = tiles.find((tile) => tile.x === mockXA && tile.y === mockYA);
+            const tileB = tiles.find((tile) => tile.x === mockXB && tile.y === mockYB);
+
+            expect(tileA?.kind).toBe(TileKind.TELEPORT);
+            expect(tileA?.teleportChannel).toBe(mockChannelNumber);
+            expect(tileB?.kind).toBe(TileKind.TELEPORT);
+            expect(tileB?.teleportChannel).toBe(mockChannelNumber);
+        });
+
+        it('should update tile to TELEPORT when teleportChannel has only entryA', () => {
+            const gameDataWithTeleportA = {
+                ...mockGameData,
+                size: mockMapSize,
+                tiles: Array.from({ length: mockMapSize * mockMapSize }, (unused, i) => ({
+                    x: i % mockMapSize,
+                    y: Math.floor(i / mockMapSize),
+                    kind: TileKind.BASE,
+                })),
+                teleportChannels: [
+                    {
+                        channelNumber: mockChannelNumber,
+                        tiles: {
+                            entryA: { x: mockXA, y: mockYA },
+                        },
+                    },
+                ],
+            };
+
+            mockGameHttpService.getGameEditorById.and.returnValue(of(gameDataWithTeleportA));
+            service.loadGameMap('game1');
+
+            const tiles = service.tiles();
+            const tileA = tiles.find((tile) => tile.x === mockXA && tile.y === mockYA);
+
+            expect(tileA?.kind).toBe(TileKind.TELEPORT);
+            expect(tileA?.teleportChannel).toBe(mockChannelNumber);
+        });
+
+        it('should update tile to TELEPORT when teleportChannel has only entryB', () => {
+            const gameDataWithTeleportB = {
+                ...mockGameData,
+                size: mockMapSize,
+                tiles: Array.from({ length: mockMapSize * mockMapSize }, (unused, i) => ({
+                    x: i % mockMapSize,
+                    y: Math.floor(i / mockMapSize),
+                    kind: TileKind.BASE,
+                })),
+                teleportChannels: [
+                    {
+                        channelNumber: mockChannelNumber,
+                        tiles: {
+                            entryB: { x: mockXB, y: mockYB },
+                        },
+                    },
+                ],
+            };
+
+            mockGameHttpService.getGameEditorById.and.returnValue(of(gameDataWithTeleportB));
+            service.loadGameMap('game1');
+
+            const tiles = service.tiles();
+            const tileB = tiles.find((tile) => tile.x === mockXB && tile.y === mockYB);
+
+            expect(tileB?.kind).toBe(TileKind.TELEPORT);
+            expect(tileB?.teleportChannel).toBe(mockChannelNumber);
+        });
+    });
+
+    describe('boatAction', () => {
+        const mockX = 6;
+        const mockY = 7;
+
+        it('should call inGameService.boatAction with coordinates', () => {
+            service.boatAction(mockX, mockY);
+            expect(mockInGameService.boatAction).toHaveBeenCalledWith(mockX, mockY);
+        });
+    });
+
+    describe('requestFlagTransfer', () => {
+        const mockX = 8;
+        const mockY = 9;
+
+        it('should call inGameService.requestFlagTransfer with coordinates', () => {
+            service.requestFlagTransfer(mockX, mockY);
+            expect(mockInGameService.requestFlagTransfer).toHaveBeenCalledWith(mockX, mockY);
+        });
+    });
+
+    describe('flagData', () => {
+        it('should return flagData from inGameService', () => {
+            const mockFlagData = {
+                position: { x: 0, y: 0 },
+                holderPlayerId: 'player1',
+            };
+            Object.defineProperty(mockInGameService, 'flagData', {
+                value: signal(mockFlagData),
+                configurable: true,
+            });
+            const result = service.flagData();
+            expect(result).toBe(mockFlagData);
+        });
+    });
+
+    describe('updateDisabledPlaceable', () => {
+        const mockPlaceableId = 'placeable1';
+        const mockTurnCount = 3;
+        const mockZeroTurnCount = 0;
+        const mockPositions: Position[] = [{ x: 1, y: 1 }];
+
+        it('should set disabled placeable when turnCount is greater than 0', () => {
+            const callback = mockInGameSocketService.onPlaceableDisabledUpdated.calls.mostRecent().args[0];
+            const data = {
+                placeableId: mockPlaceableId,
+                turnCount: mockTurnCount,
+                positions: mockPositions,
+            };
+
+            callback(data);
+
+            const info = service.getDisabledPlaceableInfo(mockPlaceableId);
+            expect(info).toBeDefined();
+            expect(info?.turnCount).toBe(mockTurnCount);
+            expect(info?.positions).toEqual(mockPositions);
+        });
+
+        it('should delete disabled placeable when turnCount is 0', () => {
+            const callback = mockInGameSocketService.onPlaceableDisabledUpdated.calls.mostRecent().args[0];
+            const setData = {
+                placeableId: mockPlaceableId,
+                turnCount: mockTurnCount,
+                positions: mockPositions,
+            };
+            callback(setData);
+
+            const deleteData = {
+                placeableId: mockPlaceableId,
+                turnCount: mockZeroTurnCount,
+                positions: mockPositions,
+            };
+            callback(deleteData);
+
+            const info = service.getDisabledPlaceableInfo(mockPlaceableId);
+            expect(info).toBeUndefined();
+        });
+
+        it('should not update when placeableId is undefined', () => {
+            const callback = mockInGameSocketService.onPlaceableDisabledUpdated.calls.mostRecent().args[0];
+            const data = {
+                turnCount: mockTurnCount,
+                positions: mockPositions,
+            };
+
+            callback(data);
+
+            const info = service.getDisabledPlaceableInfo(mockPlaceableId);
+            expect(info).toBeUndefined();
+        });
+    });
+
+    describe('getDisabledPlaceableInfo', () => {
+        const mockPlaceableId = 'placeable1';
+        const mockTurnCount = 2;
+        const mockPositions: Position[] = [{ x: 2, y: 2 }];
+
+        it('should return undefined when placeable is not disabled', () => {
+            const info = service.getDisabledPlaceableInfo(mockPlaceableId);
+            expect(info).toBeUndefined();
+        });
+
+        it('should return disabled placeable info when placeable is disabled', () => {
+            const callback = mockInGameSocketService.onPlaceableDisabledUpdated.calls.mostRecent().args[0];
+            callback({
+                placeableId: mockPlaceableId,
+                turnCount: mockTurnCount,
+                positions: mockPositions,
+            });
+
+            const info = service.getDisabledPlaceableInfo(mockPlaceableId);
+            expect(info).toBeDefined();
+            expect(info?.turnCount).toBe(mockTurnCount);
+            expect(info?.positions).toEqual(mockPositions);
+        });
+    });
+
+    describe('isPlaceableDisabled', () => {
+        const mockPlaceableId = 'placeable1';
+        const mockTurnCount = 1;
+        const mockZeroTurnCount = 0;
+        const mockPositions: Position[] = [{ x: 3, y: 3 }];
+
+        it('should return false when placeable is not disabled', () => {
+            const result = service.isPlaceableDisabled(mockPlaceableId);
+            expect(result).toBe(false);
+        });
+
+        it('should return true when placeable is disabled with turnCount > 0', () => {
+            const callback = mockInGameSocketService.onPlaceableDisabledUpdated.calls.mostRecent().args[0];
+            callback({
+                placeableId: mockPlaceableId,
+                turnCount: mockTurnCount,
+                positions: mockPositions,
+            });
+
+            const result = service.isPlaceableDisabled(mockPlaceableId);
+            expect(result).toBe(true);
+        });
+
+        it('should return false when placeable has turnCount 0', () => {
+            const callback = mockInGameSocketService.onPlaceableDisabledUpdated.calls.mostRecent().args[0];
+            callback({
+                placeableId: mockPlaceableId,
+                turnCount: mockTurnCount,
+                positions: mockPositions,
+            });
+            callback({
+                placeableId: mockPlaceableId,
+                turnCount: mockZeroTurnCount,
+                positions: mockPositions,
+            });
+
+            const result = service.isPlaceableDisabled(mockPlaceableId);
+            expect(result).toBe(false);
+        });
+    });
+
+    describe('getPlaceableTurnCount', () => {
+        const mockPlaceableId = 'placeable1';
+        const mockTurnCount = 5;
+        const mockPositions: Position[] = [{ x: 4, y: 4 }];
+
+        it('should return null when placeable is not disabled', () => {
+            const result = service.getPlaceableTurnCount(mockPlaceableId);
+            expect(result).toBeNull();
+        });
+
+        it('should return turnCount when placeable is disabled', () => {
+            const callback = mockInGameSocketService.onPlaceableDisabledUpdated.calls.mostRecent().args[0];
+            callback({
+                placeableId: mockPlaceableId,
+                turnCount: mockTurnCount,
+                positions: mockPositions,
+            });
+
+            const result = service.getPlaceableTurnCount(mockPlaceableId);
+            expect(result).toBe(mockTurnCount);
         });
     });
 });

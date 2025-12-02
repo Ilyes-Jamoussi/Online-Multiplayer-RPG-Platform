@@ -1,5 +1,6 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { ACCESS_CODE_LENGTH } from '@app/constants/session.constants';
+import { BASE_STAT_VALUE, BONUS_VALUE, RANDOM_THRESHOLD, VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-player.constants';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { ChatService } from '@app/modules/chat/services/chat.service';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
@@ -8,6 +9,7 @@ import { SessionService } from '@app/modules/session/services/session.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
+import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('SessionService', () => {
@@ -22,6 +24,15 @@ describe('SessionService', () => {
     const TEST_ITERATIONS = 100;
     const MAX_PLAYERS_TEST = 6;
     const EXPECTED_PLAYERS_COUNT = 3;
+    const ZERO = 0;
+    const ONE = 1;
+    const TWO = 2;
+    const RANDOM_OFFSET_ABOVE_THRESHOLD = 0.1;
+    const RANDOM_OFFSET_BELOW_THRESHOLD = 0.1;
+    const MOCK_DATE_NOW_1 = 1234567890;
+    const MOCK_DATE_NOW_2 = 1234567891;
+    const MOCK_RANDOM_VALUE_1 = 0.123;
+    const MOCK_RANDOM_VALUE_2 = 0.456;
 
     const createMockPlayerDto = (overrides: Partial<CreateSessionDto['player']> = {}) => ({
         id: '',
@@ -61,6 +72,47 @@ describe('SessionService', () => {
         player: createMockPlayerDto(overrides.player),
         ...overrides,
     });
+
+    const expectVirtualPlayerBaseStats = (virtualPlayer: ReturnType<typeof service.addVirtualPlayer>[number] | undefined): void => {
+        expectBaseStats(virtualPlayer);
+        expectBonusStats(virtualPlayer);
+        expectPositionStats(virtualPlayer);
+        expectCombatStats(virtualPlayer);
+        expectBoatStats(virtualPlayer);
+    };
+
+    const expectBaseStats = (virtualPlayer: ReturnType<typeof service.addVirtualPlayer>[number] | undefined): void => {
+        expect(virtualPlayer?.baseHealth).toBe(BASE_STAT_VALUE);
+        expect(virtualPlayer?.baseSpeed).toBe(BASE_STAT_VALUE);
+        expect(virtualPlayer?.baseAttack).toBe(BASE_STAT_VALUE);
+        expect(virtualPlayer?.baseDefense).toBe(BASE_STAT_VALUE);
+    };
+
+    const expectBonusStats = (virtualPlayer: ReturnType<typeof service.addVirtualPlayer>[number] | undefined): void => {
+        expect(virtualPlayer?.attackBonus).toBe(ZERO);
+        expect(virtualPlayer?.defenseBonus).toBe(ZERO);
+    };
+
+    const expectPositionStats = (virtualPlayer: ReturnType<typeof service.addVirtualPlayer>[number] | undefined): void => {
+        expect(virtualPlayer?.x).toBe(ZERO);
+        expect(virtualPlayer?.y).toBe(ZERO);
+        expect(virtualPlayer?.isInGame).toBe(false);
+        expect(virtualPlayer?.startPointId).toBe('');
+        expect(virtualPlayer?.actionsRemaining).toBe(ONE);
+    };
+
+    const expectCombatStats = (virtualPlayer: ReturnType<typeof service.addVirtualPlayer>[number] | undefined): void => {
+        expect(virtualPlayer?.combatCount).toBe(ZERO);
+        expect(virtualPlayer?.combatWins).toBe(ZERO);
+        expect(virtualPlayer?.combatLosses).toBe(ZERO);
+        expect(virtualPlayer?.combatDraws).toBe(ZERO);
+        expect(virtualPlayer?.hasCombatBonus).toBe(false);
+    };
+
+    const expectBoatStats = (virtualPlayer: ReturnType<typeof service.addVirtualPlayer>[number] | undefined): void => {
+        expect(virtualPlayer?.boatSpeedBonus).toBe(ZERO);
+        expect(virtualPlayer?.boatSpeed).toBe(ZERO);
+    };
 
     beforeEach(() => {
         mockEventEmitter = {
@@ -558,6 +610,239 @@ describe('SessionService', () => {
 
         it('should not throw error when session does not exist', () => {
             expect(() => service.releaseAvatar('non-existent-session', PLAYER_ID_1)).not.toThrow();
+        });
+    });
+
+    describe('addVirtualPlayer', () => {
+        it('should add virtual player to session', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+
+            const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
+
+            expect(players.length).toBe(TWO);
+            const virtualPlayer = players.find((p) => p.virtualPlayerType === VirtualPlayerType.Offensive);
+            expect(virtualPlayer).toBeDefined();
+            expect(virtualPlayer?.isAdmin).toBe(false);
+        });
+
+        it('should select avatar for virtual player', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+
+            service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
+
+            const avatars = service.getChosenAvatars(result.sessionId);
+            const assignedAvatar = avatars.find((a) => a.chosenBy && a.chosenBy.startsWith('virtual-'));
+            expect(assignedAvatar).toBeDefined();
+        });
+
+        it('should return updated players array', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+
+            const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Defensive);
+
+            expect(players.length).toBe(TWO);
+            expect(players).toBe(service.getPlayersSession(result.sessionId));
+        });
+
+        it('should create virtual player with available name from list', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+
+            const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
+
+            const virtualPlayer = players.find((p) => p.virtualPlayerType);
+            expect(virtualPlayer).toBeDefined();
+            expect(VIRTUAL_PLAYER_NAMES).toContain(virtualPlayer?.name);
+        });
+
+        it('should use fallback name when all names are taken', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            VIRTUAL_PLAYER_NAMES.forEach((name, index) => {
+                service.joinSession(`player-${index}`, createJoinSessionDto(result.sessionId, {
+                    player: createMockPlayerDto({ name }),
+                }));
+            });
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+            jest.spyOn(Date, 'now').mockReturnValue(MOCK_DATE_NOW_1);
+
+            const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
+
+            const virtualPlayer = players.find((p) => p.virtualPlayerType);
+            expect(virtualPlayer?.name).toBe(`Bot-${MOCK_DATE_NOW_1}`);
+        });
+
+        it('should select available avatar', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            const allAvatars = Object.values(Avatar);
+            allAvatars.slice(0, allAvatars.length - ONE).forEach((avatar, index) => {
+                service.joinSession(`player-${index}`, createJoinSessionDto(result.sessionId));
+                service.chooseAvatar(result.sessionId, `player-${index}`, avatar);
+            });
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+
+            const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
+
+            const virtualPlayer = players.find((p) => p.virtualPlayerType);
+            expect(virtualPlayer?.avatar).toBeDefined();
+            expect(virtualPlayer?.avatar).not.toBeNull();
+        });
+
+        it('should assign D4 attack dice when random is above threshold', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+
+            const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
+
+            const virtualPlayer = players.find((p) => p.virtualPlayerType);
+            expect(virtualPlayer?.attackDice).toBe(Dice.D4);
+            expect(virtualPlayer?.defenseDice).toBe(Dice.D6);
+        });
+
+        it('should assign D6 attack dice when random is below threshold', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+
+            const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
+
+            const virtualPlayer = players.find((p) => p.virtualPlayerType);
+            expect(virtualPlayer?.attackDice).toBe(Dice.D6);
+            expect(virtualPlayer?.defenseDice).toBe(Dice.D4);
+        });
+
+        it('should assign health bonus when random is above threshold', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD);
+
+            const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
+
+            const virtualPlayer = players.find((p) => p.virtualPlayerType);
+            expect(virtualPlayer?.healthBonus).toBe(BONUS_VALUE);
+            expect(virtualPlayer?.speedBonus).toBe(ZERO);
+            expect(virtualPlayer?.health).toBe(BASE_STAT_VALUE + BONUS_VALUE);
+            expect(virtualPlayer?.maxHealth).toBe(BASE_STAT_VALUE + BONUS_VALUE);
+        });
+
+        it('should assign speed bonus when health bonus is zero', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+
+            const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
+
+            const virtualPlayer = players.find((p) => p.virtualPlayerType);
+            expect(virtualPlayer?.healthBonus).toBe(ZERO);
+            expect(virtualPlayer?.speedBonus).toBe(BONUS_VALUE);
+            expect(virtualPlayer?.speed).toBe(BASE_STAT_VALUE + BONUS_VALUE);
+        });
+
+        it('should create virtual player with correct base stats', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+
+            const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Defensive);
+
+            const virtualPlayer = players.find((p) => p.virtualPlayerType);
+            expectVirtualPlayerBaseStats(virtualPlayer);
+        });
+
+        it('should create virtual player with correct virtualPlayerType', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+
+            const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Defensive);
+
+            const virtualPlayer = players.find((p) => p.virtualPlayerType);
+            expect(virtualPlayer?.virtualPlayerType).toBe(VirtualPlayerType.Defensive);
+        });
+
+        it('should create virtual player with unique ID', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            jest.spyOn(Date, 'now').mockReturnValue(MOCK_DATE_NOW_1);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(MOCK_RANDOM_VALUE_1);
+
+            const players1 = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
+            jest.spyOn(Date, 'now').mockReturnValue(MOCK_DATE_NOW_2);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(MOCK_RANDOM_VALUE_2);
+            const players2 = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Defensive);
+
+            const virtualPlayer1 = players1.find((p) => p.virtualPlayerType === VirtualPlayerType.Offensive);
+            const virtualPlayer2 = players2.find((p) => p.virtualPlayerType === VirtualPlayerType.Defensive);
+            expect(virtualPlayer1?.id).not.toBe(virtualPlayer2?.id);
+            expect(virtualPlayer1?.id).toMatch(/^virtual-/);
+            expect(virtualPlayer2?.id).toMatch(/^virtual-/);
         });
     });
 });

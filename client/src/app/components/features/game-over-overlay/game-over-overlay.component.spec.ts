@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -265,5 +266,315 @@ describe('GameOverOverlayComponent', () => {
     it('should stop timer on return to home', () => {
         component.returnToHome();
         expect(mockTimerService.stopGameOverTimer).toHaveBeenCalled();
+    });
+
+    describe('winnerTeamNumber', () => {
+        const mockTeamNumber = 1;
+
+        it('should return null when gameOverData is null', () => {
+            Object.defineProperty(mockInGameService, 'gameOverData', {
+                value: signal(null),
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'mode', {
+                value: () => GameMode.CTF,
+                configurable: true,
+            });
+            expect(component.winnerTeamNumber).toBeNull();
+        });
+
+        it('should return null when not in CTF mode', () => {
+            Object.defineProperty(mockInGameService, 'gameOverData', {
+                value: signal(mockGameOverData),
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'mode', {
+                value: () => GameMode.CLASSIC,
+                configurable: true,
+            });
+            expect(component.winnerTeamNumber).toBeNull();
+        });
+
+        it('should return null when winner player has no teamNumber', () => {
+            Object.defineProperty(mockInGameService, 'gameOverData', {
+                value: signal(mockGameOverData),
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'mode', {
+                value: () => GameMode.CTF,
+                configurable: true,
+            });
+            mockInGameService.getPlayerByPlayerId.and.returnValue(undefined as unknown as Player);
+            expect(component.winnerTeamNumber).toBeNull();
+        });
+
+        it('should return teamNumber when winner exists and has teamNumber', () => {
+            const winnerPlayer = { ...mockPlayers[0], teamNumber: mockTeamNumber };
+            Object.defineProperty(mockInGameService, 'gameOverData', {
+                value: signal(mockGameOverData),
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'mode', {
+                value: () => GameMode.CTF,
+                configurable: true,
+            });
+            mockInGameService.getPlayerByPlayerId.and.returnValue(winnerPlayer);
+            expect(component.winnerTeamNumber).toBe(mockTeamNumber);
+        });
+    });
+
+    describe('myTeamNumber', () => {
+        const mockTeamNumber = 2;
+
+        it('should return null when not in CTF mode', () => {
+            Object.defineProperty(mockInGameService, 'mode', {
+                value: () => GameMode.CLASSIC,
+                configurable: true,
+            });
+            expect(component.myTeamNumber).toBeNull();
+        });
+
+        it('should return null when player has no teamNumber', () => {
+            Object.defineProperty(mockInGameService, 'mode', {
+                value: () => GameMode.CTF,
+                configurable: true,
+            });
+            mockInGameService.getPlayerByPlayerId.and.returnValue(undefined as unknown as Player);
+            expect(component.myTeamNumber).toBeNull();
+        });
+
+        it('should return teamNumber when player exists and has teamNumber', () => {
+            const myPlayer = { ...mockPlayers[0], teamNumber: mockTeamNumber };
+            Object.defineProperty(mockInGameService, 'mode', {
+                value: () => GameMode.CTF,
+                configurable: true,
+            });
+            mockInGameService.getPlayerByPlayerId.and.returnValue(myPlayer);
+            expect(component.myTeamNumber).toBe(mockTeamNumber);
+        });
+    });
+
+    describe('winnerTeamPlayers', () => {
+        const mockTeamNumber = 1;
+        const mockPlayerName1 = 'Player One';
+        const mockPlayerName2 = 'Player Two';
+        const mockPlayerId1 = 'player1';
+        const mockPlayerId2 = 'player2';
+        const mockPlayerId3 = 'player3';
+
+        it('should return empty array when winnerTeamNumber is null', () => {
+            Object.defineProperty(mockInGameService, 'gameOverData', {
+                value: signal(null),
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'mode', {
+                value: () => GameMode.CTF,
+                configurable: true,
+            });
+            expect(component.winnerTeamPlayers).toEqual([]);
+        });
+
+        it('should return empty array when team does not exist', () => {
+            const sessionWithoutTeam: InGameSession = {
+                ...mockInGameService.inGameSession(),
+                teams: {},
+            };
+            Object.defineProperty(mockInGameService, 'gameOverData', {
+                value: signal(mockGameOverData),
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'mode', {
+                value: () => GameMode.CTF,
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'inGameSession', {
+                value: signal(sessionWithoutTeam),
+                configurable: true,
+            });
+            const winnerPlayer = { ...mockPlayers[0], teamNumber: mockTeamNumber };
+            mockInGameService.getPlayerByPlayerId.and.returnValue(winnerPlayer);
+            expect(component.winnerTeamPlayers).toEqual([]);
+        });
+
+        it('should return player names for winner team', () => {
+            const sessionWithTeam: InGameSession = {
+                ...mockInGameService.inGameSession(),
+                teams: {
+                    [mockTeamNumber]: { number: mockTeamNumber, playerIds: [mockPlayerId1, mockPlayerId2] },
+                },
+                inGamePlayers: {
+                    [mockPlayerId1]: { ...mockPlayers[0], name: mockPlayerName1 },
+                    [mockPlayerId2]: { ...mockPlayers[1], name: mockPlayerName2 },
+                },
+            };
+            Object.defineProperty(mockInGameService, 'gameOverData', {
+                value: signal(mockGameOverData),
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'mode', {
+                value: () => GameMode.CTF,
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'inGameSession', {
+                value: signal(sessionWithTeam),
+                configurable: true,
+            });
+            const winnerPlayer = { ...mockPlayers[0], teamNumber: mockTeamNumber };
+            mockInGameService.getPlayerByPlayerId.and.returnValue(winnerPlayer);
+            expect(component.winnerTeamPlayers).toEqual([mockPlayerName1, mockPlayerName2]);
+        });
+
+        it('should filter out empty names', () => {
+            const sessionWithTeam: InGameSession = {
+                ...mockInGameService.inGameSession(),
+                teams: {
+                    [mockTeamNumber]: { number: mockTeamNumber, playerIds: [mockPlayerId1, mockPlayerId3] },
+                },
+                inGamePlayers: {
+                    [mockPlayerId1]: { ...mockPlayers[0], name: mockPlayerName1 },
+                    [mockPlayerId3]: undefined as unknown as Player,
+                },
+            };
+            Object.defineProperty(mockInGameService, 'gameOverData', {
+                value: signal(mockGameOverData),
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'mode', {
+                value: () => GameMode.CTF,
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'inGameSession', {
+                value: signal(sessionWithTeam),
+                configurable: true,
+            });
+            const winnerPlayer = { ...mockPlayers[0], teamNumber: mockTeamNumber };
+            mockInGameService.getPlayerByPlayerId.and.returnValue(winnerPlayer);
+            expect(component.winnerTeamPlayers).toEqual([mockPlayerName1]);
+        });
+    });
+
+    describe('title', () => {
+        const mockTeamNumber = 1;
+        const mockMyTeamNumber = 1;
+        const mockOtherTeamNumber = 2;
+
+        it('should return team win message when CTF mode and my team wins', () => {
+            const winnerPlayer = { ...mockPlayers[0], teamNumber: mockTeamNumber };
+            const myPlayer = { ...mockPlayers[0], teamNumber: mockMyTeamNumber };
+            Object.defineProperty(mockInGameService, 'gameOverData', {
+                value: signal(mockGameOverData),
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'mode', {
+                value: () => GameMode.CTF,
+                configurable: true,
+            });
+            mockInGameService.getPlayerByPlayerId.and.callFake((playerId: string) => {
+                if (playerId === mockGameOverData.winnerId) return winnerPlayer;
+                if (playerId === mockPlayerService.id()) return myPlayer;
+                return undefined as unknown as Player;
+            });
+            expect(component.title).toBe('Votre équipe a gagné la partie !');
+        });
+
+        it('should return other team win message when CTF mode and other team wins', () => {
+            const mockMyPlayerId = 'player2';
+            const winnerPlayer = { ...mockPlayers[0], teamNumber: mockTeamNumber };
+            const myPlayer = { ...mockPlayers[1], id: mockMyPlayerId, teamNumber: mockOtherTeamNumber };
+            Object.defineProperty(mockPlayerService, 'id', {
+                value: signal(mockMyPlayerId),
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'gameOverData', {
+                value: signal(mockGameOverData),
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'mode', {
+                value: () => GameMode.CTF,
+                configurable: true,
+            });
+            mockInGameService.getPlayerByPlayerId.and.callFake((playerId: string) => {
+                if (playerId === mockGameOverData.winnerId) return winnerPlayer;
+                if (playerId === mockMyPlayerId) return myPlayer;
+                return undefined as unknown as Player;
+            });
+            expect(component.title).toBe(`L'équipe ${mockTeamNumber} a gagné la partie !`);
+        });
+    });
+
+    describe('playerStats', () => {
+        const mockCombatWins1 = 5;
+        const mockCombatWins2 = 2;
+        const mockCombatWins3 = 8;
+
+        it('should return empty array when gameOverData is null', () => {
+            Object.defineProperty(mockInGameService, 'gameOverData', {
+                value: signal(null),
+                configurable: true,
+            });
+            expect(component.playerStats).toEqual([]);
+        });
+
+        it('should return sorted player stats by wins descending', () => {
+            const playersWithWins: Record<string, Player> = {
+                player1: { ...mockPlayers[0], combatWins: mockCombatWins1 },
+                player2: { ...mockPlayers[1], combatWins: mockCombatWins2 },
+                player3: {
+                    ...mockPlayers[0],
+                    id: 'player3',
+                    name: 'Third Player',
+                    combatWins: mockCombatWins3,
+                },
+            };
+            Object.defineProperty(mockInGameService, 'inGamePlayers', {
+                value: signal(playersWithWins),
+                configurable: true,
+            });
+            const stats = component.playerStats;
+            expect(stats[0].wins).toBe(mockCombatWins3);
+            expect(stats[1].wins).toBe(mockCombatWins1);
+            expect(stats[2].wins).toBe(mockCombatWins2);
+        });
+
+        it('should mark winner correctly in player stats', () => {
+            const stats = component.playerStats;
+            const winnerStat = stats.find((stat) => stat.isWinner);
+            expect(winnerStat).toBeDefined();
+            expect(winnerStat?.name).toBe('Winner Player');
+            expect(winnerStat?.isWinner).toBe(true);
+        });
+    });
+
+    describe('ngOnDestroy', () => {
+        it('should stop game over timer', () => {
+            component.ngOnDestroy();
+            expect(mockTimerService.stopGameOverTimer).toHaveBeenCalled();
+        });
+    });
+
+    describe('returnToHome', () => {
+        it('should stop timer, reset service and navigate to home', () => {
+            mockTimerService.stopGameOverTimer.calls.reset();
+            mockInGameService.reset.calls.reset();
+            mockRouter.navigate.calls.reset();
+
+            component.returnToHome();
+
+            expect(mockTimerService.stopGameOverTimer).toHaveBeenCalled();
+            expect(mockInGameService.reset).toHaveBeenCalled();
+            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.HomePage]);
+        });
+    });
+
+    describe('viewStatistics', () => {
+        it('should stop timer and navigate to statistics page', () => {
+            mockTimerService.stopGameOverTimer.calls.reset();
+            mockRouter.navigate.calls.reset();
+
+            component.viewStatistics();
+
+            expect(mockTimerService.stopGameOverTimer).toHaveBeenCalled();
+            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.StatisticsPage]);
+        });
     });
 });
