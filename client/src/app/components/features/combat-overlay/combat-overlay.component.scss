@@ -925,3 +925,43 @@ $text-dim: rgba(255, 255, 255, 0.7);
         transform: scale(0.95) rotate(90deg);
     }
 }
+
+.combat-abandon-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    z-index: 2000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+    .btn-icon {
+        font-size: 1.1rem;
+    }
+
+    .btn-text {
+        font-size: 0.9rem;
+    }
+
+    &:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+    }
+
+    &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+}

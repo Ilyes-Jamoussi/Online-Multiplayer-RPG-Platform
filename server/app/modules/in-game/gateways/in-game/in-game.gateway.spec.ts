@@ -1,5 +1,6 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { InGameActionGateway } from '@app/modules/in-game/gateways/in-game-action/in-game-action.gateway';
+import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { validationExceptionFactory } from '@app/utils/validation/validation.util';
 import { AvailableActionType } from '@common/enums/available-action-type.enum';
@@ -175,6 +176,10 @@ describe('InGameGateway', () => {
             removeAllListeners: jest.fn(),
         };
 
+        const mockCombatService = {
+            combatAbandon: jest.fn(),
+        } as unknown as jest.Mocked<CombatService>;
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 InGameGateway,
@@ -185,6 +190,10 @@ describe('InGameGateway', () => {
                 {
                     provide: EventEmitter2,
                     useValue: mockEventEmitter,
+                },
+                {
+                    provide: CombatService,
+                    useValue: mockCombatService,
                 },
             ],
         }).compile();
