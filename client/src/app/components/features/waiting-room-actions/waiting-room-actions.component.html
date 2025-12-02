@@ -20,17 +20,6 @@
             Ajouter JV
         </button>
 
-        <button
-            class="lock-toggle-button"
-            (click)="toggleLock()"
-            [disabled]="!canToggleLock()"
-            [attr.aria-label]="isLocked() ? 'Déverrouiller la salle' : 'Verrouiller la salle'"
-        >
-            <i class="material-icons">
-                {{ isLocked() ? 'lock' : 'lock_open' }}
-            </i>
-        </button>
-
         <button class="start-button" [disabled]="!canStartGame()" (click)="startGame()">
             <i class="material-icons">play_arrow</i>
             Démarrer la partie
