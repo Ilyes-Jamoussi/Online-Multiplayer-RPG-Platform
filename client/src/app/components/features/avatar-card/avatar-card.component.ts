@@ -2,9 +2,8 @@ import { NgClass } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { AvatarSelectionState } from '@app/types/component.types';
 import { AvatarAssignment } from '@common/interfaces/session.interface';
-
-type AvatarSelectionState = 'available' | 'mine' | 'taken';
 
 @Component({
     selector: 'app-avatar-card',

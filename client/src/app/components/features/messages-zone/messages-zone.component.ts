@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ChatComponent } from '@app/components/features/chat/chat.component';
 import { GameLogComponent } from '@app/components/features/game-log/game-log.component';
 import { GameLogService } from '@app/services/game-log/game-log.service';
-
-type TabType = 'chat' | 'journal';
+import { TabType } from '@app/types/component.types';
 
 @Component({
     selector: 'app-messages-zone',

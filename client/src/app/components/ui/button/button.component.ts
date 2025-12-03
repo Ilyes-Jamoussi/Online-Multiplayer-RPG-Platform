@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ButtonSize, ButtonVariant } from '@app/enums/button-variant.enum';
+import { ButtonType } from '@app/types/component.types';
 
 @Component({
     selector: 'app-ui-button',
@@ -13,7 +14,7 @@ export class UiButtonComponent {
     @Input() disabled: boolean = false;
     @Input() loading: boolean = false;
     @Input() fullWidth: boolean = false;
-    @Input() type: 'button' | 'submit' | 'reset' = 'button';
+    @Input() type: ButtonType = 'button';
 
     @Output() buttonClick = new EventEmitter<MouseEvent>();
 

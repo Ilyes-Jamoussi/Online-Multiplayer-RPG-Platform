@@ -9,8 +9,7 @@ import { GlobalStatistics, SortColumn, SortDirection } from '@app/interfaces/gam
 import { GameLogService } from '@app/services/game-log/game-log.service';
 import { SessionService } from '@app/services/session/session.service';
 import { StatisticsService } from '@app/services/statistics/statistics.service';
-
-type TabType = 'chat' | 'journal';
+import { TabType } from '@app/types/component.types';
 
 @Component({
     selector: 'app-statistics-page',

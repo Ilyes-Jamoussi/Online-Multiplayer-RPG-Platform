@@ -9,6 +9,7 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { PlayerService } from '@app/services/player/player.service';
 import { ResetService } from '@app/services/reset/reset.service';
 import { TimerService } from '@app/services/timer/timer.service';
+import { CombatRole } from '@app/types/game.types';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
@@ -52,7 +53,7 @@ export class CombatService {
     private startCombat(
         attackerId: string,
         targetId: string,
-        userRole: 'attacker' | 'target',
+        userRole: CombatRole,
         attackerTileEffect?: number,
         targetTileEffect?: number,
     ): void {

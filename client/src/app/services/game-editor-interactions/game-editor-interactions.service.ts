@@ -5,6 +5,7 @@ import { ActiveTool, ToolType, ToolbarItem } from '@app/interfaces/game-editor.i
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
 import { GameEditorTeleportService } from '@app/services/game-editor-teleport/game-editor-teleport.service';
+import { MouseClick } from '@app/types/game.types';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Position } from '@common/interfaces/position.interface';
@@ -98,7 +99,7 @@ export class GameEditorInteractionsService {
         this._hoveredTiles.set([]);
     }
 
-    dragStart(x: number, y: number, click: 'left' | 'right'): void {
+    dragStart(x: number, y: number, click: MouseClick): void {
         const tool = this._activeTool();
         if (!tool) return;
 

@@ -2,6 +2,7 @@ import { Component, Input, Optional } from '@angular/core';
 import { GameEditorCheckService } from '@app/services/game-editor-check/game-editor-check.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
 import { GameEditorIssuesEnum } from '@app/interfaces/game-editor.interface';
+import { ValidationType } from '@app/types/component.types';
 
 @Component({
     selector: 'app-errors-badge',
@@ -10,7 +11,7 @@ import { GameEditorIssuesEnum } from '@app/interfaces/game-editor.interface';
     styleUrls: ['./errors-badge.component.scss'],
 })
 export class ErrorsBadgeComponent {
-    @Input() validationType: 'game-editor' | 'character-creation' = 'game-editor';
+    @Input() validationType: ValidationType = 'game-editor';
 
     constructor(
         @Optional() private readonly gameEditorCheckService: GameEditorCheckService,

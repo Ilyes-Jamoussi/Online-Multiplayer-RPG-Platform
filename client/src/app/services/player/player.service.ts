@@ -9,6 +9,7 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { ResetService } from '@app/services/reset/reset.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { SessionService } from '@app/services/session/session.service';
+import { DiceAttribute } from '@app/types/game.types';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
@@ -74,7 +75,7 @@ export class PlayerService {
         });
     }
 
-    setDice(attr: 'attack' | 'defense', value: Dice): void {
+    setDice(attr: DiceAttribute, value: Dice): void {
         const otherDiceValue = value === Dice.D6 ? Dice.D4 : Dice.D6;
 
         const newDice = {
