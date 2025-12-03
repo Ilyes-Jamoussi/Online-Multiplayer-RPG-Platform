@@ -71,7 +71,21 @@ export class ActionService {
         const requestKey = this.generateFlagTransferRequestKey(session.id, playerId, toPlayerId);
         if (this.pendingFlagTransfers.has(requestKey)) throw new BadRequestException('Transfer request already pending');
         this.pendingFlagTransfers.set(requestKey, { sessionId: session.id, fromPlayerId: playerId, toPlayerId, position });
-        this.eventEmitter.emit(ServerEvents.FlagTransferRequested, { session, fromPlayerId: playerId, toPlayerId, fromPlayerName: fromPlayer.name });
+        if (toPlayer.virtualPlayerType) {
+            this.eventEmitter.emit(ServerEvents.VirtualPlayerFlagTransferRequested, {
+                session,
+                fromPlayerId: playerId,
+                toPlayerId,
+                fromPlayerName: fromPlayer.name,
+            });
+        } else {
+            this.eventEmitter.emit(ServerEvents.FlagTransferRequested, {
+                session,
+                fromPlayerId: playerId,
+                toPlayerId,
+                fromPlayerName: fromPlayer.name,
+            });
+        }
     }
 
     private validateTeammates(fromPlayer: Player, toPlayer: Player): void {

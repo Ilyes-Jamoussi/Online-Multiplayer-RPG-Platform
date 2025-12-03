@@ -15,6 +15,7 @@ import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
+import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { FlagData } from '@common/interfaces/flag-data.interface';
 import { Player } from '@common/interfaces/player.interface';
@@ -398,6 +399,36 @@ describe('ActionService', () => {
             service.requestFlagTransfer(session, MOCK_PLAYER_ID_1, position);
 
             expect(() => service.requestFlagTransfer(session, MOCK_PLAYER_ID_1, position)).toThrow(BadRequestException);
+        });
+
+        it('should emit VirtualPlayerFlagTransferRequested when toPlayer is virtual player', () => {
+            const session = createMockSession({
+                flagData: { holderPlayerId: MOCK_PLAYER_ID_1, position: { x: MOCK_X, y: MOCK_Y } },
+                mode: GameMode.CTF,
+            });
+            const player1 = createMockPlayer({ id: MOCK_PLAYER_ID_1, teamNumber: MOCK_TEAM_NUMBER_1 });
+            const player2 = createMockPlayer({
+                id: MOCK_PLAYER_ID_2,
+                teamNumber: MOCK_TEAM_NUMBER_1,
+                virtualPlayerType: VirtualPlayerType.Offensive,
+            });
+            session.inGamePlayers[MOCK_PLAYER_ID_1] = player1;
+            session.inGamePlayers[MOCK_PLAYER_ID_2] = player2;
+            const position: Position = { x: MOCK_X_2, y: MOCK_Y_2 };
+            mockGameCache.getTileOccupant.mockReturnValue(MOCK_PLAYER_ID_2);
+
+            service.requestFlagTransfer(session, MOCK_PLAYER_ID_1, position);
+
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.VirtualPlayerFlagTransferRequested,
+                expect.objectContaining({
+                    session,
+                    fromPlayerId: MOCK_PLAYER_ID_1,
+                    toPlayerId: MOCK_PLAYER_ID_2,
+                    fromPlayerName: MOCK_PLAYER_NAME_1,
+                }),
+            );
+            expect(mockEventEmitter.emit).not.toHaveBeenCalledWith(ServerEvents.FlagTransferRequested, expect.anything());
         });
     });
 

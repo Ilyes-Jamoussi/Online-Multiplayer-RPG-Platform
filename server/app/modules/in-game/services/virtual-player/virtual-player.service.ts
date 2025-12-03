@@ -8,6 +8,7 @@ import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { VPExecutionService } from '@app/modules/in-game/services/vp-execution/vp-execution.service';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
+import { InGameSession } from '@common/interfaces/session.interface';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
@@ -27,6 +28,14 @@ export class VirtualPlayerService {
     @OnEvent(ServerEvents.CombatTimerRestart)
     handleCombatTimerRestart(payload: { sessionId: string }): void {
         this.gameplayService.handleVPCombat(payload.sessionId);
+    }
+
+    @OnEvent(ServerEvents.VirtualPlayerFlagTransferRequested)
+    handleFlagTransferRequested(payload: { session: InGameSession; fromPlayerId: string; toPlayerId: string }): void {
+        setTimeout(
+            () => this.gameplayService.handleVPFlagTransfer(payload.session.id, payload.fromPlayerId, payload.toPlayerId),
+            VIRTUAL_PLAYER_ACTION_DELAY_MS,
+        );
     }
 
     @OnEvent(ServerEvents.VirtualPlayerCombatVictory)
