@@ -1,4 +1,4 @@
-import { ESCAPE_MAX_DISTANCE, ESCAPE_NEARBY_RADIUS, VP_DIRECTIONS } from '@app/constants/virtual-player.constants';
+import { ESCAPE_MAX_DISTANCE_TILES, ESCAPE_NEARBY_RADIUS_TILES, VP_DIRECTIONS } from '@app/constants/virtual-player.constants';
 import { PathActionType } from '@app/enums/path-action-type.enum';
 import { ExplorationContext, NeighborParams, PathNode, TileExploration } from '@app/interfaces/vp-pathfinding-internal.interface';
 import { EnemyPosition, EscapePoint, PathAction, PathResult } from '@app/interfaces/vp-pathfinding.interface';
@@ -391,13 +391,13 @@ export class VPPathfindingService {
             if (x >= 1 && x < mapSize - 1 && y >= 1 && y < mapSize - 1) positions.push({ x, y });
         };
 
-        for (let d = 1; d <= ESCAPE_MAX_DISTANCE; d++) {
+        for (let d = 1; d <= ESCAPE_MAX_DISTANCE_TILES; d++) {
             add(Math.round(playerPos.x + nX * d), Math.round(playerPos.y + nY * d));
             add(Math.round(playerPos.x - nY * d), Math.round(playerPos.y + nX * d));
             add(Math.round(playerPos.x + nY * d), Math.round(playerPos.y - nX * d));
         }
-        for (let dx = -ESCAPE_NEARBY_RADIUS; dx <= ESCAPE_NEARBY_RADIUS; dx++) {
-            for (let dy = -ESCAPE_NEARBY_RADIUS; dy <= ESCAPE_NEARBY_RADIUS; dy++) {
+        for (let dx = -ESCAPE_NEARBY_RADIUS_TILES; dx <= ESCAPE_NEARBY_RADIUS_TILES; dx++) {
+            for (let dy = -ESCAPE_NEARBY_RADIUS_TILES; dy <= ESCAPE_NEARBY_RADIUS_TILES; dy++) {
                 if (dx !== 0 || dy !== 0) add(playerPos.x + dx, playerPos.y + dy);
             }
         }

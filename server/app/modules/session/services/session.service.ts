@@ -1,5 +1,5 @@
 import { ACCESS_CODE_LENGTH, ACCESS_CODE_PADDING, ACCESS_CODE_RANGE } from '@app/constants/session.constants';
-import { BASE_STAT_VALUE, BONUS_VALUE, RANDOM_THRESHOLD, VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-player.constants';
+import { BASE_STAT_POINTS, BONUS_HEALTH_POINTS, RANDOM_THRESHOLD_RATIO, VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-player.constants';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { ChatService } from '@app/modules/chat/services/chat.service';
 import { Game } from '@app/modules/game-store/entities/game.entity';
@@ -157,27 +157,27 @@ export class SessionService {
         const availableAvatars = avatars.filter((botAvatar) => !existingPlayers.some((player) => player.avatar === botAvatar));
         const avatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
 
-        const attackDice = Math.random() > RANDOM_THRESHOLD ? Dice.D4 : Dice.D6;
+        const attackDice = Math.random() > RANDOM_THRESHOLD_RATIO ? Dice.D4 : Dice.D6;
         const defenseDice = attackDice === Dice.D4 ? Dice.D6 : Dice.D4;
 
-        const healthBonus = Math.random() > RANDOM_THRESHOLD ? BONUS_VALUE : 0;
-        const speedBonus = healthBonus === BONUS_VALUE ? 0 : BONUS_VALUE;
+        const healthBonus = Math.random() > RANDOM_THRESHOLD_RATIO ? BONUS_HEALTH_POINTS : 0;
+        const speedBonus = healthBonus === BONUS_HEALTH_POINTS ? 0 : BONUS_HEALTH_POINTS;
 
         return {
             id: `virtual-${Date.now()}-${Math.random()}`,
             name,
             avatar,
             isAdmin: false,
-            baseHealth: BASE_STAT_VALUE,
+            baseHealth: BASE_STAT_POINTS,
             healthBonus,
-            health: BASE_STAT_VALUE + healthBonus,
-            maxHealth: BASE_STAT_VALUE + healthBonus,
-            baseSpeed: BASE_STAT_VALUE,
+            health: BASE_STAT_POINTS + healthBonus,
+            maxHealth: BASE_STAT_POINTS + healthBonus,
+            baseSpeed: BASE_STAT_POINTS,
             speedBonus,
-            speed: BASE_STAT_VALUE + speedBonus,
-            baseAttack: BASE_STAT_VALUE,
+            speed: BASE_STAT_POINTS + speedBonus,
+            baseAttack: BASE_STAT_POINTS,
             attackBonus: 0,
-            baseDefense: BASE_STAT_VALUE,
+            baseDefense: BASE_STAT_POINTS,
             defenseBonus: 0,
             attackDice,
             defenseDice,

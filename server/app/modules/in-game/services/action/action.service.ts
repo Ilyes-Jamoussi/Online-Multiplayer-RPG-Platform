@@ -1,4 +1,5 @@
 /* eslint-disable max-lines -- This file contains extensive action business logic and requires more lines than the standard limit */
+import { BONUS_HEALTH_POINTS } from '@app/constants/virtual-player.constants';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { ActiveCombat } from '@app/interfaces/active-combat.interface';
 import { PendingFlagTransfer } from '@app/interfaces/pending-flag-transfer.interface';
@@ -219,8 +220,7 @@ export class ActionService {
     private healSanctuary(session: InGameSession, playerId: string, kind: PlaceableKind, pos: Position, double: boolean = false): void {
         const player = this.validateSanctuaryAction(session, playerId, double);
         if (!player) return;
-        const HEALTH_BONUS = 2;
-        const addedHealth = double ? HEALTH_BONUS * 2 : HEALTH_BONUS;
+        const addedHealth = double ? BONUS_HEALTH_POINTS * 2 : BONUS_HEALTH_POINTS;
         this.eventEmitter.emit(ServerEvents.SanctuaryActionSuccess, {
             session,
             playerId,
