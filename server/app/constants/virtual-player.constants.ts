@@ -15,6 +15,7 @@ export const VIRTUAL_PLAYER_NAMES = ['Bot Alpha', 'Bot Beta', 'Bot Gamma', 'Bot 
 export const ESCAPE_MAX_DISTANCE_TILES = 5;
 export const ESCAPE_NEARBY_RADIUS_TILES = 3;
 export const RETURN_FLAG_SEARCH_RADIUS_TILES = 3;
+export const FLEE_DISTANCE_TILES = 3;
 
 export const RETURN_FLAG_PRIORITY_SCORE = 200;
 export const BLOCKED_FLAG_CARRIER_ATTACK_PRIORITY_SCORE = 180;
