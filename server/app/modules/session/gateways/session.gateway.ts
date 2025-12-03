@@ -127,12 +127,6 @@ export class SessionGateway implements OnGatewayDisconnect {
         this.sessionService.lock(sessionId);
     }
 
-    @SubscribeMessage(SessionEvents.UnlockSession)
-    unlockSession(socket: Socket): void {
-        const sessionId = this.sessionService.getPlayerSessionId(socket.id);
-        this.sessionService.unlock(sessionId);
-    }
-
     @SubscribeMessage(SessionEvents.KickPlayer)
     kickPlayer(socket: Socket, data: KickPlayerDto): void {
         try {

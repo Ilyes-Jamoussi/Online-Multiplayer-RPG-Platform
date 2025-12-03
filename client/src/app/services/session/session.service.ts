@@ -31,7 +31,6 @@ export class SessionService {
     readonly isRoomLocked: Signal<boolean> = computed(() => this.session().isRoomLocked);
     readonly chatId: Signal<string> = computed(() => this.session().chatId);
     readonly mode: Signal<GameMode> = computed(() => this.session().mode);
-    readonly isSessionFull: Signal<boolean> = computed(() => this.players().length >= this.maxPlayers());
 
     constructor(
         private readonly sessionSocketService: SessionSocketService,
@@ -56,11 +55,6 @@ export class SessionService {
     lock(): void {
         this.updateSession({ isRoomLocked: true });
         this.sessionSocketService.lockSession();
-    }
-
-    unlock(): void {
-        this.updateSession({ isRoomLocked: false });
-        this.sessionSocketService.unlockSession();
     }
 
     canStartGame(): boolean {

@@ -489,17 +489,6 @@ describe('SessionGateway', () => {
         });
     });
 
-    describe('unlockSession', () => {
-        it('should unlock session successfully', () => {
-            sessionService.getPlayerSessionId.mockReturnValue(SESSION_ID);
-
-            gateway.unlockSession(mockSocket);
-
-            expect(sessionService.getPlayerSessionId).toHaveBeenCalledWith(SOCKET_ID);
-            expect(sessionService.unlock).toHaveBeenCalledWith(SESSION_ID);
-        });
-    });
-
     describe('kickPlayer', () => {
         const data: KickPlayerDto = {
             playerId: 'kicked-player-id',

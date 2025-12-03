@@ -56,7 +56,6 @@ describe('SessionService', () => {
     beforeEach(() => {
         mockSessionSocketService = jasmine.createSpyObj('SessionSocketService', [
             'lockSession',
-            'unlockSession',
             'updateAvatarsAssignment',
             'kickPlayer',
             'leaveSession',
@@ -117,19 +116,6 @@ describe('SessionService', () => {
             service.lock();
             expect(service.isRoomLocked()).toBe(true);
             expect(mockSessionSocketService.lockSession).toHaveBeenCalled();
-        });
-
-        it('should unlock session', () => {
-            service.updateSession({ isRoomLocked: true });
-            service.unlock();
-            expect(service.isRoomLocked()).toBe(false);
-            expect(mockSessionSocketService.unlockSession).toHaveBeenCalled();
-        });
-
-        it('should auto-unlock when session is not full', () => {
-            service.updateSession({ maxPlayers: 4, players: [mockPlayer, mockPlayer] });
-            TestBed.flushEffects();
-            expect(service.isRoomLocked()).toBe(false);
         });
     });
 
