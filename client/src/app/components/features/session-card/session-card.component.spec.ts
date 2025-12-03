@@ -15,6 +15,8 @@ const TEST_GAME_NAME_1 = 'Test Game 1';
 const TEST_GAME_NAME_2 = 'Test Game 2';
 const TEST_GAME_DESCRIPTION_1 = 'Test game description 1';
 const TEST_GAME_DESCRIPTION_2 = 'Test game description 2';
+// eslint-disable-next-line @typescript-eslint/no-magic-numbers -- Test constant
+const UNKNOWN_MAP_SIZE = 999 as MapSize;
 
 describe('SessionCardComponent', () => {
     let component: SessionCardComponent;
@@ -223,14 +225,13 @@ describe('SessionCardComponent', () => {
         });
 
         it('should return mapSize as string when not in MAP_SIZE_DISPLAY', () => {
-            const unknownMapSize = 999 as MapSize;
             const session: SessionPreviewDto = {
                 id: TEST_SESSION_ID_1,
                 currentPlayers: TEST_CURRENT_PLAYERS_2,
                 maxPlayers: TEST_MAX_PLAYERS_4,
                 gameName: TEST_GAME_NAME_1,
                 gameDescription: TEST_GAME_DESCRIPTION_1,
-                mapSize: unknownMapSize,
+                mapSize: UNKNOWN_MAP_SIZE,
                 gameMode: GameMode.CLASSIC,
             };
             component.session = session;

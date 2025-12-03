@@ -336,9 +336,7 @@ describe('GameEditorCheckService', () => {
             store.setTiles(tiles);
             store.setSize(SIZE);
 
-            store.setObjects([
-                { id: 'heal1', kind: PlaceableKind.HEAL, x: 2, y: 2, placed: true, orientation: 'N' },
-            ]);
+            store.setObjects([{ id: 'heal1', kind: PlaceableKind.HEAL, x: 2, y: 2, placed: true, orientation: 'N' }]);
 
             const result = service.editorProblems();
             expect(result.terrainAccessibility.hasIssue).toBeFalse();
