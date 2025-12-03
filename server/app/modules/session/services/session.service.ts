@@ -75,6 +75,10 @@ export class SessionService {
         const session = this.getSession(sessionId);
         session.players = session.players.filter((player) => player.id !== playerId);
         this.releaseAvatar(sessionId, playerId);
+
+        if (session.isRoomLocked) {
+            this.unlock(sessionId);
+        }
     }
 
     isSessionFull(sessionId: string): boolean {
@@ -139,6 +143,10 @@ export class SessionService {
         const session = this.getSession(sessionId);
         session.players = session.players.filter((player) => player.id !== playerId);
         this.releaseAvatar(sessionId, playerId);
+
+        if (session.isRoomLocked) {
+            this.unlock(sessionId);
+        }
     }
 
     addVirtualPlayer(sessionId: string, virtualPlayerType: VirtualPlayerType): Player[] {
@@ -146,6 +154,12 @@ export class SessionService {
         const virtualPlayer = this.createVirtualPlayer(virtualPlayerType, session.players);
         session.players.push(virtualPlayer);
         this.selectAvatar(sessionId, virtualPlayer.id, virtualPlayer.avatar);
+
+        if (session.players.length >= session.maxPlayers) {
+            this.lock(sessionId);
+            this.eventEmitter.emit(ServerEvents.SessionAutoLocked, sessionId);
+        }
+
         return session.players;
     }
 

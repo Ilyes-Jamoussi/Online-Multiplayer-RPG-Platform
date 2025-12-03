@@ -1,4 +1,4 @@
-import { computed, effect, Injectable, Signal, signal } from '@angular/core';
+import { computed, Injectable, Signal, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MAP_SIZE_TO_MAX_PLAYERS } from '@app/constants/map-size.constants';
 import { DEFAULT_SESSION, MIN_SESSION_PLAYERS } from '@app/constants/session.constants';
@@ -39,11 +39,6 @@ export class SessionService {
         private readonly chatSocketService: ChatSocketService,
     ) {
         this.initListeners();
-
-        effect(() => {
-            if (this.isSessionFull()) this.lock();
-            else this.unlock();
-        });
     }
 
     updateSession(partial: Partial<WaitingRoomSession>): void {
