@@ -1,6 +1,8 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal, Signal } from '@angular/core';
 import { PlaceableLabel } from '@app/enums/placeable-label.enum';
+import { SanctuaryDescription, SanctuaryDoubleDescription } from '@app/enums/sanctuary-description.enum';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
@@ -191,6 +193,68 @@ describe('SanctuaryOverlayComponent', () => {
             const result = component.sanctuaryName;
 
             expect(result).toBe(PlaceableLabel.FIGHT);
+        });
+    });
+
+    describe('sanctuaryDescription', () => {
+        it('should return empty string when no sanctuary is opened', () => {
+            openedSanctuarySignal.set(null);
+            fixture.detectChanges();
+
+            const result = component.sanctuaryDescription;
+
+            expect(result).toBe(TEST_EMPTY_STRING);
+        });
+
+        it('should return HEAL description when sanctuary kind is HEAL', () => {
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL);
+            openedSanctuarySignal.set(mockSanctuary);
+            fixture.detectChanges();
+
+            const result = component.sanctuaryDescription;
+
+            expect(result).toBe(SanctuaryDescription.HEAL);
+        });
+
+        it('should return FIGHT description when sanctuary kind is FIGHT', () => {
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.FIGHT);
+            openedSanctuarySignal.set(mockSanctuary);
+            fixture.detectChanges();
+
+            const result = component.sanctuaryDescription;
+
+            expect(result).toBe(SanctuaryDescription.FIGHT);
+        });
+    });
+
+    describe('sanctuaryDoubleDescription', () => {
+        it('should return empty string when no sanctuary is opened', () => {
+            openedSanctuarySignal.set(null);
+            fixture.detectChanges();
+
+            const result = component.sanctuaryDoubleDescription;
+
+            expect(result).toBe(TEST_EMPTY_STRING);
+        });
+
+        it('should return HEAL double description when sanctuary kind is HEAL', () => {
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.HEAL);
+            openedSanctuarySignal.set(mockSanctuary);
+            fixture.detectChanges();
+
+            const result = component.sanctuaryDoubleDescription;
+
+            expect(result).toBe(SanctuaryDoubleDescription.HEAL);
+        });
+
+        it('should return FIGHT double description when sanctuary kind is FIGHT', () => {
+            const mockSanctuary = CREATE_MOCK_SANCTUARY(PlaceableKind.FIGHT);
+            openedSanctuarySignal.set(mockSanctuary);
+            fixture.detectChanges();
+
+            const result = component.sanctuaryDoubleDescription;
+
+            expect(result).toBe(SanctuaryDoubleDescription.FIGHT);
         });
     });
 

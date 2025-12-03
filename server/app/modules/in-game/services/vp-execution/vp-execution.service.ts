@@ -1,7 +1,7 @@
 import { VIRTUAL_PLAYER_ACTION_DELAY_MS, VIRTUAL_PLAYER_MOVEMENT_DELAY_MS } from '@app/constants/virtual-player.constants';
 import { PathActionType } from '@app/enums/path-action-type.enum';
 import { PointOfInterestType } from '@app/enums/point-of-interest-type.enum';
-import { EvaluatedTarget, VPDecision } from '@app/interfaces/vp-gameplay.interface';
+import { EvaluatedTarget } from '@app/interfaces/vp-gameplay.interface';
 import { PathAction } from '@app/interfaces/vp-pathfinding.interface';
 import { ActionService } from '@app/modules/in-game/services/action/action.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
@@ -12,12 +12,10 @@ import { GameMode } from '@common/enums/game-mode.enum';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { Position } from '@common/interfaces/position.interface';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class VPExecutionService {
-    private readonly logger = new Logger(VPExecutionService.name);
-
     constructor(
         private readonly gameplayService: GameplayService,
         private readonly vpGameplayService: VPGameplayService,
@@ -34,8 +32,6 @@ export class VPExecutionService {
 
         const session = this.sessionRepository.findById(sessionId);
         const decision = this.vpGameplayService.makeDecision(session, playerId, playerType);
-
-        this.logPath(decision);
 
         if (!decision.target || !decision.target.path.reachable) {
             this.endVPTurn(sessionId, playerId);
@@ -161,7 +157,6 @@ export class VPExecutionService {
 
             if (session.mode === GameMode.CTF && occupant.teamNumber === player.teamNumber) return false;
 
-            this.logger.debug(`VP ${playerId} attacking blocking enemy ${occupantId}`);
             this.actionService.attackPlayer(sessionId, playerId, blockedPosition);
             return true;
         } catch {
@@ -245,15 +240,6 @@ export class VPExecutionService {
             this.gameplayService.endPlayerTurn(sessionId, playerId);
         } catch {
             // Silent fail
-        }
-    }
-
-    private logPath(decision: VPDecision): void {
-        if (decision.target?.path.actions.length) {
-            const actionSequence = decision.target.path.actions
-                .map((a) => (a.type === PathActionType.MOVE ? a.orientation : a.type.toUpperCase()))
-                .join(' ');
-            this.logger.debug(`VP Path: ${actionSequence}`);
         }
     }
 }

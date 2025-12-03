@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { PlaceableLabel } from '@app/enums/placeable-label.enum';
+import { SanctuaryDescription, SanctuaryDoubleDescription } from '@app/enums/sanctuary-description.enum';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
@@ -30,6 +31,18 @@ export class SanctuaryOverlayComponent {
     get sanctuaryName(): string {
         if (!this.openedSanctuary) return '';
         return PlaceableLabel[this.openedSanctuary.kind];
+    }
+
+    get sanctuaryDescription(): string {
+        if (!this.openedSanctuary) return '';
+        const description = this.isHeal ? SanctuaryDescription.HEAL : SanctuaryDescription.FIGHT;
+        return description || '';
+    }
+
+    get sanctuaryDoubleDescription(): string {
+        if (!this.openedSanctuary) return '';
+        const description = this.isHeal ? SanctuaryDoubleDescription.HEAL : SanctuaryDoubleDescription.FIGHT;
+        return description || '';
     }
 
     get isHeal(): boolean {
