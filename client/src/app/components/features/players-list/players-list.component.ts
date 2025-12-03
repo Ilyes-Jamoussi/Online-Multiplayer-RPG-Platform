@@ -110,10 +110,4 @@ export class PlayersListComponent {
     isCTFMode(): boolean {
         return this.inGameService.mode() === GameMode.CTF;
     }
-
-    isEnemy(player: Player): boolean {
-        if (this.isCurrentUser(player)) return false;
-        if (this.isCTFMode()) return false;
-        return true;
-    }
 }

@@ -116,10 +116,6 @@ export class GameMapComponent implements OnInit {
         return player.id === this.playerService.id();
     }
 
-    isActivePlayer(player: Player): boolean {
-        return player.id === this.inGameService.activePlayer?.id;
-    }
-
     isCTFMode(): boolean {
         return this.inGameService.mode() === GameMode.CTF;
     }

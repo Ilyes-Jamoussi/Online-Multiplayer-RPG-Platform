@@ -350,22 +350,6 @@ describe('GameMapComponent', () => {
         });
     });
 
-    describe('isActivePlayer', () => {
-        it('should return true when player is active player', () => {
-            expect(component.isActivePlayer(mockPlayer)).toBe(true);
-        });
-
-        it('should return false when player is not active player', () => {
-            const otherPlayer = { ...mockPlayer, id: 'player2' };
-            expect(component.isActivePlayer(otherPlayer)).toBe(false);
-        });
-
-        it('should return false when there is no active player', () => {
-            mockInGameService.activePlayer = null;
-            expect(component.isActivePlayer(mockPlayer)).toBe(false);
-        });
-    });
-
     describe('isCTFMode', () => {
         it('should return true when mode is CTF', () => {
             modeSignal.set(GameMode.CTF);
