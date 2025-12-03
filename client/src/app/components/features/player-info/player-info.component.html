@@ -16,28 +16,15 @@
                 <div class="hp-fill" [style.width.%]="hpPercentage" [class]="hpColorClass"></div>
                 <span class="hp-text">{{ currentHealth }}/{{ maxHealth }}</span>
             </div>
+            @if (healthBonus > 0) {
+            <div class="hp-bonus-info">{{ baseHealth }} + {{ healthBonus }} bonus</div>
+            }
         </div>
     </div>
 
     <div class="stats-section">
         <div class="stats-columns">
             <div class="stats-column">
-                <div class="stat-group">
-                    <h4 class="stat-group-title">Vie</h4>
-                    <div class="stat-item">
-                        <span class="label">Vie de base</span>
-                        <span class="value">{{ baseHealth }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="label">Bonus</span>
-                        <span class="value">{{ healthBonus }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="label">Vie maximale</span>
-                        <span class="value">{{ maxHealth }}</span>
-                    </div>
-                </div>
-
                 <div class="stat-group">
                     <h4 class="stat-group-title">Vitesse</h4>
                     <div class="stat-item">
@@ -51,6 +38,22 @@
                     <div class="stat-item">
                         <span class="label">Bonus bateau</span>
                         <span class="value">{{ boatSpeedBonus }}</span>
+                    </div>
+                </div>
+
+                <div class="stat-group">
+                    <h4 class="stat-group-title">Défense</h4>
+                    <div class="stat-item">
+                        <span class="label">Base</span>
+                        <span class="value">{{ baseDefense }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Dé sélectionné</span>
+                        <span class="value">{{ defenseDiceType }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Bonus</span>
+                        <span class="value">{{ defenseBonus }}</span>
                     </div>
                 </div>
             </div>
@@ -73,40 +76,24 @@
                 </div>
 
                 <div class="stat-group">
-                    <h4 class="stat-group-title">Défense</h4>
+                    <h4 class="stat-group-title">Combat</h4>
                     <div class="stat-item">
-                        <span class="label">Base</span>
-                        <span class="value">{{ baseDefense }}</span>
+                        <span class="label">Combats</span>
+                        <span class="value">{{ totalCombats }}</span>
                     </div>
                     <div class="stat-item">
-                        <span class="label">Dé sélectionné</span>
-                        <span class="value">{{ defenseDiceType }}</span>
+                        <span class="label">Victoires</span>
+                        <span class="value combat-wins">{{ combatWins }}</span>
                     </div>
                     <div class="stat-item">
-                        <span class="label">Bonus</span>
-                        <span class="value">{{ defenseBonus }}</span>
+                        <span class="label">Défaites</span>
+                        <span class="value combat-losses">{{ combatLosses }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Égalités</span>
+                        <span class="value combat-draws">{{ combatDraws }}</span>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="stat-group">
-            <h4 class="stat-group-title">Combat</h4>
-            <div class="stat-item">
-                <span class="label">Combats</span>
-                <span class="value">{{ totalCombats }}</span>
-            </div>
-            <div class="stat-item">
-                <span class="label">Victoires</span>
-                <span class="value combat-wins">{{ combatWins }}</span>
-            </div>
-            <div class="stat-item">
-                <span class="label">Défaites</span>
-                <span class="value combat-losses">{{ combatLosses }}</span>
-            </div>
-            <div class="stat-item">
-                <span class="label">Égalités</span>
-                <span class="value combat-draws">{{ combatDraws }}</span>
             </div>
         </div>
     </div>

@@ -30,6 +30,7 @@ const TEST_ATTACK_COORDINATE = 3;
 const TEST_DAMAGE_DISPLAY_TIMEOUT = 2100;
 const TEST_HEALTH_VALUE = 5;
 const TEST_HEALTH_VALUE_7 = 7;
+const TEST_VICTORY_NOTIFICATION_TIMEOUT = 5100;
 
 describe('CombatService', () => {
     let service: CombatService;
@@ -497,7 +498,8 @@ describe('CombatService', () => {
                 expect(service.selectedPosture()).toBeNull();
             });
 
-            it('should hide damage display after timeout', (done) => {
+            it('should hide damage display after timeout', () => {
+                jasmine.clock().install();
                 mockTimerService.isCombatActive.and.returnValue(false);
                 combatStartedCallback({
                     attackerId: 'player1',
@@ -510,11 +512,10 @@ describe('CombatService', () => {
                 const initialDisplays = service.damageDisplays();
                 expect(initialDisplays[0].visible).toBe(true);
 
-                setTimeout(() => {
-                    const updatedDisplays = service.damageDisplays();
-                    expect(updatedDisplays[0].visible).toBe(false);
-                    done();
-                }, TEST_DAMAGE_DISPLAY_TIMEOUT);
+                jasmine.clock().tick(TEST_DAMAGE_DISPLAY_TIMEOUT);
+                const updatedDisplays = service.damageDisplays();
+                expect(updatedDisplays[0].visible).toBe(false);
+                jasmine.clock().uninstall();
             });
 
             it('should use default tile effect of 0 when tile effect is not provided', () => {
@@ -788,6 +789,29 @@ describe('CombatService', () => {
 
                 expect(clearTimeout).toHaveBeenCalledWith(TEST_TIMEOUT_ID_1);
                 expect(setTimeout).toHaveBeenCalled();
+            });
+
+            it('should call closeVictoryOverlay after timeout', () => {
+                jasmine.clock().install();
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                });
+
+                victoryCallback({
+                    playerAId: 'player1',
+                    playerBId: 'player2',
+                    winnerId: 'player1',
+                    abandon: false,
+                });
+
+                expect(service.isVictoryNotificationVisible()).toBe(true);
+
+                jasmine.clock().tick(TEST_VICTORY_NOTIFICATION_TIMEOUT);
+                expect(service.isVictoryNotificationVisible()).toBe(false);
+                expect(service.combatData()).toBeNull();
+                jasmine.clock().uninstall();
             });
         });
 

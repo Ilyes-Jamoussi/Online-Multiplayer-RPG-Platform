@@ -517,6 +517,65 @@ describe('GameMapService', () => {
             const tileClass = service.getTileClass(mockX, mockY);
             expect(tileClass).toContain('action-transfer-flag');
         });
+
+        it('should return empty string for unknown action type', () => {
+            Object.defineProperty(mockInGameService, 'availableActions', {
+                value: signal([{ x: mockX, y: mockY, type: 'UNKNOWN_ACTION' as AvailableActionType }]),
+                configurable: true,
+            });
+            const tileClass = service.getTileClass(mockX, mockY);
+            expect(tileClass).toBe('reachable-tile');
+        });
+
+        it('should return empty string when no action found at coordinates', () => {
+            Object.defineProperty(mockInGameService, 'availableActions', {
+                value: signal([{ x: 99, y: 99, type: AvailableActionType.ATTACK }]),
+                configurable: true,
+            });
+            const tileClass = service.getTileClass(mockX, mockY);
+            expect(tileClass).toBe('reachable-tile');
+        });
+
+        it('should return empty string from getActionClass when action is not found', () => {
+            Object.defineProperty(mockInGameService, 'isActionModeActive', {
+                value: signal(true),
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'availableActions', {
+                value: signal([]),
+                configurable: true,
+            });
+            Object.defineProperty(mockInGameService, 'reachableTiles', {
+                value: signal([{ x: mockX, y: mockY, cost: 1, remainingPoints: 2 }]),
+                configurable: true,
+            });
+
+            const tileClass = service.getTileClass(mockX, mockY);
+            expect(tileClass).toBe('reachable-tile');
+        });
+
+        it('should return empty string when getActionClass finds no action at coordinates', () => {
+            type ServiceWithPrivateMethod = {
+                getActionClass: (x: number, y: number) => string;
+            };
+            Object.defineProperty(mockInGameService, 'availableActions', {
+                value: signal([]),
+                configurable: true,
+            });
+
+            const result = (service as unknown as ServiceWithPrivateMethod).getActionClass(mockX, mockY);
+            expect(result).toBe('');
+        });
+    });
+
+    describe('getObjectOnTile footprint 2 diagonal', () => {
+        it('should handle object with footprint 2 at position (targetX - 1, targetY - 1)', () => {
+            const largeObject = { ...mockObject, kind: PlaceableKind.HEAL, x: 0, y: 0 };
+            service['_objects'].set([largeObject]);
+
+            const obj = service.getObjectOnTile({ x: 1, y: 1 });
+            expect(obj).toEqual(largeObject);
+        });
     });
 
     describe('healPlayer', () => {

@@ -182,6 +182,111 @@ describe('GameEditorStoreService', () => {
             subject.next(undefined as unknown as GameEditorDto);
             subject.complete();
         });
+
+        it('should deep copy teleport channels with entryA and entryB when loading game', () => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+
+            const editorDataWithChannels: GameEditorDto = {
+                ...mockEditorData,
+                teleportChannels: [
+                    {
+                        channelNumber: channelNumber1,
+                        tiles: {
+                            entryA: { x: teleportX1, y: teleportY1 },
+                            entryB: { x: teleportX2, y: teleportY2 },
+                        },
+                    },
+                ],
+            };
+
+            service.loadGameById('1');
+            subject.next(editorDataWithChannels);
+            subject.complete();
+
+            const channels = service.teleportChannels;
+            expect(channels.length).toBe(one);
+            expect(channels[zero].tiles?.entryA).toEqual({ x: teleportX1, y: teleportY1 });
+            expect(channels[zero].tiles?.entryB).toEqual({ x: teleportX2, y: teleportY2 });
+        });
+
+        it('should deep copy teleport channels with only entryA (no entryB) when loading game', () => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+
+            const editorDataWithChannels: GameEditorDto = {
+                ...mockEditorData,
+                teleportChannels: [
+                    {
+                        channelNumber: channelNumber1,
+                        tiles: {
+                            entryA: { x: teleportX1, y: teleportY1 },
+                            entryB: undefined,
+                        },
+                    },
+                ],
+            };
+
+            service.loadGameById('1');
+            subject.next(editorDataWithChannels);
+            subject.complete();
+
+            const channels = service.teleportChannels;
+            expect(channels.length).toBe(one);
+            expect(channels[zero].tiles?.entryA).toEqual({ x: teleportX1, y: teleportY1 });
+            expect(channels[zero].tiles?.entryB).toBeUndefined();
+        });
+
+        it('should deep copy teleport channels with only entryB (no entryA) when loading game', () => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+
+            const editorDataWithChannels: GameEditorDto = {
+                ...mockEditorData,
+                teleportChannels: [
+                    {
+                        channelNumber: channelNumber1,
+                        tiles: {
+                            entryA: undefined,
+                            entryB: { x: teleportX2, y: teleportY2 },
+                        },
+                    },
+                ],
+            };
+
+            service.loadGameById('1');
+            subject.next(editorDataWithChannels);
+            subject.complete();
+
+            const channels = service.teleportChannels;
+            expect(channels.length).toBe(one);
+            expect(channels[zero].tiles?.entryA).toBeUndefined();
+            expect(channels[zero].tiles?.entryB).toEqual({ x: teleportX2, y: teleportY2 });
+        });
+
+        it('should deep copy teleport channels with undefined tiles when loading game', () => {
+            const subject = new Subject<GameEditorDto>();
+            gameHttpServiceSpy.getGameEditorById.and.returnValue(subject.asObservable());
+
+            const editorDataWithChannels: GameEditorDto = {
+                ...mockEditorData,
+                teleportChannels: [
+                    {
+                        channelNumber: channelNumber1,
+                        tiles: undefined as unknown as TeleportTilesDto,
+                    },
+                ],
+            };
+
+            service.loadGameById('1');
+            subject.next(editorDataWithChannels);
+            subject.complete();
+
+            const channels = service.teleportChannels;
+            expect(channels.length).toBe(one);
+            expect(channels[zero].tiles?.entryA).toBeUndefined();
+            expect(channels[zero].tiles?.entryB).toBeUndefined();
+        });
     });
 
     describe('saveGame', () => {
@@ -875,6 +980,24 @@ describe('GameEditorStoreService', () => {
             const tiles = service.tiles();
             const tileAtInvalid = tiles.find((tile) => tile.x === invalidTile && tile.y === invalidTile);
             expect(tileAtInvalid).toBeUndefined();
+        });
+
+        it('should clean orphan TELEPORT tiles that are not in active teleport positions', () => {
+            service['_tiles'].update((currentTiles) => {
+                const updated = [...currentTiles];
+                updated[zero] = { x: zero, y: zero, kind: TileKind.TELEPORT };
+                return updated;
+            });
+            const beforeTile = service['_tiles']()[zero];
+            expect(beforeTile.kind).toBe(TileKind.TELEPORT);
+            expect(beforeTile.teleportChannel).toBeUndefined();
+
+            service['_teleportChannels'].set([]);
+
+            const visibleTiles = service.tiles();
+            const cleanedTile = visibleTiles[zero];
+            expect(cleanedTile.kind).toBe(TileKind.TELEPORT);
+            expect(cleanedTile.teleportChannel).toBeUndefined();
         });
     });
 

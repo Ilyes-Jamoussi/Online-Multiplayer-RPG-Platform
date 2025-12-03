@@ -25,8 +25,14 @@
 
         <div class="start-points-overlay" [ngStyle]="gridStyle">
             @for (startPoint of startPoints; track startPoint.id) {
-            <div class="start-point-avatar" [ngStyle]="getStartPointStyle(startPoint)">
-                <img [src]="getStartPointAvatarImage(startPoint.playerId)" [alt]="'Start point'" class="start-avatar-image" draggable="false" />
+            <div class="start-point-avatar" [class.my-start-point]="isMyStartPoint(startPoint)" [ngStyle]="getStartPointStyle(startPoint)">
+                <img
+                    [src]="getStartPointAvatarImage(startPoint.playerId)"
+                    [alt]="'Start point'"
+                    class="start-avatar-image"
+                    [ngStyle]="getStartPointBorderStyle(startPoint)"
+                    draggable="false"
+                />
             </div>
             }
         </div>

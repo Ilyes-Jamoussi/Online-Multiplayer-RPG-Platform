@@ -4,10 +4,10 @@ $success-color: #10b981;
 $success-dark: #059669;
 $warning-color: #f59e0b;
 $warning-dark: #d97706;
-$bg-overlay: rgba(255, 255, 255, 0.05);
-$border-color: rgba(255, 255, 255, 0.1);
-$text-primary: #ffffff;
-$text-secondary: rgba(255, 255, 255, 0.7);
+$bg-overlay: #ffffff;
+$border-color: rgba(0, 0, 0, 0.15);
+$text-primary: #1f2937;
+$text-secondary: rgba(0, 0, 0, 0.6);
 
 .turn-timer {
     position: relative;
@@ -21,7 +21,8 @@ $text-secondary: rgba(255, 255, 255, 0.7);
 
     &.my-turn {
         border-color: $success-color;
-        box-shadow: 0 0 0 2px rgba($success-color, 0.2);
+        border-width: 2px;
+        box-shadow: 0 0 0 2px rgba($success-color, 0.15);
 
         .timer-progress {
             background: linear-gradient(90deg, $success-color, $success-dark);
@@ -34,7 +35,8 @@ $text-secondary: rgba(255, 255, 255, 0.7);
 
     &.other-turn {
         border-color: $primary-color;
-        box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+        border-width: 2px;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.15);
 
         .timer-progress {
             background: linear-gradient(90deg, $primary-color, $primary-dark);
@@ -47,7 +49,8 @@ $text-secondary: rgba(255, 255, 255, 0.7);
 
     &.transition {
         border-color: $warning-color;
-        box-shadow: 0 0 0 2px rgba($warning-color, 0.2);
+        border-width: 2px;
+        box-shadow: 0 0 0 2px rgba($warning-color, 0.15);
 
         .timer-progress {
             background: linear-gradient(90deg, $warning-color, $warning-dark);
@@ -60,7 +63,8 @@ $text-secondary: rgba(255, 255, 255, 0.7);
 
     &.combat-active {
         border-color: #ef4444;
-        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+        border-width: 2px;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
 
         .timer-progress {
             background: linear-gradient(90deg, #ef4444, #dc2626);
@@ -101,7 +105,6 @@ $text-secondary: rgba(255, 255, 255, 0.7);
     font-weight: 800;
     color: $text-primary;
     font-family: 'Courier New', monospace;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .time-unit {
@@ -116,5 +119,5 @@ $text-secondary: rgba(255, 255, 255, 0.7);
     position: absolute;
     bottom: 0;
     left: 0;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }

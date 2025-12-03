@@ -1,5 +1,5 @@
-$text-primary: #ffffff;
-$text-secondary: rgba(255, 255, 255, 0.5);
+$text-primary: #1f2937;
+$text-secondary: rgba(0, 0, 0, 0.6);
 $primary-color: #6366f1;
 $primary-dark: #4f46e5;
 $success-color: #10b981;
@@ -8,11 +8,11 @@ $warning-color: #f59e0b;
 $warning-dark: #d97706;
 $danger-color: #ef4444;
 $danger-dark: #dc2626;
-$bg-overlay: rgba(255, 255, 255, 0.05);
-$bg-overlay-hover: rgba(255, 255, 255, 0.08);
-$bg-active: rgba(99, 102, 241, 0.15);
-$bg-current: rgba(16, 185, 129, 0.15);
-$border-color: rgba(255, 255, 255, 0.1);
+$bg-overlay: #ffffff;
+$bg-overlay-hover: #f9fafb;
+$bg-active: #ffffff;
+$bg-current: #ffffff;
+$border-color: rgba(0, 0, 0, 0.15);
 
 .players-list {
     display: flex;
@@ -68,7 +68,7 @@ $border-color: rgba(255, 255, 255, 0.1);
         border-radius: 2px;
 
         &:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.25);
         }
     }
 }
@@ -86,19 +86,19 @@ $border-color: rgba(255, 255, 255, 0.1);
     transition: all 0.2s ease;
 
     &.active {
-        background: $bg-active;
-        border-color: $primary-color;
-        box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+        border: 3px solid #d4af37;
+        box-shadow:
+            0 0 0 2px rgba(212, 175, 55, 0.3),
+            0 0 10px rgba(212, 175, 55, 0.5),
+            inset 0 0 10px rgba(212, 175, 55, 0.2);
 
         .badge-active {
-            color: $primary-color;
+            color: #b8941f;
+            background: rgba(212, 175, 55, 0.15);
+            border-color: rgba(212, 175, 55, 0.4);
             opacity: 1;
+            font-weight: 800;
         }
-    }
-
-    &.current-user {
-        background: $bg-current;
-        border-color: $success-color;
     }
 
     &.abandoned {
@@ -116,17 +116,9 @@ $border-color: rgba(255, 255, 255, 0.1);
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 2px solid $border-color;
+    border: 3px solid $border-color;
     object-fit: cover;
     transition: border-color 0.2s ease;
-
-    .player-row.current-user & {
-        border-color: $success-color;
-    }
-
-    .player-row.active & {
-        border-color: $primary-color;
-    }
 }
 
 .player-content {
@@ -196,6 +188,13 @@ $border-color: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba($primary-color, 0.4);
     border-radius: 12px;
     line-height: 1;
+}
+
+.badge-bot {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 .player-stats {

@@ -103,6 +103,7 @@ export class CombatService {
         this._tileEffects.set({});
         this._minHealthDuringCombat.set({});
         this._isCombatActive.set(false);
+        this._isVictoryNotificationVisible.set(false);
     }
 
     chooseOffensive(): void {

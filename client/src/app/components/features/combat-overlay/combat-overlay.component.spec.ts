@@ -5,7 +5,9 @@ import { DamageDisplay } from '@app/interfaces/damage-display.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { TimerService } from '@app/services/timer/timer.service';
+import { BASE_STAT_VALUE } from '@app/constants/player.constants';
 import { Avatar } from '@common/enums/avatar.enum';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
@@ -42,6 +44,7 @@ describe('CombatOverlayComponent', () => {
     let mockInGameService: jasmine.SpyObj<InGameService>;
     let mockAssetsService: jasmine.SpyObj<AssetsService>;
     let mockTimerService: jasmine.SpyObj<TimerService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
 
     const mockCombatData = {
         attackerId: 'player1',
@@ -159,6 +162,7 @@ describe('CombatOverlayComponent', () => {
             chooseOffensive: jasmine.createSpy('chooseOffensive'),
             chooseDefensive: jasmine.createSpy('chooseDefensive'),
             closeVictoryOverlay: jasmine.createSpy('closeVictoryOverlay'),
+            combatAbandon: jasmine.createSpy('combatAbandon'),
             _combatDataSignal: combatDataSignal,
             _damageDisplaysSignal: damageDisplaysSignal,
             _selectedPostureSignal: selectedPostureSignal,
@@ -182,6 +186,8 @@ describe('CombatOverlayComponent', () => {
         mockTimerService = jasmine.createSpyObj('TimerService', ['getPausedTurnTime']);
         mockTimerService.getPausedTurnTime.and.returnValue(MOCK_TURN_TIME);
 
+        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayConfirmationPopup']);
+
         await TestBed.configureTestingModule({
             imports: [CombatOverlayComponent],
             providers: [
@@ -189,6 +195,7 @@ describe('CombatOverlayComponent', () => {
                 { provide: InGameService, useValue: mockInGameService },
                 { provide: AssetsService, useValue: mockAssetsService },
                 { provide: TimerService, useValue: mockTimerService },
+                { provide: NotificationService, useValue: mockNotificationService },
             ],
         }).compileComponents();
 
@@ -255,6 +262,13 @@ describe('CombatOverlayComponent', () => {
             mockCombatService._damageDisplaysSignal.set([invisibleDamage]);
             expect(component.playerADamage).toBeNull();
         });
+
+        it('should return null for playerBDamage when combatData is null', () => {
+            mockCombatService._combatDataSignal.set(null);
+            const targetDamage = { ...mockDamageDisplay, playerId: 'player2' };
+            mockCombatService._damageDisplaysSignal.set([targetDamage]);
+            expect(component.playerBDamage).toBeNull();
+        });
     });
 
     describe('postures', () => {
@@ -277,6 +291,31 @@ describe('CombatOverlayComponent', () => {
         it('should return null when posture not set', () => {
             mockCombatService._playerPosturesSignal.set({});
             expect(component.playerAPosture).toBeNull();
+            expect(component.playerBPosture).toBeNull();
+        });
+
+        it('should return null for playerAPosture when user is target and player is not virtual', () => {
+            mockCombatService._combatDataSignal.set({ ...mockCombatData, userRole: 'target' });
+            mockInGameService.getPlayerByPlayerId.and.returnValue(mockPlayerA);
+            mockCombatService._playerPosturesSignal.set({ player1: CombatPosture.OFFENSIVE });
+            expect(component.playerAPosture).toBeNull();
+        });
+
+        it('should return posture for playerBPosture when set', () => {
+            mockCombatService._playerPosturesSignal.set({ player2: CombatPosture.DEFENSIVE });
+            mockInGameService.getPlayerByPlayerId.and.callFake((id: string) => {
+                const player = id === 'player1' ? mockPlayerA : mockPlayerB;
+                return { ...player, virtualPlayerType: VirtualPlayerType.Defensive };
+            });
+            expect(component.playerBPosture).toBe(CombatPosture.DEFENSIVE);
+        });
+
+        it('should return null for playerBPosture when posture is not in service', () => {
+            mockCombatService._playerPosturesSignal.set({ player1: CombatPosture.OFFENSIVE });
+            mockInGameService.getPlayerByPlayerId.and.callFake((id: string) => {
+                const player = id === 'player1' ? mockPlayerA : mockPlayerB;
+                return { ...player, virtualPlayerType: VirtualPlayerType.Defensive };
+            });
             expect(component.playerBPosture).toBeNull();
         });
     });
@@ -310,6 +349,12 @@ describe('CombatOverlayComponent', () => {
             expect(component.victorySubtitle).toBe('Vous avez perdu le combat...');
         });
 
+        it('should return victory subtitle when user role is target', () => {
+            mockCombatService._combatDataSignal.set({ ...mockCombatData, userRole: 'target' });
+            mockCombatService._victoryDataSignal.set({ ...mockVictoryData, winnerId: 'player2' });
+            expect(component.victorySubtitle).toBe('Vous avez gagné le combat !');
+        });
+
         it('should return spectator victory title for match nul', () => {
             mockCombatService._victoryDataSignal.set({ ...mockVictoryData, winnerId: null });
             expect(component.spectatorVictoryTitle).toBe('Match Nul !');
@@ -327,6 +372,11 @@ describe('CombatOverlayComponent', () => {
 
         it('should return spectator victory message for normal victory', () => {
             expect(component.spectatorVictoryMessage).toBe('Player A a vaincu Player B');
+        });
+
+        it('should return spectator victory message when winner is playerB', () => {
+            mockCombatService._victoryDataSignal.set({ ...mockVictoryData, winnerId: 'player2' });
+            expect(component.spectatorVictoryMessage).toBe('Player B a vaincu Player A');
         });
 
         it('should return empty strings when no victory data', () => {
@@ -439,6 +489,11 @@ describe('CombatOverlayComponent', () => {
             mockCombatService._tileEffectsSignal.set({ player1: UNKNOWN_TILE_EFFECT as TileCombatEffect });
             expect(component.playerATileEffectLabel).toBeNull();
         });
+
+        it('should return null for playerB when effect is not ICE or BASE', () => {
+            mockCombatService._tileEffectsSignal.set({ player2: UNKNOWN_TILE_EFFECT as TileCombatEffect });
+            expect(component.playerBTileEffectLabel).toBeNull();
+        });
     });
 
     describe('methods', () => {
@@ -465,6 +520,29 @@ describe('CombatOverlayComponent', () => {
         it('should get victory notification visibility', () => {
             mockCombatService._isVictoryNotificationVisibleSignal.set(true);
             expect(component.isVictoryNotificationVisible).toBe(true);
+        });
+
+        it('should return base stat value', () => {
+            expect(component.baseStatValue).toBe(BASE_STAT_VALUE);
+        });
+
+        it('should display confirmation popup and call combatAbandon and leaveGame when confirmed', () => {
+            mockInGameService.leaveGame = jasmine.createSpy('leaveGame');
+            mockNotificationService.displayConfirmationPopup.and.callFake((options: { onConfirm?: () => void }) => {
+                if (options.onConfirm) {
+                    options.onConfirm();
+                }
+            });
+
+            component.onLeaveGame();
+
+            expect(mockNotificationService.displayConfirmationPopup).toHaveBeenCalledWith({
+                title: 'Abandonner la partie',
+                message: 'Êtes-vous sûr de vouloir abandonner ?\nTous vos progrès seront perdus.',
+                onConfirm: jasmine.any(Function),
+            });
+            expect(mockCombatService.combatAbandon).toHaveBeenCalled();
+            expect(mockInGameService.leaveGame).toHaveBeenCalled();
         });
     });
 });

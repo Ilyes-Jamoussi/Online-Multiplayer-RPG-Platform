@@ -1,8 +1,10 @@
 import { WritableSignal, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
+import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { AvailableActionType } from '@common/enums/available-action-type.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Orientation } from '@common/enums/orientation.enum';
@@ -33,6 +35,8 @@ describe('GameMapFooterComponent', () => {
     let mockPlayerService: MockPlayerService;
     let mockInGameService: MockInGameService;
     let mockAdminModeService: jasmine.SpyObj<AdminModeService>;
+    let mockCombatService: jasmine.SpyObj<CombatService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
 
     beforeEach(async () => {
         const speedSignal = signal(MOCK_SPEED_VALUE);
@@ -103,6 +107,8 @@ describe('GameMapFooterComponent', () => {
         };
 
         mockAdminModeService = jasmine.createSpyObj('AdminModeService', ['toggleAdminMode']);
+        mockCombatService = jasmine.createSpyObj('CombatService', ['combatAbandon']);
+        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayConfirmationPopup']);
 
         await TestBed.configureTestingModule({
             imports: [GameMapFooterComponent],
@@ -110,6 +116,8 @@ describe('GameMapFooterComponent', () => {
                 { provide: PlayerService, useValue: mockPlayerService },
                 { provide: InGameService, useValue: mockInGameService },
                 { provide: AdminModeService, useValue: mockAdminModeService },
+                { provide: CombatService, useValue: mockCombatService },
+                { provide: NotificationService, useValue: mockNotificationService },
             ],
         }).compileComponents();
 
@@ -261,6 +269,31 @@ describe('GameMapFooterComponent', () => {
             mockPlayerService._isAdminSignal.set(false);
             component.onToggleDebug();
             expect(mockAdminModeService.toggleAdminMode).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('onLeaveGame', () => {
+        it('should display confirmation popup when leaving game', () => {
+            component.onLeaveGame();
+            expect(mockNotificationService.displayConfirmationPopup).toHaveBeenCalledWith({
+                title: 'Abandonner la partie',
+                message: 'Êtes-vous sûr de vouloir abandonner ?\nTous vos progrès seront perdus.',
+                onConfirm: jasmine.any(Function),
+            });
+        });
+
+        it('should call combatAbandon and leaveGame when confirmation is confirmed', () => {
+            mockInGameService.leaveGame = jasmine.createSpy('leaveGame');
+            mockNotificationService.displayConfirmationPopup.and.callFake((options: { onConfirm?: () => void }) => {
+                if (options.onConfirm) {
+                    options.onConfirm();
+                }
+            });
+
+            component.onLeaveGame();
+
+            expect(mockCombatService.combatAbandon).toHaveBeenCalled();
+            expect(mockInGameService.leaveGame).toHaveBeenCalled();
         });
     });
 

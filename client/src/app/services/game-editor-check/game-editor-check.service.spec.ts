@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention -- Test file uses mock objects with underscores */
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
@@ -16,13 +17,13 @@ export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
     private _name = 'Test Game';
     private _description = 'Test Description';
     private _tileSizePx = 32;
+    private _teleportChannels: TeleportChannelDto[] | undefined = [];
 
     private readonly tilesSig = signal<GameEditorTileDto[]>([]);
     private readonly objectsSig = signal<GameEditorPlaceableDto[]>([]);
     private readonly sizeSig = signal<MapSize>(MapSize.MEDIUM);
     private readonly modeSig = signal<GameMode>(GameMode.CLASSIC);
     private readonly inventorySig = signal<Inventory>({} as Inventory);
-    private readonly teleportChannelsSig = signal<TeleportChannelDto[]>([]);
 
     get name() {
         return this._name;
@@ -58,8 +59,11 @@ export class GameEditorStoreStub implements Partial<GameEditorStoreService> {
     get inventory() {
         return this.inventorySig.asReadonly();
     }
-    get teleportChannels(): readonly TeleportChannelDto[] {
-        return this.teleportChannelsSig();
+    get teleportChannels(): readonly TeleportChannelDto[] | undefined {
+        return this._teleportChannels ?? undefined;
+    }
+    setTeleportChannels(value: TeleportChannelDto[] | undefined) {
+        this._teleportChannels = value;
     }
 
     get placedObjects(): ExtendedGameEditorPlaceableDto[] {
@@ -327,6 +331,17 @@ describe('GameEditorCheckService', () => {
             expect(service.editorProblems().terrainAccessibility.hasIssue).toBeFalse();
         });
 
+        it('should consider blocking placeables (HEAL/FIGHT) as inaccessible positions', () => {
+            const tiles = makeBaseTiles(SIZE);
+            store.setTiles(tiles);
+            store.setSize(SIZE);
+
+            store.setObjects([{ id: 'heal1', kind: PlaceableKind.HEAL, x: 2, y: 2, placed: true, orientation: 'N' }]);
+
+            const result = service.editorProblems();
+            expect(result.terrainAccessibility.hasIssue).toBeFalse();
+        });
+
         it('should detect terrain accessibility issue if map is full of WALLS', () => {
             store.setTiles(makeWallTiles(SIZE));
             store.setSize(SIZE);
@@ -378,6 +393,68 @@ describe('GameEditorCheckService', () => {
             store.setSize(SIZE);
 
             expect(service.editorProblems().terrainAccessibility.hasIssue).toBeFalse();
+        });
+
+        it('should return no issue when teleportChannels is undefined', () => {
+            store.setTeleportChannels(undefined);
+            const result = service.editorProblems();
+            expect(result.teleportChannels.hasIssue).toBeFalse();
+        });
+
+        it('should detect teleport channel with only entryA', () => {
+            store.setTeleportChannels([
+                {
+                    channelNumber: 1,
+                    tiles: { entryA: { x: 0, y: 0 }, entryB: undefined },
+                } as TeleportChannelDto,
+            ]);
+            const result = service.editorProblems();
+            expect(result.teleportChannels.hasIssue).toBeTrue();
+            expect(result.teleportChannels.message).toContain('canal de téléportation 1');
+        });
+
+        it('should detect teleport channel with only entryB', () => {
+            store.setTeleportChannels([
+                {
+                    channelNumber: 2,
+                    tiles: { entryA: undefined, entryB: { x: 1, y: 1 } },
+                } as TeleportChannelDto,
+            ]);
+            const result = service.editorProblems();
+            expect(result.teleportChannels.hasIssue).toBeTrue();
+            expect(result.teleportChannels.message).toContain('canal de téléportation 2');
+        });
+
+        it('should not detect issue when teleport channel has both entries', () => {
+            store.setTeleportChannels([
+                {
+                    channelNumber: 1,
+                    tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } },
+                } as TeleportChannelDto,
+            ]);
+            const result = service.editorProblems();
+            expect(result.teleportChannels.hasIssue).toBeFalse();
+        });
+
+        it('should not detect issue when teleport channel has no entries', () => {
+            store.setTeleportChannels([
+                {
+                    channelNumber: 1,
+                    tiles: { entryA: undefined, entryB: undefined },
+                } as TeleportChannelDto,
+            ]);
+            const result = service.editorProblems();
+            expect(result.teleportChannels.hasIssue).toBeFalse();
+        });
+
+        it('should not check flag placement in CLASSIC mode', () => {
+            store.setMode(GameMode.CLASSIC);
+            store.setInventory({
+                START: { total: ONE, remaining: ZERO },
+                FLAG: { total: ONE, remaining: ONE },
+            } as Inventory);
+            const result = service.editorProblems();
+            expect(result.flagPlacement.hasIssue).toBeFalse();
         });
     });
 });

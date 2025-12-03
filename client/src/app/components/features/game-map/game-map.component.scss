@@ -170,6 +170,13 @@
     pointer-events: none;
 }
 
+.start-point-avatar.my-start-point {
+    box-shadow:
+        0 0 20px rgba(16, 185, 129, 0.8),
+        inset 0 0 20px rgba(16, 185, 129, 0.3);
+    border-radius: 4px;
+}
+
 .start-avatar-image {
     width: 40%;
     height: 40%;
@@ -224,29 +231,8 @@
         border-color 0.2s ease,
         box-shadow 0.2s ease;
     pointer-events: none;
-
-    .map-player.current-user & {
-        border: 3px solid #10b981;
-        box-shadow:
-            0 0 15px rgba(16, 185, 129, 0.6),
-            0 2px 4px rgba(0, 0, 0, 0.5);
-        animation: pulse-current-user 2s ease-in-out infinite;
-    }
 }
 
-@keyframes pulse-current-user {
-    0%,
-    100% {
-        box-shadow:
-            0 0 15px rgba(16, 185, 129, 0.6),
-            0 2px 4px rgba(0, 0, 0, 0.5);
-    }
-    50% {
-        box-shadow:
-            0 0 25px rgba(16, 185, 129, 0.8),
-            0 2px 4px rgba(0, 0, 0, 0.5);
-    }
-}
 ::ng-deep .action-attack {
     background: rgba(220, 38, 38, 0.6) !important;
     border: 2px solid #dc2626 !important;

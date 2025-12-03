@@ -6,6 +6,8 @@ import { PlayerService } from '@app/services/player/player.service';
 import { TeamColor } from '@app/enums/team-color.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { FlagData } from '@common/interfaces/flag-data.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { PlayersListComponent } from './players-list.component';
@@ -88,12 +90,16 @@ describe('PlayersListComponent', () => {
 
     const mockTurnOrder = ['player1', 'player2'];
 
+    let modeSignal: ReturnType<typeof signal<GameMode>>;
+
     beforeEach(async () => {
+        modeSignal = signal(GameMode.CLASSIC);
         mockInGameService = jasmine.createSpyObj('InGameService', [], {
             turnOrder: signal(mockTurnOrder),
             inGamePlayers: signal(mockPlayers),
             activePlayer: mockPlayers.player1,
             flagData: signal(undefined),
+            mode: modeSignal,
         });
 
         mockPlayerService = jasmine.createSpyObj('PlayerService', ['getTeamColor'], {
@@ -240,6 +246,60 @@ describe('PlayersListComponent', () => {
             expect(result).toBeUndefined();
             expect(mockPlayerService.getTeamColor).toHaveBeenCalledWith(undefined);
         });
+
+        it('should return MyPlayer when player is current user and not forTeamBadge', () => {
+            const result = component.getTeamColor(mockTeamNumber, mockPlayers.player1, false);
+            expect(result).toBe(TeamColor.MyPlayer);
+        });
+
+        it('should return team color from service when player is current user and forTeamBadge is true', () => {
+            mockPlayerService.getTeamColor.and.returnValue(TeamColor.MyTeam);
+            const result = component.getTeamColor(mockTeamNumber, mockPlayers.player1, true);
+            expect(result).toBe(TeamColor.MyTeam);
+            expect(mockPlayerService.getTeamColor).toHaveBeenCalledWith(mockTeamNumber);
+        });
+
+        it('should return EnemyTeam when player is not current user and not CTF mode', () => {
+            modeSignal.set(GameMode.CLASSIC);
+            const result = component.getTeamColor(mockTeamNumber, mockPlayers.player2);
+            expect(result).toBe(TeamColor.EnemyTeam);
+        });
+
+        it('should return team color from service when player is not current user and CTF mode', () => {
+            modeSignal.set(GameMode.CTF);
+            mockPlayerService.getTeamColor.and.returnValue(TeamColor.EnemyTeam);
+            const result = component.getTeamColor(mockTeamNumber, mockPlayers.player2);
+            expect(result).toBe(TeamColor.EnemyTeam);
+            expect(mockPlayerService.getTeamColor).toHaveBeenCalledWith(mockTeamNumber);
+        });
+    });
+
+    describe('getTeamBackgroundColor', () => {
+        const mockTeamNumber = 1;
+
+        it('should return undefined when team color is undefined', () => {
+            mockPlayerService.getTeamColor.and.returnValue(undefined);
+            const result = component.getTeamBackgroundColor(undefined);
+            expect(result).toBeUndefined();
+        });
+
+        it('should return rgb color when team color exists', () => {
+            mockPlayerService.getTeamColor.and.returnValue('#ff0000');
+            const result = component.getTeamBackgroundColor(mockTeamNumber);
+            expect(result).toMatch(/^rgb\(\d+, \d+, \d+\)$/);
+        });
+
+        it('should calculate correct background color for red team color', () => {
+            mockPlayerService.getTeamColor.and.returnValue('#ff0000');
+            const result = component.getTeamBackgroundColor(mockTeamNumber);
+            expect(result).toBeDefined();
+            expect(result).toContain('rgb');
+        });
+
+        it('should handle team color with player parameter', () => {
+            const result = component.getTeamBackgroundColor(mockTeamNumber, mockPlayers.player1);
+            expect(result).toBeDefined();
+        });
     });
 
     describe('hasFlag', () => {
@@ -291,6 +351,52 @@ describe('PlayersListComponent', () => {
                 configurable: true,
             });
             const result = component.hasFlag(mockPlayers.player1);
+            expect(result).toBe(true);
+        });
+    });
+
+    describe('isVirtualPlayer', () => {
+        it('should return false when player has no virtualPlayerType', () => {
+            const result = component.isVirtualPlayer(mockPlayers.player1);
+            expect(result).toBe(false);
+        });
+
+        it('should return true when player has virtualPlayerType', () => {
+            const virtualPlayer = { ...mockPlayers.player1, virtualPlayerType: VirtualPlayerType.Defensive };
+            const result = component.isVirtualPlayer(virtualPlayer);
+            expect(result).toBe(true);
+        });
+    });
+
+    describe('isCTFMode', () => {
+        it('should return false when mode is CLASSIC', () => {
+            modeSignal.set(GameMode.CLASSIC);
+            const result = component.isCTFMode();
+            expect(result).toBe(false);
+        });
+
+        it('should return true when mode is CTF', () => {
+            modeSignal.set(GameMode.CTF);
+            const result = component.isCTFMode();
+            expect(result).toBe(true);
+        });
+    });
+
+    describe('isEnemy', () => {
+        it('should return false when player is current user', () => {
+            const result = component.isEnemy(mockPlayers.player1);
+            expect(result).toBe(false);
+        });
+
+        it('should return false when mode is CTF', () => {
+            modeSignal.set(GameMode.CTF);
+            const result = component.isEnemy(mockPlayers.player2);
+            expect(result).toBe(false);
+        });
+
+        it('should return true when player is not current user and mode is not CTF', () => {
+            modeSignal.set(GameMode.CLASSIC);
+            const result = component.isEnemy(mockPlayers.player2);
             expect(result).toBe(true);
         });
     });

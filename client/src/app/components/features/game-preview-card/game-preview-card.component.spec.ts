@@ -122,4 +122,36 @@ describe('GamePreviewCardComponent', () => {
         component.game.size = candidate as unknown as MapSize;
         expect(component.mapSizeLabel).toBe(`${candidate}x${candidate}`);
     });
+
+    describe('CTF mode', () => {
+        it('should return true for isCTF when mode is CTF', () => {
+            component.game = { ...mockGame, mode: GameMode.CTF };
+            expect(component.isCTF).toBe(true);
+        });
+
+        it('should return false for isCTF when mode is CLASSIC', () => {
+            component.game = { ...mockGame, mode: GameMode.CLASSIC };
+            expect(component.isCTF).toBe(false);
+        });
+
+        it('should return Capture du Drapeau for modeLabel when CTF', () => {
+            component.game = { ...mockGame, mode: GameMode.CTF };
+            expect(component.modeLabel).toBe('Capture du Drapeau');
+        });
+
+        it('should return Classique for modeLabel when CLASSIC', () => {
+            component.game = { ...mockGame, mode: GameMode.CLASSIC };
+            expect(component.modeLabel).toBe('Classique');
+        });
+
+        it('should return flag emoji for modeIcon when CTF', () => {
+            component.game = { ...mockGame, mode: GameMode.CTF };
+            expect(component.modeIcon).toBe('🚩');
+        });
+
+        it('should return sword emoji for modeIcon when CLASSIC', () => {
+            component.game = { ...mockGame, mode: GameMode.CLASSIC };
+            expect(component.modeIcon).toBe('⚔️');
+        });
+    });
 });

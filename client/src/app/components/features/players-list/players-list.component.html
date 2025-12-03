@@ -9,9 +9,15 @@
             [class.active]="isActivePlayer(player)"
             [class.current-user]="isCurrentUser(player)"
             [class.abandoned]="hasAbandoned(player)"
+            [style.background-color]="getTeamBackgroundColor(getTeamNumber(player), player)"
         >
             <div class="player-avatar">
-                <img [src]="getPlayerAvatar(player.avatar)" [alt]="player.name" class="avatar-image" />
+                <img
+                    [src]="getPlayerAvatar(player.avatar)"
+                    [alt]="player.name"
+                    class="avatar-image"
+                    [style.border-color]="getTeamColor(getTeamNumber(player), player)"
+                />
             </div>
             <div class="player-content">
                 <div class="player-main-info">
@@ -26,6 +32,8 @@
                         <span class="badge-you">VOUS</span>
                         } @if (isActivePlayer(player)) {
                         <span class="badge-active">ACTUEL</span>
+                        } @if (isVirtualPlayer(player)) {
+                        <span class="badge-bot">🤖</span>
                         } @if (hasAbandoned(player)) {
                         <span class="badge-abandon">ABANDON</span>
                         } @if (hasFlag(player)) {
@@ -34,7 +42,7 @@
                     </div>
                     <div class="player-stats">
                         @if (getTeamNumber(player) !== undefined) {
-                        <span class="badge-team" [style.background-color]="getTeamColor(getTeamNumber(player))">
+                        <span class="badge-team" [style.background-color]="getTeamColor(getTeamNumber(player), player, true)">
                             Équipe {{ getTeamNumber(player) }}
                         </span>
                         }

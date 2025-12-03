@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { CombatTimerComponent } from '@app/components/features/combat-timer/combat-timer.component';
 import { CombatResultComponent } from '@app/components/features/combat-result/combat-result.component';
-import { PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
+import { BASE_STAT_VALUE, PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
@@ -237,6 +237,10 @@ export class CombatOverlayComponent {
 
     getDiceImage(dice: Dice): string {
         return this.assetsService.getDiceImage(dice);
+    }
+
+    get baseStatValue(): number {
+        return BASE_STAT_VALUE;
     }
 
     get pausedTurnTime(): number {
