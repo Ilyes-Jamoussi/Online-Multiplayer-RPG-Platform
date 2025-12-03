@@ -155,6 +155,17 @@ describe('TrackingService', () => {
             const playerTiles = trackingData?.playerTiles.get(PLAYER_ID_1);
             expect(playerTiles?.size).toBe(ONE);
         });
+
+        it('should handle case when playerTiles.get returns undefined', () => {
+            const position = createMockPosition();
+            service.initializeTracking(SESSION_ID, MAP_SIZE_SMALL, TOTAL_DOORS, TOTAL_SANCTUARIES, TOTAL_TELEPORT_TILES);
+            const trackingData = service.getTrackingData(SESSION_ID);
+            if (trackingData) {
+                const getSpy = jest.spyOn(trackingData.playerTiles, 'get').mockReturnValueOnce(undefined);
+                service.trackTileVisited(SESSION_ID, PLAYER_ID_1, position);
+                getSpy.mockRestore();
+            }
+        });
     });
 
     describe('trackTeleportation', () => {
@@ -359,6 +370,16 @@ describe('TrackingService', () => {
             const trackingData = service.getTrackingData('non-existent-session');
             expect(trackingData).toBeNull();
         });
+
+        it('should handle case when playerDamage.get returns undefined in trackDamageDealt', () => {
+            service.initializeTracking(SESSION_ID, MAP_SIZE_SMALL, TOTAL_DOORS, TOTAL_SANCTUARIES, TOTAL_TELEPORT_TILES);
+            const trackingData = service.getTrackingData(SESSION_ID);
+            if (trackingData) {
+                const getSpy = jest.spyOn(trackingData.playerDamage, 'get').mockReturnValueOnce(undefined);
+                service.trackDamageDealt(SESSION_ID, PLAYER_ID_1, DAMAGE_AMOUNT_1);
+                getSpy.mockRestore();
+            }
+        });
     });
 
     describe('trackDamageReceived', () => {
@@ -401,6 +422,16 @@ describe('TrackingService', () => {
 
             const trackingData = service.getTrackingData('non-existent-session');
             expect(trackingData).toBeNull();
+        });
+
+        it('should handle case when playerDamage.get returns undefined in trackDamageReceived', () => {
+            service.initializeTracking(SESSION_ID, MAP_SIZE_SMALL, TOTAL_DOORS, TOTAL_SANCTUARIES, TOTAL_TELEPORT_TILES);
+            const trackingData = service.getTrackingData(SESSION_ID);
+            if (trackingData) {
+                const getSpy = jest.spyOn(trackingData.playerDamage, 'get').mockReturnValueOnce(undefined);
+                service.trackDamageReceived(SESSION_ID, PLAYER_ID_1, DAMAGE_AMOUNT_1);
+                getSpy.mockRestore();
+            }
         });
 
         it('should track both damage dealt and received for the same player', () => {

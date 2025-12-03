@@ -43,6 +43,7 @@ const MOCK_TOTAL_DOORS = 5;
 const MOCK_TOTAL_SANCTUARIES = 3;
 const MOCK_TOTAL_TELEPORT_TILES = 4;
 const MOCK_MIN_PLAYERS_FOR_GAME = 2;
+const MOCK_TELEPORT_TILES_COUNT_3 = 3;
 const MOCK_POSITION_X = 0;
 const MOCK_POSITION_Y = 0;
 
@@ -309,6 +310,89 @@ describe('InGameService', () => {
 
             expect(mockSessionRepository.findById).toHaveBeenCalled();
         });
+
+        it('should count teleport tiles correctly when entryA is missing', async () => {
+            const waitingSession = createMockWaitingRoomSession();
+            const game = createMockGame({
+                teleportChannels: [
+                    { channelNumber: 1, tiles: { entryB: { x: 1, y: 1 } } },
+                    { channelNumber: 2, tiles: { entryA: { x: 2, y: 2 }, entryB: { x: 3, y: 3 } } },
+                ],
+            });
+            mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.save.mockImplementation(() => {});
+
+            await service.createInGameSession(waitingSession, GameMode.CLASSIC);
+
+            expect(mockStatisticsService.initializeTracking).toHaveBeenCalledWith(
+                MOCK_SESSION_ID,
+                game.size,
+                MOCK_TOTAL_DOORS,
+                MOCK_TOTAL_SANCTUARIES,
+                MOCK_TELEPORT_TILES_COUNT_3,
+            );
+        });
+
+        it('should count teleport tiles correctly when entryB is missing', async () => {
+            const waitingSession = createMockWaitingRoomSession();
+            const game = createMockGame({
+                teleportChannels: [
+                    { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 } } },
+                    { channelNumber: 2, tiles: { entryA: { x: 2, y: 2 }, entryB: { x: 3, y: 3 } } },
+                ],
+            });
+            mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.save.mockImplementation(() => {});
+
+            await service.createInGameSession(waitingSession, GameMode.CLASSIC);
+
+            expect(mockStatisticsService.initializeTracking).toHaveBeenCalledWith(
+                MOCK_SESSION_ID,
+                game.size,
+                MOCK_TOTAL_DOORS,
+                MOCK_TOTAL_SANCTUARIES,
+                MOCK_TELEPORT_TILES_COUNT_3,
+            );
+        });
+
+        it('should count teleport tiles correctly when tiles is undefined', async () => {
+            const waitingSession = createMockWaitingRoomSession();
+            const game = createMockGame({
+                teleportChannels: [
+                    { channelNumber: 1, tiles: undefined },
+                    { channelNumber: 2, tiles: { entryA: { x: 2, y: 2 }, entryB: { x: 3, y: 3 } } },
+                ],
+            });
+            mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.save.mockImplementation(() => {});
+
+            await service.createInGameSession(waitingSession, GameMode.CLASSIC);
+
+            const expectedTeleportTilesCount = 2;
+            expect(mockStatisticsService.initializeTracking).toHaveBeenCalledWith(
+                MOCK_SESSION_ID,
+                game.size,
+                MOCK_TOTAL_DOORS,
+                MOCK_TOTAL_SANCTUARIES,
+                expectedTeleportTilesCount,
+            );
+        });
+
+        it('should handle case when firstPlayerId is not in inGamePlayers', async () => {
+            const waitingSession = createMockWaitingRoomSession();
+            const game = createMockGame();
+            mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            mockInitializationService.makeTurnOrder.mockReturnValue(['non-existent-player']);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.save.mockImplementation(() => {});
+
+            await service.createInGameSession(waitingSession, GameMode.CLASSIC);
+
+            expect(mockSessionRepository.save).toHaveBeenCalled();
+        });
     });
 
     describe('boardBoat', () => {
@@ -435,6 +519,31 @@ describe('InGameService', () => {
             service.joinInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
             expect(mockTimerService.startFirstTurnWithTransition).not.toHaveBeenCalled();
+        });
+
+        it('should throw BadRequestException when trying to start already started session in startSessionWithTransition', () => {
+            const player1 = createMockPlayer({ id: MOCK_PLAYER_ID_1, isInGame: false });
+            const player2 = createMockPlayer({ id: MOCK_PLAYER_ID_2, isInGame: true });
+            const session = createMockInGameSession({
+                isGameStarted: false,
+                inGamePlayers: { [MOCK_PLAYER_ID_1]: player1, [MOCK_PLAYER_ID_2]: player2 },
+            });
+            const updatedSession = createMockInGameSession({
+                isGameStarted: false,
+                inGamePlayers: { [MOCK_PLAYER_ID_1]: { ...player1, isInGame: true }, [MOCK_PLAYER_ID_2]: player2 },
+            });
+            const alreadyStartedSession = createMockInGameSession({
+                isGameStarted: true,
+                inGamePlayers: { [MOCK_PLAYER_ID_1]: { ...player1, isInGame: true }, [MOCK_PLAYER_ID_2]: player2 },
+            });
+            mockSessionRepository.findById
+                .mockReturnValueOnce(session)
+                .mockReturnValueOnce(updatedSession)
+                .mockReturnValueOnce(alreadyStartedSession);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.updatePlayer.mockImplementation(() => {});
+
+            expect(() => service.joinInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1)).toThrow(BadRequestException);
         });
     });
 
