@@ -298,42 +298,38 @@ describe('GameplayService', () => {
     describe('pickUpFlag', () => {
         it('should pick up flag successfully', () => {
             const session = createMockSession({ mode: GameMode.CTF });
-            const position: Position = { x: MOCK_X, y: MOCK_Y };
             mockRepository.findById.mockReturnValue(session);
             mockActionService.calculateReachableTiles.mockReturnValue([]);
 
-            service.pickUpFlag(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
+            service.pickUpFlag(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
-            expect(mockActionService.pickUpFlag).toHaveBeenCalledWith(session, MOCK_PLAYER_ID_1, position);
+            expect(mockActionService.pickUpFlag).toHaveBeenCalledWith(session, MOCK_PLAYER_ID_1);
             expect(session.inGamePlayers[MOCK_PLAYER_ID_1].actionsRemaining).toBe(0);
             expect(session.currentTurn.hasUsedAction).toBe(true);
         });
 
         it('should throw BadRequestException when not CTF game', () => {
             const session = createMockSession({ mode: GameMode.CLASSIC });
-            const position: Position = { x: MOCK_X, y: MOCK_Y };
             mockRepository.findById.mockReturnValue(session);
 
-            expect(() => service.pickUpFlag(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position)).toThrow(BadRequestException);
+            expect(() => service.pickUpFlag(MOCK_SESSION_ID, MOCK_PLAYER_ID_1)).toThrow(BadRequestException);
         });
 
         it('should throw NotFoundException when player not found', () => {
             const session = createMockSession({ mode: GameMode.CTF });
             delete session.inGamePlayers[MOCK_PLAYER_ID_1];
-            const position: Position = { x: MOCK_X, y: MOCK_Y };
             mockRepository.findById.mockReturnValue(session);
 
-            expect(() => service.pickUpFlag(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position)).toThrow(NotFoundException);
+            expect(() => service.pickUpFlag(MOCK_SESSION_ID, MOCK_PLAYER_ID_1)).toThrow(NotFoundException);
         });
 
         it('should throw BadRequestException when no actions remaining', () => {
             const session = createMockSession({ mode: GameMode.CTF });
             const player = createMockPlayer({ id: MOCK_PLAYER_ID_1, actionsRemaining: 0 });
             session.inGamePlayers[MOCK_PLAYER_ID_1] = player;
-            const position: Position = { x: MOCK_X, y: MOCK_Y };
             mockRepository.findById.mockReturnValue(session);
 
-            expect(() => service.pickUpFlag(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position)).toThrow(BadRequestException);
+            expect(() => service.pickUpFlag(MOCK_SESSION_ID, MOCK_PLAYER_ID_1)).toThrow(BadRequestException);
         });
     });
 
@@ -705,7 +701,7 @@ describe('GameplayService', () => {
 
             service.teleportPlayer(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
 
-            expect(mockRepository.pickUpFlag).toHaveBeenCalledWith(session, MOCK_PLAYER_ID_1, position);
+            expect(mockRepository.pickUpFlag).toHaveBeenCalledWith(session, MOCK_PLAYER_ID_1);
         });
 
         it('should check CTF victory when player has flag and returns to start point', () => {

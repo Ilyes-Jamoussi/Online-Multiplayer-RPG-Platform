@@ -200,19 +200,20 @@ describe('InGameSessionRepository', () => {
             const session = createMockSession({
                 flagData: { position: createMockPosition(), holderPlayerId: null },
             });
-            const position = createMockPosition();
+            const mockPlaceable = createMockPlaceable();
+            gameCache.getFlagPlaceable.mockReturnValue(mockPlaceable);
 
-            repository.pickUpFlag(session, PLAYER_ID_1, position);
+            repository.pickUpFlag(session, PLAYER_ID_1);
 
             expect(session.flagData?.holderPlayerId).toBe(PLAYER_ID_1);
-            expect(gameCache.hidePlaceable).toHaveBeenCalledWith(session.id, position);
+            expect(gameCache.hidePlaceable).toHaveBeenCalledWith(session.id, mockPlaceable);
             expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.FlagPickedUp, { session, playerId: PLAYER_ID_1 });
         });
 
         it('should throw NotFoundException when flagData is missing', () => {
             const session = createMockSession();
 
-            expect(() => repository.pickUpFlag(session, PLAYER_ID_1, createMockPosition())).toThrow(NotFoundException);
+            expect(() => repository.pickUpFlag(session, PLAYER_ID_1)).toThrow(NotFoundException);
         });
 
         it('should throw BadRequestException when flag already picked up', () => {
@@ -220,7 +221,7 @@ describe('InGameSessionRepository', () => {
                 flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_2 },
             });
 
-            expect(() => repository.pickUpFlag(session, PLAYER_ID_1, createMockPosition())).toThrow(BadRequestException);
+            expect(() => repository.pickUpFlag(session, PLAYER_ID_1)).toThrow(BadRequestException);
         });
 
         it('should throw NotFoundException when player not found', () => {
@@ -229,7 +230,7 @@ describe('InGameSessionRepository', () => {
                 inGamePlayers: {},
             });
 
-            expect(() => repository.pickUpFlag(session, PLAYER_ID_1, createMockPosition())).toThrow(NotFoundException);
+            expect(() => repository.pickUpFlag(session, PLAYER_ID_1)).toThrow(NotFoundException);
         });
     });
 
