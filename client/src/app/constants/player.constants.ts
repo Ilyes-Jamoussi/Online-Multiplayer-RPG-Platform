@@ -3,10 +3,12 @@ import { Player } from '@common/interfaces/player.interface';
 
 export const BASE_STAT_VALUE = 4;
 export const BONUS_STAT_VALUE = 2;
+export const MAX_STAT_VALUE = 6;
 
 export const PERCENTAGE_MULTIPLIER = 100;
 export const HP_HIGH_THRESHOLD_PERCENT = 70;
 export const HP_MEDIUM_THRESHOLD_PERCENT = 30;
+export const RANDOM_BONUS_THRESHOLD = 0.5;
 
 const DEFAULT_PLAYER_ID = 'default-player-id';
 

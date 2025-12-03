@@ -3,7 +3,7 @@ import { GameLogModule } from '@app/modules/game-log/game-log.module';
 import { GameStoreModule } from '@app/modules/game-store/game-store.module';
 import { SessionModule } from '@app/modules/session/session.module';
 
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -25,6 +25,5 @@ import { MongooseModule } from '@nestjs/mongoose';
         GameStoreModule,
         SessionModule,
     ],
-    providers: [Logger],
 })
 export class AppModule {}

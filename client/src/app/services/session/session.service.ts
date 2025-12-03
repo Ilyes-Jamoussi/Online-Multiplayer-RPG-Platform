@@ -1,4 +1,4 @@
-import { computed, effect, Injectable, Signal, signal } from '@angular/core';
+import { computed, Injectable, Signal, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MAP_SIZE_TO_MAX_PLAYERS } from '@app/constants/map-size.constants';
 import { DEFAULT_SESSION, MIN_SESSION_PLAYERS } from '@app/constants/session.constants';
@@ -31,7 +31,6 @@ export class SessionService {
     readonly isRoomLocked: Signal<boolean> = computed(() => this.session().isRoomLocked);
     readonly chatId: Signal<string> = computed(() => this.session().chatId);
     readonly mode: Signal<GameMode> = computed(() => this.session().mode);
-    readonly isSessionFull: Signal<boolean> = computed(() => this.players().length >= this.maxPlayers());
 
     constructor(
         private readonly sessionSocketService: SessionSocketService,
@@ -39,11 +38,6 @@ export class SessionService {
         private readonly chatSocketService: ChatSocketService,
     ) {
         this.initListeners();
-
-        effect(() => {
-            if (this.isSessionFull()) this.lock();
-            else this.unlock();
-        });
     }
 
     updateSession(partial: Partial<WaitingRoomSession>): void {
@@ -61,11 +55,6 @@ export class SessionService {
     lock(): void {
         this.updateSession({ isRoomLocked: true });
         this.sessionSocketService.lockSession();
-    }
-
-    unlock(): void {
-        this.updateSession({ isRoomLocked: false });
-        this.sessionSocketService.unlockSession();
     }
 
     canStartGame(): boolean {

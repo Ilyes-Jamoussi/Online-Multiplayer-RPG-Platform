@@ -297,15 +297,6 @@ describe('SessionSocketService', () => {
         });
     });
 
-    describe('unlockSession', () => {
-        it('should call socket.emit with UnlockSession event and empty object', () => {
-            service.unlockSession();
-
-            expect(mockSocketService.emit).toHaveBeenCalledTimes(1);
-            expect(mockSocketService.emit).toHaveBeenCalledWith(SessionEvents.UnlockSession, EMPTY_OBJECT);
-        });
-    });
-
     describe('kickPlayer', () => {
         it('should call socket.emit with KickPlayer event and data', () => {
             const data = CREATE_MOCK_KICK_PLAYER_DTO();

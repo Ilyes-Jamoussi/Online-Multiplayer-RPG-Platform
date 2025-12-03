@@ -7,6 +7,7 @@ import { StatsBarComponent } from '@app/components/features/stats-bar/stats-bar.
 import { UiButtonComponent } from '@app/components/ui/button/button.component';
 import { UiInputComponent } from '@app/components/ui/input/input.component';
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
+import { BONUS_STAT_VALUE, MAX_STAT_VALUE } from '@app/constants/player.constants';
 import { CHARACTER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@app/constants/validation.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CharacterCreationCheckService } from '@app/services/character-creation-check/character-creation-check.service';
@@ -29,6 +30,8 @@ export class CharacterCreationPageComponent implements OnInit {
     readonly bonusType = BonusType;
     readonly characterNameMinLength = NAME_MIN_LENGTH;
     readonly characterNameMaxLength = CHARACTER_NAME_MAX_LENGTH;
+    readonly maxStatValue = MAX_STAT_VALUE;
+    readonly bonusStatValue = BONUS_STAT_VALUE;
 
     constructor(
         private readonly assetsService: AssetsService,

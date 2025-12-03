@@ -20,7 +20,6 @@ export enum SessionEvents {
 
     LockSession = 'lock-session',
     SessionAutoLocked = 'session-auto-locked',
-    UnlockSession = 'unlock-session',
 
     StartGameSession = 'start-game-session',
     GameSessionStarted = 'game-session-started',

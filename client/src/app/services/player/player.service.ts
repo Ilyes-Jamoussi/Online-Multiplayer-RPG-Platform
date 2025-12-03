@@ -1,6 +1,6 @@
 import { Injectable, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { BASE_STAT_VALUE, BONUS_STAT_VALUE, DEFAULT_PLAYER } from '@app/constants/player.constants';
+import { BASE_STAT_VALUE, BONUS_STAT_VALUE, DEFAULT_PLAYER, RANDOM_BONUS_THRESHOLD } from '@app/constants/player.constants';
 import { BonusType } from '@app/enums/character-creation.enum';
 import { TeamColor } from '@app/enums/team-color.enum';
 import { ROUTES } from '@app/enums/routes.enum';
@@ -9,6 +9,7 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { ResetService } from '@app/services/reset/reset.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { SessionService } from '@app/services/session/session.service';
+import { DiceAttribute } from '@app/types/game.types';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
@@ -74,7 +75,7 @@ export class PlayerService {
         });
     }
 
-    setDice(attr: 'attack' | 'defense', value: Dice): void {
+    setDice(attr: DiceAttribute, value: Dice): void {
         const otherDiceValue = value === Dice.D6 ? Dice.D4 : Dice.D6;
 
         const newDice = {
@@ -97,13 +98,12 @@ export class PlayerService {
 
         const randomName = names[Math.floor(Math.random() * names.length)];
         const randomAvatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
-        const randomThreshold = 0.5;
-        const randomBonus = Math.random() < randomThreshold ? BonusType.Life : BonusType.Speed;
+        const randomBonus = Math.random() < RANDOM_BONUS_THRESHOLD ? BonusType.Life : BonusType.Speed;
 
         this.setName(randomName);
         this.selectAvatar(randomAvatar);
         this.setBonus(randomBonus);
-        this.setDice(Math.random() < randomThreshold ? 'attack' : 'defense', Dice.D6);
+        this.setDice(Math.random() < RANDOM_BONUS_THRESHOLD ? 'attack' : 'defense', Dice.D6);
     }
 
     updatePlayer(partial: Partial<Player>): void {

@@ -1,3 +1,4 @@
+import { TEAM_COUNT } from '@app/constants/game-config.constants';
 import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { InitializationService } from '@app/modules/in-game/services/initialization/initialization.service';
@@ -30,8 +31,7 @@ export class InGameService {
 
         const teams: Record<number, Team> = {};
         if (isCtf) {
-            const teamCount = 2;
-            for (let i = 0; i < teamCount; i++) {
+            for (let i = 0; i < TEAM_COUNT; i++) {
                 teams[i + 1] = { number: i + 1, playerIds: [] };
             }
         }
@@ -159,16 +159,7 @@ export class InGameService {
         this.gameplayService.movePlayer(sessionId, playerId, orientation);
     }
 
-    leaveInGameSession(
-        sessionId: string,
-        playerId: string,
-    ): {
-        session: InGameSession;
-        playerName: string;
-        playerId: string;
-        sessionEnded: boolean;
-        adminModeDeactivated: boolean;
-    } {
+    leaveInGameSession(sessionId: string, playerId: string) {
         const player = this.sessionRepository.playerLeave(sessionId, playerId);
         const session = this.sessionRepository.findById(sessionId);
 

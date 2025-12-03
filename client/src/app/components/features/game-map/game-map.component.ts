@@ -3,6 +3,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { GameMapTileModalComponent } from '@app/components/features/game-map-tile-modal/game-map-tile-modal.component';
 import { GameMapTileComponent } from '@app/components/features/game-map-tile/game-map-tile.component';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { BorderStyle } from '@app/interfaces/style.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -116,10 +117,6 @@ export class GameMapComponent implements OnInit {
         return player.id === this.playerService.id();
     }
 
-    isActivePlayer(player: Player): boolean {
-        return player.id === this.inGameService.activePlayer?.id;
-    }
-
     isCTFMode(): boolean {
         return this.inGameService.mode() === GameMode.CTF;
     }
@@ -141,7 +138,7 @@ export class GameMapComponent implements OnInit {
         return teamColor;
     }
 
-    getPlayerBorderStyle(player: Player): { 'border-color'?: string; 'border-width'?: string } {
+    getPlayerBorderStyle(player: Player): BorderStyle {
         const teamColor = this.getTeamColor(player);
         if (!teamColor) {
             return {};
@@ -180,7 +177,7 @@ export class GameMapComponent implements OnInit {
         return this.gameMapService.getAvatarByPlayerId(playerId);
     }
 
-    getStartPointBorderStyle(startPoint: StartPoint): { 'border-color'?: string; 'border-width'?: string } {
+    getStartPointBorderStyle(startPoint: StartPoint): BorderStyle {
         const player = this.gameMapService.currentlyPlayers.find((playerItem) => playerItem.id === startPoint.playerId);
         if (!player) {
             return {};

@@ -15,7 +15,6 @@ import { AvailableAction } from '@common/interfaces/available-action.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import 'reflect-metadata';
@@ -216,15 +215,9 @@ describe('InGameGateway', () => {
 
     describe('ValidationPipe exceptionFactory', () => {
         it('should trigger validation error factory', () => {
-            const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
-            const mockErrors = [{ property: 'sessionId', constraints: { isString: 'sessionId must be a string' } }];
-
             expect(() => {
-                validationExceptionFactory(mockErrors);
+                validationExceptionFactory();
             }).toThrow('Validation failed');
-
-            expect(loggerSpy).toHaveBeenCalledWith('Validation failed:', mockErrors);
-            loggerSpy.mockRestore();
         });
     });
 

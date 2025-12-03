@@ -55,9 +55,9 @@
                         <div
                             class="hp-fill"
                             [style.width.%]="getHealthPercentage(player)"
-                            [class.hp-high]="getHealthPercentage(player) > 70"
-                            [class.hp-medium]="getHealthPercentage(player) > 30 && getHealthPercentage(player) <= 70"
-                            [class.hp-critical]="getHealthPercentage(player) <= 30"
+                            [class.hp-high]="getHealthPercentage(player) > hpHighThreshold"
+                            [class.hp-medium]="getHealthPercentage(player) > hpMediumThreshold && getHealthPercentage(player) <= hpHighThreshold"
+                            [class.hp-critical]="getHealthPercentage(player) <= hpMediumThreshold"
                         ></div>
                         <span class="hp-text">{{ player.health }}/{{ player.maxHealth }}</span>
                     </div>

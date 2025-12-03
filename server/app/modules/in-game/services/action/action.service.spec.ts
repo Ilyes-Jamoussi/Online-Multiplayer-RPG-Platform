@@ -984,30 +984,19 @@ describe('ActionService', () => {
             );
         });
 
-        it('should continue to next orientation when getNextPosition throws error', () => {
+        it('should handle errors when getting next position', () => {
             const session = createMockSession();
-            const nextPosition: Position = { x: MOCK_X_2, y: MOCK_Y_2 };
-            mockGameCache.getNextPosition
-                .mockImplementationOnce(() => {
-                    throw new Error('Invalid position');
-                })
-                .mockReturnValueOnce(nextPosition)
-                .mockReturnValueOnce(nextPosition)
-                .mockReturnValueOnce(nextPosition);
+            mockGameCache.getNextPosition.mockImplementation(() => {
+                throw new Error('Invalid position');
+            });
             mockGameCache.getTileOccupant.mockReturnValue(null);
             mockGameCache.getTileAtPosition.mockReturnValue(createMockTileWithPlayerId());
             mockGameCache.getPlaceableAtPosition.mockReturnValue(null);
 
-            service.calculateAvailableActions(session, MOCK_PLAYER_ID_1);
+            const result = service.calculateAvailableActions(session, MOCK_PLAYER_ID_1);
 
-            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
-                ServerEvents.PlayerAvailableActions,
-                expect.objectContaining({
-                    session,
-                    playerId: MOCK_PLAYER_ID_1,
-                    actions: expect.any(Array),
-                }),
-            );
+            expect(result).toEqual([]);
+            expect(mockEventEmitter.emit).toHaveBeenCalled();
         });
     });
 

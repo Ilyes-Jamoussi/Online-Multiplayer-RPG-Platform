@@ -48,8 +48,8 @@
                             <div
                                 class="health-fill"
                                 [style.width.%]="playerAHealth.percentage"
-                                [class.low]="playerAHealth.percentage <= 25"
-                                [class.medium]="playerAHealth.percentage > 25 && playerAHealth.percentage <= 50"
+                                [class.low]="playerAHealth.percentage <= healthLowThreshold"
+                                [class.medium]="playerAHealth.percentage > healthLowThreshold && playerAHealth.percentage <= healthMediumThreshold"
                             ></div>
                         </div>
                         <span class="health-text">{{ playerAHealth.current }}/{{ playerAHealth.max }}</span>
@@ -135,8 +135,8 @@
                             <div
                                 class="health-fill"
                                 [style.width.%]="playerBHealth.percentage"
-                                [class.low]="playerBHealth.percentage <= 25"
-                                [class.medium]="playerBHealth.percentage > 25 && playerBHealth.percentage <= 50"
+                                [class.low]="playerBHealth.percentage <= healthLowThreshold"
+                                [class.medium]="playerBHealth.percentage > healthLowThreshold && playerBHealth.percentage <= healthMediumThreshold"
                             ></div>
                         </div>
                         <span class="health-text">{{ playerBHealth.current }}/{{ playerBHealth.max }}</span>
@@ -205,7 +205,7 @@
                 >
                     <span class="btn-icon">⚔️</span>
                     <span class="btn-label">Offensive</span>
-                    <span class="btn-bonus">+2 ATK</span>
+                    <span class="btn-bonus">+{{ combatPostureBonus }} ATK</span>
                 </button>
                 <button
                     class="posture-btn defensive"
@@ -215,7 +215,7 @@
                 >
                     <span class="btn-icon">🛡️</span>
                     <span class="btn-label">Défensive</span>
-                    <span class="btn-bonus">+2 DEF</span>
+                    <span class="btn-bonus">+{{ combatPostureBonus }} DEF</span>
                 </button>
             </div>
             }

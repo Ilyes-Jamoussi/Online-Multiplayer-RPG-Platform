@@ -46,10 +46,6 @@ export class SessionSocketService {
         this.socket.emit(SessionEvents.LockSession, {});
     }
 
-    unlockSession(): void {
-        this.socket.emit(SessionEvents.UnlockSession, {});
-    }
-
     kickPlayer(data: KickPlayerDto): void {
         this.socket.emit(SessionEvents.KickPlayer, data);
     }

@@ -1,4 +1,5 @@
 import { computed, Injectable } from '@angular/core';
+import { MIN_TERRAIN_RATIO, PERCENT_BASE } from '@app/constants/game-editor.constants';
 import {
     DESCRIPTION_MAX_LENGTH,
     DESCRIPTION_MIN_LENGTH,
@@ -16,9 +17,6 @@ import { ConnectedComponent } from '@common/interfaces/connected-component.inter
 
 @Injectable()
 export class GameEditorCheckService {
-    private static readonly minTerrainRatio = 0.5;
-    private static readonly percentBase = 100;
-
     constructor(private readonly gameEditorStoreService: GameEditorStoreService) {}
 
     readonly editorProblems = computed<GameEditorIssues>(() => {
@@ -130,11 +128,11 @@ export class GameEditorCheckService {
         const terrainCount = tiles.filter((tile) => this.isTerrainTile(tile.kind)).length;
         const ratio = terrainCount / total;
         const problems: GameEditorIssue = { hasIssue: false };
-        if (ratio <= GameEditorCheckService.minTerrainRatio) {
+        if (ratio <= MIN_TERRAIN_RATIO) {
             problems.hasIssue = true;
-            problems.message = `Le ratio de tuiles de terrain est trop bas (${(ratio * GameEditorCheckService.percentBase).toFixed(
-                2,
-            )} %). Il doit être supérieur à ${GameEditorCheckService.minTerrainRatio * GameEditorCheckService.percentBase} %.`;
+            problems.message = `Le ratio de tuiles de terrain est trop bas (${(ratio * PERCENT_BASE).toFixed(2)} %). Il doit être supérieur à ${
+                MIN_TERRAIN_RATIO * PERCENT_BASE
+            } %.`;
         }
         return problems;
     }

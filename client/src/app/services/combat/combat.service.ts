@@ -9,6 +9,7 @@ import { NotificationService } from '@app/services/notification/notification.ser
 import { PlayerService } from '@app/services/player/player.service';
 import { ResetService } from '@app/services/reset/reset.service';
 import { TimerService } from '@app/services/timer/timer.service';
+import { CombatRole } from '@app/types/game.types';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
@@ -49,13 +50,7 @@ export class CombatService {
         inject(ResetService).reset$.subscribe(() => this.reset());
     }
 
-    private startCombat(
-        attackerId: string,
-        targetId: string,
-        userRole: 'attacker' | 'target',
-        attackerTileEffect?: number,
-        targetTileEffect?: number,
-    ): void {
+    private startCombat(attackerId: string, targetId: string, userRole: CombatRole, attackerTileEffect?: number, targetTileEffect?: number): void {
         this._combatData.set({ attackerId, targetId, userRole });
         this._selectedPosture.set(null);
         this._playerPostures.set({});

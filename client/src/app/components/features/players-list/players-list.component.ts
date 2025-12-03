@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, Signal } from '@angular/core';
-import { PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
+import { BASE_WHITE_VALUE, COLOR_MIX_RATIO, HEX_BLUE_START_INDEX, HEX_COLOR_LENGTH } from '@app/constants/color.constants';
+import { HP_HIGH_THRESHOLD_PERCENT, HP_MEDIUM_THRESHOLD_PERCENT, PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -17,6 +18,9 @@ import { Player } from '@common/interfaces/player.interface';
     styleUrl: './players-list.component.scss',
 })
 export class PlayersListComponent {
+    readonly hpHighThreshold = HP_HIGH_THRESHOLD_PERCENT;
+    readonly hpMediumThreshold = HP_MEDIUM_THRESHOLD_PERCENT;
+
     constructor(
         private readonly inGameService: InGameService,
         private readonly playerService: PlayerService,
@@ -83,17 +87,13 @@ export class PlayersListComponent {
         if (!teamColor) return undefined;
 
         const hex = teamColor.replace('#', '');
-        const hexColorLength = 2;
-        const blueStartIndex = 4;
-        const red = parseInt(hex.substring(0, hexColorLength), 16);
-        const green = parseInt(hex.substring(hexColorLength, hexColorLength + hexColorLength), 16);
-        const blue = parseInt(hex.substring(blueStartIndex, blueStartIndex + hexColorLength), 16);
+        const red = parseInt(hex.substring(0, HEX_COLOR_LENGTH), 16);
+        const green = parseInt(hex.substring(HEX_COLOR_LENGTH, HEX_COLOR_LENGTH + HEX_COLOR_LENGTH), 16);
+        const blue = parseInt(hex.substring(HEX_BLUE_START_INDEX, HEX_BLUE_START_INDEX + HEX_COLOR_LENGTH), 16);
 
-        const baseWhite = 250;
-        const colorMix = 0.12;
-        const finalRed = Math.round(baseWhite - (baseWhite - red) * colorMix);
-        const finalGreen = Math.round(baseWhite - (baseWhite - green) * colorMix);
-        const finalBlue = Math.round(baseWhite - (baseWhite - blue) * colorMix);
+        const finalRed = Math.round(BASE_WHITE_VALUE - (BASE_WHITE_VALUE - red) * COLOR_MIX_RATIO);
+        const finalGreen = Math.round(BASE_WHITE_VALUE - (BASE_WHITE_VALUE - green) * COLOR_MIX_RATIO);
+        const finalBlue = Math.round(BASE_WHITE_VALUE - (BASE_WHITE_VALUE - blue) * COLOR_MIX_RATIO);
 
         return `rgb(${finalRed}, ${finalGreen}, ${finalBlue})`;
     }
@@ -109,11 +109,5 @@ export class PlayersListComponent {
 
     isCTFMode(): boolean {
         return this.inGameService.mode() === GameMode.CTF;
-    }
-
-    isEnemy(player: Player): boolean {
-        if (this.isCurrentUser(player)) return false;
-        if (this.isCTFMode()) return false;
-        return true;
     }
 }

@@ -12,6 +12,7 @@ import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-s
 describe('CombatTimerService', () => {
     let service: CombatTimerService;
     let eventEmitter: jest.Mocked<EventEmitter2>;
+    let mockSessionRepository: { isVirtualPlayer: jest.Mock };
 
     const SESSION_ID_1 = 'session-1';
     const SESSION_ID_2 = 'session-2';
@@ -45,7 +46,7 @@ describe('CombatTimerService', () => {
             emit: jest.fn(),
         };
 
-        const mockSessionRepository = {
+        mockSessionRepository = {
             isVirtualPlayer: jest.fn().mockReturnValue(false),
         };
 
@@ -122,6 +123,19 @@ describe('CombatTimerService', () => {
             service.startCombatTimer(session, ATTACKER_ID, TARGET_ID);
 
             expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatTimerRestart, { sessionId: session.id });
+        });
+
+        it('should emit VirtualPlayerCombatStarted when attacker is virtual player', () => {
+            const session = createMockSession();
+            mockSessionRepository.isVirtualPlayer.mockReturnValueOnce(true);
+
+            service.startCombatTimer(session, ATTACKER_ID, TARGET_ID);
+
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.VirtualPlayerCombatStarted, {
+                sessionId: session.id,
+                attackerId: ATTACKER_ID,
+                targetId: TARGET_ID,
+            });
         });
 
         it('should schedule combat loop', () => {

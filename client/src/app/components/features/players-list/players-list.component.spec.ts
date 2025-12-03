@@ -381,23 +381,4 @@ describe('PlayersListComponent', () => {
             expect(result).toBe(true);
         });
     });
-
-    describe('isEnemy', () => {
-        it('should return false when player is current user', () => {
-            const result = component.isEnemy(mockPlayers.player1);
-            expect(result).toBe(false);
-        });
-
-        it('should return false when mode is CTF', () => {
-            modeSignal.set(GameMode.CTF);
-            const result = component.isEnemy(mockPlayers.player2);
-            expect(result).toBe(false);
-        });
-
-        it('should return true when player is not current user and mode is not CTF', () => {
-            modeSignal.set(GameMode.CLASSIC);
-            const result = component.isEnemy(mockPlayers.player2);
-            expect(result).toBe(true);
-        });
-    });
 });

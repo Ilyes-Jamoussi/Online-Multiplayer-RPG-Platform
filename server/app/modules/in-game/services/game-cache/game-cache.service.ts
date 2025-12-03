@@ -1,3 +1,4 @@
+import { TURN_COUNT } from '@app/constants/game-config.constants';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { GameMap } from '@app/interfaces/game-map.interface';
 import { Game } from '@app/modules/game-store/entities/game.entity';
@@ -269,10 +270,9 @@ export class GameCacheService {
         const sessionDisabled = this.disabledPlaceables.get(sessionId);
         if (!sessionDisabled) throw new NotFoundException('Session disabled map not found');
 
-        const turnCount = 2;
         for (const placeable of placeables) {
             const key = this.getPlaceableKey(placeable);
-            sessionDisabled.set(key, { playerId, turnCount });
+            sessionDisabled.set(key, { playerId, turnCount: TURN_COUNT });
         }
 
         const positions = placeables.map((p) => ({ x: p.x, y: p.y }));
@@ -280,7 +280,7 @@ export class GameCacheService {
             sessionId,
             placeableId: object._id?.toString(),
             positions,
-            turnCount,
+            turnCount: TURN_COUNT,
         });
     }
 

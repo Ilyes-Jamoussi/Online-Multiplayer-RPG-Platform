@@ -6,11 +6,10 @@ import { GameLogComponent } from '@app/components/features/game-log/game-log.com
 import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layout.component';
 import { ROUTES } from '@app/enums/routes.enum';
 import { GlobalStatistics, SortColumn, SortDirection } from '@app/interfaces/game-statistics.interface';
+import { GameLogService } from '@app/services/game-log/game-log.service';
 import { SessionService } from '@app/services/session/session.service';
 import { StatisticsService } from '@app/services/statistics/statistics.service';
-import { GameLogService } from '@app/services/game-log/game-log.service';
-
-type TabType = 'chat' | 'journal';
+import { TabType } from '@app/types/component.types';
 
 @Component({
     selector: 'app-statistics-page',
@@ -79,7 +78,6 @@ export class StatisticsPageComponent implements OnInit {
             return this.sortDirection === 'asc' ? comparison : -comparison;
         });
 
-        // Update the statistics with sorted data
         const currentGameStats = this.gameStatistics();
         if (currentGameStats) {
             this.statisticsService.setGameStatistics({

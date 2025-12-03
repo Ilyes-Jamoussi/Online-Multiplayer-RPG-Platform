@@ -25,18 +25,18 @@
                     <app-stats-bar
                         label="Nombre de points de vie du personnage"
                         [value]="playerHealth"
-                        [maxValue]="6"
+                        [maxValue]="maxStatValue"
                         color="#e74c3c"
                     ></app-stats-bar>
                 </div>
 
                 <div class="field">
                     <h3>Vitesse</h3>
-                    <app-stats-bar label="Rapidité du personnage" [value]="playerSpeed" [maxValue]="6" color="#2ecc71"></app-stats-bar>
+                    <app-stats-bar label="Rapidité du personnage" [value]="playerSpeed" [maxValue]="maxStatValue" color="#2ecc71"></app-stats-bar>
                 </div>
 
                 <div class="field">
-                    <h3>Bonus (+2)</h3>
+                    <h3>Bonus (+{{ bonusStatValue }})</h3>
                     <div class="radio-row" role="radiogroup">
                         <label class="radio" [class.on]="isLifeBonusSelected">
                             <input type="radio" name="bonus" value="life" [checked]="isLifeBonusSelected" (change)="onBonusChange(bonusType.Life)" />

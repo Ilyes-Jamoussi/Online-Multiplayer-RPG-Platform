@@ -2,7 +2,7 @@
 import { AVATAR_SELECTION_ROOM_PREFIX } from '@app/constants/session.constants';
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
-import { JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection';
+import { JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
 import { KickPlayerDto } from '@app/modules/session/dto/kick-player.dto';
 import { PlayerDto } from '@app/modules/session/dto/player.dto';
@@ -16,7 +16,6 @@ import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { SessionEvents } from '@common/enums/session-events.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { WaitingRoomSession } from '@common/interfaces/session.interface';
-import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import 'reflect-metadata';
@@ -181,15 +180,9 @@ describe('SessionGateway', () => {
 
     describe('ValidationPipe exceptionFactory', () => {
         it('should trigger validation error factory (coverage for lines 25-26)', () => {
-            const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
-            const mockErrors = [{ property: 'gameId', constraints: { isString: 'gameId must be a string' } }];
-
             expect(() => {
-                validationExceptionFactory(mockErrors);
+                validationExceptionFactory();
             }).toThrow('Validation failed');
-
-            expect(loggerSpy).toHaveBeenCalledWith('Validation failed:', mockErrors);
-            loggerSpy.mockRestore();
         });
     });
 
@@ -236,7 +229,6 @@ describe('SessionGateway', () => {
 
             gateway.createSession(mockSocket, data);
 
-            // Wait for async handleAvailabilityChange to complete
             await new Promise((resolve) => setTimeout(resolve, 0));
 
             expect(sessionService.createSession).toHaveBeenCalledWith(SOCKET_ID, data);
@@ -497,17 +489,6 @@ describe('SessionGateway', () => {
         });
     });
 
-    describe('unlockSession', () => {
-        it('should unlock session successfully', () => {
-            sessionService.getPlayerSessionId.mockReturnValue(SESSION_ID);
-
-            gateway.unlockSession(mockSocket);
-
-            expect(sessionService.getPlayerSessionId).toHaveBeenCalledWith(SOCKET_ID);
-            expect(sessionService.unlock).toHaveBeenCalledWith(SESSION_ID);
-        });
-    });
-
     describe('kickPlayer', () => {
         const data: KickPlayerDto = {
             playerId: 'kicked-player-id',
@@ -704,7 +685,6 @@ describe('SessionGateway', () => {
 
             gateway.leaveSession(mockSocket);
 
-            // Wait for async handleAvailabilityChange to complete
             await new Promise((resolve) => setTimeout(resolve, 0));
 
             expect(mockSocket.broadcast.to).toHaveBeenCalledWith(SESSION_ID);

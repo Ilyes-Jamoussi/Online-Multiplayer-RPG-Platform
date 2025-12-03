@@ -4,6 +4,9 @@ import { MapSize } from '@common/enums/map-size.enum';
 
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 
+export const MIN_TERRAIN_RATIO = 0.5;
+export const PERCENT_BASE = 100;
+
 export const PLACEABLE_ORDER: PlaceableKind[] = [
     PlaceableKind.START,
     PlaceableKind.FLAG,

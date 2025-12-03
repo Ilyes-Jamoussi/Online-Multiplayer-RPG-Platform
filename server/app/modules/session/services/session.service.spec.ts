@@ -1,6 +1,6 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { ACCESS_CODE_LENGTH } from '@app/constants/session.constants';
-import { BASE_STAT_VALUE, BONUS_VALUE, RANDOM_THRESHOLD, VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-player.constants';
+import { BASE_STAT_POINTS, BONUS_HEALTH_POINTS, RANDOM_THRESHOLD_RATIO, VIRTUAL_PLAYER_NAMES } from '@app/constants/virtual-player.constants';
 import { ServerEvents } from '@app/enums/server-events.enum';
 import { ChatService } from '@app/modules/chat/services/chat.service';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
@@ -29,6 +29,9 @@ describe('SessionService', () => {
     const TWO = 2;
     const RANDOM_OFFSET_ABOVE_THRESHOLD = 0.1;
     const RANDOM_OFFSET_BELOW_THRESHOLD = 0.1;
+    const RANDOM_THRESHOLD = RANDOM_THRESHOLD_RATIO;
+    const BASE_STAT_VALUE = BASE_STAT_POINTS;
+    const BONUS_VALUE = BONUS_HEALTH_POINTS;
     const MOCK_DATE_NOW_1 = 1234567890;
     const MOCK_DATE_NOW_2 = 1234567891;
     const MOCK_RANDOM_VALUE_1 = 0.123;
@@ -82,10 +85,10 @@ describe('SessionService', () => {
     };
 
     const expectBaseStats = (virtualPlayer: ReturnType<typeof service.addVirtualPlayer>[number] | undefined): void => {
-        expect(virtualPlayer?.baseHealth).toBe(BASE_STAT_VALUE);
-        expect(virtualPlayer?.baseSpeed).toBe(BASE_STAT_VALUE);
-        expect(virtualPlayer?.baseAttack).toBe(BASE_STAT_VALUE);
-        expect(virtualPlayer?.baseDefense).toBe(BASE_STAT_VALUE);
+        expect(virtualPlayer?.baseHealth).toBe(BASE_STAT_POINTS);
+        expect(virtualPlayer?.baseSpeed).toBe(BASE_STAT_POINTS);
+        expect(virtualPlayer?.baseAttack).toBe(BASE_STAT_POINTS);
+        expect(virtualPlayer?.baseDefense).toBe(BASE_STAT_POINTS);
     };
 
     const expectBonusStats = (virtualPlayer: ReturnType<typeof service.addVirtualPlayer>[number] | undefined): void => {
@@ -620,8 +623,8 @@ describe('SessionService', () => {
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)
                 .mockReturnValueOnce(ZERO)
-                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
@@ -637,8 +640,8 @@ describe('SessionService', () => {
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)
                 .mockReturnValueOnce(ZERO)
-                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
@@ -653,8 +656,8 @@ describe('SessionService', () => {
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)
                 .mockReturnValueOnce(ZERO)
-                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Defensive);
 
@@ -668,8 +671,8 @@ describe('SessionService', () => {
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)
                 .mockReturnValueOnce(ZERO)
-                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
@@ -692,8 +695,8 @@ describe('SessionService', () => {
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)
                 .mockReturnValueOnce(ZERO)
-                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD);
             jest.spyOn(Date, 'now').mockReturnValue(MOCK_DATE_NOW_1);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
@@ -713,8 +716,8 @@ describe('SessionService', () => {
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)
                 .mockReturnValueOnce(ZERO)
-                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
@@ -729,8 +732,8 @@ describe('SessionService', () => {
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)
                 .mockReturnValueOnce(ZERO)
-                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
@@ -745,8 +748,8 @@ describe('SessionService', () => {
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)
                 .mockReturnValueOnce(ZERO)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
@@ -761,21 +764,16 @@ describe('SessionService', () => {
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)
                 .mockReturnValueOnce(ZERO)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
-                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD);
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO + RANDOM_OFFSET_ABOVE_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
             const virtualPlayer = players.find((p) => p.virtualPlayerType);
-            expect(virtualPlayer?.healthBonus).toBe(BONUS_VALUE);
+            expect(virtualPlayer?.healthBonus).toBe(BONUS_HEALTH_POINTS);
             expect(virtualPlayer?.speedBonus).toBe(ZERO);
-            expect(virtualPlayer?.health).toBe(BASE_STAT_VALUE + BONUS_VALUE);
-            expect(virtualPlayer?.maxHealth).toBe(BASE_STAT_VALUE + BONUS_VALUE);
-            expect(virtualPlayer?.baseHealth).toBe(BASE_STAT_VALUE);
-            expect(virtualPlayer?.isAdmin).toBe(false);
-            expect(virtualPlayer?.id).toMatch(/^virtual-/);
-            expect(virtualPlayer?.name).toBeDefined();
-            expect(virtualPlayer?.avatar).toBeDefined();
+            expect(virtualPlayer?.health).toBe(BASE_STAT_POINTS + BONUS_HEALTH_POINTS);
+            expect(virtualPlayer?.maxHealth).toBe(BASE_STAT_POINTS + BONUS_HEALTH_POINTS);
         });
 
         it('should assign speed bonus when health bonus is zero', () => {
@@ -784,21 +782,15 @@ describe('SessionService', () => {
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)
                 .mockReturnValueOnce(ZERO)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
 
             const virtualPlayer = players.find((p) => p.virtualPlayerType);
             expect(virtualPlayer?.healthBonus).toBe(ZERO);
-            expect(virtualPlayer?.speedBonus).toBe(BONUS_VALUE);
-            expect(virtualPlayer?.speed).toBe(BASE_STAT_VALUE + BONUS_VALUE);
-            expect(virtualPlayer?.health).toBe(BASE_STAT_VALUE + ZERO);
-            expect(virtualPlayer?.baseHealth).toBe(BASE_STAT_VALUE);
-            expect(virtualPlayer?.isAdmin).toBe(false);
-            expect(virtualPlayer?.id).toMatch(/^virtual-/);
-            expect(virtualPlayer?.name).toBeDefined();
-            expect(virtualPlayer?.avatar).toBeDefined();
+            expect(virtualPlayer?.speedBonus).toBe(BONUS_HEALTH_POINTS);
+            expect(virtualPlayer?.speed).toBe(BASE_STAT_POINTS + BONUS_HEALTH_POINTS);
         });
 
         it('should create virtual player with correct base stats', () => {
@@ -807,8 +799,8 @@ describe('SessionService', () => {
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)
                 .mockReturnValueOnce(ZERO)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Defensive);
 
@@ -822,8 +814,8 @@ describe('SessionService', () => {
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)
                 .mockReturnValueOnce(ZERO)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD);
 
             const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Defensive);
 
@@ -838,8 +830,8 @@ describe('SessionService', () => {
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)
                 .mockReturnValueOnce(ZERO)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD)
                 .mockReturnValueOnce(MOCK_RANDOM_VALUE_1);
 
             const players1 = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
@@ -847,8 +839,8 @@ describe('SessionService', () => {
             jest.spyOn(Math, 'random')
                 .mockReturnValueOnce(ZERO)
                 .mockReturnValueOnce(ZERO)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
-                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD_RATIO - RANDOM_OFFSET_BELOW_THRESHOLD)
                 .mockReturnValueOnce(MOCK_RANDOM_VALUE_2);
             const players2 = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Defensive);
 

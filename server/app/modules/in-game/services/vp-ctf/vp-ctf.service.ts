@@ -1,4 +1,8 @@
-import { RETURN_FLAG_SEARCH_RADIUS } from '@app/constants/virtual-player.constants';
+import {
+    BLOCKED_FLAG_CARRIER_ATTACK_PRIORITY_SCORE,
+    RETURN_FLAG_PRIORITY_SCORE,
+    RETURN_FLAG_SEARCH_RADIUS_TILES,
+} from '@app/constants/virtual-player.constants';
 import { PointOfInterestType } from '@app/enums/point-of-interest-type.enum';
 import { VPConfig } from '@app/interfaces/vp-config.interface';
 import { EvaluatedTarget, MapScanWithDistances, PointOfInterestWithPath } from '@app/interfaces/vp-gameplay.interface';
@@ -90,8 +94,7 @@ export class VPCTFService {
             return;
         }
 
-        const returnFlagPriority = 200;
-        const score = returnFlagPriority - path.totalCost * config.distanceWeights.flagPenaltyPerTile;
+        const score = RETURN_FLAG_PRIORITY_SCORE - path.totalCost * config.distanceWeights.flagPenaltyPerTile;
         results.push({ type: PointOfInterestType.RETURNFLAG, position: path.destination, path, priorityScore: Math.max(1, score) });
     }
 
@@ -159,8 +162,7 @@ export class VPCTFService {
         const vpPlayer = session.inGamePlayers[vpPlayerId];
         if (!vpPlayer) return;
 
-        const blockedFlagCarrierAttackPriority = 180;
-        const score = blockedFlagCarrierAttackPriority + config.bonuses.adjacentAttackBonus;
+        const score = BLOCKED_FLAG_CARRIER_ATTACK_PRIORITY_SCORE + config.bonuses.adjacentAttackBonus;
 
         results.push({
             type: PointOfInterestType.ENEMY,
@@ -197,8 +199,7 @@ export class VPCTFService {
             if (!occupant || !occupant.health) continue;
             if (occupant.teamNumber === vpPlayer.teamNumber) continue;
 
-            const blockedFlagCarrierAttackPriority = 180;
-            const score = blockedFlagCarrierAttackPriority + config.bonuses.adjacentAttackBonus;
+            const score = BLOCKED_FLAG_CARRIER_ATTACK_PRIORITY_SCORE + config.bonuses.adjacentAttackBonus;
 
             results.push({
                 type: PointOfInterestType.ENEMY,
@@ -224,8 +225,8 @@ export class VPCTFService {
         let bestPath: PathResult | null = null;
         let bestDistanceToTarget = Infinity;
 
-        for (let dx = -RETURN_FLAG_SEARCH_RADIUS; dx <= RETURN_FLAG_SEARCH_RADIUS; dx++) {
-            for (let dy = -RETURN_FLAG_SEARCH_RADIUS; dy <= RETURN_FLAG_SEARCH_RADIUS; dy++) {
+        for (let dx = -RETURN_FLAG_SEARCH_RADIUS_TILES; dx <= RETURN_FLAG_SEARCH_RADIUS_TILES; dx++) {
+            for (let dy = -RETURN_FLAG_SEARCH_RADIUS_TILES; dy <= RETURN_FLAG_SEARCH_RADIUS_TILES; dy++) {
                 if (dx === 0 && dy === 0) continue;
                 const pos: Position = { x: playerPos.x + dx, y: playerPos.y + dy };
                 const path = this.pathfindingService.findPath(session, vpPlayerId, pos);

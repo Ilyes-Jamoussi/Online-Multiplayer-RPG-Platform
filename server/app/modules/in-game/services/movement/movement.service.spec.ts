@@ -845,5 +845,61 @@ describe('MovementService', () => {
 
             expect(result.length).toBeGreaterThan(ZERO);
         });
+
+        it('should handle error when getting teleport destination', () => {
+            const session = createMockSession();
+            const player = createMockPlayer({ x: POSITION_X, y: POSITION_Y, speed: SPEED });
+            session.inGamePlayers[PLAYER_ID] = player;
+            gameCache.getMapSize.mockReturnValue(MAP_SIZE);
+            gameCache.getTileAtPosition.mockReturnValueOnce(createMockTile()).mockReturnValue(createMockTile({ kind: TileKind.TELEPORT }));
+            gameCache.getPlaceableAtPosition.mockReturnValue(null);
+            gameCache.getTeleportDestination.mockImplementation(() => {
+                throw new Error('Invalid teleport');
+            });
+            gameCache.getTileOccupant.mockReturnValue(null);
+
+            const result = service.calculateReachableTiles(session, PLAYER_ID);
+
+            expect(result.length).toBeGreaterThan(ZERO);
+        });
+
+        it('should return null tile cost when on boat but not on water', () => {
+            const session = createMockSession();
+            const player = createMockPlayer({ x: POSITION_X, y: POSITION_Y, speed: SPEED, onBoatId: 'boat-1' });
+            session.inGamePlayers[PLAYER_ID] = player;
+            gameCache.getMapSize.mockReturnValue(MAP_SIZE);
+            gameCache.getTileAtPosition.mockReturnValue(createMockTile({ kind: TileKind.BASE }));
+            gameCache.getTileOccupant.mockReturnValue(null);
+
+            const result = service.calculateReachableTiles(session, PLAYER_ID);
+
+            expect(result.length).toBe(ONE);
+        });
+
+        it('should return null tile cost when tile cost is -1', () => {
+            const session = createMockSession();
+            const player = createMockPlayer({ x: POSITION_X, y: POSITION_Y, speed: SPEED });
+            session.inGamePlayers[PLAYER_ID] = player;
+            gameCache.getMapSize.mockReturnValue(MAP_SIZE);
+            gameCache.getTileAtPosition.mockReturnValue(createMockTile({ kind: TileKind.WALL }));
+            gameCache.getTileOccupant.mockReturnValue(null);
+
+            const result = service.calculateReachableTiles(session, PLAYER_ID);
+
+            expect(result.length).toBe(ONE);
+        });
+
+        it('should handle closed door with cost -1', () => {
+            const session = createMockSession();
+            const player = createMockPlayer({ x: POSITION_X, y: POSITION_Y, speed: SPEED });
+            session.inGamePlayers[PLAYER_ID] = player;
+            gameCache.getMapSize.mockReturnValue(MAP_SIZE);
+            gameCache.getTileAtPosition.mockReturnValueOnce(createMockTile()).mockReturnValue(createMockTile({ kind: TileKind.DOOR, open: false }));
+            gameCache.getTileOccupant.mockReturnValue(null);
+
+            const result = service.calculateReachableTiles(session, PLAYER_ID);
+
+            expect(result.length).toBeGreaterThan(ZERO);
+        });
     });
 });

@@ -299,7 +299,7 @@ export class GameMapService {
         });
     }
 
-    getDisabledPlaceableInfo(placeableId: string): { turnCount: number; positions: Position[] } | undefined {
+    getDisabledPlaceableInfo(placeableId: string) {
         return this._disabledPlaceables().get(placeableId);
     }
 
