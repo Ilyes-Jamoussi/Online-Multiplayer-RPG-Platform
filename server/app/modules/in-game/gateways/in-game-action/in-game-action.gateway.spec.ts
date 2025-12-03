@@ -446,7 +446,7 @@ describe('InGameActionGateway', () => {
 
             gateway.pickUpFlag(mockSocket, payload);
 
-            expect(mockInGameService.pickUpFlag).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_SOCKET_ID, { x: MOCK_X, y: MOCK_Y });
+            expect(mockInGameService.pickUpFlag).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_SOCKET_ID);
             expect(mockSocket.emit).not.toHaveBeenCalled();
         });
 
