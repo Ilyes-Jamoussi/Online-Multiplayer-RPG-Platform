@@ -62,7 +62,7 @@
             </div>
             <div class="object-display">
                 <div class="object-image-wrapper">
-                    <img [src]="getObjectImage(objectOnTile.kind)" [alt]="objectOnTile.kind" />
+                    <img [src]="getObjectImage(objectOnTile.kind)" [alt]="objectOnTile.kind" loading="lazy" />
                 </div>
                 <div class="object-details">
                     <div class="object-name">{{ placeableLabel[objectOnTile.kind] }}</div>
@@ -78,7 +78,7 @@
             </div>
             <div class="player-display">
                 <div class="player-avatar-wrapper">
-                    <img class="player-avatar" [src]="getPlayerAvatar(playerOnTile.id)" [alt]="playerOnTile.name" />
+                    <img class="player-avatar" [src]="getPlayerAvatar(playerOnTile.id)" [alt]="playerOnTile.name" loading="lazy" />
                     @if (hasFlag(playerOnTile)) {
                     <div class="flag-indicator">🚩</div>
                     }

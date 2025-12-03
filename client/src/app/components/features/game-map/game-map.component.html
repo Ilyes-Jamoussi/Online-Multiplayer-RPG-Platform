@@ -12,7 +12,7 @@
         <div class="objects-overlay" [ngStyle]="gridStyle">
             @for (obj of visibleObjects; track obj.id) { @if (obj.placed) {
             <div class="map-object" [ngStyle]="getObjectStyle(obj)" [class.disabled]="isPlaceableDisabled(obj.id)">
-                <img [src]="getPlaceableImage(obj.kind)" [alt]="obj.kind" class="object-image" draggable="false" />
+                <img [src]="getPlaceableImage(obj.kind)" [alt]="obj.kind" class="object-image" draggable="false" loading="lazy" />
                 @if (isPlaceableDisabled(obj.id)) {
                 <div class="disabled-overlay">
                     <span class="disabled-icon">✕</span>
@@ -32,6 +32,7 @@
                     class="start-avatar-image"
                     [ngStyle]="getStartPointBorderStyle(startPoint)"
                     draggable="false"
+                    loading="lazy"
                 />
             </div>
             }
@@ -46,6 +47,7 @@
                     class="player-avatar"
                     [ngStyle]="getPlayerBorderStyle(player)"
                     draggable="false"
+                    loading="lazy"
                 />
                 @if (hasFlag(player)) {
                 <span class="flag-indicator">🚩</span>
