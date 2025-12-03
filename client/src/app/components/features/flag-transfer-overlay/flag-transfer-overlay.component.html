@@ -9,7 +9,7 @@
             <div class="players-container">
                 <div class="player-card">
                     <div class="player-avatar-container">
-                        <img [src]="fromPlayerAvatar" [alt]="fromPlayerName" class="player-avatar" />
+                        <img [src]="fromPlayerAvatar" [alt]="fromPlayerName" class="player-avatar" loading="lazy" />
                     </div>
                     <p class="player-name">{{ fromPlayerName }}</p>
                 </div>
@@ -21,7 +21,7 @@
 
                 <div class="player-card">
                     <div class="player-avatar-container">
-                        <img [src]="toPlayerAvatar" [alt]="'Vous'" class="player-avatar" />
+                        <img [src]="toPlayerAvatar" [alt]="'Vous'" class="player-avatar" loading="lazy" />
                     </div>
                     <p class="player-name">Vous</p>
                 </div>
