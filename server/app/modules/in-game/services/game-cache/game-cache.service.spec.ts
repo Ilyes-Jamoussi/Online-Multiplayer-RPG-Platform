@@ -15,7 +15,7 @@ import { Position } from '@common/interfaces/position.interface';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { getModelToken } from '@nestjs/mongoose';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { Model, Types } from 'mongoose';
 import { GameCacheService } from './game-cache.service';
 
@@ -150,7 +150,7 @@ describe('GameCacheService', () => {
             findById: jest.fn(),
         } as unknown as jest.Mocked<Model<Game>>;
 
-        const module: TestingModule = await Test.createTestingModule({
+        const module = await Test.createTestingModule({
             providers: [
                 GameCacheService,
                 { provide: getModelToken(Game.name), useValue: mockGameModel },
@@ -173,11 +173,11 @@ describe('GameCacheService', () => {
                 size: MapSize.MEDIUM,
             };
             (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
-            const position: Position = { x: MOCK_X, y: MOCK_Y };
+            const placeable = createMockPlaceable({ x: MOCK_X, y: MOCK_Y });
 
-            service.hidePlaceable(MOCK_SESSION_ID, position);
+            service.hidePlaceable(MOCK_SESSION_ID, placeable);
 
-            expect(gameMap.objects[0].placed).toBe(false);
+            expect(placeable.placed).toBe(false);
             expect(mockEventEmitter.emit).toHaveBeenCalledWith(
                 ServerEvents.PlaceableUpdated,
                 expect.objectContaining({
@@ -190,21 +190,9 @@ describe('GameCacheService', () => {
         });
 
         it('should throw NotFoundException when game map not found', () => {
-            const position: Position = { x: MOCK_X, y: MOCK_Y };
+            const placeable = createMockPlaceable({ x: MOCK_X, y: MOCK_Y });
 
-            expect(() => service.hidePlaceable(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
-        });
-
-        it('should throw NotFoundException when placeable not found', () => {
-            const gameMap = {
-                tiles: [],
-                objects: [],
-                size: MapSize.MEDIUM,
-            };
-            (service as unknown as { sessionsGameMaps: Map<string, unknown> }).sessionsGameMaps.set(MOCK_SESSION_ID, gameMap);
-            const position: Position = { x: MOCK_X, y: MOCK_Y };
-
-            expect(() => service.hidePlaceable(MOCK_SESSION_ID, position)).toThrow(NotFoundException);
+            expect(() => service.hidePlaceable(MOCK_SESSION_ID, placeable)).toThrow(NotFoundException);
         });
     });
 

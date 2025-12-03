@@ -141,6 +141,7 @@ describe('MovementService', () => {
             getNextPosition: jest.fn(),
             getTileAtPosition: jest.fn(),
             getPlaceableAtPosition: jest.fn(),
+            getPlaceablesAtPosition: jest.fn(),
             getTeleportDestination: jest.fn(),
             getTileOccupant: jest.fn(),
             updatePlaceablePosition: jest.fn(),
@@ -394,15 +395,10 @@ describe('MovementService', () => {
             });
             const nextPosition = createMockPosition({ x: NEXT_X });
             const tile = createMockTile({ x: NEXT_X });
-            const placeable = createMockPlaceable({ kind: PlaceableKind.FLAG, x: NEXT_X, y: POSITION_Y });
+            const placeable = createMockPlaceable({ kind: PlaceableKind.FLAG, x: NEXT_X, y: POSITION_Y, placed: true });
             gameCache.getNextPosition.mockReturnValue(nextPosition);
             gameCache.getTileAtPosition.mockReturnValue(tile);
-            gameCache.getPlaceableAtPosition.mockImplementation((sessionId: string, position: Position) => {
-                if (position.x === NEXT_X && position.y === POSITION_Y) {
-                    return placeable;
-                }
-                return null;
-            });
+            gameCache.getPlaceablesAtPosition.mockReturnValue([placeable]);
             gameCache.getTileOccupant.mockReturnValue(null);
             sessionRepository.movePlayerPosition.mockReturnValue({ oldX: POSITION_X, oldY: POSITION_Y, newX: NEXT_X, newY: POSITION_Y });
             sessionRepository.playerHasFlag.mockReturnValue(false);
@@ -410,7 +406,7 @@ describe('MovementService', () => {
 
             service.movePlayer(session, PLAYER_ID, Orientation.E);
 
-            expect(sessionRepository.pickUpFlag).toHaveBeenCalledWith(session, PLAYER_ID, { x: NEXT_X, y: POSITION_Y });
+            expect(sessionRepository.pickUpFlag).toHaveBeenCalledWith(session, PLAYER_ID);
         });
     });
 

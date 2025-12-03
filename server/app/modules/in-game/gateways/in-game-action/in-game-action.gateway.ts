@@ -132,7 +132,7 @@ export class InGameActionGateway {
     @SubscribeMessage(InGameEvents.PickUpFlag)
     pickUpFlag(socket: Socket, payload: { sessionId: string; x: number; y: number }): void {
         try {
-            this.inGameService.pickUpFlag(payload.sessionId, socket.id, { x: payload.x, y: payload.y });
+            this.inGameService.pickUpFlag(payload.sessionId, socket.id);
         } catch (error) {
             socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message));
         }

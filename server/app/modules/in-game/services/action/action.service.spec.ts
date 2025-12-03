@@ -240,34 +240,30 @@ describe('ActionService', () => {
             const session = createMockSession({
                 flagData: { holderPlayerId: null, position: { x: MOCK_X, y: MOCK_Y } },
             });
-            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-            service.pickUpFlag(session, MOCK_PLAYER_ID_1, position);
+            service.pickUpFlag(session, MOCK_PLAYER_ID_1);
 
-            expect(mockRepository.pickUpFlag).toHaveBeenCalledWith(session, MOCK_PLAYER_ID_1, position);
+            expect(mockRepository.pickUpFlag).toHaveBeenCalledWith(session, MOCK_PLAYER_ID_1);
         });
 
         it('should throw NotFoundException when player not found', () => {
             const session = createMockSession();
-            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-            expect(() => service.pickUpFlag(session, 'non-existent', position)).toThrow(NotFoundException);
+            expect(() => service.pickUpFlag(session, 'non-existent')).toThrow(NotFoundException);
         });
 
         it('should throw NotFoundException when flag data not found', () => {
             const session = createMockSession({ flagData: undefined });
-            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-            expect(() => service.pickUpFlag(session, MOCK_PLAYER_ID_1, position)).toThrow(NotFoundException);
+            expect(() => service.pickUpFlag(session, MOCK_PLAYER_ID_1)).toThrow(NotFoundException);
         });
 
         it('should throw BadRequestException when flag already picked up', () => {
             const session = createMockSession({
                 flagData: { holderPlayerId: MOCK_PLAYER_ID_2, position: { x: MOCK_X, y: MOCK_Y } },
             });
-            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-            expect(() => service.pickUpFlag(session, MOCK_PLAYER_ID_1, position)).toThrow(BadRequestException);
+            expect(() => service.pickUpFlag(session, MOCK_PLAYER_ID_1)).toThrow(BadRequestException);
         });
     });
 
