@@ -3,7 +3,7 @@ import { InGameService } from '@app/modules/in-game/services/in-game/in-game.ser
 import { AddVirtualPlayerDto } from '@app/modules/session/dto/add-virtual-player.dto';
 import { AvailableSessionsUpdatedDto } from '@app/modules/session/dto/available-sessions-updated.dto';
 import { CreateSessionDto, SessionCreatedDto } from '@app/modules/session/dto/create-session.dto';
-import { AvatarSelectionJoinedDto, JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection';
+import { AvatarSelectionJoinedDto, JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection.dto';
 import { JoinSessionDto, SessionJoinedDto } from '@app/modules/session/dto/join-session.dto';
 import { KickPlayerDto } from '@app/modules/session/dto/kick-player.dto';
 import { AvatarAssignmentsUpdatedDto, UpdateAvatarAssignmentsDto } from '@app/modules/session/dto/update-avatar-assignments.dto';

@@ -2,7 +2,7 @@
 import { AVATAR_SELECTION_ROOM_PREFIX } from '@app/constants/session.constants';
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
-import { JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection';
+import { JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
 import { KickPlayerDto } from '@app/modules/session/dto/kick-player.dto';
 import { PlayerDto } from '@app/modules/session/dto/player.dto';
