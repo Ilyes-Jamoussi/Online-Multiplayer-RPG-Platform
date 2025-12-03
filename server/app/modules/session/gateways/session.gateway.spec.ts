@@ -236,7 +236,6 @@ describe('SessionGateway', () => {
 
             gateway.createSession(mockSocket, data);
 
-            // Wait for async handleAvailabilityChange to complete
             await new Promise((resolve) => setTimeout(resolve, 0));
 
             expect(sessionService.createSession).toHaveBeenCalledWith(SOCKET_ID, data);
@@ -704,7 +703,6 @@ describe('SessionGateway', () => {
 
             gateway.leaveSession(mockSocket);
 
-            // Wait for async handleAvailabilityChange to complete
             await new Promise((resolve) => setTimeout(resolve, 0));
 
             expect(mockSocket.broadcast.to).toHaveBeenCalledWith(SESSION_ID);
