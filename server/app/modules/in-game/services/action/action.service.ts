@@ -37,11 +37,11 @@ export class ActionService {
         private readonly sessionRepository: InGameSessionRepository,
     ) {}
 
-    pickUpFlag(session: InGameSession, playerId: string, position: Position): void {
+    pickUpFlag(session: InGameSession, playerId: string): void {
         if (!session.inGamePlayers[playerId]) throw new NotFoundException('Player not found');
         if (!session.flagData) throw new NotFoundException('Flag data not found');
         if (session.flagData.holderPlayerId) throw new BadRequestException('Flag already picked up');
-        this.sessionRepository.pickUpFlag(session, playerId, position);
+        this.sessionRepository.pickUpFlag(session, playerId);
     }
 
     transferFlag(session: InGameSession, playerId: string, position: Position): void {

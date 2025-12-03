@@ -847,5 +847,51 @@ describe('SessionService', () => {
             expect(virtualPlayer1?.id).toMatch(/^virtual-/);
             expect(virtualPlayer2?.id).toMatch(/^virtual-/);
         });
+
+        it('should create virtual player with all return object properties correctly set', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD + RANDOM_OFFSET_ABOVE_THRESHOLD);
+
+            const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Offensive);
+
+            const virtualPlayer = players.find((p) => p.virtualPlayerType);
+            expect(virtualPlayer).toBeDefined();
+            expect(virtualPlayer?.id).toBeDefined();
+            expect(virtualPlayer?.id).toMatch(/^virtual-/);
+            expect(virtualPlayer?.name).toBeDefined();
+            expect(virtualPlayer?.avatar).toBeDefined();
+            expect(virtualPlayer?.isAdmin).toBe(false);
+            expect(virtualPlayer?.baseHealth).toBe(BASE_STAT_VALUE);
+            expect(virtualPlayer?.healthBonus).toBe(BONUS_VALUE);
+            expect(virtualPlayer?.health).toBe(BASE_STAT_VALUE + BONUS_VALUE);
+        });
+
+        it('should create virtual player with healthBonus zero and health calculated correctly', () => {
+            const dto = createCreateSessionDto();
+            const result = service.createSession(ADMIN_ID, dto);
+            jest.spyOn(Math, 'random')
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(ZERO)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD)
+                .mockReturnValueOnce(RANDOM_THRESHOLD - RANDOM_OFFSET_BELOW_THRESHOLD);
+
+            const players = service.addVirtualPlayer(result.sessionId, VirtualPlayerType.Defensive);
+
+            const virtualPlayer = players.find((p) => p.virtualPlayerType);
+            expect(virtualPlayer).toBeDefined();
+            expect(virtualPlayer?.id).toBeDefined();
+            expect(virtualPlayer?.id).toMatch(/^virtual-/);
+            expect(virtualPlayer?.name).toBeDefined();
+            expect(virtualPlayer?.avatar).toBeDefined();
+            expect(virtualPlayer?.isAdmin).toBe(false);
+            expect(virtualPlayer?.baseHealth).toBe(BASE_STAT_VALUE);
+            expect(virtualPlayer?.healthBonus).toBe(ZERO);
+            expect(virtualPlayer?.health).toBe(BASE_STAT_VALUE + ZERO);
+        });
     });
 });

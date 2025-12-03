@@ -47,13 +47,13 @@ export class GameplayService {
         if (!player.actionsRemaining && !player.speed) this.timerService.endTurnManual(session);
     }
 
-    pickUpFlag(sessionId: string, playerId: string, position: Position): void {
+    pickUpFlag(sessionId: string, playerId: string): void {
         const session = this.sessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
         if (!player) throw new NotFoundException('Player not found');
         if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
         if (session.mode !== GameMode.CTF) throw new BadRequestException('Not a CTF game');
-        this.actionService.pickUpFlag(session, playerId, position);
+        this.actionService.pickUpFlag(session, playerId);
         player.actionsRemaining--;
         session.currentTurn.hasUsedAction = true;
         this.actionService.calculateReachableTiles(session, playerId);
@@ -177,7 +177,7 @@ export class GameplayService {
             } else {
                 const placeable = this.actionService.getPlaceableAtPosition(sessionId, finalPosition);
                 if (placeable && placeable.kind === PlaceableKind.FLAG && placeable.placed) {
-                    this.sessionRepository.pickUpFlag(session, playerId, finalPosition);
+                    this.sessionRepository.pickUpFlag(session, playerId);
                 }
             }
         }
