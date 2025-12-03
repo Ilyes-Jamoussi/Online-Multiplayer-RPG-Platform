@@ -60,4 +60,5 @@ export enum ServerEvents {
 
     VirtualPlayerCombatStarted = 'virtual-player-combat-started',
     VirtualPlayerCombatVictory = 'virtual-player-combat-victory',
+    VirtualPlayerFlagTransferRequested = 'virtual-player-flag-transfer-requested',
 }

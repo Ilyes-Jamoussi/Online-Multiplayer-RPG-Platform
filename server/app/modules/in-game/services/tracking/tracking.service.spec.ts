@@ -166,6 +166,17 @@ describe('TrackingService', () => {
                 getSpy.mockRestore();
             }
         });
+
+        it('should handle case when playerTiles.get returns undefined', () => {
+            const position = createMockPosition();
+            service.initializeTracking(SESSION_ID, MAP_SIZE_SMALL, TOTAL_DOORS, TOTAL_SANCTUARIES, TOTAL_TELEPORT_TILES);
+            const trackingData = service.getTrackingData(SESSION_ID);
+            if (trackingData) {
+                const getSpy = jest.spyOn(trackingData.playerTiles, 'get').mockReturnValueOnce(undefined);
+                service.trackTileVisited(SESSION_ID, PLAYER_ID_1, position);
+                getSpy.mockRestore();
+            }
+        });
     });
 
     describe('trackTeleportation', () => {
@@ -371,7 +382,7 @@ describe('TrackingService', () => {
             expect(trackingData).toBeNull();
         });
 
-        it('should handle case when playerDamage.get returns undefined', () => {
+        it('should handle case when playerDamage.get returns undefined in trackDamageDealt', () => {
             service.initializeTracking(SESSION_ID, MAP_SIZE_SMALL, TOTAL_DOORS, TOTAL_SANCTUARIES, TOTAL_TELEPORT_TILES);
             const trackingData = service.getTrackingData(SESSION_ID);
             if (trackingData) {
@@ -424,7 +435,7 @@ describe('TrackingService', () => {
             expect(trackingData).toBeNull();
         });
 
-        it('should handle case when playerDamage.get returns undefined', () => {
+        it('should handle case when playerDamage.get returns undefined in trackDamageReceived', () => {
             service.initializeTracking(SESSION_ID, MAP_SIZE_SMALL, TOTAL_DOORS, TOTAL_SANCTUARIES, TOTAL_TELEPORT_TILES);
             const trackingData = service.getTrackingData(SESSION_ID);
             if (trackingData) {
