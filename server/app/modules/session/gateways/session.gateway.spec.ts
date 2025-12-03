@@ -16,7 +16,6 @@ import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { SessionEvents } from '@common/enums/session-events.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { WaitingRoomSession } from '@common/interfaces/session.interface';
-import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import 'reflect-metadata';
@@ -181,15 +180,9 @@ describe('SessionGateway', () => {
 
     describe('ValidationPipe exceptionFactory', () => {
         it('should trigger validation error factory (coverage for lines 25-26)', () => {
-            const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
-            const mockErrors = [{ property: 'gameId', constraints: { isString: 'gameId must be a string' } }];
-
             expect(() => {
-                validationExceptionFactory(mockErrors);
+                validationExceptionFactory();
             }).toThrow('Validation failed');
-
-            expect(loggerSpy).toHaveBeenCalledWith('Validation failed:', mockErrors);
-            loggerSpy.mockRestore();
         });
     });
 

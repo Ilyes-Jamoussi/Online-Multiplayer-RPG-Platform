@@ -8,13 +8,11 @@ import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
 import { VPExecutionService } from '@app/modules/in-game/services/vp-execution/vp-execution.service';
 import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class VirtualPlayerService {
-    private readonly logger = new Logger(VirtualPlayerService.name);
-
     constructor(
         private readonly gameplayService: GameplayService,
         private readonly sessionRepository: InGameSessionRepository,
@@ -43,12 +41,10 @@ export class VirtualPlayerService {
 
         const isAttackerStillCurrentTurn = session.currentTurn.activePlayerId === attackerId;
         if (!isAttackerStillCurrentTurn) {
-            this.logger.debug(`VP ${attackerId} lost combat or turn ended, not continuing`);
             return;
         }
 
         if (!winnerId || winnerId === attackerId) {
-            this.logger.debug(`VP ${attackerId} won or drew combat, continuing turn`);
             setTimeout(() => this.vpExecutionService.continueOrEndTurn(sessionId, attackerId), VIRTUAL_PLAYER_ACTION_DELAY_MS);
         }
     }

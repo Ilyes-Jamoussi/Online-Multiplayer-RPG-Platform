@@ -1,6 +1,3 @@
-import { Logger } from '@nestjs/common';
-
-export const validationExceptionFactory = (errors: unknown): Error => {
-    new Logger('ValidationPipe').error('Validation failed:', errors);
+export const validationExceptionFactory = (): Error => {
     throw new Error('Validation failed');
 };

@@ -7,7 +7,6 @@ import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { NotificationEvents } from '@common/enums/notification-events.enum';
 import { CombatAttack, CombatDefense, CombatResult } from '@common/interfaces/combat.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import 'reflect-metadata';
 import { Server, Socket } from 'socket.io';
@@ -127,15 +126,9 @@ describe('CombatGateway', () => {
 
     describe('ValidationPipe exceptionFactory', () => {
         it('should trigger validation error factory', () => {
-            const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
-            const mockErrors = [{ property: 'sessionId', constraints: { isString: 'sessionId must be a string' } }];
-
             expect(() => {
-                validationExceptionFactory(mockErrors);
+                validationExceptionFactory();
             }).toThrow('Validation failed');
-
-            expect(loggerSpy).toHaveBeenCalledWith('Validation failed:', mockErrors);
-            loggerSpy.mockRestore();
         });
     });
 
