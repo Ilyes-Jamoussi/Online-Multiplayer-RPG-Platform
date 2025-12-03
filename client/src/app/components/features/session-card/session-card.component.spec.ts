@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SessionPreviewDto } from '@app/dto/session-preview-dto';
+import { MAP_SIZE_DISPLAY, GAME_MODE_DISPLAY } from '@app/constants/display.constants';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { SessionCardComponent } from './session-card.component';
@@ -203,6 +204,68 @@ describe('SessionCardComponent', () => {
 
             const joinButton = fixture.nativeElement.querySelector('app-ui-button');
             expect(joinButton).toBeTruthy();
+        });
+    });
+
+    describe('formattedMapSize', () => {
+        it('should return display value when mapSize exists in MAP_SIZE_DISPLAY', () => {
+            const session: SessionPreviewDto = {
+                id: TEST_SESSION_ID_1,
+                currentPlayers: TEST_CURRENT_PLAYERS_2,
+                maxPlayers: TEST_MAX_PLAYERS_4,
+                gameName: TEST_GAME_NAME_1,
+                gameDescription: TEST_GAME_DESCRIPTION_1,
+                mapSize: MapSize.SMALL,
+                gameMode: GameMode.CLASSIC,
+            };
+            component.session = session;
+            expect(component.formattedMapSize).toBe(MAP_SIZE_DISPLAY[MapSize.SMALL]);
+        });
+
+        it('should return mapSize as string when not in MAP_SIZE_DISPLAY', () => {
+            const unknownMapSize = 999 as MapSize;
+            const session: SessionPreviewDto = {
+                id: TEST_SESSION_ID_1,
+                currentPlayers: TEST_CURRENT_PLAYERS_2,
+                maxPlayers: TEST_MAX_PLAYERS_4,
+                gameName: TEST_GAME_NAME_1,
+                gameDescription: TEST_GAME_DESCRIPTION_1,
+                mapSize: unknownMapSize,
+                gameMode: GameMode.CLASSIC,
+            };
+            component.session = session;
+            expect(component.formattedMapSize).toBe('999');
+        });
+    });
+
+    describe('formattedGameMode', () => {
+        it('should return display value when gameMode exists in GAME_MODE_DISPLAY', () => {
+            const session: SessionPreviewDto = {
+                id: TEST_SESSION_ID_1,
+                currentPlayers: TEST_CURRENT_PLAYERS_2,
+                maxPlayers: TEST_MAX_PLAYERS_4,
+                gameName: TEST_GAME_NAME_1,
+                gameDescription: TEST_GAME_DESCRIPTION_1,
+                mapSize: MapSize.SMALL,
+                gameMode: GameMode.CLASSIC,
+            };
+            component.session = session;
+            expect(component.formattedGameMode).toBe(GAME_MODE_DISPLAY[GameMode.CLASSIC]);
+        });
+
+        it('should return gameMode as string when not in GAME_MODE_DISPLAY', () => {
+            const unknownGameMode = 'UNKNOWN' as GameMode;
+            const session: SessionPreviewDto = {
+                id: TEST_SESSION_ID_1,
+                currentPlayers: TEST_CURRENT_PLAYERS_2,
+                maxPlayers: TEST_MAX_PLAYERS_4,
+                gameName: TEST_GAME_NAME_1,
+                gameDescription: TEST_GAME_DESCRIPTION_1,
+                mapSize: MapSize.SMALL,
+                gameMode: unknownGameMode,
+            };
+            component.session = session;
+            expect(component.formattedGameMode).toBe('UNKNOWN');
         });
     });
 });

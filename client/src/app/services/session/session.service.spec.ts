@@ -1,12 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ROUTES } from '@app/enums/routes.enum';
+import { ChatSocketService } from '@app/services/chat-socket/chat-socket.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
+import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { SessionService } from './session.service';
 
@@ -17,6 +19,7 @@ describe('SessionService', () => {
     let mockSessionSocketService: jasmine.SpyObj<SessionSocketService>;
     let mockNotificationService: jasmine.SpyObj<NotificationService>;
     let mockRouter: jasmine.SpyObj<Router>;
+    let mockChatSocketService: jasmine.SpyObj<ChatSocketService>;
 
     const mockPlayer: Player = {
         id: 'player1',
@@ -70,16 +73,19 @@ describe('SessionService', () => {
             'onAvatarSelectionJoined',
             'onAvailableSessionsUpdated',
             'onSessionAutoLocked',
+            'addVirtualPlayer',
         ]);
 
         mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+        mockChatSocketService = jasmine.createSpyObj('ChatSocketService', ['leaveChatRoom']);
 
         TestBed.configureTestingModule({
             providers: [
                 { provide: SessionSocketService, useValue: mockSessionSocketService },
                 { provide: NotificationService, useValue: mockNotificationService },
                 { provide: Router, useValue: mockRouter },
+                { provide: ChatSocketService, useValue: mockChatSocketService },
             ],
         });
         service = TestBed.inject(SessionService);
@@ -101,6 +107,12 @@ describe('SessionService', () => {
             expect(service.id()).toBe('');
         });
 
+        it('should leave chat room when resetting session with chatId', () => {
+            service.updateSession({ chatId: 'chat123' });
+            service.reset();
+            expect(mockChatSocketService.leaveChatRoom).toHaveBeenCalledWith({ chatId: 'chat123' });
+        });
+
         it('should lock session', () => {
             service.lock();
             expect(service.isRoomLocked()).toBe(true);
@@ -113,14 +125,37 @@ describe('SessionService', () => {
             expect(service.isRoomLocked()).toBe(false);
             expect(mockSessionSocketService.unlockSession).toHaveBeenCalled();
         });
+
+        it('should auto-unlock when session is not full', () => {
+            service.updateSession({ maxPlayers: 4, players: [mockPlayer, mockPlayer] });
+            TestBed.flushEffects();
+            expect(service.isRoomLocked()).toBe(false);
+        });
     });
 
     describe('Session State Checks', () => {
-        it('should check if can start game', () => {
-            service.updateSession({ isRoomLocked: true, players: [mockPlayer, mockPlayer] });
+        it('should return true for canStartGame in CLASSIC mode with minimum players', () => {
+            service.updateSession({ mode: GameMode.CLASSIC, players: [mockPlayer, mockPlayer] });
             expect(service.canStartGame()).toBe(true);
+        });
 
-            service.updateSession({ players: [mockPlayer] });
+        it('should return false for canStartGame in CLASSIC mode with less than minimum players', () => {
+            service.updateSession({ mode: GameMode.CLASSIC, players: [mockPlayer] });
+            expect(service.canStartGame()).toBe(false);
+        });
+
+        it('should return true for canStartGame in CTF mode with even number of players', () => {
+            service.updateSession({ mode: GameMode.CTF, players: [mockPlayer, mockPlayer] });
+            expect(service.canStartGame()).toBe(true);
+        });
+
+        it('should return false for canStartGame in CTF mode with odd number of players', () => {
+            service.updateSession({ mode: GameMode.CTF, players: [mockPlayer, mockPlayer, mockPlayer] });
+            expect(service.canStartGame()).toBe(false);
+        });
+
+        it('should return false for canStartGame in CTF mode with zero players', () => {
+            service.updateSession({ mode: GameMode.CTF, players: [] });
             expect(service.canStartGame()).toBe(false);
         });
     });
@@ -151,6 +186,15 @@ describe('SessionService', () => {
             service.leaveSession();
             expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.HomePage]);
             expect(mockSessionSocketService.leaveSession).toHaveBeenCalled();
+        });
+
+        it('should add virtual player', () => {
+            service.updateSession({ id: 'session1' });
+            service.addVirtualPlayer(VirtualPlayerType.Offensive);
+            expect(mockSessionSocketService.addVirtualPlayer).toHaveBeenCalledWith({
+                sessionId: 'session1',
+                virtualPlayerType: VirtualPlayerType.Offensive,
+            });
         });
     });
 

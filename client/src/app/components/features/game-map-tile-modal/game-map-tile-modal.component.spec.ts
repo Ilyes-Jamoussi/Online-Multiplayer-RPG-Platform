@@ -11,6 +11,7 @@ import { Dice } from '@common/enums/dice.enum';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { StartPoint } from '@common/interfaces/start-point.interface';
 import { GameMapTileModalComponent } from './game-map-tile-modal.component';
 
 const MOCK_PLAYER_ID = 'player1';
@@ -88,6 +89,7 @@ describe('GameMapTileModalComponent', () => {
 
         mockInGameService = jasmine.createSpyObj('InGameService', [], {
             flagData: signal(undefined),
+            startPoints: signal<StartPoint[]>([]),
         });
 
         mockPlayerService = jasmine.createSpyObj('PlayerService', ['getTeamColor']);
@@ -247,6 +249,56 @@ describe('GameMapTileModalComponent', () => {
             const result = component.getTeamColor(undefined);
             expect(mockPlayerService.getTeamColor).toHaveBeenCalledWith(undefined);
             expect(result).toBeUndefined();
+        });
+    });
+
+    describe('startPointOnTile', () => {
+        it('should return undefined when no active tile', () => {
+            mockGameMapService.getActiveTile.and.returnValue(null);
+            expect(component.startPointOnTile).toBeUndefined();
+        });
+
+        it('should return undefined when no start point at tile position', () => {
+            mockGameMapService.getActiveTile.and.returnValue(mockTile);
+            Object.defineProperty(mockInGameService, 'startPoints', {
+                value: signal<StartPoint[]>([{ id: 'start1', x: 99, y: 99, playerId: 'other' }]),
+                configurable: true,
+            });
+            expect(component.startPointOnTile).toBeUndefined();
+        });
+
+        it('should return start point data when start point exists at tile position', () => {
+            mockGameMapService.getActiveTile.and.returnValue(mockTile);
+            Object.defineProperty(mockInGameService, 'startPoints', {
+                value: signal<StartPoint[]>([{ id: 'start1', x: mockTile.x, y: mockTile.y, playerId: MOCK_PLAYER_ID }]),
+                configurable: true,
+            });
+            Object.defineProperty(mockGameMapService, 'currentlyPlayers', {
+                value: [mockPlayer],
+                configurable: true,
+            });
+
+            const result = component.startPointOnTile;
+            expect(result).toBeDefined();
+            expect(result?.playerId).toBe(MOCK_PLAYER_ID);
+            expect(result?.player).toBe(mockPlayer);
+        });
+
+        it('should return start point data with undefined player when player not found', () => {
+            mockGameMapService.getActiveTile.and.returnValue(mockTile);
+            Object.defineProperty(mockInGameService, 'startPoints', {
+                value: signal<StartPoint[]>([{ id: 'start1', x: mockTile.x, y: mockTile.y, playerId: 'unknown-player' }]),
+                configurable: true,
+            });
+            Object.defineProperty(mockGameMapService, 'currentlyPlayers', {
+                value: [],
+                configurable: true,
+            });
+
+            const result = component.startPointOnTile;
+            expect(result).toBeDefined();
+            expect(result?.playerId).toBe('unknown-player');
+            expect(result?.player).toBeUndefined();
         });
     });
 });

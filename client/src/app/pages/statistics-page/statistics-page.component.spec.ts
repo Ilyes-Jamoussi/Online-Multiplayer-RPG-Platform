@@ -581,4 +581,28 @@ describe('StatisticsPageComponent', () => {
             expect(result).toBe(false);
         });
     });
+
+    describe('setActiveTab', () => {
+        it('should set activeTab to chat', () => {
+            component.setActiveTab('chat');
+            expect(component.activeTab).toBe('chat');
+        });
+
+        it('should set activeTab to journal', () => {
+            component.setActiveTab('journal');
+            expect(component.activeTab).toBe('journal');
+        });
+    });
+
+    describe('isActiveTab', () => {
+        it('should return true when tab matches activeTab', () => {
+            component.activeTab = 'chat';
+            expect(component.isActiveTab('chat')).toBe(true);
+        });
+
+        it('should return false when tab does not match activeTab', () => {
+            component.activeTab = 'chat';
+            expect(component.isActiveTab('journal')).toBe(false);
+        });
+    });
 });

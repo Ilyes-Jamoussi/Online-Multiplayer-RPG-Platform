@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
 import { TeleportTilesDto } from '@app/dto/teleport-tiles-dto';
@@ -333,6 +334,19 @@ describe('GameEditorToolbarComponent', () => {
                 type: ToolType.PlaceableEraserTool,
             };
             mockGameEditorInteractionsService.activeTool = eraserTool;
+
+            const result = component.isBrushSelected(brush);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when activeTool is TileBrushTool but does not have tileKind property', () => {
+            const brushToolWithoutTileKind = {
+                type: ToolType.TileBrushTool,
+                leftDrag: TEST_LEFT_DRAG_FALSE,
+                rightDrag: TEST_RIGHT_DRAG_FALSE,
+            } as ActiveTool;
+            mockGameEditorInteractionsService.activeTool = brushToolWithoutTileKind;
 
             const result = component.isBrushSelected(brush);
 

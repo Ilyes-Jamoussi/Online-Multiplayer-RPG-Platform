@@ -70,11 +70,12 @@ export class GameMapTileModalComponent {
     }
 
     get startPointOnTile(): { playerId: string; player: Player | undefined } | undefined {
-        if (!this.activeTile) return undefined;
-        const startPoint = this.inGameService.startPoints().find((point) => point.x === this.activeTile!.x && point.y === this.activeTile!.y);
+        const activeTile = this.activeTile;
+        if (!activeTile) return undefined;
+        const startPoint = this.inGameService.startPoints().find((point) => point.x === activeTile.x && point.y === activeTile.y);
         if (!startPoint) return undefined;
-        const player = this.gameMapService.currentlyPlayers.find((p) => p.id === startPoint.playerId);
-        return { playerId: startPoint.playerId, player };
+        const startPointPlayer = this.gameMapService.currentlyPlayers.find((player) => player.id === startPoint.playerId);
+        return { playerId: startPoint.playerId, player: startPointPlayer };
     }
 
     close(): void {

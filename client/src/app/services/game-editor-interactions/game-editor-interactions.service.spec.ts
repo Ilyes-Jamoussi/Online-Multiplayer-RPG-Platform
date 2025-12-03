@@ -895,6 +895,18 @@ describe('GameEditorInteractionsService', () => {
 
             expect(teleportService.placeTeleportTile).not.toHaveBeenCalled();
         });
+
+        it('does nothing when tool type is TeleportTileTool but tool is null', () => {
+            const teleportService = TestBed.inject(GameEditorTeleportService);
+            service['_activeTool'].set(null);
+
+            type ServiceWithPrivateMethod = {
+                handleTeleportTileClick: (x: number, y: number) => void;
+            };
+            (service as unknown as ServiceWithPrivateMethod).handleTeleportTileClick(5, 6);
+
+            expect(teleportService.placeTeleportTile).not.toHaveBeenCalled();
+        });
     });
 
     describe('handleTeleportTileRightClick', () => {

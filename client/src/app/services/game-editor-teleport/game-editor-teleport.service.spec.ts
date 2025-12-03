@@ -260,6 +260,21 @@ describe('GameEditorTeleportService', () => {
             expect(updatedChannels[0].tiles?.entryB).toBeUndefined();
         });
 
+        it('should create tiles object when placing first tile and tiles is null/undefined', () => {
+            const channel: TeleportChannelDto = {
+                channelNumber: TEST_CHANNEL_NUMBER_1,
+                tiles: undefined as unknown as TeleportTilesDto,
+            };
+            teleportChannelsSignal.set([channel]);
+
+            service.placeTeleportTile(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1, TEST_CHANNEL_NUMBER_1, TEST_IS_FIRST_TILE);
+
+            const updatedChannels = teleportChannelsSignal();
+            expect(updatedChannels[0].tiles).toBeDefined();
+            expect(updatedChannels[0].tiles?.entryA).toEqual(CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_1, TEST_Y_COORDINATE_1));
+            expect(updatedChannels[0].tiles?.entryB).toBeUndefined();
+        });
+
         it('should update entryA when placing first tile and tiles exists', () => {
             const tiles = CREATE_MOCK_TELEPORT_TILES(CREATE_MOCK_TELEPORT_TILE_COORDINATES(TEST_X_COORDINATE_2, TEST_Y_COORDINATE_2), undefined);
             const channel = CREATE_MOCK_TELEPORT_CHANNEL(TEST_CHANNEL_NUMBER_1, tiles);

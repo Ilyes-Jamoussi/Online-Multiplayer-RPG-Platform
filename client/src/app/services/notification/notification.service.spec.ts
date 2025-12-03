@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-empty-function -- Some functions are mocked as empty functions */
 import { TestBed } from '@angular/core/testing';
 import { NotificationService } from './notification.service';
+import { NotificationSocketService } from '@app/services/notification-socket/notification-socket.service';
 import { ROUTES } from '@app/enums/routes.enum';
 
 const TEST_DURATION_1000 = 1000;
@@ -9,9 +11,18 @@ const TEST_DURATION_5000 = 5000;
 
 describe('NotificationService', () => {
     let service: NotificationService;
+    let mockNotificationSocketService: jasmine.SpyObj<NotificationSocketService>;
+    let errorMessageCallback: (message: string) => void;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
+        mockNotificationSocketService = jasmine.createSpyObj('NotificationSocketService', ['onErrorMessage']);
+        mockNotificationSocketService.onErrorMessage.and.callFake((callback: (message: string) => void) => {
+            errorMessageCallback = callback;
+        });
+
+        TestBed.configureTestingModule({
+            providers: [{ provide: NotificationSocketService, useValue: mockNotificationSocketService }],
+        });
         service = TestBed.inject(NotificationService);
         jasmine.clock().install();
     });
@@ -63,6 +74,29 @@ describe('NotificationService', () => {
 
             service.resetPopup();
             expect(service.notification()).toBeNull();
+        });
+
+        it('should display confirmation popup', () => {
+            const confirmation = { title: 'Confirm', message: 'Are you sure?', onConfirm: () => {} };
+            service.displayConfirmationPopup(confirmation);
+
+            const notification = service.notification();
+            expect(notification).toEqual({ ...confirmation, type: 'confirmation' });
+        });
+    });
+
+    describe('Socket Listeners', () => {
+        it('should display error popup when receiving error message from socket', () => {
+            const errorMessage = 'Socket error message';
+            errorMessageCallback(errorMessage);
+
+            const notification = service.notification();
+            expect(notification).toEqual({
+                title: 'Erreur',
+                message: errorMessage,
+                redirectRoute: ROUTES.HomePage,
+                type: 'error',
+            });
         });
     });
 
