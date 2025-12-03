@@ -1,5 +1,5 @@
 <div class="map-tile" [class]="cssClass" (click)="onTileClick($event)" role="button" tabindex="0">
-    <img [src]="imageSrc" [alt]="tile.kind" class="tile-image" draggable="false" />
+    <img [src]="imageSrc" [alt]="tile.kind" class="tile-image" draggable="false" loading="lazy" />
     @if (teleportChannelNumber !== null) {
     <span class="teleport-channel-number">{{ teleportChannelNumber }}</span>
     } @if (playerOnTile) {

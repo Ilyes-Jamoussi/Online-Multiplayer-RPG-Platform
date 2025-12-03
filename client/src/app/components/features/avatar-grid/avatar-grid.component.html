@@ -1,6 +1,6 @@
 <div class="avatar-animated">
     @if (selectedAvatar && animatedAvatar) {
-    <img [src]="animatedAvatar" [alt]="'Avatar sélectionné ' + selectedAvatar" />
+    <img [src]="animatedAvatar" [alt]="'Avatar sélectionné ' + selectedAvatar" loading="lazy" />
     } @else {
     <div class="selected-empty">👤</div>
     }
