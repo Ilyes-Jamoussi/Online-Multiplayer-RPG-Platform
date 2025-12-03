@@ -15,7 +15,7 @@ import { Position } from '@common/interfaces/position.interface';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { getModelToken } from '@nestjs/mongoose';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { Model, Types } from 'mongoose';
 import { GameCacheService } from './game-cache.service';
 
@@ -150,7 +150,7 @@ describe('GameCacheService', () => {
             findById: jest.fn(),
         } as unknown as jest.Mocked<Model<Game>>;
 
-        const module: TestingModule = await Test.createTestingModule({
+        const module = await Test.createTestingModule({
             providers: [
                 GameCacheService,
                 { provide: getModelToken(Game.name), useValue: mockGameModel },

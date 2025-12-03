@@ -671,6 +671,22 @@ describe('TurnTimerService', () => {
             expect(service.getGameTimerState(SESSION_ID)).toBe(TurnTimerStates.PlayerTurn);
         });
 
+        it('should execute lines 124-125 when error occurs in setTimeout callback after nextTurn', () => {
+            const session = createMockSession();
+            sessionRepository.findById.mockReturnValue(session);
+            service.startFirstTurnWithTransition(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+            service.endTurnManual(session);
+
+            eventEmitter.emit.mockImplementationOnce(() => {
+                throw new Error('Test error in emit');
+            });
+
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            expect(service.getGameTimerState(SESSION_ID)).toBe(TurnTimerStates.PlayerTurn);
+        });
+
         it('should return newTurn from nextTurn', () => {
             const session = createMockSession();
             sessionRepository.findById.mockReturnValue(session);
@@ -724,6 +740,21 @@ describe('TurnTimerService', () => {
 
             service.startFirstTurnWithTransition(session);
             jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+            jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
+
+            expect(service.getGameTimerState(SESSION_ID)).toBe(TurnTimerStates.PlayerTurn);
+        });
+
+        it('should execute lines 158-159 when error occurs in autoEndTurn', () => {
+            const session = createMockSession();
+            sessionRepository.findById.mockReturnValue(session);
+            service.startFirstTurnWithTransition(session);
+            jest.advanceTimersByTime(DEFAULT_TURN_TRANSITION_DURATION);
+
+            sessionRepository.findById.mockImplementationOnce(() => {
+                throw new Error('Test error in autoEndTurn');
+            });
+
             jest.advanceTimersByTime(DEFAULT_TURN_DURATION);
 
             expect(service.getGameTimerState(SESSION_ID)).toBe(TurnTimerStates.PlayerTurn);
