@@ -25,11 +25,9 @@ export class GameCacheService {
         private readonly eventEmitter: EventEmitter2,
     ) {}
 
-    hidePlaceable(sessionId: string, position: Position): void {
+    hidePlaceable(sessionId: string, placeable: Placeable): void {
         const gameMap = this.sessionsGameMaps.get(sessionId);
         if (!gameMap) throw new NotFoundException('Game map not found');
-        const placeable = this.getPlaceableAtPosition(sessionId, position);
-        if (!placeable) throw new NotFoundException('Placeable not found');
         placeable.placed = false;
         this.eventEmitter.emit(ServerEvents.PlaceableUpdated, {
             sessionId,

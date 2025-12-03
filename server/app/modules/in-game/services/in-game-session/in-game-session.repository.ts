@@ -25,7 +25,7 @@ export class InGameSessionRepository {
         return Boolean(player?.virtualPlayerType);
     }
 
-    pickUpFlag(session: InGameSession, playerId: string, position: Position): void {
+    pickUpFlag(session: InGameSession, playerId: string): void {
         const flagData = session.flagData;
         if (!flagData) throw new NotFoundException('Flag data not found');
         if (flagData.holderPlayerId) throw new BadRequestException('Flag already picked up');
@@ -33,7 +33,9 @@ export class InGameSessionRepository {
         if (!player) throw new NotFoundException('Player not found');
         flagData.holderPlayerId = playerId;
         flagData.position = { x: player.x, y: player.y };
-        this.gameCache.hidePlaceable(session.id, position);
+        const flagPlaceable = this.gameCache.getFlagPlaceable(session.id, false);
+        if (!flagPlaceable) throw new NotFoundException('Flag placeable not found');
+        this.gameCache.hidePlaceable(session.id, flagPlaceable);
         this.eventEmitter.emit(ServerEvents.FlagPickedUp, { session, playerId });
     }
 

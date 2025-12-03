@@ -715,11 +715,9 @@ describe('InGameService', () => {
 
     describe('pickUpFlag', () => {
         it('should call gameplayService.pickUpFlag', () => {
-            const position: Position = { x: MOCK_X, y: MOCK_Y };
+            service.pickUpFlag(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
-            service.pickUpFlag(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
-
-            expect(mockGameplayService.pickUpFlag).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
+            expect(mockGameplayService.pickUpFlag).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
         });
     });
 

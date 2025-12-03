@@ -233,8 +233,8 @@ export class InGameService {
         this.statisticsService.calculateAndStoreGameStatistics(session, winnerId, winnerName, gameStartTime);
     }
 
-    pickUpFlag(sessionId: string, playerId: string, position: Position): void {
-        this.gameplayService.pickUpFlag(sessionId, playerId, position);
+    pickUpFlag(sessionId: string, playerId: string): void {
+        this.gameplayService.pickUpFlag(sessionId, playerId);
     }
 
     requestFlagTransfer(sessionId: string, playerId: string, position: Position): void {

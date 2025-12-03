@@ -130,9 +130,11 @@ export class MovementService {
     }
 
     private tryPickUpFlag(session: InGameSession, playerId: string, position: Position): void {
-        const placeable = this.gameCache.getPlaceableAtPosition(session.id, position);
-        if (placeable && placeable.kind === PlaceableKind.FLAG && placeable.placed) {
-            this.sessionRepository.pickUpFlag(session, playerId, position);
+        const placeables = this.gameCache.getPlaceablesAtPosition(session.id, position);
+        for (const object of placeables) {
+            if (object.kind === PlaceableKind.FLAG && object.placed) {
+                this.sessionRepository.pickUpFlag(session, playerId);
+            }
         }
     }
 
