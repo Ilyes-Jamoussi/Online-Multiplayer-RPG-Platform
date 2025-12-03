@@ -19,7 +19,7 @@
         <main class="combat-main">
             <div class="fighter-panel player-a" [class.is-me]="combatData.userRole === 'attacker'" [class.has-damage]="playerADamage">
                 <div class="fighter-identity">
-                    <img [src]="playerAAvatar" [alt]="playerAName" class="fighter-avatar" />
+                    <img [src]="playerAAvatar" [alt]="playerAName" class="fighter-avatar" loading="lazy" />
                     @if (playerADamage && playerADamage.damage > 0) {
                     <div class="damage-splash">-{{ playerADamage.damage }}</div>
                     }
@@ -62,7 +62,7 @@
                                 <span class="stat-icon">⚔️</span>
                                 <span class="base-value">{{ baseStatValue }}</span>
                                 <span class="plus">+</span>
-                                <img [src]="getDiceImage(playerADamage.attackDice)" class="dice-img" />
+                                <img [src]="getDiceImage(playerADamage.attackDice)" class="dice-img" loading="lazy" />
                                 <span class="roll">{{ playerADamage.attackRoll }}</span>
                                 @if (playerADamage.attackBonus > 0) {
                                 <span class="bonus">+{{ playerADamage.attackBonus }}</span>
@@ -76,7 +76,7 @@
                                 <span class="stat-icon">🛡️</span>
                                 <span class="base-value">{{ baseStatValue }}</span>
                                 <span class="plus">+</span>
-                                <img [src]="getDiceImage(playerADamage.defenseDice)" class="dice-img" />
+                                <img [src]="getDiceImage(playerADamage.defenseDice)" class="dice-img" loading="lazy" />
                                 <span class="roll">{{ playerADamage.defenseRoll }}</span>
                                 @if (playerADamage.defenseBonus > 0) {
                                 <span class="bonus">+{{ playerADamage.defenseBonus }}</span>
@@ -106,7 +106,7 @@
 
             <div class="fighter-panel player-b" [class.is-me]="combatData.userRole === 'target'" [class.has-damage]="playerBDamage">
                 <div class="fighter-identity">
-                    <img [src]="playerBAvatar" [alt]="playerBName" class="fighter-avatar" />
+                    <img [src]="playerBAvatar" [alt]="playerBName" class="fighter-avatar" loading="lazy" />
                     @if (playerBDamage && playerBDamage.damage > 0) {
                     <div class="damage-splash">-{{ playerBDamage.damage }}</div>
                     }
@@ -149,7 +149,7 @@
                                 <span class="stat-icon">⚔️</span>
                                 <span class="base-value">{{ baseStatValue }}</span>
                                 <span class="plus">+</span>
-                                <img [src]="getDiceImage(playerBDamage.attackDice)" class="dice-img" />
+                                <img [src]="getDiceImage(playerBDamage.attackDice)" class="dice-img" loading="lazy" />
                                 <span class="roll">{{ playerBDamage.attackRoll }}</span>
                                 @if (playerBDamage.attackBonus > 0) {
                                 <span class="bonus">+{{ playerBDamage.attackBonus }}</span>
@@ -163,7 +163,7 @@
                                 <span class="stat-icon">🛡️</span>
                                 <span class="base-value">{{ baseStatValue }}</span>
                                 <span class="plus">+</span>
-                                <img [src]="getDiceImage(playerBDamage.defenseDice)" class="dice-img" />
+                                <img [src]="getDiceImage(playerBDamage.defenseDice)" class="dice-img" loading="lazy" />
                                 <span class="roll">{{ playerBDamage.defenseRoll }}</span>
                                 @if (playerBDamage.defenseBonus > 0) {
                                 <span class="bonus">+{{ playerBDamage.defenseBonus }}</span>

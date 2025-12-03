@@ -64,10 +64,10 @@
                             <span> Attaque: @if (isAttackD4Selected) { D4 } @else if (isAttackD6Selected) { D6 } @else { (Aucun) } </span>
                             <div class="dice-row">
                                 <button type="button" class="dice-btn" [class.sel]="isAttackD4Selected" (click)="onAttackDiceChange(dice.D4)">
-                                    <img [src]="getDiceImage(dice.D4)" [alt]="dice.D4" />
+                                    <img [src]="getDiceImage(dice.D4)" [alt]="dice.D4" loading="lazy" />
                                 </button>
                                 <button type="button" class="dice-btn" [class.sel]="isAttackD6Selected" (click)="onAttackDiceChange(dice.D6)">
-                                    <img [src]="getDiceImage(dice.D6)" [alt]="dice.D6" />
+                                    <img [src]="getDiceImage(dice.D6)" [alt]="dice.D6" loading="lazy" />
                                 </button>
                             </div>
                         </div>
@@ -76,10 +76,10 @@
                             <span> Défense: @if (isDefenseD4Selected) { D4 } @else if (isDefenseD6Selected) { D6 } @else { (Aucun) } </span>
                             <div class="dice-row">
                                 <button type="button" class="dice-btn" [class.sel]="isDefenseD4Selected" (click)="onDefenseDiceChange(dice.D4)">
-                                    <img [src]="getDiceImage(dice.D4)" [alt]="dice.D4" />
+                                    <img [src]="getDiceImage(dice.D4)" [alt]="dice.D4" loading="lazy" />
                                 </button>
                                 <button type="button" class="dice-btn" [class.sel]="isDefenseD6Selected" (click)="onDefenseDiceChange(dice.D6)">
-                                    <img [src]="getDiceImage(dice.D6)" [alt]="dice.D6" />
+                                    <img [src]="getDiceImage(dice.D6)" [alt]="dice.D6" loading="lazy" />
                                 </button>
                             </div>
                         </div>

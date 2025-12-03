@@ -1,7 +1,7 @@
 <div class="player-info-panel">
     <div class="player-header">
         <div class="player-header-top">
-            <img [src]="avatarImage" [alt]="playerName" class="avatar" />
+            <img [src]="avatarImage" [alt]="playerName" class="avatar" loading="lazy" />
             <h3>
                 {{ playerName }}
                 @if (teamNumber !== undefined) {

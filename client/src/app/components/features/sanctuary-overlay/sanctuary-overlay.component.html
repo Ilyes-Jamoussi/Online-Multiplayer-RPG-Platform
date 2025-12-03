@@ -8,7 +8,7 @@
 
         <div class="sanctuary-content">
             <div class="sanctuary-image-container">
-                <img [src]="sanctuaryImage" [alt]="sanctuaryName" class="sanctuary-image" />
+                <img [src]="sanctuaryImage" [alt]="sanctuaryName" class="sanctuary-image" loading="lazy" />
             </div>
 
             @if (showActions) {
@@ -19,11 +19,13 @@
                     <button class="action-btn normal" (click)="performAction(false)">
                         <span class="btn-icon">✨</span>
                         <span class="btn-text">Action normale</span>
+                        <span class="btn-subtext">{{ sanctuaryDescription }}</span>
                     </button>
                     <button class="action-btn double" (click)="performAction(true)">
                         <span class="btn-icon">⚡</span>
                         <span class="btn-text">Doubler l'action</span>
                         <span class="btn-subtext">{{ sanctuarySuccessRate }}% de réussite</span>
+                        <span class="btn-subtext">{{ sanctuaryDoubleDescription }}</span>
                     </button>
                 </div>
             </div>
