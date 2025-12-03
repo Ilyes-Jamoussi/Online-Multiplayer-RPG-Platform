@@ -975,6 +975,31 @@ describe('InGameSessionRepository', () => {
             expect(session.startPoints.length).toBe(ZERO);
         });
 
+        it('should drop flag when player holding flag leaves', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_1 },
+            });
+            repository.save(session);
+
+            repository.playerLeave(SESSION_ID, PLAYER_ID_1);
+
+            expect(gameCache.showPlaceable).toHaveBeenCalledWith(SESSION_ID, createMockPosition());
+            expect(session.flagData?.holderPlayerId).toBeNull();
+            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.SessionUpdated, { session });
+        });
+
+        it('should not drop flag when player not holding flag leaves', () => {
+            const session = createMockSession({
+                flagData: { position: createMockPosition(), holderPlayerId: PLAYER_ID_2 },
+            });
+            repository.save(session);
+
+            repository.playerLeave(SESSION_ID, PLAYER_ID_1);
+
+            expect(gameCache.showPlaceable).not.toHaveBeenCalled();
+            expect(session.flagData?.holderPlayerId).toBe(PLAYER_ID_2);
+        });
+
         it('should throw NotFoundException when session not found', () => {
             expect(() => repository.playerLeave('non-existent', PLAYER_ID_1)).toThrow(NotFoundException);
         });

@@ -61,6 +61,7 @@ describe('VirtualPlayerService', () => {
     beforeEach(async () => {
         const mockGameplayService = {
             handleVPCombat: jest.fn(),
+            handleVPFlagTransfer: jest.fn(),
         };
 
         const mockSessionRepository = {
@@ -118,6 +119,25 @@ describe('VirtualPlayerService', () => {
             service.handleCombatTimerRestart(payload);
 
             expect(gameplayService.handleVPCombat).toHaveBeenCalledWith(SESSION_ID);
+        });
+    });
+
+    describe('handleFlagTransferRequested', () => {
+        beforeEach(() => {
+            jest.useFakeTimers();
+        });
+
+        it('should call handleVPFlagTransfer after delay', () => {
+            const session = createMockSession();
+            const payload = { session, fromPlayerId: 'player-1', toPlayerId: 'player-2' };
+
+            service.handleFlagTransferRequested(payload);
+
+            expect(gameplayService.handleVPFlagTransfer).not.toHaveBeenCalled();
+
+            jest.advanceTimersByTime(VIRTUAL_PLAYER_ACTION_DELAY_MS);
+
+            expect(gameplayService.handleVPFlagTransfer).toHaveBeenCalledWith(session.id, 'player-1', 'player-2');
         });
     });
 
