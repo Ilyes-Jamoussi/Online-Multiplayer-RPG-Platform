@@ -275,6 +275,12 @@ export class InGameSessionRepository {
         player.x = -1;
         player.y = -1;
         this.removeStartPoint(sessionId, player.startPointId);
+
+        if (session.flagData?.holderPlayerId === playerId) {
+            this.gameCache.showPlaceable(sessionId, session.flagData.position);
+            session.flagData.holderPlayerId = null;
+            this.update(session, true);
+        }
         return player;
     }
 

@@ -79,6 +79,14 @@ export class GameplayService {
         this.actionService.respondToFlagTransfer(sessionId, toPlayerId, fromPlayerId, accepted);
     }
 
+    handleVPFlagTransfer(sessionId: string, fromPlayerId: string, toPlayerId: string): void {
+        const session = this.sessionRepository.findById(sessionId);
+        const fromPlayer = session.inGamePlayers[fromPlayerId];
+        const toPlayer = session.inGamePlayers[toPlayerId];
+        if (!fromPlayer || !toPlayer) return;
+        this.actionService.respondToFlagTransfer(sessionId, toPlayerId, fromPlayerId, true);
+    }
+
     sanctuaryRequest(sessionId: string, playerId: string, position: Position, kind: PlaceableKind.HEAL | PlaceableKind.FIGHT): void {
         const session = this.sessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
