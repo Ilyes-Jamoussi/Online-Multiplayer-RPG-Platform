@@ -6,4 +6,3 @@ export const COMBAT_POSTURE_BONUS = 2;
 export const HEALTH_LOW_THRESHOLD = 25;
 export const HEALTH_MEDIUM_THRESHOLD = 50;
 export const SANCTUARY_SUCCESS_RATE = 50;
-

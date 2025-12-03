@@ -130,9 +130,9 @@ export class GameEditorCheckService {
         const problems: GameEditorIssue = { hasIssue: false };
         if (ratio <= MIN_TERRAIN_RATIO) {
             problems.hasIssue = true;
-            problems.message = `Le ratio de tuiles de terrain est trop bas (${(ratio * PERCENT_BASE).toFixed(
-                2,
-            )} %). Il doit être supérieur à ${MIN_TERRAIN_RATIO * PERCENT_BASE} %.`;
+            problems.message = `Le ratio de tuiles de terrain est trop bas (${(ratio * PERCENT_BASE).toFixed(2)} %). Il doit être supérieur à ${
+                MIN_TERRAIN_RATIO * PERCENT_BASE
+            } %.`;
         }
         return problems;
     }

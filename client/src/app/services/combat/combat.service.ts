@@ -50,13 +50,7 @@ export class CombatService {
         inject(ResetService).reset$.subscribe(() => this.reset());
     }
 
-    private startCombat(
-        attackerId: string,
-        targetId: string,
-        userRole: CombatRole,
-        attackerTileEffect?: number,
-        targetTileEffect?: number,
-    ): void {
+    private startCombat(attackerId: string, targetId: string, userRole: CombatRole, attackerTileEffect?: number, targetTileEffect?: number): void {
         this._combatData.set({ attackerId, targetId, userRole });
         this._selectedPosture.set(null);
         this._playerPostures.set({});

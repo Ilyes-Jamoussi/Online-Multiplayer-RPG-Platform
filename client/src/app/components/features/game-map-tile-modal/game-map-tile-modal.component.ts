@@ -69,7 +69,7 @@ export class GameMapTileModalComponent {
         return this.playerService.getTeamColor(teamNumber);
     }
 
-    get startPointOnTile(): { playerId: string; player: Player | undefined } | undefined {
+    get startPointOnTile() {
         const activeTile = this.activeTile;
         if (!activeTile) return undefined;
         const startPoint = this.inGameService.startPoints().find((point) => point.x === activeTile.x && point.y === activeTile.y);

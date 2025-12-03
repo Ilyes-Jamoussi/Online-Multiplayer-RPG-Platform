@@ -851,9 +851,7 @@ describe('MovementService', () => {
             const player = createMockPlayer({ x: POSITION_X, y: POSITION_Y, speed: SPEED });
             session.inGamePlayers[PLAYER_ID] = player;
             gameCache.getMapSize.mockReturnValue(MAP_SIZE);
-            gameCache.getTileAtPosition
-                .mockReturnValueOnce(createMockTile())
-                .mockReturnValue(createMockTile({ kind: TileKind.TELEPORT }));
+            gameCache.getTileAtPosition.mockReturnValueOnce(createMockTile()).mockReturnValue(createMockTile({ kind: TileKind.TELEPORT }));
             gameCache.getPlaceableAtPosition.mockReturnValue(null);
             gameCache.getTeleportDestination.mockImplementation(() => {
                 throw new Error('Invalid teleport');
@@ -896,9 +894,7 @@ describe('MovementService', () => {
             const player = createMockPlayer({ x: POSITION_X, y: POSITION_Y, speed: SPEED });
             session.inGamePlayers[PLAYER_ID] = player;
             gameCache.getMapSize.mockReturnValue(MAP_SIZE);
-            gameCache.getTileAtPosition
-                .mockReturnValueOnce(createMockTile())
-                .mockReturnValue(createMockTile({ kind: TileKind.DOOR, open: false }));
+            gameCache.getTileAtPosition.mockReturnValueOnce(createMockTile()).mockReturnValue(createMockTile({ kind: TileKind.DOOR, open: false }));
             gameCache.getTileOccupant.mockReturnValue(null);
 
             const result = service.calculateReachableTiles(session, PLAYER_ID);

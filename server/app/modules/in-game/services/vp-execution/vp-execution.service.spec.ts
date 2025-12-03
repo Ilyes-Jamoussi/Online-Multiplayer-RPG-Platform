@@ -1148,5 +1148,4 @@ describe('VPExecutionService', () => {
             }).not.toThrow();
         });
     });
-
 });
