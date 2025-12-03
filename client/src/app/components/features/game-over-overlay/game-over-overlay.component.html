@@ -1,27 +1,50 @@
 @if (gameOverData) {
 <div class="game-over-overlay">
     <div class="game-over-modal">
-        <div class="trophy-icon">🏆</div>
-        <h1 class="game-over-title">{{ title }}</h1>
+        <div class="victory-particles">
+            @for (particle of [1,2,3,4,5,6]; track particle) {
+            <div class="particle" [style.--delay]="particle * 0.15 + 's'"></div>
+            }
+        </div>
 
-        <div class="results-section">
-            <h2 class="results-header">Résultats</h2>
-            <div class="player-results">
-                @for (player of playerStats; track player.name) {
-                <div class="player-result" [class.winner]="player.isWinner">
-                    @if (player.isWinner) {
-                    <span class="winner-crown">👑</span>
+        <div class="victory-glow"></div>
+
+        <div class="modal-content">
+            <h1 class="game-over-title">{{ title }}</h1>
+
+            <div class="divider"></div>
+
+            <div class="results-section">
+                @if (isCTFMode && winnerTeamNumber) {
+                <div class="team-winners">
+                    <div class="team-number">Équipe {{ winnerTeamNumber }}</div>
+                    <div class="team-members">
+                        @for (playerName of winnerTeamPlayers; track playerName) {
+                        <div class="team-member">
+                            <span class="player-name">{{ playerName }}</span>
+                        </div>
+                        }
+                    </div>
+                </div>
+                } @else {
+                <div class="player-results">
+                    @for (player of playerStats; track player.name) {
+                    <div class="player-result" [class.winner]="player.isWinner">
+                        <span class="player-name">{{ player.name }}</span>
+                        <span class="player-wins">{{ player.wins }} victoire{{ player.wins > 1 ? 's' : '' }}</span>
+                    </div>
                     }
-                    <span class="player-name">{{ player.name }}</span>
-                    <span class="player-wins">{{ player.wins }} victoire{{ player.wins > 1 ? 's' : '' }}</span>
                 </div>
                 }
             </div>
+
+            <div class="redirect-message">Redirection automatique dans {{ gameOverTimeRemaining }}s</div>
+
+            <div class="action-buttons">
+                <button class="action-btn statistics" (click)="viewStatistics()">Statistiques</button>
+                <button class="action-btn home" (click)="returnToHome()">Accueil</button>
+            </div>
         </div>
-
-        <div class="redirect-message">Redirection vers la page d'accueil dans {{ gameOverTimeRemaining }} secondes...</div>
-
-        <button class="return-button" (click)="returnToHome()">Retourner à la page d'accueil</button>
     </div>
 </div>
 }

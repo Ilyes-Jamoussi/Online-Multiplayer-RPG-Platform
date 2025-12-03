@@ -1,236 +1,226 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
-import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
-import { TurnTimerStates } from '@app/enums/turn-timer-states.enum';
-import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { InGameActionService } from '@app/modules/in-game/services/in-game-action/in-game-action.service';
-import { InGameInitializationService } from '@app/modules/in-game/services/in-game-initialization/in-game-initialization.service';
-import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
+import { Game } from '@app/modules/game-store/entities/game.entity';
+import { GameStatisticsDto } from '@app/modules/in-game/dto/game-statistics.dto';
+import { GameplayService } from '@app/modules/in-game/services/gameplay/gameplay.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { InitializationService } from '@app/modules/in-game/services/initialization/initialization.service';
+import { StatisticsService } from '@app/modules/in-game/services/statistics/statistics.service';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
+import { DEFAULT_TURN_DURATION } from '@common/constants/in-game';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { TileKind } from '@common/enums/tile.enum';
+import { VirtualPlayerType } from '@common/enums/virtual-player-type.enum';
 import { Player } from '@common/interfaces/player.interface';
+import { Position } from '@common/interfaces/position.interface';
 import { InGameSession, WaitingRoomSession } from '@common/interfaces/session.interface';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Types } from 'mongoose';
 import { InGameService } from './in-game.service';
-import { Game } from '@app/modules/game-store/entities/game.entity';
-import { CombatService } from '@app/modules/in-game/services/combat/combat.service';
-import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
 
-describe('InGameService', () => {
-    let service: InGameService;
-    let timerService: jest.Mocked<TimerService>;
-    let gameCache: jest.Mocked<GameCacheService>;
-    let initialization: jest.Mocked<InGameInitializationService>;
-    let sessionRepository: jest.Mocked<InGameSessionRepository>;
-    let movementService: jest.Mocked<InGameMovementService>;
-    let actionService: jest.Mocked<InGameActionService>;
-    let combatService: jest.Mocked<CombatService>;
-    let combatTimerService: jest.Mocked<CombatTimerService>;
+const MOCK_SESSION_ID = 'session-123';
+const MOCK_GAME_ID = 'game-123';
+const MOCK_CHAT_ID = 'chat-123';
+const MOCK_IN_GAME_ID = 'in-game-123';
+const MOCK_PLAYER_ID_1 = 'player-1';
+const MOCK_PLAYER_ID_2 = 'player-2';
+const MOCK_PLAYER_NAME_1 = 'Player 1';
+const MOCK_PLAYER_NAME_2 = 'Player 2';
+const MOCK_X = 5;
+const MOCK_Y = 10;
+const MOCK_MAX_PLAYERS = 4;
+const MOCK_TEAM_NUMBER_1 = 1;
+const MOCK_TEAM_NUMBER_2 = 2;
+const MOCK_TURN_NUMBER = 1;
+const MOCK_BASE_SPEED = 3;
+const MOCK_SPEED_BONUS = 0;
+const MOCK_TOTAL_DOORS = 5;
+const MOCK_TOTAL_SANCTUARIES = 3;
+const MOCK_TOTAL_TELEPORT_TILES = 4;
+const MOCK_MIN_PLAYERS_FOR_GAME = 2;
+const MOCK_TELEPORT_TILES_COUNT_3 = 3;
+const MOCK_POSITION_X = 0;
+const MOCK_POSITION_Y = 0;
 
-    const SESSION_ID = 'session-123';
-    const GAME_ID = 'game-456';
-    const PLAYER_A_ID = 'player-a';
-    const PLAYER_B_ID = 'player-b';
-    const PLAYER_C_ID = 'player-c';
+const createMockPlayer = (overrides: Partial<Player> = {}): Player => ({
+    id: MOCK_PLAYER_ID_1,
+    name: MOCK_PLAYER_NAME_1,
+    avatar: Avatar.Avatar1,
+    isAdmin: false,
+    baseHealth: 100,
+    healthBonus: 0,
+    health: 100,
+    maxHealth: 100,
+    baseSpeed: MOCK_BASE_SPEED,
+    speedBonus: MOCK_SPEED_BONUS,
+    speed: MOCK_BASE_SPEED,
+    boatSpeedBonus: 0,
+    boatSpeed: 0,
+    baseAttack: 10,
+    attackBonus: 0,
+    baseDefense: 5,
+    defenseBonus: 0,
+    attackDice: Dice.D6,
+    defenseDice: Dice.D4,
+    x: MOCK_POSITION_X,
+    y: MOCK_POSITION_Y,
+    isInGame: false,
+    startPointId: '',
+    actionsRemaining: 1,
+    combatCount: 0,
+    combatWins: 0,
+    combatLosses: 0,
+    combatDraws: 0,
+    hasCombatBonus: false,
+    teamNumber: undefined,
+    ...overrides,
+});
 
-    const BASE_SPEED = 3;
-    const BASE_HEALTH = 100;
-    const BASE_ATTACK = 10;
-    const BASE_DEFENSE = 5;
-    const SPEED_BONUS = 2;
-    const HEALTH_BONUS = 0;
-    const TELEPORT_X = 5;
-    const TELEPORT_Y = 5;
-    const DOOR_X = 2;
-    const DOOR_Y = 3;
-
-    const createMockPlayer = (overrides: Partial<Player> = {}): Player => ({
-        id: PLAYER_A_ID,
-        name: 'Player A',
-        avatar: Avatar.Avatar1,
-        isAdmin: false,
-        baseHealth: BASE_HEALTH,
-        healthBonus: HEALTH_BONUS,
-        health: BASE_HEALTH,
-        maxHealth: BASE_HEALTH,
-        baseSpeed: BASE_SPEED,
-        speedBonus: 0,
-        speed: BASE_SPEED,
-        baseAttack: BASE_ATTACK,
-        attackBonus: 0,
-        attack: BASE_ATTACK,
-        baseDefense: BASE_DEFENSE,
-        defenseBonus: 0,
-        defense: BASE_DEFENSE,
-        attackDice: Dice.D6,
-        defenseDice: Dice.D4,
-        x: 0,
-        y: 0,
-        isInGame: false,
-        startPointId: '',
-        actionsRemaining: 1,
-        combatCount: 0,
-        combatWins: 0,
-        combatLosses: 0,
-        combatDraws: 0,
-        ...overrides,
+const createMockGame = (overrides: Partial<Game> = {}): Game => {
+    const mockObjectId = new Types.ObjectId();
+    Object.defineProperty(mockObjectId, 'toString', {
+        value: jest.fn().mockReturnValue(MOCK_GAME_ID),
+        writable: true,
     });
-
-    const createMockWaitingSession = (overrides: Partial<WaitingRoomSession> = {}): WaitingRoomSession => ({
-        id: SESSION_ID,
-        gameId: GAME_ID,
-        maxPlayers: 4,
-        players: [
-            createMockPlayer({ id: PLAYER_A_ID, name: 'Player A', avatar: Avatar.Avatar1 }),
-            createMockPlayer({ id: PLAYER_B_ID, name: 'Player B', avatar: Avatar.Avatar2 }),
-        ],
-        avatarAssignments: [],
-        isRoomLocked: false,
-        ...overrides,
-    });
-
-    const createMockInGameSession = (overrides: Partial<InGameSession> = {}): InGameSession => ({
-        id: SESSION_ID,
-        inGameId: `${SESSION_ID}-${GAME_ID}`,
-        gameId: GAME_ID,
-        maxPlayers: 4,
-        isGameStarted: false,
-        inGamePlayers: {
-            [PLAYER_A_ID]: createMockPlayer({ id: PLAYER_A_ID, name: 'Player A' }),
-            [PLAYER_B_ID]: createMockPlayer({ id: PLAYER_B_ID, name: 'Player B' }),
-        },
-        currentTurn: { turnNumber: 1, activePlayerId: PLAYER_A_ID, hasUsedAction: false },
-        startPoints: [],
-        mapSize: MapSize.MEDIUM,
-        mode: GameMode.CLASSIC,
-        turnOrder: [PLAYER_A_ID, PLAYER_B_ID],
-        isAdminModeActive: false,
-        ...overrides,
-    });
-
-    const createMockGame = (overrides: Partial<Game> = {}): Game => ({
-        _id: new Types.ObjectId(),
+    return {
+        _id: mockObjectId,
         name: 'Test Game',
         description: 'Test Description',
         size: MapSize.MEDIUM,
         mode: GameMode.CLASSIC,
-        tiles: [],
-        objects: [],
         visibility: true,
         lastModified: new Date(),
         createdAt: new Date(),
         gridPreviewUrl: '',
+        tiles: Array(MOCK_TOTAL_DOORS)
+            .fill(null)
+            .map(() => ({ kind: TileKind.DOOR, x: 0, y: 0, open: false })),
+        objects: Array(MOCK_TOTAL_SANCTUARIES)
+            .fill(null)
+            .map(() => ({ kind: PlaceableKind.HEAL, x: 0, y: 0, placed: true })),
         draft: false,
+        teleportChannels: [
+            { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 }, entryB: { x: 1, y: 1 } } },
+            { channelNumber: 2, tiles: { entryA: { x: 2, y: 2 }, entryB: { x: 3, y: 3 } } },
+        ],
         ...overrides,
-    });
+    };
+};
+
+const createMockWaitingRoomSession = (overrides: Partial<WaitingRoomSession> = {}): WaitingRoomSession => ({
+    id: MOCK_SESSION_ID,
+    gameId: MOCK_GAME_ID,
+    maxPlayers: MOCK_MAX_PLAYERS,
+    mode: GameMode.CLASSIC,
+    chatId: MOCK_CHAT_ID,
+    players: [createMockPlayer({ id: MOCK_PLAYER_ID_1 }), createMockPlayer({ id: MOCK_PLAYER_ID_2, name: MOCK_PLAYER_NAME_2 })],
+    avatarAssignments: [],
+    isRoomLocked: false,
+    ...overrides,
+});
+
+const createMockInGameSession = (overrides: Partial<InGameSession> = {}): InGameSession => ({
+    id: MOCK_SESSION_ID,
+    inGameId: MOCK_IN_GAME_ID,
+    gameId: MOCK_GAME_ID,
+    maxPlayers: MOCK_MAX_PLAYERS,
+    mode: GameMode.CLASSIC,
+    chatId: MOCK_CHAT_ID,
+    isGameStarted: false,
+    inGamePlayers: {
+        [MOCK_PLAYER_ID_1]: createMockPlayer({ id: MOCK_PLAYER_ID_1 }),
+        [MOCK_PLAYER_ID_2]: createMockPlayer({ id: MOCK_PLAYER_ID_2 }),
+    },
+    teams: {
+        [MOCK_TEAM_NUMBER_1]: { number: MOCK_TEAM_NUMBER_1, playerIds: [MOCK_PLAYER_ID_1] },
+    },
+    currentTurn: { turnNumber: MOCK_TURN_NUMBER, activePlayerId: MOCK_PLAYER_ID_1, hasUsedAction: false },
+    startPoints: [],
+    mapSize: MapSize.MEDIUM,
+    turnOrder: [MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2],
+    isAdminModeActive: false,
+    playerCount: MOCK_MAX_PLAYERS,
+    ...overrides,
+});
+
+describe('InGameService', () => {
+    let service: InGameService;
+    let mockTimerService: jest.Mocked<TimerService>;
+    let mockInitializationService: jest.Mocked<InitializationService>;
+    let mockSessionRepository: jest.Mocked<InGameSessionRepository>;
+    let mockGameplayService: jest.Mocked<GameplayService>;
+    let mockStatisticsService: jest.Mocked<StatisticsService>;
 
     beforeEach(async () => {
-        const mockTimerService = {
+        mockTimerService = {
             startFirstTurnWithTransition: jest.fn(),
-            endTurnManual: jest.fn(),
             forceStopTimer: jest.fn(),
-            getGameTimerState: jest.fn(),
+            endTurnManual: jest.fn(),
             clearTimerForSession: jest.fn(),
-        };
+        } as unknown as jest.Mocked<TimerService>;
 
-        const mockGameCache = {
-            fetchAndCacheGame: jest.fn(),
-            isTileFree: jest.fn(),
-            clearSessionGameCache: jest.fn(),
-        };
-
-        const mockInitialization = {
-            makeTurnOrder: jest.fn(),
+        mockInitializationService = {
+            makeTurnOrder: jest.fn().mockReturnValue([MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2]),
             assignStartPoints: jest.fn(),
-        };
+        } as unknown as jest.Mocked<InitializationService>;
 
-        const mockSessionRepository = {
+        mockSessionRepository = {
             save: jest.fn(),
             findById: jest.fn(),
-            update: jest.fn(),
             updatePlayer: jest.fn(),
+            assignPlayerToTeam: jest.fn(),
+            delete: jest.fn(),
             playerLeave: jest.fn(),
             inGamePlayersCount: jest.fn(),
+            realPlayersCount: jest.fn(),
+            update: jest.fn(),
             findSessionByPlayerId: jest.fn(),
-            movePlayerPosition: jest.fn(),
-            delete: jest.fn(),
-        };
+        } as unknown as jest.Mocked<InGameSessionRepository>;
 
-        const mockMovementService = {
+        mockGameplayService = {
+            fetchAndCacheGame: jest.fn(),
+            getInitialFlagData: jest.fn(),
+            boardBoat: jest.fn(),
+            disembarkBoat: jest.fn(),
+            endPlayerTurn: jest.fn(),
+            toggleDoorAction: jest.fn(),
+            sanctuaryRequest: jest.fn(),
             movePlayer: jest.fn(),
-            calculateReachableTiles: jest.fn(),
-        };
+            getReachableTiles: jest.fn(),
+            getAvailableActions: jest.fn(),
+            toggleAdminMode: jest.fn(),
+            teleportPlayer: jest.fn(),
+            clearSessionResources: jest.fn(),
+            performSanctuaryAction: jest.fn(),
+            pickUpFlag: jest.fn(),
+            requestFlagTransfer: jest.fn(),
+            respondToFlagTransfer: jest.fn(),
+        } as unknown as jest.Mocked<GameplayService>;
 
-        const mockActionService = {
-            toggleDoor: jest.fn(),
-            calculateAvailableActions: jest.fn(),
-        };
-
-        const mockCombatService = {
-            clearActiveCombatForSession: jest.fn(),
-        };
-
-        const mockCombatTimerService = {
-            stopCombatTimer: jest.fn(),
-        };
+        mockStatisticsService = {
+            initializeTracking: jest.fn(),
+            trackTileVisited: jest.fn(),
+            getStoredGameStatistics: jest.fn(),
+            calculateAndStoreGameStatistics: jest.fn(),
+        } as unknown as jest.Mocked<StatisticsService>;
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 InGameService,
-                {
-                    provide: TimerService,
-                    useValue: mockTimerService,
-                },
-                {
-                    provide: GameCacheService,
-                    useValue: mockGameCache,
-                },
-                {
-                    provide: InGameInitializationService,
-                    useValue: mockInitialization,
-                },
-                {
-                    provide: InGameSessionRepository,
-                    useValue: mockSessionRepository,
-                },
-                {
-                    provide: InGameMovementService,
-                    useValue: mockMovementService,
-                },
-                {
-                    provide: InGameActionService,
-                    useValue: mockActionService,
-                },
-                {
-                    provide: CombatService,
-                    useValue: mockCombatService,
-                },
-                {
-                    provide: CombatTimerService,
-                    useValue: mockCombatTimerService,
-                },
+                { provide: TimerService, useValue: mockTimerService },
+                { provide: InitializationService, useValue: mockInitializationService },
+                { provide: InGameSessionRepository, useValue: mockSessionRepository },
+                { provide: GameplayService, useValue: mockGameplayService },
+                { provide: StatisticsService, useValue: mockStatisticsService },
             ],
         }).compile();
 
         service = module.get<InGameService>(InGameService);
-        timerService = module.get(TimerService);
-        gameCache = module.get(GameCacheService);
-        initialization = module.get(InGameInitializationService);
-        sessionRepository = module.get(InGameSessionRepository);
-        movementService = module.get(InGameMovementService);
-        actionService = module.get(InGameActionService);
-        combatService = module.get(CombatService);
-        combatTimerService = module.get(CombatTimerService);
-    });
-
-    afterEach(() => {
-        jest.clearAllMocks();
     });
 
     it('should be defined', () => {
@@ -238,739 +228,623 @@ describe('InGameService', () => {
     });
 
     describe('createInGameSession', () => {
-        it('should create a new in-game session', async () => {
-            const waitingSession = createMockWaitingSession();
-            const mockGame = createMockGame();
-            const turnOrder = [PLAYER_A_ID, PLAYER_B_ID];
+        it('should create in-game session for CLASSIC mode', async () => {
+            const waitingSession = createMockWaitingRoomSession({ mode: GameMode.CLASSIC });
+            const game = createMockGame();
+            mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.save.mockImplementation(() => {});
 
-            gameCache.fetchAndCacheGame.mockResolvedValue(mockGame);
-            initialization.makeTurnOrder.mockReturnValue(turnOrder);
+            const result = await service.createInGameSession(waitingSession, GameMode.CLASSIC);
 
-            const result = await service.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.MEDIUM);
-
-            expect(result.id).toBe(SESSION_ID);
-            expect(result.gameId).toBe(GAME_ID);
-            expect(result.mapSize).toBe(MapSize.MEDIUM);
+            expect(result.id).toBe(MOCK_SESSION_ID);
             expect(result.mode).toBe(GameMode.CLASSIC);
-            expect(result.isGameStarted).toBe(false);
-            expect(gameCache.fetchAndCacheGame).toHaveBeenCalledWith(SESSION_ID, GAME_ID);
-            expect(initialization.makeTurnOrder).toHaveBeenCalledWith(waitingSession.players);
-            expect(initialization.assignStartPoints).toHaveBeenCalled();
-            expect(sessionRepository.save).toHaveBeenCalled();
+            expect(result.flagData).toBeUndefined();
+            expect(mockGameplayService.fetchAndCacheGame).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_GAME_ID);
+            expect(mockStatisticsService.initializeTracking).toHaveBeenCalledWith(
+                MOCK_SESSION_ID,
+                game.size,
+                MOCK_TOTAL_DOORS,
+                MOCK_TOTAL_SANCTUARIES,
+                MOCK_TOTAL_TELEPORT_TILES,
+            );
+            expect(mockInitializationService.makeTurnOrder).toHaveBeenCalledWith(waitingSession.players);
+            expect(mockInitializationService.assignStartPoints).toHaveBeenCalled();
+            expect(mockSessionRepository.save).toHaveBeenCalled();
         });
 
-        it('should set turn order from initialization service', async () => {
-            const waitingSession = createMockWaitingSession();
-            const mockGame = createMockGame();
-            const turnOrder = [PLAYER_B_ID, PLAYER_A_ID];
+        it('should create in-game session for CTF mode with teams and flag data', async () => {
+            const waitingSession = createMockWaitingRoomSession({ mode: GameMode.CTF });
+            const game = createMockGame();
+            const flagData = { position: { x: MOCK_X, y: MOCK_Y }, holderPlayerId: null };
+            mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            mockGameplayService.getInitialFlagData.mockReturnValue(flagData);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.save.mockImplementation(() => {});
+            mockSessionRepository.findById.mockReturnValue(createMockInGameSession({ mode: GameMode.CTF }));
 
-            gameCache.fetchAndCacheGame.mockResolvedValue(mockGame);
-            initialization.makeTurnOrder.mockReturnValue(turnOrder);
+            const result = await service.createInGameSession(waitingSession, GameMode.CTF);
 
-            const result = await service.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.MEDIUM);
-
-            expect(result.turnOrder).toEqual(turnOrder);
+            expect(result.mode).toBe(GameMode.CTF);
+            expect(result.flagData).toEqual(flagData);
+            expect(result.teams[MOCK_TEAM_NUMBER_1]).toBeDefined();
+            expect(result.teams[MOCK_TEAM_NUMBER_2]).toBeDefined();
+            expect(mockGameplayService.getInitialFlagData).toHaveBeenCalledWith(MOCK_SESSION_ID);
         });
 
-        it('should create inGamePlayers from waiting room players', async () => {
-            const waitingSession = createMockWaitingSession();
-            const mockGame = createMockGame();
-            const turnOrder = [PLAYER_A_ID, PLAYER_B_ID];
+        it('should set first player speed correctly', async () => {
+            const waitingSession = createMockWaitingRoomSession();
+            const game = createMockGame();
+            mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.save.mockImplementation(() => {});
 
-            gameCache.fetchAndCacheGame.mockResolvedValue(mockGame);
-            initialization.makeTurnOrder.mockReturnValue(turnOrder);
+            const result = await service.createInGameSession(waitingSession, GameMode.CLASSIC);
 
-            const result = await service.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.MEDIUM);
-
-            expect(result.inGamePlayers[PLAYER_A_ID]).toBeDefined();
-            expect(result.inGamePlayers[PLAYER_B_ID]).toBeDefined();
-            expect(result.inGamePlayers[PLAYER_A_ID].x).toBe(0);
-            expect(result.inGamePlayers[PLAYER_A_ID].y).toBe(0);
-            expect(result.inGamePlayers[PLAYER_A_ID].startPointId).toBe('');
+            const firstPlayer = result.inGamePlayers[MOCK_PLAYER_ID_1];
+            expect(firstPlayer.speed).toBe(MOCK_BASE_SPEED + MOCK_SPEED_BONUS);
         });
 
-        it('should set activePlayerId to first player in turn order', async () => {
-            const waitingSession = createMockWaitingSession();
-            const mockGame = createMockGame();
-            const turnOrder = [PLAYER_B_ID, PLAYER_A_ID];
+        it('should track tile visited for all players', async () => {
+            const waitingSession = createMockWaitingRoomSession();
+            const game = createMockGame();
+            mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.save.mockImplementation(() => {});
 
-            gameCache.fetchAndCacheGame.mockResolvedValue(mockGame);
-            initialization.makeTurnOrder.mockReturnValue(turnOrder);
+            await service.createInGameSession(waitingSession, GameMode.CLASSIC);
 
-            const result = await service.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.MEDIUM);
-
-            expect(result.currentTurn.activePlayerId).toBe(PLAYER_B_ID);
+            expect(mockStatisticsService.trackTileVisited).toHaveBeenCalledTimes(waitingSession.players.length);
         });
 
-        it('should set speed for first player when player exists', async () => {
-            const waitingSession = createMockWaitingSession();
-            const mockGame = createMockGame();
-            const turnOrder = [PLAYER_A_ID, PLAYER_B_ID];
+        it('should join virtual players automatically', async () => {
+            const virtualPlayer = createMockPlayer({ id: MOCK_PLAYER_ID_1, virtualPlayerType: VirtualPlayerType.Offensive });
+            const waitingSession = createMockWaitingRoomSession({ players: [virtualPlayer] });
+            const game = createMockGame();
+            mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.save.mockImplementation(() => {});
+            mockSessionRepository.findById.mockReturnValue(createMockInGameSession());
 
-            gameCache.fetchAndCacheGame.mockResolvedValue(mockGame);
-            initialization.makeTurnOrder.mockReturnValue(turnOrder);
+            await service.createInGameSession(waitingSession, GameMode.CLASSIC);
 
-            const result = await service.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.MEDIUM);
-
-            expect(result.inGamePlayers[PLAYER_A_ID].speed).toBe(BASE_SPEED + 0);
+            expect(mockSessionRepository.findById).toHaveBeenCalled();
         });
 
-        it('should set speed with bonus for first player', async () => {
-            const waitingSession = createMockWaitingSession({
-                players: [createMockPlayer({ id: PLAYER_A_ID, speedBonus: SPEED_BONUS }), createMockPlayer({ id: PLAYER_B_ID })],
+        it('should count teleport tiles correctly when entryA is missing', async () => {
+            const waitingSession = createMockWaitingRoomSession();
+            const game = createMockGame({
+                teleportChannels: [
+                    { channelNumber: 1, tiles: { entryB: { x: 1, y: 1 } } },
+                    { channelNumber: 2, tiles: { entryA: { x: 2, y: 2 }, entryB: { x: 3, y: 3 } } },
+                ],
             });
-            const mockGame = createMockGame();
-            const turnOrder = [PLAYER_A_ID, PLAYER_B_ID];
+            mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.save.mockImplementation(() => {});
 
-            gameCache.fetchAndCacheGame.mockResolvedValue(mockGame);
-            initialization.makeTurnOrder.mockReturnValue(turnOrder);
+            await service.createInGameSession(waitingSession, GameMode.CLASSIC);
 
-            const result = await service.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.MEDIUM);
-
-            expect(result.inGamePlayers[PLAYER_A_ID].speed).toBe(BASE_SPEED + SPEED_BONUS);
+            expect(mockStatisticsService.initializeTracking).toHaveBeenCalledWith(
+                MOCK_SESSION_ID,
+                game.size,
+                MOCK_TOTAL_DOORS,
+                MOCK_TOTAL_SANCTUARIES,
+                MOCK_TELEPORT_TILES_COUNT_3,
+            );
         });
 
-        it('should not set speed when first player does not exist', async () => {
-            const waitingSession = createMockWaitingSession();
-            const mockGame = createMockGame();
-            const turnOrder = ['non-existent-player', PLAYER_B_ID];
+        it('should count teleport tiles correctly when entryB is missing', async () => {
+            const waitingSession = createMockWaitingRoomSession();
+            const game = createMockGame({
+                teleportChannels: [
+                    { channelNumber: 1, tiles: { entryA: { x: 0, y: 0 } } },
+                    { channelNumber: 2, tiles: { entryA: { x: 2, y: 2 }, entryB: { x: 3, y: 3 } } },
+                ],
+            });
+            mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.save.mockImplementation(() => {});
 
-            gameCache.fetchAndCacheGame.mockResolvedValue(mockGame);
-            initialization.makeTurnOrder.mockReturnValue(turnOrder);
+            await service.createInGameSession(waitingSession, GameMode.CLASSIC);
 
-            const result = await service.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.MEDIUM);
-
-            expect(result.currentTurn.activePlayerId).toBe('non-existent-player');
-            expect(result.inGamePlayers['non-existent-player']).toBeUndefined();
+            expect(mockStatisticsService.initializeTracking).toHaveBeenCalledWith(
+                MOCK_SESSION_ID,
+                game.size,
+                MOCK_TOTAL_DOORS,
+                MOCK_TOTAL_SANCTUARIES,
+                MOCK_TELEPORT_TILES_COUNT_3,
+            );
         });
 
-        it('should assign start points', async () => {
-            const waitingSession = createMockWaitingSession();
-            const mockGame = createMockGame();
-            const turnOrder = [PLAYER_A_ID, PLAYER_B_ID];
+        it('should count teleport tiles correctly when tiles is undefined', async () => {
+            const waitingSession = createMockWaitingRoomSession();
+            const game = createMockGame({
+                teleportChannels: [
+                    { channelNumber: 1, tiles: undefined },
+                    { channelNumber: 2, tiles: { entryA: { x: 2, y: 2 }, entryB: { x: 3, y: 3 } } },
+                ],
+            });
+            mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.save.mockImplementation(() => {});
 
-            gameCache.fetchAndCacheGame.mockResolvedValue(mockGame);
-            initialization.makeTurnOrder.mockReturnValue(turnOrder);
+            await service.createInGameSession(waitingSession, GameMode.CLASSIC);
 
-            await service.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.MEDIUM);
-
-            expect(initialization.assignStartPoints).toHaveBeenCalled();
+            const expectedTeleportTilesCount = 2;
+            expect(mockStatisticsService.initializeTracking).toHaveBeenCalledWith(
+                MOCK_SESSION_ID,
+                game.size,
+                MOCK_TOTAL_DOORS,
+                MOCK_TOTAL_SANCTUARIES,
+                expectedTeleportTilesCount,
+            );
         });
 
-        it('should save session to repository', async () => {
-            const waitingSession = createMockWaitingSession();
-            const mockGame = createMockGame();
-            const turnOrder = [PLAYER_A_ID, PLAYER_B_ID];
+        it('should handle case when firstPlayerId is not in inGamePlayers', async () => {
+            const waitingSession = createMockWaitingRoomSession();
+            const game = createMockGame();
+            mockGameplayService.fetchAndCacheGame.mockResolvedValue(game);
+            mockInitializationService.makeTurnOrder.mockReturnValue(['non-existent-player']);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.save.mockImplementation(() => {});
 
-            gameCache.fetchAndCacheGame.mockResolvedValue(mockGame);
-            initialization.makeTurnOrder.mockReturnValue(turnOrder);
+            await service.createInGameSession(waitingSession, GameMode.CLASSIC);
 
-            await service.createInGameSession(waitingSession, GameMode.CLASSIC, MapSize.MEDIUM);
+            expect(mockSessionRepository.save).toHaveBeenCalled();
+        });
+    });
 
-            expect(sessionRepository.save).toHaveBeenCalled();
+    describe('boardBoat', () => {
+        it('should call gameplayService.boardBoat', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            service.boardBoat(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
+
+            expect(mockGameplayService.boardBoat).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
+        });
+    });
+
+    describe('disembarkBoat', () => {
+        it('should call gameplayService.disembarkBoat', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            service.disembarkBoat(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
+
+            expect(mockGameplayService.disembarkBoat).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
         });
     });
 
     describe('getSession', () => {
         it('should return session from repository', () => {
             const session = createMockInGameSession();
-            sessionRepository.findById.mockReturnValue(session);
+            mockSessionRepository.findById.mockReturnValue(session);
 
-            const result = service.getSession(SESSION_ID);
+            const result = service.getSession(MOCK_SESSION_ID);
 
             expect(result).toBe(session);
-            expect(sessionRepository.findById).toHaveBeenCalledWith(SESSION_ID);
+            expect(mockSessionRepository.findById).toHaveBeenCalledWith(MOCK_SESSION_ID);
         });
 
         it('should return undefined when session not found', () => {
-            sessionRepository.findById.mockReturnValue(undefined);
+            mockSessionRepository.findById.mockReturnValue(undefined);
 
-            const result = service.getSession('non-existent');
+            const result = service.getSession(MOCK_SESSION_ID);
 
             expect(result).toBeUndefined();
         });
     });
 
     describe('joinInGameSession', () => {
-        it('should allow player to join session', () => {
+        it('should throw NotFoundException when player not found', () => {
             const session = createMockInGameSession();
-            sessionRepository.findById.mockReturnValue(session);
+            mockSessionRepository.findById.mockReturnValue(session);
 
-            const result = service.joinInGameSession(SESSION_ID, PLAYER_A_ID);
-
-            expect(sessionRepository.updatePlayer).toHaveBeenCalledWith(SESSION_ID, PLAYER_A_ID, { isInGame: true });
-            expect(result).toBe(session);
+            expect(() => service.joinInGameSession(MOCK_SESSION_ID, 'non-existent')).toThrow(NotFoundException);
         });
 
-        it('should throw NotFoundException if player not found', () => {
-            const session = createMockInGameSession();
-            session.inGamePlayers = {};
-            sessionRepository.findById.mockReturnValue(session);
+        it('should throw BadRequestException when player already joined', () => {
+            const player = createMockPlayer({ id: MOCK_PLAYER_ID_1, isInGame: true });
+            const session = createMockInGameSession({ inGamePlayers: { [MOCK_PLAYER_ID_1]: player } });
+            mockSessionRepository.findById.mockReturnValue(session);
 
-            expect(() => service.joinInGameSession(SESSION_ID, PLAYER_C_ID)).toThrow(NotFoundException);
-            expect(() => service.joinInGameSession(SESSION_ID, PLAYER_C_ID)).toThrow('Player not found');
+            expect(() => service.joinInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1)).toThrow(BadRequestException);
         });
 
-        it('should throw BadRequestException if player already joined', () => {
-            const session = createMockInGameSession();
-            session.inGamePlayers[PLAYER_A_ID].isInGame = true;
-            sessionRepository.findById.mockReturnValue(session);
+        it('should update player to joined and assign to team in CTF mode', () => {
+            const player = createMockPlayer({ id: MOCK_PLAYER_ID_1, isInGame: false });
+            const session = createMockInGameSession({ mode: GameMode.CTF, inGamePlayers: { [MOCK_PLAYER_ID_1]: player } });
+            mockSessionRepository.findById.mockReturnValue(session);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.updatePlayer.mockImplementation(() => {});
 
-            expect(() => service.joinInGameSession(SESSION_ID, PLAYER_A_ID)).toThrow(BadRequestException);
-            expect(() => service.joinInGameSession(SESSION_ID, PLAYER_A_ID)).toThrow('Player already joined');
+            service.joinInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
+
+            expect(mockSessionRepository.updatePlayer).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, { isInGame: true });
+            expect(mockSessionRepository.assignPlayerToTeam).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
         });
 
-        it('should start session when all players joined and game not started', () => {
-            const initialSession = createMockInGameSession();
-            initialSession.inGamePlayers[PLAYER_B_ID].isInGame = true;
-            sessionRepository.findById.mockReturnValue(initialSession);
-            timerService.startFirstTurnWithTransition.mockReturnValue({ turnNumber: 1, activePlayerId: PLAYER_A_ID, hasUsedAction: false });
+        it('should start session when all players joined', () => {
+            const player1 = createMockPlayer({ id: MOCK_PLAYER_ID_1, isInGame: false });
+            const player2 = createMockPlayer({ id: MOCK_PLAYER_ID_2, isInGame: true });
+            const session = createMockInGameSession({
+                isGameStarted: false,
+                inGamePlayers: { [MOCK_PLAYER_ID_1]: player1, [MOCK_PLAYER_ID_2]: player2 },
+            });
+            const updatedSession = createMockInGameSession({
+                isGameStarted: false,
+                inGamePlayers: { [MOCK_PLAYER_ID_1]: { ...player1, isInGame: true }, [MOCK_PLAYER_ID_2]: player2 },
+            });
+            mockSessionRepository.findById.mockReturnValueOnce(session).mockReturnValueOnce(updatedSession).mockReturnValueOnce(updatedSession);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.updatePlayer.mockImplementation(() => {});
+            mockTimerService.startFirstTurnWithTransition.mockReturnValue(updatedSession.currentTurn);
 
-            type ServiceWithPrivateMethod = {
-                startSessionWithTransition: (sessionId: string) => InGameSession;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            const startSessionSpy = jest.spyOn(servicePrivate, 'startSessionWithTransition');
+            service.joinInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
-            const updatedSession = createMockInGameSession();
-            updatedSession.inGamePlayers[PLAYER_A_ID].isInGame = true;
-            updatedSession.inGamePlayers[PLAYER_B_ID].isInGame = true;
-
-            sessionRepository.findById.mockReturnValueOnce(initialSession).mockReturnValueOnce(updatedSession).mockReturnValueOnce(updatedSession);
-
-            service.joinInGameSession(SESSION_ID, PLAYER_A_ID);
-
-            expect(startSessionSpy).toHaveBeenCalledWith(SESSION_ID);
-        });
-
-        it('should not start session when game already started', () => {
-            const session = createMockInGameSession({ isGameStarted: true });
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                startSessionWithTransition: (sessionId: string) => InGameSession;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            const startSessionSpy = jest.spyOn(servicePrivate, 'startSessionWithTransition');
-
-            service.joinInGameSession(SESSION_ID, PLAYER_A_ID);
-
-            expect(startSessionSpy).not.toHaveBeenCalled();
+            expect(mockTimerService.startFirstTurnWithTransition).toHaveBeenCalledWith(updatedSession, DEFAULT_TURN_DURATION);
         });
 
         it('should not start session when not all players joined', () => {
-            const session = createMockInGameSession();
-            session.inGamePlayers[PLAYER_C_ID] = createMockPlayer({ id: PLAYER_C_ID, isInGame: false });
-            sessionRepository.findById.mockReturnValue(session);
+            const player1 = createMockPlayer({ id: MOCK_PLAYER_ID_1, isInGame: false });
+            const player2 = createMockPlayer({ id: MOCK_PLAYER_ID_2, isInGame: false });
+            const session = createMockInGameSession({
+                isGameStarted: false,
+                inGamePlayers: { [MOCK_PLAYER_ID_1]: player1, [MOCK_PLAYER_ID_2]: player2 },
+            });
+            const updatedSession = createMockInGameSession({
+                isGameStarted: false,
+                inGamePlayers: { [MOCK_PLAYER_ID_1]: { ...player1, isInGame: true }, [MOCK_PLAYER_ID_2]: player2 },
+            });
+            mockSessionRepository.findById.mockReturnValueOnce(session).mockReturnValueOnce(updatedSession).mockReturnValueOnce(updatedSession);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.updatePlayer.mockImplementation(() => {});
 
-            type ServiceWithPrivateMethod = {
-                startSessionWithTransition: (sessionId: string) => InGameSession;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            const startSessionSpy = jest.spyOn(servicePrivate, 'startSessionWithTransition');
+            service.joinInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
-            service.joinInGameSession(SESSION_ID, PLAYER_A_ID);
-
-            expect(startSessionSpy).not.toHaveBeenCalled();
+            expect(mockTimerService.startFirstTurnWithTransition).not.toHaveBeenCalled();
         });
 
-        it('should return updated session', () => {
-            const session = createMockInGameSession();
-            sessionRepository.findById.mockReturnValue(session);
+        it('should not start session when game already started', () => {
+            const player = createMockPlayer({ id: MOCK_PLAYER_ID_1, isInGame: false });
+            const session = createMockInGameSession({ isGameStarted: true, inGamePlayers: { [MOCK_PLAYER_ID_1]: player } });
+            const updatedSession = createMockInGameSession({
+                isGameStarted: true,
+                inGamePlayers: { [MOCK_PLAYER_ID_1]: { ...player, isInGame: true } },
+            });
+            mockSessionRepository.findById.mockReturnValueOnce(session).mockReturnValueOnce(updatedSession).mockReturnValueOnce(updatedSession);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.updatePlayer.mockImplementation(() => {});
 
-            const result = service.joinInGameSession(SESSION_ID, PLAYER_A_ID);
+            service.joinInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
-            expect(result).toBe(session);
+            expect(mockTimerService.startFirstTurnWithTransition).not.toHaveBeenCalled();
+        });
+
+        it('should throw BadRequestException when trying to start already started session in startSessionWithTransition', () => {
+            const player1 = createMockPlayer({ id: MOCK_PLAYER_ID_1, isInGame: false });
+            const player2 = createMockPlayer({ id: MOCK_PLAYER_ID_2, isInGame: true });
+            const session = createMockInGameSession({
+                isGameStarted: false,
+                inGamePlayers: { [MOCK_PLAYER_ID_1]: player1, [MOCK_PLAYER_ID_2]: player2 },
+            });
+            const updatedSession = createMockInGameSession({
+                isGameStarted: false,
+                inGamePlayers: { [MOCK_PLAYER_ID_1]: { ...player1, isInGame: true }, [MOCK_PLAYER_ID_2]: player2 },
+            });
+            const alreadyStartedSession = createMockInGameSession({
+                isGameStarted: true,
+                inGamePlayers: { [MOCK_PLAYER_ID_1]: { ...player1, isInGame: true }, [MOCK_PLAYER_ID_2]: player2 },
+            });
+            mockSessionRepository.findById
+                .mockReturnValueOnce(session)
+                .mockReturnValueOnce(updatedSession)
+                .mockReturnValueOnce(alreadyStartedSession);
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockSessionRepository.updatePlayer.mockImplementation(() => {});
+
+            expect(() => service.joinInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1)).toThrow(BadRequestException);
         });
     });
 
     describe('endPlayerTurn', () => {
-        it('should end turn when it is player turn', () => {
+        it('should call gameplayService.endPlayerTurn', () => {
             const session = createMockInGameSession();
-            sessionRepository.findById.mockReturnValue(session);
+            mockGameplayService.endPlayerTurn.mockReturnValue(session);
 
-            const result = service.endPlayerTurn(SESSION_ID, PLAYER_A_ID);
+            const result = service.endPlayerTurn(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
-            expect(timerService.endTurnManual).toHaveBeenCalledWith(session);
             expect(result).toBe(session);
-        });
-
-        it('should throw BadRequestException if not player turn', () => {
-            const session = createMockInGameSession();
-            session.currentTurn.activePlayerId = PLAYER_B_ID;
-            sessionRepository.findById.mockReturnValue(session);
-
-            expect(() => service.endPlayerTurn(SESSION_ID, PLAYER_A_ID)).toThrow(BadRequestException);
-            expect(() => service.endPlayerTurn(SESSION_ID, PLAYER_A_ID)).toThrow('Not your turn');
+            expect(mockGameplayService.endPlayerTurn).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
         });
     });
 
     describe('toggleDoorAction', () => {
-        it('should toggle door and decrement actions', () => {
-            const session = createMockInGameSession();
-            session.inGamePlayers[PLAYER_A_ID].actionsRemaining = 1;
-            sessionRepository.findById.mockReturnValue(session);
-            movementService.calculateReachableTiles.mockReturnValue([]);
+        it('should call gameplayService.toggleDoorAction', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-            service.toggleDoorAction(SESSION_ID, PLAYER_A_ID, DOOR_X, DOOR_Y);
+            service.toggleDoorAction(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
 
-            expect(actionService.toggleDoor).toHaveBeenCalledWith(session, PLAYER_A_ID, DOOR_X, DOOR_Y);
-            expect(session.inGamePlayers[PLAYER_A_ID].actionsRemaining).toBe(0);
-            expect(session.currentTurn.hasUsedAction).toBe(true);
-            expect(movementService.calculateReachableTiles).toHaveBeenCalledWith(session, PLAYER_A_ID);
+            expect(mockGameplayService.toggleDoorAction).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
         });
+    });
 
-        it('should throw NotFoundException if player not found', () => {
-            const session = createMockInGameSession();
-            session.inGamePlayers = {};
-            sessionRepository.findById.mockReturnValue(session);
+    describe('sanctuaryRequest', () => {
+        it('should call gameplayService.sanctuaryRequest', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-            expect(() => service.toggleDoorAction(SESSION_ID, PLAYER_A_ID, DOOR_X, DOOR_Y)).toThrow(NotFoundException);
-            expect(() => service.toggleDoorAction(SESSION_ID, PLAYER_A_ID, DOOR_X, DOOR_Y)).toThrow('Player not found');
-        });
+            service.sanctuaryRequest(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position, PlaceableKind.HEAL);
 
-        it('should throw BadRequestException if no actions remaining', () => {
-            const session = createMockInGameSession();
-            session.inGamePlayers[PLAYER_A_ID].actionsRemaining = 0;
-            sessionRepository.findById.mockReturnValue(session);
-
-            expect(() => service.toggleDoorAction(SESSION_ID, PLAYER_A_ID, DOOR_X, DOOR_Y)).toThrow(BadRequestException);
-            expect(() => service.toggleDoorAction(SESSION_ID, PLAYER_A_ID, DOOR_X, DOOR_Y)).toThrow('No actions remaining');
-        });
-
-        it('should end turn when no actions and no speed remaining', () => {
-            const session = createMockInGameSession();
-            session.inGamePlayers[PLAYER_A_ID].actionsRemaining = 1;
-            const NO_SPEED = 0;
-            session.inGamePlayers[PLAYER_A_ID].speed = NO_SPEED;
-            sessionRepository.findById.mockReturnValue(session);
-            movementService.calculateReachableTiles.mockReturnValue([]);
-
-            service.toggleDoorAction(SESSION_ID, PLAYER_A_ID, DOOR_X, DOOR_Y);
-
-            expect(timerService.endTurnManual).toHaveBeenCalledWith(session);
-        });
-
-        it('should not end turn when actions or speed remaining', () => {
-            const session = createMockInGameSession();
-            session.inGamePlayers[PLAYER_A_ID].actionsRemaining = 1;
-            session.inGamePlayers[PLAYER_A_ID].speed = BASE_SPEED;
-            sessionRepository.findById.mockReturnValue(session);
-            movementService.calculateReachableTiles.mockReturnValue([]);
-
-            service.toggleDoorAction(SESSION_ID, PLAYER_A_ID, DOOR_X, DOOR_Y);
-
-            expect(timerService.endTurnManual).not.toHaveBeenCalled();
-        });
-
-        it('should not end turn when actions remaining', () => {
-            const session = createMockInGameSession();
-            const ACTIONS_REMAINING = 2;
-            const NO_SPEED = 0;
-            session.inGamePlayers[PLAYER_A_ID].actionsRemaining = ACTIONS_REMAINING;
-            session.inGamePlayers[PLAYER_A_ID].speed = NO_SPEED;
-            sessionRepository.findById.mockReturnValue(session);
-            movementService.calculateReachableTiles.mockReturnValue([]);
-
-            service.toggleDoorAction(SESSION_ID, PLAYER_A_ID, DOOR_X, DOOR_Y);
-
-            expect(timerService.endTurnManual).not.toHaveBeenCalled();
+            expect(mockGameplayService.sanctuaryRequest).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position, PlaceableKind.HEAL);
         });
     });
 
     describe('movePlayer', () => {
-        it('should move player and end turn when no speed and no actions', () => {
-            const session = createMockInGameSession();
-            session.currentTurn.activePlayerId = PLAYER_A_ID;
-            sessionRepository.findById.mockReturnValue(session);
-            timerService.getGameTimerState.mockReturnValue(TurnTimerStates.PlayerTurn);
-            movementService.movePlayer.mockReturnValue(0);
-            actionService.calculateAvailableActions.mockReturnValue([]);
+        it('should call gameplayService.movePlayer', () => {
+            service.movePlayer(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, Orientation.N);
 
-            service.movePlayer(SESSION_ID, PLAYER_A_ID, Orientation.N);
-
-            expect(movementService.movePlayer).toHaveBeenCalledWith(session, PLAYER_A_ID, Orientation.N);
-            expect(actionService.calculateAvailableActions).toHaveBeenCalledWith(session, PLAYER_A_ID);
-            expect(timerService.endTurnManual).toHaveBeenCalledWith(session);
-        });
-
-        it('should throw BadRequestException if not player turn (activePlayerId check)', () => {
-            const session = createMockInGameSession();
-            session.currentTurn.activePlayerId = PLAYER_B_ID;
-            sessionRepository.findById.mockReturnValue(session);
-
-            expect(() => service.movePlayer(SESSION_ID, PLAYER_A_ID, Orientation.N)).toThrow(BadRequestException);
-            expect(() => service.movePlayer(SESSION_ID, PLAYER_A_ID, Orientation.N)).toThrow('Not your turn');
-        });
-
-        it('should throw BadRequestException if not player turn (timer state check)', () => {
-            const session = createMockInGameSession();
-            session.currentTurn.activePlayerId = PLAYER_A_ID;
-            sessionRepository.findById.mockReturnValue(session);
-            timerService.getGameTimerState.mockReturnValue(TurnTimerStates.TurnTransition);
-
-            expect(() => service.movePlayer(SESSION_ID, PLAYER_A_ID, Orientation.N)).toThrow(BadRequestException);
-            expect(() => service.movePlayer(SESSION_ID, PLAYER_A_ID, Orientation.N)).toThrow('Not your turn');
-        });
-
-        it('should not end turn when speed remaining', () => {
-            const session = createMockInGameSession();
-            session.currentTurn.activePlayerId = PLAYER_A_ID;
-            sessionRepository.findById.mockReturnValue(session);
-            timerService.getGameTimerState.mockReturnValue(TurnTimerStates.PlayerTurn);
-            movementService.movePlayer.mockReturnValue(2);
-            actionService.calculateAvailableActions.mockReturnValue([]);
-
-            service.movePlayer(SESSION_ID, PLAYER_A_ID, Orientation.N);
-
-            expect(timerService.endTurnManual).not.toHaveBeenCalled();
-        });
-
-        it('should not end turn when actions available', () => {
-            const session = createMockInGameSession();
-            session.currentTurn.activePlayerId = PLAYER_A_ID;
-            sessionRepository.findById.mockReturnValue(session);
-            timerService.getGameTimerState.mockReturnValue(TurnTimerStates.PlayerTurn);
-            movementService.movePlayer.mockReturnValue(0);
-            actionService.calculateAvailableActions.mockReturnValue([{ type: 'ATTACK', x: 1, y: 1 }]);
-
-            service.movePlayer(SESSION_ID, PLAYER_A_ID, Orientation.N);
-
-            expect(timerService.endTurnManual).not.toHaveBeenCalled();
+            expect(mockGameplayService.movePlayer).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, Orientation.N);
         });
     });
 
     describe('leaveInGameSession', () => {
-        it('should allow player to leave and return session info', () => {
-            const session = createMockInGameSession();
-            const player = createMockPlayer({ id: PLAYER_A_ID, name: 'Player A' });
-            sessionRepository.playerLeave.mockReturnValue(player);
-            sessionRepository.findById.mockReturnValue(session);
-            sessionRepository.inGamePlayersCount.mockReturnValue(2);
-
-            const result = service.leaveInGameSession(SESSION_ID, PLAYER_A_ID);
-
-            expect(result.session).toBe(session);
-            expect(result.playerName).toBe('Player A');
-            expect(result.playerId).toBe(PLAYER_A_ID);
-            expect(result.sessionEnded).toBe(false);
-            expect(result.adminModeDeactivated).toBe(false);
-        });
-
         it('should deactivate admin mode when admin leaves and admin mode is active', () => {
-            const session = createMockInGameSession({ isAdminModeActive: true });
-            const player = createMockPlayer({ id: PLAYER_A_ID, isAdmin: true });
-            sessionRepository.playerLeave.mockReturnValue(player);
-            sessionRepository.findById.mockReturnValue(session);
-            sessionRepository.inGamePlayersCount.mockReturnValue(2);
+            const adminPlayer = createMockPlayer({ id: MOCK_PLAYER_ID_1, isAdmin: true });
+            const session = createMockInGameSession({ isAdminModeActive: true, inGamePlayers: { [MOCK_PLAYER_ID_1]: adminPlayer } });
+            mockSessionRepository.playerLeave.mockReturnValue(adminPlayer);
+            mockSessionRepository.findById.mockReturnValue(session);
+            mockSessionRepository.inGamePlayersCount.mockReturnValue(MOCK_MIN_PLAYERS_FOR_GAME);
+            mockSessionRepository.realPlayersCount.mockReturnValue(MOCK_MIN_PLAYERS_FOR_GAME);
 
-            const result = service.leaveInGameSession(SESSION_ID, PLAYER_A_ID);
+            const result = service.leaveInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
             expect(result.adminModeDeactivated).toBe(true);
-            expect(session.isAdminModeActive).toBe(false);
-            expect(sessionRepository.update).toHaveBeenCalledWith(session);
+            expect(mockSessionRepository.update).toHaveBeenCalled();
         });
 
         it('should not deactivate admin mode when non-admin leaves', () => {
-            const session = createMockInGameSession({ isAdminModeActive: true });
-            const player = createMockPlayer({ id: PLAYER_A_ID, isAdmin: false });
-            sessionRepository.playerLeave.mockReturnValue(player);
-            sessionRepository.findById.mockReturnValue(session);
-            sessionRepository.inGamePlayersCount.mockReturnValue(2);
+            const player = createMockPlayer({ id: MOCK_PLAYER_ID_1, isAdmin: false });
+            const session = createMockInGameSession({ isAdminModeActive: true, inGamePlayers: { [MOCK_PLAYER_ID_1]: player } });
+            mockSessionRepository.playerLeave.mockReturnValue(player);
+            mockSessionRepository.findById.mockReturnValue(session);
+            mockSessionRepository.inGamePlayersCount.mockReturnValue(MOCK_MIN_PLAYERS_FOR_GAME);
+            mockSessionRepository.realPlayersCount.mockReturnValue(MOCK_MIN_PLAYERS_FOR_GAME);
 
-            const result = service.leaveInGameSession(SESSION_ID, PLAYER_A_ID);
-
-            expect(result.adminModeDeactivated).toBe(false);
-            expect(session.isAdminModeActive).toBe(true);
-        });
-
-        it('should not deactivate admin mode when admin leaves but admin mode inactive', () => {
-            const session = createMockInGameSession({ isAdminModeActive: false });
-            const player = createMockPlayer({ id: PLAYER_A_ID, isAdmin: true });
-            sessionRepository.playerLeave.mockReturnValue(player);
-            sessionRepository.findById.mockReturnValue(session);
-            sessionRepository.inGamePlayersCount.mockReturnValue(2);
-
-            const result = service.leaveInGameSession(SESSION_ID, PLAYER_A_ID);
+            const result = service.leaveInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
             expect(result.adminModeDeactivated).toBe(false);
+            expect(mockSessionRepository.update).not.toHaveBeenCalled();
         });
 
-        it('should end session when less than 2 players remain', () => {
-            const session = createMockInGameSession();
-            const player = createMockPlayer({ id: PLAYER_A_ID });
-            sessionRepository.playerLeave.mockReturnValue(player);
-            sessionRepository.findById.mockReturnValue(session);
-            sessionRepository.inGamePlayersCount.mockReturnValue(1);
+        it('should end session when in-game players count is less than 2', () => {
+            const player = createMockPlayer({ id: MOCK_PLAYER_ID_1 });
+            const session = createMockInGameSession({ inGamePlayers: { [MOCK_PLAYER_ID_1]: player } });
+            mockSessionRepository.playerLeave.mockReturnValue(player);
+            mockSessionRepository.findById.mockReturnValue(session);
+            mockSessionRepository.inGamePlayersCount.mockReturnValue(1);
+            mockSessionRepository.realPlayersCount.mockReturnValue(1);
 
-            const result = service.leaveInGameSession(SESSION_ID, PLAYER_A_ID);
+            const result = service.leaveInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
             expect(result.sessionEnded).toBe(true);
-            expect(timerService.forceStopTimer).toHaveBeenCalledWith(SESSION_ID);
+            expect(mockTimerService.forceStopTimer).toHaveBeenCalledWith(MOCK_SESSION_ID);
         });
 
-        it('should not end session when 2 or more players remain', () => {
-            const session = createMockInGameSession();
-            const player = createMockPlayer({ id: PLAYER_A_ID });
-            sessionRepository.playerLeave.mockReturnValue(player);
-            sessionRepository.findById.mockReturnValue(session);
-            sessionRepository.inGamePlayersCount.mockReturnValue(2);
+        it('should end session when no real players remain', () => {
+            const player = createMockPlayer({ id: MOCK_PLAYER_ID_1 });
+            const session = createMockInGameSession({ inGamePlayers: { [MOCK_PLAYER_ID_1]: player } });
+            mockSessionRepository.playerLeave.mockReturnValue(player);
+            mockSessionRepository.findById.mockReturnValue(session);
+            mockSessionRepository.inGamePlayersCount.mockReturnValue(MOCK_MIN_PLAYERS_FOR_GAME);
+            mockSessionRepository.realPlayersCount.mockReturnValue(0);
 
-            const result = service.leaveInGameSession(SESSION_ID, PLAYER_A_ID);
+            const result = service.leaveInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
-            expect(result.sessionEnded).toBe(false);
-            expect(timerService.forceStopTimer).not.toHaveBeenCalled();
+            expect(result.sessionEnded).toBe(true);
+            expect(mockTimerService.forceStopTimer).toHaveBeenCalledWith(MOCK_SESSION_ID);
         });
 
         it('should end turn when leaving player is active player', () => {
-            const session = createMockInGameSession();
-            session.currentTurn.activePlayerId = PLAYER_A_ID;
-            const player = createMockPlayer({ id: PLAYER_A_ID });
-            sessionRepository.playerLeave.mockReturnValue(player);
-            sessionRepository.findById.mockReturnValue(session);
-            sessionRepository.inGamePlayersCount.mockReturnValue(2);
+            const player = createMockPlayer({ id: MOCK_PLAYER_ID_1 });
+            const session = createMockInGameSession({
+                currentTurn: { turnNumber: MOCK_TURN_NUMBER, activePlayerId: MOCK_PLAYER_ID_1, hasUsedAction: false },
+                inGamePlayers: { [MOCK_PLAYER_ID_1]: player },
+            });
+            mockSessionRepository.playerLeave.mockReturnValue(player);
+            mockSessionRepository.findById.mockReturnValue(session);
+            mockSessionRepository.inGamePlayersCount.mockReturnValue(MOCK_MIN_PLAYERS_FOR_GAME);
+            mockSessionRepository.realPlayersCount.mockReturnValue(MOCK_MIN_PLAYERS_FOR_GAME);
 
-            service.leaveInGameSession(SESSION_ID, PLAYER_A_ID);
+            service.leaveInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
-            expect(timerService.endTurnManual).toHaveBeenCalledWith(session);
+            expect(mockTimerService.endTurnManual).toHaveBeenCalledWith(session);
         });
 
-        it('should not end turn when leaving player is not active player', () => {
-            const session = createMockInGameSession();
-            session.currentTurn.activePlayerId = PLAYER_B_ID;
-            const player = createMockPlayer({ id: PLAYER_A_ID });
-            sessionRepository.playerLeave.mockReturnValue(player);
-            sessionRepository.findById.mockReturnValue(session);
-            sessionRepository.inGamePlayersCount.mockReturnValue(2);
+        it('should return correct player information', () => {
+            const player = createMockPlayer({ id: MOCK_PLAYER_ID_1, name: MOCK_PLAYER_NAME_1 });
+            const session = createMockInGameSession({ inGamePlayers: { [MOCK_PLAYER_ID_1]: player } });
+            mockSessionRepository.playerLeave.mockReturnValue(player);
+            mockSessionRepository.findById.mockReturnValue(session);
+            mockSessionRepository.inGamePlayersCount.mockReturnValue(MOCK_MIN_PLAYERS_FOR_GAME);
+            mockSessionRepository.realPlayersCount.mockReturnValue(MOCK_MIN_PLAYERS_FOR_GAME);
 
-            service.leaveInGameSession(SESSION_ID, PLAYER_A_ID);
+            const result = service.leaveInGameSession(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
-            expect(timerService.endTurnManual).not.toHaveBeenCalled();
-        });
-
-        it('should not end turn when session ends', () => {
-            const session = createMockInGameSession();
-            session.currentTurn.activePlayerId = PLAYER_A_ID;
-            const player = createMockPlayer({ id: PLAYER_A_ID });
-            sessionRepository.playerLeave.mockReturnValue(player);
-            sessionRepository.findById.mockReturnValue(session);
-            sessionRepository.inGamePlayersCount.mockReturnValue(1);
-
-            service.leaveInGameSession(SESSION_ID, PLAYER_A_ID);
-
-            expect(timerService.endTurnManual).not.toHaveBeenCalled();
+            expect(result.playerId).toBe(MOCK_PLAYER_ID_1);
+            expect(result.playerName).toBe(MOCK_PLAYER_NAME_1);
+            expect(result.session).toBe(session);
         });
     });
 
     describe('findSessionByPlayerId', () => {
         it('should return session from repository', () => {
             const session = createMockInGameSession();
-            sessionRepository.findSessionByPlayerId.mockReturnValue(session);
+            mockSessionRepository.findSessionByPlayerId.mockReturnValue(session);
 
-            const result = service.findSessionByPlayerId(PLAYER_A_ID);
+            const result = service.findSessionByPlayerId(MOCK_PLAYER_ID_1);
 
             expect(result).toBe(session);
-            expect(sessionRepository.findSessionByPlayerId).toHaveBeenCalledWith(PLAYER_A_ID);
+            expect(mockSessionRepository.findSessionByPlayerId).toHaveBeenCalledWith(MOCK_PLAYER_ID_1);
         });
 
         it('should return null when session not found', () => {
-            sessionRepository.findSessionByPlayerId.mockReturnValue(null);
+            mockSessionRepository.findSessionByPlayerId.mockReturnValue(null);
 
-            const result = service.findSessionByPlayerId(PLAYER_A_ID);
+            const result = service.findSessionByPlayerId(MOCK_PLAYER_ID_1);
 
             expect(result).toBeNull();
         });
     });
 
     describe('getReachableTiles', () => {
-        it('should calculate reachable tiles and end turn when none and no actions', () => {
-            const session = createMockInGameSession();
-            session.inGamePlayers[PLAYER_A_ID].actionsRemaining = 0;
-            sessionRepository.findById.mockReturnValue(session);
-            movementService.calculateReachableTiles.mockReturnValue([]);
+        it('should call gameplayService.getReachableTiles', () => {
+            service.getReachableTiles(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
-            service.getReachableTiles(SESSION_ID, PLAYER_A_ID);
-
-            expect(movementService.calculateReachableTiles).toHaveBeenCalledWith(session, PLAYER_A_ID);
-            expect(timerService.endTurnManual).toHaveBeenCalledWith(session);
-        });
-
-        it('should not end turn when reachable tiles exist', () => {
-            const session = createMockInGameSession();
-            session.inGamePlayers[PLAYER_A_ID].actionsRemaining = 0;
-            sessionRepository.findById.mockReturnValue(session);
-            movementService.calculateReachableTiles.mockReturnValue([{ x: 1, y: 1, cost: 1, remainingPoints: 2 }]);
-
-            service.getReachableTiles(SESSION_ID, PLAYER_A_ID);
-
-            expect(timerService.endTurnManual).not.toHaveBeenCalled();
-        });
-
-        it('should not end turn when actions remaining', () => {
-            const session = createMockInGameSession();
-            session.inGamePlayers[PLAYER_A_ID].actionsRemaining = 1;
-            sessionRepository.findById.mockReturnValue(session);
-            movementService.calculateReachableTiles.mockReturnValue([]);
-
-            service.getReachableTiles(SESSION_ID, PLAYER_A_ID);
-
-            expect(timerService.endTurnManual).not.toHaveBeenCalled();
+            expect(mockGameplayService.getReachableTiles).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
         });
     });
 
     describe('getAvailableActions', () => {
-        it('should calculate available actions', () => {
-            const session = createMockInGameSession();
-            sessionRepository.findById.mockReturnValue(session);
-            actionService.calculateAvailableActions.mockReturnValue([{ type: 'ATTACK', x: 1, y: 1 }]);
+        it('should call gameplayService.getAvailableActions', () => {
+            // eslint-disable-next-line @typescript-eslint/no-empty-function -- Intentionally empty function for test stub
+            mockGameplayService.getAvailableActions.mockImplementation(() => {});
 
-            service.getAvailableActions(SESSION_ID, PLAYER_A_ID);
+            service.getAvailableActions(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
-            expect(actionService.calculateAvailableActions).toHaveBeenCalledWith(session, PLAYER_A_ID);
+            expect(mockGameplayService.getAvailableActions).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
         });
     });
 
     describe('toggleAdminMode', () => {
-        it('should toggle admin mode when player is admin', () => {
-            const session = createMockInGameSession({ isAdminModeActive: false });
-            session.inGamePlayers[PLAYER_A_ID].isAdmin = true;
-            sessionRepository.findById.mockReturnValue(session);
+        it('should return result from gameplayService.toggleAdminMode', () => {
+            const session = createMockInGameSession();
+            mockGameplayService.toggleAdminMode.mockReturnValue(session);
 
-            const result = service.toggleAdminMode(SESSION_ID, PLAYER_A_ID);
+            const result = service.toggleAdminMode(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
 
-            expect(result.isAdminModeActive).toBe(true);
-            expect(sessionRepository.update).toHaveBeenCalledWith(session);
             expect(result).toBe(session);
-        });
-
-        it('should deactivate admin mode when already active', () => {
-            const session = createMockInGameSession({ isAdminModeActive: true });
-            session.inGamePlayers[PLAYER_A_ID].isAdmin = true;
-            sessionRepository.findById.mockReturnValue(session);
-
-            const result = service.toggleAdminMode(SESSION_ID, PLAYER_A_ID);
-
-            expect(result.isAdminModeActive).toBe(false);
-        });
-
-        it('should throw NotFoundException if player not found', () => {
-            const session = createMockInGameSession();
-            session.inGamePlayers = {};
-            sessionRepository.findById.mockReturnValue(session);
-
-            expect(() => service.toggleAdminMode(SESSION_ID, PLAYER_A_ID)).toThrow(NotFoundException);
-            expect(() => service.toggleAdminMode(SESSION_ID, PLAYER_A_ID)).toThrow('Player not found');
-        });
-
-        it('should throw BadRequestException if player is not admin', () => {
-            const session = createMockInGameSession();
-            session.inGamePlayers[PLAYER_A_ID].isAdmin = false;
-            sessionRepository.findById.mockReturnValue(session);
-
-            expect(() => service.toggleAdminMode(SESSION_ID, PLAYER_A_ID)).toThrow(BadRequestException);
-            expect(() => service.toggleAdminMode(SESSION_ID, PLAYER_A_ID)).toThrow('Only admin can toggle admin mode');
+            expect(mockGameplayService.toggleAdminMode).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
         });
     });
 
     describe('teleportPlayer', () => {
-        it('should teleport player when admin mode active and player turn', () => {
-            const session = createMockInGameSession({ isAdminModeActive: true });
-            session.currentTurn.activePlayerId = PLAYER_A_ID;
-            sessionRepository.findById.mockReturnValue(session);
-            gameCache.isTileFree.mockReturnValue(true);
-            movementService.calculateReachableTiles.mockReturnValue([]);
-            actionService.calculateAvailableActions.mockReturnValue([]);
+        it('should call gameplayService.teleportPlayer', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-            service.teleportPlayer(SESSION_ID, PLAYER_A_ID, TELEPORT_X, TELEPORT_Y);
+            service.teleportPlayer(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
 
-            const NO_COST = 0;
-            expect(gameCache.isTileFree).toHaveBeenCalledWith(SESSION_ID, TELEPORT_X, TELEPORT_Y);
-            expect(sessionRepository.movePlayerPosition).toHaveBeenCalledWith(SESSION_ID, PLAYER_A_ID, TELEPORT_X, TELEPORT_Y, NO_COST);
-            expect(movementService.calculateReachableTiles).toHaveBeenCalledWith(session, PLAYER_A_ID);
-            expect(actionService.calculateAvailableActions).toHaveBeenCalledWith(session, PLAYER_A_ID);
-        });
-
-        it('should throw BadRequestException if admin mode not active', () => {
-            const session = createMockInGameSession({ isAdminModeActive: false });
-            sessionRepository.findById.mockReturnValue(session);
-
-            expect(() => service.teleportPlayer(SESSION_ID, PLAYER_A_ID, TELEPORT_X, TELEPORT_Y)).toThrow(BadRequestException);
-            expect(() => service.teleportPlayer(SESSION_ID, PLAYER_A_ID, TELEPORT_X, TELEPORT_Y)).toThrow('Admin mode not active');
-        });
-
-        it('should throw BadRequestException if not player turn', () => {
-            const session = createMockInGameSession({ isAdminModeActive: true });
-            session.currentTurn.activePlayerId = PLAYER_B_ID;
-            sessionRepository.findById.mockReturnValue(session);
-
-            expect(() => service.teleportPlayer(SESSION_ID, PLAYER_A_ID, TELEPORT_X, TELEPORT_Y)).toThrow(BadRequestException);
-            expect(() => service.teleportPlayer(SESSION_ID, PLAYER_A_ID, TELEPORT_X, TELEPORT_Y)).toThrow('Not your turn');
-        });
-
-        it('should throw BadRequestException if tile is not free', () => {
-            const session = createMockInGameSession({ isAdminModeActive: true });
-            session.currentTurn.activePlayerId = PLAYER_A_ID;
-            sessionRepository.findById.mockReturnValue(session);
-            gameCache.isTileFree.mockReturnValue(false);
-
-            expect(() => service.teleportPlayer(SESSION_ID, PLAYER_A_ID, TELEPORT_X, TELEPORT_Y)).toThrow(BadRequestException);
-            expect(() => service.teleportPlayer(SESSION_ID, PLAYER_A_ID, TELEPORT_X, TELEPORT_Y)).toThrow('Tile is not free');
-        });
-    });
-
-    describe('startSessionWithTransition', () => {
-        it('should start session with transition', () => {
-            const session = createMockInGameSession({ isGameStarted: false });
-            sessionRepository.findById.mockReturnValue(session);
-            timerService.startFirstTurnWithTransition.mockReturnValue({ turnNumber: 1, activePlayerId: PLAYER_A_ID, hasUsedAction: false });
-
-            type ServiceWithPrivateMethod = {
-                startSessionWithTransition: (sessionId: string) => InGameSession;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-
-            const result = servicePrivate.startSessionWithTransition(SESSION_ID);
-
-            expect(result.isGameStarted).toBe(true);
-            expect(timerService.startFirstTurnWithTransition).toHaveBeenCalledWith(session, DEFAULT_TURN_DURATION);
-            expect(result.currentTurn).toEqual({ turnNumber: 1, activePlayerId: PLAYER_A_ID, hasUsedAction: false });
-        });
-
-        it('should throw BadRequestException if game already started', () => {
-            const session = createMockInGameSession({ isGameStarted: true });
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                startSessionWithTransition: (sessionId: string) => InGameSession;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-
-            expect(() => servicePrivate.startSessionWithTransition(SESSION_ID)).toThrow(BadRequestException);
-            expect(() => servicePrivate.startSessionWithTransition(SESSION_ID)).toThrow('Game already started');
+            expect(mockGameplayService.teleportPlayer).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
         });
     });
 
     describe('removeSession', () => {
-        it('should remove session and clear all related caches', () => {
-            const session = createMockInGameSession();
-            sessionRepository.findById.mockReturnValue(session);
+        it('should delete session and clear resources', () => {
+            service.removeSession(MOCK_SESSION_ID);
 
-            service.removeSession(SESSION_ID);
+            expect(mockSessionRepository.delete).toHaveBeenCalledWith(MOCK_SESSION_ID);
+            expect(mockGameplayService.clearSessionResources).toHaveBeenCalledWith(MOCK_SESSION_ID);
+            expect(mockTimerService.clearTimerForSession).toHaveBeenCalledWith(MOCK_SESSION_ID);
+        });
+    });
 
-            expect(sessionRepository.findById).toHaveBeenCalledWith(SESSION_ID);
-            expect(sessionRepository.delete).toHaveBeenCalledWith(SESSION_ID);
-            expect(gameCache.clearSessionGameCache).toHaveBeenCalledWith(SESSION_ID);
-            expect(combatService.clearActiveCombatForSession).toHaveBeenCalledWith(SESSION_ID);
-            expect(combatTimerService.stopCombatTimer).toHaveBeenCalledWith(session);
-            expect(timerService.clearTimerForSession).toHaveBeenCalledWith(SESSION_ID);
+    describe('performSanctuaryAction', () => {
+        it('should call gameplayService.performSanctuaryAction with default double false', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            service.performSanctuaryAction(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
+
+            expect(mockGameplayService.performSanctuaryAction).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position, false);
         });
 
-        it('should throw NotFoundException when session not found', () => {
-            sessionRepository.findById.mockImplementation(() => {
-                throw new NotFoundException('Session not found');
-            });
+        it('should call gameplayService.performSanctuaryAction with double true', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
 
-            expect(() => service.removeSession(SESSION_ID)).toThrow(NotFoundException);
+            service.performSanctuaryAction(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position, true);
+
+            expect(mockGameplayService.performSanctuaryAction).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position, true);
+        });
+    });
+
+    describe('getGameStatistics', () => {
+        it('should return statistics from statisticsService', () => {
+            const expectedStats: GameStatisticsDto = {
+                winnerId: MOCK_PLAYER_ID_1,
+                winnerName: MOCK_PLAYER_NAME_1,
+                playersStatistics: [],
+                globalStatistics: {
+                    gameDuration: '0:00',
+                    totalTurns: MOCK_TURN_NUMBER,
+                    tilesVisitedPercentage: 0,
+                    totalTeleportations: 0,
+                    doorsManipulatedPercentage: 0,
+                    sanctuariesUsedPercentage: 0,
+                    flagHoldersCount: 0,
+                },
+            };
+            mockStatisticsService.getStoredGameStatistics.mockReturnValue(expectedStats);
+
+            const result = service.getGameStatistics(MOCK_SESSION_ID);
+
+            expect(result).toBe(expectedStats);
+            expect(mockStatisticsService.getStoredGameStatistics).toHaveBeenCalledWith(MOCK_SESSION_ID);
+        });
+    });
+
+    describe('storeGameStatistics', () => {
+        it('should calculate and store statistics with gameStartTime', () => {
+            const gameStartTime = new Date();
+            const session = createMockInGameSession({ gameStartTime });
+            mockSessionRepository.findById.mockReturnValue(session);
+
+            service.storeGameStatistics(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, MOCK_PLAYER_NAME_1);
+
+            expect(mockStatisticsService.calculateAndStoreGameStatistics).toHaveBeenCalledWith(
+                session,
+                MOCK_PLAYER_ID_1,
+                MOCK_PLAYER_NAME_1,
+                gameStartTime,
+            );
+        });
+
+        it('should use current date when gameStartTime is undefined', () => {
+            const session = createMockInGameSession();
+            mockSessionRepository.findById.mockReturnValue(session);
+            const beforeCall = new Date();
+
+            service.storeGameStatistics(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, MOCK_PLAYER_NAME_1);
+
+            const afterCall = new Date();
+            expect(mockStatisticsService.calculateAndStoreGameStatistics).toHaveBeenCalled();
+            const callArgs = mockStatisticsService.calculateAndStoreGameStatistics.mock.calls[0];
+            const gameStartTime = callArgs[3];
+            expect(gameStartTime.getTime()).toBeGreaterThanOrEqual(beforeCall.getTime());
+            expect(gameStartTime.getTime()).toBeLessThanOrEqual(afterCall.getTime());
+        });
+    });
+
+    describe('pickUpFlag', () => {
+        it('should call gameplayService.pickUpFlag', () => {
+            service.pickUpFlag(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
+
+            expect(mockGameplayService.pickUpFlag).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
+        });
+    });
+
+    describe('requestFlagTransfer', () => {
+        it('should call gameplayService.requestFlagTransfer', () => {
+            const position: Position = { x: MOCK_X, y: MOCK_Y };
+
+            service.requestFlagTransfer(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
+
+            expect(mockGameplayService.requestFlagTransfer).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, position);
+        });
+    });
+
+    describe('respondToFlagTransfer', () => {
+        it('should call gameplayService.respondToFlagTransfer', () => {
+            service.respondToFlagTransfer(MOCK_SESSION_ID, MOCK_PLAYER_ID_2, MOCK_PLAYER_ID_1, true);
+
+            expect(mockGameplayService.respondToFlagTransfer).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_2, MOCK_PLAYER_ID_1, true);
         });
     });
 });

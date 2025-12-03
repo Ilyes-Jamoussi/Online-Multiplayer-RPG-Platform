@@ -4,6 +4,10 @@
             <span class="footer-label">Mouvements RESTANTS</span>
             <span class="footer-value">{{ remainingMovements }}</span>
         </div>
+        <div class="footer-item">
+            <span class="footer-label">Mouvements bateau</span>
+            <span class="footer-value">{{ boatSpeed }}</span>
+        </div>
         <div class="control-group">
             <span class="control-label">Déplacement</span>
             <div class="keys-container">
@@ -37,10 +41,20 @@
             </div>
         </div>
         }
-        <button class="action-btn" [disabled]="isActionDisabled()" (click)="onAction()" title="Afficher les actions disponibles">
+        <button
+            class="action-btn"
+            [class.active]="isActionModeActive"
+            [disabled]="isActionDisabled()"
+            (click)="onAction()"
+            title="Afficher les actions disponibles"
+        >
             <span class="btn-icon">⚡</span>
-            <span class="btn-text">Actions</span>
+            <span class="btn-text">{{ isActionModeActive ? 'Annuler' : 'Actions' }}</span>
         </button>
         <span class="actions-count">{{ availableActionsCount }}</span>
+        <button class="abandon-btn" (click)="onLeaveGame()" title="Abandonner la partie">
+            <span class="btn-icon">🚪</span>
+            <span class="btn-text">Abandonner</span>
+        </button>
     </div>
 </div>

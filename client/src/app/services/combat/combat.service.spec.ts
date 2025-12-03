@@ -1,27 +1,27 @@
 /* eslint-disable max-lines -- Extensive tests needed for 100% code coverage */
 import { TestBed } from '@angular/core/testing';
-import { CombatService } from './combat.service';
-import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
+import { CombatPostureSelectedDto } from '@app/dto/combat-posture-selected-dto';
 import { CombatStartedDto } from '@app/dto/combat-started-dto';
 import { CombatVictoryDto } from '@app/dto/combat-victory-dto';
-import { CombatPostureSelectedDto } from '@app/dto/combat-posture-selected-dto';
-import { PlayerHealthChangedDto } from '@app/dto/player-health-changed-dto';
+import { PlayerCombatDrawsDto } from '@app/dto/player-combat-draws-dto';
+import { PlayerCombatLossesDto } from '@app/dto/player-combat-losses-dto';
 import { PlayerCombatStatsDto } from '@app/dto/player-combat-stats-dto';
 import { PlayerCombatWinsDto } from '@app/dto/player-combat-wins-dto';
-import { PlayerCombatLossesDto } from '@app/dto/player-combat-losses-dto';
-import { PlayerCombatDrawsDto } from '@app/dto/player-combat-draws-dto';
+import { PlayerHealthChangedDto } from '@app/dto/player-health-changed-dto';
+import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
-import { CombatResult } from '@common/interfaces/combat.interface';
-import { Dice } from '@common/enums/dice.enum';
-import { TileCombatEffect } from '@common/enums/tile.enum';
+import { TimerService } from '@app/services/timer/timer.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
+import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
+import { TileCombatEffect } from '@common/enums/tile.enum';
+import { CombatResult } from '@common/interfaces/combat.interface';
 import { Player } from '@common/interfaces/player.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
+import { CombatService } from './combat.service';
 
 const TEST_TIMEOUT_ID_1 = 123;
 const TEST_TIMEOUT_ID_2 = 456;
@@ -30,14 +30,15 @@ const TEST_ATTACK_COORDINATE = 3;
 const TEST_DAMAGE_DISPLAY_TIMEOUT = 2100;
 const TEST_HEALTH_VALUE = 5;
 const TEST_HEALTH_VALUE_7 = 7;
+const TEST_VICTORY_NOTIFICATION_TIMEOUT = 5100;
 
 describe('CombatService', () => {
     let service: CombatService;
     let mockCombatSocketService: jasmine.SpyObj<CombatSocketService>;
     let mockInGameService: jasmine.SpyObj<InGameService>;
-    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
     let mockPlayerService: jasmine.SpyObj<PlayerService>;
-    let mockTimerService: jasmine.SpyObj<TimerCoordinatorService>;
+    let mockTimerService: jasmine.SpyObj<TimerService>;
 
     const mockPlayer: Player = {
         id: 'player1',
@@ -53,10 +54,8 @@ describe('CombatService', () => {
         speed: 3,
         baseAttack: 5,
         attackBonus: 0,
-        attack: 5,
         baseDefense: 4,
         defenseBonus: 0,
-        defense: 4,
         attackDice: Dice.D6,
         defenseDice: Dice.D6,
         x: 0,
@@ -68,6 +67,9 @@ describe('CombatService', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
     };
 
     const mockTargetPlayer: Player = {
@@ -84,16 +86,22 @@ describe('CombatService', () => {
         maxPlayers: 4,
         isRoomLocked: false,
         inGameId: 'ingame1',
+        chatId: 'chat1',
         isGameStarted: true,
         inGamePlayers: {
             player1: mockPlayer,
             player2: mockTargetPlayer,
+        },
+        teams: {
+            1: { number: 1, playerIds: ['player1'] },
+            2: { number: 2, playerIds: ['player2'] },
         },
         currentTurn: { turnNumber: 1, activePlayerId: 'player1', hasUsedAction: false },
         startPoints: [],
         turnOrder: ['player1', 'player2'],
         mapSize: MapSize.SMALL,
         mode: GameMode.CLASSIC,
+        playerCount: 2,
     } as InGameSession;
 
     const mockCombatResult: CombatResult = {
@@ -106,6 +114,7 @@ describe('CombatService', () => {
             attackBonus: 0,
             totalAttack: 9,
             tileCombatEffect: TileCombatEffect.BASE,
+            postureBonus: 0,
         },
         playerBAttack: {
             dice: Dice.D6,
@@ -114,6 +123,7 @@ describe('CombatService', () => {
             attackBonus: 0,
             totalAttack: 8,
             tileCombatEffect: TileCombatEffect.BASE,
+            postureBonus: 0,
         },
         playerADefense: {
             dice: Dice.D6,
@@ -122,6 +132,7 @@ describe('CombatService', () => {
             defenseBonus: 0,
             totalDefense: 6,
             tileCombatEffect: TileCombatEffect.BASE,
+            postureBonus: 0,
         },
         playerBDefense: {
             dice: Dice.D6,
@@ -130,6 +141,7 @@ describe('CombatService', () => {
             defenseBonus: 0,
             totalDefense: 9,
             tileCombatEffect: TileCombatEffect.BASE,
+            postureBonus: 0,
         },
         playerADamage: 2,
         playerBDamage: 0,
@@ -201,11 +213,11 @@ describe('CombatService', () => {
 
         const inGameSpy = jasmine.createSpyObj('InGameService', ['getPlayerByPlayerId', 'updateInGameSession', 'sessionId', 'inGameSession']);
 
-        const notificationSpy = jasmine.createSpyObj('NotificationCoordinatorService', ['showInfoToast', 'showSuccessToast']);
+        const notificationSpy = jasmine.createSpyObj('NotificationService', ['showInfoToast', 'showSuccessToast']);
 
         const playerSpy = jasmine.createSpyObj('PlayerService', ['id', 'updatePlayer']);
 
-        const timerSpy = jasmine.createSpyObj('TimerCoordinatorService', [
+        const timerSpy = jasmine.createSpyObj('TimerService', [
             'pauseTurnTimer',
             'resumeTurnTimer',
             'startCombatTimer',
@@ -219,18 +231,18 @@ describe('CombatService', () => {
                 CombatService,
                 { provide: CombatSocketService, useValue: combatSocketSpy },
                 { provide: InGameService, useValue: inGameSpy },
-                { provide: NotificationCoordinatorService, useValue: notificationSpy },
+                { provide: NotificationService, useValue: notificationSpy },
                 { provide: PlayerService, useValue: playerSpy },
-                { provide: TimerCoordinatorService, useValue: timerSpy },
+                { provide: TimerService, useValue: timerSpy },
             ],
         });
 
         service = TestBed.inject(CombatService);
         mockCombatSocketService = TestBed.inject(CombatSocketService) as jasmine.SpyObj<CombatSocketService>;
         mockInGameService = TestBed.inject(InGameService) as jasmine.SpyObj<InGameService>;
-        mockNotificationService = TestBed.inject(NotificationCoordinatorService) as jasmine.SpyObj<NotificationCoordinatorService>;
+        mockNotificationService = TestBed.inject(NotificationService) as jasmine.SpyObj<NotificationService>;
         mockPlayerService = TestBed.inject(PlayerService) as jasmine.SpyObj<PlayerService>;
-        mockTimerService = TestBed.inject(TimerCoordinatorService) as jasmine.SpyObj<TimerCoordinatorService>;
+        mockTimerService = TestBed.inject(TimerService) as jasmine.SpyObj<TimerService>;
 
         mockInGameService.getPlayerByPlayerId.and.callFake((id: string) => {
             return id === 'player1' ? mockPlayer : mockTargetPlayer;
@@ -486,7 +498,8 @@ describe('CombatService', () => {
                 expect(service.selectedPosture()).toBeNull();
             });
 
-            it('should hide damage display after timeout', (done) => {
+            it('should hide damage display after timeout', () => {
+                jasmine.clock().install();
                 mockTimerService.isCombatActive.and.returnValue(false);
                 combatStartedCallback({
                     attackerId: 'player1',
@@ -499,11 +512,10 @@ describe('CombatService', () => {
                 const initialDisplays = service.damageDisplays();
                 expect(initialDisplays[0].visible).toBe(true);
 
-                setTimeout(() => {
-                    const updatedDisplays = service.damageDisplays();
-                    expect(updatedDisplays[0].visible).toBe(false);
-                    done();
-                }, TEST_DAMAGE_DISPLAY_TIMEOUT);
+                jasmine.clock().tick(TEST_DAMAGE_DISPLAY_TIMEOUT);
+                const updatedDisplays = service.damageDisplays();
+                expect(updatedDisplays[0].visible).toBe(false);
+                jasmine.clock().uninstall();
             });
 
             it('should use default tile effect of 0 when tile effect is not provided', () => {
@@ -777,6 +789,29 @@ describe('CombatService', () => {
 
                 expect(clearTimeout).toHaveBeenCalledWith(TEST_TIMEOUT_ID_1);
                 expect(setTimeout).toHaveBeenCalled();
+            });
+
+            it('should call closeVictoryOverlay after timeout', () => {
+                jasmine.clock().install();
+                mockTimerService.isCombatActive.and.returnValue(false);
+                combatStartedCallback({
+                    attackerId: 'player1',
+                    targetId: 'player2',
+                });
+
+                victoryCallback({
+                    playerAId: 'player1',
+                    playerBId: 'player2',
+                    winnerId: 'player1',
+                    abandon: false,
+                });
+
+                expect(service.isVictoryNotificationVisible()).toBe(true);
+
+                jasmine.clock().tick(TEST_VICTORY_NOTIFICATION_TIMEOUT);
+                expect(service.isVictoryNotificationVisible()).toBe(false);
+                expect(service.combatData()).toBeNull();
+                jasmine.clock().uninstall();
             });
         });
 

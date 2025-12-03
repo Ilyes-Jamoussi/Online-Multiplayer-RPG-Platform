@@ -1,12 +1,15 @@
-import { computed, Injectable, Signal, signal, WritableSignal } from '@angular/core';
+import { Injectable, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { BASE_STAT_VALUE, BONUS_STAT_VALUE, DEFAULT_PLAYER } from '@app/constants/player.constants';
+import { BASE_STAT_VALUE, BONUS_STAT_VALUE, DEFAULT_PLAYER, RANDOM_BONUS_THRESHOLD } from '@app/constants/player.constants';
 import { BonusType } from '@app/enums/character-creation.enum';
+import { TeamColor } from '@app/enums/team-color.enum';
 import { ROUTES } from '@app/enums/routes.enum';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
+import { ResetService } from '@app/services/reset/reset.service';
 import { SessionSocketService } from '@app/services/session-socket/session-socket.service';
 import { SessionService } from '@app/services/session/session.service';
+import { DiceAttribute } from '@app/types/game.types';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { Player } from '@common/interfaces/player.interface';
@@ -27,8 +30,8 @@ export class PlayerService {
     readonly maxHealth = computed(() => this.player().maxHealth);
     readonly speedBonus = computed(() => this.player().speedBonus);
     readonly speed = computed(() => this.player().speed);
-    readonly attack = computed(() => this.player().attack);
-    readonly defense = computed(() => this.player().defense);
+    readonly attackBonus = computed(() => this.player().attackBonus);
+    readonly defenseBonus = computed(() => this.player().defenseBonus);
     readonly attackDice = computed(() => this.player().attackDice);
     readonly defenseDice = computed(() => this.player().defenseDice);
     readonly actionsRemaining = computed(() => this.player().actionsRemaining);
@@ -38,15 +41,17 @@ export class PlayerService {
     readonly combatWins = computed(() => this.player().combatWins);
     readonly combatLosses = computed(() => this.player().combatLosses);
     readonly combatDraws = computed(() => this.player().combatDraws);
+    readonly teamNumber = computed(() => this.player().teamNumber);
 
     constructor(
         private readonly sessionService: SessionService,
         private readonly sessionSocketService: SessionSocketService,
         private readonly inGameSocketService: InGameSocketService,
-        private readonly notificationCoordinatorService: NotificationCoordinatorService,
+        private readonly notificationCoordinatorService: NotificationService,
         private readonly router: Router,
     ) {
         this.initListeners();
+        inject(ResetService).reset$.subscribe(() => this.reset());
     }
 
     setName(name: string): void {
@@ -70,7 +75,7 @@ export class PlayerService {
         });
     }
 
-    setDice(attr: 'attack' | 'defense', value: Dice): void {
+    setDice(attr: DiceAttribute, value: Dice): void {
         const otherDiceValue = value === Dice.D6 ? Dice.D4 : Dice.D6;
 
         const newDice = {
@@ -93,13 +98,12 @@ export class PlayerService {
 
         const randomName = names[Math.floor(Math.random() * names.length)];
         const randomAvatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
-        const randomThreshold = 0.5;
-        const randomBonus = Math.random() < randomThreshold ? BonusType.Life : BonusType.Speed;
+        const randomBonus = Math.random() < RANDOM_BONUS_THRESHOLD ? BonusType.Life : BonusType.Speed;
 
         this.setName(randomName);
         this.selectAvatar(randomAvatar);
         this.setBonus(randomBonus);
-        this.setDice(Math.random() < randomThreshold ? 'attack' : 'defense', Dice.D6);
+        this.setDice(Math.random() < RANDOM_BONUS_THRESHOLD ? 'attack' : 'defense', Dice.D6);
     }
 
     updatePlayer(partial: Partial<Player>): void {
@@ -108,7 +112,7 @@ export class PlayerService {
 
     reset(): void {
         this._player.set({ ...DEFAULT_PLAYER });
-        this.sessionService.resetSession();
+        this.sessionService.reset();
     }
 
     setAsAdmin(): void {
@@ -150,10 +154,33 @@ export class PlayerService {
         this.updatePlayer({ actionsRemaining });
     }
 
+    boatAction(x: number, y: number): void {
+        if (this.player().onBoatId) {
+            this.disembarkBoat(x, y);
+        } else {
+            this.boardBoat(x, y);
+        }
+    }
+
+    private boardBoat(x: number, y: number): void {
+        this.inGameSocketService.playerBoardBoat(this.sessionService.id(), x, y);
+    }
+
+    private disembarkBoat(x: number, y: number): void {
+        this.inGameSocketService.playerDisembarkBoat(this.sessionService.id(), x, y);
+    }
+
+    getTeamColor(teamNumber: number | undefined): string | undefined {
+        if (teamNumber === undefined) return undefined;
+        const myTeamNumber = this.teamNumber();
+        if (myTeamNumber === undefined) return undefined;
+        return teamNumber === myTeamNumber ? TeamColor.MyTeam : TeamColor.EnemyTeam;
+    }
+
     private initListeners(): void {
         this.sessionSocketService.onSessionCreated((data) => {
             this.updatePlayer({ id: data.playerId });
-            this.sessionService.updateSession({ id: data.sessionId });
+            this.sessionService.updateSession({ id: data.sessionId, chatId: data.chatId });
             void this.router.navigate([ROUTES.WaitingRoomPage]);
         });
 
@@ -173,7 +200,7 @@ export class PlayerService {
 
         this.sessionSocketService.onSessionJoined((data) => {
             if (data.modifiedPlayerName) this.updatePlayer({ name: data.modifiedPlayerName });
-            this.sessionService.handleSessionJoined({ gameId: data.gameId, maxPlayers: data.maxPlayers });
+            this.sessionService.handleSessionJoined(data);
         });
 
         this.inGameSocketService.onPlayerUpdated((updatedPlayer) => {

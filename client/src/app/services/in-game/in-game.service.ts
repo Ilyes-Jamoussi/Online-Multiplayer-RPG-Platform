@@ -1,14 +1,19 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
+import { AvailableActionDto } from '@app/dto/available-action-dto';
+import { FlagTransferRequestDto } from '@app/dto/flag-transfer-request-dto';
 import { ROUTES } from '@app/enums/routes.enum';
+import { GameOverData } from '@app/interfaces/game-over-data.interface';
+import { OpenedSanctuary } from '@app/interfaces/opened-sanctuary.interface';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { ResetService } from '@app/services/reset/reset.service';
 import { SessionService } from '@app/services/session/session.service';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { DEFAULT_TURN_DURATION, DEFAULT_TURN_TRANSITION_DURATION } from '@common/constants/in-game';
 import { Orientation } from '@common/enums/orientation.enum';
-import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { ReachableTile } from '@common/interfaces/reachable-tile.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
@@ -21,9 +26,11 @@ export class InGameService {
     private readonly _isTransitioning = signal<boolean>(false);
     private readonly _isGameStarted = signal<boolean>(false);
     private readonly _reachableTiles = signal<ReachableTile[]>([]);
-    private readonly _availableActions = signal<AvailableAction[]>([]);
+    private readonly _availableActions = signal<AvailableActionDto[]>([]);
     private readonly _isActionModeActive = signal<boolean>(false);
-    private readonly _gameOverData = signal<{ winnerId: string; winnerName: string } | null>(null);
+    private readonly _gameOverData = signal<GameOverData | null>(null);
+    private readonly _openedSanctuary = signal<OpenedSanctuary | null>(null);
+    private readonly _pendingFlagTransferRequest = signal<FlagTransferRequestDto | null>(null);
 
     readonly isMyTurn = computed(() => this._inGameSession().currentTurn.activePlayerId === this.playerService.id());
     private readonly currentTurn = computed(() => this._inGameSession().currentTurn);
@@ -42,6 +49,9 @@ export class InGameService {
     readonly availableActions = this._availableActions.asReadonly();
     readonly isActionModeActive = this._isActionModeActive.asReadonly();
     readonly gameOverData = this._gameOverData.asReadonly();
+    readonly openedSanctuary = this._openedSanctuary.asReadonly();
+    readonly flagData = computed(() => this._inGameSession().flagData);
+    readonly pendingFlagTransferRequest = this._pendingFlagTransferRequest.asReadonly();
 
     sessionId(): string {
         return this.sessionService.id();
@@ -68,17 +78,22 @@ export class InGameService {
 
     deactivateActionMode(): void {
         this._isActionModeActive.set(false);
+    }
+
+    resetActions(): void {
+        this._isActionModeActive.set(false);
         this._availableActions.set([]);
     }
 
     constructor(
         private readonly inGameSocketService: InGameSocketService,
         private readonly sessionService: SessionService,
-        private readonly timerCoordinatorService: TimerCoordinatorService,
+        private readonly timerCoordinatorService: TimerService,
         private readonly playerService: PlayerService,
-        private readonly notificationCoordinatorService: NotificationCoordinatorService,
+        private readonly notificationCoordinatorService: NotificationService,
     ) {
         this.initListeners();
+        inject(ResetService).reset$.subscribe(() => this.reset());
     }
 
     get activePlayer(): Player | undefined {
@@ -90,7 +105,7 @@ export class InGameService {
     }
 
     get turnTransitionMessage(): string {
-        return this.isMyTurn() ? "C'est ton tour !" : `C'est le tour de ${this.activePlayer?.name} !`;
+        return this.isMyTurn() ? "C'est votre tour !" : `C'est le tour de ${this.activePlayer?.name} !`;
     }
 
     getPlayerByPlayerId(playerId: string): Player {
@@ -125,6 +140,29 @@ export class InGameService {
 
     updateInGameSession(data: Partial<InGameSession>): void {
         this._inGameSession.update((inGameSession) => ({ ...inGameSession, ...data }));
+        if (data.inGamePlayers) {
+            const currentPlayerId = this.playerService.id();
+            const updatedPlayer = data.inGamePlayers[currentPlayerId];
+            if (updatedPlayer) {
+                this.playerService.updatePlayer(updatedPlayer);
+            }
+        }
+    }
+
+    healPlayer(x: number, y: number): void {
+        this.inGameSocketService.playerSanctuaryRequest({ sessionId: this.sessionService.id(), x, y, kind: PlaceableKind.HEAL });
+    }
+
+    fightPlayer(x: number, y: number): void {
+        this.inGameSocketService.playerSanctuaryRequest({ sessionId: this.sessionService.id(), x, y, kind: PlaceableKind.FIGHT });
+    }
+
+    closeSanctuary(): void {
+        this._openedSanctuary.set(null);
+    }
+
+    performSanctuaryAction(x: number, y: number, kind: PlaceableKind, double: boolean = false): void {
+        this.inGameSocketService.playerSanctuaryAction({ sessionId: this.sessionService.id(), x, y, kind, double });
     }
 
     private startTurnTimer(): void {
@@ -144,10 +182,43 @@ export class InGameService {
         this.stopTurnTimer();
         this.startTurnTransitionTimer();
         this._isTransitioning.set(true);
+        this.resetActions();
     }
 
     private turnTransitionEnded(): void {
         this._isTransitioning.set(false);
+    }
+
+    private updatePlayerInSession(playerId: string, updates: Partial<Player>, updatePlayerService: boolean = false): void {
+        this.updateInGameSession({
+            inGamePlayers: {
+                ...this.inGameSession().inGamePlayers,
+                [playerId]: {
+                    ...this.inGameSession().inGamePlayers[playerId],
+                    ...updates,
+                },
+            },
+        });
+        if (updatePlayerService && this.playerService.id() === playerId) {
+            this.playerService.updatePlayer(updates);
+        }
+    }
+
+    boatAction(x: number, y: number): void {
+        this.playerService.boatAction(x, y);
+    }
+
+    requestFlagTransfer(x: number, y: number): void {
+        this.inGameSocketService.requestFlagTransfer({ sessionId: this.sessionService.id(), x, y });
+    }
+
+    respondToFlagTransfer(fromPlayerId: string, accepted: boolean): void {
+        this.inGameSocketService.respondToFlagTransfer({
+            sessionId: this.sessionService.id(),
+            fromPlayerId,
+            accepted,
+        });
+        this._pendingFlagTransferRequest.set(null);
     }
 
     reset(): void {
@@ -159,6 +230,7 @@ export class InGameService {
         this._gameOverData.set(null);
         this._isActionModeActive.set(false);
         this._availableActions.set([]);
+        this._pendingFlagTransferRequest.set(null);
     }
 
     private initListeners(): void {
@@ -181,6 +253,7 @@ export class InGameService {
 
         this.inGameSocketService.onTurnEnded((data) => {
             this.turnEnd(data);
+            this.closeSanctuary();
         });
 
         this.inGameSocketService.onTurnTransitionEnded(() => {
@@ -196,30 +269,13 @@ export class InGameService {
         });
 
         this.inGameSocketService.onPlayerMoved((data) => {
-            this.updateInGameSession({
-                inGamePlayers: {
-                    ...this.inGameSession().inGamePlayers,
-                    [data.playerId]: {
-                        ...this.inGameSession().inGamePlayers[data.playerId],
-                        x: data.x,
-                        y: data.y,
-                        speed: data.speed,
-                    },
-                },
-            });
-            if (this.playerService.id() === data.playerId) {
-                this.playerService.updatePlayer({
-                    x: data.x,
-                    y: data.y,
-                    speed: data.speed,
-                });
-            }
+            const isCurrentPlayer = this.playerService.id() === data.playerId;
+            this.updatePlayerInSession(data.playerId, { x: data.x, y: data.y, speed: data.speed, boatSpeed: data.boatSpeed }, isCurrentPlayer);
         });
-
-        this.inGameSocketService.onPlayerAvailableActions((actions) => {
-            this._availableActions.set(actions);
+        this.inGameSocketService.onPlayerAvailableActions((data) => {
+            this._availableActions.set(data.availableActions);
             if (this.isMyTurn()) {
-                this.playerService.updateActionsRemaining(actions.length);
+                this.playerService.updateActionsRemaining(data.availableActions.length);
             }
         });
 
@@ -227,7 +283,7 @@ export class InGameService {
             this.reset();
             this.notificationCoordinatorService.displayInformationPopup({
                 title: 'Départ réussi',
-                message: `Tu as quitté la partie avec succès`,
+                message: `Vous avez quitté la partie avec succès`,
                 redirectRoute: ROUTES.HomePage,
             });
         });
@@ -246,32 +302,102 @@ export class InGameService {
         });
 
         this.inGameSocketService.onPlayerTeleported((data) => {
-            this.updateInGameSession({
-                inGamePlayers: {
-                    ...this.inGameSession().inGamePlayers,
-                    [data.playerId]: {
-                        ...this.inGameSession().inGamePlayers[data.playerId],
-                        x: data.x,
-                        y: data.y,
-                    },
-                },
-            });
-            if (this.playerService.id() === data.playerId) {
-                this.playerService.updatePlayer({
-                    x: data.x,
-                    y: data.y,
-                });
-            }
+            this.updatePlayerInSession(data.playerId, { x: data.x, y: data.y }, true);
         });
 
         this.inGameSocketService.onPlayerActionUsed(() => {
             this.playerActionUsed();
-            this.deactivateActionMode();
+            this.resetActions();
         });
 
         this.inGameSocketService.onGameOver((data) => {
             this._gameOverData.set(data);
             this.stopTurnTimer();
+        });
+
+        this.inGameSocketService.onOpenSanctuary((data) => {
+            this._openedSanctuary.set({ kind: data.kind, x: data.x, y: data.y, success: false });
+        });
+
+        this.inGameSocketService.onSanctuaryActionFailed(() => {
+            this.notificationCoordinatorService.displayErrorPopup({
+                title: 'Action de sanctuaire échouée',
+                message: `L'action de sanctuaire a échouée`,
+            });
+            this._openedSanctuary.set(null);
+        });
+
+        this.inGameSocketService.onSanctuaryActionSuccess((data) => {
+            this._openedSanctuary.set(data);
+        });
+
+        this.inGameSocketService.onPlayerBonusesChanged((data) => {
+            this.playerService.updatePlayer({
+                attackBonus: data.attackBonus,
+                defenseBonus: data.defenseBonus,
+            });
+        });
+
+        this.inGameSocketService.onOpenSanctuaryError((message) => {
+            this.notificationCoordinatorService.displayErrorPopup({
+                title: 'Action impossible',
+                message,
+            });
+        });
+
+        this.inGameSocketService.onPlayerBoardedBoat((data) => {
+            this.updatePlayerInSession(data.playerId, { onBoatId: data.boatId }, true);
+        });
+
+        this.inGameSocketService.onPlayerDisembarkedBoat((data) => {
+            this.updatePlayerInSession(data.playerId, { onBoatId: undefined });
+        });
+
+        this.inGameSocketService.onSessionUpdated((data) => {
+            this.updateInGameSession(data);
+        });
+
+        this.inGameSocketService.onFlagPickedUp((data) => {
+            const currentFlagData = this.flagData();
+            if (currentFlagData) {
+                this.updateInGameSession({
+                    flagData: { ...currentFlagData, holderPlayerId: data.playerId },
+                });
+            }
+        });
+
+        this.inGameSocketService.onFlagTransferRequested((data) => {
+            if (this.playerService.id() === data.toPlayerId) {
+                this._pendingFlagTransferRequest.set(data);
+            }
+        });
+
+        this.inGameSocketService.onFlagTransferResult((data) => {
+            if (data.accepted) {
+                this.notificationCoordinatorService.showInfoToast(`Transfert de drapeau accepté`);
+            } else {
+                this.notificationCoordinatorService.showInfoToast(`Transfert de drapeau refusé`);
+            }
+        });
+
+        this.inGameSocketService.onFlagTransferred((data) => {
+            const currentFlagData = this.flagData();
+            if (currentFlagData) {
+                const toPlayer = this.inGamePlayers()[data.toPlayerId];
+                this.updateInGameSession({
+                    flagData: {
+                        ...currentFlagData,
+                        holderPlayerId: data.toPlayerId,
+                        position: toPlayer ? { x: toPlayer.x, y: toPlayer.y } : currentFlagData.position,
+                    },
+                });
+            }
+        });
+
+        this.inGameSocketService.onFlagTransferRequestsCleared(() => {
+            if (this._pendingFlagTransferRequest()) {
+                this._pendingFlagTransferRequest.set(null);
+            }
         });
     }
 }

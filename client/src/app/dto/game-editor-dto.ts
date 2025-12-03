@@ -11,6 +11,7 @@ import { GameEditorTileDto } from './game-editor-tile-dto';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { GameEditorPlaceableDto } from './game-editor-placeable-dto';
 import { MapSize } from '@common/enums/map-size.enum';
+import { TeleportChannelDto } from './teleport-channel-dto';
 
 export interface GameEditorDto {
     id: string;
@@ -20,6 +21,7 @@ export interface GameEditorDto {
     mode: GameMode;
     tiles: Array<GameEditorTileDto>;
     objects: Array<GameEditorPlaceableDto>;
+    teleportChannels: Array<TeleportChannelDto>;
     gridPreviewUrl: string;
     lastModified: string;
 }

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal, signal } from '@angular/core';
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { TurnTimerComponent } from './turn-timer.component';
 
 const TEST_TIME_REMAINING = 25;
@@ -19,7 +19,7 @@ describe('TurnTimerComponent', () => {
     let component: TurnTimerComponent;
     let fixture: ComponentFixture<TurnTimerComponent>;
     let mockInGameService: MockInGameService;
-    let mockTimerCoordinatorService: jasmine.SpyObj<TimerCoordinatorService>;
+    let mockTimerService: jasmine.SpyObj<TimerService>;
     let mockCombatService: jasmine.SpyObj<CombatService>;
     let timeRemainingSignal: WritableSignal<number>;
     let isMyTurnSignal: WritableSignal<boolean>;
@@ -39,9 +39,9 @@ describe('TurnTimerComponent', () => {
             isGameStarted: isGameStartedSignal,
         };
 
-        mockTimerCoordinatorService = jasmine.createSpyObj('TimerCoordinatorService', ['getPausedTurnTime', 'isTurnActive']);
-        mockTimerCoordinatorService.getPausedTurnTime.and.returnValue(TEST_PAUSED_TIME);
-        mockTimerCoordinatorService.isTurnActive.and.returnValue(true);
+        mockTimerService = jasmine.createSpyObj('TimerService', ['getPausedTurnTime', 'isTurnActive']);
+        mockTimerService.getPausedTurnTime.and.returnValue(TEST_PAUSED_TIME);
+        mockTimerService.isTurnActive.and.returnValue(true);
 
         mockCombatService = jasmine.createSpyObj('CombatService', ['isCombatActive']);
         mockCombatService.isCombatActive.and.returnValue(false);
@@ -50,7 +50,7 @@ describe('TurnTimerComponent', () => {
             imports: [TurnTimerComponent],
             providers: [
                 { provide: InGameService, useValue: mockInGameService },
-                { provide: TimerCoordinatorService, useValue: mockTimerCoordinatorService },
+                { provide: TimerService, useValue: mockTimerService },
                 { provide: CombatService, useValue: mockCombatService },
             ],
         }).compileComponents();
@@ -91,7 +91,7 @@ describe('TurnTimerComponent', () => {
             mockCombatService.isCombatActive.and.returnValue(true);
 
             expect(component.displayedTime).toBe(TEST_PAUSED_TIME);
-            expect(mockTimerCoordinatorService.getPausedTurnTime).toHaveBeenCalled();
+            expect(mockTimerService.getPausedTurnTime).toHaveBeenCalled();
         });
 
         it('should return timeRemaining when combat is not active', () => {
@@ -166,7 +166,7 @@ describe('TurnTimerComponent', () => {
     describe('shouldShowTimer', () => {
         it('should return true when game is started and turn is active', () => {
             isGameStartedSignal.set(true);
-            mockTimerCoordinatorService.isTurnActive.and.returnValue(true);
+            mockTimerService.isTurnActive.and.returnValue(true);
             mockCombatService.isCombatActive.and.returnValue(false);
 
             expect(component.shouldShowTimer).toBe(true);
@@ -174,7 +174,7 @@ describe('TurnTimerComponent', () => {
 
         it('should return true when game is started and combat is active', () => {
             isGameStartedSignal.set(true);
-            mockTimerCoordinatorService.isTurnActive.and.returnValue(false);
+            mockTimerService.isTurnActive.and.returnValue(false);
             mockCombatService.isCombatActive.and.returnValue(true);
 
             expect(component.shouldShowTimer).toBe(true);
@@ -182,7 +182,7 @@ describe('TurnTimerComponent', () => {
 
         it('should return false when game is not started', () => {
             isGameStartedSignal.set(false);
-            mockTimerCoordinatorService.isTurnActive.and.returnValue(true);
+            mockTimerService.isTurnActive.and.returnValue(true);
             mockCombatService.isCombatActive.and.returnValue(false);
 
             expect(component.shouldShowTimer).toBe(false);
@@ -190,7 +190,7 @@ describe('TurnTimerComponent', () => {
 
         it('should return false when turn is not active and combat is not active', () => {
             isGameStartedSignal.set(true);
-            mockTimerCoordinatorService.isTurnActive.and.returnValue(false);
+            mockTimerService.isTurnActive.and.returnValue(false);
             mockCombatService.isCombatActive.and.returnValue(false);
 
             expect(component.shouldShowTimer).toBe(false);
@@ -200,7 +200,7 @@ describe('TurnTimerComponent', () => {
     describe('template rendering', () => {
         it('should display timer when shouldShowTimer is true', () => {
             isGameStartedSignal.set(true);
-            mockTimerCoordinatorService.isTurnActive.and.returnValue(true);
+            mockTimerService.isTurnActive.and.returnValue(true);
 
             fixture.detectChanges();
 
@@ -210,7 +210,7 @@ describe('TurnTimerComponent', () => {
 
         it('should not display timer when shouldShowTimer is false', () => {
             isGameStartedSignal.set(false);
-            mockTimerCoordinatorService.isTurnActive.and.returnValue(false);
+            mockTimerService.isTurnActive.and.returnValue(false);
 
             fixture.detectChanges();
 
@@ -220,7 +220,7 @@ describe('TurnTimerComponent', () => {
 
         it('should display correct timer label and time', () => {
             isGameStartedSignal.set(true);
-            mockTimerCoordinatorService.isTurnActive.and.returnValue(true);
+            mockTimerService.isTurnActive.and.returnValue(true);
             isMyTurnSignal.set(true);
 
             fixture.detectChanges();
@@ -234,7 +234,7 @@ describe('TurnTimerComponent', () => {
 
         it('should apply correct CSS class', () => {
             isGameStartedSignal.set(true);
-            mockTimerCoordinatorService.isTurnActive.and.returnValue(true);
+            mockTimerService.isTurnActive.and.returnValue(true);
             isMyTurnSignal.set(true);
 
             fixture.detectChanges();

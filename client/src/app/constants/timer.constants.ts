@@ -1,0 +1,2 @@
+export const TURN_TIMER_MAX_SECONDS = 30;
+export const COMBAT_TIMER_MAX_SECONDS = 5;

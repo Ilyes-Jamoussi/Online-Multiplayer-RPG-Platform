@@ -11,16 +11,47 @@
 
         <div class="objects-overlay" [ngStyle]="gridStyle">
             @for (obj of visibleObjects; track obj.id) { @if (obj.placed) {
-            <div class="map-object" [ngStyle]="getObjectStyle(obj)">
-                <img [src]="getPlaceableImage(obj.kind)" [alt]="obj.kind" class="object-image" draggable="false" />
+            <div class="map-object" [ngStyle]="getObjectStyle(obj)" [class.disabled]="isPlaceableDisabled(obj.id)">
+                <img [src]="getPlaceableImage(obj.kind)" [alt]="obj.kind" class="object-image" draggable="false" loading="lazy" />
+                @if (isPlaceableDisabled(obj.id)) {
+                <div class="disabled-overlay">
+                    <span class="disabled-icon">✕</span>
+                    <span class="turn-count">{{ getPlaceableTurnCount(obj.id) }}</span>
+                </div>
+                }
             </div>
             } }
+        </div>
+
+        <div class="start-points-overlay" [ngStyle]="gridStyle">
+            @for (startPoint of startPoints; track startPoint.id) {
+            <div class="start-point-avatar" [class.my-start-point]="isMyStartPoint(startPoint)" [ngStyle]="getStartPointStyle(startPoint)">
+                <img
+                    [src]="getStartPointAvatarImage(startPoint.playerId)"
+                    [alt]="'Start point'"
+                    class="start-avatar-image"
+                    [ngStyle]="getStartPointBorderStyle(startPoint)"
+                    draggable="false"
+                    loading="lazy"
+                />
+            </div>
+            }
         </div>
 
         <div class="players-overlay" [ngStyle]="gridStyle">
             @for (player of players; track player.id) {
             <div class="map-player" [class.current-user]="isCurrentUser(player)" [ngStyle]="getPlayerStyle(player)">
-                <img [src]="getPlayerAvatarImage(player.id)" [alt]="player.name" class="player-avatar" draggable="false" />
+                <img
+                    [src]="getPlayerAvatarImage(player.id)"
+                    [alt]="player.name"
+                    class="player-avatar"
+                    [ngStyle]="getPlayerBorderStyle(player)"
+                    draggable="false"
+                    loading="lazy"
+                />
+                @if (hasFlag(player)) {
+                <span class="flag-indicator">🚩</span>
+                }
             </div>
             }
         </div>

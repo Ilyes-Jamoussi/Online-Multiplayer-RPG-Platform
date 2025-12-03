@@ -1,8 +1,9 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
+import { ResetService } from '@app/services/reset/reset.service';
 
 @Injectable({
     providedIn: 'root',
@@ -17,6 +18,7 @@ export class AdminModeService {
         private readonly inGameService: InGameService,
     ) {
         this.initListeners();
+        inject(ResetService).reset$.subscribe(() => this.reset());
     }
 
     toggleAdminMode(): void {

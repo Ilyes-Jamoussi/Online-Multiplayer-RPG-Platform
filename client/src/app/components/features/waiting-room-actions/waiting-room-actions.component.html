@@ -1,19 +1,26 @@
-<ng-container [ngTemplateOutlet]="isAdmin ? adminActions : playerMessage"></ng-container>
+<ng-container [ngTemplateOutlet]="isAdmin() ? adminActions : playerMessage"></ng-container>
+
+@if (showVirtualPlayerModal()) {
+<app-virtual-player-modal
+    [canAddVirtualPlayer]="canAddVirtualPlayer()"
+    (typeSelected)="onVirtualPlayerTypeSelected($event)"
+    (cancelled)="closeVirtualPlayerModal()"
+></app-virtual-player-modal>
+}
 
 <ng-template #adminActions>
     <div class="session-control-container">
         <button
-            class="lock-toggle-button"
-            (click)="toggleLock()"
-            [disabled]="!canToggleLock"
-            [attr.aria-label]="isLocked ? 'Déverrouiller la salle' : 'Verrouiller la salle'"
+            class="add-virtual-player-button"
+            (click)="openVirtualPlayerModal()"
+            [disabled]="!canAddVirtualPlayer()"
+            [attr.aria-label]="'Ajouter un joueur virtuel'"
         >
-            <i class="material-icons">
-                {{ isLocked ? 'lock' : 'lock_open' }}
-            </i>
+            <i class="material-icons">smart_toy</i>
+            Ajouter JV
         </button>
 
-        <button class="start-button" [disabled]="!canStartGame" (click)="startGame()">
+        <button class="start-button" [disabled]="!canStartGame()" (click)="startGame()">
             <i class="material-icons">play_arrow</i>
             Démarrer la partie
         </button>

@@ -1,52 +1,104 @@
 @if (activeTile) {
 <div class="tile-modal-backdrop" (click)="close()"></div>
 <div class="tile-modal" role="dialog" aria-modal="true">
+    <button class="tile-modal__close" (click)="close()" aria-label="Fermer">
+        <i class="material-icons">close</i>
+    </button>
+
     <header class="tile-modal__header">
-        <h3>Tuile: {{ tileLabel[activeTile.kind] }} ({{ activeTile.kind }})</h3>
-        <button class="tile-modal__close" (click)="close()" aria-label="Fermer">×</button>
+        <div class="tile-icon">
+            <i class="material-icons">grid_on</i>
+        </div>
+        <div class="tile-header-content">
+            <h3>{{ tileLabel[activeTile.kind] }}</h3>
+            <span class="tile-type">{{ activeTile.kind }}</span>
+        </div>
     </header>
 
-    <section class="tile-modal__section">
-        <h4>Caractéristiques</h4>
-        <ul>
-            <li>Position: ({{ activeTile.x }}, {{ activeTile.y }})</li>
-            @if(activeTile.kind === tileKind.DOOR){
-            <li>Ouverte: {{ activeTile.open ? 'Oui' : 'Non' }}</li>
-            } @if (activeTile.teleportChannel !== undefined) {
-            <li>Canal de téléportation: {{ activeTile.teleportChannel }}</li>
-            }
-        </ul>
-    </section>
-
-    @if (objectOnTile) {
-    <section class="tile-modal__section">
-        <h4>Objet sur la tuile</h4>
-        <div class="tile-modal__object">
-            <img [src]="getObjectImage(objectOnTile.kind)" [alt]="objectOnTile.kind" />
-            <div class="tile-modal__object-info">
-                <div>Type: {{ objectOnTile.kind }}</div>
-                <div>Label: {{ placeableLabel[objectOnTile.kind] }}</div>
+    <div class="tile-modal__body">
+        <section class="info-card">
+            <div class="info-card__header">
+                <i class="material-icons">info</i>
+                <h4>Caractéristiques</h4>
             </div>
-        </div>
-    </section>
-    } @if (playerOnTile) {
-    <section class="tile-modal__section">
-        <h4>Joueur sur la tuile</h4>
-        <div class="tile-modal__player">
-            <img class="avatar" [src]="getPlayerAvatar(playerOnTile.id)" [alt]="playerOnTile.name" />
-            <div class="tile-modal__player-info">
-                <div>Nom: {{ playerOnTile.name }}</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Position</span>
+                    <span class="info-value">({{ activeTile.x }}, {{ activeTile.y }})</span>
+                </div>
+                @if(activeTile.kind === tileKind.DOOR){
+                <div class="info-item">
+                    <span class="info-label">État</span>
+                    <span class="info-value">
+                        <span class="status-badge" [class.status-open]="activeTile.open" [class.status-closed]="!activeTile.open">
+                            {{ activeTile.open ? 'Ouverte' : 'Fermée' }}
+                        </span>
+                    </span>
+                </div>
+                } @if (activeTile.teleportChannel !== undefined) {
+                <div class="info-item">
+                    <span class="info-label">Téléportation</span>
+                    <span class="info-value">Canal {{ activeTile.teleportChannel }}</span>
+                </div>
+                } @if (startPointOnTile) {
+                <div class="info-item">
+                    <span class="info-label">Point de départ de</span>
+                    <span class="info-value">
+                        @if (startPointOnTile.player) {
+                        {{ startPointOnTile.player.name }}
+                        } @else { Joueur {{ startPointOnTile.playerId }}
+                        }
+                    </span>
+                </div>
+                }
             </div>
-        </div>
-    </section>
-    } @if (!objectOnTile && !playerOnTile) {
-    <section class="tile-modal__section">
-        <em>Aucun objet ni joueur sur cette tuile.</em>
-    </section>
-    }
+        </section>
 
-    <footer class="tile-modal__footer">
-        <button (click)="close()">Fermer</button>
-    </footer>
+        @if (objectOnTile) {
+        <section class="info-card">
+            <div class="info-card__header">
+                <i class="material-icons">category</i>
+                <h4>Objet sur la tuile</h4>
+            </div>
+            <div class="object-display">
+                <div class="object-image-wrapper">
+                    <img [src]="getObjectImage(objectOnTile.kind)" [alt]="objectOnTile.kind" loading="lazy" />
+                </div>
+                <div class="object-details">
+                    <div class="object-name">{{ placeableLabel[objectOnTile.kind] }}</div>
+                    <div class="object-type">{{ objectOnTile.kind }}</div>
+                </div>
+            </div>
+        </section>
+        } @if (playerOnTile) {
+        <section class="info-card">
+            <div class="info-card__header">
+                <i class="material-icons">person</i>
+                <h4>Joueur sur la tuile</h4>
+            </div>
+            <div class="player-display">
+                <div class="player-avatar-wrapper">
+                    <img class="player-avatar" [src]="getPlayerAvatar(playerOnTile.id)" [alt]="playerOnTile.name" loading="lazy" />
+                    @if (hasFlag(playerOnTile)) {
+                    <div class="flag-indicator">🚩</div>
+                    }
+                </div>
+                <div class="player-details">
+                    <div class="player-name">{{ playerOnTile.name }}</div>
+                    @if (getTeamNumber(playerOnTile) !== undefined) {
+                    <div class="team-badge" [style.background-color]="getTeamColor(getTeamNumber(playerOnTile))">
+                        Équipe {{ getTeamNumber(playerOnTile) }}
+                    </div>
+                    }
+                </div>
+            </div>
+        </section>
+        } @if (!objectOnTile && !playerOnTile) {
+        <section class="info-card empty-state">
+            <i class="material-icons">check_circle</i>
+            <p>Cette tuile est vide</p>
+        </section>
+        }
+    </div>
 </div>
 }

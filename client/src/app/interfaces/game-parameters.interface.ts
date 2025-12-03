@@ -11,4 +11,5 @@ export interface GameModeOption {
     value: GameMode;
     label: string;
     description: string;
+    icon: string;
 }

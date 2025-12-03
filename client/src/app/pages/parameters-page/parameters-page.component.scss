@@ -28,6 +28,28 @@
             0 4px 6px -2px rgba(0, 0, 0, 0.05);
         transform: translateY(-2px);
     }
+
+    &:nth-child(2) .option-card:nth-child(2) {
+        &::before {
+            background: linear-gradient(90deg, #f97316, #fb923c);
+        }
+
+        &:hover {
+            border-color: #f97316;
+        }
+
+        &.selected {
+            border-color: #f97316;
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            box-shadow:
+                0 20px 25px -5px rgba(249, 115, 22, 0.2),
+                0 10px 10px -5px rgba(249, 115, 22, 0.1);
+
+            .option-content h3 {
+                color: #ea580c;
+            }
+        }
+    }
 }
 
 .section-header {
@@ -152,20 +174,20 @@
 
     .option-header {
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
         margin-bottom: 1rem;
+        position: relative;
 
         .option-icon {
-            color: #3b82f6;
+            font-size: 2.5rem;
             transition: transform 0.3s ease;
-
-            app-ui-icon {
-                font-size: 1.5rem;
-            }
         }
 
         .selection-indicator {
+            position: absolute;
+            top: 0;
+            right: 0;
             width: 1.5rem;
             height: 1.5rem;
             border-radius: 50%;
@@ -185,6 +207,8 @@
     }
 
     .option-content {
+        text-align: center;
+
         h3 {
             margin: 0 0 0.75rem 0;
             font-size: 1.125rem;
@@ -204,6 +228,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
+            justify-content: center;
 
             .detail-item {
                 display: flex;
@@ -228,24 +253,16 @@
     }
 }
 
-.footer-content {
+:host ::ng-deep .footer-content {
     display: flex;
     justify-content: center;
-    padding: 1.5rem;
-    background: white;
-    border-top: 1px solid #e2e8f0;
+    padding: 1rem;
+}
 
-    .button-content {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-
-        .button-icon {
-            app-ui-icon {
-                font-size: 1.125rem;
-            }
-        }
-    }
+:host ::ng-deep app-ui-footer {
+    background: transparent;
+    border-top: none;
+    box-shadow: none;
 }
 
 @media (max-width: 768px) {

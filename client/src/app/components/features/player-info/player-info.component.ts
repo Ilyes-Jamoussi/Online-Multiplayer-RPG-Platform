@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { HP_HIGH_THRESHOLD_PERCENT, HP_MEDIUM_THRESHOLD_PERCENT, PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { HP_HIGH_THRESHOLD_PERCENT, HP_MEDIUM_THRESHOLD_PERCENT, PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { Avatar } from '@common/enums/avatar.enum';
 
 @Component({
@@ -49,10 +49,6 @@ export class PlayerInfoComponent {
         return this.player.baseAttack;
     }
 
-    get attackValue(): number {
-        return this.playerService.attack();
-    }
-
     get attackDiceType(): string {
         return this.playerService.attackDice();
     }
@@ -61,12 +57,16 @@ export class PlayerInfoComponent {
         return this.player.baseDefense;
     }
 
-    get defenseValue(): number {
-        return this.playerService.defense();
-    }
-
     get defenseDiceType(): string {
         return this.playerService.defenseDice();
+    }
+
+    get attackBonus(): number {
+        return this.playerService.attackBonus();
+    }
+
+    get defenseBonus(): number {
+        return this.playerService.defenseBonus();
     }
 
     get baseSpeed(): number {
@@ -75,6 +75,10 @@ export class PlayerInfoComponent {
 
     get speedBonus(): number {
         return this.player.speedBonus;
+    }
+
+    get boatSpeedBonus(): number {
+        return this.player.boatSpeedBonus;
     }
 
     get baseHealth(): number {
@@ -126,6 +130,19 @@ export class PlayerInfoComponent {
 
     get combatDraws(): number {
         return this.playerService.combatDraws();
+    }
+
+    get teamNumber(): number | undefined {
+        return this.player.teamNumber;
+    }
+
+    getTeamColor(teamNumber: number | undefined): string | undefined {
+        return this.playerService.getTeamColor(teamNumber);
+    }
+
+    get hasFlag(): boolean {
+        const flagData = this.inGameService.flagData();
+        return flagData?.holderPlayerId === this.playerService.id();
     }
 
     isActionDisabled(): boolean {

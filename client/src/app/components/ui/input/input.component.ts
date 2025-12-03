@@ -1,4 +1,5 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
+import { SPACE_DOT_LENGTH } from '@app/constants/input.constants';
 import { NUMBER_ALLOWED_CHARS_PATTERN, TEXT_ALLOWED_CHARS_PATTERN } from '@app/constants/validation.constants';
 import { InputVariants } from '@app/enums/input-variants.enum';
 
@@ -49,11 +50,10 @@ export class UiInputComponent {
 
     onInput(event: Event): void {
         const input = event.target as HTMLInputElement | HTMLTextAreaElement;
-        const spaceDotLength = 2;
         let value = input.value;
 
         if (value.endsWith('. ')) {
-            value = value.slice(0, -spaceDotLength) + ' ';
+            value = value.slice(0, -SPACE_DOT_LENGTH) + ' ';
             input.value = value;
         }
         value = this.filterInvalidChars(value);

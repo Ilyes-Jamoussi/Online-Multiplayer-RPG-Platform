@@ -1,113 +1,84 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
-import { CombatService } from '@app/services/combat/combat.service';
-import { InGameService } from '@app/services/in-game/in-game.service';
-import { PlayerService } from '@app/services/player/player.service';
-
 import { ROUTES } from '@app/enums/routes.enum';
+import { ResetService } from '@app/services/reset/reset.service';
 import { HomePageComponent } from './home-page.component';
+
+const MOCK_TEAM_NUMBER = '204';
+const MOCK_MEMBER_1 = 'Wael El Karoui';
+const MOCK_MEMBER_2 = 'Ilyes Jamoussi';
+const MOCK_MEMBER_3 = 'Noah Blanchard';
+const MOCK_MEMBER_4 = 'Adam Rafai';
+const MOCK_MEMBER_5 = 'Eduard Andrei Podaru';
+const EXPECTED_MEMBERS_COUNT = 5;
 
 describe('HomePageComponent', () => {
     let component: HomePageComponent;
     let fixture: ComponentFixture<HomePageComponent>;
-
-    const routerStub = {
-        navigate: jasmine.createSpy('navigate'),
-    };
-
-    const playerServiceStub = {
-        reset: jasmine.createSpy('reset'),
-    };
-
-    const inGameServiceStub = {
-        reset: jasmine.createSpy('reset'),
-    };
-
-    const combatServiceStub = {
-        reset: jasmine.createSpy('reset'),
-    };
-
-    const adminModeServiceStub = {
-        reset: jasmine.createSpy('reset'),
-    };
+    let mockRouter: jasmine.SpyObj<Router>;
+    let mockResetService: jasmine.SpyObj<ResetService>;
 
     beforeEach(async () => {
+        mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+        mockResetService = jasmine.createSpyObj('ResetService', ['triggerReset']);
+
         await TestBed.configureTestingModule({
             imports: [HomePageComponent],
             providers: [
-                { provide: Router, useValue: routerStub },
-                { provide: PlayerService, useValue: playerServiceStub },
-                { provide: InGameService, useValue: inGameServiceStub },
-                { provide: CombatService, useValue: combatServiceStub },
-                { provide: AdminModeService, useValue: adminModeServiceStub },
+                { provide: Router, useValue: mockRouter },
+                { provide: ResetService, useValue: mockResetService },
             ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(HomePageComponent);
         component = fixture.componentInstance;
-        routerStub.navigate.calls.reset();
-        playerServiceStub.reset.calls.reset();
-        inGameServiceStub.reset.calls.reset();
-        combatServiceStub.reset.calls.reset();
-        adminModeServiceStub.reset.calls.reset();
     });
 
-    it('should create the component', () => {
+    it('should create', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should call reset methods on ngOnInit', () => {
-        component.ngOnInit();
-
-        expect(playerServiceStub.reset).toHaveBeenCalledTimes(1);
-        expect(inGameServiceStub.reset).toHaveBeenCalledTimes(1);
-        expect(combatServiceStub.reset).toHaveBeenCalledTimes(1);
-        expect(adminModeServiceStub.reset).toHaveBeenCalledTimes(1);
+    it('should initialize teamInfo with correct team number', () => {
+        expect(component.teamInfo.teamNumber).toBe(MOCK_TEAM_NUMBER);
     });
 
-    it('should expose team info with expected shape', () => {
-        expect(component.teamInfo).toBeDefined();
-        expect(component.teamInfo.teamNumber).toBeDefined();
-        expect(Array.isArray(component.teamInfo.members)).toBeTrue();
-        expect(component.teamInfo.members.length).toBeGreaterThan(0);
+    it('should initialize teamInfo with correct members', () => {
+        expect(component.teamInfo.members).toEqual([MOCK_MEMBER_1, MOCK_MEMBER_2, MOCK_MEMBER_3, MOCK_MEMBER_4, MOCK_MEMBER_5]);
     });
 
-    it('navigateToCreateGame should call router.navigate with ROUTES.gameSessionCreation', () => {
-        component.navigateToCreateGame();
-        expect(routerStub.navigate).toHaveBeenCalledTimes(1);
-        expect(routerStub.navigate).toHaveBeenCalledWith([ROUTES.SessionCreationPage]);
+    it('should have correct number of members', () => {
+        expect(component.teamInfo.members.length).toBe(EXPECTED_MEMBERS_COUNT);
     });
 
-    it('navigateToAdminPage should call router.navigate with ROUTES.gameManagement', () => {
-        component.navigateToAdminPage();
-        expect(routerStub.navigate).toHaveBeenCalledTimes(1);
-        expect(routerStub.navigate).toHaveBeenCalledWith([ROUTES.ManagementPage]);
-    });
+    describe('ngOnInit', () => {
+        it('should call triggerReset on ResetService', () => {
+            component.ngOnInit();
 
-    it('template should render team number and team members in footer', () => {
-        fixture.detectChanges();
-
-        const native = fixture.nativeElement as HTMLElement;
-
-        expect(native.textContent).toContain(`Équipe ${component.teamInfo.teamNumber}`);
-
-        component.teamInfo.members.forEach((member) => {
-            expect(native.textContent).toContain(member);
+            expect(mockResetService.triggerReset).toHaveBeenCalled();
         });
     });
 
-    it('buttons should trigger navigation methods', () => {
-        fixture.detectChanges();
+    describe('navigateToCreateGame', () => {
+        it('should navigate to SessionCreationPage', () => {
+            component.navigateToCreateGame();
 
-        const buttonDebugEls = fixture.debugElement.queryAll(By.css('button'));
+            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.SessionCreationPage]);
+        });
+    });
 
-        expect(buttonDebugEls.length).toBeGreaterThanOrEqual(0);
+    describe('navigateToAdminPage', () => {
+        it('should navigate to ManagementPage', () => {
+            component.navigateToAdminPage();
 
-        routerStub.navigate.calls.reset();
-        buttonDebugEls.forEach((btn) => btn.triggerEventHandler('click', null));
+            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.ManagementPage]);
+        });
+    });
 
-        expect(true).toBeTrue();
+    describe('navigateToJoinGame', () => {
+        it('should navigate to JoinSessionPage', () => {
+            component.navigateToJoinGame();
+
+            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.JoinSessionPage]);
+        });
     });
 });

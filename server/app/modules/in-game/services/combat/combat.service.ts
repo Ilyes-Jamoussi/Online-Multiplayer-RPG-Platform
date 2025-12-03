@@ -1,15 +1,18 @@
 import { COMBAT_WINS_TO_WIN_GAME } from '@app/constants/game-config.constants';
 import { DiceSides } from '@app/enums/dice-sides.enum';
-import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
+import { ServerEvents } from '@app/enums/server-events.enum';
+import { ActiveCombat } from '@app/interfaces/active-combat.interface';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
 import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
 import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
+import { TrackingService } from '@app/modules/in-game/services/tracking/tracking.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { ServerEvents } from '@app/enums/server-events.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatState } from '@common/interfaces/combat.interface';
+import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
@@ -18,23 +21,23 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 export class CombatService {
     private readonly activeCombats = new Map<string, CombatState>();
 
-    // eslint-disable-next-line max-params -- NestJS dependency injection requires multiple parameters, more than 6 is required for this service
+    // eslint-disable-next-line max-params -- This is a constructor with a lot of dependencies
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly timerService: TimerService,
-        private readonly combatTimerService: CombatTimerService,
         private readonly sessionRepository: InGameSessionRepository,
-        private readonly inGameMovementService: InGameMovementService,
+        private readonly inGameMovementService: MovementService,
         private readonly gameCacheService: GameCacheService,
+        private readonly trackingService: TrackingService,
     ) {}
 
     combatAbandon(sessionId: string, playerId: string): void {
         const combat = this.activeCombats.get(sessionId);
-        if (!combat) throw new NotFoundException('Combat not found');
-        if (combat.playerAId !== playerId && combat.playerBId !== playerId) throw new BadRequestException('Player not in combat');
+        if (!combat) return;
+        if (combat.playerAId !== playerId && combat.playerBId !== playerId) return;
         const winnerId = combat.playerAId === playerId ? combat.playerBId : combat.playerAId;
         const session = this.sessionRepository.findById(sessionId);
-        if (!session) throw new NotFoundException('Session not found');
+        if (!session) return;
         this.sessionRepository.incrementPlayerCombatWins(sessionId, winnerId);
         this.endCombat(session, combat.playerAId, combat.playerBId, winnerId, true);
     }
@@ -47,14 +50,16 @@ export class CombatService {
         }
     }
 
-    attackPlayerAction(sessionId: string, playerId: string, x: number, y: number): void {
+    attackPlayerAction(sessionId: string, playerId: string, targetPosition: Position): void {
         const session = this.sessionRepository.findById(sessionId);
         const player = session.inGamePlayers[playerId];
 
         if (!player) throw new NotFoundException('Player not found');
         if (player.actionsRemaining === 0) throw new BadRequestException('No actions remaining');
 
-        const targetPlayer = Object.values(session.inGamePlayers).find((p) => p.x === x && p.y === y && p.id !== playerId);
+        const targetPlayer = Object.values(session.inGamePlayers).find(
+            (p) => p.x === targetPosition.x && p.y === targetPosition.y && p.id !== playerId,
+        );
 
         if (!targetPlayer) {
             throw new BadRequestException('No opponent at this position');
@@ -82,7 +87,7 @@ export class CombatService {
 
         if (combat.playerAPosture !== null && combat.playerBPosture !== null) {
             const session = this.sessionRepository.findById(sessionId);
-            this.combatTimerService.forceNextLoop(session);
+            this.timerService.forceNextLoop(session);
         }
     }
 
@@ -102,8 +107,7 @@ export class CombatService {
 
         this.activeCombats.set(session.id, combatState);
 
-        this.timerService.pauseTurnTimer(session.id);
-        this.combatTimerService.startCombatTimer(session, playerAId, playerBId, combatState.playerATileEffect, combatState.playerBTileEffect);
+        this.timerService.startCombat(session, playerAId, playerBId, combatState.playerATileEffect, combatState.playerBTileEffect);
 
         this.sessionRepository.incrementPlayerCombatCount(session.id, playerAId);
         this.sessionRepository.incrementPlayerCombatCount(session.id, playerBId);
@@ -121,9 +125,14 @@ export class CombatService {
         this.activeCombats.delete(sessionId);
     }
 
+    getActiveCombat(sessionId: string): ActiveCombat | null {
+        const combat = this.activeCombats.get(sessionId);
+        return combat ? { playerAId: combat.playerAId, playerBId: combat.playerBId } : null;
+    }
+
     private endCombat(session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean = false): void {
         this.activeCombats.delete(session.id);
-        this.combatTimerService.stopCombatTimer(session);
+        this.timerService.endCombat(session, winnerId);
 
         this.eventEmitter.emit(ServerEvents.CombatVictory, {
             sessionId: session.id,
@@ -133,12 +142,22 @@ export class CombatService {
             abandon,
         });
 
-        if (!winnerId || (winnerId && winnerId !== session.currentTurn.activePlayerId)) {
-            this.timerService.endTurnManual(session);
-        } else {
-            this.timerService.resumeTurnTimer(session.id);
-            this.inGameMovementService.calculateReachableTiles(session, session.currentTurn.activePlayerId);
-        }
+        this.emitVirtualPlayerCombatVictoryIfNeeded(session.id, playerAId, playerBId, winnerId);
+
+        this.inGameMovementService.calculateReachableTiles(session, session.currentTurn.activePlayerId);
+    }
+
+    private emitVirtualPlayerCombatVictoryIfNeeded(sessionId: string, playerAId: string, playerBId: string, winnerId: string | null): void {
+        const isPlayerAVirtual = this.sessionRepository.isVirtualPlayer(sessionId, playerAId);
+        const isPlayerBVirtual = this.sessionRepository.isVirtualPlayer(sessionId, playerBId);
+
+        if (!isPlayerAVirtual && !isPlayerBVirtual) return;
+
+        this.eventEmitter.emit(ServerEvents.VirtualPlayerCombatVictory, {
+            sessionId,
+            winnerId,
+            attackerId: playerAId,
+        });
     }
 
     private combatRound(sessionId: string): void {
@@ -161,6 +180,16 @@ export class CombatService {
 
         const playerAHealth = this.sessionRepository.decreasePlayerHealth(sessionId, playerAId, playerADamage);
         const playerBHealth = this.sessionRepository.decreasePlayerHealth(sessionId, playerBId, playerBDamage);
+
+        if (playerADamage > 0) {
+            this.trackingService.trackDamageReceived(sessionId, playerAId, playerADamage);
+            this.trackingService.trackDamageDealt(sessionId, playerBId, playerADamage);
+        }
+
+        if (playerBDamage > 0) {
+            this.trackingService.trackDamageReceived(sessionId, playerBId, playerBDamage);
+            this.trackingService.trackDamageDealt(sessionId, playerAId, playerBDamage);
+        }
 
         this.eventEmitter.emit(ServerEvents.PlayerHealthChanged, {
             sessionId,
@@ -198,13 +227,11 @@ export class CombatService {
             }
 
             if (playerADead) {
-                this.inGameMovementService.movePlayerToStartPosition(session, playerAId);
-                this.sessionRepository.resetPlayerHealth(sessionId, playerAId);
+                this.handlePlayerDeath(sessionId, session, playerAId);
             }
 
             if (playerBDead) {
-                this.inGameMovementService.movePlayerToStartPosition(session, playerBId);
-                this.sessionRepository.resetPlayerHealth(sessionId, playerBId);
+                this.handlePlayerDeath(sessionId, session, playerBId);
             }
 
             if (isDraw) {
@@ -232,6 +259,15 @@ export class CombatService {
         combat.playerBPosture = null;
     }
 
+    private handlePlayerDeath(sessionId: string, session: InGameSession, playerId: string): void {
+        const player = session.inGamePlayers[playerId];
+        this.inGameMovementService.movePlayerToStartPosition(session, playerId);
+        this.sessionRepository.resetPlayerHealth(sessionId, playerId);
+        if (player && this.sessionRepository.playerHasFlag(sessionId, playerId)) {
+            this.sessionRepository.dropFlag(sessionId, playerId);
+        }
+    }
+
     private getPlayerDefense(
         sessionId: string,
         playerId: string,
@@ -242,21 +278,40 @@ export class CombatService {
         diceRoll: number;
         baseDefense: number;
         defenseBonus: number;
+        postureBonus: number;
         totalDefense: number;
         tileCombatEffect: TileCombatEffect;
     } {
         const session = this.sessionRepository.findById(sessionId);
         if (!session)
-            return { dice: Dice.D4, diceRoll: 0, baseDefense: 0, defenseBonus: 0, totalDefense: 0, tileCombatEffect: TileCombatEffect.BASE };
+            return {
+                dice: Dice.D4,
+                diceRoll: 0,
+                baseDefense: 0,
+                defenseBonus: 0,
+                postureBonus: 0,
+                totalDefense: 0,
+                tileCombatEffect: TileCombatEffect.BASE,
+            };
 
         const player = session.inGamePlayers[playerId];
-        if (!player) return { dice: Dice.D4, diceRoll: 0, baseDefense: 0, defenseBonus: 0, totalDefense: 0, tileCombatEffect: TileCombatEffect.BASE };
+        if (!player)
+            return {
+                dice: Dice.D4,
+                diceRoll: 0,
+                baseDefense: 0,
+                defenseBonus: 0,
+                postureBonus: 0,
+                totalDefense: 0,
+                tileCombatEffect: TileCombatEffect.BASE,
+            };
 
         const defenseRoll = this.rollDice(player.defenseDice, sessionId, false);
         const baseDefense = player.baseDefense;
-        const defenseBonus = posture === CombatPosture.DEFENSIVE ? 2 : 0;
-        const totalDefense = baseDefense + defenseRoll + defenseBonus + tileCombatEffect;
-        return { dice: player.defenseDice, diceRoll: defenseRoll, baseDefense, defenseBonus, totalDefense, tileCombatEffect };
+        const defenseBonus = player.defenseBonus;
+        const postureBonus = posture === CombatPosture.DEFENSIVE ? 2 : 0;
+        const totalDefense = baseDefense + defenseRoll + defenseBonus + postureBonus + tileCombatEffect;
+        return { dice: player.defenseDice, diceRoll: defenseRoll, baseDefense, defenseBonus, postureBonus, totalDefense, tileCombatEffect };
     }
 
     private getPlayerAttack(
@@ -269,18 +324,38 @@ export class CombatService {
         diceRoll: number;
         baseAttack: number;
         attackBonus: number;
+        postureBonus: number;
         totalAttack: number;
         tileCombatEffect: TileCombatEffect;
     } {
         const session = this.sessionRepository.findById(sessionId);
-        if (!session) return { dice: Dice.D4, diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0, tileCombatEffect: TileCombatEffect.BASE };
+        if (!session)
+            return {
+                dice: Dice.D4,
+                diceRoll: 0,
+                baseAttack: 0,
+                attackBonus: 0,
+                postureBonus: 0,
+                totalAttack: 0,
+                tileCombatEffect: TileCombatEffect.BASE,
+            };
         const player = session.inGamePlayers[playerId];
-        if (!player) return { dice: Dice.D4, diceRoll: 0, baseAttack: 0, attackBonus: 0, totalAttack: 0, tileCombatEffect: TileCombatEffect.BASE };
+        if (!player)
+            return {
+                dice: Dice.D4,
+                diceRoll: 0,
+                baseAttack: 0,
+                attackBonus: 0,
+                postureBonus: 0,
+                totalAttack: 0,
+                tileCombatEffect: TileCombatEffect.BASE,
+            };
         const attackRoll = this.rollDice(player.attackDice, sessionId, true);
         const baseAttack = player.baseAttack;
-        const attackBonus = posture === CombatPosture.OFFENSIVE ? 2 : 0;
-        const totalAttack = baseAttack + attackRoll + attackBonus + tileCombatEffect;
-        return { dice: player.attackDice, diceRoll: attackRoll, baseAttack, attackBonus, totalAttack, tileCombatEffect };
+        const attackBonus = player.attackBonus;
+        const postureBonus = posture === CombatPosture.OFFENSIVE ? 2 : 0;
+        const totalAttack = baseAttack + attackRoll + attackBonus + postureBonus + tileCombatEffect;
+        return { dice: player.attackDice, diceRoll: attackRoll, baseAttack, attackBonus, postureBonus, totalAttack, tileCombatEffect };
     }
 
     private calculateDamage(attack: number, defense: number): number {
@@ -300,9 +375,8 @@ export class CombatService {
         const session = this.sessionRepository.findById(sessionId);
         const winner = session.inGamePlayers[winnerId];
 
-        if (winner && winner.combatWins >= COMBAT_WINS_TO_WIN_GAME) {
-            this.timerService.forceStopTimer(sessionId);
-            this.combatTimerService.stopCombatTimer(session);
+        if (session.mode !== GameMode.CTF && winner && winner.combatWins >= COMBAT_WINS_TO_WIN_GAME) {
+            this.timerService.clearTimerForSession(sessionId);
             this.eventEmitter.emit(ServerEvents.GameOver, {
                 sessionId,
                 winnerId,

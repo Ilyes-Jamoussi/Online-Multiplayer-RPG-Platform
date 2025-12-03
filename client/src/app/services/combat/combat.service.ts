@@ -1,13 +1,15 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { COMBAT_TOAST_DURATION_MS, DAMAGE_DISPLAY_DURATION_MS, VICTORY_NOTIFICATION_DURATION_MS } from '@app/constants/combat.constants';
 import { CombatData } from '@app/interfaces/combat-data.interface';
 import { DamageDisplay } from '@app/interfaces/damage-display.interface';
 import { VictoryData } from '@app/interfaces/victory-data.interface';
 import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { ResetService } from '@app/services/reset/reset.service';
+import { TimerService } from '@app/services/timer/timer.service';
+import { CombatRole } from '@app/types/game.types';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
 import { CombatResult } from '@common/interfaces/combat.interface';
@@ -38,22 +40,17 @@ export class CombatService {
     readonly isVictoryNotificationVisible = this._isVictoryNotificationVisible.asReadonly();
     readonly isCombatActive = this._isCombatActive.asReadonly();
     constructor(
-        private readonly timerCoordinatorService: TimerCoordinatorService,
+        private readonly timerCoordinatorService: TimerService,
         private readonly combatSocketService: CombatSocketService,
         private readonly playerService: PlayerService,
         private readonly inGameService: InGameService,
-        private readonly notificationCoordinatorService: NotificationCoordinatorService,
+        private readonly notificationCoordinatorService: NotificationService,
     ) {
         this.initListeners();
+        inject(ResetService).reset$.subscribe(() => this.reset());
     }
 
-    private startCombat(
-        attackerId: string,
-        targetId: string,
-        userRole: 'attacker' | 'target',
-        attackerTileEffect?: number,
-        targetTileEffect?: number,
-    ): void {
+    private startCombat(attackerId: string, targetId: string, userRole: CombatRole, attackerTileEffect?: number, targetTileEffect?: number): void {
         this._combatData.set({ attackerId, targetId, userRole });
         this._selectedPosture.set(null);
         this._playerPostures.set({});
@@ -101,6 +98,7 @@ export class CombatService {
         this._tileEffects.set({});
         this._minHealthDuringCombat.set({});
         this._isCombatActive.set(false);
+        this._isVictoryNotificationVisible.set(false);
     }
 
     chooseOffensive(): void {
@@ -229,9 +227,13 @@ export class CombatService {
             damage: data.playerADamage,
             attackRoll: data.playerAAttack.diceRoll,
             attackDice: data.playerAAttack.dice,
+            attackBonus: data.playerAAttack.attackBonus,
+            attackPostureBonus: data.playerAAttack.postureBonus,
             totalAttack: data.playerAAttack.totalAttack,
             defenseRoll: data.playerADefense.diceRoll,
             defenseDice: data.playerADefense.dice,
+            defenseBonus: data.playerADefense.defenseBonus,
+            defensePostureBonus: data.playerADefense.postureBonus,
             totalDefense: data.playerADefense.totalDefense,
             tileEffect: tileEffects[data.playerAId] ?? 0,
             visible: true,
@@ -242,9 +244,13 @@ export class CombatService {
             damage: data.playerBDamage,
             attackRoll: data.playerBAttack.diceRoll,
             attackDice: data.playerBAttack.dice,
+            attackBonus: data.playerBAttack.attackBonus,
+            attackPostureBonus: data.playerBAttack.postureBonus,
             totalAttack: data.playerBAttack.totalAttack,
             defenseRoll: data.playerBDefense.diceRoll,
             defenseDice: data.playerBDefense.dice,
+            defenseBonus: data.playerBDefense.defenseBonus,
+            defensePostureBonus: data.playerBDefense.postureBonus,
             totalDefense: data.playerBDefense.totalDefense,
             tileEffect: tileEffects[data.playerBId] ?? 0,
             visible: true,

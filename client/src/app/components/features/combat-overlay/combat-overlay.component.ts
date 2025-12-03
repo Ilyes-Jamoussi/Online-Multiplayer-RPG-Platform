@@ -1,11 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { CombatTimerComponent } from '@app/components/features/combat-timer/combat-timer.component';
-import { PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
+import { CombatResultComponent } from '@app/components/features/combat-result/combat-result.component';
+import { COMBAT_POSTURE_BONUS, HEALTH_LOW_THRESHOLD, HEALTH_MEDIUM_THRESHOLD } from '@app/constants/combat.constants';
+import { BASE_STAT_VALUE, PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
-import { TimerCoordinatorService } from '@app/services/timer-coordinator/timer-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { CombatPosture } from '@common/enums/combat-posture.enum';
 import { Dice } from '@common/enums/dice.enum';
 import { TileCombatEffect } from '@common/enums/tile.enum';
@@ -13,16 +16,21 @@ import { TileCombatEffect } from '@common/enums/tile.enum';
 @Component({
     selector: 'app-combat-overlay',
     standalone: true,
-    imports: [CommonModule, CombatTimerComponent],
+    imports: [CommonModule, CombatTimerComponent, CombatResultComponent],
     templateUrl: './combat-overlay.component.html',
     styleUrls: ['./combat-overlay.component.scss'],
 })
 export class CombatOverlayComponent {
+    readonly combatPostureBonus = COMBAT_POSTURE_BONUS;
+    readonly healthLowThreshold = HEALTH_LOW_THRESHOLD;
+    readonly healthMediumThreshold = HEALTH_MEDIUM_THRESHOLD;
+
     constructor(
         private readonly combatService: CombatService,
         private readonly inGameService: InGameService,
         private readonly assetsService: AssetsService,
-        private readonly timerCoordinatorService: TimerCoordinatorService,
+        private readonly timerCoordinatorService: TimerService,
+        private readonly notificationService: NotificationService,
     ) {}
 
     get combatData() {
@@ -36,7 +44,7 @@ export class CombatOverlayComponent {
     get playerAAvatar() {
         if (!this.combatData) return '';
         const player = this.inGameService.getPlayerByPlayerId(this.combatData.attackerId);
-        return this.assetsService.getAvatarStaticImage(player.avatar);
+        return this.assetsService.getAvatarAnimatedImage(player.avatar);
     }
 
     get playerBName() {
@@ -46,7 +54,7 @@ export class CombatOverlayComponent {
     get playerBAvatar() {
         if (!this.combatData) return '';
         const player = this.inGameService.getPlayerByPlayerId(this.combatData.targetId);
-        return this.assetsService.getAvatarStaticImage(player.avatar);
+        return this.assetsService.getAvatarAnimatedImage(player.avatar);
     }
 
     get playerAHealth() {
@@ -99,11 +107,23 @@ export class CombatOverlayComponent {
 
     get playerAPosture(): CombatPosture | null {
         if (!this.combatData) return null;
+        const player = this.inGameService.getPlayerByPlayerId(this.combatData.attackerId);
+        const isOpponent = this.combatData.userRole === 'target';
+        const isVirtual = player.virtualPlayerType !== undefined;
+
+        if (isOpponent && !isVirtual) return null;
+
         return this.combatService.playerPostures()[this.combatData.attackerId] || null;
     }
 
     get playerBPosture(): CombatPosture | null {
         if (!this.combatData) return null;
+        const player = this.inGameService.getPlayerByPlayerId(this.combatData.targetId);
+        const isOpponent = this.combatData.userRole === 'attacker';
+        const isVirtual = player.virtualPlayerType !== undefined;
+
+        if (isOpponent && !isVirtual) return null;
+
         return this.combatService.playerPostures()[this.combatData.targetId] || null;
     }
 
@@ -146,10 +166,10 @@ export class CombatOverlayComponent {
         }
 
         if (this.victoryData.winnerId === myId) {
-            return 'Tu as gagné le combat !';
+            return 'Vous avez gagné le combat !';
         }
 
-        return 'Tu as perdu le combat...';
+        return 'Vous avez perdu le combat...';
     }
 
     get isVictory(): boolean {
@@ -224,6 +244,10 @@ export class CombatOverlayComponent {
         return this.assetsService.getDiceImage(dice);
     }
 
+    get baseStatValue(): number {
+        return BASE_STAT_VALUE;
+    }
+
     get pausedTurnTime(): number {
         return this.timerCoordinatorService.getPausedTurnTime();
     }
@@ -234,5 +258,16 @@ export class CombatOverlayComponent {
 
     closeVictoryOverlay(): void {
         this.combatService.closeVictoryOverlay();
+    }
+
+    onLeaveGame(): void {
+        this.notificationService.displayConfirmationPopup({
+            title: 'Abandonner la partie',
+            message: 'Êtes-vous sûr de vouloir abandonner ?\nTous vos progrès seront perdus.',
+            onConfirm: () => {
+                this.combatService.combatAbandon();
+                this.inGameService.leaveGame();
+            },
+        });
     }
 }

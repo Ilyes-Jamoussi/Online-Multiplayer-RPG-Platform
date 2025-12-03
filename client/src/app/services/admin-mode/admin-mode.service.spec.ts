@@ -1,3 +1,4 @@
+import { Subject } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { AdminModeService } from './admin-mode.service';
 import { AdminModeToggledDto } from '@app/dto/admin-mode-toggled-dto';
@@ -5,6 +6,7 @@ import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket
 import { PlayerService } from '@app/services/player/player.service';
 import { SessionService } from '@app/services/session/session.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
+import { ResetService } from '@app/services/reset/reset.service';
 
 const TEST_X_COORDINATE = 5;
 const TEST_Y_COORDINATE = 3;
@@ -15,10 +17,13 @@ describe('AdminModeService', () => {
     let mockPlayerService: jasmine.SpyObj<PlayerService>;
     let mockSessionService: jasmine.SpyObj<SessionService>;
     let mockInGameService: jasmine.SpyObj<InGameService>;
+    let resetService: { reset$: Subject<void> };
 
     let adminModeToggledCallback: (data: { isAdminModeActive: boolean }) => void;
 
     beforeEach(() => {
+        resetService = { reset$: new Subject<void>() };
+
         const inGameSocketSpy = jasmine.createSpyObj('InGameSocketService', ['toggleAdminMode', 'playerTeleport', 'onAdminModeToggled']);
 
         inGameSocketSpy.onAdminModeToggled.and.callFake((callback: (data: AdminModeToggledDto) => void) => {
@@ -36,6 +41,7 @@ describe('AdminModeService', () => {
                 { provide: PlayerService, useValue: playerSpy },
                 { provide: SessionService, useValue: sessionSpy },
                 { provide: InGameService, useValue: inGameSpy },
+                { provide: ResetService, useValue: resetService },
             ],
         });
 
@@ -131,6 +137,22 @@ describe('AdminModeService', () => {
 
                 expect(service.isAdminModeActivated()).toBe(false);
             });
+        });
+    });
+
+    describe('reset', () => {
+        it('should set admin mode to false', () => {
+            service.isAdminModeActivated.set(true);
+            service.reset();
+            expect(service.isAdminModeActivated()).toBe(false);
+        });
+    });
+
+    describe('reset$ subscription', () => {
+        it('should call reset when reset$ emits', () => {
+            service.isAdminModeActivated.set(true);
+            resetService.reset$.next();
+            expect(service.isAdminModeActivated()).toBe(false);
         });
     });
 });

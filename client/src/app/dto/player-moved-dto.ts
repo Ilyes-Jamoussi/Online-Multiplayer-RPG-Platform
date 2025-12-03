@@ -13,4 +13,5 @@ export interface PlayerMovedDto {
     x: number;
     y: number;
     speed: number;
+    boatSpeed: number;
 }

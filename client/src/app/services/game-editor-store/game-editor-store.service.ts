@@ -1,17 +1,19 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { computed, Injectable, signal } from '@angular/core';
-import { PLACEABLE_ORDER } from '@app/constants/game-editor.constants';
+import { DEFAULT_GAME_EDITOR_DTO, PLACEABLE_ORDER } from '@app/constants/game-editor.constants';
 import { CreateGameDto } from '@app/dto/create-game-dto';
 import { GameEditorDto } from '@app/dto/game-editor-dto';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { GameEditorTileDto } from '@app/dto/game-editor-tile-dto';
 import { PatchGameEditorDto } from '@app/dto/patch-game-editor-dto';
+import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
 import { ROUTES } from '@app/enums/routes.enum';
 import { ExtendedGameEditorPlaceableDto, Inventory } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { ScreenshotService } from '@app/services/screenshot/screenshot.service';
+import { pickChangedProperties } from '@app/utils/object.utils';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
@@ -25,20 +27,10 @@ export class GameEditorStoreService {
         private readonly gameHttpService: GameHttpService,
         private readonly screenshotService: ScreenshotService,
         private readonly assetsService: AssetsService,
-        private readonly notificationCoordinatorService: NotificationCoordinatorService,
+        private readonly notificationCoordinatorService: NotificationService,
     ) {}
 
-    private readonly _initial = signal<GameEditorDto>({
-        id: '',
-        name: '',
-        description: '',
-        size: MapSize.MEDIUM,
-        mode: GameMode.CLASSIC,
-        tiles: [],
-        objects: [],
-        lastModified: new Date().toISOString(),
-        gridPreviewUrl: '',
-    });
+    private readonly _initial = signal<GameEditorDto>(DEFAULT_GAME_EDITOR_DTO);
 
     private readonly _id = signal<string>('');
     private readonly _name = signal<string>('');
@@ -48,99 +40,109 @@ export class GameEditorStoreService {
     private readonly _size = signal<MapSize>(MapSize.MEDIUM);
     private readonly _gridPreviewUrl = signal<string>('');
     private readonly _mode = signal<GameMode>(GameMode.CLASSIC);
-
+    private readonly _teleportChannels = signal<TeleportChannelDto[]>([]);
     private readonly _tileSizePx = signal<number>(0);
 
     get placedObjects(): ExtendedGameEditorPlaceableDto[] {
-        const objects = this._objects();
-        const placed = objects.filter((object) => object.placed);
-        const accumulator: ExtendedGameEditorPlaceableDto[] = [];
-
-        for (const object of placed) {
-            const footprint = PlaceableFootprint[PlaceableKind[object.kind]];
-            const xPositions: number[] = [];
-            const yPositions: number[] = [];
-            for (let deltaX = 0; deltaX < footprint; deltaX++) {
-                for (let deltaY = 0; deltaY < footprint; deltaY++) {
-                    xPositions.push(object.x + deltaX);
-                    yPositions.push(object.y + deltaY);
+        return this._objects()
+            .filter((object) => object.placed)
+            .map((object) => {
+                const footprint = PlaceableFootprint[PlaceableKind[object.kind]];
+                const xPositions: number[] = [];
+                const yPositions: number[] = [];
+                for (let deltaX = 0; deltaX < footprint; deltaX++) {
+                    for (let deltaY = 0; deltaY < footprint; deltaY++) {
+                        xPositions.push(object.x + deltaX);
+                        yPositions.push(object.y + deltaY);
+                    }
                 }
-            }
-            accumulator.push({
-                id: object.id,
-                kind: object.kind,
-                orientation: object.orientation,
-                placed: object.placed,
-                x: object.x,
-                y: object.y,
-                xPositions,
-                yPositions,
+                return { ...object, xPositions, yPositions };
             });
-        }
-
-        return accumulator;
     }
 
+    readonly visibleTiles = computed<GameEditorTileDto[]>(() => {
+        const tiles = [...this._tiles()];
+        const activeTeleportPositions = new Set<string>();
+        const channels = this._teleportChannels();
+
+        for (const channel of channels) {
+            if (channel.tiles?.entryA) activeTeleportPositions.add(`${channel.tiles.entryA.x},${channel.tiles.entryA.y}`);
+            if (channel.tiles?.entryB) activeTeleportPositions.add(`${channel.tiles.entryB.x},${channel.tiles.entryB.y}`);
+        }
+
+        const cleanedTiles = tiles.map((tile) => {
+            const key = `${tile.x},${tile.y}`;
+            if (tile.kind === TileKind.TELEPORT && !activeTeleportPositions.has(key) && !tile.teleportChannel) {
+                return { ...tile, teleportChannel: undefined };
+            }
+            return tile;
+        });
+
+        for (const channel of channels) {
+            const updateTile = (x: number, y: number) => {
+                const idx = this.getIndexByCoord(x, y);
+                if (idx >= 0 && idx < cleanedTiles.length) {
+                    cleanedTiles[idx] = { ...cleanedTiles[idx], kind: TileKind.TELEPORT, teleportChannel: channel.channelNumber };
+                }
+            };
+            if (channel.tiles?.entryA) updateTile(channel.tiles.entryA.x, channel.tiles.entryA.y);
+            if (channel.tiles?.entryB) updateTile(channel.tiles.entryB.x, channel.tiles.entryB.y);
+        }
+        return cleanedTiles;
+    });
+
     readonly inventory = computed<Inventory>(() => {
-        const objects = this._objects();
-        const inventory: Inventory = {} as Inventory;
-
-        for (const object of objects) {
-            const kind = PlaceableKind[object.kind];
-            if (!(kind in inventory)) {
-                inventory[kind] = { kind, total: 0, remaining: 0, disabled: false, image: this.assetsService.getPlaceableImage(kind) };
+        const inv: Inventory = {} as Inventory;
+        for (const obj of this._objects()) {
+            const kind = PlaceableKind[obj.kind];
+            if (!(kind in inv)) {
+                inv[kind] = { kind, total: 0, remaining: 0, disabled: false, image: this.assetsService.getPlaceableImage(kind) };
             }
-            inventory[kind].total += 1;
-            if (!object.placed) {
-                inventory[kind].remaining += 1;
-            }
+            inv[kind].total += 1;
+            if (!obj.placed) inv[kind].remaining += 1;
         }
-
         for (const kind of PLACEABLE_ORDER) {
-            if (!(kind in inventory)) {
-                inventory[kind] = { total: 0, remaining: 0, kind, disabled: true, image: this.assetsService.getPlaceableImage(kind) };
+            if (!(kind in inv)) {
+                inv[kind] = { total: 0, remaining: 0, kind, disabled: true, image: this.assetsService.getPlaceableImage(kind) };
             } else {
-                inventory[kind].disabled = inventory[kind].remaining === 0;
+                inv[kind].disabled = inv[kind].remaining === 0;
             }
         }
-
-        return inventory;
+        return inv;
     });
 
     get name() {
         return this._name();
     }
-
     set name(value: string) {
         this._name.set(value);
     }
-
     get description() {
         return this._description();
     }
-
     set description(value: string) {
         this._description.set(value);
     }
-
     get tiles() {
-        return this._tiles.asReadonly();
+        return this.visibleTiles;
     }
-
     get size() {
         return this._size.asReadonly();
     }
-
     get mode() {
         return this._mode.asReadonly();
     }
-
     get tileSizePx() {
         return this._tileSizePx();
     }
-
     set tileSizePx(value: number) {
         this._tileSizePx.set(value);
+    }
+    get teleportChannelsSignal() {
+        return this._teleportChannels;
+    }
+    get teleportChannels(): readonly TeleportChannelDto[] {
+        return this._teleportChannels();
     }
 
     loadGameById(id: string): void {
@@ -149,9 +151,7 @@ export class GameEditorStoreService {
             .pipe(
                 take(1),
                 tap((game) => {
-                    if (!game) {
-                        return;
-                    }
+                    if (!game) return;
                     this._id.set(game.id);
                     this._initial.set(game);
                     this._name.set(game.name);
@@ -161,10 +161,9 @@ export class GameEditorStoreService {
                     this._size.set(game.size);
                     this._gridPreviewUrl.set(game.gridPreviewUrl);
                     this._mode.set(game.mode);
+                    this._teleportChannels.set(this.deepCopyTeleportChannels(game.teleportChannels || []));
                 }),
-                catchError(() => {
-                    return of(null);
-                }),
+                catchError(() => of(null)),
             )
             .subscribe();
     }
@@ -180,9 +179,9 @@ export class GameEditorStoreService {
             tiles: this._tiles(),
             objects: this._objects(),
             gridPreviewUrl: gridPreviewImage ?? this._gridPreviewUrl(),
+            teleportChannels: [...this._teleportChannels()],
         };
-
-        return this.pickChangedProperties(current, this._initial());
+        return pickChangedProperties(current, this._initial());
     }
 
     private saveOrCreateGame(patchDto: PatchGameEditorDto, gridPreviewImage: string | undefined) {
@@ -209,16 +208,15 @@ export class GameEditorStoreService {
 
     private updateNewGame(newGameId: string, gridPreviewImage: string | undefined) {
         this._id.set(newGameId);
-
         const updateGame: PatchGameEditorDto = {
             tiles: this._tiles(),
             objects: this._objects(),
             gridPreviewUrl: gridPreviewImage,
+            teleportChannels: [...this._teleportChannels()],
         };
 
         return this.gameHttpService.patchGameEditorById(newGameId, updateGame).pipe(take(1));
     }
-
     private notifySuccess(): void {
         this.notificationCoordinatorService.displaySuccessPopup({
             title: 'Jeu sauvegardé',
@@ -226,17 +224,11 @@ export class GameEditorStoreService {
             redirectRoute: ROUTES.ManagementPage,
         });
     }
-
     private notifyError(error: unknown): void {
         if (error instanceof Error) {
-            this.notificationCoordinatorService.displayErrorPopup({
-                title: 'Erreur lors de la sauvegarde',
-                message: error.message,
-            });
+            this.notificationCoordinatorService.displayErrorPopup({ title: 'Erreur lors de la sauvegarde', message: error.message });
         }
     }
-    //}
-
     async saveGame(gridElement: HTMLElement): Promise<void> {
         try {
             const gridPreviewImage = await this.captureGridPreview(gridElement);
@@ -254,29 +246,32 @@ export class GameEditorStoreService {
     getTileAt(x: number, y: number): GameEditorTileDto | undefined {
         if (!this.inBounds(x, y)) return undefined;
         const index = this.getIndexByCoord(x, y);
-        return this._tiles()[index];
+        return this.visibleTiles()[index];
     }
 
-    setTileAt(x: number, y: number, kind: TileKind): void {
+    setTileAt(x: number, y: number, kind: TileKind, teleportChannel?: number): void {
         this.withBounds(x, y, () => {
             this.updateTiles((draft) => {
                 const idx = this.getIndexByCoord(x, y);
                 const currentTile = draft[idx];
                 if (!currentTile) return;
 
-                if (currentTile.kind !== TileKind.DOOR && currentTile.kind === kind) return;
+                if (currentTile.kind !== TileKind.DOOR && currentTile.kind === kind) {
+                    if (kind === TileKind.TELEPORT && currentTile.kind === TileKind.TELEPORT) {
+                        if (currentTile.teleportChannel === teleportChannel) return;
+                    } else {
+                        return;
+                    }
+                }
 
                 const open = currentTile.kind === TileKind.DOOR ? !currentTile.open : false;
-                draft[idx] = { x, y, kind, open };
-            });
-        });
-    }
-
-    resetTileAt(x: number, y: number): void {
-        this.withBounds(x, y, () => {
-            this.updateTiles((draft) => {
-                const idx = this.getIndexByCoord(x, y);
-                draft[idx] = { x, y, kind: TileKind.BASE };
+                const tileData: GameEditorTileDto = { x, y, kind, open };
+                if (kind === TileKind.TELEPORT && teleportChannel !== undefined) {
+                    tileData.teleportChannel = teleportChannel;
+                } else if (kind !== TileKind.TELEPORT && currentTile.kind === TileKind.TELEPORT) {
+                    tileData.teleportChannel = undefined;
+                }
+                draft[idx] = tileData;
             });
         });
     }
@@ -290,6 +285,7 @@ export class GameEditorStoreService {
         this._description.set(initial.description);
         this._mode.set(initial.mode);
         this._gridPreviewUrl.set(initial.gridPreviewUrl);
+        this._teleportChannels.set(this.deepCopyTeleportChannels(initial.teleportChannels || []));
     }
 
     getPlacedObjectAt(x: number, y: number): GameEditorPlaceableDto | undefined {
@@ -343,7 +339,6 @@ export class GameEditorStoreService {
         if (!this.inBounds(x, y)) return undefined;
         return functionToRun();
     }
-
     private updateTiles(mutator: (draft: GameEditorTileDto[]) => void): void {
         this._tiles.update((tiles) => {
             const draft = [...tiles];
@@ -351,7 +346,6 @@ export class GameEditorStoreService {
             return draft;
         });
     }
-
     private updateObjects(mutator: (draft: GameEditorPlaceableDto[]) => void): void {
         this._objects.update((objects) => {
             const draft = [...objects];
@@ -363,21 +357,22 @@ export class GameEditorStoreService {
     private findObjectIndexById(draft: GameEditorPlaceableDto[], id: string): number {
         return draft.findIndex((object) => object.id === id);
     }
-
     private findFirstUnplacedIndexByKind(draft: GameEditorPlaceableDto[], kind: PlaceableKind): number {
         return draft.findIndex((object) => object.kind === PlaceableKind[kind] && !object.placed);
     }
-
     private isOccupiedByOther(id: string | null, x: number, y: number): boolean {
         const occ = this.getPlacedObjectAt(x, y);
         return !!occ && (!id || occ.id !== id);
     }
-
-    private pickChangedProperties<T extends object>(current: T, initial: T): Partial<T> {
-        const out: Partial<T> = {};
-        for (const k of Object.keys(current) as (keyof T)[]) {
-            if (current[k] !== initial[k]) out[k] = current[k];
-        }
-        return out;
+    private deepCopyTeleportChannels(channels: TeleportChannelDto[]): TeleportChannelDto[] {
+        return channels.map((channel) => ({
+            channelNumber: channel.channelNumber,
+            tiles: channel.tiles
+                ? {
+                      entryA: channel.tiles.entryA ? { ...channel.tiles.entryA } : undefined,
+                      entryB: channel.tiles.entryB ? { ...channel.tiles.entryB } : undefined,
+                  }
+                : { entryA: undefined, entryB: undefined },
+        }));
     }
 }

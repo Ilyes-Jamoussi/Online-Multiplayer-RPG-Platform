@@ -3,10 +3,12 @@ import { Player } from '@common/interfaces/player.interface';
 
 export const BASE_STAT_VALUE = 4;
 export const BONUS_STAT_VALUE = 2;
+export const MAX_STAT_VALUE = 6;
 
 export const PERCENTAGE_MULTIPLIER = 100;
 export const HP_HIGH_THRESHOLD_PERCENT = 70;
 export const HP_MEDIUM_THRESHOLD_PERCENT = 30;
+export const RANDOM_BONUS_THRESHOLD = 0.5;
 
 const DEFAULT_PLAYER_ID = 'default-player-id';
 
@@ -22,12 +24,12 @@ export const DEFAULT_PLAYER: Player = {
     baseSpeed: BASE_STAT_VALUE,
     speedBonus: 0,
     speed: BASE_STAT_VALUE,
+    boatSpeedBonus: 0,
+    boatSpeed: 0,
     baseAttack: BASE_STAT_VALUE,
     attackBonus: 0,
-    attack: BASE_STAT_VALUE,
     baseDefense: BASE_STAT_VALUE,
     defenseBonus: 0,
-    defense: BASE_STAT_VALUE,
     attackDice: Dice.D6,
     defenseDice: Dice.D6,
     x: 0,
@@ -39,4 +41,5 @@ export const DEFAULT_PLAYER: Player = {
     combatWins: 0,
     combatLosses: 0,
     combatDraws: 0,
+    hasCombatBonus: false,
 };

@@ -6,10 +6,10 @@ import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameKeyboardEventsService } from '@app/services/in-game-keyboard-events/in-game-keyboard-events.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { SessionService } from '@app/services/session/session.service';
-import { MapSize } from '@common/enums/map-size.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
 import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { GameSessionPageComponent } from './game-session-page.component';
 
 const TEST_MAP_SIZE = 10;
@@ -51,10 +51,8 @@ describe('GameSessionPageComponent', () => {
                 speed: TEST_PLAYER_SPEED,
                 baseAttack: 6,
                 attackBonus: 0,
-                attack: 6,
                 baseDefense: 5,
                 defenseBonus: 0,
-                defense: 5,
                 attackDice: Dice.D6,
                 defenseDice: Dice.D6,
                 x: 5,
@@ -66,6 +64,9 @@ describe('GameSessionPageComponent', () => {
                 combatWins: 0,
                 combatLosses: 0,
                 combatDraws: 0,
+                hasCombatBonus: false,
+                boatSpeedBonus: 0,
+                boatSpeed: 0,
             },
         },
         currentTurn: {
@@ -191,84 +192,6 @@ describe('GameSessionPageComponent', () => {
         });
     });
 
-    describe('getPlayersCount', () => {
-        it('should return number of inGamePlayers', () => {
-            expect(component.getPlayersCount()).toBe(1);
-            expect(mockInGameService.inGameSession).toHaveBeenCalled();
-        });
-
-        it('should return 0 when no players', () => {
-            mockInGameService.inGameSession.and.returnValue({
-                ...mockInGameSession,
-                inGamePlayers: {},
-            });
-            expect(component.getPlayersCount()).toBe(0);
-        });
-    });
-
-    describe('getMapSizeLabel', () => {
-        it('should return correct label for SMALL', () => {
-            mockInGameService.mapSize.and.returnValue(MapSize.SMALL);
-            expect(component.getMapSizeLabel()).toBe('Petite');
-        });
-
-        it('should return correct label for MEDIUM', () => {
-            mockInGameService.mapSize.and.returnValue(MapSize.MEDIUM);
-            expect(component.getMapSizeLabel()).toBe('Moyenne');
-        });
-
-        it('should return correct label for LARGE', () => {
-            mockInGameService.mapSize.and.returnValue(MapSize.LARGE);
-            expect(component.getMapSizeLabel()).toBe('Grande');
-        });
-
-        it('should return default label for unknown size', () => {
-            mockInGameService.mapSize.and.returnValue('unknown' as unknown as MapSize);
-            expect(component.getMapSizeLabel()).toBe('Inconnue');
-        });
-    });
-
-    describe('getCurrentPlayerSpeed', () => {
-        it('should return speed of active player', () => {
-            expect(component.getCurrentPlayerSpeed()).toBe(TEST_PLAYER_SPEED);
-        });
-
-        it('should return 0 when player not found', () => {
-            mockInGameService.inGameSession.and.returnValue({
-                ...mockInGameSession,
-                currentTurn: { ...mockInGameSession.currentTurn, activePlayerId: 'non-existent' },
-            });
-            expect(component.getCurrentPlayerSpeed()).toBe(0);
-        });
-    });
-
-    describe('getReachableTilesCount', () => {
-        it('should return count of reachable tiles', () => {
-            expect(component.getReachableTilesCount()).toBe(2);
-            expect(mockInGameService.reachableTiles).toHaveBeenCalled();
-        });
-
-        it('should return 0 when no reachable tiles', () => {
-            mockInGameService.reachableTiles.and.returnValue([]);
-            expect(component.getReachableTilesCount()).toBe(0);
-        });
-    });
-
-    describe('getDebugInfo', () => {
-        it('should return debug info for active player', () => {
-            const result = component.getDebugInfo();
-            expect(result).toBe(`Pos:(5,3) Vitesse:${TEST_PLAYER_SPEED}`);
-        });
-
-        it('should return error message when player not found', () => {
-            mockInGameService.inGameSession.and.returnValue({
-                ...mockInGameSession,
-                currentTurn: { ...mockInGameSession.currentTurn, activePlayerId: 'non-existent' },
-            });
-            expect(component.getDebugInfo()).toBe('Joueur non trouvé');
-        });
-    });
-
     describe('lifecycle methods', () => {
         it('should initialize services on ngOnInit', () => {
             component.ngOnInit();
@@ -282,15 +205,6 @@ describe('GameSessionPageComponent', () => {
 
             expect(mockKeyboardEventsService.stopListening).toHaveBeenCalled();
             expect(mockInGameService.reset).toHaveBeenCalled();
-        });
-    });
-
-    describe('onLeaveGame', () => {
-        it('should abandon combat and leave game', () => {
-            component.onLeaveGame();
-
-            expect(mockCombatService.combatAbandon).toHaveBeenCalled();
-            expect(mockInGameService.leaveGame).toHaveBeenCalled();
         });
     });
 });

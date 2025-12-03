@@ -1,10 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal, signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
+import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { NotificationService } from '@app/services/notification/notification.service';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
+import { Dice } from '@common/enums/dice.enum';
 import { Orientation } from '@common/enums/orientation.enum';
 import { AvailableAction } from '@common/interfaces/available-action.interface';
+import { Player } from '@common/interfaces/player.interface';
 import { GameMapFooterComponent } from './game-map-footer.component';
 
 const MOCK_SPEED_VALUE = 3;
@@ -13,6 +18,7 @@ const EXPECTED_ACTIONS_COUNT = 2;
 type MockPlayerService = Partial<PlayerService> & {
     _speedSignal: WritableSignal<number>;
     _isAdminSignal: WritableSignal<boolean>;
+    _playerSignal: WritableSignal<Player>;
 };
 
 type MockInGameService = Partial<InGameService> & {
@@ -20,6 +26,7 @@ type MockInGameService = Partial<InGameService> & {
     _isMyTurnSignal: WritableSignal<boolean>;
     _isGameStartedSignal: WritableSignal<boolean>;
     _hasUsedActionSignal: WritableSignal<boolean>;
+    _isActionModeActiveSignal: WritableSignal<boolean>;
 };
 
 describe('GameMapFooterComponent', () => {
@@ -28,23 +35,59 @@ describe('GameMapFooterComponent', () => {
     let mockPlayerService: MockPlayerService;
     let mockInGameService: MockInGameService;
     let mockAdminModeService: jasmine.SpyObj<AdminModeService>;
+    let mockCombatService: jasmine.SpyObj<CombatService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
 
     beforeEach(async () => {
         const speedSignal = signal(MOCK_SPEED_VALUE);
         const isAdminSignal = signal(false);
+        const playerSignal = signal<Player>({
+            id: 'test-player',
+            name: 'Test Player',
+            avatar: null,
+            isAdmin: false,
+            baseHealth: 10,
+            healthBonus: 0,
+            health: 10,
+            maxHealth: 10,
+            baseSpeed: 3,
+            speedBonus: 0,
+            speed: MOCK_SPEED_VALUE,
+            boatSpeedBonus: 0,
+            boatSpeed: 0,
+            baseAttack: 4,
+            attackBonus: 0,
+            baseDefense: 4,
+            defenseBonus: 0,
+            attackDice: Dice.D6,
+            defenseDice: Dice.D6,
+            x: 0,
+            y: 0,
+            isInGame: true,
+            startPointId: '',
+            actionsRemaining: 1,
+            combatCount: 0,
+            combatWins: 0,
+            combatLosses: 0,
+            combatDraws: 0,
+            hasCombatBonus: false,
+        });
         const availableActionsSignal = signal([
-            { type: 'ATTACK', x: 1, y: 1 },
-            { type: 'DOOR', x: 2, y: 2 },
+            { type: AvailableActionType.ATTACK, x: 1, y: 1 },
+            { type: AvailableActionType.DOOR, x: 2, y: 2 },
         ] as AvailableAction[]);
         const isMyTurnSignal = signal(true);
         const isGameStartedSignal = signal(true);
         const hasUsedActionSignal = signal(false);
+        const isActionModeActiveSignal = signal(false);
 
         mockPlayerService = {
             speed: speedSignal.asReadonly(),
             isAdmin: isAdminSignal.asReadonly(),
+            player: playerSignal.asReadonly(),
             _speedSignal: speedSignal,
             _isAdminSignal: isAdminSignal,
+            _playerSignal: playerSignal,
         };
 
         mockInGameService = {
@@ -52,15 +95,20 @@ describe('GameMapFooterComponent', () => {
             isMyTurn: isMyTurnSignal.asReadonly(),
             isGameStarted: isGameStartedSignal.asReadonly(),
             hasUsedAction: hasUsedActionSignal.asReadonly(),
+            isActionModeActive: isActionModeActiveSignal.asReadonly(),
             activateActionMode: jasmine.createSpy('activateActionMode'),
+            deactivateActionMode: jasmine.createSpy('deactivateActionMode'),
             movePlayer: jasmine.createSpy('movePlayer'),
             _availableActionsSignal: availableActionsSignal,
             _isMyTurnSignal: isMyTurnSignal,
             _isGameStartedSignal: isGameStartedSignal,
             _hasUsedActionSignal: hasUsedActionSignal,
+            _isActionModeActiveSignal: isActionModeActiveSignal,
         };
 
         mockAdminModeService = jasmine.createSpyObj('AdminModeService', ['toggleAdminMode']);
+        mockCombatService = jasmine.createSpyObj('CombatService', ['combatAbandon']);
+        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayConfirmationPopup']);
 
         await TestBed.configureTestingModule({
             imports: [GameMapFooterComponent],
@@ -68,6 +116,8 @@ describe('GameMapFooterComponent', () => {
                 { provide: PlayerService, useValue: mockPlayerService },
                 { provide: InGameService, useValue: mockInGameService },
                 { provide: AdminModeService, useValue: mockAdminModeService },
+                { provide: CombatService, useValue: mockCombatService },
+                { provide: NotificationService, useValue: mockNotificationService },
             ],
         }).compileComponents();
 
@@ -171,9 +221,18 @@ describe('GameMapFooterComponent', () => {
     });
 
     describe('actions', () => {
-        it('should call activateActionMode on onAction', () => {
+        it('should call activateActionMode on onAction when mode is inactive', () => {
+            mockInGameService._isActionModeActiveSignal.set(false);
             component.onAction();
             expect(mockInGameService.activateActionMode).toHaveBeenCalled();
+            expect(mockInGameService.deactivateActionMode).not.toHaveBeenCalled();
+        });
+
+        it('should call deactivateActionMode on onAction when mode is active', () => {
+            mockInGameService._isActionModeActiveSignal.set(true);
+            component.onAction();
+            expect(mockInGameService.deactivateActionMode).toHaveBeenCalled();
+            expect(mockInGameService.activateActionMode).not.toHaveBeenCalled();
         });
 
         it('should move player in all directions when conditions are met', () => {
@@ -210,6 +269,31 @@ describe('GameMapFooterComponent', () => {
             mockPlayerService._isAdminSignal.set(false);
             component.onToggleDebug();
             expect(mockAdminModeService.toggleAdminMode).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('onLeaveGame', () => {
+        it('should display confirmation popup when leaving game', () => {
+            component.onLeaveGame();
+            expect(mockNotificationService.displayConfirmationPopup).toHaveBeenCalledWith({
+                title: 'Abandonner la partie',
+                message: 'Êtes-vous sûr de vouloir abandonner ?\nTous vos progrès seront perdus.',
+                onConfirm: jasmine.any(Function),
+            });
+        });
+
+        it('should call combatAbandon and leaveGame when confirmation is confirmed', () => {
+            mockInGameService.leaveGame = jasmine.createSpy('leaveGame');
+            mockNotificationService.displayConfirmationPopup.and.callFake((options: { onConfirm?: () => void }) => {
+                if (options.onConfirm) {
+                    options.onConfirm();
+                }
+            });
+
+            component.onLeaveGame();
+
+            expect(mockCombatService.combatAbandon).toHaveBeenCalled();
+            expect(mockInGameService.leaveGame).toHaveBeenCalled();
         });
     });
 

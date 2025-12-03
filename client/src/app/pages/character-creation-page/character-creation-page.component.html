@@ -25,18 +25,18 @@
                     <app-stats-bar
                         label="Nombre de points de vie du personnage"
                         [value]="playerHealth"
-                        [maxValue]="6"
+                        [maxValue]="maxStatValue"
                         color="#e74c3c"
                     ></app-stats-bar>
                 </div>
 
                 <div class="field">
                     <h3>Vitesse</h3>
-                    <app-stats-bar label="Rapidité du personnage" [value]="playerSpeed" [maxValue]="6" color="#2ecc71"></app-stats-bar>
+                    <app-stats-bar label="Rapidité du personnage" [value]="playerSpeed" [maxValue]="maxStatValue" color="#2ecc71"></app-stats-bar>
                 </div>
 
                 <div class="field">
-                    <h3>Bonus (+2)</h3>
+                    <h3>Bonus (+{{ bonusStatValue }})</h3>
                     <div class="radio-row" role="radiogroup">
                         <label class="radio" [class.on]="isLifeBonusSelected">
                             <input type="radio" name="bonus" value="life" [checked]="isLifeBonusSelected" (change)="onBonusChange(bonusType.Life)" />
@@ -64,10 +64,10 @@
                             <span> Attaque: @if (isAttackD4Selected) { D4 } @else if (isAttackD6Selected) { D6 } @else { (Aucun) } </span>
                             <div class="dice-row">
                                 <button type="button" class="dice-btn" [class.sel]="isAttackD4Selected" (click)="onAttackDiceChange(dice.D4)">
-                                    <img [src]="getDiceImage(dice.D4)" [alt]="dice.D4" />
+                                    <img [src]="getDiceImage(dice.D4)" [alt]="dice.D4" loading="lazy" />
                                 </button>
                                 <button type="button" class="dice-btn" [class.sel]="isAttackD6Selected" (click)="onAttackDiceChange(dice.D6)">
-                                    <img [src]="getDiceImage(dice.D6)" [alt]="dice.D6" />
+                                    <img [src]="getDiceImage(dice.D6)" [alt]="dice.D6" loading="lazy" />
                                 </button>
                             </div>
                         </div>
@@ -76,10 +76,10 @@
                             <span> Défense: @if (isDefenseD4Selected) { D4 } @else if (isDefenseD6Selected) { D6 } @else { (Aucun) } </span>
                             <div class="dice-row">
                                 <button type="button" class="dice-btn" [class.sel]="isDefenseD4Selected" (click)="onDefenseDiceChange(dice.D4)">
-                                    <img [src]="getDiceImage(dice.D4)" [alt]="dice.D4" />
+                                    <img [src]="getDiceImage(dice.D4)" [alt]="dice.D4" loading="lazy" />
                                 </button>
                                 <button type="button" class="dice-btn" [class.sel]="isDefenseD6Selected" (click)="onDefenseDiceChange(dice.D6)">
-                                    <img [src]="getDiceImage(dice.D6)" [alt]="dice.D6" />
+                                    <img [src]="getDiceImage(dice.D6)" [alt]="dice.D6" loading="lazy" />
                                 </button>
                             </div>
                         </div>

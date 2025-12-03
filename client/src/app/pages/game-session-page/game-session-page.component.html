@@ -1,7 +1,6 @@
 <div class="game-session-grid">
     <aside class="players-list-container">
         <app-players-list></app-players-list>
-        <app-in-game-chat></app-in-game-chat>
     </aside>
 
     <div class="game-map-container">
@@ -22,6 +21,7 @@
 
     <aside class="player-info-container">
         <app-player-info></app-player-info>
+        <app-messages-zone></app-messages-zone>
     </aside>
 </div>
 
@@ -40,11 +40,10 @@
 
 <app-combat-overlay></app-combat-overlay>
 
-<app-game-over-overlay></app-game-over-overlay>
+<app-sanctuary-overlay></app-sanctuary-overlay>
 
-<button class="abandon-button-fixed" (click)="onLeaveGame()" title="Abandonner la partie">
-    <span class="btn-icon">🚪</span>
-    <span class="btn-text">Abandonner</span>
-</button>
+<app-flag-transfer-overlay></app-flag-transfer-overlay>
+
+<app-game-over-overlay></app-game-over-overlay>
 
 <app-toast></app-toast>

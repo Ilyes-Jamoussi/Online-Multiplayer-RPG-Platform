@@ -1,15 +1,16 @@
 import { TestBed } from '@angular/core/testing';
-import { InGameSocketService } from './in-game-socket.service';
 import { SocketService } from '@app/services/socket/socket.service';
 import { InGameEvents } from '@common/enums/in-game-events.enum';
 import { Orientation } from '@common/enums/orientation.enum';
+import { PlaceableKind } from '@common/enums/placeable-kind.enum';
+import { InGameSocketService } from './in-game-socket.service';
 
 describe('InGameSocketService', () => {
     let service: InGameSocketService;
     let mockSocketService: jasmine.SpyObj<SocketService>;
 
     beforeEach(() => {
-        mockSocketService = jasmine.createSpyObj('SocketService', ['emit', 'onSuccessEvent']);
+        mockSocketService = jasmine.createSpyObj('SocketService', ['emit', 'onSuccessEvent', 'onErrorEvent']);
 
         TestBed.configureTestingModule({
             providers: [{ provide: SocketService, useValue: mockSocketService }],
@@ -66,6 +67,85 @@ describe('InGameSocketService', () => {
                 x: 3,
                 y: 7,
             });
+        });
+
+        it('should emit playerBoardBoat', () => {
+            const mockSessionId = 'session1';
+            const mockX = 5;
+            const mockY = 10;
+            service.playerBoardBoat(mockSessionId, mockX, mockY);
+            expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerBoardBoat, {
+                sessionId: mockSessionId,
+                x: mockX,
+                y: mockY,
+            });
+        });
+
+        it('should emit playerDisembarkBoat', () => {
+            const mockSessionId = 'session1';
+            const mockX = 3;
+            const mockY = 7;
+            service.playerDisembarkBoat(mockSessionId, mockX, mockY);
+            expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerDisembarkBoat, {
+                sessionId: mockSessionId,
+                x: mockX,
+                y: mockY,
+            });
+        });
+
+        it('should emit playerSanctuaryRequest', () => {
+            const mockSessionId = 'session1';
+            const mockX = 2;
+            const mockY = 4;
+            const mockKind = PlaceableKind.HEAL;
+            const mockData = { sessionId: mockSessionId, x: mockX, y: mockY, kind: mockKind };
+            service.playerSanctuaryRequest(mockData);
+            expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerSanctuaryRequest, mockData);
+        });
+
+        it('should emit playerSanctuaryAction without double', () => {
+            const mockSessionId = 'session1';
+            const mockX = 1;
+            const mockY = 2;
+            const mockKind = PlaceableKind.FIGHT;
+            const mockData = { sessionId: mockSessionId, x: mockX, y: mockY, kind: mockKind };
+            service.playerSanctuaryAction(mockData);
+            expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerSanctuaryAction, mockData);
+        });
+
+        it('should emit playerSanctuaryAction with double', () => {
+            const mockSessionId = 'session1';
+            const mockX = 1;
+            const mockY = 2;
+            const mockKind = PlaceableKind.HEAL;
+            const mockDouble = true;
+            const mockData = { sessionId: mockSessionId, x: mockX, y: mockY, kind: mockKind, double: mockDouble };
+            service.playerSanctuaryAction(mockData);
+            expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.PlayerSanctuaryAction, mockData);
+        });
+
+        it('should emit requestFlagTransfer', () => {
+            const mockSessionId = 'session1';
+            const mockX = 6;
+            const mockY = 8;
+            const mockData = { sessionId: mockSessionId, x: mockX, y: mockY };
+            service.requestFlagTransfer(mockData);
+            expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.FlagTransferRequest, mockData);
+        });
+
+        it('should emit respondToFlagTransfer', () => {
+            const mockSessionId = 'session1';
+            const mockFromPlayerId = 'player2';
+            const mockAccepted = true;
+            const mockData = { sessionId: mockSessionId, fromPlayerId: mockFromPlayerId, accepted: mockAccepted };
+            service.respondToFlagTransfer(mockData);
+            expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.FlagTransferResponse, mockData);
+        });
+
+        it('should emit loadGameStatistics', () => {
+            const mockSessionId = 'session1';
+            service.loadGameStatistics(mockSessionId);
+            expect(mockSocketService.emit).toHaveBeenCalledWith(InGameEvents.LoadGameStatistics, mockSessionId);
         });
     });
 
@@ -170,6 +250,102 @@ describe('InGameSocketService', () => {
             const callback = jasmine.createSpy();
             service.onGameOver(callback);
             expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.GameOver, callback);
+        });
+
+        it('should listen to onLoadGameStatistics', () => {
+            const callback = jasmine.createSpy();
+            service.onLoadGameStatistics(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.LoadGameStatistics, callback);
+        });
+
+        it('should listen to onPlaceableUpdated', () => {
+            const callback = jasmine.createSpy();
+            service.onPlaceableUpdated(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.PlaceableUpdated, callback);
+        });
+
+        it('should listen to onPlaceableDisabledUpdated', () => {
+            const callback = jasmine.createSpy();
+            service.onPlaceableDisabledUpdated(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.PlaceableDisabledUpdated, callback);
+        });
+
+        it('should listen to onOpenSanctuary', () => {
+            const callback = jasmine.createSpy();
+            service.onOpenSanctuary(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.OpenSanctuary, callback);
+        });
+
+        it('should listen to onOpenSanctuaryError', () => {
+            const callback = jasmine.createSpy();
+            service.onOpenSanctuaryError(callback);
+            expect(mockSocketService.onErrorEvent).toHaveBeenCalledWith(InGameEvents.OpenSanctuary, callback);
+        });
+
+        it('should listen to onSanctuaryActionFailed', () => {
+            const callback = jasmine.createSpy();
+            service.onSanctuaryActionFailed(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.SanctuaryActionFailed, callback);
+        });
+
+        it('should listen to onSanctuaryActionSuccess', () => {
+            const callback = jasmine.createSpy();
+            service.onSanctuaryActionSuccess(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.SanctuaryActionSuccess, callback);
+        });
+
+        it('should listen to onPlayerBonusesChanged', () => {
+            const callback = jasmine.createSpy();
+            service.onPlayerBonusesChanged(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.PlayerBonusesChanged, callback);
+        });
+
+        it('should listen to onPlayerBoardedBoat', () => {
+            const callback = jasmine.createSpy();
+            service.onPlayerBoardedBoat(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.PlayerBoardedBoat, callback);
+        });
+
+        it('should listen to onPlayerDisembarkedBoat', () => {
+            const callback = jasmine.createSpy();
+            service.onPlayerDisembarkedBoat(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.PlayerDisembarkedBoat, callback);
+        });
+
+        it('should listen to onSessionUpdated', () => {
+            const callback = jasmine.createSpy();
+            service.onSessionUpdated(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.SessionUpdated, callback);
+        });
+
+        it('should listen to onFlagPickedUp', () => {
+            const callback = jasmine.createSpy();
+            service.onFlagPickedUp(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.FlagPickedUp, callback);
+        });
+
+        it('should listen to onFlagTransferRequested', () => {
+            const callback = jasmine.createSpy();
+            service.onFlagTransferRequested(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.FlagTransferRequested, callback);
+        });
+
+        it('should listen to onFlagTransferResult', () => {
+            const callback = jasmine.createSpy();
+            service.onFlagTransferResult(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.FlagTransferResult, callback);
+        });
+
+        it('should listen to onFlagTransferred', () => {
+            const callback = jasmine.createSpy();
+            service.onFlagTransferred(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.FlagTransferred, callback);
+        });
+
+        it('should listen to onFlagTransferRequestsCleared', () => {
+            const callback = jasmine.createSpy();
+            service.onFlagTransferRequestsCleared(callback);
+            expect(mockSocketService.onSuccessEvent).toHaveBeenCalledWith(InGameEvents.FlagTransferRequestsCleared, callback);
         });
     });
 });

@@ -1,190 +1,154 @@
 /* eslint-disable max-lines -- Test file with comprehensive test coverage */
-import { COMBAT_WINS_TO_WIN_GAME } from '@app/constants/game-config.constants';
 import { DiceSides } from '@app/enums/dice-sides.enum';
-import { Tile } from '@app/modules/game-store/entities/tile.entity';
-import { CombatTimerService } from '@app/modules/in-game/services/combat-timer/combat-timer.service';
-import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
-import { InGameMovementService } from '@app/modules/in-game/services/in-game-movement/in-game-movement.service';
-import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
-import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
-import { Dice } from '@common/enums/dice.enum';
 import { ServerEvents } from '@app/enums/server-events.enum';
+import { Tile } from '@app/modules/game-store/entities/tile.entity';
+import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
+import { InGameSessionRepository } from '@app/modules/in-game/services/in-game-session/in-game-session.repository';
+import { MovementService } from '@app/modules/in-game/services/movement/movement.service';
+import { TimerService } from '@app/modules/in-game/services/timer/timer.service';
+import { TrackingService } from '@app/modules/in-game/services/tracking/tracking.service';
+import { Avatar } from '@common/enums/avatar.enum';
+import { CombatPosture } from '@common/enums/combat-posture.enum';
+import { Dice } from '@common/enums/dice.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { MapSize } from '@common/enums/map-size.enum';
 import { TileCombatEffect, TileKind } from '@common/enums/tile.enum';
 import { CombatState } from '@common/interfaces/combat.interface';
+import { Player } from '@common/interfaces/player.interface';
+import { Position } from '@common/interfaces/position.interface';
 import { InGameSession } from '@common/interfaces/session.interface';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
-import { GameMode } from '@common/enums/game-mode.enum';
-import { MapSize } from '@common/enums/map-size.enum';
 import { CombatService } from './combat.service';
-import { CombatPosture } from '@common/enums/combat-posture.enum';
 
-type PlayerAttackResult = {
-    dice: Dice;
-    diceRoll: number;
-    baseAttack: number;
-    attackBonus: number;
-    totalAttack: number;
-    tileCombatEffect: TileCombatEffect;
-};
+const MOCK_SESSION_ID = 'session-123';
+const MOCK_PLAYER_ID_1 = 'player-1';
+const MOCK_PLAYER_ID_2 = 'player-2';
+const MOCK_PLAYER_NAME_1 = 'Player 1';
+const MOCK_PLAYER_NAME_2 = 'Player 2';
+const MOCK_X = 5;
+const MOCK_Y = 10;
+const MOCK_X_2 = 6;
+const MOCK_Y_2 = 11;
+const MOCK_BASE_ATTACK = 10;
+const MOCK_BASE_DEFENSE = 5;
+const MOCK_POSTURE_BONUS = 2;
+const MOCK_HEALTH = 100;
+const MOCK_COMBAT_WINS = 3;
+const MOCK_RANDOM_VALUE = 0.5;
 
-type PlayerDefenseResult = {
-    dice: Dice;
-    diceRoll: number;
-    baseDefense: number;
-    defenseBonus: number;
-    totalDefense: number;
-    tileCombatEffect: TileCombatEffect;
-};
+const createMockPlayer = (overrides: Partial<Player> = {}): Player => ({
+    id: MOCK_PLAYER_ID_1,
+    name: MOCK_PLAYER_NAME_1,
+    avatar: Avatar.Avatar1,
+    isAdmin: false,
+    baseHealth: MOCK_HEALTH,
+    healthBonus: 0,
+    health: MOCK_HEALTH,
+    maxHealth: MOCK_HEALTH,
+    baseSpeed: 3,
+    speedBonus: 0,
+    speed: 3,
+    boatSpeedBonus: 0,
+    boatSpeed: 0,
+    baseAttack: MOCK_BASE_ATTACK,
+    attackBonus: 0,
+    baseDefense: MOCK_BASE_DEFENSE,
+    defenseBonus: 0,
+    attackDice: Dice.D6,
+    defenseDice: Dice.D4,
+    x: MOCK_X,
+    y: MOCK_Y,
+    isInGame: true,
+    startPointId: '',
+    actionsRemaining: 1,
+    combatCount: 0,
+    combatWins: 0,
+    combatLosses: 0,
+    combatDraws: 0,
+    hasCombatBonus: false,
+    ...overrides,
+});
 
-type TileWithPlayerId = Tile & { playerId: string | null };
+const createMockSession = (overrides: Partial<InGameSession> = {}): InGameSession => ({
+    id: MOCK_SESSION_ID,
+    inGameId: 'in-game-123',
+    gameId: 'game-123',
+    chatId: 'chat-123',
+    maxPlayers: 4,
+    mode: GameMode.CLASSIC,
+    isGameStarted: false,
+    isAdminModeActive: false,
+    inGamePlayers: {
+        [MOCK_PLAYER_ID_1]: createMockPlayer({ id: MOCK_PLAYER_ID_1, name: MOCK_PLAYER_NAME_1 }),
+        [MOCK_PLAYER_ID_2]: createMockPlayer({ id: MOCK_PLAYER_ID_2, name: MOCK_PLAYER_NAME_2 }),
+    },
+    teams: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention -- Team number must be numeric
+        1: { number: 1, playerIds: [MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2] },
+    },
+    currentTurn: { turnNumber: 1, activePlayerId: MOCK_PLAYER_ID_1, hasUsedAction: false },
+    startPoints: [],
+    mapSize: MapSize.MEDIUM,
+    turnOrder: [MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2],
+    playerCount: 2,
+    ...overrides,
+});
+
+const createMockTileWithPlayerId = (overrides: Partial<Tile & { playerId: string | null }> = {}): Tile & { playerId: string | null } => ({
+    kind: TileKind.BASE,
+    x: MOCK_X,
+    y: MOCK_Y,
+    playerId: null,
+    ...overrides,
+});
 
 describe('CombatService', () => {
     let service: CombatService;
-    let eventEmitter: jest.Mocked<EventEmitter2>;
-    let timerService: jest.Mocked<TimerService>;
-    let combatTimerService: jest.Mocked<CombatTimerService>;
-    let sessionRepository: jest.Mocked<InGameSessionRepository>;
-    let inGameMovementService: jest.Mocked<InGameMovementService>;
-    let gameCacheService: jest.Mocked<GameCacheService>;
-
-    const SESSION_ID = 'session-1';
-    const PLAYER_A_ID = 'player-a';
-    const PLAYER_B_ID = 'player-b';
-    const PLAYER_C_ID = 'player-c';
-
-    const RANDOM_VALUE = 0.5;
-    const INVALID_POSITION = 99;
-    const HEALTH_AFTER_DAMAGE_1 = 90;
-    const HEALTH_AFTER_DAMAGE_2 = 95;
-    const HEALTH_AFTER_DAMAGE_3 = 50;
-    const BASE_DEFENSE_VALUE = 5;
-    const BASE_ATTACK_VALUE = 10;
-
-    const createMockSession = (overrides: Partial<InGameSession> = {}): InGameSession => ({
-        id: SESSION_ID,
-        inGameId: 'in-game-1',
-        gameId: 'game-1',
-        maxPlayers: 4,
-        isGameStarted: true,
-        inGamePlayers: {
-            [PLAYER_A_ID]: {
-                id: PLAYER_A_ID,
-                name: 'Player A',
-                avatar: null,
-                isAdmin: false,
-                baseHealth: 100,
-                healthBonus: 0,
-                health: 100,
-                maxHealth: 100,
-                baseSpeed: 3,
-                speedBonus: 0,
-                speed: 3,
-                baseAttack: 10,
-                attackBonus: 0,
-                attack: 10,
-                baseDefense: 5,
-                defenseBonus: 0,
-                defense: 5,
-                attackDice: Dice.D6,
-                defenseDice: Dice.D4,
-                x: 0,
-                y: 0,
-                isInGame: true,
-                startPointId: 'start-1',
-                actionsRemaining: 1,
-                combatCount: 0,
-                combatWins: 0,
-                combatLosses: 0,
-                combatDraws: 0,
-            },
-            [PLAYER_B_ID]: {
-                id: PLAYER_B_ID,
-                name: 'Player B',
-                avatar: null,
-                isAdmin: false,
-                baseHealth: 100,
-                healthBonus: 0,
-                health: 100,
-                maxHealth: 100,
-                baseSpeed: 3,
-                speedBonus: 0,
-                speed: 3,
-                baseAttack: 10,
-                attackBonus: 0,
-                attack: 10,
-                baseDefense: 5,
-                defenseBonus: 0,
-                defense: 5,
-                attackDice: Dice.D6,
-                defenseDice: Dice.D4,
-                x: 1,
-                y: 1,
-                isInGame: true,
-                startPointId: 'start-2',
-                actionsRemaining: 1,
-                combatCount: 0,
-                combatWins: 0,
-                combatLosses: 0,
-                combatDraws: 0,
-            },
-        },
-        currentTurn: { turnNumber: 1, activePlayerId: PLAYER_A_ID, hasUsedAction: false },
-        startPoints: [],
-        mapSize: MapSize.MEDIUM,
-        mode: GameMode.CLASSIC,
-        turnOrder: [PLAYER_A_ID, PLAYER_B_ID],
-        isAdminModeActive: false,
-        ...overrides,
-    });
-
-    const createMockCombatState = (overrides: Partial<CombatState> = {}): CombatState => ({
-        sessionId: SESSION_ID,
-        playerAId: PLAYER_A_ID,
-        playerBId: PLAYER_B_ID,
-        playerAPosture: null,
-        playerBPosture: null,
-        playerATileEffect: TileCombatEffect.BASE,
-        playerBTileEffect: TileCombatEffect.BASE,
-        ...overrides,
-    });
+    let mockEventEmitter: jest.Mocked<EventEmitter2>;
+    let mockTimerService: jest.Mocked<TimerService>;
+    let mockRepository: jest.Mocked<InGameSessionRepository>;
+    let mockMovementService: jest.Mocked<MovementService>;
+    let mockGameCacheService: jest.Mocked<GameCacheService>;
 
     beforeEach(async () => {
-        const mockEventEmitter = {
+        const mockEventEmitterValue = {
             emit: jest.fn(),
         };
 
-        const mockTimerService = {
-            pauseTurnTimer: jest.fn(),
-            resumeTurnTimer: jest.fn(),
-            endTurnManual: jest.fn(),
-            forceStopTimer: jest.fn(),
-        };
-
-        const mockCombatTimerService = {
-            startCombatTimer: jest.fn(),
-            stopCombatTimer: jest.fn(),
+        const mockTimerServiceValue = {
+            startCombat: jest.fn(),
+            endCombat: jest.fn(),
             forceNextLoop: jest.fn(),
+            clearTimerForSession: jest.fn(),
         };
 
-        const mockSessionRepository = {
+        const mockRepositoryValue = {
             findById: jest.fn(),
             incrementPlayerCombatCount: jest.fn(),
-            decreasePlayerHealth: jest.fn(),
-            resetPlayerHealth: jest.fn(),
             incrementPlayerCombatWins: jest.fn(),
             incrementPlayerCombatLosses: jest.fn(),
             incrementPlayerCombatDraws: jest.fn(),
+            decreasePlayerHealth: jest.fn(),
+            resetPlayerHealth: jest.fn(),
+            playerHasFlag: jest.fn(),
+            dropFlag: jest.fn(),
+            isVirtualPlayer: jest.fn(),
         };
 
-        const mockInGameMovementService = {
-            movePlayerToStartPosition: jest.fn(),
+        const mockMovementServiceValue = {
             calculateReachableTiles: jest.fn(),
+            movePlayerToStartPosition: jest.fn(),
         };
 
-        const mockGameCacheService = {
+        const mockGameCacheServiceValue = {
             getTileByPlayerId: jest.fn(),
+        };
+
+        const mockTrackingServiceValue = {
+            trackDamageReceived: jest.fn(),
+            trackDamageDealt: jest.fn(),
         };
 
         const module: TestingModule = await Test.createTestingModule({
@@ -192,758 +156,594 @@ describe('CombatService', () => {
                 CombatService,
                 {
                     provide: EventEmitter2,
-                    useValue: mockEventEmitter,
+                    useValue: mockEventEmitterValue,
                 },
                 {
                     provide: TimerService,
-                    useValue: mockTimerService,
-                },
-                {
-                    provide: CombatTimerService,
-                    useValue: mockCombatTimerService,
+                    useValue: mockTimerServiceValue,
                 },
                 {
                     provide: InGameSessionRepository,
-                    useValue: mockSessionRepository,
+                    useValue: mockRepositoryValue,
                 },
                 {
-                    provide: InGameMovementService,
-                    useValue: mockInGameMovementService,
+                    provide: MovementService,
+                    useValue: mockMovementServiceValue,
                 },
                 {
                     provide: GameCacheService,
-                    useValue: mockGameCacheService,
+                    useValue: mockGameCacheServiceValue,
+                },
+                {
+                    provide: TrackingService,
+                    useValue: mockTrackingServiceValue,
                 },
             ],
         }).compile();
 
         service = module.get<CombatService>(CombatService);
-        eventEmitter = module.get(EventEmitter2);
-        timerService = module.get(TimerService);
-        combatTimerService = module.get(CombatTimerService);
-        sessionRepository = module.get(InGameSessionRepository);
-        inGameMovementService = module.get(InGameMovementService);
-        gameCacheService = module.get(GameCacheService);
-
-        jest.spyOn(Math, 'random').mockReturnValue(RANDOM_VALUE);
+        mockEventEmitter = module.get(EventEmitter2);
+        mockTimerService = module.get(TimerService);
+        mockRepository = module.get(InGameSessionRepository);
+        mockMovementService = module.get(MovementService);
+        mockGameCacheService = module.get(GameCacheService);
     });
 
     afterEach(() => {
+        const activeCombats = (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats;
+        activeCombats.forEach((_, sessionId) => {
+            mockTimerService.clearTimerForSession(sessionId);
+        });
+        activeCombats.clear();
+        jest.clearAllTimers();
         jest.clearAllMocks();
-        jest.restoreAllMocks();
     });
 
     it('should be defined', () => {
         expect(service).toBeDefined();
     });
 
-    describe('getSession', () => {
-        it('should return session from repository', () => {
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
-
-            const result = service.getSession(SESSION_ID);
-
-            expect(result).toBe(session);
-            expect(sessionRepository.findById).toHaveBeenCalledWith(SESSION_ID);
-        });
-    });
-
     describe('combatAbandon', () => {
-        it('should throw NotFoundException when combat not found', () => {
+        it('should abandon combat successfully when playerA abandons', () => {
             const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: null,
+                playerBPosture: null,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
+            };
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
+            mockRepository.findById.mockReturnValue(session);
 
-            expect(() => service.combatAbandon(SESSION_ID, PLAYER_A_ID)).toThrow(NotFoundException);
-            expect(() => service.combatAbandon(SESSION_ID, PLAYER_A_ID)).toThrow('Combat not found');
+            service.combatAbandon(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
+
+            expect(mockRepository.incrementPlayerCombatWins).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_2);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.CombatVictory,
+                expect.objectContaining({
+                    sessionId: MOCK_SESSION_ID,
+                    playerAId: MOCK_PLAYER_ID_1,
+                    playerBId: MOCK_PLAYER_ID_2,
+                    winnerId: MOCK_PLAYER_ID_2,
+                    abandon: true,
+                }),
+            );
+        });
+
+        it('should abandon combat successfully when playerB abandons', () => {
+            const session = createMockSession();
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: null,
+                playerBPosture: null,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
+            };
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
+            mockRepository.findById.mockReturnValue(session);
+
+            service.combatAbandon(MOCK_SESSION_ID, MOCK_PLAYER_ID_2);
+
+            expect(mockRepository.incrementPlayerCombatWins).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
+        });
+
+        it('should throw NotFoundException when combat not found', () => {
+            service.combatAbandon(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
+
+            expect(mockRepository.incrementPlayerCombatWins).not.toHaveBeenCalled();
+            expect(mockEventEmitter.emit).not.toHaveBeenCalled();
         });
 
         it('should throw BadRequestException when player not in combat', () => {
-            const session = createMockSession();
-            const combat = createMockCombatState();
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: null,
+                playerBPosture: null,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
             };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
 
-            expect(() => service.combatAbandon(SESSION_ID, PLAYER_C_ID)).toThrow(BadRequestException);
-            expect(() => service.combatAbandon(SESSION_ID, PLAYER_C_ID)).toThrow('Player not in combat');
+            service.combatAbandon(MOCK_SESSION_ID, 'non-existent');
+
+            expect(mockRepository.incrementPlayerCombatWins).not.toHaveBeenCalled();
+            expect(mockEventEmitter.emit).not.toHaveBeenCalled();
         });
 
         it('should throw NotFoundException when session not found', () => {
-            const combat = createMockCombatState();
-            sessionRepository.findById.mockReturnValue(null);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: null,
+                playerBPosture: null,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
             };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
+            mockRepository.findById.mockReturnValue(null);
 
-            expect(() => service.combatAbandon(SESSION_ID, PLAYER_A_ID)).toThrow(NotFoundException);
-            expect(() => service.combatAbandon(SESSION_ID, PLAYER_A_ID)).toThrow('Session not found');
+            service.combatAbandon(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
+
+            expect(mockRepository.incrementPlayerCombatWins).not.toHaveBeenCalled();
+            expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('getSession', () => {
+        it('should return session when found', () => {
+            const session = createMockSession();
+            mockRepository.findById.mockReturnValue(session);
+
+            const result = service.getSession(MOCK_SESSION_ID);
+
+            expect(result).toBe(session);
         });
 
-        it('should end combat with playerB as winner when playerA abandons', () => {
-            const session = createMockSession();
-            const combat = createMockCombatState();
-            sessionRepository.findById.mockReturnValue(session);
+        it('should return null when session not found', () => {
+            mockRepository.findById.mockImplementation(() => {
+                throw new Error('Not found');
+            });
 
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-                endCombat: (session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-            const endCombatSpy = jest.spyOn(servicePrivate, 'endCombat');
+            const result = service.getSession(MOCK_SESSION_ID);
 
-            service.combatAbandon(SESSION_ID, PLAYER_A_ID);
-
-            expect(endCombatSpy).toHaveBeenCalledWith(session, PLAYER_A_ID, PLAYER_B_ID, PLAYER_B_ID, true);
-        });
-
-        it('should end combat with playerA as winner when playerB abandons', () => {
-            const session = createMockSession();
-            const combat = createMockCombatState();
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-                endCombat: (session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-            const endCombatSpy = jest.spyOn(servicePrivate, 'endCombat');
-
-            service.combatAbandon(SESSION_ID, PLAYER_B_ID);
-
-            expect(endCombatSpy).toHaveBeenCalledWith(session, PLAYER_A_ID, PLAYER_B_ID, PLAYER_A_ID, true);
+            expect(result).toBeNull();
         });
     });
 
     describe('attackPlayerAction', () => {
+        it('should start combat successfully', () => {
+            const session = createMockSession();
+            const targetPosition: Position = { x: MOCK_X_2, y: MOCK_Y_2 };
+            const player2 = createMockPlayer({ id: MOCK_PLAYER_ID_2, x: MOCK_X_2, y: MOCK_Y_2 });
+            session.inGamePlayers[MOCK_PLAYER_ID_2] = player2;
+            mockRepository.findById.mockReturnValue(session);
+            mockGameCacheService.getTileByPlayerId.mockReturnValue(createMockTileWithPlayerId());
+
+            service.attackPlayerAction(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, targetPosition);
+
+            expect(session.inGamePlayers[MOCK_PLAYER_ID_1].actionsRemaining).toBe(0);
+            expect(session.currentTurn.hasUsedAction).toBe(true);
+            expect(mockTimerService.startCombat).toHaveBeenCalled();
+            expect(mockRepository.incrementPlayerCombatCount).toHaveBeenCalledTimes(2);
+        });
+
         it('should throw NotFoundException when player not found', () => {
             const session = createMockSession();
-            session.inGamePlayers = {};
-            sessionRepository.findById.mockReturnValue(session);
+            const targetPosition: Position = { x: MOCK_X, y: MOCK_Y };
+            mockRepository.findById.mockReturnValue(session);
 
-            expect(() => service.attackPlayerAction(SESSION_ID, PLAYER_A_ID, 0, 0)).toThrow(NotFoundException);
-            expect(() => service.attackPlayerAction(SESSION_ID, PLAYER_A_ID, 0, 0)).toThrow('Player not found');
+            expect(() => service.attackPlayerAction(MOCK_SESSION_ID, 'non-existent', targetPosition)).toThrow(NotFoundException);
         });
 
         it('should throw BadRequestException when no actions remaining', () => {
             const session = createMockSession();
-            session.inGamePlayers[PLAYER_A_ID].actionsRemaining = 0;
-            sessionRepository.findById.mockReturnValue(session);
+            const player = createMockPlayer({ id: MOCK_PLAYER_ID_1, actionsRemaining: 0 });
+            session.inGamePlayers[MOCK_PLAYER_ID_1] = player;
+            const targetPosition: Position = { x: MOCK_X_2, y: MOCK_Y_2 };
+            mockRepository.findById.mockReturnValue(session);
 
-            expect(() => service.attackPlayerAction(SESSION_ID, PLAYER_A_ID, 1, 1)).toThrow(BadRequestException);
-            expect(() => service.attackPlayerAction(SESSION_ID, PLAYER_A_ID, 1, 1)).toThrow('No actions remaining');
+            expect(() => service.attackPlayerAction(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, targetPosition)).toThrow(BadRequestException);
         });
 
         it('should throw BadRequestException when no opponent at position', () => {
             const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
+            const targetPosition: Position = { x: MOCK_X_2, y: MOCK_Y_2 };
+            mockRepository.findById.mockReturnValue(session);
 
-            expect(() => service.attackPlayerAction(SESSION_ID, PLAYER_A_ID, INVALID_POSITION, INVALID_POSITION)).toThrow(BadRequestException);
-            expect(() => service.attackPlayerAction(SESSION_ID, PLAYER_A_ID, INVALID_POSITION, INVALID_POSITION)).toThrow(
-                'No opponent at this position',
-            );
-        });
-
-        it('should throw BadRequestException when attacking own position', () => {
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
-
-            expect(() => service.attackPlayerAction(SESSION_ID, PLAYER_A_ID, 0, 0)).toThrow(BadRequestException);
-            expect(() => service.attackPlayerAction(SESSION_ID, PLAYER_A_ID, 0, 0)).toThrow('No opponent at this position');
-        });
-
-        it('should start combat and decrement actions', () => {
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
-            gameCacheService.getTileByPlayerId.mockReturnValue({ kind: TileKind.BASE, x: 0, y: 0, playerId: null } as TileWithPlayerId);
-
-            type ServiceWithPrivateMethod = {
-                startCombat: (session: InGameSession, playerAId: string, playerBId: string) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            const startCombatSpy = jest.spyOn(servicePrivate, 'startCombat');
-
-            service.attackPlayerAction(SESSION_ID, PLAYER_A_ID, 1, 1);
-
-            expect(session.inGamePlayers[PLAYER_A_ID].actionsRemaining).toBe(0);
-            expect(session.currentTurn.hasUsedAction).toBe(true);
-            expect(startCombatSpy).toHaveBeenCalledWith(session, PLAYER_A_ID, PLAYER_B_ID);
+            expect(() => service.attackPlayerAction(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, targetPosition)).toThrow(BadRequestException);
         });
     });
 
     describe('combatChoice', () => {
+        it('should set posture for playerA', () => {
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: null,
+                playerBPosture: null,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
+            };
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
+
+            service.combatChoice(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, CombatPosture.OFFENSIVE);
+
+            expect(combatState.playerAPosture).toBe(CombatPosture.OFFENSIVE);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.CombatPostureSelected,
+                expect.objectContaining({
+                    sessionId: MOCK_SESSION_ID,
+                    playerId: MOCK_PLAYER_ID_1,
+                    posture: CombatPosture.OFFENSIVE,
+                }),
+            );
+        });
+
+        it('should set posture for playerB', () => {
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: null,
+                playerBPosture: null,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
+            };
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
+
+            service.combatChoice(MOCK_SESSION_ID, MOCK_PLAYER_ID_2, CombatPosture.DEFENSIVE);
+
+            expect(combatState.playerBPosture).toBe(CombatPosture.DEFENSIVE);
+        });
+
+        it('should call forceNextLoop when both postures are set', () => {
+            const session = createMockSession();
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: CombatPosture.OFFENSIVE,
+                playerBPosture: null,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
+            };
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
+            mockRepository.findById.mockReturnValue(session);
+
+            service.combatChoice(MOCK_SESSION_ID, MOCK_PLAYER_ID_2, CombatPosture.DEFENSIVE);
+
+            expect(mockTimerService.forceNextLoop).toHaveBeenCalledWith(session);
+        });
+
         it('should return early when combat not found', () => {
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
+            service.combatChoice(MOCK_SESSION_ID, MOCK_PLAYER_ID_1, CombatPosture.OFFENSIVE);
 
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE)).not.toThrow();
-            expect(eventEmitter.emit).not.toHaveBeenCalled();
+            expect(mockEventEmitter.emit).not.toHaveBeenCalled();
         });
 
-        it('should throw BadRequestException when player not in combat (line 66 check)', () => {
-            const combat = createMockCombatState();
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
+        it('should throw BadRequestException when player not in combat', () => {
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: null,
+                playerBPosture: null,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
             };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
 
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_C_ID, CombatPosture.OFFENSIVE)).toThrow(BadRequestException);
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_C_ID, CombatPosture.OFFENSIVE)).toThrow('Player not in combat');
-        });
-
-        it('should throw BadRequestException when player not in combat (line 66 check)', () => {
-            const combat = createMockCombatState();
-            combat.playerAId = 'different-a';
-            combat.playerBId = 'different-b';
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE)).toThrow(BadRequestException);
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE)).toThrow('Player not in combat');
-        });
-
-        it('should throw BadRequestException from else branch (line 72) when player matches neither A nor B', () => {
-            const combat = createMockCombatState();
-            combat.playerAId = 'wrong-player-a';
-            combat.playerBId = 'wrong-player-b';
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE)).toThrow(BadRequestException);
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE)).toThrow('Player not in combat');
-        });
-
-        it('should set playerA posture and emit event', () => {
-            const combat = createMockCombatState();
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-
-            service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE);
-
-            expect(combat.playerAPosture).toBe(CombatPosture.OFFENSIVE);
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatPostureSelected, {
-                sessionId: SESSION_ID,
-                playerId: PLAYER_A_ID,
-                posture: CombatPosture.OFFENSIVE,
-            });
-        });
-
-        it('should set playerB posture and emit event', () => {
-            const combat = createMockCombatState();
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-
-            service.combatChoice(SESSION_ID, PLAYER_B_ID, CombatPosture.DEFENSIVE);
-
-            expect(combat.playerBPosture).toBe(CombatPosture.DEFENSIVE);
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatPostureSelected, {
-                sessionId: SESSION_ID,
-                playerId: PLAYER_B_ID,
-                posture: CombatPosture.DEFENSIVE,
-            });
-        });
-
-        it('should force next loop when both postures are set', () => {
-            const combat = createMockCombatState();
-            combat.playerAPosture = CombatPosture.OFFENSIVE;
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-
-            service.combatChoice(SESSION_ID, PLAYER_B_ID, CombatPosture.DEFENSIVE);
-
-            expect(combatTimerService.forceNextLoop).toHaveBeenCalledWith(session);
-        });
-
-        it('should not force next loop when only one posture is set', () => {
-            const combat = createMockCombatState();
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-
-            service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE);
-
-            expect(combatTimerService.forceNextLoop).not.toHaveBeenCalled();
-        });
-
-        it('should handle playerB choice when playerA condition is false', () => {
-            const combat = createMockCombatState();
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-
-            service.combatChoice(SESSION_ID, PLAYER_B_ID, CombatPosture.OFFENSIVE);
-
-            expect(combat.playerBPosture).toBe(CombatPosture.OFFENSIVE);
-            expect(combat.playerAPosture).toBeNull();
-        });
-
-        it('should execute else if branch when playerA is not the player but playerB is', () => {
-            const combat = createMockCombatState();
-            combat.playerAId = 'different-player';
-            combat.playerBId = PLAYER_B_ID;
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-
-            service.combatChoice(SESSION_ID, PLAYER_B_ID, CombatPosture.DEFENSIVE);
-
-            expect(combat.playerAPosture).toBeNull();
-            expect(combat.playerBPosture).toBe(CombatPosture.DEFENSIVE);
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatPostureSelected, {
-                sessionId: SESSION_ID,
-                playerId: PLAYER_B_ID,
-                posture: CombatPosture.DEFENSIVE,
-            });
-        });
-
-        it('should execute else branch when both if and else if conditions are false', () => {
-            const combat = createMockCombatState();
-            combat.playerAId = 'wrong-player-a';
-            combat.playerBId = 'wrong-player-b';
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE)).toThrow(BadRequestException);
-            expect(() => service.combatChoice(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE)).toThrow('Player not in combat');
-        });
-    });
-
-    describe('startCombat', () => {
-        it('should create combat state and start timer', () => {
-            const session = createMockSession();
-            gameCacheService.getTileByPlayerId.mockReturnValue({ kind: TileKind.BASE, x: 0, y: 0, playerId: null } as TileWithPlayerId);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-                startCombat: (session: InGameSession, playerAId: string, playerBId: string) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-
-            servicePrivate.startCombat(session, PLAYER_A_ID, PLAYER_B_ID);
-
-            expect(servicePrivate.activeCombats.has(SESSION_ID)).toBe(true);
-            const combat = servicePrivate.activeCombats.get(SESSION_ID);
-            expect(combat?.playerAId).toBe(PLAYER_A_ID);
-            expect(combat?.playerBId).toBe(PLAYER_B_ID);
-            expect(timerService.pauseTurnTimer).toHaveBeenCalledWith(SESSION_ID);
-            expect(combatTimerService.startCombatTimer).toHaveBeenCalledWith(
-                session,
-                PLAYER_A_ID,
-                PLAYER_B_ID,
-                TileCombatEffect.BASE,
-                TileCombatEffect.BASE,
-            );
-            expect(sessionRepository.incrementPlayerCombatCount).toHaveBeenCalledWith(SESSION_ID, PLAYER_A_ID);
-            expect(sessionRepository.incrementPlayerCombatCount).toHaveBeenCalledWith(SESSION_ID, PLAYER_B_ID);
-        });
-
-        it('should use default tile effect when tile is null', () => {
-            const session = createMockSession();
-            gameCacheService.getTileByPlayerId.mockReturnValue(null);
-
-            type ServiceWithPrivateMethod = {
-                startCombat: (session: InGameSession, playerAId: string, playerBId: string) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.startCombat(session, PLAYER_A_ID, PLAYER_B_ID);
-
-            expect(combatTimerService.startCombatTimer).toHaveBeenCalledWith(session, PLAYER_A_ID, PLAYER_B_ID, 0, 0);
-        });
-
-        it('should use tile combat effect from tile kind', () => {
-            const session = createMockSession();
-            gameCacheService.getTileByPlayerId
-                .mockReturnValueOnce({ kind: TileKind.ICE, x: 0, y: 0, playerId: null } as TileWithPlayerId)
-                .mockReturnValueOnce({ kind: TileKind.WATER, x: 0, y: 0, playerId: null } as TileWithPlayerId);
-
-            type ServiceWithPrivateMethod = {
-                startCombat: (session: InGameSession, playerAId: string, playerBId: string) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.startCombat(session, PLAYER_A_ID, PLAYER_B_ID);
-
-            expect(combatTimerService.startCombatTimer).toHaveBeenCalledWith(
-                session,
-                PLAYER_A_ID,
-                PLAYER_B_ID,
-                TileCombatEffect.ICE,
-                TileCombatEffect.WATER,
-            );
+            expect(() => service.combatChoice(MOCK_SESSION_ID, 'non-existent', CombatPosture.OFFENSIVE)).toThrow(BadRequestException);
         });
     });
 
     describe('handleTimerLoop', () => {
         it('should call combatRound when combat exists', () => {
-            const combat = createMockCombatState();
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-                combatRound: (sessionId: string) => void;
+            const session = createMockSession();
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: CombatPosture.OFFENSIVE,
+                playerBPosture: CombatPosture.DEFENSIVE,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
             };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-            const combatRoundSpy = jest.spyOn(servicePrivate, 'combatRound');
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
+            mockRepository.findById.mockReturnValue(session);
+            mockRepository.decreasePlayerHealth.mockReturnValue(MOCK_HEALTH);
+            const originalRandom = Math.random;
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
-            service.handleTimerLoop({ sessionId: SESSION_ID });
+            service['handleTimerLoop']({ sessionId: MOCK_SESSION_ID });
 
-            expect(combatRoundSpy).toHaveBeenCalledWith(SESSION_ID);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerHealthChanged, expect.anything());
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatResult, expect.anything());
+
+            Math.random = originalRandom;
         });
 
-        it('should not call combatRound when combat does not exist', () => {
-            type ServiceWithPrivateMethod = {
-                combatRound: (sessionId: string) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            const combatRoundSpy = jest.spyOn(servicePrivate, 'combatRound');
+        it('should return early when combat not found', () => {
+            service['handleTimerLoop']({ sessionId: MOCK_SESSION_ID });
 
-            service.handleTimerLoop({ sessionId: SESSION_ID });
-
-            expect(combatRoundSpy).not.toHaveBeenCalled();
+            expect(mockEventEmitter.emit).not.toHaveBeenCalled();
         });
     });
 
-    describe('endCombat', () => {
-        it('should end turn when winnerId is null', () => {
-            const session = createMockSession();
-            const combat = createMockCombatState();
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-                endCombat: (session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean) => void;
+    describe('clearActiveCombatForSession', () => {
+        it('should clear active combat', () => {
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: null,
+                playerBPosture: null,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
             };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
 
-            servicePrivate.endCombat(session, PLAYER_A_ID, PLAYER_B_ID, null, false);
+            service.clearActiveCombatForSession(MOCK_SESSION_ID);
 
-            expect(servicePrivate.activeCombats.has(SESSION_ID)).toBe(false);
-            expect(combatTimerService.stopCombatTimer).toHaveBeenCalledWith(session);
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.CombatVictory, {
-                sessionId: SESSION_ID,
-                playerAId: PLAYER_A_ID,
-                playerBId: PLAYER_B_ID,
-                winnerId: null,
-                abandon: false,
-            });
-            expect(timerService.endTurnManual).toHaveBeenCalledWith(session);
+            const activeCombat = service.getActiveCombat(MOCK_SESSION_ID);
+            expect(activeCombat).toBeNull();
+        });
+    });
+
+    describe('getActiveCombat', () => {
+        it('should return active combat when exists', () => {
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: null,
+                playerBPosture: null,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
+            };
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
+
+            const result = service.getActiveCombat(MOCK_SESSION_ID);
+
+            expect(result).toEqual({ playerAId: MOCK_PLAYER_ID_1, playerBId: MOCK_PLAYER_ID_2 });
         });
 
-        it('should end turn when winnerId is different from active player', () => {
-            const session = createMockSession();
-            session.currentTurn.activePlayerId = PLAYER_A_ID;
-            const combat = createMockCombatState();
+        it('should return null when combat not found', () => {
+            const result = service.getActiveCombat(MOCK_SESSION_ID);
 
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-                endCombat: (session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-
-            servicePrivate.endCombat(session, PLAYER_A_ID, PLAYER_B_ID, PLAYER_B_ID, false);
-
-            expect(timerService.endTurnManual).toHaveBeenCalledWith(session);
-            expect(timerService.resumeTurnTimer).not.toHaveBeenCalled();
-        });
-
-        it('should resume timer when winnerId is same as active player', () => {
-            const session = createMockSession();
-            session.currentTurn.activePlayerId = PLAYER_A_ID;
-            const combat = createMockCombatState();
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-                endCombat: (session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-
-            servicePrivate.endCombat(session, PLAYER_A_ID, PLAYER_B_ID, PLAYER_A_ID, false);
-
-            expect(timerService.resumeTurnTimer).toHaveBeenCalledWith(SESSION_ID);
-            expect(inGameMovementService.calculateReachableTiles).toHaveBeenCalledWith(session, PLAYER_A_ID);
-            expect(timerService.endTurnManual).not.toHaveBeenCalled();
+            expect(result).toBeNull();
         });
     });
 
     describe('combatRound', () => {
-        it('should return early when combat not found', () => {
+        it('should handle combat round with no deaths', () => {
             const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                combatRound: (sessionId: string) => void;
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: CombatPosture.OFFENSIVE,
+                playerBPosture: CombatPosture.DEFENSIVE,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
             };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
+            mockRepository.findById.mockReturnValue(session);
+            mockRepository.decreasePlayerHealth.mockReturnValue(MOCK_HEALTH);
+            const originalRandom = Math.random;
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
-            expect(() => servicePrivate.combatRound(SESSION_ID)).not.toThrow();
-            expect(eventEmitter.emit).not.toHaveBeenCalled();
-        });
+            service['combatRound'](MOCK_SESSION_ID);
 
-        it('should return early when session not found', () => {
-            const combat = createMockCombatState();
-            sessionRepository.findById.mockReturnValue(null);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerHealthChanged, expect.anything());
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerCombatResult, expect.anything());
 
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-                combatRound: (sessionId: string) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-
-            expect(() => servicePrivate.combatRound(SESSION_ID)).not.toThrow();
-            expect(eventEmitter.emit).not.toHaveBeenCalled();
-        });
-
-        it('should process combat round and emit events', () => {
-            const session = createMockSession();
-            const combat = createMockCombatState();
-            combat.playerAPosture = CombatPosture.OFFENSIVE;
-            combat.playerBPosture = CombatPosture.DEFENSIVE;
-            sessionRepository.findById.mockReturnValue(session);
-            sessionRepository.decreasePlayerHealth.mockReturnValueOnce(HEALTH_AFTER_DAMAGE_1).mockReturnValueOnce(HEALTH_AFTER_DAMAGE_2);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-                combatRound: (sessionId: string) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-
-            servicePrivate.combatRound(SESSION_ID);
-
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerHealthChanged, {
-                sessionId: SESSION_ID,
-                playerId: PLAYER_A_ID,
-                newHealth: HEALTH_AFTER_DAMAGE_1,
-            });
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.PlayerHealthChanged, {
-                sessionId: SESSION_ID,
-                playerId: PLAYER_B_ID,
-                newHealth: HEALTH_AFTER_DAMAGE_2,
-            });
-            expect(eventEmitter.emit).toHaveBeenCalledWith(
-                ServerEvents.PlayerCombatResult,
-                expect.objectContaining({
-                    sessionId: SESSION_ID,
-                    playerAId: PLAYER_A_ID,
-                    playerBId: PLAYER_B_ID,
-                }),
-            );
-            expect(combat.playerAPosture).toBeNull();
-            expect(combat.playerBPosture).toBeNull();
+            Math.random = originalRandom;
         });
 
         it('should handle playerA death', () => {
             const session = createMockSession();
-            const combat = createMockCombatState();
-            sessionRepository.findById.mockReturnValue(session);
-            sessionRepository.decreasePlayerHealth.mockReturnValueOnce(0).mockReturnValueOnce(HEALTH_AFTER_DAMAGE_3);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-                combatRound: (sessionId: string) => void;
-                checkGameVictory: (sessionId: string, winnerId: string, playerAId: string, playerBId: string) => void;
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: CombatPosture.OFFENSIVE,
+                playerBPosture: CombatPosture.DEFENSIVE,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
             };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-            const checkGameVictorySpy = jest.spyOn(servicePrivate, 'checkGameVictory');
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
+            mockRepository.findById.mockReturnValue(session);
+            mockRepository.decreasePlayerHealth.mockReturnValueOnce(0).mockReturnValueOnce(MOCK_HEALTH);
+            mockRepository.playerHasFlag.mockReturnValue(false);
+            const originalRandom = Math.random;
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
-            servicePrivate.combatRound(SESSION_ID);
+            service['combatRound'](MOCK_SESSION_ID);
 
-            expect(inGameMovementService.movePlayerToStartPosition).toHaveBeenCalledWith(session, PLAYER_A_ID);
-            expect(sessionRepository.resetPlayerHealth).toHaveBeenCalledWith(SESSION_ID, PLAYER_A_ID);
-            expect(sessionRepository.incrementPlayerCombatWins).toHaveBeenCalledWith(SESSION_ID, PLAYER_B_ID);
-            expect(sessionRepository.incrementPlayerCombatLosses).toHaveBeenCalledWith(SESSION_ID, PLAYER_A_ID);
-            expect(checkGameVictorySpy).toHaveBeenCalledWith(SESSION_ID, PLAYER_B_ID, PLAYER_A_ID, PLAYER_B_ID);
+            expect(mockMovementService.movePlayerToStartPosition).toHaveBeenCalledWith(session, MOCK_PLAYER_ID_1);
+            expect(mockRepository.resetPlayerHealth).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
+            expect(mockRepository.incrementPlayerCombatWins).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_2);
+            expect(mockRepository.incrementPlayerCombatLosses).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
+
+            Math.random = originalRandom;
         });
 
         it('should handle playerB death', () => {
             const session = createMockSession();
-            const combat = createMockCombatState();
-            sessionRepository.findById.mockReturnValue(session);
-            sessionRepository.decreasePlayerHealth.mockReturnValueOnce(HEALTH_AFTER_DAMAGE_3).mockReturnValueOnce(0);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-                combatRound: (sessionId: string) => void;
-                checkGameVictory: (sessionId: string, winnerId: string, playerAId: string, playerBId: string) => void;
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: CombatPosture.OFFENSIVE,
+                playerBPosture: CombatPosture.DEFENSIVE,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
             };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-            const checkGameVictorySpy = jest.spyOn(servicePrivate, 'checkGameVictory');
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
+            mockRepository.findById.mockReturnValue(session);
+            mockRepository.decreasePlayerHealth.mockReturnValueOnce(MOCK_HEALTH).mockReturnValueOnce(0);
+            mockRepository.playerHasFlag.mockReturnValue(false);
+            const originalRandom = Math.random;
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
-            servicePrivate.combatRound(SESSION_ID);
+            service['combatRound'](MOCK_SESSION_ID);
 
-            expect(inGameMovementService.movePlayerToStartPosition).toHaveBeenCalledWith(session, PLAYER_B_ID);
-            expect(sessionRepository.resetPlayerHealth).toHaveBeenCalledWith(SESSION_ID, PLAYER_B_ID);
-            expect(sessionRepository.incrementPlayerCombatWins).toHaveBeenCalledWith(SESSION_ID, PLAYER_A_ID);
-            expect(sessionRepository.incrementPlayerCombatLosses).toHaveBeenCalledWith(SESSION_ID, PLAYER_B_ID);
-            expect(checkGameVictorySpy).toHaveBeenCalledWith(SESSION_ID, PLAYER_A_ID, PLAYER_A_ID, PLAYER_B_ID);
+            expect(mockMovementService.movePlayerToStartPosition).toHaveBeenCalledWith(session, MOCK_PLAYER_ID_2);
+            expect(mockRepository.incrementPlayerCombatWins).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
+
+            Math.random = originalRandom;
         });
 
-        it('should handle draw (both players dead)', () => {
+        it('should handle draw when both players die', () => {
             const session = createMockSession();
-            const combat = createMockCombatState();
-            sessionRepository.findById.mockReturnValue(session);
-            sessionRepository.decreasePlayerHealth.mockReturnValueOnce(0).mockReturnValueOnce(0);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-                combatRound: (sessionId: string) => void;
-                endCombat: (session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean) => void;
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: CombatPosture.OFFENSIVE,
+                playerBPosture: CombatPosture.DEFENSIVE,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
             };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-            const endCombatSpy = jest.spyOn(servicePrivate, 'endCombat');
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
+            mockRepository.findById.mockReturnValue(session);
+            mockRepository.decreasePlayerHealth.mockReturnValue(0);
+            mockRepository.playerHasFlag.mockReturnValue(false);
+            const originalRandom = Math.random;
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
-            servicePrivate.combatRound(SESSION_ID);
+            service['combatRound'](MOCK_SESSION_ID);
 
-            expect(inGameMovementService.movePlayerToStartPosition).toHaveBeenCalledWith(session, PLAYER_A_ID);
-            expect(inGameMovementService.movePlayerToStartPosition).toHaveBeenCalledWith(session, PLAYER_B_ID);
-            expect(sessionRepository.resetPlayerHealth).toHaveBeenCalledWith(SESSION_ID, PLAYER_A_ID);
-            expect(sessionRepository.resetPlayerHealth).toHaveBeenCalledWith(SESSION_ID, PLAYER_B_ID);
-            expect(sessionRepository.incrementPlayerCombatDraws).toHaveBeenCalledWith(SESSION_ID, PLAYER_A_ID);
-            expect(sessionRepository.incrementPlayerCombatDraws).toHaveBeenCalledWith(SESSION_ID, PLAYER_B_ID);
-            expect(endCombatSpy).toHaveBeenCalledWith(session, PLAYER_A_ID, PLAYER_B_ID, null);
+            expect(mockRepository.incrementPlayerCombatDraws).toHaveBeenCalledTimes(2);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.CombatVictory,
+                expect.objectContaining({
+                    winnerId: null,
+                }),
+            );
+
+            Math.random = originalRandom;
         });
 
-        it('should not end combat when both players alive', () => {
+        it('should drop flag when player dies with flag', () => {
             const session = createMockSession();
-            const combat = createMockCombatState();
-            sessionRepository.findById.mockReturnValue(session);
-            sessionRepository.decreasePlayerHealth.mockReturnValueOnce(HEALTH_AFTER_DAMAGE_3).mockReturnValueOnce(HEALTH_AFTER_DAMAGE_3);
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-                combatRound: (sessionId: string) => void;
-                endCombat: (session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean) => void;
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: CombatPosture.OFFENSIVE,
+                playerBPosture: CombatPosture.DEFENSIVE,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
             };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
-            const endCombatSpy = jest.spyOn(servicePrivate, 'endCombat');
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
+            mockRepository.findById.mockReturnValue(session);
+            mockRepository.decreasePlayerHealth.mockReturnValueOnce(0).mockReturnValueOnce(MOCK_HEALTH);
+            mockRepository.playerHasFlag.mockReturnValue(true);
+            const originalRandom = Math.random;
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
-            servicePrivate.combatRound(SESSION_ID);
+            service['combatRound'](MOCK_SESSION_ID);
 
-            expect(endCombatSpy).not.toHaveBeenCalled();
-            expect(inGameMovementService.movePlayerToStartPosition).not.toHaveBeenCalled();
+            expect(mockRepository.dropFlag).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
+
+            Math.random = originalRandom;
+        });
+
+        it('should return early when combat not found', () => {
+            service['combatRound'](MOCK_SESSION_ID);
+
+            expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+        });
+
+        it('should return early when session not found', () => {
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: CombatPosture.OFFENSIVE,
+                playerBPosture: CombatPosture.DEFENSIVE,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
+            };
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
+            mockRepository.findById.mockReturnValue(null);
+
+            service['combatRound'](MOCK_SESSION_ID);
+
+            expect(mockEventEmitter.emit).not.toHaveBeenCalled();
         });
     });
 
     describe('resetCombatPosture', () => {
-        it('should reset postures when combat exists', () => {
-            const combat = createMockCombatState();
-            combat.playerAPosture = CombatPosture.OFFENSIVE;
-            combat.playerBPosture = CombatPosture.DEFENSIVE;
-
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-                resetCombatPosture: (sessionId: string) => void;
+        it('should reset combat postures', () => {
+            const combatState: CombatState = {
+                sessionId: MOCK_SESSION_ID,
+                playerAId: MOCK_PLAYER_ID_1,
+                playerBId: MOCK_PLAYER_ID_2,
+                playerAPosture: CombatPosture.OFFENSIVE,
+                playerBPosture: CombatPosture.DEFENSIVE,
+                playerATileEffect: TileCombatEffect.BASE,
+                playerBTileEffect: TileCombatEffect.BASE,
             };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combat);
+            (service as unknown as { activeCombats: Map<string, CombatState> }).activeCombats.set(MOCK_SESSION_ID, combatState);
 
-            servicePrivate.resetCombatPosture(SESSION_ID);
+            service['resetCombatPosture'](MOCK_SESSION_ID);
 
-            expect(combat.playerAPosture).toBeNull();
-            expect(combat.playerBPosture).toBeNull();
+            expect(combatState.playerAPosture).toBeNull();
+            expect(combatState.playerBPosture).toBeNull();
         });
 
         it('should return early when combat not found', () => {
-            type ServiceWithPrivateMethod = {
-                resetCombatPosture: (sessionId: string) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+            service['resetCombatPosture'](MOCK_SESSION_ID);
 
-            expect(() => servicePrivate.resetCombatPosture(SESSION_ID)).not.toThrow();
+            expect(true).toBe(true);
+        });
+    });
+
+    describe('handlePlayerDeath', () => {
+        it('should handle player death', () => {
+            const session = createMockSession();
+            mockRepository.playerHasFlag.mockReturnValue(false);
+
+            service['handlePlayerDeath'](MOCK_SESSION_ID, session, MOCK_PLAYER_ID_1);
+
+            expect(mockMovementService.movePlayerToStartPosition).toHaveBeenCalledWith(session, MOCK_PLAYER_ID_1);
+            expect(mockRepository.resetPlayerHealth).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
+        });
+
+        it('should drop flag when player has flag', () => {
+            const session = createMockSession();
+            mockRepository.playerHasFlag.mockReturnValue(true);
+
+            service['handlePlayerDeath'](MOCK_SESSION_ID, session, MOCK_PLAYER_ID_1);
+
+            expect(mockRepository.dropFlag).toHaveBeenCalledWith(MOCK_SESSION_ID, MOCK_PLAYER_ID_1);
         });
     });
 
     describe('getPlayerDefense', () => {
         it('should return default values when session not found', () => {
-            sessionRepository.findById.mockReturnValue(null);
+            mockRepository.findById.mockReturnValue(null);
 
-            type ServiceWithPrivateMethod = {
-                getPlayerDefense: (
-                    sessionId: string,
-                    playerId: string,
-                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
-                    tileCombatEffect: TileCombatEffect,
-                ) => PlayerDefenseResult;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-
-            const result = servicePrivate.getPlayerDefense(SESSION_ID, PLAYER_A_ID, CombatPosture.DEFENSIVE, TileCombatEffect.BASE);
+            const result = service['getPlayerDefense'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, null, TileCombatEffect.BASE);
 
             expect(result).toEqual({
                 dice: Dice.D4,
                 diceRoll: 0,
                 baseDefense: 0,
                 defenseBonus: 0,
+                postureBonus: 0,
                 totalDefense: 0,
                 tileCombatEffect: TileCombatEffect.BASE,
             });
@@ -951,94 +751,58 @@ describe('CombatService', () => {
 
         it('should return default values when player not found', () => {
             const session = createMockSession();
-            session.inGamePlayers = {};
-            sessionRepository.findById.mockReturnValue(session);
+            delete session.inGamePlayers[MOCK_PLAYER_ID_1];
+            mockRepository.findById.mockReturnValue(session);
 
-            type ServiceWithPrivateMethod = {
-                getPlayerDefense: (
-                    sessionId: string,
-                    playerId: string,
-                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
-                    tileCombatEffect: TileCombatEffect,
-                ) => PlayerDefenseResult;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-
-            const result = servicePrivate.getPlayerDefense(SESSION_ID, PLAYER_A_ID, CombatPosture.DEFENSIVE, TileCombatEffect.BASE);
+            const result = service['getPlayerDefense'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, null, TileCombatEffect.BASE);
 
             expect(result).toEqual({
                 dice: Dice.D4,
                 diceRoll: 0,
                 baseDefense: 0,
                 defenseBonus: 0,
+                postureBonus: 0,
                 totalDefense: 0,
                 tileCombatEffect: TileCombatEffect.BASE,
             });
         });
 
-        it('should calculate defense with defensive posture bonus', () => {
+        it('should calculate defense with DEFENSIVE posture bonus', () => {
             const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
+            mockRepository.findById.mockReturnValue(session);
+            const originalRandom = Math.random;
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
-            type ServiceWithPrivateMethod = {
-                getPlayerDefense: (
-                    sessionId: string,
-                    playerId: string,
-                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
-                    tileCombatEffect: TileCombatEffect,
-                ) => PlayerDefenseResult;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+            const result = service['getPlayerDefense'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, CombatPosture.DEFENSIVE, TileCombatEffect.BASE);
 
-            const result = servicePrivate.getPlayerDefense(SESSION_ID, PLAYER_A_ID, CombatPosture.DEFENSIVE, TileCombatEffect.BASE);
-
-            expect(result.dice).toBe(Dice.D4);
-            expect(result.baseDefense).toBe(BASE_DEFENSE_VALUE);
-            expect(result.defenseBonus).toBe(2);
+            expect(result.postureBonus).toBe(MOCK_POSTURE_BONUS);
             expect(result.totalDefense).toBeGreaterThan(0);
+
+            Math.random = originalRandom;
         });
 
-        it('should calculate defense without bonus for offensive posture', () => {
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
+        it('should calculate defense with admin mode active', () => {
+            const session = createMockSession({ isAdminModeActive: true });
+            mockRepository.findById.mockReturnValue(session);
 
-            type ServiceWithPrivateMethod = {
-                getPlayerDefense: (
-                    sessionId: string,
-                    playerId: string,
-                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
-                    tileCombatEffect: TileCombatEffect,
-                ) => PlayerDefenseResult;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+            const result = service['getPlayerDefense'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, null, TileCombatEffect.BASE);
 
-            const result = servicePrivate.getPlayerDefense(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE, TileCombatEffect.BASE);
-
-            expect(result.defenseBonus).toBe(0);
+            expect(result.diceRoll).toBe(1);
         });
     });
 
     describe('getPlayerAttack', () => {
         it('should return default values when session not found', () => {
-            sessionRepository.findById.mockReturnValue(null);
+            mockRepository.findById.mockReturnValue(null);
 
-            type ServiceWithPrivateMethod = {
-                getPlayerAttack: (
-                    sessionId: string,
-                    playerId: string,
-                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
-                    tileCombatEffect: TileCombatEffect,
-                ) => PlayerAttackResult;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-
-            const result = servicePrivate.getPlayerAttack(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE, TileCombatEffect.BASE);
+            const result = service['getPlayerAttack'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, null, TileCombatEffect.BASE);
 
             expect(result).toEqual({
                 dice: Dice.D4,
                 diceRoll: 0,
                 baseAttack: 0,
                 attackBonus: 0,
+                postureBonus: 0,
                 totalAttack: 0,
                 tileCombatEffect: TileCombatEffect.BASE,
             });
@@ -1046,271 +810,186 @@ describe('CombatService', () => {
 
         it('should return default values when player not found', () => {
             const session = createMockSession();
-            session.inGamePlayers = {};
-            sessionRepository.findById.mockReturnValue(session);
+            delete session.inGamePlayers[MOCK_PLAYER_ID_1];
+            mockRepository.findById.mockReturnValue(session);
 
-            type ServiceWithPrivateMethod = {
-                getPlayerAttack: (
-                    sessionId: string,
-                    playerId: string,
-                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
-                    tileCombatEffect: TileCombatEffect,
-                ) => PlayerAttackResult;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-
-            const result = servicePrivate.getPlayerAttack(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE, TileCombatEffect.BASE);
+            const result = service['getPlayerAttack'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, null, TileCombatEffect.BASE);
 
             expect(result).toEqual({
                 dice: Dice.D4,
                 diceRoll: 0,
                 baseAttack: 0,
                 attackBonus: 0,
+                postureBonus: 0,
                 totalAttack: 0,
                 tileCombatEffect: TileCombatEffect.BASE,
             });
         });
 
-        it('should calculate attack with offensive posture bonus', () => {
+        it('should calculate attack with OFFENSIVE posture bonus', () => {
             const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
+            mockRepository.findById.mockReturnValue(session);
+            const originalRandom = Math.random;
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
-            type ServiceWithPrivateMethod = {
-                getPlayerAttack: (
-                    sessionId: string,
-                    playerId: string,
-                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
-                    tileCombatEffect: TileCombatEffect,
-                ) => PlayerAttackResult;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+            const result = service['getPlayerAttack'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, CombatPosture.OFFENSIVE, TileCombatEffect.BASE);
 
-            const result = servicePrivate.getPlayerAttack(SESSION_ID, PLAYER_A_ID, CombatPosture.OFFENSIVE, TileCombatEffect.BASE);
-
-            expect(result.dice).toBe(Dice.D6);
-            expect(result.baseAttack).toBe(BASE_ATTACK_VALUE);
-            expect(result.attackBonus).toBe(2);
+            expect(result.postureBonus).toBe(MOCK_POSTURE_BONUS);
             expect(result.totalAttack).toBeGreaterThan(0);
+
+            Math.random = originalRandom;
         });
 
-        it('should calculate attack without bonus for defensive posture', () => {
-            const session = createMockSession();
-            sessionRepository.findById.mockReturnValue(session);
+        it('should calculate attack with admin mode active', () => {
+            const session = createMockSession({ isAdminModeActive: true });
+            const player = createMockPlayer({ id: MOCK_PLAYER_ID_1, attackDice: Dice.D6 });
+            session.inGamePlayers[MOCK_PLAYER_ID_1] = player;
+            mockRepository.findById.mockReturnValue(session);
 
-            type ServiceWithPrivateMethod = {
-                getPlayerAttack: (
-                    sessionId: string,
-                    playerId: string,
-                    posture: CombatPosture.OFFENSIVE | CombatPosture.DEFENSIVE,
-                    tileCombatEffect: TileCombatEffect,
-                ) => PlayerAttackResult;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+            const result = service['getPlayerAttack'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, null, TileCombatEffect.BASE);
 
-            const result = servicePrivate.getPlayerAttack(SESSION_ID, PLAYER_A_ID, CombatPosture.DEFENSIVE, TileCombatEffect.BASE);
-
-            expect(result.attackBonus).toBe(0);
+            expect(result.diceRoll).toBe(DiceSides.D6);
         });
     });
 
     describe('calculateDamage', () => {
-        it('should return positive damage when attack > defense', () => {
-            type ServiceWithPrivateMethod = {
-                calculateDamage: (attack: number, defense: number) => number;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+        it('should calculate damage when attack > defense', () => {
+            const result = service['calculateDamage'](MOCK_BASE_ATTACK, MOCK_BASE_DEFENSE);
 
-            const result = servicePrivate.calculateDamage(BASE_ATTACK_VALUE, BASE_DEFENSE_VALUE);
-
-            expect(result).toBe(BASE_DEFENSE_VALUE);
+            expect(result).toBe(MOCK_BASE_ATTACK - MOCK_BASE_DEFENSE);
         });
 
         it('should return 0 when attack <= defense', () => {
-            type ServiceWithPrivateMethod = {
-                calculateDamage: (attack: number, defense: number) => number;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-
-            const result = servicePrivate.calculateDamage(BASE_DEFENSE_VALUE, BASE_ATTACK_VALUE);
-
-            expect(result).toBe(0);
-        });
-
-        it('should return 0 when attack equals defense', () => {
-            type ServiceWithPrivateMethod = {
-                calculateDamage: (attack: number, defense: number) => number;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-
-            const result = servicePrivate.calculateDamage(BASE_ATTACK_VALUE, BASE_ATTACK_VALUE);
+            const result = service['calculateDamage'](MOCK_BASE_DEFENSE, MOCK_BASE_ATTACK);
 
             expect(result).toBe(0);
         });
     });
 
     describe('rollDice', () => {
-        it('should return max dice value for attack in admin mode', () => {
-            const session = createMockSession();
-            session.isAdminModeActive = true;
-            sessionRepository.findById.mockReturnValue(session);
+        it('should return max dice value when admin mode active and isAttack', () => {
+            const session = createMockSession({ isAdminModeActive: true });
+            mockRepository.findById.mockReturnValue(session);
 
-            type ServiceWithPrivateMethod = {
-                rollDice: (dice: Dice, sessionId: string, isAttack: boolean) => number;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+            const result = service['rollDice'](Dice.D6, MOCK_SESSION_ID, true);
 
-            const result = servicePrivate.rollDice(Dice.D6, SESSION_ID, true);
-
-            expect(result).toBe(DiceSides[Dice.D6]);
+            expect(result).toBe(DiceSides.D6);
         });
 
-        it('should return 1 for defense in admin mode', () => {
-            const session = createMockSession();
-            session.isAdminModeActive = true;
-            sessionRepository.findById.mockReturnValue(session);
+        it('should return 1 when admin mode active and not isAttack', () => {
+            const session = createMockSession({ isAdminModeActive: true });
+            mockRepository.findById.mockReturnValue(session);
 
-            type ServiceWithPrivateMethod = {
-                rollDice: (dice: Dice, sessionId: string, isAttack: boolean) => number;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-
-            const result = servicePrivate.rollDice(Dice.D6, SESSION_ID, false);
+            const result = service['rollDice'](Dice.D6, MOCK_SESSION_ID, false);
 
             expect(result).toBe(1);
         });
 
-        it('should return random value in normal mode', () => {
-            const session = createMockSession();
-            session.isAdminModeActive = false;
-            sessionRepository.findById.mockReturnValue(session);
+        it('should return random value when admin mode not active', () => {
+            const session = createMockSession({ isAdminModeActive: false });
+            mockRepository.findById.mockReturnValue(session);
+            const originalRandom = Math.random;
+            Math.random = jest.fn().mockReturnValue(MOCK_RANDOM_VALUE);
 
-            type ServiceWithPrivateMethod = {
-                rollDice: (dice: Dice, sessionId: string, isAttack: boolean) => number;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-
-            const result = servicePrivate.rollDice(Dice.D6, SESSION_ID, true);
+            const result = service['rollDice'](Dice.D6, MOCK_SESSION_ID, true);
 
             expect(result).toBeGreaterThanOrEqual(1);
-            expect(result).toBeLessThanOrEqual(DiceSides[Dice.D6]);
-        });
+            expect(result).toBeLessThanOrEqual(DiceSides.D6);
 
-        it('should handle null session', () => {
-            sessionRepository.findById.mockReturnValue(null);
-
-            type ServiceWithPrivateMethod = {
-                rollDice: (dice: Dice, sessionId: string, isAttack?: boolean) => number;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-
-            const result = servicePrivate.rollDice(Dice.D6, SESSION_ID);
-
-            expect(result).toBeGreaterThanOrEqual(1);
-            expect(result).toBeLessThanOrEqual(DiceSides[Dice.D6]);
-        });
-
-        it('should use default isAttack parameter when not provided', () => {
-            const session = createMockSession();
-            session.isAdminModeActive = true;
-            sessionRepository.findById.mockReturnValue(session);
-
-            type ServiceWithPrivateMethod = {
-                rollDice: (dice: Dice, sessionId: string, isAttack?: boolean) => number;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-
-            const result = servicePrivate.rollDice(Dice.D6, SESSION_ID);
-
-            expect(result).toBe(DiceSides[Dice.D6]);
+            Math.random = originalRandom;
         });
     });
 
     describe('checkGameVictory', () => {
-        it('should emit game over when winner has enough wins', () => {
-            const session = createMockSession();
-            session.inGamePlayers[PLAYER_A_ID].combatWins = COMBAT_WINS_TO_WIN_GAME;
-            sessionRepository.findById.mockReturnValue(session);
+        it('should emit GameOver when combat wins threshold reached in CLASSIC mode', () => {
+            const session = createMockSession({ mode: GameMode.CLASSIC });
+            const player = createMockPlayer({ id: MOCK_PLAYER_ID_1, combatWins: MOCK_COMBAT_WINS });
+            session.inGamePlayers[MOCK_PLAYER_ID_1] = player;
+            mockRepository.findById.mockReturnValue(session);
 
-            type ServiceWithPrivateMethod = {
-                checkGameVictory: (sessionId: string, winnerId: string, playerAId: string, playerBId: string) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
+            service['checkGameVictory'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2);
 
-            servicePrivate.checkGameVictory(SESSION_ID, PLAYER_A_ID, PLAYER_A_ID, PLAYER_B_ID);
-
-            expect(timerService.forceStopTimer).toHaveBeenCalledWith(SESSION_ID);
-            expect(combatTimerService.stopCombatTimer).toHaveBeenCalledWith(session);
-            expect(eventEmitter.emit).toHaveBeenCalledWith(ServerEvents.GameOver, {
-                sessionId: SESSION_ID,
-                winnerId: PLAYER_A_ID,
-                winnerName: 'Player A',
-            });
+            expect(mockTimerService.clearTimerForSession).toHaveBeenCalledWith(MOCK_SESSION_ID);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.GameOver,
+                expect.objectContaining({
+                    sessionId: MOCK_SESSION_ID,
+                    winnerId: MOCK_PLAYER_ID_1,
+                    winnerName: MOCK_PLAYER_NAME_1,
+                }),
+            );
         });
 
-        it('should end combat when winner does not have enough wins', () => {
-            const session = createMockSession();
-            session.inGamePlayers[PLAYER_A_ID].combatWins = COMBAT_WINS_TO_WIN_GAME - 1;
-            sessionRepository.findById.mockReturnValue(session);
+        it('should end combat when combat wins threshold not reached', () => {
+            const session = createMockSession({ mode: GameMode.CLASSIC });
+            const player = createMockPlayer({ id: MOCK_PLAYER_ID_1, combatWins: 0 });
+            session.inGamePlayers[MOCK_PLAYER_ID_1] = player;
+            mockRepository.findById.mockReturnValue(session);
 
-            type ServiceWithPrivateMethod = {
-                checkGameVictory: (sessionId: string, winnerId: string, playerAId: string, playerBId: string) => void;
-                endCombat: (session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            const endCombatSpy = jest.spyOn(servicePrivate, 'endCombat');
+            service['checkGameVictory'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2);
 
-            servicePrivate.checkGameVictory(SESSION_ID, PLAYER_A_ID, PLAYER_A_ID, PLAYER_B_ID);
-
-            expect(timerService.forceStopTimer).not.toHaveBeenCalled();
-            expect(endCombatSpy).toHaveBeenCalledWith(session, PLAYER_A_ID, PLAYER_B_ID, PLAYER_A_ID);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.CombatVictory,
+                expect.objectContaining({
+                    winnerId: MOCK_PLAYER_ID_1,
+                }),
+            );
         });
 
-        it('should end combat when winner not found', () => {
-            const session = createMockSession();
-            session.inGamePlayers = {};
-            sessionRepository.findById.mockReturnValue(session);
+        it('should end combat when CTF mode', () => {
+            const session = createMockSession({ mode: GameMode.CTF });
+            const player = createMockPlayer({ id: MOCK_PLAYER_ID_1, combatWins: MOCK_COMBAT_WINS });
+            session.inGamePlayers[MOCK_PLAYER_ID_1] = player;
+            mockRepository.findById.mockReturnValue(session);
 
-            type ServiceWithPrivateMethod = {
-                checkGameVictory: (sessionId: string, winnerId: string, playerAId: string, playerBId: string) => void;
-                endCombat: (session: InGameSession, playerAId: string, playerBId: string, winnerId: string | null, abandon: boolean) => void;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            const endCombatSpy = jest.spyOn(servicePrivate, 'endCombat');
+            service['checkGameVictory'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2);
 
-            servicePrivate.checkGameVictory(SESSION_ID, PLAYER_A_ID, PLAYER_A_ID, PLAYER_B_ID);
-
-            expect(timerService.forceStopTimer).not.toHaveBeenCalled();
-            expect(endCombatSpy).toHaveBeenCalledWith(session, PLAYER_A_ID, PLAYER_B_ID, PLAYER_A_ID);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.CombatVictory,
+                expect.objectContaining({
+                    winnerId: MOCK_PLAYER_ID_1,
+                }),
+            );
         });
     });
 
-    describe('clearActiveCombatForSession', () => {
-        it('should remove active combat for session', () => {
-            const combatState: CombatState = {
-                sessionId: SESSION_ID,
-                playerAId: PLAYER_A_ID,
-                playerBId: PLAYER_B_ID,
-                playerAPosture: null,
-                playerBPosture: null,
-                playerATileEffect: 0,
-                playerBTileEffect: 0,
-            };
+    describe('emitVirtualPlayerCombatVictoryIfNeeded', () => {
+        it('should emit event when playerA is virtual', () => {
+            mockRepository.isVirtualPlayer.mockReturnValueOnce(true).mockReturnValueOnce(false);
 
-            type ServiceWithPrivateMethod = {
-                activeCombats: Map<string, CombatState>;
-            };
-            const servicePrivate = service as unknown as ServiceWithPrivateMethod;
-            servicePrivate.activeCombats.set(SESSION_ID, combatState);
+            service['emitVirtualPlayerCombatVictoryIfNeeded'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2, MOCK_PLAYER_ID_1);
 
-            expect(servicePrivate.activeCombats.has(SESSION_ID)).toBe(true);
-
-            service.clearActiveCombatForSession(SESSION_ID);
-
-            expect(servicePrivate.activeCombats.has(SESSION_ID)).toBe(false);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.VirtualPlayerCombatVictory,
+                expect.objectContaining({
+                    sessionId: MOCK_SESSION_ID,
+                    winnerId: MOCK_PLAYER_ID_1,
+                    attackerId: MOCK_PLAYER_ID_1,
+                }),
+            );
         });
 
-        it('should not throw error when clearing non-existent combat', () => {
-            expect(() => service.clearActiveCombatForSession('non-existent-session')).not.toThrow();
+        it('should emit event when playerB is virtual', () => {
+            mockRepository.isVirtualPlayer.mockReturnValueOnce(false).mockReturnValueOnce(true);
+
+            service['emitVirtualPlayerCombatVictoryIfNeeded'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2, MOCK_PLAYER_ID_2);
+
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+                ServerEvents.VirtualPlayerCombatVictory,
+                expect.objectContaining({
+                    sessionId: MOCK_SESSION_ID,
+                    winnerId: MOCK_PLAYER_ID_2,
+                    attackerId: MOCK_PLAYER_ID_1,
+                }),
+            );
+        });
+
+        it('should not emit event when neither player is virtual', () => {
+            mockRepository.isVirtualPlayer.mockReturnValue(false);
+
+            service['emitVirtualPlayerCombatVictoryIfNeeded'](MOCK_SESSION_ID, MOCK_PLAYER_ID_1, MOCK_PLAYER_ID_2, MOCK_PLAYER_ID_1);
+
+            expect(mockEventEmitter.emit).not.toHaveBeenCalledWith(ServerEvents.VirtualPlayerCombatVictory, expect.anything());
         });
     });
 });

@@ -1,0 +1,21 @@
+<div class="game-log-section">
+    <div class="entries" #entriesContainer>
+        @if (entries().length === 0) {
+        <div class="empty-state">
+            <p>Le journal est vide</p>
+        </div>
+        } @else { @for (entry of entries(); track entry.id) {
+        <div class="entry">
+            <div class="entry-content">
+                <div class="entry-header">
+                    <span class="time">{{ formatTime(entry.timestamp) }}</span>
+                    @if (getIconName(entry.icon)) {
+                    <app-ui-icon [iconName]="getIconName(entry.icon)!" size="sm"></app-ui-icon>
+                    }
+                </div>
+                <div class="entry-message">{{ entry.message }}</div>
+            </div>
+        </div>
+        } }
+    </div>
+</div>

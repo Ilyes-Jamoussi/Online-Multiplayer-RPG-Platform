@@ -1,27 +1,26 @@
-/* eslint-disable max-lines -- Test file */
+/* eslint-disable max-lines -- Test file with comprehensive test coverage */
 import { AVATAR_SELECTION_ROOM_PREFIX } from '@app/constants/session.constants';
 import { InGameService } from '@app/modules/in-game/services/in-game/in-game.service';
 import { CreateSessionDto } from '@app/modules/session/dto/create-session.dto';
-import { JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection';
+import { JoinAvatarSelectionDto } from '@app/modules/session/dto/join-avatar-selection.dto';
 import { JoinSessionDto } from '@app/modules/session/dto/join-session.dto';
 import { KickPlayerDto } from '@app/modules/session/dto/kick-player.dto';
+import { PlayerDto } from '@app/modules/session/dto/player.dto';
 import { UpdateAvatarAssignmentsDto } from '@app/modules/session/dto/update-avatar-assignments.dto';
 import { SessionService } from '@app/modules/session/services/session.service';
-import { SessionEvents } from '@common/enums/session-events.enum';
-import { GameMode } from '@common/enums/game-mode.enum';
-import { MapSize } from '@common/enums/map-size.enum';
-import { Avatar } from '@common/enums/avatar.enum';
-import { Test, TestingModule } from '@nestjs/testing';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { SessionGateway } from './session.gateway';
 import { validationExceptionFactory } from '@app/utils/validation/validation.util';
-import { Server, Socket } from 'socket.io';
-import { WaitingRoomSession } from '@common/interfaces/session.interface';
-import { Player } from '@common/interfaces/player.interface';
+import { Avatar } from '@common/enums/avatar.enum';
 import { Dice } from '@common/enums/dice.enum';
-import { PlayerDto } from '@app/modules/session/dto/player.dto';
-import { Logger } from '@nestjs/common';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { NotificationEvents } from '@common/enums/notification-events.enum';
+import { SessionEvents } from '@common/enums/session-events.enum';
+import { Player } from '@common/interfaces/player.interface';
+import { WaitingRoomSession } from '@common/interfaces/session.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Test, TestingModule } from '@nestjs/testing';
 import 'reflect-metadata';
+import { Server, Socket } from 'socket.io';
+import { SessionGateway } from './session.gateway';
 
 describe('SessionGateway', () => {
     let gateway: SessionGateway;
@@ -76,6 +75,8 @@ describe('SessionGateway', () => {
         players: [],
         avatarAssignments: [],
         isRoomLocked: false,
+        chatId: 'chat1',
+        mode: GameMode.CLASSIC,
         ...overrides,
     });
 
@@ -91,12 +92,12 @@ describe('SessionGateway', () => {
         baseSpeed: 3,
         speedBonus: 0,
         speed: 3,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
         baseAttack: 10,
         attackBonus: 0,
-        attack: 10,
         baseDefense: 5,
         defenseBonus: 0,
-        defense: 5,
         attackDice: Dice.D6,
         defenseDice: Dice.D4,
         x: 0,
@@ -108,6 +109,7 @@ describe('SessionGateway', () => {
         combatWins: 0,
         combatLosses: 0,
         combatDraws: 0,
+        hasCombatBonus: false,
         ...overrides,
     });
 
@@ -178,15 +180,9 @@ describe('SessionGateway', () => {
 
     describe('ValidationPipe exceptionFactory', () => {
         it('should trigger validation error factory (coverage for lines 25-26)', () => {
-            const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
-            const mockErrors = [{ property: 'gameId', constraints: { isString: 'gameId must be a string' } }];
-
             expect(() => {
-                validationExceptionFactory(mockErrors);
+                validationExceptionFactory();
             }).toThrow('Validation failed');
-
-            expect(loggerSpy).toHaveBeenCalledWith('Validation failed:', mockErrors);
-            loggerSpy.mockRestore();
         });
     });
 
@@ -203,30 +199,37 @@ describe('SessionGateway', () => {
         maxHealth: 100,
         baseAttack: 10,
         attackBonus: 0,
-        attack: 10,
         baseDefense: 5,
         defenseBonus: 0,
-        defense: 5,
         baseSpeed: 3,
         speedBonus: 0,
         speed: 3,
+        boatSpeedBonus: 0,
+        boatSpeed: 0,
         actionsRemaining: 1,
+        hasCombatBonus: false,
         ...overrides,
     });
 
     describe('createSession', () => {
-        it('should create session successfully', () => {
+        it('should create session successfully', async () => {
             const data: CreateSessionDto = {
                 gameId: GAME_ID,
                 maxPlayers: MAX_PLAYERS,
+                mode: GameMode.CLASSIC,
                 player: createMockPlayerDto(),
             };
             const players = [createMockPlayer()];
 
-            sessionService.createSession.mockReturnValue(SESSION_ID);
+            sessionService.createSession.mockReturnValue({ sessionId: SESSION_ID, chatId: 'chat1' });
             sessionService.getPlayersSession.mockReturnValue(players);
+            sessionService.getAvailableSessions.mockResolvedValue([]);
+
+            const handleAvailabilityChangeSpy = jest.spyOn(gateway, 'handleAvailabilityChange').mockResolvedValue();
 
             gateway.createSession(mockSocket, data);
+
+            await new Promise((resolve) => setTimeout(resolve, 0));
 
             expect(sessionService.createSession).toHaveBeenCalledWith(SOCKET_ID, data);
             expect(mockSocket.join).toHaveBeenCalledWith(SESSION_ID);
@@ -235,7 +238,7 @@ describe('SessionGateway', () => {
                 SessionEvents.SessionCreated,
                 expect.objectContaining({
                     success: true,
-                    data: { sessionId: SESSION_ID, playerId: SOCKET_ID },
+                    data: { sessionId: SESSION_ID, playerId: SOCKET_ID, chatId: 'chat1' },
                 }),
             );
             expect(mockSocket.emit).toHaveBeenCalledWith(
@@ -245,13 +248,14 @@ describe('SessionGateway', () => {
                     data: { players },
                 }),
             );
-            expect(mockServer.emit).toHaveBeenCalled();
+            expect(handleAvailabilityChangeSpy).toHaveBeenCalled();
         });
 
         it('should handle error when creating session', () => {
             const data: CreateSessionDto = {
                 gameId: GAME_ID,
                 maxPlayers: MAX_PLAYERS,
+                mode: GameMode.CLASSIC,
                 player: createMockPlayerDto(),
             };
             const errorMessage = 'Session creation failed';
@@ -263,7 +267,7 @@ describe('SessionGateway', () => {
             gateway.createSession(mockSocket, data);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.SessionCreated,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: errorMessage,
@@ -282,7 +286,7 @@ describe('SessionGateway', () => {
             gateway.joinSession(mockSocket, data);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.SessionJoined,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: 'Session non trouvée',
@@ -298,7 +302,7 @@ describe('SessionGateway', () => {
             gateway.joinSession(mockSocket, data);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.SessionJoined,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: 'Session est verrouillée',
@@ -315,7 +319,7 @@ describe('SessionGateway', () => {
             gateway.joinSession(mockSocket, data);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.SessionJoined,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: 'Session est pleine',
@@ -347,6 +351,8 @@ describe('SessionGateway', () => {
                     data: {
                         gameId: GAME_ID,
                         maxPlayers: MAX_PLAYERS,
+                        chatId: 'chat1',
+                        mode: GameMode.CLASSIC,
                     },
                 }),
             );
@@ -376,6 +382,8 @@ describe('SessionGateway', () => {
                         gameId: GAME_ID,
                         maxPlayers: MAX_PLAYERS,
                         modifiedPlayerName: MODIFIED_PLAYER_NAME,
+                        chatId: 'chat1',
+                        mode: GameMode.CLASSIC,
                     },
                 }),
             );
@@ -391,7 +399,7 @@ describe('SessionGateway', () => {
             gateway.joinAvatarSelection(mockSocket, data);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.AvatarSelectionJoined,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: 'Session non trouvée',
@@ -481,17 +489,6 @@ describe('SessionGateway', () => {
         });
     });
 
-    describe('unlockSession', () => {
-        it('should unlock session successfully', () => {
-            sessionService.getPlayerSessionId.mockReturnValue(SESSION_ID);
-
-            gateway.unlockSession(mockSocket);
-
-            expect(sessionService.getPlayerSessionId).toHaveBeenCalledWith(SOCKET_ID);
-            expect(sessionService.unlock).toHaveBeenCalledWith(SESSION_ID);
-        });
-    });
-
     describe('kickPlayer', () => {
         const data: KickPlayerDto = {
             playerId: 'kicked-player-id',
@@ -546,7 +543,7 @@ describe('SessionGateway', () => {
             gateway.kickPlayer(mockSocket, data);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.SessionEnded,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: errorMessage,
@@ -562,7 +559,7 @@ describe('SessionGateway', () => {
             await gateway.startGameSession(mockSocket);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.StartGameSession,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: 'Joueur non connecté à une session',
@@ -577,7 +574,7 @@ describe('SessionGateway', () => {
             await gateway.startGameSession(mockSocket);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.StartGameSession,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: 'Session introuvable',
@@ -596,7 +593,7 @@ describe('SessionGateway', () => {
             await gateway.startGameSession(mockSocket);
 
             expect(mockSocket.emit).toHaveBeenCalledWith(
-                SessionEvents.StartGameSession,
+                NotificationEvents.ErrorMessage,
                 expect.objectContaining({
                     success: false,
                     message: errorMessage,
@@ -623,7 +620,7 @@ describe('SessionGateway', () => {
 
             await gateway.startGameSession(mockSocket);
 
-            expect(inGameService.createInGameSession).toHaveBeenCalledWith(waitingSession, GameMode.CLASSIC, MapSize.SMALL);
+            expect(inGameService.createInGameSession).toHaveBeenCalledWith(waitingSession, GameMode.CLASSIC);
             expect(playerSocket1.join).toHaveBeenCalledWith(IN_GAME_ID);
             expect(playerSocket2.join).toHaveBeenCalledWith(IN_GAME_ID);
             expect(mockServer.to).toHaveBeenCalledWith(SESSION_ID);
@@ -671,7 +668,7 @@ describe('SessionGateway', () => {
             }).toThrow(errorMessage);
         });
 
-        it('should leave session as admin successfully', () => {
+        it('should leave session as admin successfully', async () => {
             const session = createMockWaitingSession({
                 players: [createMockPlayer({ id: SOCKET_ID }), createMockPlayer({ id: 'player-2' })],
             });
@@ -679,18 +676,23 @@ describe('SessionGateway', () => {
             sessionService.getPlayerSessionId.mockReturnValue(SESSION_ID);
             sessionService.getSession.mockReturnValue(session);
             sessionService.isAdmin.mockReturnValue(true);
+            sessionService.getAvailableSessions.mockResolvedValue([]);
 
             const playerSocket2 = createMockSocket('player-2');
             mockServer.sockets.sockets.set('player-2', playerSocket2);
 
+            const handleAvailabilityChangeSpy = jest.spyOn(gateway, 'handleAvailabilityChange').mockResolvedValue();
+
             gateway.leaveSession(mockSocket);
+
+            await new Promise((resolve) => setTimeout(resolve, 0));
 
             expect(mockSocket.broadcast.to).toHaveBeenCalledWith(SESSION_ID);
             expect(playerSocket2.leave).toHaveBeenCalledWith(SESSION_ID);
             expect(sessionService.releaseAvatar).toHaveBeenCalledWith(SESSION_ID, SOCKET_ID);
             expect(sessionService.releaseAvatar).toHaveBeenCalledWith(SESSION_ID, 'player-2');
             expect(sessionService.endSession).toHaveBeenCalledWith(SESSION_ID);
-            expect(mockServer.emit).toHaveBeenCalled();
+            expect(handleAvailabilityChangeSpy).toHaveBeenCalled();
         });
 
         it('should leave session as admin with missing player sockets', () => {
@@ -738,12 +740,12 @@ describe('SessionGateway', () => {
     });
 
     describe('loadAvailableSessions', () => {
-        it('should load and emit available sessions', () => {
+        it('should load and emit available sessions', async () => {
             const sessions = [];
 
-            sessionService.getAvailableSessions.mockReturnValue(sessions);
+            sessionService.getAvailableSessions.mockReturnValue(Promise.resolve(sessions));
 
-            gateway.loadAvailableSessions(mockSocket);
+            await gateway.loadAvailableSessions(mockSocket);
 
             expect(sessionService.getAvailableSessions).toHaveBeenCalled();
             expect(mockSocket.emit).toHaveBeenCalledWith(
@@ -757,12 +759,12 @@ describe('SessionGateway', () => {
     });
 
     describe('handleAvailabilityChange', () => {
-        it('should emit available sessions to all clients', () => {
+        it('should emit available sessions to all clients', async () => {
             const sessions = [];
 
-            sessionService.getAvailableSessions.mockReturnValue(sessions);
+            sessionService.getAvailableSessions.mockReturnValue(Promise.resolve(sessions));
 
-            gateway.handleAvailabilityChange();
+            await gateway.handleAvailabilityChange();
 
             expect(sessionService.getAvailableSessions).toHaveBeenCalled();
             expect(mockServer.emit).toHaveBeenCalledWith(
@@ -892,6 +894,7 @@ describe('SessionGateway', () => {
                 player: createMockPlayerDto(),
             };
 
+            sessionService.getSession.mockReturnValue(createMockWaitingSession());
             sessionService.joinSession.mockReturnValue(MODIFIED_PLAYER_NAME);
 
             type GatewayWithPrivateMethod = {

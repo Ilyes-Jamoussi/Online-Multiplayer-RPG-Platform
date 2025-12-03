@@ -1,0 +1,17 @@
+<div class="virtual-player-card" [class]="player.virtualPlayerType">
+    <div class="avatar-wrapper">
+        <img class="avatar-image" [src]="avatarImage" [alt]="player.name" loading="lazy" />
+    </div>
+
+    <div class="player-info">
+        <h4 class="player-name">{{ player.name }}</h4>
+        <span class="type-label">
+            <i class="material-icons">{{ getTypeIcon() }}</i>
+            {{ getTypeLabel() }}
+        </span>
+    </div>
+
+    @if (showRemoveButton) {
+    <button class="remove-button" (click)="removeVirtualPlayer()" aria-label="Retirer ce joueur virtuel">Expulser</button>
+    }
+</div>

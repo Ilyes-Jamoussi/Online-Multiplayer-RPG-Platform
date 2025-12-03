@@ -7,6 +7,8 @@ import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
+import { AvailableActionType } from '@common/enums/available-action-type.enum';
+import { TileKind } from '@common/enums/tile.enum';
 import { Player } from '@common/interfaces/player.interface';
 
 @Component({
@@ -43,6 +45,17 @@ export class GameMapTileComponent {
         return player ? this.gameMapService.getAvatarByPlayerId(player.id) : '';
     }
 
+    get startPointPlayer(): Player | undefined {
+        const startPoint = this.inGameService.startPoints().find((point) => point.x === this.tile.x && point.y === this.tile.y);
+        if (!startPoint) return undefined;
+        return this.gameMapService.currentlyPlayers.find((player) => player.id === startPoint.playerId);
+    }
+
+    get startPointAvatarSrc(): string {
+        const player = this.startPointPlayer;
+        return player ? this.gameMapService.getAvatarByPlayerId(player.id) : '';
+    }
+
     get objectImageSrc(): string {
         const obj = this.objectOnTile;
         return obj ? this.assetsService.getPlaceableImage(obj.kind) : '';
@@ -71,23 +84,29 @@ export class GameMapTileComponent {
 
         const actionType = this.gameMapService.getActionTypeAt(this.tile.x, this.tile.y);
 
-        if (actionType === 'DOOR') {
+        if (actionType === AvailableActionType.DOOR) {
             this.gameMapService.toggleDoor(this.tile.x, this.tile.y);
-        } else if (actionType === 'ATTACK') {
+        } else if (actionType === AvailableActionType.ATTACK) {
             this.combatService.attackPlayer(this.tile.x, this.tile.y);
+        } else if (actionType === AvailableActionType.HEAL) {
+            this.gameMapService.healPlayer(this.tile.x, this.tile.y);
+        } else if (actionType === AvailableActionType.FIGHT) {
+            this.gameMapService.fightPlayer(this.tile.x, this.tile.y);
+        } else if (actionType === AvailableActionType.BOAT) {
+            this.gameMapService.boatAction(this.tile.x, this.tile.y);
+        } else if (actionType === AvailableActionType.TRANSFER_FLAG) {
+            this.gameMapService.requestFlagTransfer(this.tile.x, this.tile.y);
         }
-    }
-
-    openModal(event: MouseEvent): void {
-        event.preventDefault();
-        this.gameMapService.openTileModal(this.tile);
-    }
-
-    closeModal(): void {
-        this.gameMapService.closeTileModal();
     }
 
     get isModalOpen(): boolean {
         return this.gameMapService.isTileModalOpen(this.tile);
+    }
+
+    get teleportChannelNumber(): number | null {
+        if (this.tile.kind === TileKind.TELEPORT && this.tile.teleportChannel) {
+            return this.tile.teleportChannel;
+        }
+        return null;
     }
 }

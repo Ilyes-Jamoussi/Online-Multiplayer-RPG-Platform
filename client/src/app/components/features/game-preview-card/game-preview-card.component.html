@@ -1,46 +1,64 @@
-<div class="game-card">
+<div class="game-card" [class.ctf-mode]="isCTF">
+    <div class="card-glow"></div>
+
+    <div class="mode-badge" [class.ctf]="isCTF">
+        <span class="mode-icon">{{ modeIcon }}</span>
+    </div>
+
     <div class="card-content">
         <div class="game-preview">
-            <img [src]="imageUrl" [alt]="game.name + ' preview'" class="preview-image" />
+            <img [src]="imageUrl" [alt]="game.name + ' preview'" class="preview-image" loading="lazy" />
             <div class="description-tooltip">{{ game.description }}</div>
         </div>
 
         <div class="game-info-section">
             <div class="game-header">
-                <div class="game-info">
-                    <h3 class="game-title">{{ game.name }}</h3>
-                </div>
+                <h3 class="game-title">{{ game.name }}</h3>
             </div>
 
-            <div class="game-meta">
-                <div class="meta-item">
-                    <span class="meta-label">Taille</span>
-                    <span class="meta-value">{{ mapSizeLabel }}</span>
+            <div class="game-stats">
+                <div class="stat-item">
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <path d="M3 9h18M9 21V9" />
+                    </svg>
+                    <div class="stat-content">
+                        <span class="stat-label">Taille</span>
+                        <span class="stat-value">{{ mapSizeLabel }}</span>
+                    </div>
                 </div>
-                <div class="meta-item">
-                    <span class="meta-label">Modifié</span>
-                    <span class="meta-value">{{ formatDate(game.lastModified) }}</span>
+                <div class="stat-item">
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <div class="stat-content">
+                        <span class="stat-label">Modifié</span>
+                        <span class="stat-value">{{ formatDate(game.lastModified) }}</span>
+                    </div>
                 </div>
             </div>
 
             <div class="game-actions">
                 @if (isAdmin) {
-                <app-ui-button variant="primary" size="sm" (buttonClick)="onEditGame()">
-                    <app-ui-icon iconName="Edit"></app-ui-icon>
-                    Modifier
-                </app-ui-button>
-                <app-ui-button [variant]="game.visibility ? 'success' : 'warning'" size="sm" (buttonClick)="onToggleVisibility()">
-                    <app-ui-icon [iconName]="game.visibility ? 'Eye' : 'EyeSlash'"></app-ui-icon>
-                    {{ game.visibility ? 'Publié' : 'Masqué' }}
-                </app-ui-button>
-                <app-ui-button variant="error" size="sm" (buttonClick)="onDeleteGame()">
-                    <app-ui-icon iconName="Trash"></app-ui-icon>
-                    Supprimer
-                </app-ui-button>
+                <div class="admin-actions">
+                    <app-ui-button variant="secondary" size="sm" (buttonClick)="onEditGame()">
+                        <app-ui-icon iconName="Edit"></app-ui-icon>
+                        <span>Modifier</span>
+                    </app-ui-button>
+                    <app-ui-button variant="secondary" size="sm" (buttonClick)="onToggleVisibility()">
+                        <app-ui-icon [iconName]="game.visibility ? 'Eye' : 'EyeSlash'"></app-ui-icon>
+                        <span>{{ game.visibility ? 'Publié' : 'Masqué' }}</span>
+                    </app-ui-button>
+                    <app-ui-button variant="error" size="sm" (buttonClick)="onDeleteGame()">
+                        <app-ui-icon iconName="Trash"></app-ui-icon>
+                        <span>Supprimer</span>
+                    </app-ui-button>
+                </div>
                 } @else {
                 <app-ui-button variant="primary" size="md" (buttonClick)="onStartGame()">
-                    <app-ui-icon iconName="Play"></app-ui-icon>
-                    Jouer
+                    <span class="play-icon">▶</span>
+                    <span class="play-text">Jouer</span>
                 </app-ui-button>
                 }
             </div>

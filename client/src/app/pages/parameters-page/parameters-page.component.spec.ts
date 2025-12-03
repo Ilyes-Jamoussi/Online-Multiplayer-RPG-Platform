@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { ROUTES } from '@app/enums/routes.enum';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { MAP_SIZE_TO_MAX_PLAYERS } from '@app/constants/map-size.constants';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
@@ -17,7 +17,7 @@ describe('ParametersPageComponent', () => {
     let fixture: ComponentFixture<ParametersPageComponent>;
     let mockRouter: jasmine.SpyObj<Router>;
     let mockGameStoreService: jasmine.SpyObj<GameStoreService>;
-    let mockNotificationService: jasmine.SpyObj<NotificationCoordinatorService>;
+    let mockNotificationService: jasmine.SpyObj<NotificationService>;
 
     const mockGamePreview: GamePreviewDto = {
         id: 'test-game-id',
@@ -34,7 +34,7 @@ describe('ParametersPageComponent', () => {
     beforeEach(async () => {
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         mockGameStoreService = jasmine.createSpyObj('GameStoreService', ['createGame']);
-        mockNotificationService = jasmine.createSpyObj('NotificationCoordinatorService', ['displayErrorPopup']);
+        mockNotificationService = jasmine.createSpyObj('NotificationService', ['displayErrorPopup']);
 
         await TestBed.configureTestingModule({
             imports: [ParametersPageComponent],
@@ -43,7 +43,7 @@ describe('ParametersPageComponent', () => {
                 provideHttpClientTesting(),
                 { provide: Router, useValue: mockRouter },
                 { provide: GameStoreService, useValue: mockGameStoreService },
-                { provide: NotificationCoordinatorService, useValue: mockNotificationService },
+                { provide: NotificationService, useValue: mockNotificationService },
             ],
         }).compileComponents();
 
@@ -64,17 +64,17 @@ describe('ParametersPageComponent', () => {
         expect(component.mapSizeOptions).toEqual([
             {
                 value: MapSize.SMALL,
-                label: `Petite (${MapSize.SMALL}x${MapSize.SMALL})`,
+                label: `Petit (${MapSize.SMALL}x${MapSize.SMALL})`,
                 maxPlayers: MAP_SIZE_TO_MAX_PLAYERS[MapSize.SMALL],
             },
             {
                 value: MapSize.MEDIUM,
-                label: `Moyenne (${MapSize.MEDIUM}x${MapSize.MEDIUM})`,
+                label: `Moyen (${MapSize.MEDIUM}x${MapSize.MEDIUM})`,
                 maxPlayers: MAP_SIZE_TO_MAX_PLAYERS[MapSize.MEDIUM],
             },
             {
                 value: MapSize.LARGE,
-                label: `Grande (${MapSize.LARGE}x${MapSize.LARGE})`,
+                label: `Grand (${MapSize.LARGE}x${MapSize.LARGE})`,
                 maxPlayers: MAP_SIZE_TO_MAX_PLAYERS[MapSize.LARGE],
             },
         ]);
@@ -85,12 +85,14 @@ describe('ParametersPageComponent', () => {
             {
                 value: GameMode.CLASSIC,
                 label: 'Classique',
-                description: 'Mode de jeu standard',
+                description: 'Gagnez 3 combats pour remporter la partie',
+                icon: '⚔️',
             },
             {
                 value: GameMode.CTF,
                 label: 'Capture du Drapeau',
-                description: 'Capturez le drapeau ennemi',
+                description: 'Capturez le drapeau et ramenez-le à votre point de départ pour gagner en équipe',
+                icon: '🚩',
             },
         ]);
     });

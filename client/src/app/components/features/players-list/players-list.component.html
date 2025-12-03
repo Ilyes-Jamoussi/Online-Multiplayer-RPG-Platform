@@ -9,37 +9,58 @@
             [class.active]="isActivePlayer(player)"
             [class.current-user]="isCurrentUser(player)"
             [class.abandoned]="hasAbandoned(player)"
+            [style.background-color]="getTeamBackgroundColor(getTeamNumber(player), player)"
         >
-            <div class="player-main-info">
-                <div class="player-name-section">
-                    @if (isAdmin(player)) {
-                    <span class="crown">👑</span>
-                    }
-                    <span class="player-name" [class.strikethrough]="hasAbandoned(player)">
-                        {{ player.name }}
-                    </span>
-                    @if (isCurrentUser(player)) {
-                    <span class="badge-you">VOUS</span>
-                    } @if (isActivePlayer(player)) {
-                    <span class="badge-active">ACTUEL</span>
-                    } @if (hasAbandoned(player)) {
-                    <span class="badge-abandon">ABANDON</span>
-                    }
-                </div>
-                <div class="player-stats">
-                    <span class="combat-wins">⚔️ Victoires : {{ getCombatWins(player) }}</span>
-                </div>
+            <div class="player-avatar">
+                <img
+                    [src]="getPlayerAvatar(player.avatar)"
+                    [alt]="player.name"
+                    class="avatar-image"
+                    [style.border-color]="getTeamColor(getTeamNumber(player), player)"
+                    loading="lazy"
+                />
             </div>
-            <div class="hp-section">
-                <div class="hp-bar">
-                    <div
-                        class="hp-fill"
-                        [style.width.%]="getHealthPercentage(player)"
-                        [class.hp-high]="getHealthPercentage(player) > 70"
-                        [class.hp-medium]="getHealthPercentage(player) > 30 && getHealthPercentage(player) <= 70"
-                        [class.hp-critical]="getHealthPercentage(player) <= 30"
-                    ></div>
-                    <span class="hp-text">{{ player.health }}/{{ player.maxHealth }}</span>
+            <div class="player-content">
+                <div class="player-main-info">
+                    <div class="player-name-section">
+                        @if (isAdmin(player)) {
+                        <span class="crown">👑</span>
+                        }
+                        <span class="player-name" [class.strikethrough]="hasAbandoned(player)">
+                            {{ player.name }}
+                        </span>
+                        @if (isCurrentUser(player)) {
+                        <span class="badge-you">VOUS</span>
+                        } @if (isActivePlayer(player)) {
+                        <span class="badge-active">ACTUEL</span>
+                        } @if (isVirtualPlayer(player)) {
+                        <span class="badge-bot">🤖</span>
+                        } @if (hasAbandoned(player)) {
+                        <span class="badge-abandon">ABANDON</span>
+                        } @if (hasFlag(player)) {
+                        <span class="badge-flag">🚩</span>
+                        }
+                    </div>
+                    <div class="player-stats">
+                        @if (getTeamNumber(player) !== undefined) {
+                        <span class="badge-team" [style.background-color]="getTeamColor(getTeamNumber(player), player, true)">
+                            Équipe {{ getTeamNumber(player) }}
+                        </span>
+                        }
+                        <span class="combat-wins">⚔️ Victoires : {{ getCombatWins(player) }}</span>
+                    </div>
+                </div>
+                <div class="hp-section">
+                    <div class="hp-bar">
+                        <div
+                            class="hp-fill"
+                            [style.width.%]="getHealthPercentage(player)"
+                            [class.hp-high]="getHealthPercentage(player) > hpHighThreshold"
+                            [class.hp-medium]="getHealthPercentage(player) > hpMediumThreshold && getHealthPercentage(player) <= hpHighThreshold"
+                            [class.hp-critical]="getHealthPercentage(player) <= hpMediumThreshold"
+                        ></div>
+                        <span class="hp-text">{{ player.health }}/{{ player.maxHealth }}</span>
+                    </div>
                 </div>
             </div>
         </div>

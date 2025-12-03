@@ -1,11 +1,15 @@
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { TeleportChannelDto } from '@app/dto/teleport-channel-dto';
 import { PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
+import { Position } from '@common/interfaces/position.interface';
 
 export enum ToolType {
     TileBrushTool = 'tile-brush-tool',
     PlaceableTool = 'placeable-tool',
     PlaceableEraserTool = 'placeable-eraser-tool',
+    TeleportTileTool = 'teleport-tile-tool',
+    TeleportTileEraserTool = 'teleport-tile-eraser-tool',
 }
 
 export enum GameEditorIssuesEnum {
@@ -16,6 +20,7 @@ export enum GameEditorIssuesEnum {
     FlagPlacement = 'flagPlacement',
     NameValidation = 'nameValidation',
     DescriptionValidation = 'descriptionValidation',
+    TeleportChannels = 'teleportChannels',
 }
 
 export type GameEditorIssues = {
@@ -26,13 +31,14 @@ export type GameEditorIssues = {
     [GameEditorIssuesEnum.FlagPlacement]: GameEditorIssue;
     [GameEditorIssuesEnum.NameValidation]: GameEditorIssue;
     [GameEditorIssuesEnum.DescriptionValidation]: GameEditorIssue;
+    [GameEditorIssuesEnum.TeleportChannels]: GameEditorIssue;
 };
 export interface GameEditorIssue {
     message?: string;
     hasIssue: boolean;
 }
 export interface AccesibilityIssue extends GameEditorIssue {
-    tiles: Vector2[];
+    tiles: Position[];
 }
 
 export type Inventory = {
@@ -54,6 +60,17 @@ export interface TileBrushTool {
     rightDrag: boolean;
 }
 
+export interface TeleportTileTool {
+    type: ToolType.TeleportTileTool;
+    channelNumber: number;
+    teleportChannel: TeleportChannelDto;
+    firstTilePlaced?: Position;
+}
+
+interface TeleportTileEraserTool {
+    type: ToolType.TeleportTileEraserTool;
+}
+
 interface PlaceableTool {
     type: ToolType.PlaceableTool;
     placeableKind: PlaceableKind;
@@ -63,12 +80,7 @@ interface PlaceableEraserTool {
     type: ToolType.PlaceableEraserTool;
 }
 
-export type ActiveTool = TileBrushTool | PlaceableTool | PlaceableEraserTool;
-
-export interface Vector2 {
-    x: number;
-    y: number;
-}
+export type ActiveTool = TileBrushTool | TeleportTileTool | PlaceableTool | PlaceableEraserTool | TeleportTileEraserTool;
 
 export interface ExtendedGameEditorPlaceableDto extends GameEditorPlaceableDto {
     xPositions: number[];
@@ -79,5 +91,12 @@ export type ToolbarItem = {
     image: string;
     tileKind: TileKind;
     class: string;
-    disabled?: boolean;
 };
+
+export interface TeleportChannel {
+    channelNumber: number;
+    tiles: {
+        a: Position;
+        b: Position;
+    };
+}

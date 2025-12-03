@@ -3,11 +3,15 @@ import { Component, Input, OnInit } from '@angular/core';
 import { GameMapTileModalComponent } from '@app/components/features/game-map-tile-modal/game-map-tile-modal.component';
 import { GameMapTileComponent } from '@app/components/features/game-map-tile/game-map-tile.component';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
+import { BorderStyle } from '@app/interfaces/style.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
+import { GameMode } from '@common/enums/game-mode.enum';
+import { TeamColor } from '@app/enums/team-color.enum';
 import { Player } from '@common/interfaces/player.interface';
 import { StartPoint } from '@common/interfaces/start-point.interface';
 
@@ -26,6 +30,7 @@ export class GameMapComponent implements OnInit {
         private readonly gameMapService: GameMapService,
         private readonly assetsService: AssetsService,
         private readonly playerService: PlayerService,
+        private readonly inGameService: InGameService,
     ) {}
 
     ngOnInit(): void {
@@ -65,6 +70,10 @@ export class GameMapComponent implements OnInit {
         return this.gameMapService.visibleObjects();
     }
 
+    get startPoints() {
+        return this.inGameService.startPoints();
+    }
+
     getTileImage(tileKind: string, opened: boolean = false): string {
         return this.assetsService.getTileImage(tileKind as TileKind, opened);
     }
@@ -100,6 +109,63 @@ export class GameMapComponent implements OnInit {
         return PlaceableFootprint[placeableKind as PlaceableKind];
     }
 
+    getTileClass(x: number, y: number): string {
+        return this.gameMapService.getTileClass(x, y);
+    }
+
+    isCurrentUser(player: Player): boolean {
+        return player.id === this.playerService.id();
+    }
+
+    isCTFMode(): boolean {
+        return this.inGameService.mode() === GameMode.CTF;
+    }
+
+    getTeamColor(player: Player): string | undefined {
+        if (this.isCurrentUser(player)) {
+            return TeamColor.MyPlayer;
+        }
+
+        const teamColor = this.playerService.getTeamColor(player.teamNumber);
+        if (teamColor === TeamColor.MyTeam) {
+            return TeamColor.MyTeam;
+        }
+
+        if (!this.isCTFMode()) {
+            return TeamColor.EnemyTeam;
+        }
+
+        return teamColor;
+    }
+
+    getPlayerBorderStyle(player: Player): BorderStyle {
+        const teamColor = this.getTeamColor(player);
+        if (!teamColor) {
+            return {};
+        }
+        return {
+            'border-color': teamColor,
+            'border-width': '3px',
+        };
+    }
+
+    hasFlag(player: Player): boolean {
+        const flagData = this.gameMapService.flagData();
+        return flagData?.holderPlayerId === player.id;
+    }
+
+    isPlaceableDisabled(placeableId: string): boolean {
+        return this.gameMapService.isPlaceableDisabled(placeableId);
+    }
+
+    getPlaceableTurnCount(placeableId: string): number | null {
+        return this.gameMapService.getPlaceableTurnCount(placeableId);
+    }
+
+    isMyStartPoint(startPoint: StartPoint): boolean {
+        return startPoint.playerId === this.playerService.id();
+    }
+
     getStartPointStyle(startPoint: StartPoint) {
         return {
             gridColumn: `${startPoint.x + 1}`,
@@ -107,11 +173,22 @@ export class GameMapComponent implements OnInit {
         };
     }
 
-    getTileClass(x: number, y: number): string {
-        return this.gameMapService.getTileClass(x, y);
+    getStartPointAvatarImage(playerId: string): string {
+        return this.gameMapService.getAvatarByPlayerId(playerId);
     }
 
-    isCurrentUser(player: Player): boolean {
-        return player.id === this.playerService.id();
+    getStartPointBorderStyle(startPoint: StartPoint): BorderStyle {
+        const player = this.gameMapService.currentlyPlayers.find((playerItem) => playerItem.id === startPoint.playerId);
+        if (!player) {
+            return {};
+        }
+        const teamColor = this.getTeamColor(player);
+        if (!teamColor) {
+            return {};
+        }
+        return {
+            'border-color': teamColor,
+            'border-width': '3px',
+        };
     }
 }

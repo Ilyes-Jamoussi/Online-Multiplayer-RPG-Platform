@@ -1,39 +1,43 @@
 import { Injectable, signal } from '@angular/core';
 import { GameEditorPlaceableDto } from '@app/dto/game-editor-placeable-dto';
 import { PlaceableMime } from '@app/enums/placeable-mime.enum';
-import { ActiveTool, ToolbarItem, ToolType, Vector2 } from '@app/interfaces/game-editor.interface';
+import { ActiveTool, ToolType, ToolbarItem } from '@app/interfaces/game-editor.interface';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { GameEditorStoreService } from '@app/services/game-editor-store/game-editor-store.service';
+import { GameEditorTeleportService } from '@app/services/game-editor-teleport/game-editor-teleport.service';
+import { MouseClick } from '@app/types/game.types';
 import { PlaceableFootprint, PlaceableKind } from '@common/enums/placeable-kind.enum';
 import { TileKind } from '@common/enums/tile.enum';
+import { Position } from '@common/interfaces/position.interface';
 
 @Injectable()
 export class GameEditorInteractionsService {
     constructor(
         private readonly store: GameEditorStoreService,
         private readonly assetService: AssetsService,
+        private readonly teleportService: GameEditorTeleportService,
     ) {}
 
     private readonly _activeTool = signal<ActiveTool | null>(null);
     private readonly _previousActiveTool = signal<ActiveTool | null>(null);
-    private readonly _hoveredTiles = signal<Vector2[]>([]);
-    private readonly _objectGrabOffset = signal<Vector2>({ x: 0, y: 0 });
-    private readonly _objectDropVec2 = signal<Vector2>({ x: 0, y: 0 });
+    private readonly _hoveredTiles = signal<Position[]>([]);
+    private readonly _objectGrabOffset = signal<Position>({ x: 0, y: 0 });
+    private readonly _objectDropVec2 = signal<Position>({ x: 0, y: 0 });
     private readonly _draggedObject = signal<PlaceableKind | string>('');
 
-    private get objectGrabOffset(): Vector2 {
+    private get objectGrabOffset(): Position {
         return this._objectGrabOffset();
     }
 
-    private set objectGrabOffset(offset: Vector2) {
+    private set objectGrabOffset(offset: Position) {
         this._objectGrabOffset.set(offset);
     }
 
-    private get objectDropVec2(): Vector2 {
+    private get objectDropVec2(): Position {
         return this._objectDropVec2();
     }
 
-    private set objectDropVec2(vec: Vector2) {
+    private set objectDropVec2(vec: Position) {
         this._objectDropVec2.set(vec);
     }
 
@@ -41,8 +45,12 @@ export class GameEditorInteractionsService {
         return this._activeTool();
     }
 
-    set activeTool(tool: ActiveTool) {
-        this._previousActiveTool.set(this._activeTool());
+    set activeTool(tool: ActiveTool | null) {
+        const currentTool = this._activeTool();
+        if (currentTool && currentTool.type === ToolType.TeleportTileTool && tool?.type !== ToolType.TeleportTileTool) {
+            this.cancelTeleportPlacement();
+        }
+        this._previousActiveTool.set(currentTool);
         this._activeTool.set(tool);
     }
 
@@ -57,7 +65,6 @@ export class GameEditorInteractionsService {
                 image: this.assetService.getTileImage(tileKind),
                 tileKind,
                 class: tileKind.toLowerCase(),
-                disabled: tileKind === TileKind.TELEPORT,
             }));
     }
 
@@ -79,14 +86,32 @@ export class GameEditorInteractionsService {
     }
 
     revertToPreviousTool(): void {
-        this._activeTool.set(this._previousActiveTool());
+        const currentTool = this._activeTool();
+        const previousTool = this._previousActiveTool();
+
+        if (currentTool?.type === ToolType.TeleportTileEraserTool && previousTool?.type === ToolType.TeleportTileTool) {
+            this.selectTeleportTool();
+            return;
+        }
+
+        this._activeTool.set(previousTool);
         this._previousActiveTool.set(null);
         this._hoveredTiles.set([]);
     }
 
-    dragStart(x: number, y: number, click: 'left' | 'right'): void {
+    dragStart(x: number, y: number, click: MouseClick): void {
         const tool = this._activeTool();
-        if (!tool || tool.type !== ToolType.TileBrushTool) return;
+        if (!tool) return;
+
+        if (tool.type === ToolType.TeleportTileTool) {
+            this.handleTeleportTileClick(x, y);
+            return;
+        } else if (tool.type === ToolType.TeleportTileEraserTool) {
+            this.handleTeleportTileRightClick(x, y);
+            return;
+        }
+
+        if (tool.type !== ToolType.TileBrushTool) return;
         this._activeTool.set({
             ...tool,
             leftDrag: click === 'left' ? true : tool.leftDrag,
@@ -128,7 +153,7 @@ export class GameEditorInteractionsService {
         if (!tool || tool.type !== ToolType.PlaceableTool) return;
 
         const footprint = PlaceableFootprint[tool.placeableKind];
-        const hoveredTiles: Vector2[] = [];
+        const hoveredTiles: Position[] = [];
 
         const offsetX = evt.offsetX;
         const offsetY = evt.offsetY;
@@ -180,6 +205,82 @@ export class GameEditorInteractionsService {
         return Object.values(PlaceableMime).some((mime) => types.includes(mime));
     }
 
+    selectTeleportTool(): void {
+        const channel = this.teleportService.getNextAvailableTeleportChannel();
+        if (!channel) return;
+
+        this.activeTool = {
+            type: ToolType.TeleportTileTool,
+            channelNumber: channel.channelNumber,
+            teleportChannel: channel,
+        };
+    }
+
+    selectTeleportTileEraserTool(): void {
+        this.activeTool = {
+            type: ToolType.TeleportTileEraserTool,
+        };
+    }
+
+    cancelTeleportPlacement(): void {
+        const tool = this.activeTool;
+        if (!tool || tool.type !== ToolType.TeleportTileTool) return;
+        this.teleportService.cancelTeleportPlacement(tool.channelNumber);
+        this.selectTeleportTool();
+    }
+
+    private handleTeleportTileClick(x: number, y: number): void {
+        const tool = this._activeTool();
+        if (!tool || tool.type !== ToolType.TeleportTileTool) return;
+
+        if (!tool.firstTilePlaced) {
+            this.teleportService.placeTeleportTile(x, y, tool.channelNumber, true);
+            this._activeTool.set({
+                ...tool,
+                firstTilePlaced: { x, y },
+            });
+        } else {
+            this.teleportService.placeTeleportTile(x, y, tool.channelNumber, false);
+            const nextChannel = this.teleportService.getNextAvailableTeleportChannel();
+            if (nextChannel) {
+                this._activeTool.set({
+                    type: ToolType.TeleportTileTool,
+                    channelNumber: nextChannel.channelNumber,
+                    teleportChannel: nextChannel,
+                });
+            } else {
+                this._activeTool.set(null);
+            }
+        }
+    }
+
+    private handleTeleportTileRightClick(x: number, y: number): void {
+        const tool = this._activeTool();
+        if (tool && tool.type === ToolType.TeleportTileTool && tool.firstTilePlaced) {
+            this.cancelTeleportPlacement();
+            return;
+        }
+
+        const tile = this.store.getTileAt(x, y);
+        if (tile && tile.kind === TileKind.TELEPORT && tile.teleportChannel) {
+            this.teleportService.removeTeleportPair(x, y);
+
+            if (tool?.type === ToolType.TeleportTileTool) {
+                const nextChannel = this.teleportService.getNextAvailableTeleportChannel();
+                if (nextChannel) {
+                    this._activeTool.set({
+                        type: ToolType.TeleportTileTool,
+                        channelNumber: nextChannel.channelNumber,
+                        teleportChannel: nextChannel,
+                        firstTilePlaced: tool.firstTilePlaced,
+                    });
+                } else {
+                    this._activeTool.set(null);
+                }
+            }
+        }
+    }
+
     private canPlaceObject(x: number, y: number, kind: PlaceableKind, excludeId?: string): boolean {
         const footprint = PlaceableFootprint[kind];
 
@@ -221,7 +322,7 @@ export class GameEditorInteractionsService {
         this.store.movePlacedObject(id, x, y);
     }
 
-    private processDropTile(tileX: number, tileY: number, offsetX: number, offsetY: number): Vector2 {
+    private processDropTile(tileX: number, tileY: number, offsetX: number, offsetY: number): Position {
         const tileSize = this.store.tileSizePx;
 
         const pointerPxX = tileX * tileSize + offsetX;

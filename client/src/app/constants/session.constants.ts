@@ -9,9 +9,11 @@ export const DEFAULT_SESSION: WaitingRoomSession = {
     id: '',
     gameId: '',
     maxPlayers: 0,
+    mode: GameMode.CLASSIC,
     players: [],
     avatarAssignments: DEFAULT_AVATAR_ASSIGNMENTS,
     isRoomLocked: false,
+    chatId: '',
 };
 
 export const DEFAULT_IN_GAME_SESSION: InGameSession = {
@@ -24,4 +26,6 @@ export const DEFAULT_IN_GAME_SESSION: InGameSession = {
     turnOrder: [],
     mapSize: MapSize.SMALL,
     mode: GameMode.CLASSIC,
+    teams: {},
+    playerCount: 0,
 };

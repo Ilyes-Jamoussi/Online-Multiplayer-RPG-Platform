@@ -1,0 +1,48 @@
+@if (pendingRequest) {
+<div class="flag-transfer-overlay" (click)="reject()">
+    <div class="flag-transfer-modal" (click)="$event.stopPropagation()">
+        <div class="flag-transfer-header">
+            <h2>Transfert de drapeau</h2>
+        </div>
+
+        <div class="flag-transfer-content">
+            <div class="players-container">
+                <div class="player-card">
+                    <div class="player-avatar-container">
+                        <img [src]="fromPlayerAvatar" [alt]="fromPlayerName" class="player-avatar" loading="lazy" />
+                    </div>
+                    <p class="player-name">{{ fromPlayerName }}</p>
+                </div>
+
+                <div class="arrow-container">
+                    <span class="arrow">→</span>
+                    <span class="flag-icon">🚩</span>
+                </div>
+
+                <div class="player-card">
+                    <div class="player-avatar-container">
+                        <img [src]="toPlayerAvatar" [alt]="'Vous'" class="player-avatar" loading="lazy" />
+                    </div>
+                    <p class="player-name">Vous</p>
+                </div>
+            </div>
+
+            <div class="message">
+                <p>{{ fromPlayerName }} souhaite vous transférer le drapeau.</p>
+                <p class="question">Acceptez-vous ?</p>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn accept" (click)="accept()">
+                    <span class="btn-icon">✓</span>
+                    <span class="btn-text">Oui</span>
+                </button>
+                <button class="action-btn reject" (click)="reject()">
+                    <span class="btn-icon">✕</span>
+                    <span class="btn-text">Non</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+}

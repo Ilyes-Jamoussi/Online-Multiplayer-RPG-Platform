@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { GameKey } from '@app/enums/game-key.enum';
+import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
+import { CombatService } from '@app/services/combat/combat.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { AdminModeService } from '@app/services/admin-mode/admin-mode.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 import { Orientation } from '@common/enums/orientation.enum';
-import { GameKey } from '@app/enums/game-key.enum';
 
 @Component({
     selector: 'app-game-map-footer',
@@ -22,6 +24,8 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
         private readonly playerService: PlayerService,
         private readonly inGameService: InGameService,
         private readonly adminModeService: AdminModeService,
+        private readonly combatService: CombatService,
+        private readonly notificationService: NotificationService,
     ) {}
 
     ngOnInit(): void {
@@ -60,6 +64,10 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
         return this.playerService.speed();
     }
 
+    get boatSpeed(): number {
+        return this.playerService.player().boatSpeed;
+    }
+
     get availableActionsCount(): number {
         return this.inGameService.availableActions().length;
     }
@@ -84,8 +92,16 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
         return this.inGameService.availableActions().length > 0;
     }
 
+    get isActionModeActive(): boolean {
+        return this.inGameService.isActionModeActive();
+    }
+
     onAction(): void {
-        this.inGameService.activateActionMode();
+        if (this.isActionModeActive) {
+            this.inGameService.deactivateActionMode();
+        } else {
+            this.inGameService.activateActionMode();
+        }
     }
 
     get isAdmin(): boolean {
@@ -120,5 +136,16 @@ export class GameMapFooterComponent implements OnInit, OnDestroy {
         if (this.isAdmin) {
             this.adminModeService.toggleAdminMode();
         }
+    }
+
+    onLeaveGame(): void {
+        this.notificationService.displayConfirmationPopup({
+            title: 'Abandonner la partie',
+            message: 'Êtes-vous sûr de vouloir abandonner ?\nTous vos progrès seront perdus.',
+            onConfirm: () => {
+                this.combatService.combatAbandon();
+                this.inGameService.leaveGame();
+            },
+        });
     }
 }

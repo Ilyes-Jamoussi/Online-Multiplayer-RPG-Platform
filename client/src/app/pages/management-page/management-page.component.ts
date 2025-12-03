@@ -6,6 +6,7 @@ import { UiPageLayoutComponent } from '@app/components/ui/page-layout/page-layou
 import { ROUTES } from '@app/enums/routes.enum';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameStoreService } from '@app/services/game-store/game-store.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 
 @Component({
     selector: 'app-management-page',
@@ -22,6 +23,7 @@ export class ManagementPageComponent implements OnInit {
     constructor(
         private readonly router: Router,
         private readonly gameStoreService: GameStoreService,
+        private readonly notificationService: NotificationService,
     ) {}
 
     ngOnInit(): void {
@@ -37,7 +39,13 @@ export class ManagementPageComponent implements OnInit {
     }
 
     onDeleteGame(gameId: string): void {
-        this.gameStoreService.deleteGame(gameId).subscribe();
+        this.notificationService.displayConfirmationPopup({
+            title: 'Supprimer le jeu',
+            message: 'Êtes-vous sûr de vouloir supprimer ce jeu ? Cette action est irréversible.',
+            onConfirm: () => {
+                this.gameStoreService.deleteGame(gameId).subscribe();
+            },
+        });
     }
 
     onToggleVisibility(gameId: string): void {

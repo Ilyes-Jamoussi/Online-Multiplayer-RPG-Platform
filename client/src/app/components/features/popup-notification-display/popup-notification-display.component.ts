@@ -2,7 +2,7 @@ import { NgClass } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
-import { NotificationCoordinatorService } from '@app/services/notification-coordinator/notification-coordinator.service';
+import { NotificationService } from '@app/services/notification/notification.service';
 
 @Component({
     selector: 'app-notification-display',
@@ -15,7 +15,7 @@ export class PopupNotificationDisplayComponent {
     notification = this.notificationCoordinatorService.notification;
 
     constructor(
-        private readonly notificationCoordinatorService: NotificationCoordinatorService,
+        private readonly notificationCoordinatorService: NotificationService,
         private readonly router: Router,
     ) {}
 
@@ -25,6 +25,24 @@ export class PopupNotificationDisplayComponent {
 
         if (currentNotification?.redirectRoute) {
             void this.router.navigate([currentNotification.redirectRoute]);
+        }
+    }
+
+    onConfirm(): void {
+        const currentNotification = this.notification();
+        this.notificationCoordinatorService.resetPopup();
+
+        if (currentNotification?.onConfirm) {
+            currentNotification.onConfirm();
+        }
+    }
+
+    onCancel(): void {
+        const currentNotification = this.notification();
+        this.notificationCoordinatorService.resetPopup();
+
+        if (currentNotification?.onCancel) {
+            currentNotification.onCancel();
         }
     }
 }

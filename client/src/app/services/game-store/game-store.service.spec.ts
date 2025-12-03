@@ -3,6 +3,7 @@ import { CreateGameDto } from '@app/dto/create-game-dto';
 import { GamePreviewDto } from '@app/dto/game-preview-dto';
 import { GameHttpService } from '@app/services/game-http/game-http.service';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
+import { GameTab } from '@app/types/game-tab.types';
 import { GameMode } from '@common/enums/game-mode.enum';
 import { MapSize } from '@common/enums/map-size.enum';
 import { of } from 'rxjs';
@@ -18,7 +19,7 @@ describe('GameStoreService', () => {
             id: '1',
             name: 'Game 1',
             description: 'Desc 1',
-            size: 10,
+            size: MapSize.SMALL,
             mode: GameMode.CLASSIC,
             lastModified: '2023-01-01',
             visibility: true,
@@ -29,7 +30,7 @@ describe('GameStoreService', () => {
             id: '2',
             name: 'Game 2',
             description: 'Desc 2',
-            size: 15,
+            size: MapSize.MEDIUM,
             mode: GameMode.CLASSIC,
             lastModified: '2023-01-02',
             visibility: false,
@@ -131,7 +132,7 @@ describe('GameStoreService', () => {
 
     describe('create/update wrappers', () => {
         it('createGame should call http createGame with payload', () => {
-            const payload: CreateGameDto = { name: 'C1', description: 'd', size: 10, mode: 'classic' } as CreateGameDto;
+            const payload: CreateGameDto = { name: 'C1', description: 'd', size: MapSize.SMALL, mode: 'classic' } as CreateGameDto;
             gameHttpServiceSpy.createGame.and.returnValue(of(mockGames[0]));
 
             service.createGame(payload).subscribe((res) => {
@@ -139,6 +140,102 @@ describe('GameStoreService', () => {
             });
 
             expect(gameHttpServiceSpy.createGame).toHaveBeenCalledWith(payload);
+        });
+    });
+
+    describe('classicGames', () => {
+        beforeEach(() => {
+            const mixedGames: GamePreviewDto[] = [
+                {
+                    id: '1',
+                    name: 'Classic Game',
+                    description: 'Classic Desc',
+                    size: MapSize.SMALL,
+                    mode: GameMode.CLASSIC,
+                    lastModified: '2023-01-01',
+                    visibility: true,
+                    gridPreviewUrl: '/assets/classic.png',
+                    draft: false,
+                },
+                {
+                    id: '2',
+                    name: 'CTF Game',
+                    description: 'CTF Desc',
+                    size: MapSize.MEDIUM,
+                    mode: GameMode.CTF,
+                    lastModified: '2023-01-02',
+                    visibility: true,
+                    gridPreviewUrl: '/assets/ctf.png',
+                    draft: false,
+                },
+            ];
+            gameHttpServiceSpy.getGamesDisplay.and.returnValue(of(mixedGames));
+            service.loadGames().subscribe();
+        });
+
+        it('should return only classic games from visible games', () => {
+            const classicGames = service.classicGames();
+            expect(classicGames.length).toBe(1);
+            expect(classicGames[0].mode).toBe(GameMode.CLASSIC);
+            expect(classicGames[0].id).toBe('1');
+        });
+    });
+
+    describe('ctfGames', () => {
+        beforeEach(() => {
+            const mixedGames: GamePreviewDto[] = [
+                {
+                    id: '1',
+                    name: 'Classic Game',
+                    description: 'Classic Desc',
+                    size: MapSize.SMALL,
+                    mode: GameMode.CLASSIC,
+                    lastModified: '2023-01-01',
+                    visibility: true,
+                    gridPreviewUrl: '/assets/classic.png',
+                    draft: false,
+                },
+                {
+                    id: '2',
+                    name: 'CTF Game',
+                    description: 'CTF Desc',
+                    size: MapSize.MEDIUM,
+                    mode: GameMode.CTF,
+                    lastModified: '2023-01-02',
+                    visibility: true,
+                    gridPreviewUrl: '/assets/ctf.png',
+                    draft: false,
+                },
+            ];
+            gameHttpServiceSpy.getGamesDisplay.and.returnValue(of(mixedGames));
+            service.loadGames().subscribe();
+        });
+
+        it('should return only ctf games from visible games', () => {
+            const ctfGames = service.ctfGames();
+            expect(ctfGames.length).toBe(1);
+            expect(ctfGames[0].mode).toBe(GameMode.CTF);
+            expect(ctfGames[0].id).toBe('2');
+        });
+    });
+
+    describe('setActiveTab', () => {
+        it('should set active tab to classic', () => {
+            const mockTab: GameTab = 'classic';
+            service.setActiveTab(mockTab);
+            expect(service.activeTab()).toBe(mockTab);
+        });
+
+        it('should set active tab to ctf', () => {
+            const mockTab: GameTab = 'ctf';
+            service.setActiveTab(mockTab);
+            expect(service.activeTab()).toBe(mockTab);
+        });
+
+        it('should set active tab to all', () => {
+            const mockTab: GameTab = 'all';
+            service.setActiveTab(mockTab);
+            expect(service.activeTab()).toBe(mockTab);
         });
     });
 
