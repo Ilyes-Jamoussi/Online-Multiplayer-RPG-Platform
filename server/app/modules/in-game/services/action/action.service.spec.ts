@@ -956,6 +956,21 @@ describe('ActionService', () => {
                 }),
             );
         });
+
+        it('should handle errors when getting next position', () => {
+            const session = createMockSession();
+            mockGameCache.getNextPosition.mockImplementation(() => {
+                throw new Error('Invalid position');
+            });
+            mockGameCache.getTileOccupant.mockReturnValue(null);
+            mockGameCache.getTileAtPosition.mockReturnValue(createMockTileWithPlayerId());
+            mockGameCache.getPlaceableAtPosition.mockReturnValue(null);
+
+            const result = service.calculateAvailableActions(session, MOCK_PLAYER_ID_1);
+
+            expect(result).toEqual([]);
+            expect(mockEventEmitter.emit).toHaveBeenCalled();
+        });
     });
 
     describe('addAttackAction', () => {
