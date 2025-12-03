@@ -831,13 +831,11 @@ describe('VPExecutionService', () => {
             sessionRepository.findById.mockReturnValue(session);
             gameCache.getNextPosition.mockReturnValue(blockedPosition);
             gameCache.getTileOccupant.mockReturnValue(ENEMY_PLAYER_ID);
-            const loggerSpy = jest.spyOn(service['logger'], 'debug');
 
             const result = service['tryAttackBlockingEnemy'](SESSION_ID, PLAYER_ID, action);
 
             expect(result).toBe(true);
             expect(actionService.attackPlayer).toHaveBeenCalledWith(SESSION_ID, PLAYER_ID, blockedPosition);
-            expect(loggerSpy).toHaveBeenCalled();
         });
 
         it('should return false when exception is thrown', () => {
@@ -1151,35 +1149,4 @@ describe('VPExecutionService', () => {
         });
     });
 
-    describe('logPath', () => {
-        it('should log path when target has actions', () => {
-            const action = createMockPathAction({ type: PathActionType.MOVE, orientation: Orientation.N });
-            const target = createMockEvaluatedTarget({ path: createMockPathResult({ actions: [action] }) });
-            const decision: VPDecision = { target, allEvaluatedTargets: [], useDoubleAction: false };
-            const loggerSpy = jest.spyOn(service['logger'], 'debug');
-
-            service['logPath'](decision);
-
-            expect(loggerSpy).toHaveBeenCalled();
-        });
-
-        it('should not log when target has no actions', () => {
-            const target = createMockEvaluatedTarget({ path: createMockPathResult({ actions: [] }) });
-            const decision: VPDecision = { target, allEvaluatedTargets: [], useDoubleAction: false };
-            const loggerSpy = jest.spyOn(service['logger'], 'debug');
-
-            service['logPath'](decision);
-
-            expect(loggerSpy).not.toHaveBeenCalled();
-        });
-
-        it('should not log when target is null', () => {
-            const decision: VPDecision = { target: null, allEvaluatedTargets: [], useDoubleAction: false };
-            const loggerSpy = jest.spyOn(service['logger'], 'debug');
-
-            service['logPath'](decision);
-
-            expect(loggerSpy).not.toHaveBeenCalled();
-        });
-    });
 });

@@ -3,6 +3,8 @@ import { DEFAULT_IN_GAME_SESSION } from '@app/constants/session.constants';
 import { AvailableActionDto } from '@app/dto/available-action-dto';
 import { FlagTransferRequestDto } from '@app/dto/flag-transfer-request-dto';
 import { ROUTES } from '@app/enums/routes.enum';
+import { GameOverData } from '@app/interfaces/game-over-data.interface';
+import { OpenedSanctuary } from '@app/interfaces/opened-sanctuary.interface';
 import { InGameSocketService } from '@app/services/in-game-socket/in-game-socket.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -26,16 +28,8 @@ export class InGameService {
     private readonly _reachableTiles = signal<ReachableTile[]>([]);
     private readonly _availableActions = signal<AvailableActionDto[]>([]);
     private readonly _isActionModeActive = signal<boolean>(false);
-    private readonly _gameOverData = signal<{ winnerId: string; winnerName: string } | null>(null);
-    private readonly _openedSanctuary = signal<{
-        kind: PlaceableKind;
-        x: number;
-        y: number;
-        success: boolean;
-        addedHealth?: number;
-        addedDefense?: number;
-        addedAttack?: number;
-    } | null>(null);
+    private readonly _gameOverData = signal<GameOverData | null>(null);
+    private readonly _openedSanctuary = signal<OpenedSanctuary | null>(null);
     private readonly _pendingFlagTransferRequest = signal<FlagTransferRequestDto | null>(null);
 
     readonly isMyTurn = computed(() => this._inGameSession().currentTurn.activePlayerId === this.playerService.id());
@@ -259,6 +253,7 @@ export class InGameService {
 
         this.inGameSocketService.onTurnEnded((data) => {
             this.turnEnd(data);
+            this.closeSanctuary();
         });
 
         this.inGameSocketService.onTurnTransitionEnded(() => {
@@ -277,7 +272,6 @@ export class InGameService {
             const isCurrentPlayer = this.playerService.id() === data.playerId;
             this.updatePlayerInSession(data.playerId, { x: data.x, y: data.y, speed: data.speed, boatSpeed: data.boatSpeed }, isCurrentPlayer);
         });
-
         this.inGameSocketService.onPlayerAvailableActions((data) => {
             this._availableActions.set(data.availableActions);
             if (this.isMyTurn()) {
