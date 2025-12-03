@@ -9,4 +9,3 @@ export interface OpenedSanctuary {
     addedDefense?: number;
     addedAttack?: number;
 }
-

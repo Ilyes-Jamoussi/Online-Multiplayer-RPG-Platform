@@ -2,7 +2,7 @@
 import { VIRTUAL_PLAYER_ACTION_DELAY_MS, VIRTUAL_PLAYER_MOVEMENT_DELAY_MS } from '@app/constants/virtual-player.constants';
 import { PathActionType } from '@app/enums/path-action-type.enum';
 import { PointOfInterestType } from '@app/enums/point-of-interest-type.enum';
-import { EvaluatedTarget, VPDecision } from '@app/interfaces/vp-gameplay.interface';
+import { EvaluatedTarget } from '@app/interfaces/vp-gameplay.interface';
 import { PathAction, PathResult } from '@app/interfaces/vp-pathfinding.interface';
 import { ActionService } from '@app/modules/in-game/services/action/action.service';
 import { GameCacheService } from '@app/modules/in-game/services/game-cache/game-cache.service';
@@ -1148,5 +1148,4 @@ describe('VPExecutionService', () => {
             }).not.toThrow();
         });
     });
-
 });
