@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { CombatTimerComponent } from '@app/components/features/combat-timer/combat-timer.component';
 import { CombatResultComponent } from '@app/components/features/combat-result/combat-result.component';
+import { COMBAT_POSTURE_BONUS, HEALTH_LOW_THRESHOLD, HEALTH_MEDIUM_THRESHOLD } from '@app/constants/combat.constants';
 import { BASE_STAT_VALUE, PERCENTAGE_MULTIPLIER } from '@app/constants/player.constants';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { CombatService } from '@app/services/combat/combat.service';
@@ -20,6 +21,10 @@ import { TileCombatEffect } from '@common/enums/tile.enum';
     styleUrls: ['./combat-overlay.component.scss'],
 })
 export class CombatOverlayComponent {
+    readonly combatPostureBonus = COMBAT_POSTURE_BONUS;
+    readonly healthLowThreshold = HEALTH_LOW_THRESHOLD;
+    readonly healthMediumThreshold = HEALTH_MEDIUM_THRESHOLD;
+
     constructor(
         private readonly combatService: CombatService,
         private readonly inGameService: InGameService,

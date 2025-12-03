@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Signal } from '@angular/core';
+import { TURN_TIMER_MAX_SECONDS } from '@app/constants/timer.constants';
 import { InGameService } from '@app/services/in-game/in-game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { CombatService } from '@app/services/combat/combat.service';
@@ -12,6 +13,8 @@ import { CombatService } from '@app/services/combat/combat.service';
     styleUrl: './turn-timer.component.scss',
 })
 export class TurnTimerComponent {
+    readonly turnTimerMaxSeconds = TURN_TIMER_MAX_SECONDS;
+
     constructor(
         private readonly inGameService: InGameService,
         private readonly timerCoordinatorService: TimerService,

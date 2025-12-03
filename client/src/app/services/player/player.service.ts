@@ -1,6 +1,6 @@
 import { Injectable, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { BASE_STAT_VALUE, BONUS_STAT_VALUE, DEFAULT_PLAYER } from '@app/constants/player.constants';
+import { BASE_STAT_VALUE, BONUS_STAT_VALUE, DEFAULT_PLAYER, RANDOM_BONUS_THRESHOLD } from '@app/constants/player.constants';
 import { BonusType } from '@app/enums/character-creation.enum';
 import { TeamColor } from '@app/enums/team-color.enum';
 import { ROUTES } from '@app/enums/routes.enum';
@@ -97,13 +97,12 @@ export class PlayerService {
 
         const randomName = names[Math.floor(Math.random() * names.length)];
         const randomAvatar = availableAvatars[Math.floor(Math.random() * availableAvatars.length)];
-        const randomThreshold = 0.5;
-        const randomBonus = Math.random() < randomThreshold ? BonusType.Life : BonusType.Speed;
+        const randomBonus = Math.random() < RANDOM_BONUS_THRESHOLD ? BonusType.Life : BonusType.Speed;
 
         this.setName(randomName);
         this.selectAvatar(randomAvatar);
         this.setBonus(randomBonus);
-        this.setDice(Math.random() < randomThreshold ? 'attack' : 'defense', Dice.D6);
+        this.setDice(Math.random() < RANDOM_BONUS_THRESHOLD ? 'attack' : 'defense', Dice.D6);
     }
 
     updatePlayer(partial: Partial<Player>): void {

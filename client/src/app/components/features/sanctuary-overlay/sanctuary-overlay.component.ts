@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { SANCTUARY_SUCCESS_RATE } from '@app/constants/combat.constants';
 import { PlaceableLabel } from '@app/enums/placeable-label.enum';
 import { AssetsService } from '@app/services/assets/assets.service';
 import { InGameService } from '@app/services/in-game/in-game.service';
@@ -13,6 +14,8 @@ import { PlaceableKind } from '@common/enums/placeable-kind.enum';
     styleUrls: ['./sanctuary-overlay.component.scss'],
 })
 export class SanctuaryOverlayComponent {
+    readonly sanctuarySuccessRate = SANCTUARY_SUCCESS_RATE;
+
     constructor(
         private readonly inGameService: InGameService,
         private readonly assetsService: AssetsService,
