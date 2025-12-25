@@ -38,8 +38,8 @@ export class CharacterCreationCheckService {
             return {
                 isValid: false,
                 errors: [
-                    `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${CHARACTER_NAME_MAX_LENGTH} caractères ` +
-                        `et ne pas être composé uniquement d'espaces.`,
+                    `The name must contain between ${NAME_MIN_LENGTH} and ${CHARACTER_NAME_MAX_LENGTH} characters ` +
+                        `and not be composed only of spaces.`,
                 ],
             };
         }
@@ -49,7 +49,7 @@ export class CharacterCreationCheckService {
 
     private checkAvatarSelection(avatar: Avatar | null): ValidationResult {
         if (avatar === null) {
-            return { isValid: false, errors: ['Un avatar doit être sélectionné.'] };
+            return { isValid: false, errors: ['An avatar must be selected.'] };
         }
 
         return { isValid: true, errors: [] };
@@ -57,7 +57,7 @@ export class CharacterCreationCheckService {
 
     private checkBonusSelection(bonusSelected: boolean): ValidationResult {
         if (!bonusSelected) {
-            return { isValid: false, errors: ['Un bonus doit être sélectionné.'] };
+            return { isValid: false, errors: ['A bonus must be selected.'] };
         }
 
         return { isValid: true, errors: [] };

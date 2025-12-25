@@ -74,7 +74,7 @@ export class GameEditorCheckService {
         const inventory = this.gameEditorStoreService.inventory();
         const startItem = inventory.START;
         if (startItem.remaining > 0) {
-            problem.message = 'Tous les points de départ doivent être placés sur la carte.';
+            problem.message = 'All starting points must be placed on the map.';
             problem.hasIssue = true;
         }
         return problem;
@@ -86,7 +86,7 @@ export class GameEditorCheckService {
             const inventory = this.gameEditorStoreService.inventory();
             const flagItem = inventory.FLAG;
             if (flagItem.remaining > 0) {
-                problem.message = 'Tous les drapeaux doivent être placés sur la carte.';
+                problem.message = 'All flags must be placed on the map.';
                 problem.hasIssue = true;
             }
         }
@@ -116,7 +116,7 @@ export class GameEditorCheckService {
                     y,
                 });
                 problems.hasIssue = true;
-                problems.message = 'Une porte doit être placée entre deux murs et adossée à des tuiles de terrain.';
+                problems.message = 'A door must be placed between two walls and backed by terrain tiles.';
             }
         }
         return problems;
@@ -130,9 +130,9 @@ export class GameEditorCheckService {
         const problems: GameEditorIssue = { hasIssue: false };
         if (ratio <= MIN_TERRAIN_RATIO) {
             problems.hasIssue = true;
-            problems.message = `Le ratio de tuiles de terrain est trop bas (${(ratio * PERCENT_BASE).toFixed(2)} %). Il doit être supérieur à ${
+            problems.message = `The terrain tile ratio is too low (${(ratio * PERCENT_BASE).toFixed(2)}%). It must be greater than ${
                 MIN_TERRAIN_RATIO * PERCENT_BASE
-            } %.`;
+            }%.`;
         }
         return problems;
     }
@@ -251,7 +251,7 @@ export class GameEditorCheckService {
                     x: tile.x,
                     y: tile.y,
                 });
-                inaccessibleTilesIssue.message = 'Certaines tuiles de terrain ne sont pas accessibles.';
+                inaccessibleTilesIssue.message = 'Some terrain tiles are not accessible.';
             }
         }
         return inaccessibleTilesIssue;
@@ -265,8 +265,8 @@ export class GameEditorCheckService {
             ? {
                   hasIssue: true,
                   message:
-                      `Le nom doit contenir entre ${NAME_MIN_LENGTH} et ${GAME_NAME_MAX_LENGTH} caractères ` +
-                      `et ne pas être composé uniquement d'espaces.`,
+                      `The name must contain between ${NAME_MIN_LENGTH} and ${GAME_NAME_MAX_LENGTH} characters ` +
+                      `and not be composed only of spaces.`,
               }
             : { hasIssue: false };
 
@@ -284,8 +284,8 @@ export class GameEditorCheckService {
             ? {
                   hasIssue: true,
                   message:
-                      `La description doit contenir entre ${DESCRIPTION_MIN_LENGTH} et ${DESCRIPTION_MAX_LENGTH} caractères ` +
-                      `et ne pas être composée uniquement d'espaces.`,
+                      `The description must contain between ${DESCRIPTION_MIN_LENGTH} and ${DESCRIPTION_MAX_LENGTH} characters ` +
+                      `and not be composed only of spaces.`,
               }
             : { hasIssue: false };
 
@@ -306,7 +306,7 @@ export class GameEditorCheckService {
 
             if ((hasEntryA && !hasEntryB) || (!hasEntryA && hasEntryB)) {
                 problem.hasIssue = true;
-                problem.message = `Le canal de téléportation ${channel.channelNumber} doit avoir deux points d'entrée (entryA et entryB).`;
+                problem.message = `Teleportation channel ${channel.channelNumber} must have two entry points (entryA and entryB).`;
                 break;
             }
         }
