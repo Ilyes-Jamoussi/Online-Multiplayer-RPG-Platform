@@ -1,7 +1,7 @@
 @if (showWrapper) {
 <div class="chat-wrapper">
     <div class="wrapper-header">
-        <h2>Clavardage</h2>
+        <h2>Chat</h2>
     </div>
     <div class="wrapper-content">
         <div class="chat-section">
@@ -24,7 +24,7 @@
                     (valueChange)="messageInput = $event"
                     (keydown.enter)="sendMessage()"
                     type="text"
-                    placeholder="Tapez votre message..."
+                    placeholder="Type your message..."
                     [maxLength]="maxMessageLength"
                 >
                 </app-ui-input>
@@ -56,7 +56,7 @@
             (valueChange)="messageInput = $event"
             (keydown.enter)="sendMessage()"
             type="text"
-            placeholder="Tapez votre message..."
+            placeholder="Type your message..."
             [maxLength]="maxMessageLength"
         >
         </app-ui-input>

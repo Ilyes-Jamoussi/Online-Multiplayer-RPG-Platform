@@ -1,9 +1,9 @@
 export enum SanctuaryDescription {
-    HEAL = 'Gagnez 2 points de vie !',
-    FIGHT = "Gagnez 1 points de défense et 1 points d'attaque !",
+    HEAL = 'Gain 2 health points!',
+    FIGHT = 'Gain 1 defense point and 1 attack point!',
 }
 
 export enum SanctuaryDoubleDescription {
-    HEAL = 'Gagnez 4 points de vie !',
-    FIGHT = "Gagnez 2 points de défense et 2 points d'attaque !",
+    HEAL = 'Gain 4 health points!',
+    FIGHT = 'Gain 2 defense points and 2 attack points!',
 }

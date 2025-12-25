@@ -37,7 +37,7 @@ export class GamePreviewCardComponent {
     }
 
     get modeLabel(): string {
-        return this.isCTF ? 'Capture du Drapeau' : 'Classique';
+        return this.isCTF ? 'Capture the Flag' : 'Classic';
     }
 
     get modeIcon(): string {

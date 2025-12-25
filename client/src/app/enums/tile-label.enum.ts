@@ -1,8 +1,8 @@
 export enum TileLabel {
-    WATER = 'Eau',
-    WALL = 'Mur',
-    ICE = 'Glace',
-    DOOR = 'Porte',
+    WATER = 'Water',
+    WALL = 'Wall',
+    ICE = 'Ice',
+    DOOR = 'Door',
     BASE = 'Base',
-    TELEPORT = 'Téléporteur',
+    TELEPORT = 'Teleporter',
 }

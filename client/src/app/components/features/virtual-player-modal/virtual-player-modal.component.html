@@ -1,35 +1,35 @@
 <div class="modal-overlay" (click)="onCancel()">
     <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <h3>Ajouter un joueur virtuel</h3>
+            <h3>Add Virtual Player</h3>
             <button class="close-button" (click)="onCancel()">
                 <i class="material-icons">close</i>
             </button>
         </div>
 
         <div class="modal-body">
-            <p>Sélectionnez le style de jeu du joueur virtuel</p>
+            <p>Select the virtual player's play style</p>
 
             <div class="type-options">
                 <div class="button-wrapper">
                     <button class="type-button offensive" [disabled]="!canAddVirtualPlayer" (click)="onTypeSelect(virtualPlayerType.Offensive)">
                         <i class="material-icons">local_fire_department</i>
-                        <span>Offensif</span>
-                        <small>Attaque agressive et prise de risques</small>
+                        <span>Offensive</span>
+                        <small>Aggressive attack and risk-taking</small>
                     </button>
                     @if (!canAddVirtualPlayer) {
-                    <div class="tooltip">Session pleine</div>
+                    <div class="tooltip">Session full</div>
                     }
                 </div>
 
                 <div class="button-wrapper">
                     <button class="type-button defensive" [disabled]="!canAddVirtualPlayer" (click)="onTypeSelect(virtualPlayerType.Defensive)">
                         <i class="material-icons">security</i>
-                        <span>Défensif</span>
-                        <small>Stratégie prudente et protection</small>
+                        <span>Defensive</span>
+                        <small>Prudent strategy and protection</small>
                     </button>
                     @if (!canAddVirtualPlayer) {
-                    <div class="tooltip">Session pleine</div>
+                    <div class="tooltip">Session full</div>
                     }
                 </div>
             </div>
