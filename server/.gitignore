@@ -36,6 +36,7 @@ lerna-debug.log*
 !package-lock.json
 
 # Environment variables
+.env
 .env.local
 
 # images
