@@ -23,7 +23,7 @@
                         <path d="M3 9h18M9 21V9" />
                     </svg>
                     <div class="stat-content">
-                        <span class="stat-label">Taille</span>
+                        <span class="stat-label">Size</span>
                         <span class="stat-value">{{ mapSizeLabel }}</span>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                         <polyline points="12 6 12 12 16 14" />
                     </svg>
                     <div class="stat-content">
-                        <span class="stat-label">Modifié</span>
+                        <span class="stat-label">Modified</span>
                         <span class="stat-value">{{ formatDate(game.lastModified) }}</span>
                     </div>
                 </div>
@@ -44,21 +44,21 @@
                 <div class="admin-actions">
                     <app-ui-button variant="secondary" size="sm" (buttonClick)="onEditGame()">
                         <app-ui-icon iconName="Edit"></app-ui-icon>
-                        <span>Modifier</span>
+                        <span>Edit</span>
                     </app-ui-button>
                     <app-ui-button variant="secondary" size="sm" (buttonClick)="onToggleVisibility()">
                         <app-ui-icon [iconName]="game.visibility ? 'Eye' : 'EyeSlash'"></app-ui-icon>
-                        <span>{{ game.visibility ? 'Publié' : 'Masqué' }}</span>
+                        <span>{{ game.visibility ? 'Published' : 'Hidden' }}</span>
                     </app-ui-button>
                     <app-ui-button variant="error" size="sm" (buttonClick)="onDeleteGame()">
                         <app-ui-icon iconName="Trash"></app-ui-icon>
-                        <span>Supprimer</span>
+                        <span>Delete</span>
                     </app-ui-button>
                 </div>
                 } @else {
                 <app-ui-button variant="primary" size="md" (buttonClick)="onStartGame()">
                     <span class="play-icon">▶</span>
-                    <span class="play-text">Jouer</span>
+                    <span class="play-text">Play</span>
                 </app-ui-button>
                 }
             </div>

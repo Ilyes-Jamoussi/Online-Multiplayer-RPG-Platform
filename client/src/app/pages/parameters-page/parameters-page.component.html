@@ -1,11 +1,11 @@
-<app-ui-page-layout [hasHeader]="true" headerTitle="Configuration de la partie" [showBackButton]="true" [hasFooter]="true">
+<app-ui-page-layout [hasHeader]="true" headerTitle="Game Configuration" [showBackButton]="true" [hasFooter]="true">
     <div class="parameters-container">
         <div class="parameters-content">
             <section class="parameter-section">
                 <div class="section-header">
                     <div class="section-info">
-                        <h2>Taille de la carte</h2>
-                        <p>Choisissez la dimension du terrain de jeu</p>
+                        <h2>Map Size</h2>
+                        <p>Choose the game terrain dimension</p>
                     </div>
                 </div>
                 <div class="options-grid">
@@ -22,7 +22,7 @@
                             <div class="option-details">
                                 <span class="detail-item">
                                     <app-ui-icon iconName="Users" class="detail-icon"></app-ui-icon>
-                                    {{ option.maxPlayers }} joueurs max
+                                    {{ option.maxPlayers }} players max
                                 </span>
                             </div>
                         </div>
@@ -34,8 +34,8 @@
             <section class="parameter-section">
                 <div class="section-header">
                     <div class="section-info">
-                        <h2>Mode de jeu</h2>
-                        <p>Sélectionnez le style de partie souhaité</p>
+                        <h2>Game Mode</h2>
+                        <p>Select the desired game style</p>
                     </div>
                 </div>
                 <div class="options-grid">
@@ -61,7 +61,7 @@
 
     <div slot="footer">
         <div class="footer-content">
-            <app-ui-button variant="primary" size="lg" (buttonClick)="onCreate()"> Continuer </app-ui-button>
+            <app-ui-button variant="primary" size="lg" (buttonClick)="onCreate()"> Continue </app-ui-button>
         </div>
     </div>
 </app-ui-page-layout>
