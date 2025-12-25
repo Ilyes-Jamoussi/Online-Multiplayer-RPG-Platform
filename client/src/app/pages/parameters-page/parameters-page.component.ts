@@ -77,8 +77,8 @@ export class ParametersPageComponent {
                 },
                 error: (err) => {
                     this.notificationCoordinatorService.displayErrorPopup({
-                        title: 'Erreur lors de la création de la partie',
-                        message: err?.error?.message ?? 'Une erreur est survenue',
+                        title: 'Game Creation Error',
+                        message: err?.error?.message ?? 'An error occurred',
                     });
                 },
             });

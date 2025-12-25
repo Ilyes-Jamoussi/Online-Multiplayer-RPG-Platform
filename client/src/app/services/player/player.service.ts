@@ -186,7 +186,7 @@ export class PlayerService {
 
         this.sessionSocketService.onSessionEnded((message) => {
             this.notificationCoordinatorService.displayErrorPopup({
-                title: 'Session terminée',
+                title: 'Session Ended',
                 message,
                 redirectRoute: ROUTES.HomePage,
             });

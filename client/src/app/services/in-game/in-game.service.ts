@@ -118,8 +118,8 @@ export class InGameService {
         } else {
             this.reset();
             this.notificationCoordinatorService.displayErrorPopup({
-                title: 'Session non trouvée',
-                message: `Vous n'êtes connecté à aucune session`,
+                title: 'Session Not Found',
+                message: `You are not connected to any session`,
                 redirectRoute: ROUTES.HomePage,
             });
         }
@@ -291,8 +291,8 @@ export class InGameService {
         this.inGameSocketService.onGameForceStopped(() => {
             this.reset();
             this.notificationCoordinatorService.displayErrorPopup({
-                title: 'Partie terminée par défaut',
-                message: `Il n'y a plus assez de joueurs pour continuer la partie, la partie est terminée`,
+                title: 'Game Ended by Default',
+                message: `There are not enough players to continue the game, the game is over`,
                 redirectRoute: ROUTES.HomePage,
             });
         });
@@ -321,8 +321,8 @@ export class InGameService {
 
         this.inGameSocketService.onSanctuaryActionFailed(() => {
             this.notificationCoordinatorService.displayErrorPopup({
-                title: 'Action de sanctuaire échouée',
-                message: `L'action de sanctuaire a échouée`,
+                title: 'Sanctuary Action Failed',
+                message: `The sanctuary action failed`,
             });
             this._openedSanctuary.set(null);
         });
@@ -340,7 +340,7 @@ export class InGameService {
 
         this.inGameSocketService.onOpenSanctuaryError((message) => {
             this.notificationCoordinatorService.displayErrorPopup({
-                title: 'Action impossible',
+                title: 'Action Impossible',
                 message,
             });
         });

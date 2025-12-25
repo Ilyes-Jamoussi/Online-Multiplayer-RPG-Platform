@@ -220,7 +220,7 @@ export class GameMapService {
                     this.buildGameMap(gameData);
                 }),
                 catchError(() => {
-                    this.notificationCoordinatorService.displayErrorPopup({ title: 'Erreur', message: 'Erreur lors du chargement de la carte' });
+                    this.notificationCoordinatorService.displayErrorPopup({ title: 'Error', message: 'Error loading map' });
                     return of(null);
                 }),
             )

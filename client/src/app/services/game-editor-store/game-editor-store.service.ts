@@ -219,14 +219,14 @@ export class GameEditorStoreService {
     }
     private notifySuccess(): void {
         this.notificationCoordinatorService.displaySuccessPopup({
-            title: 'Jeu sauvegardé',
-            message: 'Votre jeu a été sauvegardé avec succès !',
+            title: 'Game Saved',
+            message: 'Your game has been saved successfully!',
             redirectRoute: ROUTES.ManagementPage,
         });
     }
     private notifyError(error: unknown): void {
         if (error instanceof Error) {
-            this.notificationCoordinatorService.displayErrorPopup({ title: 'Erreur lors de la sauvegarde', message: error.message });
+            this.notificationCoordinatorService.displayErrorPopup({ title: 'Save Error', message: error.message });
         }
     }
     async saveGame(gridElement: HTMLElement): Promise<void> {

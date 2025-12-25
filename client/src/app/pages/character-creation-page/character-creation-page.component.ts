@@ -44,8 +44,8 @@ export class CharacterCreationPageComponent implements OnInit {
     ngOnInit(): void {
         if (!this.playerService.isConnected()) {
             this.notificationCoordinatorService.displayErrorPopup({
-                title: 'Session expirée',
-                message: 'Veuillez rejoindre une session.',
+                title: 'Session Expired',
+                message: 'Please join a session.',
                 redirectRoute: ROUTES.HomePage,
             });
             return;
