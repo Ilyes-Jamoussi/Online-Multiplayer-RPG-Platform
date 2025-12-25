@@ -1,10 +1,10 @@
-<app-ui-page-layout [hasHeader]="true" [hasSidebar]="true" headerTitle="Éditeur de Jeu" [showBackButton]="true">
+<app-ui-page-layout [hasHeader]="true" [hasSidebar]="true" headerTitle="Game Editor" [showBackButton]="true">
     <div class="editor-container">
         <div class="editor-content">
             <div class="editor-sidebar" slot="sidebar">
-                <span>Choix de tuiles</span>
+                <span>Tile Selection</span>
                 <app-editor-toolbar></app-editor-toolbar>
-                <span>Inventaire d'objets</span>
+                <span>Object Inventory</span>
                 <app-editor-inventory></app-editor-inventory>
             </div>
             <div class="grid-container">
@@ -38,11 +38,11 @@
             </div>
             <div class="editor-sidebar right" slot="sidebar">
                 <div class="game-infos">
-                    <span class="label">Nom du jeu</span>
+                    <span class="label">Game Name</span>
                     <app-ui-input
                         [fullWidth]="true"
                         type="text"
-                        placeholder="Saisissez le nom de votre jeu"
+                        placeholder="Enter your game name"
                         [value]="name"
                         (valueChange)="name = $event"
                         [maxLength]="gameNameMaxLength"
@@ -53,7 +53,7 @@
                     <app-ui-input
                         type="textarea"
                         [fullWidth]="true"
-                        placeholder="Décrivez votre jeu en quelques mots"
+                        placeholder="Describe your game in a few words"
                         [value]="description"
                         (valueChange)="description = $event"
                         [maxLength]="descriptionMaxLength"
@@ -62,8 +62,8 @@
                 </div>
 
                 <div class="sidebar-actions">
-                    <app-ui-button [fullWidth]="true" (buttonClick)="onReset()">Réinitialiser la grille</app-ui-button>
-                    <app-ui-button [fullWidth]="true" (buttonClick)="onSave()" [disabled]="!canSave">Sauvegarder</app-ui-button>
+                    <app-ui-button [fullWidth]="true" (buttonClick)="onReset()">Reset Grid</app-ui-button>
+                    <app-ui-button [fullWidth]="true" (buttonClick)="onSave()" [disabled]="!canSave">Save</app-ui-button>
                 </div>
 
                 <app-errors-badge validationType="game-editor"></app-errors-badge>
