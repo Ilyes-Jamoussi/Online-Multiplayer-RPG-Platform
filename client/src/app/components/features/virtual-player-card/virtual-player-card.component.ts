@@ -37,6 +37,6 @@ export class VirtualPlayerCardComponent {
     }
 
     getTypeLabel(): string {
-        return this.player.virtualPlayerType === VirtualPlayerType.Offensive ? 'Offensif' : 'Défensif';
+        return this.player.virtualPlayerType === VirtualPlayerType.Offensive ? 'Offensive' : 'Defensive';
     }
 }
