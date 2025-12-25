@@ -137,7 +137,7 @@ export class SessionGateway implements OnGatewayDisconnect {
             const kickedSocket = this.server.sockets.sockets.get(data.playerId);
             if (kickedSocket) {
                 void kickedSocket.leave(sessionId);
-                kickedSocket.emit(SessionEvents.SessionEnded, successResponse({ message: 'Vous avez été exclu de la session' }));
+                kickedSocket.emit(SessionEvents.SessionEnded, successResponse({ message: 'You have been kicked from the session' }));
             }
 
             const players = this.sessionService.getPlayersSession(sessionId);
@@ -173,13 +173,13 @@ export class SessionGateway implements OnGatewayDisconnect {
             const sessionId = this.sessionService.getPlayerSessionId(socket.id);
 
             if (!sessionId) {
-                socket.emit(NotificationEvents.ErrorMessage, errorResponse('Joueur non connecté à une session'));
+                socket.emit(NotificationEvents.ErrorMessage, errorResponse('Player not connected to a session'));
                 return;
             }
 
             const waitingSession = this.sessionService.getSession(sessionId);
             if (!waitingSession) {
-                socket.emit(NotificationEvents.ErrorMessage, errorResponse('Session introuvable'));
+                socket.emit(NotificationEvents.ErrorMessage, errorResponse('Session not found'));
                 return;
             }
 
@@ -208,7 +208,7 @@ export class SessionGateway implements OnGatewayDisconnect {
             }
             this.sessionService.endSession(sessionId);
         } catch (error) {
-            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message || 'Erreur lors du démarrage de la partie'));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse(error.message || 'Error starting the game'));
         }
     }
 
@@ -221,7 +221,7 @@ export class SessionGateway implements OnGatewayDisconnect {
         const isAdmin = this.sessionService.isAdmin(socket.id);
 
         if (isAdmin) {
-            socket.broadcast.to(sessionId).emit(SessionEvents.SessionEnded, successResponse({ message: "L'organisateur a quitté" }));
+            socket.broadcast.to(sessionId).emit(SessionEvents.SessionEnded, successResponse({ message: 'The host has left' }));
 
             for (const player of session.players) {
                 const playerSocket = this.server.sockets.sockets.get(player.id);
@@ -280,15 +280,15 @@ export class SessionGateway implements OnGatewayDisconnect {
         const room = this.getRoom(sessionId);
 
         if (!room) {
-            return errorResponse('Session non trouvée');
+            return errorResponse('Session not found');
         }
 
         if (this.sessionService.isRoomLocked(sessionId)) {
-            return errorResponse('Session est verrouillée');
+            return errorResponse('Session is locked');
         }
 
         if (this.sessionService.isSessionFull(sessionId)) {
-            return errorResponse('Session est pleine');
+            return errorResponse('Session is full');
         }
 
         return null;

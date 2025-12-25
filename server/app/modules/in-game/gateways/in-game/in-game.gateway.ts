@@ -70,7 +70,7 @@ export class InGameGateway {
             const gameStatistics = this.inGameService.getGameStatistics(sessionId);
             socket.emit(InGameEvents.LoadGameStatistics, successResponse<GameStatisticsDto>(gameStatistics));
         } catch {
-            socket.emit(NotificationEvents.ErrorMessage, errorResponse('Impossible de charger les statistiques de la partie'));
+            socket.emit(NotificationEvents.ErrorMessage, errorResponse('Unable to load game statistics'));
         }
     }
 
