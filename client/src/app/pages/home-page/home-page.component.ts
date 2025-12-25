@@ -14,11 +14,6 @@ import { ResetService } from '@app/services/reset/reset.service';
     standalone: true,
 })
 export class HomePageComponent implements OnInit {
-    teamInfo = {
-        teamNumber: '204',
-        members: ['Wael El Karoui', 'Ilyes Jamoussi', 'Noah Blanchard', 'Adam Rafai', 'Eduard Andrei Podaru'],
-    };
-
     constructor(
         private readonly router: Router,
         private readonly resetService: ResetService,
