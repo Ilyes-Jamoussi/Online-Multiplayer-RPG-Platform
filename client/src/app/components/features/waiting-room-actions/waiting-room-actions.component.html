@@ -14,15 +14,15 @@
             class="add-virtual-player-button"
             (click)="openVirtualPlayerModal()"
             [disabled]="!canAddVirtualPlayer()"
-            [attr.aria-label]="'Ajouter un joueur virtuel'"
+            [attr.aria-label]="'Add virtual player'"
         >
             <i class="material-icons">smart_toy</i>
-            Ajouter JV
+            Add VP
         </button>
 
         <button class="start-button" [disabled]="!canStartGame()" (click)="startGame()">
             <i class="material-icons">play_arrow</i>
-            Démarrer la partie
+            Start Game
         </button>
     </div>
 </ng-template>
@@ -30,6 +30,6 @@
 <ng-template #playerMessage>
     <div class="waiting-message">
         <i class="material-icons">hourglass_empty</i>
-        En attente du démarrage de la partie...
+        Waiting for game to start...
     </div>
 </ng-template>

@@ -5,7 +5,7 @@
             <h3>
                 {{ playerName }}
                 @if (teamNumber !== undefined) {
-                <span class="badge-team" [style.background-color]="getTeamColor(teamNumber)"> Équipe {{ teamNumber }} </span>
+                <span class="badge-team" [style.background-color]="getTeamColor(teamNumber)"> Team {{ teamNumber }} </span>
                 } @if (hasFlag) {
                 <span class="badge-flag">🚩</span>
                 }
@@ -26,9 +26,9 @@
         <div class="stats-columns">
             <div class="stats-column">
                 <div class="stat-group">
-                    <h4 class="stat-group-title">Vitesse</h4>
+                    <h4 class="stat-group-title">Speed</h4>
                     <div class="stat-item">
-                        <span class="label">Vitesse de base</span>
+                        <span class="label">Base Speed</span>
                         <span class="value">{{ baseSpeed }}</span>
                     </div>
                     <div class="stat-item">
@@ -36,19 +36,19 @@
                         <span class="value">{{ speedBonus }}</span>
                     </div>
                     <div class="stat-item">
-                        <span class="label">Bonus bateau</span>
+                        <span class="label">Boat Bonus</span>
                         <span class="value">{{ boatSpeedBonus }}</span>
                     </div>
                 </div>
 
                 <div class="stat-group">
-                    <h4 class="stat-group-title">Défense</h4>
+                    <h4 class="stat-group-title">Defense</h4>
                     <div class="stat-item">
                         <span class="label">Base</span>
                         <span class="value">{{ baseDefense }}</span>
                     </div>
                     <div class="stat-item">
-                        <span class="label">Dé sélectionné</span>
+                        <span class="label">Selected Dice</span>
                         <span class="value">{{ defenseDiceType }}</span>
                     </div>
                     <div class="stat-item">
@@ -60,13 +60,13 @@
 
             <div class="stats-column">
                 <div class="stat-group">
-                    <h4 class="stat-group-title">Attaque</h4>
+                    <h4 class="stat-group-title">Attack</h4>
                     <div class="stat-item">
                         <span class="label">Base</span>
                         <span class="value">{{ baseAttack }}</span>
                     </div>
                     <div class="stat-item">
-                        <span class="label">Dé sélectionné</span>
+                        <span class="label">Selected Dice</span>
                         <span class="value">{{ attackDiceType }}</span>
                     </div>
                     <div class="stat-item">
@@ -82,15 +82,15 @@
                         <span class="value">{{ totalCombats }}</span>
                     </div>
                     <div class="stat-item">
-                        <span class="label">Victoires</span>
+                        <span class="label">Wins</span>
                         <span class="value combat-wins">{{ combatWins }}</span>
                     </div>
                     <div class="stat-item">
-                        <span class="label">Défaites</span>
+                        <span class="label">Losses</span>
                         <span class="value combat-losses">{{ combatLosses }}</span>
                     </div>
                     <div class="stat-item">
-                        <span class="label">Égalités</span>
+                        <span class="label">Draws</span>
                         <span class="value combat-draws">{{ combatDraws }}</span>
                     </div>
                 </div>

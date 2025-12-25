@@ -17,7 +17,7 @@
             <div class="results-section">
                 @if (isCTFMode && winnerTeamNumber) {
                 <div class="team-winners">
-                    <div class="team-number">Équipe {{ winnerTeamNumber }}</div>
+                    <div class="team-number">Team {{ winnerTeamNumber }}</div>
                     <div class="team-members">
                         @for (playerName of winnerTeamPlayers; track playerName) {
                         <div class="team-member">
@@ -31,18 +31,18 @@
                     @for (player of playerStats; track player.name) {
                     <div class="player-result" [class.winner]="player.isWinner">
                         <span class="player-name">{{ player.name }}</span>
-                        <span class="player-wins">{{ player.wins }} victoire{{ player.wins > 1 ? 's' : '' }}</span>
+                        <span class="player-wins">{{ player.wins }} win{{ player.wins > 1 ? 's' : '' }}</span>
                     </div>
                     }
                 </div>
                 }
             </div>
 
-            <div class="redirect-message">Redirection automatique dans {{ gameOverTimeRemaining }}s</div>
+            <div class="redirect-message">Automatic redirect in {{ gameOverTimeRemaining }}s</div>
 
             <div class="action-buttons">
-                <button class="action-btn statistics" (click)="viewStatistics()">Statistiques</button>
-                <button class="action-btn home" (click)="returnToHome()">Accueil</button>
+                <button class="action-btn statistics" (click)="viewStatistics()">Statistics</button>
+                <button class="action-btn home" (click)="returnToHome()">Home</button>
             </div>
         </div>
     </div>

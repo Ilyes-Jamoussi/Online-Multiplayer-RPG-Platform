@@ -1,12 +1,12 @@
-<app-ui-page-layout [hasHeader]="true" [hasFooter]="true" [showBackButton]="true" headerTitle="Salle d'attente" (backClick)="onBack()">
+<app-ui-page-layout [hasHeader]="true" [hasFooter]="true" [showBackButton]="true" headerTitle="Waiting Room" (backClick)="onBack()">
     <div class="waiting-room-content">
         <div class="left-panel">
             <div class="players-section">
                 <div class="header">
-                    <h2><i class="material-icons">group</i> Joueurs</h2>
+                    <h2><i class="material-icons">group</i> Players</h2>
                     <div class="player-info">
                         @if (showCTFRule()) {
-                        <span class="ctf-rule">Mode CTF : nombre pair requis</span>
+                        <span class="ctf-rule">CTF Mode: even number required</span>
                         }
                         <span class="player-count">{{ players().length }} / {{ maxPlayers() }}</span>
                     </div>
@@ -21,7 +21,7 @@
                 @if (isRoomLocked()) {
                 <div class="lock-message">
                     <i class="material-icons">lock</i>
-                    La salle est verrouillée, plus aucun joueur ne peut la rejoindre
+                    The room is locked, no more players can join
                 </div>
                 }
             </div>

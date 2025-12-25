@@ -19,7 +19,7 @@
         <section class="info-card">
             <div class="info-card__header">
                 <i class="material-icons">info</i>
-                <h4>Caractéristiques</h4>
+                <h4>Characteristics</h4>
             </div>
             <div class="info-grid">
                 <div class="info-item">
@@ -28,25 +28,25 @@
                 </div>
                 @if(activeTile.kind === tileKind.DOOR){
                 <div class="info-item">
-                    <span class="info-label">État</span>
+                    <span class="info-label">State</span>
                     <span class="info-value">
                         <span class="status-badge" [class.status-open]="activeTile.open" [class.status-closed]="!activeTile.open">
-                            {{ activeTile.open ? 'Ouverte' : 'Fermée' }}
+                            {{ activeTile.open ? 'Open' : 'Closed' }}
                         </span>
                     </span>
                 </div>
                 } @if (activeTile.teleportChannel !== undefined) {
                 <div class="info-item">
-                    <span class="info-label">Téléportation</span>
-                    <span class="info-value">Canal {{ activeTile.teleportChannel }}</span>
+                    <span class="info-label">Teleportation</span>
+                    <span class="info-value">Channel {{ activeTile.teleportChannel }}</span>
                 </div>
                 } @if (startPointOnTile) {
                 <div class="info-item">
-                    <span class="info-label">Point de départ de</span>
+                    <span class="info-label">Starting point of</span>
                     <span class="info-value">
                         @if (startPointOnTile.player) {
                         {{ startPointOnTile.player.name }}
-                        } @else { Joueur {{ startPointOnTile.playerId }}
+                        } @else { Player {{ startPointOnTile.playerId }}
                         }
                     </span>
                 </div>
@@ -58,7 +58,7 @@
         <section class="info-card">
             <div class="info-card__header">
                 <i class="material-icons">category</i>
-                <h4>Objet sur la tuile</h4>
+                <h4>Object on Tile</h4>
             </div>
             <div class="object-display">
                 <div class="object-image-wrapper">
@@ -74,7 +74,7 @@
         <section class="info-card">
             <div class="info-card__header">
                 <i class="material-icons">person</i>
-                <h4>Joueur sur la tuile</h4>
+                <h4>Player on Tile</h4>
             </div>
             <div class="player-display">
                 <div class="player-avatar-wrapper">
@@ -87,7 +87,7 @@
                     <div class="player-name">{{ playerOnTile.name }}</div>
                     @if (getTeamNumber(playerOnTile) !== undefined) {
                     <div class="team-badge" [style.background-color]="getTeamColor(getTeamNumber(playerOnTile))">
-                        Équipe {{ getTeamNumber(playerOnTile) }}
+                        Team {{ getTeamNumber(playerOnTile) }}
                     </div>
                     }
                 </div>
@@ -96,7 +96,7 @@
         } @if (!objectOnTile && !playerOnTile) {
         <section class="info-card empty-state">
             <i class="material-icons">check_circle</i>
-            <p>Cette tuile est vide</p>
+            <p>This tile is empty</p>
         </section>
         }
     </div>
