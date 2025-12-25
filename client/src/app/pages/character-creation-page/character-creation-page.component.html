@@ -1,18 +1,18 @@
-<app-ui-page-layout [hasHeader]="true" [hasFooter]="true" headerTitle="Création de personnage" [showBackButton]="true" (backClick)="onBack()">
+<app-ui-page-layout [hasHeader]="true" [hasFooter]="true" headerTitle="Character Creation" [showBackButton]="true" (backClick)="onBack()">
     <div class="layout">
-        <section class="card" aria-label="Sélection d'avatar">
+        <section class="card" aria-label="Avatar Selection">
             <div class="card-body">
                 <app-avatar-grid />
             </div>
         </section>
 
-        <section class="card" aria-label="Paramètres du personnage">
+        <section class="card" aria-label="Character Parameters">
             <div class="card-body">
                 <div class="field">
-                    <h3>Nom *</h3>
+                    <h3>Name *</h3>
                     <app-ui-input
                         type="text"
-                        placeholder="Nom du personnage"
+                        placeholder="Character name"
                         [value]="playerName"
                         (valueChange)="onNameChange($event)"
                         [maxLength]="characterNameMaxLength"
@@ -21,9 +21,9 @@
                 </div>
 
                 <div class="field">
-                    <h3>Vie</h3>
+                    <h3>Health</h3>
                     <app-stats-bar
-                        label="Nombre de points de vie du personnage"
+                        label="Character health points"
                         [value]="playerHealth"
                         [maxValue]="maxStatValue"
                         color="#e74c3c"
@@ -31,8 +31,8 @@
                 </div>
 
                 <div class="field">
-                    <h3>Vitesse</h3>
-                    <app-stats-bar label="Rapidité du personnage" [value]="playerSpeed" [maxValue]="maxStatValue" color="#2ecc71"></app-stats-bar>
+                    <h3>Speed</h3>
+                    <app-stats-bar label="Character speed" [value]="playerSpeed" [maxValue]="maxStatValue" color="#2ecc71"></app-stats-bar>
                 </div>
 
                 <div class="field">
@@ -40,7 +40,7 @@
                     <div class="radio-row" role="radiogroup">
                         <label class="radio" [class.on]="isLifeBonusSelected">
                             <input type="radio" name="bonus" value="life" [checked]="isLifeBonusSelected" (change)="onBonusChange(bonusType.Life)" />
-                            <span>❤️ Vie</span>
+                            <span>❤️ Health</span>
                         </label>
                         <label class="radio" [class.on]="isSpeedBonusSelected">
                             <input
@@ -50,18 +50,18 @@
                                 [checked]="isSpeedBonusSelected"
                                 (change)="onBonusChange(bonusType.Speed)"
                             />
-                            <span>⚡ Rapidité</span>
+                            <span>⚡ Speed</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="field">
-                    <h3>Choix des dés</h3>
-                    <p class="sub">Assignez une combinaison de dés</p>
+                    <h3>Dice Selection</h3>
+                    <p class="sub">Assign a dice combination</p>
 
                     <div class="dice-rows">
                         <div class="dice-card">
-                            <span> Attaque: @if (isAttackD4Selected) { D4 } @else if (isAttackD6Selected) { D6 } @else { (Aucun) } </span>
+                            <span> Attack: @if (isAttackD4Selected) { D4 } @else if (isAttackD6Selected) { D6 } @else { (None) } </span>
                             <div class="dice-row">
                                 <button type="button" class="dice-btn" [class.sel]="isAttackD4Selected" (click)="onAttackDiceChange(dice.D4)">
                                     <img [src]="getDiceImage(dice.D4)" [alt]="dice.D4" loading="lazy" />
@@ -73,7 +73,7 @@
                         </div>
 
                         <div class="dice-card">
-                            <span> Défense: @if (isDefenseD4Selected) { D4 } @else if (isDefenseD6Selected) { D6 } @else { (Aucun) } </span>
+                            <span> Defense: @if (isDefenseD4Selected) { D4 } @else if (isDefenseD6Selected) { D6 } @else { (None) } </span>
                             <div class="dice-row">
                                 <button type="button" class="dice-btn" [class.sel]="isDefenseD4Selected" (click)="onDefenseDiceChange(dice.D4)">
                                     <img [src]="getDiceImage(dice.D4)" [alt]="dice.D4" loading="lazy" />
@@ -90,8 +90,8 @@
     </div>
 
     <div slot="footer" class="actions">
-        <app-ui-button (buttonClick)="generateRandomCharacter()">🎲 Générer aléatoire</app-ui-button>
-        <app-ui-button (buttonClick)="onSubmit()" [disabled]="!canCreateCharacter">Créer le personnage →</app-ui-button>
+        <app-ui-button (buttonClick)="generateRandomCharacter()">🎲 Generate Random</app-ui-button>
+        <app-ui-button (buttonClick)="onSubmit()" [disabled]="!canCreateCharacter">Create Character →</app-ui-button>
         <app-errors-badge validationType="character-creation"></app-errors-badge>
     </div>
 </app-ui-page-layout>

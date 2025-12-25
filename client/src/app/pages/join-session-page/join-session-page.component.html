@@ -1,4 +1,4 @@
-<app-ui-page-layout [hasHeader]="true" headerTitle="Rejoindre une partie" [showBackButton]="true">
+<app-ui-page-layout [hasHeader]="true" headerTitle="Join Session" [showBackButton]="true">
     <div class="sessions-section">
         @if (availableSessions() && availableSessions().length > 0) {
         <div class="sessions-grid">
@@ -8,8 +8,8 @@
         </div>
         } @else {
         <div class="no-sessions-message">
-            <h2>Aucune partie disponible</h2>
-            <p>Il n'y a actuellement aucune partie que vous pouvez rejoindre.</p>
+            <h2>No Available Sessions</h2>
+            <p>There are currently no sessions you can join.</p>
         </div>
         }
     </div>

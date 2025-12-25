@@ -1,6 +1,6 @@
 <div class="players-list">
     <div class="players-header">
-        <h3>Joueurs dans la partie</h3>
+        <h3>Players in Game</h3>
     </div>
     <div class="players-container">
         @for (player of orderedPlayers(); track player.id) {
@@ -30,13 +30,13 @@
                             {{ player.name }}
                         </span>
                         @if (isCurrentUser(player)) {
-                        <span class="badge-you">VOUS</span>
+                        <span class="badge-you">YOU</span>
                         } @if (isActivePlayer(player)) {
-                        <span class="badge-active">ACTUEL</span>
+                        <span class="badge-active">ACTIVE</span>
                         } @if (isVirtualPlayer(player)) {
                         <span class="badge-bot">🤖</span>
                         } @if (hasAbandoned(player)) {
-                        <span class="badge-abandon">ABANDON</span>
+                        <span class="badge-abandon">LEFT</span>
                         } @if (hasFlag(player)) {
                         <span class="badge-flag">🚩</span>
                         }
@@ -44,10 +44,10 @@
                     <div class="player-stats">
                         @if (getTeamNumber(player) !== undefined) {
                         <span class="badge-team" [style.background-color]="getTeamColor(getTeamNumber(player), player, true)">
-                            Équipe {{ getTeamNumber(player) }}
+                            Team {{ getTeamNumber(player) }}
                         </span>
                         }
-                        <span class="combat-wins">⚔️ Victoires : {{ getCombatWins(player) }}</span>
+                        <span class="combat-wins">⚔️ Wins: {{ getCombatWins(player) }}</span>
                     </div>
                 </div>
                 <div class="hp-section">

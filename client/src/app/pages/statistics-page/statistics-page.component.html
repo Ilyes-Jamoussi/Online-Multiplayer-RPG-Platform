@@ -1,53 +1,53 @@
-<app-ui-page-layout [hasHeader]="true" [showBackButton]="true" headerTitle="Statistiques de fin de partie" (backClick)="onBackClick()">
+<app-ui-page-layout [hasHeader]="true" [showBackButton]="true" headerTitle="End Game Statistics" (backClick)="onBackClick()">
     <div class="statistics-grid">
-        <!-- Zone des statistiques globales - 1/3 hauteur, toute la largeur -->
+        <!-- Global statistics zone - 1/3 height, full width -->
         <section class="global-statistics">
-            <h2>Statistiques Globales</h2>
+            <h2>Global Statistics</h2>
             <div class="stats-grid">
                 <div class="stat-item">
-                    <span class="stat-label">Durée de la partie</span>
+                    <span class="stat-label">Game Duration</span>
                     <span class="stat-value">{{ globalStatistics().gameDuration }}</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Nombre de tours de jeu</span>
+                    <span class="stat-label">Total Turns</span>
                     <span class="stat-value">{{ globalStatistics().totalTurns }}</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Tuiles visitées</span>
+                    <span class="stat-label">Tiles Visited</span>
                     <span class="stat-value">{{ globalStatistics().tilesVisitedPercentage }}%</span>
                 </div>
                 @if (globalStatistics().totalTeleportations !== undefined) {
                 <div class="stat-item">
-                    <span class="stat-label">Total téléportations</span>
+                    <span class="stat-label">Total Teleportations</span>
                     <span class="stat-value">{{ globalStatistics().totalTeleportations }}</span>
                 </div>
                 } @if (globalStatistics().doorsManipulatedPercentage !== undefined) {
                 <div class="stat-item">
-                    <span class="stat-label">Portes manipulées</span>
+                    <span class="stat-label">Doors Manipulated</span>
                     <span class="stat-value">{{ globalStatistics().doorsManipulatedPercentage }}%</span>
                 </div>
                 } @if (globalStatistics().sanctuariesUsedPercentage !== undefined) {
                 <div class="stat-item">
-                    <span class="stat-label">Sanctuaires utilisés</span>
+                    <span class="stat-label">Sanctuaries Used</span>
                     <span class="stat-value">{{ globalStatistics().sanctuariesUsedPercentage }}%</span>
                 </div>
                 } @if (globalStatistics().flagHoldersCount !== undefined) {
                 <div class="stat-item">
-                    <span class="stat-label">Joueurs ayant détenu le drapeau</span>
+                    <span class="stat-label">Players Who Held the Flag</span>
                     <span class="stat-value">{{ globalStatistics().flagHoldersCount }}</span>
                 </div>
                 }
             </div>
         </section>
 
-        <!-- Tableau des joueurs - 2/3 hauteur, 2/3 largeur -->
+        <!-- Players table - 2/3 height, 2/3 width -->
         <section class="players-table-section">
-            <h2>Statistiques des Joueurs</h2>
+            <h2>Player Statistics</h2>
             <div class="table-container">
                 <table class="players-table">
                     <thead>
                         <tr>
-                            <th>Nom</th>
+                            <th>Name</th>
                             <th
                                 class="sortable"
                                 (click)="sortBy('combatCount')"
@@ -66,7 +66,7 @@
                                 [attr.data-sort]="getSortIcon('combatWins')"
                             >
                                 <div class="header-content">
-                                    <span class="header-text">Victoires</span>
+                                    <span class="header-text">Wins</span>
                                     <span class="sort-indicator"></span>
                                 </div>
                             </th>
@@ -77,7 +77,7 @@
                                 [attr.data-sort]="getSortIcon('combatLosses')"
                             >
                                 <div class="header-content">
-                                    <span class="header-text">Défaites</span>
+                                    <span class="header-text">Losses</span>
                                     <span class="sort-indicator"></span>
                                 </div>
                             </th>
@@ -88,7 +88,7 @@
                                 [attr.data-sort]="getSortIcon('healthLost')"
                             >
                                 <div class="header-content">
-                                    <span class="header-text">PV perdus</span>
+                                    <span class="header-text">HP Lost</span>
                                     <span class="sort-indicator"></span>
                                 </div>
                             </th>
@@ -99,7 +99,7 @@
                                 [attr.data-sort]="getSortIcon('healthDealt')"
                             >
                                 <div class="header-content">
-                                    <span class="header-text">PV infligés</span>
+                                    <span class="header-text">HP Dealt</span>
                                     <span class="sort-indicator"></span>
                                 </div>
                             </th>
@@ -110,7 +110,7 @@
                                 [attr.data-sort]="getSortIcon('tilesVisitedPercentage')"
                             >
                                 <div class="header-content">
-                                    <span class="header-text">Tuiles visitées (%)</span>
+                                    <span class="header-text">Tiles Visited (%)</span>
                                     <span class="sort-indicator"></span>
                                 </div>
                             </th>
@@ -133,19 +133,19 @@
             </div>
         </section>
 
-        <!-- Zone de clavardage/journal - 2/3 hauteur, 1/3 largeur -->
+        <!-- Messages zone - 2/3 height, 1/3 width -->
         <aside class="messages-section">
             <div class="messages-header">
-                <h2>Zone des messages</h2>
+                <h2>Messages</h2>
                 <div class="header-controls">
                     <div class="tabs">
                         <button class="tab" [class.active]="isActiveTab('chat')" (click)="setActiveTab('chat')">Chat</button>
-                        <button class="tab" [class.active]="isActiveTab('journal')" (click)="setActiveTab('journal')">Journal</button>
+                        <button class="tab" [class.active]="isActiveTab('journal')" (click)="setActiveTab('journal')">Log</button>
                     </div>
                     @if (isActiveTab('journal')) {
                     <label class="filter-checkbox">
                         <input type="checkbox" [checked]="!gameLogService.filterByMe()" (change)="gameLogService.toggleFilter()" />
-                        <span>Tout</span>
+                        <span>All</span>
                     </label>
                     }
                 </div>
