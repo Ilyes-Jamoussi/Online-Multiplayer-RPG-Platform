@@ -1,0 +1,26 @@
+services:
+  # Backend Service
+  - type: web
+    name: rpg-platform-backend
+    runtime: node
+    buildCommand: ./render-build.sh
+    startCommand: cd server && npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_CONNECTION_STRING
+        sync: false
+    healthCheckPath: /api/docs
+
+  # Frontend Service
+  - type: web
+    name: rpg-platform-frontend
+    runtime: static
+    buildCommand: cd client && npm ci && npm run build
+    staticPublishPath: ./client/dist/client
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
