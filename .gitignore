@@ -10,3 +10,8 @@ coverage/
 
 #Node Modules
 /node_modules
+
+# AWS EC2 Key Pair
+*.pem
+*.ppk
+rpg-server-key.pem
