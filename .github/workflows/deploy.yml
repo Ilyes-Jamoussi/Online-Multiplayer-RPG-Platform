@@ -1,0 +1,52 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Build Frontend
+        run: |
+          cd client
+          npm ci
+          npm run build
+
+      - name: Deploy to EC2
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          
+          # Copy frontend files
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/* $USER@$HOST:~/frontend/
+          
+          # Deploy backend and restart
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+            cd ~/Online-Multiplayer-RPG-Platform
+            git pull origin master
+            cd server
+            npm ci
+            npm run build
+            pm2 restart rpg-backend
+            
+            # Update frontend in Nginx
+            sudo cp -r ~/frontend/* /var/www/html/
+          EOF
+          
+          rm -f private_key.pem
