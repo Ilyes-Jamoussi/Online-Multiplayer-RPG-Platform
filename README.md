@@ -1,10 +1,271 @@
-# LOG2990 - Code de base
+# Manor Tactics - Online Multiplayer RPG Platform
 
-Code de base à utiliser pour démarrer le développement de votre projet.
-Le code contient 2 projets séparés :
+[](#overview) [](#aperçu)
 
--   client : le site Web fait avec le cadriciel(_framework_) **Angular**.
--   serveur : le serveur dynamique bâti avec la librairie **Express** ou **NestJs** ([selon votre choix](#choix-du-serveur)).
+---
+
+## Overview
+
+**Manor Tactics** is a comprehensive tactical RPG platform featuring real-time multiplayer gameplay with turn-based combat mechanics. Built with Angular frontend and NestJS backend, the application includes a game editor for creating custom maps and scenarios, real-time chat functionality, and support for both human and virtual players. Players navigate grid-based maps with various terrain types including water, walls, ice, doors, teleporters, and sanctuaries.
+
+🎮 **[Play Live Demo](http://13.60.84.0)**
+
+![Manor Tactics Game](https://via.placeholder.com/800x400/1a1a2e/eaeaea?text=Manor+Tactics+-+Tactical+RPG)
+
+## Features
+
+- **Real-time Multiplayer**: Play with 2-4 players using Socket.IO for instant synchronization
+- **Game Modes**: Classic mode and Capture the Flag (CTF)
+- **Custom Map Editor**: Visual editor with drag-and-drop tile placement
+- **Turn-based Combat**: Strategic gameplay with attack, defense, and special abilities
+- **Virtual Players**: AI opponents with configurable difficulty (Beginner, Expert)
+- **Live Chat**: In-game chat system for player communication
+- **Persistent Data**: MongoDB integration for saving games and player progress
+
+## Technologies
+
+- **Frontend**: Angular 18, TypeScript, SCSS, Socket.IO Client
+- **Backend**: NestJS, TypeScript, Socket.IO, MongoDB, Mongoose
+- **Deployment**: Amazon EC2, Nginx, PM2, GitHub Actions
+- **Testing**: Jest, Jasmine
+- **Tools**: Swagger, Postman, ESLint, Prettier
+
+## Prerequisites
+
+Ensure you have the following installed:
+
+- **Node.js**: Version 20.x or above
+- **npm**: Version 10.x or above
+- **MongoDB**: Local instance or MongoDB Atlas account
+
+## Project Setup
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Ilyes-Jamoussi/Online-Multiplayer-RPG-Platform.git
+   cd Online-Multiplayer-RPG-Platform
+   ```
+
+2. **Install Backend Dependencies**:
+   ```bash
+   cd server
+   npm ci
+   ```
+
+3. **Install Frontend Dependencies**:
+   ```bash
+   cd client
+   npm ci
+   ```
+
+4. **Configure Environment Variables**:
+   
+   Create a `.env` file in the `server` directory:
+   ```env
+   DATABASE_CONNECTION_STRING=mongodb://localhost:27017/manor-tactics
+   PORT=3000
+   ```
+
+5. **Build the Backend**:
+   ```bash
+   cd server
+   npm run build
+   ```
+
+6. **Build the Frontend**:
+   ```bash
+   cd client
+   npm run build
+   ```
+
+## Running the Application
+
+### Development Mode
+
+**Backend**:
+```bash
+cd server
+npm start
+```
+
+**Frontend**:
+```bash
+cd client
+npm start
+```
+
+Access the application at `http://localhost:4200`
+
+### Production Mode
+
+The application is deployed on AWS EC2 with automated CI/CD. Visit the live demo at **http://13.60.84.0**
+
+## Testing
+
+**Run Backend Tests**:
+```bash
+cd server
+npm test
+```
+
+**Run Frontend Tests**:
+```bash
+cd client
+npm test
+```
+
+**Generate Coverage Reports**:
+```bash
+npm run coverage
+```
+
+## API Documentation
+
+Once the server is running, access the Swagger API documentation at:
+```
+http://localhost:3000/api/docs
+```
+
+## Deployment
+
+The application uses GitHub Actions for automated deployment to AWS EC2. Every push to the `master` branch triggers:
+1. Frontend build
+2. Deployment to EC2 via SSH
+3. Backend rebuild and PM2 restart
+4. Nginx configuration update
+
+---
+
+## Aperçu
+
+**Manor Tactics** est une plateforme RPG tactique complète avec gameplay multijoueur en temps réel et mécaniques de combat au tour par tour. Construite avec Angular en frontend et NestJS en backend, l'application inclut un éditeur de jeu pour créer des cartes et scénarios personnalisés, un système de chat en temps réel, et le support de joueurs humains et virtuels. Les joueurs naviguent sur des cartes en grille avec différents types de terrain incluant l'eau, les murs, la glace, les portes, les téléporteurs et les sanctuaires.
+
+🎮 **[Jouer à la démo en direct](http://13.60.84.0)**
+
+![Manor Tactics Game](https://via.placeholder.com/800x400/1a1a2e/eaeaea?text=Manor+Tactics+-+RPG+Tactique)
+
+## Fonctionnalités
+
+- **Multijoueur en temps réel** : Jouez avec 2-4 joueurs utilisant Socket.IO pour une synchronisation instantanée
+- **Modes de jeu** : Mode classique et Capture du drapeau (CTF)
+- **Éditeur de carte personnalisé** : Éditeur visuel avec placement de tuiles par glisser-déposer
+- **Combat au tour par tour** : Gameplay stratégique avec attaque, défense et capacités spéciales
+- **Joueurs virtuels** : Adversaires IA avec difficulté configurable (Débutant, Expert)
+- **Chat en direct** : Système de chat en jeu pour la communication entre joueurs
+- **Données persistantes** : Intégration MongoDB pour sauvegarder les parties et la progression
+
+## Technologies
+
+- **Frontend** : Angular 18, TypeScript, SCSS, Socket.IO Client
+- **Backend** : NestJS, TypeScript, Socket.IO, MongoDB, Mongoose
+- **Déploiement** : Amazon EC2, Nginx, PM2, GitHub Actions
+- **Tests** : Jest, Jasmine
+- **Outils** : Swagger, Postman, ESLint, Prettier
+
+## Prérequis
+
+Assurez-vous d'avoir les éléments suivants installés :
+
+- **Node.js** : Version 20.x ou supérieure
+- **npm** : Version 10.x ou supérieure
+- **MongoDB** : Instance locale ou compte MongoDB Atlas
+
+## Configuration du projet
+
+1. **Cloner le dépôt** :
+   ```bash
+   git clone https://github.com/Ilyes-Jamoussi/Online-Multiplayer-RPG-Platform.git
+   cd Online-Multiplayer-RPG-Platform
+   ```
+
+2. **Installer les dépendances Backend** :
+   ```bash
+   cd server
+   npm ci
+   ```
+
+3. **Installer les dépendances Frontend** :
+   ```bash
+   cd client
+   npm ci
+   ```
+
+4. **Configurer les variables d'environnement** :
+   
+   Créer un fichier `.env` dans le répertoire `server` :
+   ```env
+   DATABASE_CONNECTION_STRING=mongodb://localhost:27017/manor-tactics
+   PORT=3000
+   ```
+
+5. **Compiler le Backend** :
+   ```bash
+   cd server
+   npm run build
+   ```
+
+6. **Compiler le Frontend** :
+   ```bash
+   cd client
+   npm run build
+   ```
+
+## Exécuter l'application
+
+### Mode Développement
+
+**Backend** :
+```bash
+cd server
+npm start
+```
+
+**Frontend** :
+```bash
+cd client
+npm start
+```
+
+Accéder à l'application sur `http://localhost:4200`
+
+### Mode Production
+
+L'application est déployée sur AWS EC2 avec CI/CD automatisé. Visitez la démo en direct sur **http://13.60.84.0**
+
+## Tests
+
+**Exécuter les tests Backend** :
+```bash
+cd server
+npm test
+```
+
+**Exécuter les tests Frontend** :
+```bash
+cd client
+npm test
+```
+
+**Générer les rapports de couverture** :
+```bash
+npm run coverage
+```
+
+## Documentation API
+
+Une fois le serveur lancé, accédez à la documentation Swagger de l'API sur :
+```
+http://localhost:3000/api/docs
+```
+
+## Déploiement
+
+L'application utilise GitHub Actions pour le déploiement automatisé sur AWS EC2. Chaque push sur la branche `master` déclenche :
+1. Build du frontend
+2. Déploiement sur EC2 via SSH
+3. Rebuild du backend et redémarrage PM2
+4. Mise à jour de la configuration Nginx
+
 
 # Documentation supplémentaire
 
