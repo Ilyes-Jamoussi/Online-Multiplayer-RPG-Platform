@@ -6,265 +6,370 @@
 
 ## Overview
 
-**Manor Tactics** is a comprehensive tactical RPG platform featuring real-time multiplayer gameplay with turn-based combat mechanics. Built with Angular frontend and NestJS backend, the application includes a game editor for creating custom maps and scenarios, real-time chat functionality, and support for both human and virtual players. Players navigate grid-based maps with various terrain types including water, walls, ice, doors, teleporters, and sanctuaries.
+**Manor Tactics** is a comprehensive tactical RPG platform featuring real-time multiplayer gameplay with turn-based combat mechanics. Players navigate grid-based maps, engage in strategic combat, and complete objectives in two distinct game modes. The platform includes a complete game editor, session management system, and support for both human and AI players.
 
 🎮 **[Play Live Demo](http://13.60.84.0)**
 
 ![Manor Tactics Game](https://via.placeholder.com/800x400/1a1a2e/eaeaea?text=Manor+Tactics+-+Tactical+RPG)
 
-## Features
+## Key Features
 
-- **Real-time Multiplayer**: Play with 2-4 players using Socket.IO for instant synchronization
-- **Game Modes**: Classic mode and Capture the Flag (CTF)
-- **Custom Map Editor**: Visual editor with drag-and-drop tile placement
-- **Turn-based Combat**: Strategic gameplay with attack, defense, and special abilities
-- **Virtual Players**: AI opponents with configurable difficulty (Beginner, Expert)
-- **Live Chat**: In-game chat system for player communication
-- **Persistent Data**: MongoDB integration for saving games and player progress
+### Game Modes
+
+**Classic Mode**: Players compete to win 3 combats. First player to reach this threshold wins the game.
+
+**Capture the Flag (CTF)**: Team-based gameplay where players must capture the flag and return it to their starting point to win.
+
+### Core Gameplay Mechanics
+
+- **Turn-based Combat System**: Strategic combat with attack/defense postures, dice rolls, and attribute-based calculations
+- **Grid-based Movement**: Navigate maps with varied terrain types, each affecting movement costs differently
+- **Real-time Multiplayer**: 2-6 players depending on map size, synchronized via WebSocket (Socket.IO)
+- **Character Customization**: Players create characters with customizable attributes (Life, Speed, Attack, Defense) and bonus dice (D4/D6)
+- **Interactive Terrain**: Water, ice, walls, doors, teleportation tiles, each with unique gameplay effects
+- **Environmental Objects**: Boats for water navigation, healing sanctuaries, combat sanctuaries
+- **Live Chat System**: Real-time communication between players during sessions
+
+### Game Editor
+
+- **Visual Map Editor**: Drag-and-drop interface for creating custom game maps
+- **Multiple Map Sizes**: Small (10x10), Medium (15x15), Large (20x20) grids
+- **Tile Applicators**: Tools for placing walls, doors, water, ice, and teleportation tiles
+- **Object Placement**: Drag-and-drop system for start points, flags, sanctuaries, and boats
+- **Validation System**: Comprehensive validation ensuring map playability (accessibility checks, door placement rules, terrain coverage)
+- **Dynamic Preview**: Real-time map preview with game metadata
+
+### Session Management
+
+- **Session Creation & Discovery**: Browse available games and create new sessions
+- **Waiting Room**: Pre-game lobby with player list, chat, and team assignment (CTF mode)
+- **Virtual Players (AI)**: Two AI profiles (Aggressive/Defensive) with strategic decision-making
+- **Session Locking**: Automatic locking when player limit is reached
+- **Player Kick System**: Host can remove players before game starts
+
+### Advanced Features
+
+- **Combat System**: Simultaneous attack resolution with offensive/defensive postures
+- **Teleportation Pairs**: Up to 5 linked teleportation tile pairs per map
+- **Sanctuary System**: Healing and combat buff sanctuaries with "double or nothing" mode
+- **Flag Transfer**: Team members can request/transfer flag possession (CTF mode)
+- **Game Log**: Comprehensive event logging with filtering options
+- **Statistics Tracking**: Individual and global game statistics
+- **Debug Mode**: Host-controlled debug features for testing
 
 ## Technologies
 
-- **Frontend**: Angular 18, TypeScript, SCSS, Socket.IO Client
-- **Backend**: NestJS, TypeScript, Socket.IO, MongoDB, Mongoose
-- **Deployment**: Amazon EC2, Nginx, PM2, GitHub Actions
-- **Testing**: Jest, Jasmine
-- **Tools**: Swagger, Postman, ESLint, Prettier
+### Frontend Architecture
+- **Angular 18**: Modern component-based architecture with standalone components
+- **TypeScript**: Strict type safety across the entire codebase
+- **SCSS**: Modular styling with component-scoped styles
+- **Socket.IO Client**: Real-time bidirectional communication
+- **RxJS**: Reactive state management and event handling
 
-## Prerequisites
+### Backend Architecture
+- **NestJS**: Modular backend architecture with dependency injection
+- **Socket.IO**: WebSocket gateway for real-time game events
+- **MongoDB + Mongoose**: Document-based data persistence
+- **Swagger**: Auto-generated API documentation
 
-Ensure you have the following installed:
+### Key Backend Modules
+- **Session Module**: Manages game sessions, player joining, and lobby state
+- **In-Game Module**: Handles turn management, movement, combat, and game logic
+- **Game Store Module**: CRUD operations for game maps and metadata
+- **Chat Module**: Real-time messaging system
+- **Game Log Module**: Event tracking and statistics
 
-- **Node.js**: Version 20.x or above
-- **npm**: Version 10.x or above
-- **MongoDB**: Local instance or MongoDB Atlas account
+### DevOps & Deployment
+- **Amazon EC2**: Cloud hosting with Ubuntu Server
+- **Nginx**: Reverse proxy and static file serving
+- **PM2**: Process management with auto-restart
+- **GitHub Actions**: Automated CI/CD pipeline
+- **MongoDB Atlas**: Cloud database with automatic backups
 
-## Project Setup
+### Development Tools
+- **Jest**: Backend unit testing with comprehensive coverage
+- **Jasmine + Karma**: Frontend unit testing
+- **ESLint**: Code quality and consistency enforcement
+- **Prettier**: Automatic code formatting
+- **Postman**: API testing and documentation
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/Ilyes-Jamoussi/Online-Multiplayer-RPG-Platform.git
-   cd Online-Multiplayer-RPG-Platform
-   ```
+## Project Architecture
 
-2. **Install Backend Dependencies**:
-   ```bash
-   cd server
-   npm ci
-   ```
-
-3. **Install Frontend Dependencies**:
-   ```bash
-   cd client
-   npm ci
-   ```
-
-4. **Configure Environment Variables**:
-   
-   Create a `.env` file in the `server` directory:
-   ```env
-   DATABASE_CONNECTION_STRING=mongodb://localhost:27017/manor-tactics
-   PORT=3000
-   ```
-
-5. **Build the Backend**:
-   ```bash
-   cd server
-   npm run build
-   ```
-
-6. **Build the Frontend**:
-   ```bash
-   cd client
-   npm run build
-   ```
-
-## Running the Application
-
-### Development Mode
-
-**Backend**:
-```bash
-cd server
-npm start
+```
+Manor Tactics Platform
+│
+├── Client (Angular)
+│   ├── Pages (Home, Editor, Session, Game, Statistics)
+│   ├── Components (Game Board, Player Cards, Chat, Combat Interface)
+│   ├── Services (Socket, Game Logic, Session Management)
+│   └── Guards & Interceptors
+│
+├── Server (NestJS)
+│   ├── Modules
+│   │   ├── Session (Lobby & Player Management)
+│   │   ├── In-Game (Turn Logic, Combat, Movement)
+│   │   ├── Game Store (Map CRUD & Validation)
+│   │   ├── Chat (Real-time Messaging)
+│   │   └── Game Log (Event Tracking)
+│   ├── Gateways (WebSocket Event Handlers)
+│   ├── Controllers (REST API Endpoints)
+│   └── Schemas (MongoDB Models)
+│
+└── Common (Shared Types & Constants)
+    ├── Interfaces (Player, Session, Combat, Map)
+    ├── Enums (Tiles, Events, Game Modes)
+    └── Constants (Game Rules, Validation)
 ```
 
-**Frontend**:
-```bash
-cd client
-npm start
-```
+## Game Mechanics Highlights
 
-Access the application at `http://localhost:4200`
+### Movement System
+- **Terrain-based Costs**: Ice (0), Base terrain (1), Open door (1), Water (2), Water with boat (1)
+- **Pathfinding**: Algorithm calculates reachable tiles considering terrain costs and obstacles
+- **Movement Points**: Based on Speed attribute, refreshed each turn
+- **Bonus Movement**: Boats provide 4 bonus movement points for water navigation
 
-### Production Mode
+### Combat System
+- **Simultaneous Resolution**: Both players attack at the same time each combat turn
+- **Posture Selection**: Offensive (+2 attack) or Defensive (+2 defense) with 5-second timer
+- **Dice Mechanics**: D4 or D6 bonus dice assigned to attack/defense during character creation
+- **Damage Calculation**: `(Attack + Dice + Posture) - (Defense + Dice + Posture) = Damage`
+- **Terrain Effects**: Ice terrain applies -2 penalty to both attack and defense
+- **Sanctuary Buffs**: Combat sanctuaries provide temporary +1 attack/+1 defense
 
-The application is deployed on AWS EC2 with automated CI/CD. Visit the live demo at **http://13.60.84.0**
+### AI Implementation
+- **Aggressive Profile**: Seeks combat, uses offensive postures, pursues flag carriers
+- **Defensive Profile**: Avoids unnecessary combat, uses defensive postures, guards objectives
+- **Strategic Behavior**: AI uses interactive tiles (doors, teleporters, sanctuaries) when advantageous
+- **Human-like Timing**: Simulated "thinking time" for realistic gameplay
 
-## Testing
-
-**Run Backend Tests**:
-```bash
-cd server
-npm test
-```
-
-**Run Frontend Tests**:
-```bash
-cd client
-npm test
-```
-
-**Generate Coverage Reports**:
-```bash
-npm run coverage
-```
-
-## API Documentation
-
-Once the server is running, access the Swagger API documentation at:
-```
-http://localhost:3000/api/docs
-```
+### Map Editor Validation
+- **Door Placement**: Doors must be between two walls on the same axis
+- **Accessibility Check**: All terrain tiles must be reachable from every start point
+- **Terrain Coverage**: Minimum 50% of map must be traversable terrain
+- **Object Requirements**: All start points and flags (CTF) must be placed
+- **Teleporter Pairing**: Maximum 5 teleporter pairs, each properly linked
 
 ## Deployment
 
-The application uses GitHub Actions for automated deployment to AWS EC2. Every push to the `master` branch triggers:
-1. Frontend build
-2. Deployment to EC2 via SSH
-3. Backend rebuild and PM2 restart
-4. Nginx configuration update
+The application is deployed on AWS EC2 with automated CI/CD:
+
+- **Frontend**: Nginx serves static Angular build on port 80
+- **Backend**: Node.js with PM2 process manager on port 3000
+- **Database**: MongoDB Atlas with automatic backups
+- **CI/CD**: GitHub Actions triggers deployment on push to master branch
+
+**Live Demo**: http://13.60.84.0
+
+## API Documentation
+
+Interactive Swagger documentation available at:
+```
+http://13.60.84.0:3000/api/docs
+```
+
+## Testing
+
+The project includes comprehensive test coverage:
+
+**Backend Tests**:
+```bash
+cd server
+npm test              # Run all tests
+npm run coverage      # Generate coverage report
+```
+
+**Frontend Tests**:
+```bash
+cd client
+npm test              # Run all tests
+npm run coverage      # Generate coverage report
+```
 
 ---
 
 ## Aperçu
 
-**Manor Tactics** est une plateforme RPG tactique complète avec gameplay multijoueur en temps réel et mécaniques de combat au tour par tour. Construite avec Angular en frontend et NestJS en backend, l'application inclut un éditeur de jeu pour créer des cartes et scénarios personnalisés, un système de chat en temps réel, et le support de joueurs humains et virtuels. Les joueurs naviguent sur des cartes en grille avec différents types de terrain incluant l'eau, les murs, la glace, les portes, les téléporteurs et les sanctuaires.
+**Manor Tactics** est une plateforme RPG tactique complète avec gameplay multijoueur en temps réel et mécaniques de combat au tour par tour. Les joueurs naviguent sur des cartes en grille, participent à des combats stratégiques et accomplissent des objectifs dans deux modes de jeu distincts. La plateforme inclut un éditeur de jeu complet, un système de gestion de sessions et le support de joueurs humains et IA.
 
 🎮 **[Jouer à la démo en direct](http://13.60.84.0)**
 
 ![Manor Tactics Game](https://via.placeholder.com/800x400/1a1a2e/eaeaea?text=Manor+Tactics+-+RPG+Tactique)
 
-## Fonctionnalités
+## Fonctionnalités principales
 
-- **Multijoueur en temps réel** : Jouez avec 2-4 joueurs utilisant Socket.IO pour une synchronisation instantanée
-- **Modes de jeu** : Mode classique et Capture du drapeau (CTF)
-- **Éditeur de carte personnalisé** : Éditeur visuel avec placement de tuiles par glisser-déposer
-- **Combat au tour par tour** : Gameplay stratégique avec attaque, défense et capacités spéciales
-- **Joueurs virtuels** : Adversaires IA avec difficulté configurable (Débutant, Expert)
-- **Chat en direct** : Système de chat en jeu pour la communication entre joueurs
-- **Données persistantes** : Intégration MongoDB pour sauvegarder les parties et la progression
+### Modes de jeu
+
+**Mode Classique** : Les joueurs s'affrontent pour remporter 3 combats. Le premier joueur à atteindre ce seuil gagne la partie.
+
+**Capture du Drapeau (CTF)** : Gameplay en équipe où les joueurs doivent capturer le drapeau et le ramener à leur point de départ pour gagner.
+
+### Mécaniques de jeu principales
+
+- **Système de combat au tour par tour** : Combat stratégique avec postures attaque/défense, jets de dés et calculs basés sur les attributs
+- **Déplacement sur grille** : Navigation sur des cartes avec types de terrain variés, chacun affectant différemment les coûts de déplacement
+- **Multijoueur en temps réel** : 2-6 joueurs selon la taille de la carte, synchronisés via WebSocket (Socket.IO)
+- **Personnalisation des personnages** : Création de personnages avec attributs personnalisables (Vie, Rapidité, Attaque, Défense) et dés bonus (D4/D6)
+- **Terrain interactif** : Eau, glace, murs, portes, tuiles de téléportation, chacun avec des effets de gameplay uniques
+- **Objets environnementaux** : Bateaux pour navigation aquatique, sanctuaires de soin, sanctuaires de combat
+- **Système de chat en direct** : Communication en temps réel entre joueurs pendant les sessions
+
+### Éditeur de jeu
+
+- **Éditeur de carte visuel** : Interface glisser-déposer pour créer des cartes de jeu personnalisées
+- **Tailles de carte multiples** : Grilles Petite (10x10), Moyenne (15x15), Grande (20x20)
+- **Applicateurs de tuiles** : Outils pour placer murs, portes, eau, glace et tuiles de téléportation
+- **Placement d'objets** : Système glisser-déposer pour points de départ, drapeaux, sanctuaires et bateaux
+- **Système de validation** : Validation complète assurant la jouabilité de la carte (vérifications d'accessibilité, règles de placement des portes, couverture du terrain)
+- **Aperçu dynamique** : Prévisualisation de carte en temps réel avec métadonnées du jeu
+
+### Gestion des sessions
+
+- **Création et découverte de sessions** : Parcourir les jeux disponibles et créer de nouvelles sessions
+- **Salle d'attente** : Lobby pré-jeu avec liste des joueurs, chat et assignation d'équipes (mode CTF)
+- **Joueurs virtuels (IA)** : Deux profils d'IA (Agressif/Défensif) avec prise de décision stratégique
+- **Verrouillage de session** : Verrouillage automatique lorsque la limite de joueurs est atteinte
+- **Système d'exclusion** : L'hôte peut retirer des joueurs avant le début du jeu
+
+### Fonctionnalités avancées
+
+- **Système de combat** : Résolution d'attaque simultanée avec postures offensives/défensives
+- **Paires de téléportation** : Jusqu'à 5 paires de tuiles de téléportation liées par carte
+- **Système de sanctuaire** : Sanctuaires de soin et de buff de combat avec mode "double ou rien"
+- **Transfert de drapeau** : Les coéquipiers peuvent demander/transférer la possession du drapeau (mode CTF)
+- **Journal de jeu** : Journalisation complète des événements avec options de filtrage
+- **Suivi des statistiques** : Statistiques de jeu individuelles et globales
+- **Mode débogage** : Fonctionnalités de débogage contrôlées par l'hôte pour les tests
 
 ## Technologies
 
-- **Frontend** : Angular 18, TypeScript, SCSS, Socket.IO Client
-- **Backend** : NestJS, TypeScript, Socket.IO, MongoDB, Mongoose
-- **Déploiement** : Amazon EC2, Nginx, PM2, GitHub Actions
-- **Tests** : Jest, Jasmine
-- **Outils** : Swagger, Postman, ESLint, Prettier
+### Architecture Frontend
+- **Angular 18** : Architecture moderne basée sur les composants avec composants autonomes
+- **TypeScript** : Sécurité de type stricte dans toute la base de code
+- **SCSS** : Stylisation modulaire avec styles scopés aux composants
+- **Socket.IO Client** : Communication bidirectionnelle en temps réel
+- **RxJS** : Gestion d'état réactive et gestion des événements
 
-## Prérequis
+### Architecture Backend
+- **NestJS** : Architecture backend modulaire avec injection de dépendances
+- **Socket.IO** : Passerelle WebSocket pour événements de jeu en temps réel
+- **MongoDB + Mongoose** : Persistance de données basée sur documents
+- **Swagger** : Documentation API auto-générée
 
-Assurez-vous d'avoir les éléments suivants installés :
+### Modules Backend principaux
+- **Module Session** : Gère les sessions de jeu, l'arrivée des joueurs et l'état du lobby
+- **Module In-Game** : Gère la gestion des tours, les déplacements, les combats et la logique de jeu
+- **Module Game Store** : Opérations CRUD pour les cartes de jeu et métadonnées
+- **Module Chat** : Système de messagerie en temps réel
+- **Module Game Log** : Suivi des événements et statistiques
 
-- **Node.js** : Version 20.x ou supérieure
-- **npm** : Version 10.x ou supérieure
-- **MongoDB** : Instance locale ou compte MongoDB Atlas
+### DevOps et Déploiement
+- **Amazon EC2** : Hébergement cloud avec Ubuntu Server
+- **Nginx** : Reverse proxy et service de fichiers statiques
+- **PM2** : Gestion de processus avec redémarrage automatique
+- **GitHub Actions** : Pipeline CI/CD automatisé
+- **MongoDB Atlas** : Base de données cloud avec sauvegardes automatiques
 
-## Configuration du projet
+### Outils de développement
+- **Jest** : Tests unitaires backend avec couverture complète
+- **Jasmine + Karma** : Tests unitaires frontend
+- **ESLint** : Application de la qualité et cohérence du code
+- **Prettier** : Formatage automatique du code
+- **Postman** : Tests et documentation API
 
-1. **Cloner le dépôt** :
-   ```bash
-   git clone https://github.com/Ilyes-Jamoussi/Online-Multiplayer-RPG-Platform.git
-   cd Online-Multiplayer-RPG-Platform
-   ```
+## Architecture du projet
 
-2. **Installer les dépendances Backend** :
-   ```bash
-   cd server
-   npm ci
-   ```
-
-3. **Installer les dépendances Frontend** :
-   ```bash
-   cd client
-   npm ci
-   ```
-
-4. **Configurer les variables d'environnement** :
-   
-   Créer un fichier `.env` dans le répertoire `server` :
-   ```env
-   DATABASE_CONNECTION_STRING=mongodb://localhost:27017/manor-tactics
-   PORT=3000
-   ```
-
-5. **Compiler le Backend** :
-   ```bash
-   cd server
-   npm run build
-   ```
-
-6. **Compiler le Frontend** :
-   ```bash
-   cd client
-   npm run build
-   ```
-
-## Exécuter l'application
-
-### Mode Développement
-
-**Backend** :
-```bash
-cd server
-npm start
+```
+Plateforme Manor Tactics
+│
+├── Client (Angular)
+│   ├── Pages (Accueil, Éditeur, Session, Jeu, Statistiques)
+│   ├── Composants (Plateau de jeu, Cartes joueur, Chat, Interface combat)
+│   ├── Services (Socket, Logique de jeu, Gestion de session)
+│   └── Guards & Intercepteurs
+│
+├── Serveur (NestJS)
+│   ├── Modules
+│   │   ├── Session (Lobby & Gestion des joueurs)
+│   │   ├── In-Game (Logique des tours, Combat, Déplacement)
+│   │   ├── Game Store (CRUD carte & Validation)
+│   │   ├── Chat (Messagerie temps réel)
+│   │   └── Game Log (Suivi des événements)
+│   ├── Gateways (Gestionnaires d'événements WebSocket)
+│   ├── Controllers (Points de terminaison API REST)
+│   └── Schemas (Modèles MongoDB)
+│
+└── Common (Types et constantes partagés)
+    ├── Interfaces (Joueur, Session, Combat, Carte)
+    ├── Enums (Tuiles, Événements, Modes de jeu)
+    └── Constants (Règles de jeu, Validation)
 ```
 
-**Frontend** :
-```bash
-cd client
-npm start
-```
+## Points forts des mécaniques de jeu
 
-Accéder à l'application sur `http://localhost:4200`
+### Système de déplacement
+- **Coûts basés sur le terrain** : Glace (0), Terrain de base (1), Porte ouverte (1), Eau (2), Eau avec bateau (1)
+- **Recherche de chemin** : Algorithme calcule les tuiles atteignables en considérant les coûts de terrain et obstacles
+- **Points de mouvement** : Basés sur l'attribut Rapidité, renouvelés à chaque tour
+- **Mouvement bonus** : Les bateaux fournissent 4 points de mouvement bonus pour la navigation aquatique
 
-### Mode Production
+### Système de combat
+- **Résolution simultanée** : Les deux joueurs attaquent en même temps à chaque tour de combat
+- **Sélection de posture** : Offensive (+2 attaque) ou Défensive (+2 défense) avec minuterie de 5 secondes
+- **Mécaniques de dés** : Dés bonus D4 ou D6 assignés à attaque/défense lors de la création du personnage
+- **Calcul des dégâts** : `(Attaque + Dé + Posture) - (Défense + Dé + Posture) = Dégâts`
+- **Effets de terrain** : Le terrain de glace applique une pénalité de -2 à l'attaque et à la défense
+- **Buffs de sanctuaire** : Les sanctuaires de combat fournissent temporairement +1 attaque/+1 défense
 
-L'application est déployée sur AWS EC2 avec CI/CD automatisé. Visitez la démo en direct sur **http://13.60.84.0**
+### Implémentation de l'IA
+- **Profil Agressif** : Cherche le combat, utilise des postures offensives, poursuit les porteurs de drapeau
+- **Profil Défensif** : Évite les combats inutiles, utilise des postures défensives, garde les objectifs
+- **Comportement stratégique** : L'IA utilise les tuiles interactives (portes, téléporteurs, sanctuaires) quand c'est avantageux
+- **Timing humain** : Temps de "réflexion" simulé pour un gameplay réaliste
 
-## Tests
-
-**Exécuter les tests Backend** :
-```bash
-cd server
-npm test
-```
-
-**Exécuter les tests Frontend** :
-```bash
-cd client
-npm test
-```
-
-**Générer les rapports de couverture** :
-```bash
-npm run coverage
-```
-
-## Documentation API
-
-Une fois le serveur lancé, accédez à la documentation Swagger de l'API sur :
-```
-http://localhost:3000/api/docs
-```
+### Validation de l'éditeur de carte
+- **Placement des portes** : Les portes doivent être entre deux murs sur le même axe
+- **Vérification d'accessibilité** : Toutes les tuiles de terrain doivent être accessibles depuis chaque point de départ
+- **Couverture du terrain** : Minimum 50% de la carte doit être du terrain traversable
+- **Exigences d'objets** : Tous les points de départ et drapeaux (CTF) doivent être placés
+- **Appairage de téléporteurs** : Maximum 5 paires de téléporteurs, chacune correctement liée
 
 ## Déploiement
 
-L'application utilise GitHub Actions pour le déploiement automatisé sur AWS EC2. Chaque push sur la branche `master` déclenche :
-1. Build du frontend
-2. Déploiement sur EC2 via SSH
-3. Rebuild du backend et redémarrage PM2
-4. Mise à jour de la configuration Nginx
+L'application est déployée sur AWS EC2 avec CI/CD automatisé :
+
+- **Frontend** : Nginx sert le build Angular statique sur le port 80
+- **Backend** : Node.js avec gestionnaire de processus PM2 sur le port 3000
+- **Base de données** : MongoDB Atlas avec sauvegardes automatiques
+- **CI/CD** : GitHub Actions déclenche le déploiement lors du push sur la branche master
+
+**Démo en direct** : http://13.60.84.0
+
+## Documentation API
+
+Documentation Swagger interactive disponible sur :
+```
+http://13.60.84.0:3000/api/docs
+```
+
+## Tests
+
+Le projet inclut une couverture de tests complète :
+
+**Tests Backend** :
+```bash
+cd server
+npm test              # Exécuter tous les tests
+npm run coverage      # Générer le rapport de couverture
+```
+
+**Tests Frontend** :
+```bash
+cd client
+npm test              # Exécuter tous les tests
+npm run coverage      # Générer le rapport de couverture
+```
+
 
 
 # Documentation supplémentaire
