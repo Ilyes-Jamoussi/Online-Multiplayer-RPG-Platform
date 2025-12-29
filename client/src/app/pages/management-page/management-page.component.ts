@@ -40,8 +40,8 @@ export class ManagementPageComponent implements OnInit {
 
     onDeleteGame(gameId: string): void {
         this.notificationService.displayConfirmationPopup({
-            title: 'Supprimer le jeu',
-            message: 'Êtes-vous sûr de vouloir supprimer ce jeu ? Cette action est irréversible.',
+            title: 'Delete Game',
+            message: 'Are you sure you want to delete this game? This action is irreversible.',
             onConfirm: () => {
                 this.gameStoreService.deleteGame(gameId).subscribe();
             },
