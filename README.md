@@ -1,6 +1,11 @@
 # Manor Tactics - Online Multiplayer RPG Platform
 
-[](#overview) [](#aperçu)
+<div align="center">
+  
+  [<img src="https://img.shields.io/badge/-English-blue?style=for-the-badge">](#overview)
+  [<img src="https://img.shields.io/badge/-Français-green?style=for-the-badge">](#aperçu)
+
+</div>
 
 ---
 
