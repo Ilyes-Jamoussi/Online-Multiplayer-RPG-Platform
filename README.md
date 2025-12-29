@@ -13,11 +13,7 @@
 
 **Manor Tactics** is a comprehensive tactical RPG platform featuring real-time multiplayer gameplay with turn-based combat mechanics. Players navigate grid-based maps, engage in strategic combat, and complete objectives in two distinct game modes. The platform includes a complete game editor, session management system, and support for both human and AI players.
 
-**[Play Now](http://13.60.84.0)**
-
-<div align="center">
-    <img alt="Manor Tactics Gameplay" width="800" src="https://via.placeholder.com/800x400/1a1a2e/eaeaea?text=Manor+Tactics+-+Tactical+RPG">
-</div>
+### [▶️ Play Now](http://13.60.84.0)
 
 ## Key Features
 
@@ -199,11 +195,7 @@ npm run coverage      # Generate coverage report
 
 **Manor Tactics** est une plateforme RPG tactique complète avec gameplay multijoueur en temps réel et mécaniques de combat au tour par tour. Les joueurs naviguent sur des cartes en grille, participent à des combats stratégiques et accomplissent des objectifs dans deux modes de jeu distincts. La plateforme inclut un éditeur de jeu complet, un système de gestion de sessions et le support de joueurs humains et IA.
 
-**[Jouer maintenant](http://13.60.84.0)**
-
-<div align="center">
-    <img alt="Manor Tactics Gameplay" width="800" src="https://via.placeholder.com/800x400/1a1a2e/eaeaea?text=Manor+Tactics+-+RPG+Tactique">
-</div>
+### [▶️ Jouer maintenant](http://13.60.84.0)
 
 ## Fonctionnalités principales
 
