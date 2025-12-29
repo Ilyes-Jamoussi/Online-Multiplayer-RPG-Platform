@@ -262,8 +262,8 @@ export class CombatOverlayComponent {
 
     onLeaveGame(): void {
         this.notificationService.displayConfirmationPopup({
-            title: 'Abandonner la partie',
-            message: 'Êtes-vous sûr de vouloir abandonner ?\nTous vos progrès seront perdus.',
+            title: 'Leave Game',
+            message: 'Are you sure you want to leave?\nAll your progress will be lost.',
             onConfirm: () => {
                 this.combatService.combatAbandon();
                 this.inGameService.leaveGame();
