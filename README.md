@@ -15,7 +15,9 @@
 
 **[Play Now](http://13.60.84.0)**
 
-![Manor Tactics Game](https://via.placeholder.com/800x400/1a1a2e/eaeaea?text=Manor+Tactics+-+Tactical+RPG)
+<div align="center">
+    <img alt="Manor Tactics Gameplay" width="800" src="https://via.placeholder.com/800x400/1a1a2e/eaeaea?text=Manor+Tactics+-+Tactical+RPG">
+</div>
 
 ## Key Features
 
@@ -199,7 +201,9 @@ npm run coverage      # Generate coverage report
 
 **[Jouer maintenant](http://13.60.84.0)**
 
-![Manor Tactics Game](https://via.placeholder.com/800x400/1a1a2e/eaeaea?text=Manor+Tactics+-+RPG+Tactique)
+<div align="center">
+    <img alt="Manor Tactics Gameplay" width="800" src="https://via.placeholder.com/800x400/1a1a2e/eaeaea?text=Manor+Tactics+-+RPG+Tactique">
+</div>
 
 ## Fonctionnalités principales
 
