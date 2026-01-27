@@ -49,12 +49,7 @@ jobs:
           scp -i private_key.pem -o StrictHostKeyChecking=no server/package*.json $USER@$HOST:~/manor-tactics-backend/
           
           # Deploy and restart backend
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST << 'ENDSSH'
-            cd ~/manor-tactics-backend
-            npm ci --production
-            
-            # Create ecosystem file for PM2
-            cat > ecosystem.config.js << 'PM2_CONFIG'
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST "cd ~/manor-tactics-backend && npm ci --production && cat > ecosystem.config.js << 'EOF'
 module.exports = {
   apps: [{
     name: 'manor-tactics-backend',
@@ -64,17 +59,11 @@ module.exports = {
     env: {
       NODE_ENV: 'production',
       PORT: 4000,
-      DATABASE_CONNECTION_STRING: process.env.DATABASE_CONNECTION_STRING
+      DATABASE_CONNECTION_STRING: '${DATABASE_CONNECTION_STRING}'
     }
   }]
 };
-PM2_CONFIG
-            
-            # Set environment variable and restart
-            export DATABASE_CONNECTION_STRING="${DATABASE_CONNECTION_STRING}"
-            pm2 delete manor-tactics-backend 2>/dev/null || true
-            pm2 start ecosystem.config.js
-            pm2 save
-ENDSSH
+EOF
+pm2 delete manor-tactics-backend 2>/dev/null || true && pm2 start ecosystem.config.js && pm2 save"
           
           rm -f private_key.pem
