@@ -23,12 +23,10 @@ jobs:
           cd client
           npm ci
           npm run build
-          echo "=== Build output structure ==="
-          ls -la dist/
-          echo "=== Client dist contents ==="
-          ls -la dist/client/ || echo "No dist/client"
-          echo "=== Browser folder check ==="
-          ls -la dist/client/browser/ || echo "No browser folder"
+          echo "=== After build, checking dist ==="
+          ls -la
+          ls -la dist/ || echo "No dist folder!"
+          ls -la dist/client/ || echo "No dist/client folder!"
 
       - name: Build Backend
         run: |
