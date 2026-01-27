@@ -55,11 +55,6 @@ jobs:
           sudo chown -R www-data:www-data /var/www/manor-tactics
           sudo chmod -R 755 /var/www/manor-tactics
           
-          # Create game-previews directory with write permissions
-          sudo mkdir -p /var/www/manor-tactics/assets/game-previews
-          sudo chown -R www-data:www-data /var/www/manor-tactics/assets/game-previews
-          sudo chmod -R 775 /var/www/manor-tactics/assets/game-previews
-          
           echo "✅ Frontend deployed"
           
           # Deploy backend
@@ -67,6 +62,14 @@ jobs:
           cp ~/package*.json ~/manor-tactics-backend/
           cd ~/manor-tactics-backend
           npm ci --production
+          
+          # Create assets/game-previews directory in backend
+          mkdir -p ~/manor-tactics-backend/assets/game-previews
+          
+          # Create symbolic link from nginx assets to backend assets
+          sudo rm -rf /var/www/manor-tactics/assets/game-previews
+          sudo ln -s /home/${USER}/manor-tactics-backend/assets/game-previews /var/www/manor-tactics/assets/game-previews
+          
           echo "✅ Backend deployed"
           
           # Update PM2 config with DATABASE_CONNECTION_STRING
