@@ -43,13 +43,11 @@ jobs:
           # Create directories if needed
           ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "sudo mkdir -p /var/www/manor-tactics && sudo chown -R ${EC2_USER}:${EC2_USER} /var/www/manor-tactics && mkdir -p ~/manor-tactics-backend"
           
-          # Copy frontend (from browser subfolder)
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/browser ${EC2_USER}@${EC2_HOST}:~/frontend-tmp
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "cp -r ~/frontend-tmp/* /var/www/manor-tactics/ && rm -rf ~/frontend-tmp"
+          # Deploy frontend using rsync
+          rsync -avz -e "ssh -i private_key.pem -o StrictHostKeyChecking=no" client/dist/client/ ${EC2_USER}@${EC2_HOST}:/var/www/manor-tactics/
           
-          # Copy backend
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r server/out ${EC2_USER}@${EC2_HOST}:~/backend-tmp
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "cp -r ~/backend-tmp/* ~/manor-tactics-backend/ && rm -rf ~/backend-tmp"
+          # Deploy backend using rsync
+          rsync -avz -e "ssh -i private_key.pem -o StrictHostKeyChecking=no" server/out/ ${EC2_USER}@${EC2_HOST}:~/manor-tactics-backend/
           scp -i private_key.pem -o StrictHostKeyChecking=no server/package*.json ${EC2_USER}@${EC2_HOST}:~/manor-tactics-backend/
           
           # Install dependencies and restart
