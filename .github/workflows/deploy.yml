@@ -52,6 +52,8 @@ jobs:
           ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
           # Deploy frontend
           sudo tar -xzf ~/frontend.tar.gz -C /var/www/manor-tactics/
+          sudo chown -R www-data:www-data /var/www/manor-tactics
+          sudo chmod -R 755 /var/www/manor-tactics
           echo "✅ Frontend deployed"
           
           # Deploy backend
