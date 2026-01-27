@@ -23,10 +23,9 @@ jobs:
           cd client
           npm ci
           npm run build
-          echo "=== After build, checking dist ==="
-          ls -la
-          ls -la dist/ || echo "No dist folder!"
-          ls -la dist/client/ || echo "No dist/client folder!"
+          cd ..
+          echo "=== Checking build output ==="
+          ls -la client/dist/client/
 
       - name: Build Backend
         run: |
@@ -52,7 +51,7 @@ jobs:
           ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST "sudo mkdir -p /var/www/manor-tactics && sudo chown -R ubuntu:ubuntu /var/www/manor-tactics && mkdir -p ~/manor-tactics-backend"
           
           # Copy frontend build
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/browser/. $USER@$HOST:/var/www/manor-tactics/ || scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/. $USER@$HOST:/var/www/manor-tactics/
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/. $USER@$HOST:/var/www/manor-tactics/
           
           # Copy backend files
           scp -i private_key.pem -o StrictHostKeyChecking=no -r server/out/* $USER@$HOST:~/manor-tactics-backend/
