@@ -35,29 +35,22 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER }}
-          DATABASE_CONNECTION_STRING: ${{ secrets.DATABASE_CONNECTION_STRING }}
+          DB_CONNECTION: ${{ secrets.DATABASE_CONNECTION_STRING }}
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
           
-          # Create directories on EC2
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "sudo mkdir -p /var/www/manor-tactics && sudo chown -R $EC2_USER:$EC2_USER /var/www/manor-tactics && mkdir -p ~/manor-tactics-backend"
+          # Copy frontend
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/* ${EC2_USER}@${EC2_HOST}:/var/www/manor-tactics/
           
-          # Wait for directory to be ready
-          sleep 2
+          # Copy backend
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r server/out/* ${EC2_USER}@${EC2_HOST}:~/manor-tactics-backend/
+          scp -i private_key.pem -o StrictHostKeyChecking=no server/package*.json ${EC2_USER}@${EC2_HOST}:~/manor-tactics-backend/
           
-          # Copy frontend build
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/* $EC2_USER@$EC2_HOST:/var/www/manor-tactics/
-          
-          # Copy backend files
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r server/out/* $EC2_USER@$EC2_HOST:~/manor-tactics-backend/
-          scp -i private_key.pem -o StrictHostKeyChecking=no server/package*.json $EC2_USER@$EC2_HOST:~/manor-tactics-backend/
-          
-          # Deploy and restart backend
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'ENDSSH'
+          # Deploy backend
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << EOF
           cd ~/manor-tactics-backend
           npm ci --production
-          
           cat > ecosystem.config.js << 'EOFPM2'
           module.exports = {
             apps: [{
@@ -68,15 +61,13 @@ jobs:
               env: {
                 NODE_ENV: 'production',
                 PORT: 4000,
-                DATABASE_CONNECTION_STRING: process.env.DATABASE_CONNECTION_STRING
+                DATABASE_CONNECTION_STRING: '${DB_CONNECTION}'
               }
             }]
           };
           EOFPM2
-          
-          export DATABASE_CONNECTION_STRING="${DATABASE_CONNECTION_STRING}"
           pm2 restart manor-tactics-backend || pm2 start ecosystem.config.js
           pm2 save
-          ENDSSH
+          EOF
           
           rm -f private_key.pem
