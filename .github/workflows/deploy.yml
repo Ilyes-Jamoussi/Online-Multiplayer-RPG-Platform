@@ -1,4 +1,4 @@
-name: Deploy to EC2
+name: Deploy Manor Tactics to EC2
 
 on:
   push:
@@ -24,29 +24,57 @@ jobs:
           npm ci
           npm run build
 
+      - name: Build Backend
+        run: |
+          cd server
+          npm ci
+          npm run build
+
       - name: Deploy to EC2
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           HOST: ${{ secrets.EC2_HOST }}
           USER: ${{ secrets.EC2_USER }}
+          DATABASE_CONNECTION_STRING: ${{ secrets.DATABASE_CONNECTION_STRING }}
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
           
-          # Copy frontend files
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/* $USER@$HOST:~/frontend/
+          # Copy frontend build
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/browser/* $USER@$HOST:/var/www/manor-tactics/
           
-          # Deploy backend and restart
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
-            cd ~/Online-Multiplayer-RPG-Platform
-            git pull origin master
-            cd server
-            npm ci
-            npm run build
-            pm2 restart rpg-backend
+          # Copy backend files
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST "mkdir -p ~/manor-tactics-backend"
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r server/out/* $USER@$HOST:~/manor-tactics-backend/
+          scp -i private_key.pem -o StrictHostKeyChecking=no server/package*.json $USER@$HOST:~/manor-tactics-backend/
+          
+          # Deploy and restart backend
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST << 'ENDSSH'
+            cd ~/manor-tactics-backend
+            npm ci --production
             
-            # Update frontend in Nginx
-            sudo cp -r ~/frontend/* /var/www/html/
-          EOF
+            # Create ecosystem file for PM2
+            cat > ecosystem.config.js << 'PM2_CONFIG'
+module.exports = {
+  apps: [{
+    name: 'manor-tactics-backend',
+    script: './server/app/index.js',
+    instances: 1,
+    exec_mode: 'fork',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 4000,
+      DATABASE_CONNECTION_STRING: process.env.DATABASE_CONNECTION_STRING
+    }
+  }]
+};
+PM2_CONFIG
+            
+            # Set environment variable and restart
+            export DATABASE_CONNECTION_STRING="${DATABASE_CONNECTION_STRING}"
+            pm2 delete manor-tactics-backend 2>/dev/null || true
+            pm2 start ecosystem.config.js
+            pm2 save
+ENDSSH
           
           rm -f private_key.pem
