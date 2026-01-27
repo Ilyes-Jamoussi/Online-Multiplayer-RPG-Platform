@@ -43,6 +43,13 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
           
+          # Verify build exists
+          echo "=== Verifying frontend build ==="
+          ls -la client/dist/client/ || { echo "Frontend build not found!"; exit 1; }
+          
+          echo "=== Verifying backend build ==="
+          ls -la server/out/ || { echo "Backend build not found!"; exit 1; }
+          
           # Create directories on EC2
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "sudo mkdir -p /var/www/manor-tactics && sudo chown -R ubuntu:ubuntu /var/www/manor-tactics && mkdir -p ~/manor-tactics-backend"
           
