@@ -44,7 +44,7 @@ jobs:
           ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST "sudo mkdir -p /var/www/manor-tactics && sudo chown -R ubuntu:ubuntu /var/www/manor-tactics && mkdir -p ~/manor-tactics-backend"
           
           # Copy frontend build
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/browser/* $USER@$HOST:/var/www/manor-tactics/
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/* $USER@$HOST:/var/www/manor-tactics/
           
           # Copy backend files
           scp -i private_key.pem -o StrictHostKeyChecking=no -r server/out/* $USER@$HOST:~/manor-tactics-backend/
