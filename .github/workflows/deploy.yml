@@ -54,6 +54,12 @@ jobs:
           sudo tar -xzf ~/frontend.tar.gz -C /var/www/manor-tactics/
           sudo chown -R www-data:www-data /var/www/manor-tactics
           sudo chmod -R 755 /var/www/manor-tactics
+          
+          # Create game-previews directory with write permissions
+          sudo mkdir -p /var/www/manor-tactics/assets/game-previews
+          sudo chown -R www-data:www-data /var/www/manor-tactics/assets/game-previews
+          sudo chmod -R 775 /var/www/manor-tactics/assets/game-previews
+          
           echo "✅ Frontend deployed"
           
           # Deploy backend
