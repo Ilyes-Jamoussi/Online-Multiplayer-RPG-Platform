@@ -30,6 +30,11 @@ jobs:
           npm ci
           npm run build
 
+      - name: Create deployment archives
+        run: |
+          tar -czf frontend.tar.gz -C client/dist/client .
+          tar -czf backend.tar.gz -C server/out .
+
       - name: Deploy to EC2
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -40,22 +45,23 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
           
-          # Create directories if needed
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "sudo mkdir -p /var/www/manor-tactics && sudo chown -R ${EC2_USER}:${EC2_USER} /var/www/manor-tactics && mkdir -p ~/manor-tactics-backend"
+          # Copy archives to EC2
+          scp -i private_key.pem -o StrictHostKeyChecking=no frontend.tar.gz backend.tar.gz server/package*.json ${EC2_USER}@${EC2_HOST}:~/
           
+          # Deploy on EC2
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
           # Deploy frontend
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client ${EC2_USER}@${EC2_HOST}:~/temp-frontend
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "cp -r ~/temp-frontend/* /var/www/manor-tactics/ && rm -rf ~/temp-frontend"
+          sudo tar -xzf ~/frontend.tar.gz -C /var/www/manor-tactics/
+          echo "✅ Frontend deployed"
           
           # Deploy backend
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r server/out ${EC2_USER}@${EC2_HOST}:~/temp-backend
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "cp -r ~/temp-backend/* ~/manor-tactics-backend/ && rm -rf ~/temp-backend"
-          scp -i private_key.pem -o StrictHostKeyChecking=no server/package*.json ${EC2_USER}@${EC2_HOST}:~/manor-tactics-backend/
-          
-          # Install dependencies and restart
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
+          tar -xzf ~/backend.tar.gz -C ~/manor-tactics-backend/
+          cp ~/package*.json ~/manor-tactics-backend/
           cd ~/manor-tactics-backend
           npm ci --production
+          echo "✅ Backend deployed"
+          
+          # Update PM2 config with DATABASE_CONNECTION_STRING
           cat > ecosystem.config.js << 'EOFPM2'
           module.exports = {
             apps: [{
@@ -71,9 +77,16 @@ jobs:
             }]
           };
           EOFPM2
+          
+          # Set environment variable and restart PM2
           export DATABASE_CONNECTION_STRING="${DB_CONNECTION}"
           pm2 restart manor-tactics-backend || pm2 start ecosystem.config.js
           pm2 save
+          echo "✅ PM2 restarted"
+          
+          # Cleanup
+          rm ~/frontend.tar.gz ~/backend.tar.gz ~/package*.json
+          echo "✅ Cleanup completed"
           ENDSSH
           
           rm -f private_key.pem
