@@ -40,14 +40,17 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
           
-          # Ensure directories exist
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "sudo mkdir -p /var/www/manor-tactics && sudo chown ${EC2_USER}:${EC2_USER} /var/www/manor-tactics && mkdir -p ~/manor-tactics-backend"
+          # Create directories
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "sudo mkdir -p /var/www/manor-tactics && sudo chown -R ${EC2_USER}:${EC2_USER} /var/www && mkdir -p ~/manor-tactics-backend"
+          
+          # Wait for filesystem sync
+          sleep 1
           
           # Copy frontend
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/. ${EC2_USER}@${EC2_HOST}:/var/www/manor-tactics/
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/* ${EC2_USER}@${EC2_HOST}:/var/www/manor-tactics/
           
           # Copy backend
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r server/out/. ${EC2_USER}@${EC2_HOST}:~/manor-tactics-backend/
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r server/out/* ${EC2_USER}@${EC2_HOST}:~/manor-tactics-backend/
           scp -i private_key.pem -o StrictHostKeyChecking=no server/package*.json ${EC2_USER}@${EC2_HOST}:~/manor-tactics-backend/
           
           # Deploy backend
