@@ -46,11 +46,13 @@ jobs:
           # Wait for filesystem sync
           sleep 1
           
-          # Copy frontend
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/* ${EC2_USER}@${EC2_HOST}:/var/www/manor-tactics/
+          # Copy frontend (copy directory then move contents)
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client ${EC2_USER}@${EC2_HOST}:/tmp/
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "sudo cp -r /tmp/client/* /var/www/manor-tactics/ && rm -rf /tmp/client"
           
           # Copy backend
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r server/out/* ${EC2_USER}@${EC2_HOST}:~/manor-tactics-backend/
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r server/out ${EC2_USER}@${EC2_HOST}:~/manor-tactics-backend-tmp/
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "cp -r ~/manor-tactics-backend-tmp/out/* ~/manor-tactics-backend/ && rm -rf ~/manor-tactics-backend-tmp"
           scp -i private_key.pem -o StrictHostKeyChecking=no server/package*.json ${EC2_USER}@${EC2_HOST}:~/manor-tactics-backend/
           
           # Deploy backend
