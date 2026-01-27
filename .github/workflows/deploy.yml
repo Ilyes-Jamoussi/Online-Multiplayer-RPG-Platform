@@ -40,6 +40,9 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
           
+          # Create directories on EC2
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "sudo mkdir -p /var/www/manor-tactics && sudo chown -R ubuntu:ubuntu /var/www/manor-tactics && mkdir -p ~/manor-tactics-backend"
+          
           # Copy frontend build
           scp -i private_key.pem -o StrictHostKeyChecking=no -r client/dist/client/* $EC2_USER@$EC2_HOST:/var/www/manor-tactics/
           
