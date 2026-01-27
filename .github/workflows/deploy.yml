@@ -53,21 +53,27 @@ jobs:
           scp -i private_key.pem -o StrictHostKeyChecking=no server/package*.json ${EC2_USER}@${EC2_HOST}:~/manor-tactics-backend/
           
           # Install dependencies and restart
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "cd ~/manor-tactics-backend && npm ci --production && export DATABASE_CONNECTION_STRING='${DB_CONNECTION}' && pm2 restart manor-tactics-backend || (cat > ecosystem.config.js << 'EOFPM2'
-module.exports = {
-  apps: [{
-    name: 'manor-tactics-backend',
-    script: './server/app/index.js',
-    instances: 1,
-    exec_mode: 'fork',
-    env: {
-      NODE_ENV: 'production',
-      PORT: 4000,
-      DATABASE_CONNECTION_STRING: process.env.DATABASE_CONNECTION_STRING
-    }
-  }]
-};
-EOFPM2
-pm2 start ecosystem.config.js) && pm2 save"
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
+          cd ~/manor-tactics-backend
+          npm ci --production
+          cat > ecosystem.config.js << 'EOFPM2'
+          module.exports = {
+            apps: [{
+              name: 'manor-tactics-backend',
+              script: './server/app/index.js',
+              instances: 1,
+              exec_mode: 'fork',
+              env: {
+                NODE_ENV: 'production',
+                PORT: 4000,
+                DATABASE_CONNECTION_STRING: process.env.DATABASE_CONNECTION_STRING
+              }
+            }]
+          };
+          EOFPM2
+          export DATABASE_CONNECTION_STRING="${DB_CONNECTION}"
+          pm2 restart manor-tactics-backend || pm2 start ecosystem.config.js
+          pm2 save
+          ENDSSH
           
           rm -f private_key.pem
