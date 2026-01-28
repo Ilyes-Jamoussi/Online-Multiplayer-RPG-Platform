@@ -66,6 +66,10 @@ jobs:
           # Create assets/game-previews directory in backend
           mkdir -p ~/manor-tactics-backend/assets/game-previews
           
+          # Fix permissions for nginx to access assets via symlink
+          chmod 755 /home/${USER}
+          chmod -R 755 ~/manor-tactics-backend/assets
+          
           # Create symbolic link from nginx assets to backend assets
           sudo rm -rf /var/www/manor-tactics/assets/game-previews
           sudo ln -s /home/${USER}/manor-tactics-backend/assets/game-previews /var/www/manor-tactics/assets/game-previews
