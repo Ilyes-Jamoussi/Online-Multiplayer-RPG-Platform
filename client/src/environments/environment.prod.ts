@@ -1,5 +1,5 @@
 export const ENVIRONMENT = {
     production: true,
-    serverUrl: 'http://35.182.148.132/api',
-    socketUrl: 'http://35.182.148.132',
+    serverUrl: 'http://98.88.78.57/api',
+    socketUrl: 'http://98.88.78.57',
 };

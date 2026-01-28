@@ -13,7 +13,7 @@
 
 **Manor Tactics** is a comprehensive tactical RPG platform featuring real-time multiplayer gameplay with turn-based combat mechanics. Players navigate grid-based maps, engage in strategic combat, and complete objectives in two distinct game modes. The platform includes a complete game editor, session management system, and support for both human and AI players.
 
-### [▶️ Play Now](http://35.182.148.132)
+### [▶️ Play Now](http://98.88.78.57)
 
 ## Key Features
 
@@ -162,13 +162,13 @@ The application is deployed on AWS EC2 with automated CI/CD:
 - **Database**: MongoDB Atlas with automatic backups
 - **CI/CD**: GitHub Actions triggers deployment on push to master branch
 
-**Live Demo**: http://35.182.148.132
+**Live Demo**: http://98.88.78.57
 
 ## API Documentation
 
 Interactive Swagger documentation available at:
 ```
-http://35.182.148.132/api/docs
+http://98.88.78.57/api/docs
 ```
 
 ## Testing
@@ -195,7 +195,7 @@ npm run coverage      # Generate coverage report
 
 **Manor Tactics** est une plateforme RPG tactique complète avec gameplay multijoueur en temps réel et mécaniques de combat au tour par tour. Les joueurs naviguent sur des cartes en grille, participent à des combats stratégiques et accomplissent des objectifs dans deux modes de jeu distincts. La plateforme inclut un éditeur de jeu complet, un système de gestion de sessions et le support de joueurs humains et IA.
 
-### [▶️ Jouer maintenant](http://35.182.148.132)
+### [▶️ Jouer maintenant](http://98.88.78.57)
 
 ## Fonctionnalités principales
 
@@ -344,13 +344,13 @@ L'application est déployée sur AWS EC2 avec CI/CD automatisé :
 - **Base de données** : MongoDB Atlas avec sauvegardes automatiques
 - **CI/CD** : GitHub Actions déclenche le déploiement lors du push sur la branche master
 
-**Démo en direct** : http://35.182.148.132
+**Démo en direct** : http://98.88.78.57
 
 ## Documentation API
 
 Documentation Swagger interactive disponible sur :
 ```
-http://35.182.148.132/api/docs
+http://98.88.78.57/api/docs
 ```
 
 ## Tests
